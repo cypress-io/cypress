@@ -16,7 +16,7 @@ function smokeTestDockerImage (title: string, dockerImage: string, expectedExitC
 describe('e2e binary CI environments', () => {
   smokeTestDockerImage(
     'bare node image fails (lacks xvfb)',
-    'node:16', 1,
+    'node:18', 1,
     async (exec) => {
       const { stdout } = await exec()
 
@@ -24,19 +24,13 @@ describe('e2e binary CI environments', () => {
     },
   )
 
-  // TODO: Where is this image located? Needs to be bumped to Node 16.16.0 or later
-  smokeTestDockerImage(
-    'bare xvfb image fails',
-    'cypressinternal/xvfb:12.13.0', 1,
-  )
-
   smokeTestDockerImage(
     'ubuntu 20 passes',
-    'cypress/base-internal:ubuntu20-node16', 0,
+    'cypress/base-internal:ubuntu20-node18', 0,
   )
 
   smokeTestDockerImage(
     'ubuntu 22 passes',
-    'cypress/base-internal:ubuntu22-node16', 0,
+    'cypress/base-internal:ubuntu22-node18', 0,
   )
 })

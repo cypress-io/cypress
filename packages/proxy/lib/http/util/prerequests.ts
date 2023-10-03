@@ -33,40 +33,40 @@ type PendingPreRequest = {
 }
 
 /**
- * Data structure that organizes items with duplicated keys into stacks.
+ * Data structure that organizes items with duplicated keys into queues.
  */
-class StackMap<T> {
-  private stacks: Record<string, Array<T>> = {}
-  push (stackKey: string, value: T) {
-    if (!this.stacks[stackKey]) this.stacks[stackKey] = []
+class QueueMap<T> {
+  private queues: Record<string, Array<T>> = {}
+  push (queueKey: string, value: T) {
+    if (!this.queues[queueKey]) this.queues[queueKey] = []
 
-    this.stacks[stackKey].push(value)
+    this.queues[queueKey].push(value)
   }
-  pop (stackKey: string): T | undefined {
-    const stack = this.stacks[stackKey]
+  shift (queueKey: string): T | undefined {
+    const queue = this.queues[queueKey]
 
-    if (!stack) return
+    if (!queue) return
 
-    const item = stack.pop()
+    const item = queue.shift()
 
-    if (stack.length === 0) delete this.stacks[stackKey]
+    if (queue.length === 0) delete this.queues[queueKey]
 
     return item
   }
   removeMatching (filterFn: (value: T) => boolean) {
-    Object.entries(this.stacks).forEach(([stackKey, stack]) => {
-      this.stacks[stackKey] = stack.filter(filterFn)
-      if (this.stacks[stackKey].length === 0) delete this.stacks[stackKey]
+    Object.entries(this.queues).forEach(([queueKey, queue]) => {
+      this.queues[queueKey] = queue.filter(filterFn)
+      if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
     })
   }
-  removeExact (stackKey: string, value: T) {
-    const i = this.stacks[stackKey].findIndex((v) => v === value)
+  removeExact (queueKey: string, value: T) {
+    const i = this.queues[queueKey].findIndex((v) => v === value)
 
-    this.stacks[stackKey].splice(i, 1)
-    if (this.stacks[stackKey].length === 0) delete this.stacks[stackKey]
+    this.queues[queueKey].splice(i, 1)
+    if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
   }
   get length () {
-    return Object.values(this.stacks).reduce((prev, cur) => prev + cur.length, 0)
+    return Object.values(this.queues).reduce((prev, cur) => prev + cur.length, 0)
   }
 }
 
@@ -79,8 +79,8 @@ class StackMap<T> {
 export class PreRequests {
   requestTimeout: number
   sweepInterval: number
-  pendingPreRequests = new StackMap<PendingPreRequest>()
-  pendingRequests = new StackMap<PendingRequest>()
+  pendingPreRequests = new QueueMap<PendingPreRequest>()
+  pendingRequests = new QueueMap<PendingRequest>()
   sweepIntervalTimer: NodeJS.Timeout
 
   constructor (
@@ -119,7 +119,7 @@ export class PreRequests {
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
     const key = `${browserPreRequest.method}-${browserPreRequest.url}`
-    const pendingRequest = this.pendingRequests.pop(key)
+    const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
@@ -136,10 +136,16 @@ export class PreRequests {
     })
   }
 
+  removePending (requestId: string) {
+    this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
+      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
+    })
+  }
+
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
-    const pendingPreRequest = this.pendingPreRequests.pop(key)
+    const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++

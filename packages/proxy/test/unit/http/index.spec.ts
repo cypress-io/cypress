@@ -79,6 +79,37 @@ describe('http', function () {
       })
     })
 
+    it('ensures not to create fake pending browser pre requests on multiple errors', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          errorHandled: true,
+        }
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-ignore
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(http.addPendingBrowserPreRequest).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
     it('moves to Error stack if err in IncomingResponse', function () {
       incomingRequest.callsFake(function () {
         this.incomingRes = {}

@@ -50,6 +50,7 @@ describe('e2e video compression', () => {
       snapshot: false,
       headed,
       config: {
+        video: true,
         videoCompression: 32,
         env: {
           NUM_TESTS,
@@ -115,6 +116,7 @@ describe('video compression 0', () => {
     browser: 'chrome',
     spec: 'video_compression.cy.js',
     config: {
+      video: true,
       videoCompression: 0,
     },
     snapshot: true,

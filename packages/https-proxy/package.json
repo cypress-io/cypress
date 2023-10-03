@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/request": "2.88.12",
-    "@cypress/request-promise": "4.2.7",
+    "@cypress/request": "^3.0.0",
+    "@cypress/request-promise": "^5.0.0",
     "@packages/network": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",

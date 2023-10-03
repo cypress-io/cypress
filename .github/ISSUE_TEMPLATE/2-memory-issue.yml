@@ -51,7 +51,7 @@ body:
     attributes:
       label: Node version
       description: What version of node.js are you using to run Cypress?
-      placeholder: ex. v16.16.0
+      placeholder: ex. v18.15.0
     validations:
       required: true
   - type: input

@@ -112,7 +112,8 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
 
-        expect(spyLog.consoleProps.Command).to.equal('spy-1')
+        expect(spyLog.consoleProps.name).to.equal('spy-1')
+        expect(spyLog.consoleProps.type).to.equal('command')
         expect(spyLog.callCount).to.be.a('number')
         expect(spyLog.functionName).to.equal('bar')
       })
@@ -130,7 +131,8 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
 
-        expect(stubLog.consoleProps.Command).to.equal('stub-1')
+        expect(stubLog.consoleProps.name).to.equal('stub-1')
+        expect(stubLog.consoleProps.type).to.equal('command')
         expect(stubLog.callCount).to.be.a('number')
         expect(stubLog.functionName).to.equal('bar')
       })
@@ -150,9 +152,10 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         const consoleProps = clockLog.consoleProps()
 
-        expect(consoleProps.Command).to.equal('clock')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.name).to.equal('clock')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
       })
     })
 
@@ -172,10 +175,11 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
 
-        expect(consoleProps.Command).to.equal('tick')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
-        expect(consoleProps).to.have.property('Ticked').that.is.a('string')
+        expect(consoleProps.name).to.equal('tick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.props).to.have.property('Ticked').that.is.a('string')
       })
     })
   })

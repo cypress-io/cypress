@@ -14,7 +14,7 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project)
+      cy.openProject(project, ['--component'])
       cy.startAppServer('component')
     })
 

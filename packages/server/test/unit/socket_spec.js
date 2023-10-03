@@ -9,7 +9,7 @@ const Fixtures = require('@tooling/system-tests')
 
 const errors = require('../../lib/errors')
 const { SocketE2E } = require('../../lib/socket-e2e')
-const { ServerE2E } = require('../../lib/server-e2e')
+const { ServerBase } = require('../../lib/server-base')
 const { Automation } = require('../../lib/automation')
 const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
@@ -37,7 +37,7 @@ describe('lib/socket', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
 
-    this.server = new ServerE2E()
+    this.server = new ServerBase()
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
@@ -76,7 +76,7 @@ describe('lib/socket', () => {
         done = _.once(done)
 
         // when our real client connects then we're done
-        this.socket.io.on('connection', (socket) => {
+        this.socket.socketIo.on('connection', (socket) => {
           this.socketClient = socket
 
           return done()
@@ -157,11 +157,11 @@ describe('lib/socket', () => {
             },
           }
 
-          extensionBackgroundPage = require('@packages/extension/app/background')
+          extensionBackgroundPage = require('@packages/extension/app/v2/background')
         })
 
         beforeEach(function (done) {
-          this.socket.io.on('connection', (extClient) => {
+          this.socket.socketIo.on('connection', (extClient) => {
             this.extClient = extClient
 
             return this.extClient.on('automation:client:connected', () => {
@@ -411,7 +411,7 @@ describe('lib/socket', () => {
       it('emits \'automation:push:message\'', function (done) {
         const data = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' }, removed: true }
 
-        const emit = sinon.stub(this.socket.io, 'emit')
+        const emit = sinon.stub(this.socket.socketIo, 'emit')
 
         return this.client.emit('automation:push:request', 'change:cookie', data, () => {
           expect(emit).to.be.calledWith('automation:push:message', 'change:cookie', {
@@ -765,7 +765,7 @@ describe('lib/socket', () => {
         close: sinon.stub(),
       }
 
-      sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
+      sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
       return this.server.open(this.cfg, {
@@ -814,7 +814,7 @@ describe('lib/socket', () => {
       it('calls close on #io', function () {
         this.socket.close()
 
-        expect(this.socket.io.close).to.be.called
+        expect(this.socket.socketIo.close).to.be.called
       })
 
       it('does not error when io isnt defined', function () {

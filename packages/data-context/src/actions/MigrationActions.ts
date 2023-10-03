@@ -176,7 +176,7 @@ export class MigrationActions {
       throw Error('cannot do migration without currentProject!')
     }
 
-    if (this.ctx.isGlobalMode) {
+    if (this.ctx.coreData.app.isGlobalMode) {
       const version = await this.locallyInstalledCypressVersion(this.ctx.currentProject)
 
       if (!version) {

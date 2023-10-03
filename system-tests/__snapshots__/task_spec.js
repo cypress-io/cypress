@@ -36,15 +36,10 @@ Only the last attempt will be registered.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     multiple_task_registrations.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations.cy.js.mp4
 
 
 ====================================================================================================
@@ -125,7 +120,7 @@ https://on.cypress.io/api/task
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     task.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -137,11 +132,6 @@ https://on.cypress.io/api/task
      failed).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/includes stack trace in error (faile     (1280x720)
      d).png                                                                                         
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/task.cy.js.mp4
 
 
 ====================================================================================================
