@@ -8,7 +8,6 @@ import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
-import tar from 'tar'
 
 import * as packages from './util/packages'
 import * as meta from './meta'
@@ -40,7 +39,6 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
-  createTar?: boolean
 }
 
 /**
@@ -78,7 +76,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, keepBuild = false, createTar } = options
+  const { platform, version, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -213,12 +211,6 @@ require('./packages/server/index.js')
   // transformSymlinkRequires
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
-
-  // optionally create a tar of the `cypress-build` directory. This is used in CI.
-  if (createTar) {
-    log('#create tar from dist dir')
-    await tar.c({ file: 'cypress-dist.tgz', gzip: true, cwd: os.tmpdir() }, ['cypress-build'])
-  }
 
   log(`#testDistVersion ${meta.distDir()}`)
   await testDistVersion(meta.distDir(), version)
