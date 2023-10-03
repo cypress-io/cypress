@@ -86,9 +86,6 @@
         "dependsOn": [
           "!@cypress/react18:build"
         ],
-        "inputs": [
-          "{workspaceRoot}/scripts"
-        ],
         "outputs": [
           "{workspaceRoot}/cli/vue",
           "{projectRoot}/dist"
