@@ -254,6 +254,8 @@ export default (Commands, Cypress, cy, state) => {
         const respMap = new Map()
         const respSeq = resp.map((r) => r.routeId)
 
+        // responses are sorted in the order the user specified them. if there are multiples of the same
+        // alias awaited, they're sorted in execution order
         resp.sort((a, b) => {
           // sort responses based on browser request ID
           const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
@@ -264,7 +266,7 @@ export default (Commands, Cypress, cy, state) => {
           respMap.get(r.routeId)?.push(r) ?? respMap.set(r.routeId, [r])
         })
 
-        return respSeq.map((r) => respMap.get(r)?.shift())
+        return respSeq.map((routeId) => respMap.get(routeId)?.shift())
       })(responses)
 
       if (log) {
