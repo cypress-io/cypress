@@ -409,7 +409,7 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('inherits when on linux and xvfb isnt needed', function () {
+    it('inherits when on linux and xvfb isn’t needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(false)

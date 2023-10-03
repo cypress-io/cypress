@@ -39,7 +39,7 @@
 //     }
 
 //     if (matched.length > 1) {
-//       throw new Error(`Mutliple matches for ${key} in extractCypressNamespacedTypes: ${__filename}`)
+//       throw new Error(`Multiple matches for ${key} in extractCypressNamespacedTypes: ${__filename}`)
 //     }
 
 //     typeDefs.push(matched[0])
