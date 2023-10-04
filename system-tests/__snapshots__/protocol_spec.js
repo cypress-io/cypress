@@ -4923,7 +4923,8 @@ exports['e2e events'] = `
   "resetTest": [
     "r3"
   ],
-  "responseEndedWithEmptyBody": []
+  "responseEndedWithEmptyBody": [],
+  "responseStreamTimedOut": []
 }
 `
 
@@ -6531,37 +6532,94 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "responseEndedWithEmptyBody": [
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     }
-  ]
+  ],
+  "responseStreamTimedOut": []
 }
 `
 
@@ -8169,20 +8227,49 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "responseEndedWithEmptyBody": [
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpClientSideEventTime": "Any.Number",
+        "cdpServerSideEventReceivedTime": "Any.Number",
+        "proxyReceivedTime": "Any.Number",
+        "cdpLagTime": "Any.Number",
+        "correlationTime": "Any.Number"
+      }
     }
-  ]
+  ],
+  "responseStreamTimedOut": []
 }
 `

@@ -1,7 +1,9 @@
 import type {
   CypressIncomingRequest,
   BrowserPreRequest,
+  BrowserPreRequestWithTimings,
 } from '@packages/proxy'
+import type { ProtocolManagerShape } from '@packages/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
@@ -19,17 +21,20 @@ process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
-export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
+export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequestWithTimings) => void
 
 type PendingRequest = {
   ctxDebug
   callback: GetPreRequestCb
   timeout: NodeJS.Timeout
+  timedOut?: boolean
+  proxyReceivedTime: number
 }
 
 type PendingPreRequest = {
   browserPreRequest: BrowserPreRequest
-  timestamp: number
+  cdpClientSideEventTime: number
+  cdpServerSideEventReceivedTime: number
 }
 
 /**
@@ -82,9 +87,10 @@ export class PreRequests {
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
   sweepIntervalTimer: NodeJS.Timeout
+  protocolManager?: ProtocolManagerShape
 
   constructor (
-    requestTimeout = 500,
+    requestTimeout = 1000 * 2,
     // 10 seconds
     sweepInterval = 1000 * 10,
   ) {
@@ -103,8 +109,8 @@ export class PreRequests {
     this.sweepIntervalTimer = setInterval(() => {
       const now = Date.now()
 
-      this.pendingPreRequests.removeMatching(({ timestamp, browserPreRequest }) => {
-        if (timestamp + this.sweepInterval < now) {
+      this.pendingPreRequests.removeMatching(({ cdpServerSideEventReceivedTime, browserPreRequest }) => {
+        if (cdpServerSideEventReceivedTime + this.sweepInterval < now) {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
@@ -123,8 +129,30 @@ export class PreRequests {
 
     if (pendingRequest) {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
-      clearTimeout(pendingRequest.timeout)
-      pendingRequest.callback(browserPreRequest)
+      if (!pendingRequest.timedOut) {
+        clearTimeout(pendingRequest.timeout)
+        pendingRequest.callback({
+          ...browserPreRequest,
+          cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
+          cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
+          proxyReceivedTime: pendingRequest.proxyReceivedTime,
+          cdpLagTime: browserPreRequest.cdpServerSideEventReceivedTime - browserPreRequest.cdpClientSideEventTime,
+          correlationTime: Math.max(browserPreRequest.cdpServerSideEventReceivedTime - pendingRequest.proxyReceivedTime, 0),
+        })
+
+        return
+      }
+
+      this.protocolManager?.responseStreamTimedOut({
+        requestId: browserPreRequest.requestId,
+        timings: {
+          cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
+          cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
+          proxyReceivedTime: pendingRequest.proxyReceivedTime,
+          cdpLagTime: browserPreRequest.cdpServerSideEventReceivedTime - browserPreRequest.cdpClientSideEventTime,
+          correlationTime: Math.max(browserPreRequest.cdpServerSideEventReceivedTime - pendingRequest.proxyReceivedTime, 0),
+        },
+      })
 
       return
     }
@@ -132,7 +160,8 @@ export class PreRequests {
     debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
-      timestamp: Date.now(),
+      cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
+      cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
     })
   }
 
@@ -143,6 +172,8 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
+    const proxyReceivedTime = performance.now() + performance.timeOrigin
+
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
@@ -150,7 +181,14 @@ export class PreRequests {
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
-      callback(pendingPreRequest.browserPreRequest)
+      callback({
+        ...pendingPreRequest.browserPreRequest,
+        cdpClientSideEventTime: pendingPreRequest.cdpClientSideEventTime,
+        cdpServerSideEventReceivedTime: pendingPreRequest.cdpServerSideEventReceivedTime,
+        proxyReceivedTime,
+        cdpLagTime: pendingPreRequest.cdpServerSideEventReceivedTime - pendingPreRequest.cdpClientSideEventTime,
+        correlationTime: Math.max(pendingPreRequest.cdpServerSideEventReceivedTime - proxyReceivedTime, 0),
+      })
 
       return
     }
@@ -158,14 +196,19 @@ export class PreRequests {
     const pendingRequest: PendingRequest = {
       ctxDebug,
       callback,
+      proxyReceivedTime: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
         ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
-        this.pendingRequests.removeExact(key, pendingRequest)
+        pendingRequest.timedOut = true
         callback()
       }, this.requestTimeout),
     }
 
     this.pendingRequests.push(key, pendingRequest)
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this.protocolManager = protocolManager
   }
 }

@@ -109,20 +109,23 @@ context('lib/browsers/cdp_automation', () => {
             url: 'https://www.google.com',
             headers: {},
           },
+          wallTime: 100.100100,
         }
 
         this.onFn
         .withArgs('Network.requestWillBeSent')
         .yield(browserPreRequest)
 
-        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
-          requestId: browserPreRequest.requestId,
-          method: browserPreRequest.request.method,
-          url: browserPreRequest.request.url,
-          headers: browserPreRequest.request.headers,
-          resourceType: browserPreRequest.type,
-          originalResourceType: browserPreRequest.type,
-        })
+        const arg = this.automation.onBrowserPreRequest.getCall(0).args[0]
+
+        expect(arg.requestId).to.eq(browserPreRequest.requestId)
+        expect(arg.method).to.eq(browserPreRequest.request.method)
+        expect(arg.url).to.eq(browserPreRequest.request.url)
+        expect(arg.headers).to.eq(browserPreRequest.request.headers)
+        expect(arg.resourceType).to.eq(browserPreRequest.type)
+        expect(arg.originalResourceType).to.eq(browserPreRequest.type)
+        expect(arg.cdpClientSideEventTime).to.eq(100100.100)
+        expect(arg.cdpServerSideEventReceivedTime).to.be.a('number')
       })
 
       it('removes # from a url', function () {
@@ -134,20 +137,23 @@ context('lib/browsers/cdp_automation', () => {
             url: 'https://www.google.com/foo#',
             headers: {},
           },
+          wallTime: 100.100100,
         }
 
         this.onFn
         .withArgs('Network.requestWillBeSent')
         .yield(browserPreRequest)
 
-        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
-          requestId: browserPreRequest.requestId,
-          method: browserPreRequest.request.method,
-          url: 'https://www.google.com/foo', // we only care about the url
-          headers: browserPreRequest.request.headers,
-          resourceType: browserPreRequest.type,
-          originalResourceType: browserPreRequest.type,
-        })
+        const arg = this.automation.onBrowserPreRequest.getCall(0).args[0]
+
+        expect(arg.requestId).to.eq(browserPreRequest.requestId)
+        expect(arg.method).to.eq(browserPreRequest.request.method)
+        expect(arg.url).to.eq('https://www.google.com/foo')
+        expect(arg.headers).to.eq(browserPreRequest.request.headers)
+        expect(arg.resourceType).to.eq(browserPreRequest.type)
+        expect(arg.originalResourceType).to.eq(browserPreRequest.type)
+        expect(arg.cdpClientSideEventTime).to.eq(100100.100)
+        expect(arg.cdpServerSideEventReceivedTime).to.be.a('number')
       })
 
       it('ignore events with data urls', function () {

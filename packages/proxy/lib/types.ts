@@ -10,7 +10,7 @@ export type CypressIncomingRequest = Request & {
   proxiedUrl: string
   abort: () => void
   requestId: string
-  browserPreRequest?: BrowserPreRequest
+  browserPreRequest?: BrowserPreRequestWithTimings
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
@@ -60,7 +60,19 @@ export type BrowserPreRequest = {
   resourceType: ResourceType
   originalResourceType: string | undefined
   errorHandled?: boolean
+  cdpClientSideEventTime: number
+  cdpServerSideEventReceivedTime: number
 }
+
+export type ProxyTimings = {
+  cdpClientSideEventTime: number
+  cdpServerSideEventReceivedTime: number
+  proxyReceivedTime: number
+  cdpLagTime: number
+  correlationTime: number
+}
+
+export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings
 
 /**
  * Notification that the browser has received a response for a request for which a pre-request may have been emitted.

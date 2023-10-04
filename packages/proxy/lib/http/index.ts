@@ -427,5 +427,6 @@ export class Http {
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
+    this.preRequests.setProtocolManager(protocolManager)
   }
 }
