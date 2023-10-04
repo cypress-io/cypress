@@ -31,6 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'publish-binary'
         - 'chore/update_electron25_and_node18'
+        - 'lerna-optimize-tasks'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +42,8 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -51,9 +53,10 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'jordanpowell88/update-angular-tsconfig-path', << pipeline.git.branch >> ]
-    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -73,7 +76,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -143,7 +147,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "chore/update_electron25_and_node18" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "lerna-optimize-tasks" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -210,10 +214,9 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Build all codegen
+          name: Sync Cloud Validations
           command: |
             source ./scripts/ensure-node.sh
-            yarn gulp buildProd
             yarn gulp syncCloudValidations
       - run:
           name: Build packages
@@ -1181,11 +1184,7 @@ commands:
           name: Build NPM package
           command: |
             source ./scripts/ensure-node.sh
-            yarn build --scope cypress
-      - run:
-          name: Copy Re-exported NPM Packages
-          command: node ./scripts/post-build.js
-          working_directory: cli
+            yarn lerna run build-cli
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -1520,6 +1519,7 @@ jobs:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
+            - run: yarn build --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1902,7 +1902,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn lerna run build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1960,7 +1960,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1969,7 +1969,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn lerna run build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1986,7 +1986,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2003,7 +2003,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn lerna run build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2025,7 +2025,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: yarn lerna run build --scope create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2042,8 +2042,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build
-          working_directory: npm/cypress-schematic
+            yarn lerna run build --scope @cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2381,10 +2380,12 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
+    parallelism: 4
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          command: npm run test:ci
+          # Split the specs up across 4 different machines to run in parallel
+          command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks $CIRCLE_NODE_TOTAL
           browser: electron
 
   # This is a special job. It allows you to test the current
