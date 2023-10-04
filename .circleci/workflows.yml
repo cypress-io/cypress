@@ -228,6 +228,7 @@ commands:
             source ./scripts/ensure-node.sh
             yarn gulp buildProd
             yarn gulp syncCloudValidations
+      - setup_remote_docker
       - run:
           name: Build better-sqlite3
           command: |
