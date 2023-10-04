@@ -4,7 +4,9 @@
       "runner": "nx-cloud",
       "options": {
         "cacheableOperations": [
-          "lint"
+          "lint",
+          "check-ts",
+          "build"
         ],
         "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
       }
@@ -29,7 +31,9 @@
     }
   },
   "namedInputs": {
-    "sharedGlobals": [],
+    "sharedGlobals": [
+      "{workspaceRoot}/scripts"
+    ],
     "default": [
       "{projectRoot}/**/*",
       "sharedGlobals"
