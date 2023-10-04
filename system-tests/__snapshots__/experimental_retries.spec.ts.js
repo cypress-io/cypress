@@ -1,4 +1,4 @@
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / only runs the first attempt of the test if the test passes'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / passes / only runs the first attempt of the test if the test passes'] = `
 
 ====================================================================================================
 
@@ -53,7 +53,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied'] = `
 
 ====================================================================================================
 
@@ -114,7 +114,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied (max attempts)'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied (max attempts)'] = `
 
 ====================================================================================================
 
@@ -179,7 +179,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / short-circuits if the needed "passesRequired" cannot be satisfied by the remaining attempts available'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / fails / short-circuits if the needed "passesRequired" cannot be satisfied by the remaining attempts available'] = `
 
 ====================================================================================================
 
@@ -245,7 +245,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / retries up to the "passesRequired" limit if the config can be satisfied (max attempts possible)'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / fails / retries up to the "passesRequired" limit if the config can be satisfied (max attempts possible)'] = `
 
 ====================================================================================================
 
@@ -315,7 +315,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / passes / only runs the first attempt of the test if the test passes'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / passes / only runs the first attempt of the test if the test passes'] = `
 
 ====================================================================================================
 
@@ -370,7 +370,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs all attempts of the test if the first attempt fails and "stopIfAnyPassed=false"'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / fails / runs all attempts of the test if the first attempt fails and "stopIfAnyPassed=false"'] = `
 
 ====================================================================================================
 
@@ -444,7 +444,7 @@ AssertionError: expected true to be false
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs attempts of the test if the first attempt fails until the test passes if "stopIfAnyPassed=true"'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / fails / runs attempts of the test if the first attempt fails until the test passes if "stopIfAnyPassed=true"'] = `
 
 ====================================================================================================
 
@@ -510,7 +510,7 @@ AssertionError: expected true to be false
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / exercises experimental-retries suite to verify console reporter and final status code are correct.'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / exercises experimental-retries suite to verify console reporter and final status code are correct.'] = `
 
 ====================================================================================================
 
@@ -853,7 +853,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries suite to verify console reporter and final status code are correct.'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exercises experimental-retries suite to verify console reporter and final status code are correct.'] = `
 
 ====================================================================================================
 
@@ -1290,7 +1290,7 @@ Error: test 2
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries suite to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exercises experimental-retries suite to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
 
 ====================================================================================================
 
@@ -1673,7 +1673,7 @@ Error: test 2
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
 
 ====================================================================================================
 
@@ -1885,7 +1885,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
 
 ====================================================================================================
 
@@ -2097,7 +2097,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
+exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
 
 ====================================================================================================
 
