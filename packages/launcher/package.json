@@ -38,5 +38,10 @@
     "index.js",
     "lib"
   ],
-  "types": "index.ts"
+  "types": "index.ts",
+  "nx": {
+    "implicitDependencies": [
+      "@packages/graphql"
+    ]
+  }
 }
