@@ -1320,7 +1320,7 @@ jobs:
             fi
             docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
             docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
-            docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
+            docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
             docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             docker rm -f centos7-builder
       - store-npm-logs
