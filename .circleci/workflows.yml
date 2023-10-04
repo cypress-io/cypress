@@ -218,16 +218,10 @@ commands:
           command: |
             npx playwright install webkit
             npx playwright install-deps webkit
-
-  build-and-persist:
-    description: Save entire folder as artifact for other jobs to run without reinstalling
+  
+  build-better-sqlite3:
+    description: Build better-sqlite3 from source on CentOS 7 to ensure compatibility with a minimum of glibc 2.17
     steps:
-      - run:
-          name: Build all codegen
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn gulp buildProd
-            yarn gulp syncCloudValidations
       - setup_remote_docker
       - run:
           name: Build better-sqlite3
@@ -247,6 +241,17 @@ commands:
             docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
             docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             docker rm -f centos7-builder
+
+
+  build-and-persist:
+    description: Save entire folder as artifact for other jobs to run without reinstalling
+    steps:
+      - run:
+          name: Build all codegen
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp buildProd
+            yarn gulp syncCloudValidations
       - run:
           name: Build packages
           command: |
@@ -1311,6 +1316,19 @@ jobs:
               node ./scripts/circle-env.js --check-canaries
             fi
       - build-and-persist
+      - store-npm-logs
+  
+  build-better-sqlite3:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: large
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - build-better-sqlite3
       - store-npm-logs
 
   lint:
@@ -2540,10 +2558,13 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install
+    - build-better-sqlite3:
+        requires:
+          - node_modules_install
     - build:
         context: test-runner:env-canary
         requires:
-          - node_modules_install
+          - build
     - check-ts:
         requires:
           - build
