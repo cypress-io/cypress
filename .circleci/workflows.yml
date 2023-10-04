@@ -230,7 +230,7 @@ commands:
             yarn gulp syncCloudValidations
       - run:
           name: Build better-sqlite3
-          command:
+          command: |
             set -x
             apt update && apt install -y docker.io
             if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
