@@ -19,7 +19,7 @@ This guide has instructions for building both.
 Building a new npm package is two commands:
 
 1. Increment the version in the root `package.json`
-2. `yarn build --scope cypress`
+2. `yarn lerna run build-cli`
 
 The steps above:
 

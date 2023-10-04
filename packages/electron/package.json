@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "node ./bin/cypress-electron --install",
-    "build-prod": "yarn build",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "start": "./bin/cypress-electron",

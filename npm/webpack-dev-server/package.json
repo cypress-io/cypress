@@ -6,7 +6,6 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
@@ -56,5 +55,14 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }
