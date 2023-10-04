@@ -1287,7 +1287,13 @@ jobs:
             fi
       - build-and-persist
       - store-npm-logs
-  
+
+  # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
+  # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
+  # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
+  # Since this is running Docker remote, we need to copy the project into the container, and copy the built plugin out
+  # of the container because the host running docker does not have access to the project directory so volume mounts are
+  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.  
   build-better-sqlite3:
     <<: *defaults
     parameters:
@@ -1320,7 +1326,7 @@ jobs:
           paths:
             - centos7-builder.tar
       - run:
-          name: Build better-sqlite3
+          name: Build better-sqlite3 for CentOS 7
           command: |
             docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
             docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
