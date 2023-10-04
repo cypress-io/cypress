@@ -88,6 +88,19 @@
   "publishConfig": {
     "access": "public"
   },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "!@cypress/react18:build"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/react",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
+  },
   "standard": {
     "globals": [
       "Cypress",
