@@ -68,8 +68,8 @@ export type ProxyTimings = {
   cdpRequestWillBeSentTimestamp: number
   cdpRequestWillBeSentReceivedTimestamp: number
   proxyRequestReceivedTimestamp: number
-  cdpLagTimestamp: number
-  proxyRequestCorrelationTimestamp: number
+  cdpLagDuration: number
+  proxyRequestCorrelationDuration: number
 }
 
 export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings

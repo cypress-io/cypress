@@ -81,8 +81,8 @@ describe('http/util/prerequests', () => {
     expect(arg.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
     expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
     expect(arg.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(arg.cdpLagTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.proxyRequestCorrelationTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
+    expect(arg.cdpLagDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.proxyRequestCorrelationDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
 
     expectPendingCounts(0, 2)
   })
@@ -136,8 +136,8 @@ describe('http/util/prerequests', () => {
     expect(arg.timings.cdpRequestWillBeSentTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentTimestamp)
     expect(arg.timings.cdpRequestWillBeSentReceivedTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp)
     expect(arg.timings.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(arg.timings.cdpLagTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.timings.proxyRequestCorrelationTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.timings.proxyRequestReceivedTimestamp)
+    expect(arg.timings.cdpLagDuration).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.timings.proxyRequestCorrelationDuration).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.timings.proxyRequestReceivedTimestamp)
   })
 
   // https://github.com/cypress-io/cypress/issues/17853

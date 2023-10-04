@@ -6537,8 +6537,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6548,8 +6548,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6559,8 +6559,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6570,8 +6570,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6581,8 +6581,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6592,8 +6592,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6603,8 +6603,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -6614,8 +6614,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     }
   ],
@@ -8232,8 +8232,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -8243,8 +8243,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -8254,8 +8254,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     },
     {
@@ -8265,8 +8265,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "cdpRequestWillBeSentTimestamp": "Any.Number",
         "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
         "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagTimestamp": "Any.Number",
-        "proxyRequestCorrelationTimestamp": "Any.Number"
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
       }
     }
   ],

@@ -695,8 +695,8 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
           cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
           cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
           proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
-          cdpLagTimestamp: this.req.browserPreRequest.cdpLagTimestamp,
-          proxyRequestCorrelationTimestamp: this.req.browserPreRequest.proxyRequestCorrelationTimestamp,
+          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
         },
       })
     }
@@ -819,8 +819,8 @@ const GzipBody: ResponseMiddleware = async function () {
         cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
         cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
         proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagTimestamp: preRequest.cdpLagTimestamp,
-        proxyRequestCorrelationTimestamp: preRequest.proxyRequestCorrelationTimestamp,
+        cdpLagDuration: preRequest.cdpLagDuration,
+        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
       },
     })
 

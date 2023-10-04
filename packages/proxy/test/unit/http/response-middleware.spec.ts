@@ -1830,8 +1830,8 @@ describe('http/response-middleware', function () {
             cdpRequestWillBeSentTimestamp: 1,
             cdpRequestWillBeSentReceivedTimestamp: 2,
             proxyRequestReceivedTimestamp: 3,
-            cdpLagTimestamp: 4,
-            proxyRequestCorrelationTimestamp: 5,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
           },
         },
         incomingRes: {
@@ -1848,8 +1848,8 @@ describe('http/response-middleware', function () {
             expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
             expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
             expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
-            expect(actual.timings.cdpLagTimestamp).to.equal(4)
-            expect(actual.timings.proxyRequestCorrelationTimestamp).to.equal(5)
+            expect(actual.timings.cdpLagDuration).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationDuration).to.equal(5)
 
             return true
           }),
@@ -2272,8 +2272,8 @@ describe('http/response-middleware', function () {
             cdpRequestWillBeSentTimestamp: 1,
             cdpRequestWillBeSentReceivedTimestamp: 2,
             proxyRequestReceivedTimestamp: 3,
-            cdpLagTimestamp: 4,
-            proxyRequestCorrelationTimestamp: 5,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
           },
         },
         res,
@@ -2296,8 +2296,8 @@ describe('http/response-middleware', function () {
             expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
             expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
             expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
-            expect(actual.timings.cdpLagTimestamp).to.equal(4)
-            expect(actual.timings.proxyRequestCorrelationTimestamp).to.equal(5)
+            expect(actual.timings.cdpLagDuration).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationDuration).to.equal(5)
 
             return true
           }),
