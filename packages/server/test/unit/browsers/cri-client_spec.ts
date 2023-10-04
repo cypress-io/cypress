@@ -80,6 +80,14 @@ describe('lib/browsers/cri-client', function () {
         .to.be.rejectedWith(err)
       })
 
+      it('rejects if target has crashed', async function () {
+        const command = 'DOM.getDocument'
+        const client = await getClient()
+
+        await criStub.on.withArgs('Inspector.targetCrashed').args[0][1]()
+        await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
+      })
+
       context('retries', () => {
         ([
           'WebSocket is not open',

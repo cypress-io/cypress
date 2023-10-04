@@ -9,7 +9,7 @@ import {
   testingTypeBreakingOptions,
 } from './options'
 
-import type { TestingType } from '@packages/types'
+import type { BreakingErrResult, TestingType } from '@packages/types'
 import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
 
@@ -58,14 +58,6 @@ const issuedWarnings = new Set()
 export type InvalidTestOverrideResult = {
   invalidConfigKey: string
   supportedOverrideLevel: string
-}
-
-export type BreakingErrResult = {
-  name: string
-  newName?: string
-  value?: any
-  configFile: string
-  testingType?: TestingType
 }
 
 type ErrorHandler = (
