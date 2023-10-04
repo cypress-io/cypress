@@ -6534,88 +6534,88 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     }
   ],
@@ -8229,44 +8229,44 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     },
     {
       "requestId": "Any.Number",
       "isCached": true,
       "timings": {
-        "cdpClientSideEventTime": "Any.Number",
-        "cdpServerSideEventReceivedTime": "Any.Number",
-        "proxyReceivedTime": "Any.Number",
-        "cdpLagTime": "Any.Number",
-        "correlationTime": "Any.Number"
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagTimestamp": "Any.Number",
+        "proxyRequestCorrelationTimestamp": "Any.Number"
       }
     }
   ],

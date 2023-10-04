@@ -60,16 +60,16 @@ export type BrowserPreRequest = {
   resourceType: ResourceType
   originalResourceType: string | undefined
   errorHandled?: boolean
-  cdpClientSideEventTime: number
-  cdpServerSideEventReceivedTime: number
+  cdpRequestWillBeSentTimestamp: number
+  cdpRequestWillBeSentReceivedTimestamp: number
 }
 
 export type ProxyTimings = {
-  cdpClientSideEventTime: number
-  cdpServerSideEventReceivedTime: number
-  proxyReceivedTime: number
-  cdpLagTime: number
-  correlationTime: number
+  cdpRequestWillBeSentTimestamp: number
+  cdpRequestWillBeSentReceivedTimestamp: number
+  proxyRequestReceivedTimestamp: number
+  cdpLagTimestamp: number
+  proxyRequestCorrelationTimestamp: number
 }
 
 export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings

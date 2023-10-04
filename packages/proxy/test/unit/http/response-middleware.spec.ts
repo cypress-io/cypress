@@ -1827,11 +1827,11 @@ describe('http/response-middleware', function () {
         req: {
           browserPreRequest: {
             requestId: '123',
-            cdpClientSideEventTime: 1,
-            cdpServerSideEventReceivedTime: 2,
-            proxyReceivedTime: 3,
-            cdpLagTime: 4,
-            correlationTime: 5,
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagTimestamp: 4,
+            proxyRequestCorrelationTimestamp: 5,
           },
         },
         incomingRes: {
@@ -1845,11 +1845,11 @@ describe('http/response-middleware', function () {
           sinon.match(function (actual) {
             expect(actual.requestId).to.equal('123')
             expect(actual.isCached).to.equal(true)
-            expect(actual.timings.cdpClientSideEventTime).to.equal(1)
-            expect(actual.timings.cdpServerSideEventReceivedTime).to.equal(2)
-            expect(actual.timings.proxyReceivedTime).to.equal(3)
-            expect(actual.timings.cdpLagTime).to.equal(4)
-            expect(actual.timings.correlationTime).to.equal(5)
+            expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
+            expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
+            expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
+            expect(actual.timings.cdpLagTimestamp).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationTimestamp).to.equal(5)
 
             return true
           }),
@@ -2269,11 +2269,11 @@ describe('http/response-middleware', function () {
         req: {
           browserPreRequest: {
             requestId: '123',
-            cdpClientSideEventTime: 1,
-            cdpServerSideEventReceivedTime: 2,
-            proxyReceivedTime: 3,
-            cdpLagTime: 4,
-            correlationTime: 5,
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagTimestamp: 4,
+            proxyRequestCorrelationTimestamp: 5,
           },
         },
         res,
@@ -2293,11 +2293,11 @@ describe('http/response-middleware', function () {
             expect(actual.isAlreadyGunzipped).to.equal(true)
             expect(actual.responseStream).to.equal(stream)
             expect(actual.res).to.equal(res)
-            expect(actual.timings.cdpClientSideEventTime).to.equal(1)
-            expect(actual.timings.cdpServerSideEventReceivedTime).to.equal(2)
-            expect(actual.timings.proxyReceivedTime).to.equal(3)
-            expect(actual.timings.cdpLagTime).to.equal(4)
-            expect(actual.timings.correlationTime).to.equal(5)
+            expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
+            expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
+            expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
+            expect(actual.timings.cdpLagTimestamp).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationTimestamp).to.equal(5)
 
             return true
           }),

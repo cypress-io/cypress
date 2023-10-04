@@ -124,8 +124,8 @@ context('lib/browsers/cdp_automation', () => {
         expect(arg.headers).to.eq(browserPreRequest.request.headers)
         expect(arg.resourceType).to.eq(browserPreRequest.type)
         expect(arg.originalResourceType).to.eq(browserPreRequest.type)
-        expect(arg.cdpClientSideEventTime).to.eq(100100.100)
-        expect(arg.cdpServerSideEventReceivedTime).to.be.a('number')
+        expect(arg.cdpRequestWillBeSentTimestamp).to.eq(100100.100)
+        expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.be.a('number')
       })
 
       it('removes # from a url', function () {
@@ -152,8 +152,8 @@ context('lib/browsers/cdp_automation', () => {
         expect(arg.headers).to.eq(browserPreRequest.request.headers)
         expect(arg.resourceType).to.eq(browserPreRequest.type)
         expect(arg.originalResourceType).to.eq(browserPreRequest.type)
-        expect(arg.cdpClientSideEventTime).to.eq(100100.100)
-        expect(arg.cdpServerSideEventReceivedTime).to.be.a('number')
+        expect(arg.cdpRequestWillBeSentTimestamp).to.eq(100100.100)
+        expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.be.a('number')
       })
 
       it('ignore events with data urls', function () {

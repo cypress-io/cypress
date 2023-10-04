@@ -28,13 +28,13 @@ type PendingRequest = {
   callback: GetPreRequestCb
   timeout: NodeJS.Timeout
   timedOut?: boolean
-  proxyReceivedTime: number
+  proxyRequestReceivedTimestamp: number
 }
 
 type PendingPreRequest = {
   browserPreRequest: BrowserPreRequest
-  cdpClientSideEventTime: number
-  cdpServerSideEventReceivedTime: number
+  cdpRequestWillBeSentTimestamp: number
+  cdpRequestWillBeSentReceivedTimestamp: number
 }
 
 /**
@@ -109,8 +109,8 @@ export class PreRequests {
     this.sweepIntervalTimer = setInterval(() => {
       const now = Date.now()
 
-      this.pendingPreRequests.removeMatching(({ cdpServerSideEventReceivedTime, browserPreRequest }) => {
-        if (cdpServerSideEventReceivedTime + this.sweepInterval < now) {
+      this.pendingPreRequests.removeMatching(({ cdpRequestWillBeSentReceivedTimestamp, browserPreRequest }) => {
+        if (cdpRequestWillBeSentReceivedTimestamp + this.sweepInterval < now) {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
@@ -133,11 +133,11 @@ export class PreRequests {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback({
           ...browserPreRequest,
-          cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
-          cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
-          proxyReceivedTime: pendingRequest.proxyReceivedTime,
-          cdpLagTime: browserPreRequest.cdpServerSideEventReceivedTime - browserPreRequest.cdpClientSideEventTime,
-          correlationTime: Math.max(browserPreRequest.cdpServerSideEventReceivedTime - pendingRequest.proxyReceivedTime, 0),
+          cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
+          cdpLagTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
+          proxyRequestCorrelationTimestamp: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
         })
 
         return
@@ -146,11 +146,11 @@ export class PreRequests {
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
         timings: {
-          cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
-          cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
-          proxyReceivedTime: pendingRequest.proxyReceivedTime,
-          cdpLagTime: browserPreRequest.cdpServerSideEventReceivedTime - browserPreRequest.cdpClientSideEventTime,
-          correlationTime: Math.max(browserPreRequest.cdpServerSideEventReceivedTime - pendingRequest.proxyReceivedTime, 0),
+          cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
+          cdpLagTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
+          proxyRequestCorrelationTimestamp: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
         },
       })
 
@@ -160,8 +160,8 @@ export class PreRequests {
     debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
-      cdpClientSideEventTime: browserPreRequest.cdpClientSideEventTime,
-      cdpServerSideEventReceivedTime: browserPreRequest.cdpServerSideEventReceivedTime,
+      cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
+      cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
     })
   }
 
@@ -172,7 +172,7 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
-    const proxyReceivedTime = performance.now() + performance.timeOrigin
+    const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
@@ -183,11 +183,11 @@ export class PreRequests {
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
       callback({
         ...pendingPreRequest.browserPreRequest,
-        cdpClientSideEventTime: pendingPreRequest.cdpClientSideEventTime,
-        cdpServerSideEventReceivedTime: pendingPreRequest.cdpServerSideEventReceivedTime,
-        proxyReceivedTime,
-        cdpLagTime: pendingPreRequest.cdpServerSideEventReceivedTime - pendingPreRequest.cdpClientSideEventTime,
-        correlationTime: Math.max(pendingPreRequest.cdpServerSideEventReceivedTime - proxyReceivedTime, 0),
+        cdpRequestWillBeSentTimestamp: pendingPreRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp,
+        cdpLagTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
+        proxyRequestCorrelationTimestamp: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
       })
 
       return
@@ -196,7 +196,7 @@ export class PreRequests {
     const pendingRequest: PendingRequest = {
       ctxDebug,
       callback,
-      proxyReceivedTime: performance.now() + performance.timeOrigin,
+      proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
         ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++

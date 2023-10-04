@@ -36,8 +36,8 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
-      cdpClientSideEventTime: 1,
-      cdpServerSideEventReceivedTime: 2,
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: 2,
     })
 
     const secondPreRequest: BrowserPreRequest = {
@@ -47,8 +47,8 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
-      cdpClientSideEventTime: 1,
-      cdpServerSideEventReceivedTime: performance.now() + performance.timeOrigin + 10000,
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
 
     preRequests.addPending(secondPreRequest)
@@ -59,8 +59,8 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
-      cdpClientSideEventTime: 1,
-      cdpServerSideEventReceivedTime: 2,
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: 2,
     })
 
     expectPendingCounts(0, 3)
@@ -78,11 +78,11 @@ describe('http/util/prerequests', () => {
     expect(arg.headers).to.deep.eq(secondPreRequest.headers)
     expect(arg.resourceType).to.eq(secondPreRequest.resourceType)
     expect(arg.originalResourceType).to.eq(secondPreRequest.originalResourceType)
-    expect(arg.cdpClientSideEventTime).to.eq(secondPreRequest.cdpClientSideEventTime)
-    expect(arg.cdpServerSideEventReceivedTime).to.eq(secondPreRequest.cdpServerSideEventReceivedTime)
-    expect(arg.proxyReceivedTime).to.be.a('number')
-    expect(arg.cdpLagTime).to.eq(secondPreRequest.cdpServerSideEventReceivedTime - secondPreRequest.cdpClientSideEventTime)
-    expect(arg.correlationTime).to.eq(secondPreRequest.cdpServerSideEventReceivedTime - arg.proxyReceivedTime)
+    expect(arg.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(arg.proxyRequestReceivedTimestamp).to.be.a('number')
+    expect(arg.cdpLagTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.proxyRequestCorrelationTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
 
     expectPendingCounts(0, 2)
   })
@@ -122,8 +122,8 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
-      cdpClientSideEventTime: 1,
-      cdpServerSideEventReceivedTime: performance.now() + performance.timeOrigin + 10000,
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
 
     preRequests.addPending(browserPreRequest)
@@ -133,17 +133,17 @@ describe('http/util/prerequests', () => {
     const arg = (protocolManager.responseStreamTimedOut as any).getCall(0).args[0]
 
     expect(arg.requestId).to.eq(browserPreRequest.requestId)
-    expect(arg.timings.cdpClientSideEventTime).to.eq(browserPreRequest.cdpClientSideEventTime)
-    expect(arg.timings.cdpServerSideEventReceivedTime).to.eq(browserPreRequest.cdpServerSideEventReceivedTime)
-    expect(arg.timings.proxyReceivedTime).to.be.a('number')
-    expect(arg.timings.cdpLagTime).to.eq(browserPreRequest.cdpServerSideEventReceivedTime - browserPreRequest.cdpClientSideEventTime)
-    expect(arg.timings.correlationTime).to.eq(browserPreRequest.cdpServerSideEventReceivedTime - arg.timings.proxyReceivedTime)
+    expect(arg.timings.cdpRequestWillBeSentTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.timings.cdpRequestWillBeSentReceivedTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(arg.timings.proxyRequestReceivedTimestamp).to.be.a('number')
+    expect(arg.timings.cdpLagTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.timings.proxyRequestCorrelationTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.timings.proxyRequestReceivedTimestamp)
   })
 
   // https://github.com/cypress-io/cypress/issues/17853
   it('eventually discards pre-requests that don\'t match requests', (done) => {
     preRequests = new PreRequests(10, 200)
-    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpServerSideEventReceivedTime: performance.now() + performance.timeOrigin } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin } as BrowserPreRequest)
 
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request

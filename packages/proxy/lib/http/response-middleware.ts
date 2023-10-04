@@ -692,11 +692,11 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
         requestId,
         isCached: this.incomingRes.statusCode === 304,
         timings: {
-          cdpClientSideEventTime: this.req.browserPreRequest.cdpClientSideEventTime,
-          cdpServerSideEventReceivedTime: this.req.browserPreRequest.cdpServerSideEventReceivedTime,
-          proxyReceivedTime: this.req.browserPreRequest.proxyReceivedTime,
-          cdpLagTime: this.req.browserPreRequest.cdpLagTime,
-          correlationTime: this.req.browserPreRequest.correlationTime,
+          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+          cdpLagTimestamp: this.req.browserPreRequest.cdpLagTimestamp,
+          proxyRequestCorrelationTimestamp: this.req.browserPreRequest.proxyRequestCorrelationTimestamp,
         },
       })
     }
@@ -816,11 +816,11 @@ const GzipBody: ResponseMiddleware = async function () {
       responseStream: this.incomingResStream,
       res: this.res,
       timings: {
-        cdpClientSideEventTime: preRequest.cdpClientSideEventTime,
-        cdpServerSideEventReceivedTime: preRequest.cdpServerSideEventReceivedTime,
-        proxyReceivedTime: preRequest.proxyReceivedTime,
-        cdpLagTime: preRequest.cdpLagTime,
-        correlationTime: preRequest.correlationTime,
+        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+        cdpLagTimestamp: preRequest.cdpLagTimestamp,
+        proxyRequestCorrelationTimestamp: preRequest.proxyRequestCorrelationTimestamp,
       },
     })
 

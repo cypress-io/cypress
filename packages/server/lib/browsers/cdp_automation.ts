@@ -238,8 +238,8 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
-      cdpClientSideEventTime: params.wallTime * 1000,
-      cdpServerSideEventReceivedTime: performance.now() + performance.timeOrigin,
+      cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
