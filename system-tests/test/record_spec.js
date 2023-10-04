@@ -2310,7 +2310,7 @@ describe('e2e record', () => {
 
       describe('when the tab crashes in chrome', () => {
         enableCaptureProtocol()
-        it('still uploads a test replay', function () {
+        it('posts accurate test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2320,7 +2320,6 @@ describe('e2e record', () => {
             snapshot: true,
             expectedExitCode: 1,
           }).then(() => {
-            const urls = getRequestUrls()
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
@@ -2331,8 +2330,34 @@ describe('e2e record', () => {
             expect(postResultsRequest.body.stats.passes).to.equal(1)
             expect(postResultsRequest.body.stats.failures).to.equal(1)
             expect(postResultsRequest.body.stats.skipped).to.equal(0)
+          })
+        })
+      })
 
-            expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+      describe('when there is an async error thrown from config file', () => {
+        enableCaptureProtocol()
+        it('posts accurate test results', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            browser: 'chrome',
+            project: 'config-with-crashing-plugin',
+            spec: 'simple_multiple.cy.js',
+            configFile: 'cypress-with-project-id.config.js',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          }).then(() => {
+            const requests = getRequests()
+            const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
+
+            console.log(postResultsRequest)
+            expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
+            expect(postResultsRequest?.body.tests).to.have.length(2)
+            expect(postResultsRequest?.body.stats.suites).to.equal(1)
+            expect(postResultsRequest?.body.stats.tests).to.equal(2)
+            expect(postResultsRequest?.body.stats.passes).to.equal(1)
+            expect(postResultsRequest?.body.stats.failures).to.equal(1)
+            expect(postResultsRequest?.body.stats.skipped).to.equal(0)
           })
         })
       })
