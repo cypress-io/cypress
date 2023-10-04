@@ -526,7 +526,7 @@ commands:
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests run --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
@@ -606,7 +606,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns|DebugPendingRunCounts|DebugRunStates|DebugPageHeader|DebugPendingRunSplash|DebugRunNavigation|DebugRunNavigationLimitMessage).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns|DebugPendingRunCounts|DebugRunStates|DebugPageHeader|DebugPendingRunSplash|DebugRunNavigation|DebugRunNavigationLimitMessage).cy.*' | circleci tests run --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -666,7 +666,7 @@ commands:
               fi
               SPECS="$SPECS $file"
             done
-            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests run --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
