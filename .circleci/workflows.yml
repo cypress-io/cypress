@@ -29,7 +29,6 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-        - 'update-v8-snapshot-cache-on-develop'
         - 'feature/experimental-retries'
         - 'publish-binary'
         - 'chore/update_electron25_and_node18'
@@ -58,8 +57,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
