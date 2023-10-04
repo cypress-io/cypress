@@ -2564,7 +2564,7 @@ linux-x64-workflow: &linux-x64-workflow
     - build:
         context: test-runner:env-canary
         requires:
-          - build
+          - build-better-sqlite3
     - check-ts:
         requires:
           - build
