@@ -52,14 +52,14 @@
   "nx": {
     "targets": {
       "build": {
-        "inputs": [
-          "{workspaceRoot}/scripts"
-        ],
         "outputs": [
           "{workspaceRoot}/cli/vue2",
           "{projectRoot}/dist"
         ]
       }
-    }
+    },
+    "implicitDependencies": [
+      "!cypress"
+    ]
   }
 }

@@ -61,9 +61,6 @@
   "nx": {
     "targets": {
       "build": {
-        "inputs": [
-          "{workspaceRoot}/scripts"
-        ],
         "outputs": [
           "{workspaceRoot}/cli/angular"
         ]

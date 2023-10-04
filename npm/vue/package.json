@@ -83,8 +83,8 @@
   "nx": {
     "targets": {
       "build": {
-        "inputs": [
-          "{workspaceRoot}/scripts"
+        "dependsOn": [
+          "!@cypress/react18:build"
         ],
         "outputs": [
           "{workspaceRoot}/cli/vue",

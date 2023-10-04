@@ -5,8 +5,8 @@
       "options": {
         "cacheableOperations": [
           "lint",
-          "build",
-          "check-ts"
+          "check-ts",
+          "build"
         ],
         "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
       }
