@@ -526,13 +526,12 @@ commands:
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests run --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests run --total=$CIRCLE_NODE_TOTAL --verbose --command="xargs yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES --runner-ui")
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -1515,7 +1514,7 @@ jobs:
             - run: yarn lerna run build-prod --stream --concurrency 4
             - run: yarn build --concurrency 4
             # run unit tests from each individual package
-            - run: yarn test
+            - run: circleci tests run --command="yarn test" --verbose
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
