@@ -483,6 +483,63 @@ commands:
             which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+  
+
+
+  # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
+  # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
+  # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
+  # Since this is running Docker remote, we need to copy the project into the container, and copy the built plugin out
+  # of the container because the host running docker does not have access to the project directory so volume mounts are
+  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.  
+  build-better-sqlite3:
+    description: Build better-sqlite3 for CentOS 7
+    steps:
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+      - run:
+          name: Build or load centos7-builder image
+          command: |
+            set -x
+            apt update && apt install -y docker.io
+            if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
+                echo "*" > .dockerignore
+                docker build -t centos7-builder -f centos7-builder.Dockerfile .
+                docker save centos7-builder > centos7-builder.tar
+                rm .dockerignore
+            else
+                docker load < centos7-builder.tar
+            fi
+      - save_cache:
+          key: cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+          paths:
+            - centos7-builder.tar
+      - restore_cache:
+          keys:
+            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+      - run:
+          name: Build better-sqlite3 for CentOS 7
+          command: |
+            if [[ ! -f better_sqlite3.node ]]; then
+              docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
+              docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
+              docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
+              docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+              docker rm -f centos7-builder
+              cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
+            else
+              cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            fi
+      - save_cache:
+          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+          paths:
+            - better_sqlite3.node
+      - run:
+          name: Clean up top level better-sqlite3 file
+          command: |
+            rm ~/cypress/better_sqlite3.node
 
   run-driver-integration-tests:
     parameters:
@@ -1254,6 +1311,7 @@ jobs:
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
+      - build-better-sqlite3
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1286,76 +1344,6 @@ jobs:
               node ./scripts/circle-env.js --check-canaries
             fi
       - build-and-persist
-      - store-npm-logs
-
-  # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
-  # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
-  # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
-  # Since this is running Docker remote, we need to copy the project into the container, and copy the built plugin out
-  # of the container because the host running docker does not have access to the project directory so volume mounts are
-  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.  
-  build-better-sqlite3:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: large
-    resource_class: << parameters.resource_class >>
-    steps:
-      - restore_cached_workspace
-      - setup_remote_docker
-      - restore_cache:
-          keys:
-            - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
-      - run:
-          name: Build or load centos7-builder image
-          command: |
-            set -x
-            apt update && apt install -y docker.io
-            if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
-                echo "*" > .dockerignore
-                docker build -t centos7-builder -f centos7-builder.Dockerfile .
-                docker save centos7-builder > centos7-builder.tar
-                rm .dockerignore
-            else
-                docker load < centos7-builder.tar
-            fi
-      - save_cache:
-          key: cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
-          paths:
-            - centos7-builder.tar
-      - restore_cache:
-          keys:
-            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
-      - run:
-          name: Build better-sqlite3 for CentOS 7
-          command: |
-            if [[ ! -f better_sqlite3.node ]]; then
-              docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
-              docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
-              docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
-              docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
-              docker rm -f centos7-builder
-              cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
-            else
-              cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
-            fi
-      - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
-          paths:
-            - better_sqlite3.node
-      - run:
-          name: Clean up top level better-sqlite3 file
-          command: |
-            rm ~/cypress/better_sqlite3.node
-      - prepare-modules-cache # So we don't throw these in the workspace cache
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress
-            - .ssh
-            - node_modules # contains the npm i -g modules
       - store-npm-logs
 
   lint:
@@ -2587,13 +2575,10 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install
-    - build-better-sqlite3:
-        requires:
-          - node_modules_install
     - build:
         context: test-runner:env-canary
         requires:
-          - build-better-sqlite3
+          - node_modules_install
     - check-ts:
         requires:
           - build
