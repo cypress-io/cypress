@@ -10,9 +10,6 @@ _Released 10/03/2023 (PENDING)_
 - Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
 - Fixed an issue where Test Replay couldn't record tests due to issues involving `GLIBC`. Fixes [#27902](https://github.com/cypress-io/cypress/issues/27902).
 
-**Dependency Updates:**
-
-- Update dependency `better-sqlite3` to 8.7.0. Addressed in [#27902](https://github.com/cypress-io/cypress/issues/27902).
 
 ## 13.3.0
 
