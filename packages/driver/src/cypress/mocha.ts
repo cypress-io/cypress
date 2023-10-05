@@ -45,19 +45,15 @@ interface CypressTest extends Mocha.Test {
 
 type Strategy = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
 
-type Options<T> = T extends 'detect-flake-and-pass-on-threshold' ?
-  {
-    maxRetries: number
-    passesRequired: number
-  } :
-  T extends 'detect-flake-but-always-fail' ? {
-    maxRetries: number
-    stopIfAnyPassed: boolean
-  } :
-    undefined
+type NormalizedRetriesConfig = {
+  strategy?: Strategy
+  maxRetries?: number
+  passesRequired?: number
+  stopIfAnyPassed?: boolean
+}
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>) {
+export function calculateTestStatus (test: CypressTest, config: NormalizedRetriesConfig) {
   // @ts-expect-error
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
@@ -82,21 +78,21 @@ export function calculateTestStatus (test: CypressTest, strategy: Strategy, opti
     const passingAttempts = passedTests.length
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
-    let passesRequired = strategy !== 'detect-flake-but-always-fail' ?
-      ((options as Options<'detect-flake-and-pass-on-threshold'> | undefined)?.passesRequired || 1) :
+    let passesRequired = config.strategy !== 'detect-flake-but-always-fail' ?
+      (config.passesRequired || 1) :
       null
 
-    const neededPassingAttemptsLeft = strategy !== 'detect-flake-but-always-fail' ?
+    const neededPassingAttemptsLeft = config.strategy !== 'detect-flake-but-always-fail' ?
       (passesRequired as number) - passingAttempts :
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
-    let stopIfAnyPassed = strategy === 'detect-flake-but-always-fail' ?
-      ((options as Options<'detect-flake-but-always-fail'>).stopIfAnyPassed || false) :
+    let stopIfAnyPassed = config.strategy === 'detect-flake-but-always-fail' ?
+      (config.stopIfAnyPassed || false) :
       null
 
     // Do we have the required amount of passes? If yes, we no longer need to keep running the test.
-    if (strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
+    if (config.strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
       outerTestStatus = 'passed'
       test.final = true
       shouldAttemptsContinue = false
@@ -105,13 +101,13 @@ export function calculateTestStatus (test: CypressTest, strategy: Strategy, opti
         // For strategy "detect-flake-and-pass-on-threshold" or no strategy (current GA retries):
         //  If we haven't met our max attempt limit AND we have enough remaining attempts that can satisfy the passing requirement.
         // retry the test.
-        (strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
+        (config.strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
         // For strategy "detect-flake-but-always-fail":
         //  If we haven't met our max attempt limit AND
         //    stopIfAnyPassed is false OR
         //    stopIfAnyPassed is true and no tests have passed yet.
         // retry the test.
-        (strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
+        (config.strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
       )) {
       test.final = false
       shouldAttemptsContinue = true
@@ -132,7 +128,7 @@ export function calculateTestStatus (test: CypressTest, strategy: Strategy, opti
   }
 
   return {
-    strategy,
+    strategy: config.strategy,
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: outerTestStatus,
@@ -438,16 +434,63 @@ function patchTestClone () {
   }
 }
 
+function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetriesConfig {
+  const retriesConfig = Cypress.config('retries')
+  const isInOpenMode = Cypress.config('isInteractive')
+
+  if (retriesConfig == null) {
+    return {}
+  }
+
+  if (typeof retriesConfig === 'number') {
+    return {
+      strategy: 'detect-flake-and-pass-on-threshold',
+      maxRetries: retriesConfig,
+      passesRequired: 1,
+    }
+  }
+
+  const enablementKey: 'openMode'|'runMode' = isInOpenMode ? 'openMode' : 'runMode'
+  const enablementValue = retriesConfig[enablementKey]
+
+  // if retries are explicitly disabled, return an empty object
+  if (enablementValue === false) {
+    return {}
+  }
+
+  // by default, retries are disabled in open mode
+  if (!enablementValue && isInOpenMode) {
+    return {}
+  }
+
+  if (typeof enablementValue === 'number') {
+    return {
+      strategy: 'detect-flake-and-pass-on-threshold',
+      maxRetries: enablementValue,
+      passesRequired: 1,
+    }
+  }
+
+  const config = retriesConfig as Cypress.RetryStrategy
+
+  // TODO: For GA, rename experimentalStrategy to strategy, experimentalOptions to options
+  return {
+    strategy: config.experimentalStrategy,
+    maxRetries: config.experimentalOptions?.maxRetries,
+    passesRequired: config.experimentalOptions?.['passesRequired'],
+    stopIfAnyPassed: config.experimentalOptions?.['stopIfAnyPassed'],
+  }
+}
+
 function createCalculateTestStatus (Cypress: Cypress.Cypress) {
   // Adds a method to the test object called 'calculateTestStatus'
   // which is used inside our mocha patch (./driver/patches/mocha+7.0.1.dev.patch)
   // in order to calculate test retries. This prototype functions as a light abstraction around
   // 'calculateTestStatus', which makes the function easier to unit-test
   Test.prototype.calculateTestStatus = function () {
-    let retriesConfig = Cypress.config('retries')
+    const retriesConfig = getNormalizedRetriesConfig(Cypress)
 
-    // @ts-expect-error
-    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions)
+    return calculateTestStatus(this, retriesConfig)
   }
 }
 
