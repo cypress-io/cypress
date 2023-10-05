@@ -90,7 +90,7 @@ export class PreRequests {
   protocolManager?: ProtocolManagerShape
 
   constructor (
-    requestTimeout = 1,
+    requestTimeout = 2000,
     // 10 seconds
     sweepInterval = 10000,
   ) {
