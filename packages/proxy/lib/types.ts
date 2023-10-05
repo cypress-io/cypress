@@ -1,5 +1,6 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
+import type { ProxyTimings } from '@packages/types'
 import type { ResourceType } from '@packages/net-stubbing'
 import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 
@@ -62,14 +63,6 @@ export type BrowserPreRequest = {
   errorHandled?: boolean
   cdpRequestWillBeSentTimestamp: number
   cdpRequestWillBeSentReceivedTimestamp: number
-}
-
-export type ProxyTimings = {
-  cdpRequestWillBeSentTimestamp: number
-  cdpRequestWillBeSentReceivedTimestamp: number
-  proxyRequestReceivedTimestamp: number
-  cdpLagDuration: number
-  proxyRequestCorrelationDuration: number
 }
 
 export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings

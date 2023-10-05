@@ -2,7 +2,7 @@ import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
-import type { ProxyTimings } from '@packages/proxy'
+import type { ProxyTimings } from '@packages/types'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
