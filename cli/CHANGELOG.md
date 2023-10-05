@@ -8,7 +8,11 @@ _Released 10/03/2023 (PENDING)_
 - Fixed an issue where requests were correlated in the wrong order in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27892](https://github.com/cypress-io/cypress/pull/27892).
 - Fixed an issue where a crashed Chrome renderer can cause the Test Replay recorder to hang. Addressed in [#27909](https://github.com/cypress-io/cypress/pull/27909).
 - Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
-- Fixed an issue where Test Replay couldn't record tests due to issues involving `GLIBC`. Fixes [#27902](https://github.com/cypress-io/cypress/issues/27902)
+- Fixed an issue where Test Replay couldn't record tests due to issues involving `GLIBC`. Fixes [#27902](https://github.com/cypress-io/cypress/issues/27902).
+
+**Dependency Updates:**
+
+- Update dependency `better-sqlite3` to 8.7.0. Addressed in [#27902](https://github.com/cypress-io/cypress/issues/27902).
 
 ## 13.3.0
 
