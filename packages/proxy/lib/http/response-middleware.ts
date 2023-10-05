@@ -167,6 +167,27 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
+const FilterNonProxiedResponse: ResponseMiddleware = function () {
+  // if the request is not from the main Cypress tab, we want to skip any
+  // manipulation of the response and only run the middleware necessary to
+  // get it back to the browser
+  if (!this.req.isFromMainTarget) {
+    this.debug('response for [%s %s] is not from the main target - skip proxying', this.req.method, this.req.proxiedUrl)
+
+    this.onlyRunMiddleware([
+      'AttachPlainTextStreamFn',
+      'PatchExpressSetHeader',
+      'MaybeSendRedirectToClient',
+      'CopyResponseStatusCode',
+      'MaybeEndWithEmptyBody',
+      'GzipBody',
+      'SendResponseBodyToClient',
+    ])
+  }
+
+  this.next()
+}
+
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
     const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -848,6 +869,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,

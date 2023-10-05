@@ -31,14 +31,24 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+  this.req.isFromMainTarget = !!this.req.headers['x-cypress-is-from-main-target']
 
   span?.setAttributes({
     isAUTFrame: this.req.isAUTFrame,
+    isFromMainTarget: this.req.isFromMainTarget,
   })
 
-  if (this.req.headers['x-cypress-is-aut-frame']) {
-    delete this.req.headers['x-cypress-is-aut-frame']
+  // we only want to proxy requests from the main target and not ones from
+  // extra tabs or windows, so only run the bare minimum to shuttle the
+  // request and response back to the browser
+  if (!this.req.isFromMainTarget) {
+    this.debug('request for [%s %s] is not from the main target - skip proxying', this.req.method, this.req.proxiedUrl)
+
+    this.onlyRunMiddleware(['SendRequestOutgoing'])
   }
+
+  delete this.req.headers['x-cypress-is-aut-frame']
+  delete this.req.headers['x-cypress-is-from-main-target']
 
   span?.end()
   this.next()

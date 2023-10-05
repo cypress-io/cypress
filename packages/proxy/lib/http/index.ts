@@ -103,6 +103,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'onResponse',
   'onError',
   'skipMiddleware',
+  'onlyRunMiddleware',
 ]
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
@@ -116,6 +117,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
+  onlyRunMiddleware: (names: string[]) => void
 }>
 
 export function _runStage (type: HttpStages, ctx: any, onError: Function) {
@@ -217,8 +219,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
           _end()
         },
         onError: _onError,
-        skipMiddleware: (name) => {
+        skipMiddleware: (name: string) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
+        },
+        onlyRunMiddleware: (names: string[]) => {
+          ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
         ...ctx,
       }

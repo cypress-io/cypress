@@ -164,7 +164,7 @@ export class CdpAutomation implements CDPClient {
   on: OnFn
   off: OffFn
   send: SendDebuggerCommand
-  private frameTree: any
+  private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: any
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
@@ -331,26 +331,33 @@ export class CdpAutomation implements CDPClient {
       requestId: params.requestId,
     }
 
-    if (header) {
     // headers are received as an object but need to be an array
     // to modify them
-      const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
+    const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
 
-      details.headers = [
-        ...currentHeaders,
-        header,
-      ]
+    details.headers = [
+      ...currentHeaders,
+      // indicates that this request came from the main target to differentiate
+      // it from other targets like extra tabs and windows
+      {
+        name: 'X-Cypress-Is-From-Main-Target',
+        value: 'true',
+      },
+    ]
+
+    if (header) {
+      details.headers.push(header)
     }
 
     debugVerbose('continueRequest: %o', details)
 
     client.send('Fetch.continueRequest', details).catch((err) => {
-    // swallow this error so it doesn't crash Cypress.
-    // an "Invalid InterceptionId" error can randomly happen in the driver tests
-    // when testing the redirection loop limit, when a redirect request happens
-    // to be sent after the test has moved on. this shouldn't crash Cypress, in
-    // any case, and likely wouldn't happen for standard user tests, since they
-    // will properly fail and not move on like the driver tests
+      // swallow this error so it doesn't crash Cypress.
+      // an "Invalid InterceptionId" error can randomly happen in the driver tests
+      // when testing the redirection loop limit, when a redirect request happens
+      // to be sent after the test has moved on. this shouldn't crash Cypress, in
+      // any case, and likely wouldn't happen for standard user tests, since they
+      // will properly fail and not move on like the driver tests
       debugVerbose('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
     })
   }
