@@ -760,6 +760,77 @@ describe('src/cy/commands/waiting', () => {
           expect(xhr2.response.body).to.deep.eq(resp2)
         })
       })
+
+      it('all responses returned in correct order - unique aliases', () => {
+        const resp1 = { value: 'alpha' }
+        const resp2 = { value: 'beta' }
+        const resp3 = { value: 'gamma' }
+        const resp4 = { value: 'delta' }
+        const resp5 = { value: 'epsilon' }
+
+        cy.intercept(/alpha/, resp1).as('getAlpha')
+        cy.intercept(/beta/, resp2).as('getBeta')
+        cy.intercept(/gamma/, resp3).as('getGamma')
+        cy.intercept(/delta/, resp4).as('getDelta')
+        cy.intercept(/epsilon/, resp5).as('getEpsilon')
+
+        cy.window().then((win) => {
+          xhrGet(win, '/epsilon')
+          xhrGet(win, '/beta')
+          xhrGet(win, '/gamma')
+          xhrGet(win, '/delta')
+          xhrGet(win, '/alpha')
+
+          return null
+        })
+
+        cy.wait(['@getAlpha', '@getBeta', '@getGamma', '@getDelta', '@getEpsilon']).then((responses) => {
+          expect(responses[0]?.response?.body.value).to.eq('alpha')
+          expect(responses[1]?.response?.body.value).to.eq('beta')
+          expect(responses[2]?.response?.body.value).to.eq('gamma')
+          expect(responses[3]?.response?.body.value).to.eq('delta')
+          expect(responses[4]?.response?.body.value).to.eq('epsilon')
+        })
+      })
+
+      it('all responses returned in correct order - duplicate aliases', () => {
+        let alphaCount = 0
+        let betaCount = 0
+        let gammaCount = 0
+
+        cy.intercept(/alpha/, (req) => {
+          req.reply({ value: `alpha-${alphaCount}` })
+          alphaCount++
+        }).as('getAlpha')
+
+        cy.intercept(/beta/, (req) => {
+          req.reply({ value: `beta-${betaCount}` })
+          betaCount++
+        }).as('getBeta')
+
+        cy.intercept(/gamma/, (req) => {
+          req.reply({ value: `gamma-${gammaCount}` })
+          gammaCount++
+        }).as('getGamma')
+
+        cy.window().then((win) => {
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/beta')
+          xhrGet(win, '/gamma')
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/gamma')
+
+          return null
+        })
+
+        cy.wait(['@getGamma', '@getBeta', '@getGamma', '@getAlpha', '@getAlpha']).then((responses) => {
+          expect(responses[0]?.response?.body.value).to.eq('gamma-0')
+          expect(responses[1]?.response?.body.value).to.eq('beta-0')
+          expect(responses[2]?.response?.body.value).to.eq('gamma-1')
+          expect(responses[3]?.response?.body.value).to.eq('alpha-0')
+          expect(responses[4]?.response?.body.value).to.eq('alpha-1')
+        })
+      })
     })
 
     describe('multiple separate alias waits', () => {
