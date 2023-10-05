@@ -524,26 +524,26 @@ commands:
       - restore_cache:
           keys:
             - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
       - run:
           name: Build or load centos7-builder image
           command: |
-            set -x
-            apt update && apt install -y docker.io
-            if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
-                echo "*" > .dockerignore
-                docker build -t centos7-builder -f centos7-builder.Dockerfile .
-                docker save centos7-builder > centos7-builder.tar
-                rm .dockerignore
-            else
-                docker load < centos7-builder.tar
+            if [[ ! -f better_sqlite3.node ]]; then
+              set -x
+              apt update && apt install -y docker.io
+              if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
+                  echo "*" > .dockerignore
+                  docker build -t centos7-builder -f centos7-builder.Dockerfile .
+                  docker save centos7-builder > centos7-builder.tar
+                  rm .dockerignore
+              else
+                  docker load < centos7-builder.tar
+              fi
             fi
       - save_cache:
           key: cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
           paths:
             - centos7-builder.tar
-      - restore_cache:
-          keys:
-            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
       - run:
           name: Build better-sqlite3 for CentOS 7
           command: |
