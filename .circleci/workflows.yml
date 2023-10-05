@@ -1511,9 +1511,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --concurrency 4
-            - run: yarn build --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
