@@ -372,6 +372,11 @@ commands:
             PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
+      - when:
+          condition:
+            equal: [ *linux-x64-executor, << parameters.executor >> ]
+          steps:
+            - build-better-sqlite3
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
@@ -484,8 +489,6 @@ commands:
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
   
-
-
   # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
   # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
   # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
@@ -1319,11 +1322,6 @@ jobs:
             - ProgramData/nvm # windows
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
-      - when:
-          condition:
-            equal: [ *linux-x64-executor, << parameters.executor >> ]
-          steps:
-            - build-better-sqlite3
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
