@@ -82,7 +82,7 @@ windowsWorkflowFilters: &windows-workflow-filters
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc: &linux-x64-executor
+  cy-doc:
     docker:
       - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -340,6 +340,9 @@ commands:
       only-cache-for-root-user:
         type: boolean
         default: false
+      build-better-sqlite3:
+        type: boolean
+        default: false
     steps:
       - install_cache_helpers_dependencies
       - run:
@@ -373,8 +376,7 @@ commands:
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
       - when:
-          condition:
-            equal: [ *linux-x64-executor, << parameters.executor >> ]
+          condition: <<parameters.build-better-sqlite3>>
           steps:
             - build-better-sqlite3
       - prepare-modules-cache:
@@ -1322,6 +1324,7 @@ jobs:
             - ProgramData/nvm # windows
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+          build-better-sqlite3: <<parameters.build-better-sqlite3>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -2576,7 +2579,8 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
         requires:
