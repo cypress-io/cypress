@@ -1310,6 +1310,9 @@ jobs:
       resource_class:
         type: string
         default: medium
+      build-better-sqlite3:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - checkout
