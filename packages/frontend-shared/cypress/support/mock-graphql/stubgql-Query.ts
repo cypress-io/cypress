@@ -43,4 +43,13 @@ export const stubQuery: MaybeResolver<Query> = {
   scaffoldedFiles () {
     return null
   },
+  videoEmbedHtml () {
+    return `<iframe
+      src="https://player.vimeo.com/video/855168407?h=0cbc785eef"
+      class="rounded h-full bg-gray-1000 w-full"
+      frameborder="0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen
+    />`
+  },
 }

@@ -6,6 +6,7 @@ describe('<DebugArtifacts />', () => {
     { icon: 'TERMINAL_LOG', text: 'View Log', url: 'www.cypress.io' },
     { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: 'cloud.cypress.io' },
     { icon: 'PLAY', text: 'View Video', url: 'www.cypress.io' },
+    { icon: 'REPLAY', text: 'View Replay', url: 'www.cypress.io' },
   ]
 
   it('mounts correctly, provides expected tooltip content, and emits correct event', () => {
@@ -30,12 +31,14 @@ describe('<DebugArtifacts />', () => {
         <DebugArtifactLink icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
         <DebugArtifactLink icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
         <DebugArtifactLink icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>
+        <DebugArtifactLink icon={'REPLAY'} popperText={'View Test Replay'} url={'www.cypress.io'}/>
       </div>
     ))
 
-    cy.findByTestId('debug-artifacts-all').children().should('have.length', 3)
+    cy.findByTestId('debug-artifacts-all').children().should('have.length', 4)
     cy.findByTestId(`TERMINAL_LOG-button`).should('have.attr', 'href', 'www.cypress.io')
     cy.findByTestId(`IMAGE_SCREENSHOT-button`).should('have.attr', 'href', 'cloud.cypress.io')
     cy.findByTestId(`PLAY-button`).should('have.attr', 'href', 'www.cypress.io')
+    cy.findByTestId(`REPLAY-button`).should('have.attr', 'href', 'www.cypress.io')
   })
 })

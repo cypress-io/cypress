@@ -13,9 +13,6 @@ describe('e2e downloads', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (implement downloads support)
     project: 'downloads',
     spec: 'downloads.cy.ts',
-    config: {
-      video: false,
-    },
   })
 
   const fileExists = (fileName) => {
@@ -28,7 +25,6 @@ describe('e2e downloads', () => {
     spec: 'downloads.cy.ts',
     config: {
       downloadsFolder: 'cypress/dls',
-      video: false,
     },
     onRun: async (exec) => {
       await exec()

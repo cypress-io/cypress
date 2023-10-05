@@ -38,13 +38,14 @@ context('cy.origin shadow dom', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('shadow', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('shadow')
-        expect(consoleProps.Elements).to.equal(1)
+        expect(consoleProps.name).to.equal('shadow')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
-        expect(consoleProps['Applied To']).to.have.property('id').that.equals('shadow-element-1')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
+        expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('shadow-element-1')
 
-        expect(consoleProps.Yielded).to.be.null
+        expect(consoleProps.props.Yielded).to.be.null
       })
     })
   })

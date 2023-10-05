@@ -292,6 +292,11 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+  Cypress.Commands.overwrite<'screenshot', 'element'>('screenshot', (originalFn, subject, fileName, options) => {
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
+    fileName // $ExpectType string
+    options // $ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions> | undefined
+  })
 
   Cypress.Commands.addQuery('newQuery', function(arg) {
     this // $ExpectType Command
@@ -661,6 +666,9 @@ namespace CypressFilterTests {
 }
 
 namespace CypressScreenshotTests {
+  cy.screenshot().then((result) => {
+    result // $ExpectType undefined
+  })
   cy.screenshot('example-name')
   cy.screenshot('example', { log: false })
   cy.screenshot({ log: false })
@@ -671,6 +679,10 @@ namespace CypressScreenshotTests {
   cy.screenshot('example', {
     log: true,
     blackout: []
+  })
+  cy.get<HTMLDivElement>('#id').screenshot('example-name', { log: false })
+  cy.get<HTMLDivElement>('#id').screenshot().then((result) => {
+    result // $ExpectType JQuery<HTMLDivElement>
   })
 }
 
@@ -1188,4 +1200,21 @@ namespace CypressRequireTests {
   Cypress.require() // $ExpectError
   Cypress.require({}) // $ExpectError
   Cypress.require(123) // $ExpectError
+}
+
+namespace CypressGlobalsTests {
+  Cypress
+  cy
+  expect
+  assert
+
+  window.Cypress
+  window.cy
+  window.expect
+  window.assert
+
+  globalThis.Cypress
+  globalThis.cy
+  globalThis.expect
+  globalThis.assert
 }

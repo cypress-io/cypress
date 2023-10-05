@@ -20,12 +20,12 @@ describe('http/util/prerequests', () => {
   })
 
   it('synchronously matches a pre-request that existed at the time of the request', () => {
-    // should match in reverse order
+    // should match in order
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'WRONGMETHOD' } as BrowserPreRequest)
-    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
-    const thirdPreRequest = { requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest
+    const secondPreRequest = { requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest
 
-    preRequests.addPending(thirdPreRequest)
+    preRequests.addPending(secondPreRequest)
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
     expectPendingCounts(0, 3)
 
     const cb = sinon.stub()
@@ -34,7 +34,7 @@ describe('http/util/prerequests', () => {
 
     const { args } = cb.getCall(0)
 
-    expect(args[0]).to.eq(thirdPreRequest)
+    expect(args[0]).to.eq(secondPreRequest)
 
     expectPendingCounts(0, 2)
   })
@@ -77,5 +77,32 @@ describe('http/util/prerequests', () => {
 
       preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     }, 1200)
+  })
+
+  it('removes a pre-request with a matching requestId', () => {
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1236', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    expectPendingCounts(0, 3)
+
+    preRequests.removePending('1235')
+
+    expectPendingCounts(0, 2)
+  })
+
+  it('removes a pre-request with a matching requestId with retries', () => {
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-1', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-2', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-3', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1236', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    expectPendingCounts(0, 6)
+
+    preRequests.removePending('1235')
+
+    expectPendingCounts(0, 2)
   })
 })

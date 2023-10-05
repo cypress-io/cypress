@@ -41,15 +41,10 @@ exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-e
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     with_allow_list_custom.cy.ts                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/with_allow_list_custom.cy.ts.mp4
 
 
 ====================================================================================================
@@ -107,15 +102,10 @@ exports['e2e experimentalCspAllowList / experimentalCspAllowList=true / strips o
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     with_allow_list_true.cy.ts                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/with_allow_list_true.cy.ts.mp4
 
 
 ====================================================================================================
@@ -174,15 +164,10 @@ exports['e2e experimentalCspAllowList / experimentalCspAllowList=true / always s
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     with_allow_list_custom_or_true.cy.ts                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/with_allow_list_custom_or_true.cy.ts.mp4
 
 
 ====================================================================================================
@@ -242,15 +227,10 @@ exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-e
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     with_allow_list_custom_or_true.cy.ts                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/with_allow_list_custom_or_true.cy.ts.mp4
 
 
 ====================================================================================================
@@ -320,7 +300,7 @@ When this \`load\` event occurs, Cypress will continue running commands.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_action_with_allow_list_custom.cy.ts                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -331,11 +311,6 @@ When this \`load\` event occurs, Cypress will continue running commands.
   -  /XXX/XXX/XXX/cypress/screenshots/form_action_with_allow_list_custom.cy.ts/experi     (1280x720)
      mentalCspAllowList=['script-src-elem', 'script-src', 'default-src'] -- fails on                
      inline form action (failed).png                                                                
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/form_action_with_allow_list_custom.cy.ts.mp4
 
 
 ====================================================================================================

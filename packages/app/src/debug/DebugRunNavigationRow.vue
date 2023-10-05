@@ -20,13 +20,13 @@
         class="flex items-center justify-between w-full"
       >
         <div class="flex items-center min-w-0">
-          <DebugRunNumber
+          <RunNumber
             v-if="props.gql.status && props.gql.runNumber"
             :status="props.gql.status"
             :value="props.gql.runNumber"
             class="mr-[8px]"
           />
-          <DebugResults
+          <RunResults
             v-if="props.gql"
             :gql="props.gql"
           />
@@ -46,11 +46,11 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import DebugRunNumber from './DebugRunNumber.vue'
+import RunNumber from '../runs/RunNumber.vue'
+import RunResults from '../runs/RunResults.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import type { DebugProgress_DebugTestsFragment } from '../generated/graphql'
 import { computed, FunctionalComponent, h } from 'vue'
-import DebugResults from './DebugResults.vue'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 import { useI18n } from '@cy/i18n'
@@ -75,7 +75,7 @@ fragment DebugProgress_DebugTests on CloudRun {
   status
   completedInstanceCount
   totalInstanceCount
-  ...DebugResults
+  ...RunResults
 }`
 
 const Dot: FunctionalComponent = () => {

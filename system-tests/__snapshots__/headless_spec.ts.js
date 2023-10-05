@@ -19,18 +19,17 @@ exports['e2e headless / tests in headless mode pass'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
-    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
 
 
-  3 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -48,9 +47,9 @@ exports['e2e headless / tests in headless mode pass'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless.cy.js                           XX:XX        3        3        -        -        - │
+  │ ✔  headless.cy.js                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -76,31 +75,25 @@ exports['e2e headless / tests in headed mode pass in !electron'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
-    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
 
 
-  3 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/headless.cy.js.mp4
 
 
 ====================================================================================================
@@ -110,9 +103,9 @@ exports['e2e headless / tests in headed mode pass in !electron'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless.cy.js                           XX:XX        3        3        -        -        - │
+  │ ✔  headless.cy.js                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -138,31 +131,25 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
-    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
 
 
-  3 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/headless.cy.js.mp4
 
 
 ====================================================================================================
@@ -172,9 +159,9 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless.cy.js                           XX:XX        3        3        -        -        - │
+  │ ✔  headless.cy.js                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

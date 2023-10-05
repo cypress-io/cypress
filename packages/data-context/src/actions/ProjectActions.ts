@@ -109,6 +109,7 @@ export class ProjectActions {
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
+      d.app.browserUserAgent = null
     })
 
     // Also clear any data associated with the linked cloud project
@@ -120,12 +121,10 @@ export class ProjectActions {
     await this.api.closeActiveProject()
   }
 
-  private get projects () {
-    return this.ctx.projectsList
-  }
-
   private set projects (projects: ProjectShape[]) {
-    this.ctx.coreData.app.projects = projects
+    this.ctx.update((d) => {
+      d.app.projects = projects
+    })
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -169,11 +168,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.ctx.update((d) => {
-      d.app.projects = [...projectRoots]
-    })
-
-    return this.projects
+    return this.projects = [...projectRoots]
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
@@ -454,7 +449,7 @@ export class ProjectActions {
       return
     }
 
-    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+    const baseUrlWarning = this.ctx.coreData.diagnostics.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
 
     if (baseUrlWarning) {
       this.ctx.actions.error.clearWarning(baseUrlWarning.id)

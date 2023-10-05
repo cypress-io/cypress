@@ -6,8 +6,9 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import type { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Maybe<T> = T | null | undefined
 
@@ -21,6 +22,18 @@ export interface AuthenticatedUserShape {
 export interface ProjectShape {
   projectRoot: string
   savedState?: () => Promise<Maybe<SavedStateShape>>
+}
+
+export interface ServersDataShape {
+  appServer?: Maybe<Server>
+  appServerPort?: Maybe<number>
+  appSocketServer?: Maybe<SocketIOServer>
+  appSocketNamespace?: Maybe<SocketIONamespace>
+  cdpSocketServer?: CDPSocketServer | undefined
+  cdpSocketNamespace?: CDPSocketServer | undefined
+  gqlServer?: Maybe<Server>
+  gqlServerPort?: Maybe<number>
+  gqlSocketServer?: Maybe<SocketIONamespace>
 }
 
 export interface DevStateShape {
@@ -63,6 +76,7 @@ export interface AppDataShape {
   projects: ProjectShape[]
   nodePath: Maybe<string>
   browserStatus: BrowserStatus
+  browserUserAgent: string | null
   relaunchBrowser: boolean
 }
 
@@ -79,6 +93,7 @@ export interface WizardDataShape {
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
+  videoEmbedHtml: string | null
   legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
@@ -132,15 +147,7 @@ export interface CoreDataShape {
   machineId: Promise<string | null>
   machineBrowsers: Promise<FoundBrowser[]> | null
   allBrowsers: Promise<FoundBrowser[]> | null
-  servers: {
-    appServer?: Maybe<Server>
-    appServerPort?: Maybe<number>
-    appSocketServer?: Maybe<SocketIOServer>
-    appSocketNamespace?: Maybe<SocketIONamespace>
-    gqlServer?: Maybe<Server>
-    gqlServerPort?: Maybe<number>
-    gqlSocketServer?: Maybe<SocketIONamespace>
-  }
+  servers: ServersDataShape
   hasInitializedMode: 'run' | 'open' | null
   cloudGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
@@ -163,6 +170,7 @@ export interface CoreDataShape {
     npmMetadata: Promise<Record<string, string>>
   } | null
   cloudProject: CloudDataShape
+  eventCollectorSource: EventCollectorSource | null
 }
 
 /**
@@ -187,6 +195,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       projects: [],
       nodePath: modeOptions.userNodePath,
       browserStatus: 'closed',
+      browserUserAgent: null,
       relaunchBrowser: false,
     },
     localSettings: {
@@ -213,6 +222,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     migration: {
       step: 'renameAuto',
+      videoEmbedHtml: null,
       legacyConfigForMigration: null,
       filteredSteps: [...MIGRATION_STEPS],
       flags: {
@@ -240,6 +250,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cloudProject: {
       testsForRunResults: {},
     },
+    eventCollectorSource: null,
   }
 
   async function machineId (): Promise<string | null> {

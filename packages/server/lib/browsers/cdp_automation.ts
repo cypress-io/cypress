@@ -9,9 +9,10 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { WriteVideoFrame } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+import type { CriClient } from './cri-client'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -138,9 +139,16 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0]) => Promise<ProtocolMapping.Commands[T]['returnType']>
+
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+
+export type OffFn = (eventName: string, cb: (data: any) => void) => void
+
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
-type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+interface HasFrame {
+  frame: Protocol.Page.Frame
+}
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -152,10 +160,22 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+export class CdpAutomation implements CDPClient {
+  on: OnFn
+  off: OffFn
+  send: SendDebuggerCommand
+  private frameTree: any
+  private gettingFrameTree: any
+
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
+    onFn('Network.loadingFailed', this.onRequestFailed)
+
+    this.on = onFn
+    this.off = offFn
+    this.send = sendDebuggerCommandFn
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -174,14 +194,20 @@ export class CdpAutomation {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
-    await sendDebuggerCommandFn('Network.enable', {
+    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
+      maxPostDataSize: 64 * 1024,
+    } : {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
-    })
+    }
+
+    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
 
     return cdpAutomation
   }
@@ -216,7 +242,21 @@ export class CdpAutomation {
     this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
+  private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
+    this.automation.onRequestServedFromCache?.(params.requestId)
+  }
+
+  private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
+    this.automation.onRequestFailed?.(params.requestId)
+  }
+
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
+    if (params.response.fromDiskCache) {
+      this.automation.onRequestServedFromCache?.(params.requestId)
+
+      return
+    }
+
     const browserResponseReceived: BrowserResponseReceived = {
       requestId: params.requestId,
       status: params.response.status,
@@ -266,6 +306,110 @@ export class CdpAutomation {
     .then((cookies) => {
       return _.get(cookies, 0, null)
     })
+  }
+
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  private _updateFrameTree = (client: CriClient, eventName) => async () => {
+    debugVerbose(`update frame tree for ${eventName}`)
+
+    this.gettingFrameTree = new Promise<void>(async (resolve) => {
+      try {
+        this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+        debugVerbose('frame tree updated')
+      } catch (err) {
+        debugVerbose('failed to update frame tree:', err.stack)
+      } finally {
+        this.gettingFrameTree = null
+
+        resolve()
+      }
+    })
+  }
+
+  private _continueRequest = (client, params, header?) => {
+    const details: Protocol.Fetch.ContinueRequestRequest = {
+      requestId: params.requestId,
+    }
+
+    if (header) {
+    // headers are received as an object but need to be an array
+    // to modify them
+      const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
+
+      details.headers = [
+        ...currentHeaders,
+        header,
+      ]
+    }
+
+    debugVerbose('continueRequest: %o', details)
+
+    client.send('Fetch.continueRequest', details).catch((err) => {
+    // swallow this error so it doesn't crash Cypress.
+    // an "Invalid InterceptionId" error can randomly happen in the driver tests
+    // when testing the redirection loop limit, when a redirect request happens
+    // to be sent after the test has moved on. this shouldn't crash Cypress, in
+    // any case, and likely wouldn't happen for standard user tests, since they
+    // will properly fail and not move on like the driver tests
+      debugVerbose('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+    })
+  }
+
+  private _isAUTFrame = async (frameId: string) => {
+    debugVerbose('need frame tree')
+
+    // the request could come in while in the middle of getting the frame tree,
+    // which is asynchronous, so wait for it to be fetched
+    if (this.gettingFrameTree) {
+      debugVerbose('awaiting frame tree')
+
+      await this.gettingFrameTree
+    }
+
+    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
+      return frame?.name?.startsWith('Your project:')
+    }) as HasFrame | undefined
+
+    if (frame) {
+      return frame.frame.id === frameId
+    }
+
+    return false
+  }
+
+  _handlePausedRequests = async (client: CriClient) => {
+    // NOTE: only supported in chromium based browsers
+    await client.send('Fetch.enable', {
+      // only enable request pausing for documents to determine the AUT iframe
+      patterns: [{
+        resourceType: 'Document',
+      }],
+    })
+
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      if (await this._isAUTFrame(params.frameId)) {
+        debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
+
+        return this._continueRequest(client, params, {
+          name: 'X-Cypress-Is-AUT-Frame',
+          value: 'true',
+        })
+      }
+
+      return this._continueRequest(client, params)
+    })
+  }
+
+  // we can't get the frame tree during the Fetch.requestPaused event, because
+  // the CDP is tied up during that event and can't be utilized. so we maintain
+  // a reference to it that's updated when it's likely to have been changed
+  _listenForFrameTreeChanges = (client: CriClient) => {
+    debugVerbose('listen for frame tree changes')
+
+    client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))
+    client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
   onRequest = (message, data) => {

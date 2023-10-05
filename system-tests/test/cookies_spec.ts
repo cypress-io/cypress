@@ -199,7 +199,6 @@ describe('e2e cookies', () => {
     it('with forced SameSite strictness', {
       browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
-        videoCompression: false,
         baseUrl,
         env: {
           baseUrl,
@@ -254,7 +253,6 @@ describe('e2e cookies', () => {
         it(`passes with baseurl: ${baseUrl}`, {
           browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
-            videoCompression: false,
             baseUrl,
             env: {
               baseUrl,
@@ -279,7 +277,6 @@ describe('e2e cookies', () => {
       it('passes with no baseurl', {
         browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
-          videoCompression: false,
           env: {
             httpUrl,
             httpsUrl,
@@ -354,7 +351,6 @@ describe('cross-origin cookies, set:cookies', () => {
   it('set:cookies', {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
-      video: false,
       baseUrl: `http://127.0.0.3:${httpPort}`,
       env: {
         HTTP: httpPort,

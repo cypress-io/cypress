@@ -5,6 +5,6 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.0",
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
-    "babel-loader": "8.1.0"
+    "babel-loader": "8.3.0"
   }
 }

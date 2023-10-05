@@ -4,6 +4,7 @@ import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
 import net from 'net'
+import { ProtocolManagerShape } from '@packages/types'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -22,7 +23,7 @@ describe('lib/browsers/cri-client', function () {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
-  let getClient: () => ReturnType<typeof BrowserCriClient.create>
+  let getClient: (protocolManager?: ProtocolManagerShape) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
     sinon.stub(protocol, '_connectAsync')
@@ -47,7 +48,7 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = () => browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError)
+    getClient = (protocolManager) => browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError, undefined, protocolManager)
   })
 
   context('.create', function () {
@@ -149,6 +150,23 @@ describe('lib/browsers/cri-client', function () {
         const client = await browserClient.attachToTargetUrl('http://foo.com')
 
         expect(client).to.be.equal(mockPageClient)
+      })
+
+      it('creates a page client when the passed in url is found and notifies the protocol manager', async function () {
+        const mockPageClient = {}
+        const protocolManager: any = {
+          connectToBrowser: sinon.stub().resolves(),
+        }
+
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+
+        const browserClient = await getClient(protocolManager)
+
+        const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+        expect(client).to.be.equal(mockPageClient)
+        expect(protocolManager.connectToBrowser).to.be.calledWith(client)
       })
 
       it('retries when the passed in url is not found', async function () {

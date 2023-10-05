@@ -2,8 +2,6 @@ require('../../spec_helper')
 
 const os = require('os')
 const mockfs = require('mock-fs')
-const path = require('path')
-const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
@@ -258,43 +256,6 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('install extension and ensure write access', function () {
-      mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
-          'background.js': mockfs.file({
-            mode: 0o0444,
-          }),
-        },
-      })
-
-      const getFile = function (path) {
-        return _.reduce(_.compact(_.split(path, '/')), (acc, item) => {
-          return acc.getItem(item)
-        }, mockfs.getMockRoot())
-      }
-
-      chrome._writeExtension.restore()
-      utils.getProfileDir.restore()
-
-      const profilePath = '/home/foo/snap/chromium/current'
-      const fullPath = `${profilePath}/Cypress/chromium-stable/interactive`
-
-      this.readJson.withArgs(`${fullPath}/Default/Preferences`).rejects({ code: 'ENOENT' })
-      this.readJson.withArgs(`${fullPath}/Default/Secure Preferences`).rejects({ code: 'ENOENT' })
-      this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
-
-      return chrome.open({
-        isHeadless: false,
-        isHeaded: false,
-        profilePath,
-        name: 'chromium',
-        channel: 'stable',
-      }, 'http://', openOpts, this.automation)
-      .then(() => {
-        expect((getFile(fullPath).getMode()) & 0o0700).to.be.above(0o0500)
-      })
-    })
-
     it('cleans up an unclean browser profile exit status', function () {
       this.readJson.withArgs('/profile/dir/Default/Preferences').resolves({
         profile: {
@@ -399,10 +360,14 @@ describe('lib/browsers/chrome', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
-      it('sends Fetch.enable', async function () {
+      it('sends Fetch.enable only for Document ResourceType', async function () {
         await chrome.open('chrome', 'http://', openOpts, this.automation)
 
-        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
       })
 
       it('does not add header when not a document', async function () {
@@ -413,9 +378,7 @@ describe('lib/browsers/chrome', () => {
           resourceType: 'Script',
         })
 
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-        })
+        expect(this.pageCriClient.send).not.to.be.calledWith('Fetch.continueRequest')
       })
 
       it('does not add header when it is a spec frame request', async function () {
@@ -469,70 +432,6 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      it('appends X-Cypress-Is-XHR-Or-Fetch header to fetch request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
-
-        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
-
-        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
-          frameId: 'aut-frame-id',
-          requestId: '1234',
-          resourceType: 'Fetch',
-          request: {
-            url: 'http://localhost:3000/test-request',
-            headers: {
-              'X-Foo': 'Bar',
-            },
-          },
-        })
-
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-          headers: [
-            {
-              name: 'X-Foo',
-              value: 'Bar',
-            },
-            {
-              name: 'X-Cypress-Is-XHR-Or-Fetch',
-              value: 'fetch',
-            },
-          ],
-        })
-      })
-
-      it('appends X-Cypress-Is-XHR-Or-Fetch header to xhr request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
-
-        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
-
-        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
-          frameId: 'aut-frame-id',
-          requestId: '1234',
-          resourceType: 'XHR',
-          request: {
-            url: 'http://localhost:3000/test-request',
-            headers: {
-              'X-Foo': 'Bar',
-            },
-          },
-        })
-
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-          headers: [
-            {
-              name: 'X-Foo',
-              value: 'Bar',
-            },
-            {
-              name: 'X-Cypress-Is-XHR-Or-Fetch',
-              value: 'xhr',
-            },
-          ],
-        })
-      })
-
       it('gets frame tree on Page.frameAttached', async function () {
         await chrome.open('chrome', 'http://', openOpts, this.automation)
 
@@ -553,21 +452,28 @@ describe('lib/browsers/chrome', () => {
 
   context('#connectToNewSpec', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        targetId: '1234',
+      }
+
+      const cdpSocketServer = {
+        attachCDPClient: sinon.stub(),
       }
 
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
+        host: 'http://localhost',
+        port: 1234,
       }
 
       const automation = {
         use: sinon.stub().returns(),
-      }
-
-      const launchedBrowser = {
-        kill: sinon.stub().returns(),
       }
 
       let onInitializeNewBrowserTabCalled = false
@@ -580,6 +486,7 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTab: () => {
           onInitializeNewBrowserTabCalled = true
         },
+        protocolManager,
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
@@ -587,7 +494,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
+      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, cdpSocketServer)
 
       expect(automation.use).to.be.called
       expect(chrome._getBrowserCriClient).to.be.called
@@ -595,6 +502,54 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
+      expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
+      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+    })
+  })
+
+  context('#connectProtocolToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const pageCriClient = sinon.stub()
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectProtocolToBrowser({ protocolManager })
+
+      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(null)
+
+      expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(protocolManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: null,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(protocolManager.connectToBrowser).not.to.be.called
     })
   })
 

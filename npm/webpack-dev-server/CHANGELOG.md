@@ -1,3 +1,33 @@
+# [@cypress/webpack-dev-server-v3.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.0...@cypress/webpack-dev-server-v3.6.1) (2023-09-07)
+
+# [@cypress/webpack-dev-server-v3.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.3...@cypress/webpack-dev-server-v3.6.0) (2023-09-07)
+
+
+### Features
+
+* **webpack-dev-server:** update the generated tsconfig path for angular CT ([#27723](https://github.com/cypress-io/cypress/issues/27723)) ([264a118](https://github.com/cypress-io/cypress/commit/264a118e4858ea6bc401d71895b09f656a4dc938))
+
+# [@cypress/webpack-dev-server-v3.5.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.2...@cypress/webpack-dev-server-v3.5.3) (2023-08-29)
+
+
+### Bug Fixes
+
+* allow cypress config.port to override devServer.port for proxying assets ([f82fdf0](https://github.com/cypress-io/cypress/commit/f82fdf026eeab125a2b974e4257a7ac5e33640eb))
+
+# [@cypress/webpack-dev-server-v3.5.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.1...@cypress/webpack-dev-server-v3.5.2) (2023-08-04)
+
+
+### Bug Fixes
+
+* **cypress/webpack-dev-server:** correct path for `indexHtmlFile` ([#27320](https://github.com/cypress-io/cypress/issues/27320)) ([53fd537](https://github.com/cypress-io/cypress/commit/53fd537a0486caedc7faccacff7c6433ebc2601f))
+
+# [@cypress/webpack-dev-server-v3.5.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.0...@cypress/webpack-dev-server-v3.5.1) (2023-07-18)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** add typeRoots to generated tsconfig for angular ([#27117](https://github.com/cypress-io/cypress/issues/27117)) ([376795f](https://github.com/cypress-io/cypress/commit/376795f125054c4a70cb1a9b75b01c1a42cccf93))
+
 # [@cypress/webpack-dev-server-v3.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.4.1...@cypress/webpack-dev-server-v3.5.0) (2023-06-26)
 
 

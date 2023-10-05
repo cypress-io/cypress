@@ -12,8 +12,8 @@ import TestModel from '../test/test-model'
 import AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
 
-import CollapseIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
-import ExpandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/expand_x16.svg'
+import CollapseIcon from '@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
+import ExpandIcon from '@packages/frontend-shared/src/assets/icons/expand_x16.svg'
 import StateIcon from '../lib/state-icon'
 
 const NoCommands = () => (

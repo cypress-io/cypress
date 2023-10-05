@@ -5,8 +5,8 @@ const os = require('os')
 const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { buildEntryPointAndCleanup } = require('./binary/binary-cleanup')
-const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudApiFileSource, validateEncryptionFile } = require('./binary/binary-sources')
+const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudEnvironmentFileSource, validateEncryptionFile, getProtocolFileSource, validateCloudEnvironmentFile, validateProtocolFile } = require('./binary/binary-sources')
 
 const CY_ROOT_DIR = path.join(__dirname, '..')
 
@@ -61,18 +61,26 @@ module.exports = async function (params) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
       const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
       const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
-      const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
-      const cloudApiFileSource = await getCloudApiFileSource(cloudApiFilePath)
+      const cloudEnvironmentFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
+      const cloudEnvironmentFileSource = await getCloudEnvironmentFileSource(cloudEnvironmentFilePath)
+      const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api.ts')
+      const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
+      const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
+      const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
 
       await Promise.all([
         fs.writeFile(encryptionFilePath, encryptionFileSource),
+        fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
+        fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
       await Promise.all([
         validateEncryptionFile(encryptionFilePath),
-        validateEncryptionFile(cloudApiFilePath),
+        validateCloudEnvironmentFile(cloudEnvironmentFilePath),
+        validateProtocolFile(cloudApiFilePath),
+        validateProtocolFile(cloudProtocolFilePath),
       ])
 
       await flipFuses(
@@ -88,10 +96,14 @@ module.exports = async function (params) {
 
       // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
       await buildEntryPointAndCleanup(outputFolder)
+      await cleanupUnneededDependencies(outputFolder)
       await setupV8Snapshots({
         cypressAppPath: params.appOutDir,
         integrityCheckSource: getIntegrityCheckSource(outputFolder),
       })
+    } else {
+      console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping snapshot require...`)
+      await cleanupUnneededDependencies(outputFolder)
     }
   } catch (error) {
     console.log(error)
