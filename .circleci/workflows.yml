@@ -82,7 +82,7 @@ windowsWorkflowFilters: &windows-workflow-filters
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-doc: &linux-x64-executor
     docker:
       - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -1311,7 +1311,6 @@ jobs:
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
-      - build-better-sqlite3
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1320,6 +1319,11 @@ jobs:
             - ProgramData/nvm # windows
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+      - when:
+          condition:
+            equal: [ *linux-x64-executor, << parameters.executor >> ]
+          steps:
+            - build-better-sqlite3
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
