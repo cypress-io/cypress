@@ -1,0 +1,28 @@
+{
+  "name": "Cypress",
+  "description": "Adds Themes for testing with Cypress",
+  "applications": {
+    "gecko": {
+      "id": "automation-extension-v3@cypress.io"
+    }
+  },
+  "permissions": [],
+  "icons": {
+    "16": "icons/icon_16x16.png",
+    "48": "icons/icon_48x48.png",
+    "128": "icons/icon_128x128.png"
+  },
+  "browser_action": {
+    "default_title": "Cypress",
+    "default_icon": {
+      "19": "icons/icon_19x19.png",
+      "38": "icons/icon_38x38.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "manifest_version": 3,
+  "version": "0.0.0"
+}
