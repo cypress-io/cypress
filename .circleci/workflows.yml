@@ -350,7 +350,7 @@ commands:
           command: node ./scripts/get-platform-key.js > platform_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-{{ checksum "centos7-builder.Dockerfile" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -518,7 +518,7 @@ commands:
             - centos7-builder.tar
       - restore_cache:
           keys:
-            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
       - run:
           name: Build better-sqlite3 for CentOS 7
           command: |
@@ -533,7 +533,7 @@ commands:
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             fi
       - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
           paths:
             - better_sqlite3.node
       - run:
