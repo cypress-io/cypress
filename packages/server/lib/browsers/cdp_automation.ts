@@ -238,6 +238,8 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
+      // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
+      // normalize to milliseconds to be comparable to everything else we're gathering
       cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
