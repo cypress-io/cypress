@@ -222,6 +222,8 @@ export class WebKitAutomation {
         headers: request.headers(),
         resourceType: normalizeResourceType(request.resourceType()),
         originalResourceType: request.resourceType(),
+        cdpRequestWillBeSentTimestamp: request.timing().requestStart,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
       }
 
       debug('received request %o', { browserPreRequest })

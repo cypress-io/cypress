@@ -90,7 +90,7 @@ export class PreRequests {
   protocolManager?: ProtocolManagerShape
 
   constructor (
-    requestTimeout = 2000,
+    requestTimeout = 1,
     // 10 seconds
     sweepInterval = 10000,
   ) {
@@ -128,16 +128,20 @@ export class PreRequests {
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
+      const timings = {
+        cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
+        cdpLagDuration: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
+        proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
+      }
+
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback({
           ...browserPreRequest,
-          cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
-          proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
+          ...timings,
         })
 
         return
@@ -145,13 +149,7 @@ export class PreRequests {
 
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
-        timings: {
-          cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
-          proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
-        },
+        timings,
       })
 
       return
