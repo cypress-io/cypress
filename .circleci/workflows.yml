@@ -524,6 +524,8 @@ commands:
       - restore_cache:
           keys:
             - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+      - restore_cache:
+          keys:
             - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
       - run:
           name: Build or load centos7-builder image
