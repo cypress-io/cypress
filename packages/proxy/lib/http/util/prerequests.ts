@@ -90,9 +90,9 @@ export class PreRequests {
   protocolManager?: ProtocolManagerShape
 
   constructor (
-    requestTimeout = 1000 * 2,
+    requestTimeout = 2000,
     // 10 seconds
-    sweepInterval = 1000 * 10,
+    sweepInterval = 10000,
   ) {
     // If a request comes in and we don't have a matching pre-request after this timeout,
     // we invoke the request callback to tell the server to proceed (we don't want to block
