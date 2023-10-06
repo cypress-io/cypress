@@ -9,6 +9,10 @@ _Released 10/03/2023 (PENDING)_
 - Fixed an issue where a crashed Chrome renderer can cause the Test Replay recorder to hang. Addressed in [#27909](https://github.com/cypress-io/cypress/pull/27909).
 - Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
 
+**Dependency Updates:**
+
+- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
+
 ## 13.3.0
 
 _Released 09/27/2023_
