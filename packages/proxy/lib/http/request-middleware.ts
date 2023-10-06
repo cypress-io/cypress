@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import request from '@cypress/request'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
@@ -10,6 +11,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
+
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -33,22 +35,41 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
   this.req.isFromMainTarget = !!this.req.headers['x-cypress-is-from-main-target']
 
+  delete this.req.headers['x-cypress-is-aut-frame']
+  delete this.req.headers['x-cypress-is-from-main-target']
+
   span?.setAttributes({
     isAUTFrame: this.req.isAUTFrame,
     isFromMainTarget: this.req.isFromMainTarget,
   })
 
   // we only want to proxy requests from the main target and not ones from
-  // extra tabs or windows, so only run the bare minimum to shuttle the
-  // request and response back to the browser
+  // extra tabs or windows, so skip the rest of the request/response middleware
+  // and pipe the request/response directly through
   if (!this.req.isFromMainTarget) {
     this.debug('request for [%s %s] is not from the main target - skip proxying', this.req.method, this.req.proxiedUrl)
 
-    this.onlyRunMiddleware(['SendRequestOutgoing'])
-  }
+    delete this.req.headers['x-cypress-is-from-main-target']
 
-  delete this.req.headers['x-cypress-is-aut-frame']
-  delete this.req.headers['x-cypress-is-from-main-target']
+    request({
+      body: this.req.body,
+      headers: this.req.headers,
+      method: this.req.method,
+      url: this.req.proxiedUrl,
+    })
+    .pipe(this.res)
+
+    this.reqMiddlewareSpan?.setAttributes({
+      nonProxiedRequest: true,
+    })
+
+    this.reqMiddlewareSpan?.end()
+    this.handleHttpRequestSpan?.end()
+
+    span?.end()
+
+    return this.end()
+  }
 
   span?.end()
   this.next()

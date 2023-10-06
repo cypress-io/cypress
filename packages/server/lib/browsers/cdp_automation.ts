@@ -386,12 +386,7 @@ export class CdpAutomation implements CDPClient {
 
   _handlePausedRequests = async (client: CriClient) => {
     // NOTE: only supported in chromium based browsers
-    await client.send('Fetch.enable', {
-      // only enable request pausing for documents to determine the AUT iframe
-      patterns: [{
-        resourceType: 'Document',
-      }],
-    })
+    await client.send('Fetch.enable')
 
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
