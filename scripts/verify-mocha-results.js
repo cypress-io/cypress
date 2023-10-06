@@ -94,6 +94,14 @@ async function checkReportFiles (filenames) {
 
 async function verifyMochaResults () {
   try {
+    try {
+      await fs.access(REPORTS_PATH)
+    } catch {
+      console.log('Reports directory does not exist - assuming no tests ran')
+
+      return
+    }
+
     const filenames = await fs.readdir(REPORTS_PATH)
 
     const resultCount = filenames.length
