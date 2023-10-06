@@ -50,5 +50,10 @@
   },
   "license": "MIT",
   "repository": "https://github.com/cypress-io/cypress.git",
-  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/create-cypress-tests/#readme"
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/create-cypress-tests/#readme",
+  "nx": {
+    "implicitDependencies": [
+      "@packages/example"
+    ]
+  }
 }
