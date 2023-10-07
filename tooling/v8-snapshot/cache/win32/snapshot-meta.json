@@ -4086,6 +4086,7 @@
     "./packages/server/lib/util/find_process.js",
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/get-windows-proxy.js",
+    "./packages/server/lib/util/graceful_crash_handling.ts",
     "./packages/server/lib/util/headers.js",
     "./packages/server/lib/util/human_time.js",
     "./packages/server/lib/util/net_profiler.js",
