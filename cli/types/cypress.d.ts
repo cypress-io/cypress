@@ -295,6 +295,10 @@ declare namespace Cypress {
     absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
     specFilter?: string // optional spec filter used by the user
     specType?: CypressSpecType
+    baseName: string // "config_passing_spec.js"
+    fileExtension: string // ".js"
+    fileName: string // "config_passing_spec"
+    id?: string // "U3BlYzovVXNlcnMvamFuZWxhbmUvYXBwL2N5cHJlc3MvaW50ZWdyYXRpb24vY29uZmlnX3Bhc3Npbmdfc3BlYy5qcw=="
   }
 
   /**
