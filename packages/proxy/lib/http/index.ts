@@ -425,8 +425,8 @@ export class Http {
     this.preRequests.removePending(requestId)
   }
 
-  addPendingNoPreRequest (url: string) {
-    this.preRequests.addPendingNoPreRequest(url)
+  addPendingUrlWithoutPreRequest (url: string) {
+    this.preRequests.addPendingUrlWithoutPreRequest(url)
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {

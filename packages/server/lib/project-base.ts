@@ -339,7 +339,7 @@ export class ProjectBase extends EE {
     }
 
     const onDownloadLinkClicked = (downloadUrl: string) => {
-      this.server.addPendingNoBrowserPreRequest(downloadUrl)
+      this.server.addPendingUrlWithoutPreRequest(downloadUrl)
     }
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)

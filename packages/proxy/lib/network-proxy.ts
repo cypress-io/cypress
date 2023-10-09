@@ -17,8 +17,8 @@ export class NetworkProxy {
     this.http.removePendingBrowserPreRequest(requestId)
   }
 
-  addPendingNoBrowserPreRequest (url: string) {
-    this.http.addPendingNoPreRequest(url)
+  addPendingUrlWithoutPreRequest (url: string) {
+    this.http.addPendingUrlWithoutPreRequest(url)
   }
 
   handleHttpRequest (req, res) {

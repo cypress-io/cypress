@@ -9,6 +9,15 @@ import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { CriClient } from './cri-client'
 
+declare global {
+  interface Window {
+    navigation?: {
+      addEventListener: (event: string, listener: (event: any) => void) => void
+    }
+    cypressDownloadLinkClicked: (url: string) => void
+  }
+}
+
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
@@ -364,6 +373,9 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
+// Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
+// We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
+// correlated in the proxy.
 const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Automation) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
@@ -383,27 +395,24 @@ const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Autom
   })
 }
 
+// The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
+// For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
 const listenForDocumentDownload = () => {
-  // @ts-expect-error
   if (window.navigation) {
-    // @ts-expect-error
     window.navigation.addEventListener('navigate', (event) => {
       if (typeof event.downloadRequest === 'string') {
-        // @ts-expect-error
         window.cypressDownloadLinkClicked(event.destination.url)
       }
     })
   } else {
     document.addEventListener('click', (event) => {
       if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
-        // @ts-expect-error
         window.cypressDownloadLinkClicked(event.target.href)
       }
     })
 
     document.addEventListener('keydown', (event) => {
       if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
-        // @ts-expect-error
         window.cypressDownloadLinkClicked(event.target.href)
       }
     })

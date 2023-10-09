@@ -37,7 +37,7 @@ type PendingPreRequest = {
   cdpRequestWillBeSentReceivedTimestamp: number
 }
 
-type PendingNoPreRequest = {
+type PendingUrlWithoutPreRequest = {
   timestamp: number
 }
 
@@ -90,7 +90,7 @@ export class PreRequests {
   sweepInterval: number
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
-  pendingNoPreRequests = new QueueMap<PendingNoPreRequest>()
+  pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
 
@@ -125,7 +125,7 @@ export class PreRequests {
         return true
       })
 
-      this.pendingNoPreRequests.removeMatching(({ timestamp }) => {
+      this.pendingUrlsWithoutPreRequests.removeMatching(({ timestamp }) => {
         return timestamp + this.sweepInterval >= now
       })
     }, this.sweepInterval)
@@ -172,7 +172,7 @@ export class PreRequests {
     })
   }
 
-  addPendingNoPreRequest (url: string) {
+  addPendingUrlWithoutPreRequest (url: string) {
     const key = `GET-${url}`
     const pendingRequest = this.pendingRequests.shift(key)
 
@@ -184,7 +184,7 @@ export class PreRequests {
       return
     }
 
-    this.pendingNoPreRequests.push(key, {
+    this.pendingUrlsWithoutPreRequests.push(key, {
       timestamp: Date.now(),
     })
   }
@@ -217,11 +217,11 @@ export class PreRequests {
       return
     }
 
-    const pendingNoPreRequests = this.pendingNoPreRequests.shift(key)
+    const pendingUrlWithoutPreRequests = this.pendingUrlsWithoutPreRequests.shift(key)
 
-    if (pendingNoPreRequests) {
+    if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known no-pre-request', key)
+      ctxDebug('Incoming request %s matches known pending url without pre request', key)
       callback()
 
       return
@@ -232,7 +232,7 @@ export class PreRequests {
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
-        ctxDebug('Never received pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback()

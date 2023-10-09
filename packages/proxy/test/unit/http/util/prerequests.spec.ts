@@ -9,9 +9,10 @@ describe('http/util/prerequests', () => {
   let preRequests: PreRequests
   let protocolManager: ProtocolManagerShape
 
-  function expectPendingCounts (pendingRequests: number, pendingPreRequests: number) {
+  function expectPendingCounts (pendingRequests: number, pendingPreRequests: number, pendingWithoutPreRequests = 0) {
     expect(preRequests.pendingRequests.length).to.eq(pendingRequests, 'wrong number of pending requests')
     expect(preRequests.pendingPreRequests.length).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
+    expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(pendingWithoutPreRequests, 'wrong number of pending without prerequests')
   }
 
   beforeEach(() => {
@@ -87,6 +88,26 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 2)
   })
 
+  it('synchronously matches a request without a pre-request that existed at the time of the request', () => {
+    // should match in order
+    preRequests.addPendingUrlWithoutPreRequest('foo')
+    preRequests.addPendingUrlWithoutPreRequest('foo')
+    preRequests.addPendingUrlWithoutPreRequest('foo')
+
+    expectPendingCounts(0, 0, 3)
+
+    const cb = sinon.stub()
+
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+
+    const { args } = cb.getCall(0)
+    const arg = args[0]
+
+    expect(arg).to.be.undefined
+
+    expectPendingCounts(0, 0, 2)
+  })
+
   it('synchronously matches a pre-request added after the request', (done) => {
     const cb = (preRequest) => {
       expect(preRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
@@ -96,6 +117,17 @@ describe('http/util/prerequests', () => {
 
     preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+  })
+
+  it('synchronously matches a request without a pre-request added after the request', (done) => {
+    const cb = (preRequest) => {
+      expect(preRequest).to.be.undefined
+      expectPendingCounts(0, 0)
+      done()
+    }
+
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.addPendingUrlWithoutPreRequest('foo')
   })
 
   it('invokes a request callback after a timeout if no pre-request occurs', async () => {
@@ -144,6 +176,7 @@ describe('http/util/prerequests', () => {
   it('eventually discards pre-requests that don\'t match requests', (done) => {
     preRequests = new PreRequests(10, 200)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin } as BrowserPreRequest)
+    preRequests.addPendingUrlWithoutPreRequest('bar')
 
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request
@@ -151,7 +184,7 @@ describe('http/util/prerequests', () => {
     setTimeout(() => {
       const cb = (preRequest) => {
         expect(preRequest).to.be.undefined
-        expectPendingCounts(1, 0)
+        expectPendingCounts(1, 0, 0)
         done()
       }
 
