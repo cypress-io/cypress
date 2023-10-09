@@ -78,6 +78,37 @@ interface BackendError {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
+  Commands.addAll({
+    // allow our signature to be similar to cy.intercept
+    // METHOD / URL / BODY
+    // or object literal with all expanded options
+    request (...args) {
+      let fxArg = ''
+
+      if (args.length === 2) {
+        fxArg = args[1]
+        // Default to POST
+        if (hasFixturePrefix(fxArg)) {
+          args = ['POST', ...args]
+        }
+      } else if (args.length === 3) {
+        fxArg = args[2]
+      }
+
+      if (hasFixturePrefix(fxArg)) {
+        const fxName = fxArg.split(':')[1]
+
+        return cy.fixture(fxName).then((fixtureData) => {
+          args[2] = fixtureData
+
+          return requestHandler(...args)
+        })
+      }
+
+      return requestHandler(...args)
+    },
+  })
+
   const requestHandler = function (...args) {
     const o: any = {}
     const userOptions = o
@@ -423,35 +454,4 @@ export default (Commands, Cypress, cy, state, config) => {
       })
     })
   }
-
-  Commands.addAll({
-    // allow our signature to be similar to cy.intercept
-    // METHOD / URL / BODY
-    // or object literal with all expanded options
-    request (...args) {
-      let fxArg = ''
-
-      if (args.length === 2) {
-        fxArg = args[1]
-        // Default to POST
-        if (hasFixturePrefix(fxArg)) {
-          args = ['POST', ...args]
-        }
-      } else if (args.length === 3) {
-        fxArg = args[2]
-      }
-
-      if (hasFixturePrefix(fxArg)) {
-        const fxName = fxArg.split(':')[1]
-
-        return cy.fixture(fxName).then((fixtureData) => {
-          args[2] = fixtureData
-
-          return requestHandler(...args)
-        })
-      }
-
-      return requestHandler(...args)
-    },
-  })
 }
