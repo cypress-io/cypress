@@ -380,7 +380,6 @@ export class ProjectBase extends EE {
       },
 
       onMocha: async (event, runnable) => {
-        debug('onMocha', event)
         // bail if we dont have a
         // reporter instance
         if (!reporterInstance) {
@@ -389,7 +388,12 @@ export class ProjectBase extends EE {
 
         reporterInstance.emit(event, runnable)
 
-        if (event === 'end') {
+        if (event === 'test:before:run') {
+          this.emit('test:before:run', {
+            runnable,
+            previousResults: reporterInstance?.results() || {},
+          })
+        } else if (event === 'end') {
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),

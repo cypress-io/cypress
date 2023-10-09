@@ -17,7 +17,8 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
 
 
-  1) navigates to about /html
+  a test suite with a browser crash
+    ✓ navigates to about:blank
 
 We detected that the Chrome Renderer process just crashed.
 
@@ -37,22 +38,16 @@ https://on.cypress.io/renderer-process-crashed
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html      (1280x720)
-     (failed).png                                                                                   
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -87,11 +82,11 @@ https://on.cypress.io/renderer-process-crashed
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_tab_crash.cy.js                   XX:XX        -        -        1        -        - │
+  │ ✖  chrome_tab_crash.cy.js                   XX:XX        2        1        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        1        1        1        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        3        2        1        -        -  
 
 
 `
@@ -115,7 +110,8 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
 
 
-  1) navigates to about /html
+  a test suite with a browser crash
+    ✓ navigates to about:blank
 
 We detected that the Electron Renderer process just crashed.
 
@@ -135,22 +131,16 @@ https://on.cypress.io/renderer-process-crashed
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html      (1280x720)
-     (failed).png                                                                                   
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -185,11 +175,11 @@ https://on.cypress.io/renderer-process-crashed
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_tab_crash.cy.js                   XX:XX        -        -        1        -        - │
+  │ ✖  chrome_tab_crash.cy.js                   XX:XX        2        1        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        1        1        1        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        3        2        1        -        -  
 
 
 `
@@ -229,7 +219,7 @@ This can happen for many different reasons:
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
+  │ Tests:        1                                                                                │
   │ Passing:      0                                                                                │
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
@@ -273,11 +263,11 @@ This can happen for many different reasons:
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_process_crash.cy.js               XX:XX        -        -        1        -        - │
+  │ ✖  chrome_process_crash.cy.js               XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        1        1        1        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        2        1        1        -        -  
 
 
 `
@@ -317,7 +307,7 @@ This can happen for many different reasons:
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
+  │ Tests:        1                                                                                │
   │ Passing:      0                                                                                │
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
@@ -371,11 +361,11 @@ This can happen for many different reasons:
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_process_crash.cy.js               XX:XX        -        -        1        -        - │
+  │ ✖  chrome_process_crash.cy.js               XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        1        1        1        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        2        1        1        -        -  
 
 
 `
