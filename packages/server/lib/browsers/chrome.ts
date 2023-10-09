@@ -501,8 +501,6 @@ export = {
       options.onError(err)
     })
 
-    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
-
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     debug('attaching listeners to chrome %o', { url, options })
@@ -518,6 +516,8 @@ export = {
     }
 
     await pageCriClient.send('Page.enable')
+
+    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
 
     await options['onInitializeNewBrowserTab']?.()
 
