@@ -1,10 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.3.1
 
-_Released 09/27/2023 (PENDING)_
+_Released 10/09/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where requests were correlated in the wrong order in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27892](https://github.com/cypress-io/cypress/pull/27892).
+- Fixed an issue where a crashed Chrome renderer can cause the Test Replay recorder to hang. Addressed in [#27909](https://github.com/cypress-io/cypress/pull/27909).
+- Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
+- Enables test replay for executed specs in runs that have a spec that causes a browser crash. Addressed in [#27786](https://github.com/cypress-io/cypress/pull/27786)
 - Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 **Dependency Updates:**
@@ -13,7 +17,7 @@ _Released 09/27/2023 (PENDING)_
 
 ## 13.3.0
 
-_Released 09/26/2023_
+_Released 09/27/2023_
 
 **Features:**
 
