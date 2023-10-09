@@ -392,7 +392,7 @@ describe('src/cy/commands/request', () => {
           })
           .then(function () {
             this.expectOptionsToBe({
-              url: 'http://localhost:8888/?foo%5B0%5D%5B0%5D=bar&foo%5B0%5D%5B1%5D=baz&foo%5B1%5D%5B0%5D=qux',
+              url: 'http://localhost:8888/?foo=bar%2Cbaz%2Cqux',
             })
           })
         })

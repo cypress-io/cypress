@@ -175,7 +175,7 @@ export class $Location {
 
     // Use qs over UrlParse for parsing queries to accept
     // queries as nested objects and arrays #27908
-    const queryString = qs.stringify(query)
+    const queryString = qs.stringify(query, { arrayFormat: 'comma' })
 
     url.set('query', queryString)
 
