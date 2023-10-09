@@ -870,6 +870,16 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    it('can send nested querystring params', () => {
+      const qs = { foo: { bar: 'baz', quux: [1, 2, 3] } }
+
+      cy
+      .visit('http://localhost:3500/dump-qs', { qs })
+      .then(() => {
+        cy.url().should('eq', 'http://localhost:3500/dump-qs?foo%5Bbar%5D=baz&foo%5Bquux%5D=1%2C2%2C3')
+      })
+    })
+
     describe('can send a POST request', () => {
       it('automatically urlencoded using an object body', () => {
         cy.visit('http://localhost:3500/post-only', {
