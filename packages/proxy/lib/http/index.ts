@@ -425,6 +425,10 @@ export class Http {
     this.preRequests.removePending(requestId)
   }
 
+  addPendingNoPreRequest (url: string) {
+    this.preRequests.addPendingNoPreRequest(url)
+  }
+
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)

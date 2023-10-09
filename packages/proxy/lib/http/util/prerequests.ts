@@ -37,6 +37,10 @@ type PendingPreRequest = {
   cdpRequestWillBeSentReceivedTimestamp: number
 }
 
+type PendingNoPreRequest = {
+  timestamp: number
+}
+
 /**
  * Data structure that organizes items with duplicated keys into queues.
  */
@@ -86,6 +90,7 @@ export class PreRequests {
   sweepInterval: number
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
+  pendingNoPreRequests = new QueueMap<PendingNoPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
 
@@ -118,6 +123,10 @@ export class PreRequests {
         }
 
         return true
+      })
+
+      this.pendingNoPreRequests.removeMatching(({ timestamp }) => {
+        return timestamp + this.sweepInterval >= now
       })
     }, this.sweepInterval)
   }
@@ -163,6 +172,23 @@ export class PreRequests {
     })
   }
 
+  addPendingNoPreRequest (url: string) {
+    const key = `GET-${url}`
+    const pendingRequest = this.pendingRequests.shift(key)
+
+    if (pendingRequest) {
+      debugVerbose('Handling %s without a CDP prerequest', key)
+      clearTimeout(pendingRequest.timeout)
+      pendingRequest.callback()
+
+      return
+    }
+
+    this.pendingNoPreRequests.push(key, {
+      timestamp: Date.now(),
+    })
+  }
+
   removePending (requestId: string) {
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
       return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
@@ -187,6 +213,16 @@ export class PreRequests {
         cdpLagDuration: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
         proxyRequestCorrelationDuration: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
       })
+
+      return
+    }
+
+    const pendingNoPreRequests = this.pendingNoPreRequests.shift(key)
+
+    if (pendingNoPreRequests) {
+      metrics.immediatelyMatchedRequests++
+      ctxDebug('Incoming request %s matches known no-pre-request', key)
+      callback()
 
       return
     }

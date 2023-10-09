@@ -499,6 +499,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.socket.toDriver('request:event', eventName, data)
   }
 
+  addPendingNoBrowserPreRequest (downloadUrl: string) {
+    this.networkProxy.addPendingNoBrowserPreRequest(downloadUrl)
+  }
+
   _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
 

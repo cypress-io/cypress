@@ -307,6 +307,7 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),
         this._handleDownloads(win, options.downloadsFolder, automation),
+        await utils.handleDownloadLinksViaCDP(pageCriClient, automation),
       ])
     }
 

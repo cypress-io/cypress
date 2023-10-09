@@ -17,6 +17,10 @@ export class NetworkProxy {
     this.http.removePendingBrowserPreRequest(requestId)
   }
 
+  addPendingNoBrowserPreRequest (url: string) {
+    this.http.addPendingNoPreRequest(url)
+  }
+
   handleHttpRequest (req, res) {
     const span = telemetry.startSpan({
       name: 'network:proxy:handleHttpRequest',

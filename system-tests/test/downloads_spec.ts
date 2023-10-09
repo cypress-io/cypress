@@ -1,6 +1,6 @@
 import path from 'path'
 
-import systemTests, { expect } from '../lib/system-tests'
+import systemTests, { BrowserName, expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import { fs } from '@packages/server/lib/util/fs'
 
@@ -53,24 +53,34 @@ describe('e2e downloads', () => {
     expect(exists, `Expected ${filePath} not to exist, but it does`).to.be.false
   })
 
-  it('does not trash downloads between runs if trashAssetsBeforeRuns: false', async function () {
-    await systemTests.exec(this, {
-      project: 'downloads',
-      spec: 'download_csv.cy.ts',
+  const browsers: BrowserName[] = ['chrome', 'electron', 'firefox', 'webkit']
+
+  browsers.forEach((browser) => {
+    it(`does not trash downloads between runs if trashAssetsBeforeRuns: false - ${browser}`, async function () {
+      await systemTests.exec(this, {
+        browser,
+        project: 'downloads',
+        spec: 'download_csv.cy.ts',
+        config: {
+          experimentalWebKitSupport: true,
+        },
+      })
+
+      // this run should _not_ trash the downloads from the above run
+      await systemTests.exec(this, {
+        browser,
+        project: 'downloads',
+        spec: 'simple_passing.cy.ts',
+        config: {
+          experimentalWebKitSupport: true,
+          trashAssetsBeforeRuns: false,
+        },
+      })
+
+      const filePath = path.join(downloadsProject, 'cypress', 'downloads', 'records.csv')
+      const exists = await fs.pathExists(filePath)
+
+      expect(exists, `Expected ${filePath} to exist, but it does not`).to.be.true
     })
-
-    // this run should _not_ trash the downloads from the above run
-    await systemTests.exec(this, {
-      project: 'downloads',
-      spec: 'simple_passing.cy.ts',
-      config: {
-        trashAssetsBeforeRuns: false,
-      },
-    })
-
-    const filePath = path.join(downloadsProject, 'cypress', 'downloads', 'records.csv')
-    const exists = await fs.pathExists(filePath)
-
-    expect(exists, `Expected ${filePath} to exist, but it does not`).to.be.true
   })
 })

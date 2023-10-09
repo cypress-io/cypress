@@ -6,6 +6,8 @@ import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
+import type { Automation } from '../automation'
+import type { CriClient } from './cri-client'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -362,6 +364,52 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
+const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Automation) => {
+  await criClient.send('Runtime.enable')
+  await criClient.send('Runtime.addBinding', {
+    name: 'cypressDownloadLinkClicked',
+  })
+
+  await criClient.on('Runtime.bindingCalled', async (data) => {
+    if (data.name === 'cypressDownloadLinkClicked') {
+      const url = data.payload
+
+      await automation.onDownloadLinkClicked?.(url)
+    }
+  })
+
+  await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(${listenForDocumentDownload.toString()})()`,
+  })
+}
+
+const listenForDocumentDownload = () => {
+  // @ts-expect-error
+  if (window.navigation) {
+    // @ts-expect-error
+    window.navigation.addEventListener('navigate', (event) => {
+      if (typeof event.downloadRequest === 'string') {
+        // @ts-expect-error
+        window.cypressDownloadLinkClicked(event.destination.url)
+      }
+    })
+  } else {
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
+        // @ts-expect-error
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
+        // @ts-expect-error
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+  }
+}
+
 export = {
 
   extendLaunchOptionsFromPlugins,
@@ -395,6 +443,10 @@ export = {
   formatBrowsersToOptions,
 
   throwBrowserNotFound,
+
+  handleDownloadLinksViaCDP,
+
+  listenForDocumentDownload,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
