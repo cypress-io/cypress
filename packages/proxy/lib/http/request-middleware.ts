@@ -348,7 +348,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
+  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
 
   span?.setAttributes({
