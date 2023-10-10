@@ -365,8 +365,10 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
     if (doesAcceptHeadingIncludeGzip) {
       this.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      this.req.headers['accept-encoding'] = 'identity'
     }
+  } else {
+    this.req.headers['accept-encoding'] = 'identity'
   }
 
   span?.end()

@@ -1139,10 +1139,9 @@ describe('Routes', () => {
       })
 
       it('removes accept-encoding when nothing is supported', function () {
-        nock(this.server.remoteStates.current().origin, {
-          badheaders: ['accept-encoding'],
-        })
+        nock(this.server.remoteStates.current().origin)
         .get('/accept')
+        .matchHeader('accept-encoding', 'identity')
         .reply(200, '<html>accept</html>')
 
         return this.rp({
@@ -1151,6 +1150,22 @@ describe('Routes', () => {
           headers: {
             'accept-encoding': 'foo,bar,baz',
           },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.eq('<html>accept</html>')
+        })
+      })
+
+      it('removes accept-encoding when no header is passed', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/accept')
+        .matchHeader('accept-encoding', 'identity')
+        .reply(200, '<html>accept</html>')
+
+        return this.rp({
+          url: 'http://www.github.com/accept',
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
