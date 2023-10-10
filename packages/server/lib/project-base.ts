@@ -338,7 +338,11 @@ export class ProjectBase extends EE {
       this.server.removeBrowserPreRequest(requestId)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed)
+    const onDownloadLinkClicked = (downloadUrl: string) => {
+      this.server.addPendingUrlWithoutPreRequest(downloadUrl)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
