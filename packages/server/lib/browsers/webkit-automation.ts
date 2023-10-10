@@ -110,7 +110,7 @@ export class WebKitAutomation {
     this.context = this.page.context()
 
     await this.page.addInitScript({
-      content: `(${utils.listenForDocumentDownload.toString()})()`,
+      content: `(${utils.listenForDownload.toString()})()`,
     })
 
     await this.context.exposeBinding('cypressDownloadLinkClicked', (source, downloadUrl) => {

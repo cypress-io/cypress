@@ -391,13 +391,13 @@ const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Autom
   })
 
   await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
-    source: `(${listenForDocumentDownload.toString()})()`,
+    source: `(${listenForDownload.toString()})()`,
   })
 }
 
 // The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
 // For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
-const listenForDocumentDownload = () => {
+const listenForDownload = () => {
   if (window.navigation) {
     window.navigation.addEventListener('navigate', (event) => {
       if (typeof event.downloadRequest === 'string') {
@@ -455,7 +455,7 @@ export = {
 
   handleDownloadLinksViaCDP,
 
-  listenForDocumentDownload,
+  listenForDownload,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
