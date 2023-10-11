@@ -368,7 +368,8 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
       this.req.headers['accept-encoding'] = 'identity'
     }
   } else {
-    this.req.headers['accept-encoding'] = 'identity'
+    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding). In that case, we want to explicitly filter that down to `gzip`
+    this.req.headers['accept-encoding'] = 'gzip'
   }
 
   span?.end()
