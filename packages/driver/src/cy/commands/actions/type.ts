@@ -262,7 +262,7 @@ export default function (Commands, Cypress, cy, state, config) {
           // on the button will indeed trigger the form submit event
           // so we dont need to fire it manually anymore!
           if (!clickedDefaultButton(defaultButton)) {
-            // if we werent able to click the default button
+            // if we weren't able to click the default button
             // then synchronously fire the submit event
             // currently this is sync but if we use a waterfall
             // promise in the submit command it will break again

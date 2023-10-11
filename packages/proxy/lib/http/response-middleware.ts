@@ -712,6 +712,13 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
       this.protocolManager.responseEndedWithEmptyBody({
         requestId,
         isCached: this.incomingRes.statusCode === 304,
+        timings: {
+          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
+        },
       })
     }
 
@@ -818,15 +825,24 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+    const preRequest = this.req.browserPreRequest
+    const requestId = getOriginalRequestId(preRequest.requestId)
 
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+
     const resultingStream = this.protocolManager.responseStreamReceived({
       requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
       res: this.res,
+      timings: {
+        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+        cdpLagDuration: preRequest.cdpLagDuration,
+        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+      },
     })
 
     if (resultingStream) {

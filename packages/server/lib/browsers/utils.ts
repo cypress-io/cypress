@@ -7,6 +7,17 @@ import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
 import type { Browser } from './types'
+import type { Automation } from '../automation'
+import type { CriClient } from './cri-client'
+
+declare global {
+  interface Window {
+    navigation?: {
+      addEventListener: (event: string, listener: (event: any) => void) => void
+    }
+    cypressDownloadLinkClicked: (url: string) => void
+  }
+}
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -384,6 +395,52 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
+// Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
+// We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
+// correlated in the proxy.
+const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Automation) => {
+  await criClient.send('Runtime.enable')
+  await criClient.send('Runtime.addBinding', {
+    name: 'cypressDownloadLinkClicked',
+  })
+
+  await criClient.on('Runtime.bindingCalled', async (data) => {
+    if (data.name === 'cypressDownloadLinkClicked') {
+      const url = data.payload
+
+      await automation.onDownloadLinkClicked?.(url)
+    }
+  })
+
+  await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(${listenForDownload.toString()})()`,
+  })
+}
+
+// The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
+// For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
+const listenForDownload = () => {
+  if (window.navigation) {
+    window.navigation.addEventListener('navigate', (event) => {
+      if (typeof event.downloadRequest === 'string') {
+        window.cypressDownloadLinkClicked(event.destination.url)
+      }
+    })
+  } else {
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+  }
+}
+
 export = {
 
   extendLaunchOptionsFromPlugins,
@@ -419,6 +476,10 @@ export = {
   formatBrowsersToOptions,
 
   throwBrowserNotFound,
+
+  handleDownloadLinksViaCDP,
+
+  listenForDownload,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')

@@ -250,7 +250,7 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    // find elements by the :cy-contains psuedo selector
+    // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 

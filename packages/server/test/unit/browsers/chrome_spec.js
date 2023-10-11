@@ -10,6 +10,7 @@ const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
+const { expect } = require('chai')
 
 const openOpts = {
   onError: () => {},
@@ -65,6 +66,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
+      sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
 
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -97,6 +99,8 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+
+        expect(utils.handleDownloadLinksViaCDP).to.be.calledOnce
       })
     })
 
