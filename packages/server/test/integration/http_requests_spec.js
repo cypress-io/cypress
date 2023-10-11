@@ -1158,7 +1158,7 @@ describe('Routes', () => {
         })
       })
 
-      it('removes accept-encoding when no header is passed', function () {
+      it('sets accept-encoding header to "identity" when no header is passed', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/accept')
         .matchHeader('accept-encoding', 'identity')
