@@ -3339,8 +3339,6 @@
     "./node_modules/tough-cookie/lib/validators.js",
     "./node_modules/tough-cookie/lib/version.js",
     "./node_modules/tough-cookie/node_modules/universalify/index.js",
-    "./node_modules/tr46/index.js",
-    "./node_modules/tr46/lib/mappingTable.json",
     "./node_modules/trash/index.js",
     "./node_modules/trash/lib/linux.js",
     "./node_modules/trash/lib/macos.js",
@@ -4300,5 +4298,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "255730976d36aa880d1e064459615222389b1e961f2b1731fea9cc3824f7f472"
+  "deferredHash": "cf4e9c12ad34bb6a943f5346777e1c22aadbadfb169463b0179c4f46035deb97"
 }

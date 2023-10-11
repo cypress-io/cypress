@@ -29,7 +29,8 @@ describe('mocha custom methods', () => {
       expect(undefinedStrategyTest.final).to.be.true
 
       const detectFlakeAndPassOnThresholdStrategyTest = createMockTest()
-      const detectFlakeAndPassOnThreshold = calculateTestStatus(detectFlakeAndPassOnThresholdStrategyTest, 'detect-flake-and-pass-on-threshold', {
+      const detectFlakeAndPassOnThreshold = calculateTestStatus(detectFlakeAndPassOnThresholdStrategyTest, {
+        strategy: 'detect-flake-and-pass-on-threshold',
         maxRetries: 8,
         passesRequired: 5,
       })
@@ -41,7 +42,8 @@ describe('mocha custom methods', () => {
       expect(detectFlakeAndPassOnThresholdStrategyTest.final).to.be.true
 
       const detectFlakeButAlwaysFailStrategyTest = createMockTest()
-      const detectFlakeButAlwaysFail = calculateTestStatus(detectFlakeButAlwaysFailStrategyTest, 'detect-flake-but-always-fail', {
+      const detectFlakeButAlwaysFail = calculateTestStatus(detectFlakeButAlwaysFailStrategyTest, {
+        strategy: 'detect-flake-but-always-fail',
         maxRetries: 8,
         stopIfAnyPassed: false,
       })
@@ -105,7 +107,8 @@ describe('mocha custom methods', () => {
       it('passed: no longer signals to retry test after passesRequired threshold is reached', function () {
         totalRetries = 5
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1, 'detect-flake-and-pass-on-threshold', {
+        const attempt1 = calculateTestStatus(mockTest1, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -117,7 +120,8 @@ describe('mocha custom methods', () => {
         expect(mockTest1.final).to.be.false
 
         const mockTest2 = createMockTest('failed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2, 'detect-flake-and-pass-on-threshold', {
+        const attempt2 = calculateTestStatus(mockTest2, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -129,7 +133,8 @@ describe('mocha custom methods', () => {
         expect(mockTest2.final).to.be.false
 
         const mockTest3 = createMockTest('passed', [mockTest1, mockTest2])
-        const attempt3 = calculateTestStatus(mockTest3, 'detect-flake-and-pass-on-threshold', {
+        const attempt3 = calculateTestStatus(mockTest3, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -141,7 +146,8 @@ describe('mocha custom methods', () => {
         expect(mockTest3.final).to.be.false
 
         const mockTest4 = createMockTest('passed', [mockTest1, mockTest2, mockTest3])
-        const attempt4 = calculateTestStatus(mockTest4, 'detect-flake-and-pass-on-threshold', {
+        const attempt4 = calculateTestStatus(mockTest4, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -156,7 +162,8 @@ describe('mocha custom methods', () => {
       it('failed: no longer signals to retry test if the passesRequired is impossible to meet', function () {
         totalRetries = 4
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1, 'detect-flake-and-pass-on-threshold', {
+        const attempt1 = calculateTestStatus(mockTest1, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -168,7 +175,8 @@ describe('mocha custom methods', () => {
         expect(mockTest1.final).to.be.false
 
         const mockTest2 = createMockTest('failed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2, 'detect-flake-and-pass-on-threshold', {
+        const attempt2 = calculateTestStatus(mockTest2, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -180,7 +188,8 @@ describe('mocha custom methods', () => {
         expect(mockTest2.final).to.be.false
 
         const mockTest3 = createMockTest('failed', [mockTest1, mockTest2])
-        const attempt3 = calculateTestStatus(mockTest3, 'detect-flake-and-pass-on-threshold', {
+        const attempt3 = calculateTestStatus(mockTest3, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -192,7 +201,8 @@ describe('mocha custom methods', () => {
         expect(mockTest3.final).to.be.false
 
         const mockTest4 = createMockTest('failed', [mockTest1, mockTest2, mockTest3])
-        const attempt4 = calculateTestStatus(mockTest4, 'detect-flake-and-pass-on-threshold', {
+        const attempt4 = calculateTestStatus(mockTest4, {
+          strategy: 'detect-flake-and-pass-on-threshold',
           maxRetries: totalRetries,
           passesRequired: 2,
         })
@@ -209,7 +219,8 @@ describe('mocha custom methods', () => {
       it('failed: no longer signals to retry after retries are exhausted', function () {
         totalRetries = 3
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1, 'detect-flake-but-always-fail', {
+        const attempt1 = calculateTestStatus(mockTest1, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: false,
         })
@@ -221,7 +232,8 @@ describe('mocha custom methods', () => {
         expect(mockTest1.final).to.be.false
 
         const mockTest2 = createMockTest('failed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2, 'detect-flake-but-always-fail', {
+        const attempt2 = calculateTestStatus(mockTest2, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: false,
         })
@@ -233,7 +245,8 @@ describe('mocha custom methods', () => {
         expect(mockTest2.final).to.be.false
 
         const mockTest3 = createMockTest('passed', [mockTest1, mockTest2])
-        const attempt3 = calculateTestStatus(mockTest3, 'detect-flake-but-always-fail', {
+        const attempt3 = calculateTestStatus(mockTest3, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: false,
         })
@@ -245,7 +258,8 @@ describe('mocha custom methods', () => {
         expect(mockTest3.final).to.be.false
 
         const mockTest4 = createMockTest('passed', [mockTest1, mockTest2, mockTest3])
-        const attempt4 = calculateTestStatus(mockTest4, 'detect-flake-but-always-fail', {
+        const attempt4 = calculateTestStatus(mockTest4, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: false,
         })
@@ -262,7 +276,8 @@ describe('mocha custom methods', () => {
       it('failed: short circuits after a retry has a passed test', function () {
         totalRetries = 3
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1, 'detect-flake-but-always-fail', {
+        const attempt1 = calculateTestStatus(mockTest1, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: true,
         })
@@ -274,7 +289,8 @@ describe('mocha custom methods', () => {
         expect(mockTest1.final).to.be.false
 
         const mockTest2 = createMockTest('passed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2, 'detect-flake-but-always-fail', {
+        const attempt2 = calculateTestStatus(mockTest2, {
+          strategy: 'detect-flake-but-always-fail',
           maxRetries: totalRetries,
           stopIfAnyPassed: true,
         })
