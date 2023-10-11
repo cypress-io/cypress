@@ -53,7 +53,7 @@ type NormalizedRetriesConfig = {
 }
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, config: NormalizedRetriesConfig) {
+export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig) {
   // @ts-expect-error
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
@@ -78,21 +78,21 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
     const passingAttempts = passedTests.length
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
-    let passesRequired = config.strategy !== 'detect-flake-but-always-fail' ?
-      (config.passesRequired || 1) :
+    let passesRequired = config?.strategy !== 'detect-flake-but-always-fail' ?
+      (config?.passesRequired || 1) :
       null
 
-    const neededPassingAttemptsLeft = config.strategy !== 'detect-flake-but-always-fail' ?
+    const neededPassingAttemptsLeft = config?.strategy !== 'detect-flake-but-always-fail' ?
       (passesRequired as number) - passingAttempts :
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
-    let stopIfAnyPassed = config.strategy === 'detect-flake-but-always-fail' ?
+    let stopIfAnyPassed = config?.strategy === 'detect-flake-but-always-fail' ?
       (config.stopIfAnyPassed || false) :
       null
 
     // Do we have the required amount of passes? If yes, we no longer need to keep running the test.
-    if (config.strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
+    if (config?.strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
       outerTestStatus = 'passed'
       test.final = true
       shouldAttemptsContinue = false
@@ -101,13 +101,13 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
         // For strategy "detect-flake-and-pass-on-threshold" or no strategy (current GA retries):
         //  If we haven't met our max attempt limit AND we have enough remaining attempts that can satisfy the passing requirement.
         // retry the test.
-        (config.strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
+        (config?.strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
         // For strategy "detect-flake-but-always-fail":
         //  If we haven't met our max attempt limit AND
         //    stopIfAnyPassed is false OR
         //    stopIfAnyPassed is true and no tests have passed yet.
         // retry the test.
-        (config.strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
+        (config?.strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
       )) {
       test.final = false
       shouldAttemptsContinue = true
@@ -128,7 +128,7 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
   }
 
   return {
-    strategy: config.strategy,
+    strategy: config?.strategy,
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: outerTestStatus,
