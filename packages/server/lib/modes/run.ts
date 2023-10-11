@@ -648,7 +648,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     await project.server.destroyAut()
   }
 
-  // we do not support experimentalSingleTabRunMode for e2e
+  // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
