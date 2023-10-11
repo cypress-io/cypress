@@ -517,6 +517,8 @@ export = {
 
     await pageCriClient.send('Page.enable')
 
+    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
+
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([

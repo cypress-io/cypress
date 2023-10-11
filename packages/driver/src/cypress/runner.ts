@@ -1342,11 +1342,13 @@ export default {
     const replacePreviousAttemptWith = (test) => {
       const prevAttempt = _testsById[test.id]
 
-      const prevAttempts = prevAttempt.prevAttempts || []
+      const prevAttempts = prevAttempt?.prevAttempts || []
 
-      const newPrevAttempts = prevAttempts.concat([prevAttempt])
+      const newPrevAttempts = prevAttempt ? prevAttempts.concat([prevAttempt]) : prevAttempts
 
-      delete prevAttempt.prevAttempts
+      if (prevAttempt) {
+        delete prevAttempt.prevAttempts
+      }
 
       test.prevAttempts = newPrevAttempts
 
