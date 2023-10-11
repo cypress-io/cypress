@@ -7,6 +7,7 @@ import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
+import utils from './utils'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -107,6 +108,14 @@ export class WebKitAutomation {
 
     this.page = await newContext.newPage()
     this.context = this.page.context()
+
+    await this.page.addInitScript({
+      content: `(${utils.listenForDownload.toString()})()`,
+    })
+
+    await this.context.exposeBinding('cypressDownloadLinkClicked', (source, downloadUrl) => {
+      this.automation.onDownloadLinkClicked?.(downloadUrl)
+    })
 
     this.handleRequestEvents()
 
@@ -222,6 +231,8 @@ export class WebKitAutomation {
         headers: request.headers(),
         resourceType: normalizeResourceType(request.resourceType()),
         originalResourceType: request.resourceType(),
+        cdpRequestWillBeSentTimestamp: request.timing().requestStart,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
       }
 
       debug('received request %o', { browserPreRequest })
