@@ -7,6 +7,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
+import { performance } from 'perf_hooks'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
@@ -237,6 +238,10 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
+      // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
+      // normalize to milliseconds to be comparable to everything else we're gathering
+      cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
