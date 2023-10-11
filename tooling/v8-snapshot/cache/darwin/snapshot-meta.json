@@ -4297,6 +4297,7 @@
     "./packages/types/src/modeOptions.ts",
     "./packages/types/src/preferences.ts",
     "./packages/types/src/protocol.ts",
+    "./packages/types/src/proxy.ts",
     "./packages/types/src/reporter.ts",
     "./packages/types/src/server.ts",
     "./packages/types/src/spec.ts",
