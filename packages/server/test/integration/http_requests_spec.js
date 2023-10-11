@@ -1138,7 +1138,7 @@ describe('Routes', () => {
         })
       })
 
-      it('removes accept-encoding when nothing is supported', function () {
+      it('sets accept-encoding header to "identity" when nothing is supported', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/accept')
         .matchHeader('accept-encoding', 'identity')
