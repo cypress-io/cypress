@@ -957,7 +957,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
-        // however, network errors will be obsfucated by the proxying so this is not an ideal solution
+        // however, network errors will be obfuscated by the proxying so this is not an ideal solution
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
