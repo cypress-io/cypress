@@ -31,7 +31,7 @@ describe('e2e typescript in spec and support file', function () {
     })
   })
 
-  it('project wtih custom supportFile passes', function () {
+  it('project with custom supportFile passes', function () {
     return systemTests.exec(this, {
       project: 'ts-proj-custom-names',
       snapshot: true,

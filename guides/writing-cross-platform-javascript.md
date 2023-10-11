@@ -40,7 +40,7 @@ path.resolve('../', '/../', '../')
 // 'C:\\Users' on Windows
 ```
 
-In general, you want to avoid writing file system code using `/` and `\`, and use Node.js APIs where possible - those are cross platform and guarenteed to work.
+In general, you want to avoid writing file system code using `/` and `\`, and use Node.js APIs where possible - those are cross platform and guaranteed to work.
 
 ## Use Node.js Scripts 
 
