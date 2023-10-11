@@ -83,7 +83,7 @@ const DEFAULT_ARGS = [
   // https://github.com/cypress-io/cypress/issues/1951
   '--disable-site-isolation-trials',
 
-  // the following come frome chromedriver
+  // the following come from chromedriver
   // https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   '--metrics-recording-only',
   '--disable-prompt-on-repost',

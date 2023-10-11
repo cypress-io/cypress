@@ -166,7 +166,7 @@ describe('findSpecs', () => {
     await ctx.fs.remove(projectRoot)
   })
 
-  it('exludes specs outside `specPattern`, even if passing a generic glob', async () => {
+  it('excludes specs outside `specPattern`, even if passing a generic glob', async () => {
     const specs = await ctx.project.findSpecs({
       projectRoot,
       testingType: 'e2e',
