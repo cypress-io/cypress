@@ -11982,13 +11982,13 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@1.17.1:
-  version "1.17.1"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.17.1.tgz#a14d5c64de5dd1083a6ec1a61430d76efb00e18d"
-  integrity sha512-iMIiuDpcLMPiZcUtfdbMtMoX5uvGHPH+M/XeD/jmnZCfc+aX+a+g2RNEPQzuM4MD4GGKMTnui/RQ7I++Ca+VOg==
+cypress-example-kitchensink@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-2.0.0.tgz#16b0e5c226eca08d937d0057293c5d168d0498fd"
+  integrity sha512-Uoqz+E5UNdmraQ/s+BtKOQ/diRacfB4vGl6mXM37nHKDJFCRo6PGV9Ooy68m5IGZQs97aclL9ALPb2GpTUcTmg==
   dependencies:
     npm-run-all "^4.1.2"
-    serve "14.2.0"
+    serve "14.2.1"
 
 cypress-expect@^2.5.3:
   version "2.5.3"
@@ -26281,10 +26281,10 @@ serve-static@1.14.2:
     parseurl "~1.3.3"
     send "0.17.2"
 
-serve@14.2.0:
-  version "14.2.0"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-14.2.0.tgz#3d768e88fa13ad8644f2393599189707176e66b8"
-  integrity sha512-+HOw/XK1bW8tw5iBilBz/mJLWRzM8XM6MPxL4J/dKzdxq1vfdEWSwhaR7/yS8EJp5wzvP92p1qirysJvnEtjXg==
+serve@14.2.1:
+  version "14.2.1"
+  resolved "https://registry.yarnpkg.com/serve/-/serve-14.2.1.tgz#3f078d292ed5e7b2c5a64f957af2765b0459798b"
+  integrity sha512-48er5fzHh7GCShLnNyPBRPEjs2I6QBozeGr02gaacROiyS/8ARADlj595j39iZXAqBbJHH/ivJJyPRWY9sQWZA==
   dependencies:
     "@zeit/schemas" "2.29.0"
     ajv "8.11.0"
