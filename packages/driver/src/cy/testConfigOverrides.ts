@@ -167,6 +167,18 @@ export class TestConfigOverride {
       unverifiedTestConfig: [],
     }
 
+    // TODO: remove when experimental overriding is supported
+    const experimentalRetryCfgKeys = [
+      'experimentalStrategy', 'experimentalOptions',
+    ]
+
+    const experimentalRetryConfigAttempted = Object.keys(resolvedTestConfig.unverifiedTestConfig?.retries || {})
+    .some((v) => experimentalRetryCfgKeys.includes(v))
+
+    if (experimentalRetryConfigAttempted) {
+      throw new Error('Cannot set experimental retries on individual tests')
+    }
+
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
     }
