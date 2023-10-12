@@ -10,13 +10,12 @@
     "test-e2e": "cypress run",
     "test-unit": "echo 'no unit tests'",
     "build": "node ./bin/build.js && gulp build",
-    "build-prod": "yarn build",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build -b gh-pages"
   },
   "devDependencies": {
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "1.17.1",
+    "cypress-example-kitchensink": "2.0.0",
     "gh-pages": "5.0.0",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
@@ -28,5 +27,16 @@
     "cypress",
     "lib"
   ],
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/cypress",
+          "{projectRoot}/app",
+          "{projectRoot}/build"
+        ]
+      }
+    }
+  }
 }

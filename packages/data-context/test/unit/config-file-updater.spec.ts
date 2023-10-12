@@ -320,7 +320,7 @@ describe('lib/util/config-file-updater', () => {
       })
 
       describe('failures', () => {
-        it('fails if not an object litteral', () => {
+        it('fails if not an object literal', () => {
           const src = [
             'const foo = {}',
             'export default foo',

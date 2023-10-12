@@ -100,7 +100,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
+    await execa('yarn', ['lerna', 'run', 'build', '--concurrency', '4'], {
+      stdio: 'inherit',
+      cwd: CY_ROOT_DIR,
+    })
+
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
@@ -133,8 +138,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
     scripts: {
-      // After the `yarn --production` install, we need to patch packages and trigger a server build to rebuild native bindings for `better-sqlite3`
-      postinstall: 'patch-package && yarn workspace @packages/server rebuild-better-sqlite3',
+      // After the `yarn --production` install, we need to patch packages
+      postinstall: 'patch-package',
     },
   }, { spaces: 2 })
 
@@ -152,6 +157,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     cwd: DIST_DIR,
     stdio: 'inherit',
   })
+
+  log('#copying better-sqlite3')
+  fs.copySync(
+    path.join(CY_ROOT_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+    path.join(DIST_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+  )
 
   // TODO: Validate no-hoists / single copies of libs
 

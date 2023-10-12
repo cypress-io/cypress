@@ -265,7 +265,7 @@ export const create = async (
       }
 
       const enqueue = () => {
-        debug('enqueing command', { command, params })
+        debug('enqueueing command', { command, params })
 
         return new Promise((resolve, reject) => {
           const obj: EnqueuedCommand = {

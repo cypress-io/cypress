@@ -1100,7 +1100,7 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // TODO: Re-think skipping text insert if non-shift modifers
+    // TODO: Re-think skipping text insert if non-shift modifiers
     // @see https://github.com/cypress-io/cypress/issues/5622
     // if (hasModifierBesidesShift(modifiers)) {
     //   details.text = ''

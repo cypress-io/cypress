@@ -20,7 +20,7 @@ const $LocalStorage = {
 
     // we have to iterate over both our remoteIframes localStorage
     // and our window localStorage to remove items from it
-    // due to a bug in IE that does not properly propogate
+    // due to a bug in IE that does not properly propagate
     // changes to an iframes localStorage
     return _.each(storages, (storage) => {
       return _
