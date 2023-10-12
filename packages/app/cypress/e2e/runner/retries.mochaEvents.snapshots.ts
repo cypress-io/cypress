@@ -240,6 +240,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -272,6 +273,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -319,6 +321,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -352,6 +355,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -960,6 +964,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1013,6 +1018,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1081,6 +1087,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1135,6 +1142,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1764,6 +1772,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1817,6 +1826,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1885,6 +1895,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -1939,6 +1950,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -2742,6 +2754,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -2805,6 +2818,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -2883,6 +2897,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -2947,6 +2962,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -3824,6 +3840,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -3880,6 +3897,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -3936,6 +3954,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -3992,6 +4011,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -4049,6 +4069,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 2,
           outerStatus: 'passed',
@@ -4311,6 +4332,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4368,6 +4390,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4425,6 +4448,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4482,6 +4506,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4540,6 +4565,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4840,6 +4866,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4904,6 +4931,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -4968,6 +4996,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -5032,6 +5061,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -5097,6 +5127,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -5964,6 +5995,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -6008,6 +6040,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -6052,6 +6085,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -6096,6 +6130,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -6141,6 +6176,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -6307,6 +6343,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -6347,6 +6384,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -6402,6 +6440,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -6443,6 +6482,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -6599,6 +6639,7 @@ export const snapshots = {
       {
         _cypressTestStatusInfo: {
           attempts: 1,
+          strategy: 'detect-flake-and-pass-on-threshold',
           outerStatus: 'failed',
           shouldAttemptsContinue: false,
         },
@@ -7081,6 +7122,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -7135,6 +7177,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -7189,6 +7232,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -7243,6 +7287,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -7298,6 +7343,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -8102,6 +8148,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -8148,6 +8195,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -8194,6 +8242,7 @@ export const snapshots = {
       'test:before:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -8240,6 +8289,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -8287,6 +8337,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 3,
           outerStatus: 'passed',
@@ -8500,6 +8551,7 @@ export const snapshots = {
       'pass',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -8554,6 +8606,7 @@ export const snapshots = {
       'test end',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -8623,6 +8676,7 @@ export const snapshots = {
       'test:after:run',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -8678,6 +8732,7 @@ export const snapshots = {
       'test:after:run:async',
       {
         _cypressTestStatusInfo: {
+          strategy: 'detect-flake-and-pass-on-threshold',
           shouldAttemptsContinue: false,
           attempts: 1,
           outerStatus: 'passed',
@@ -9121,6 +9176,7 @@ export const snapshots = {
         'fail',
         {
           _cypressTestStatusInfo: {
+            strategy: 'detect-flake-and-pass-on-threshold',
             shouldAttemptsContinue: false,
             attempts: 3,
             outerStatus: 'failed',
@@ -9165,6 +9221,7 @@ export const snapshots = {
         'test end',
         {
           _cypressTestStatusInfo: {
+            strategy: 'detect-flake-and-pass-on-threshold',
             shouldAttemptsContinue: false,
             attempts: 3,
             outerStatus: 'failed',
@@ -9203,6 +9260,7 @@ export const snapshots = {
         'test:after:run',
         {
           _cypressTestStatusInfo: {
+            strategy: 'detect-flake-and-pass-on-threshold',
             shouldAttemptsContinue: false,
             attempts: 3,
             outerStatus: 'failed',
@@ -9242,6 +9300,7 @@ export const snapshots = {
         'test:after:run:async',
         {
           _cypressTestStatusInfo: {
+            strategy: 'detect-flake-and-pass-on-threshold',
             shouldAttemptsContinue: false,
             attempts: 3,
             outerStatus: 'failed',
