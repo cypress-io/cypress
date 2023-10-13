@@ -4,7 +4,7 @@ const http = require('http')
 const socket = require('@packages/socket')
 const Promise = require('bluebird')
 const mockRequire = require('mock-require')
-const client = require('../../app/client')
+const client = require('../../app/v2/client')
 
 const browser = {
   cookies: {
@@ -48,7 +48,7 @@ const browser = {
 
 mockRequire('webextension-polyfill', browser)
 
-const background = require('../../app/background')
+const background = require('../../app/v2/background')
 const { expect } = require('chai')
 
 const PORT = 12345

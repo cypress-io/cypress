@@ -153,7 +153,7 @@ export function assembleScript (
   const auxiliaryDataString = JSON.stringify(auxiliaryData)
 
   // 2. Determine the path of the main module which needs to be required in
-  //    order to trigger initialization o the modules we want to embedd during
+  //    order to trigger initialization of the modules we want to embed during
   //    snapshot creation
   const mainModuleRequirePath =
     opts.entryPoint ?? getMainModuleRequirePath(basedir, entryFilePath)
