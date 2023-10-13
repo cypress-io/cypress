@@ -546,7 +546,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project, burnInConfig } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -604,6 +604,7 @@ const createRun = Promise.method((options = {}) => {
     commit,
     autoCancelAfterFailures,
     project,
+    burnInConfig,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -794,6 +795,10 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
               autoCancelAfterFailures,
             })
+          case 'BURN_IN_MISMATCH':
+            return errors.throwErr('CLOUD_BURN_IN_MISMATCH', {
+              runUrl,
+            }, burnInConfig, path.basename(options.configFile))
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
@@ -913,6 +918,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       configFile: config ? config.configFile : null,
       autoCancelAfterFailures,
       project,
+      burnInConfig: config?.experimentalBurnIn,
     })
     .then((resp) => {
       if (!resp) {

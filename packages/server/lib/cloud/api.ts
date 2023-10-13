@@ -363,6 +363,7 @@ module.exports = {
             'specPattern',
             'tags',
             'testingType',
+            'burnInConfig',
           ]),
           runnerCapabilities,
         }
