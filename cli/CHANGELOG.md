@@ -1,4 +1,10 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.3.2
+
+_Released 10/25/2023 (PENDING)_
+
+- Fixed an issue with Accept Encoding headers by forcing gzip when no accept encoding header is sent and using identity if gzip is not sent. Fixes [#18025](https://github.com/cypress-io/cypress/issues/28025)
+
 ## 13.3.1
 
 _Released 10/11/2023_
