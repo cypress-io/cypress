@@ -4294,6 +4294,7 @@
     "./packages/types/src/modeOptions.ts",
     "./packages/types/src/preferences.ts",
     "./packages/types/src/protocol.ts",
+    "./packages/types/src/proxy.ts",
     "./packages/types/src/reporter.ts",
     "./packages/types/src/server.ts",
     "./packages/types/src/spec.ts",
@@ -4303,5 +4304,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "255730976d36aa880d1e064459615222389b1e961f2b1731fea9cc3824f7f472"
+  "deferredHash": "1893230999f0c0f17f4633aeef0ea5f15751a6768485a27ab7cdefea825027c6"
 }
