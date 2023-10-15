@@ -74,6 +74,13 @@ class QueueMap<T> {
     this.queues[queueKey].splice(i, 1)
     if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
   }
+
+  forEach (fn: (value: T) => void) {
+    Object.values(this.queues).forEach((queue) => {
+      queue.forEach(fn)
+    })
+  }
+
   get length () {
     return Object.values(this.queues).reduce((prev, cur) => prev + cur.length, 0)
   }
@@ -93,6 +100,7 @@ export class PreRequests {
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
+  activeServiceWorkers: Set<string> = new Set()
 
   constructor (
     requestTimeout = 2000,
@@ -196,6 +204,32 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
+    if (req.headers['sec-fetch-dest'] === 'serviceworker') {
+      ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
+
+      this.activeServiceWorkers.add(req.proxiedUrl)
+
+      callback()
+
+      return
+    }
+
+    if (req.headers['service-worker-navigation-preload'] === 'true') {
+      ctxDebug('Ignoring request with service-worker-navigation-preload: true', req.proxiedUrl)
+
+      callback()
+
+      return
+    }
+
+    if (req.headers['referer'] && this.activeServiceWorkers.has(req.headers['referer'])) {
+      ctxDebug('Ignoring request with service worker referrer:', req.proxiedUrl)
+
+      callback()
+
+      return
+    }
+
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
@@ -244,5 +278,20 @@ export class PreRequests {
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
+  }
+
+  reset () {
+    this.pendingPreRequests = new QueueMap<PendingPreRequest>()
+
+    // Clear out the pending requests timeout callbacks first then clear the queue
+    this.pendingRequests.forEach(({ callback, timeout }) => {
+      clearTimeout(timeout)
+      metrics.unmatchedRequests++
+      callback()
+    })
+
+    this.pendingRequests = new QueueMap<PendingRequest>()
+    this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+    this.activeServiceWorkers = new Set()
   }
 }

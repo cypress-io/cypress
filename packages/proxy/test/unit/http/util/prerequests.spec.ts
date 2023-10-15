@@ -68,7 +68,7 @@ describe('http/util/prerequests', () => {
 
     const cb = sinon.stub()
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
     const { args } = cb.getCall(0)
     const arg = args[0]
@@ -98,7 +98,7 @@ describe('http/util/prerequests', () => {
 
     const cb = sinon.stub()
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
     const { args } = cb.getCall(0)
     const arg = args[0]
@@ -115,7 +115,7 @@ describe('http/util/prerequests', () => {
       done()
     }
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
   })
 
@@ -126,7 +126,7 @@ describe('http/util/prerequests', () => {
       done()
     }
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
     preRequests.addPendingUrlWithoutPreRequest('foo')
   })
 
@@ -143,7 +143,7 @@ describe('http/util/prerequests', () => {
       }
     })
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
     await cbPromise
 
@@ -188,7 +188,7 @@ describe('http/util/prerequests', () => {
         done()
       }
 
-      preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
+      preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
     }, 1200)
   })
 
@@ -217,5 +217,48 @@ describe('http/util/prerequests', () => {
     preRequests.removePending('1235')
 
     expectPendingCounts(0, 2)
+  })
+
+  it('immediately handles a request from a service worker loading and a request initiated from that service worker', () => {
+    const cbServiceWorker = sinon.stub()
+    const cbWithinServiceWorker = sinon.stub()
+
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'sec-fetch-dest': 'serviceworker' } } as any, () => {}, cbServiceWorker)
+
+    expect(cbServiceWorker).to.be.calledOnce
+    expect(cbServiceWorker).to.be.calledWith()
+
+    preRequests.get({ proxiedUrl: 'bar', method: 'GET', headers: { 'referer': 'foo' } } as CypressIncomingRequest, () => {}, cbWithinServiceWorker)
+
+    expect(cbWithinServiceWorker).to.be.calledOnce
+    expect(cbWithinServiceWorker).to.be.calledWith()
+  })
+
+  it('immediately handles a request from a service worker preload', () => {
+    const cbServiceWorker = sinon.stub()
+
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'service-worker-navigation-preload': 'true' } } as any, () => {}, cbServiceWorker)
+
+    expect(cbServiceWorker).to.be.calledOnce
+    expect(cbServiceWorker).to.be.calledWith()
+  })
+
+  it('resets the queues', () => {
+    let callbackCalled = false
+
+    preRequests.addPending({ requestId: '1234', url: 'bar', method: 'GET' } as BrowserPreRequest)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, () => {
+      callbackCalled = true
+    })
+
+    preRequests.addPendingUrlWithoutPreRequest('baz')
+
+    expectPendingCounts(1, 1, 1)
+
+    preRequests.reset()
+
+    expectPendingCounts(0, 0, 0)
+
+    expect(callbackCalled).to.be.true
   })
 })

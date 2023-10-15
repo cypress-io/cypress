@@ -411,6 +411,7 @@ export class Http {
   reset () {
     this.buffers.reset()
     this.setAUTUrl(undefined)
+    this.preRequests.reset()
   }
 
   setBuffer (buffer) {
