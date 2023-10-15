@@ -25,7 +25,7 @@ export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequestWithTimings)
 
 type PendingRequest = {
   ctxDebug
-  callback: GetPreRequestCb
+  callback?: GetPreRequestCb
   timeout: NodeJS.Timeout
   timedOut?: boolean
   proxyRequestReceivedTimestamp: number
@@ -156,10 +156,12 @@ export class PreRequests {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
-        pendingRequest.callback({
+        pendingRequest.callback?.({
           ...browserPreRequest,
           ...timings,
         })
+
+        delete pendingRequest.callback
 
         return
       }
@@ -187,7 +189,8 @@ export class PreRequests {
     if (pendingRequest) {
       debugVerbose('Handling %s without a CDP prerequest', key)
       clearTimeout(pendingRequest.timeout)
-      pendingRequest.callback()
+      pendingRequest.callback?.()
+      delete pendingRequest.callback
 
       return
     }
@@ -270,6 +273,7 @@ export class PreRequests {
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback()
+        delete pendingRequest.callback
       }, this.requestTimeout),
     }
 
@@ -287,7 +291,7 @@ export class PreRequests {
     this.pendingRequests.forEach(({ callback, timeout }) => {
       clearTimeout(timeout)
       metrics.unmatchedRequests++
-      callback()
+      callback?.()
     })
 
     this.pendingRequests = new QueueMap<PendingRequest>()
