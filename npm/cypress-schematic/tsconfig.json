@@ -7,7 +7,7 @@
     ],
     "declaration": true,
     "module": "commonjs",
-    "moduleResolution": "Node16",
+    "moduleResolution": "node",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,

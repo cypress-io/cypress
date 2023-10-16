@@ -6,7 +6,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "node",
     "strict": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
