@@ -6244,10 +6244,10 @@
   resolved "https://registry.yarnpkg.com/@types/detect-port/-/detect-port-1.3.1.tgz#a1af9bb9e8e43f5a2190f876cfd4120a5fae41ab"
   integrity sha512-evutJ8HynqPgm07LaG7nj7VqFqfAYpAjpKYYjhj5rlD5ukdF0hFiqHQo94Tu1FBJQkWDQPt3f1DaXLOGEL1nAw==
 
-"@types/doctrine@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@types/doctrine/-/doctrine-0.0.5.tgz#9768264221e8fd422e4989c8cfdab2ff781f4eb6"
-  integrity sha512-JJwEeFy8Sl9ctiugU4h4DGN9hCB47oyhUkM2H8g8xZr4tHTEXtmV4U6krKrU8Ng0S7RlG/J7fkta1rGu3pq+YQ==
+"@types/doctrine@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@types/doctrine/-/doctrine-0.0.6.tgz#12ede1f7cd3797be5856277c85f031299ccd2641"
+  integrity sha512-KlEqPtaNBHBJ2/fVA4yLdD0Tc8zw34pKU4K5SHBIEwtLJ8xxumIC1xeG+4S+/9qhVj2MqC7O3Ld8WvDG4HqlgA==
 
 "@types/ejs@^3.1.2":
   version "3.1.2"
@@ -24659,17 +24659,17 @@ react-clientside-effect@^1.2.2:
   dependencies:
     "@babel/runtime" "^7.12.13"
 
-react-docgen@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/react-docgen/-/react-docgen-6.0.0.tgz#e7c792e324d757f01762b550b7f56d45c2238d7f"
-  integrity sha512-qafzyFTiZoRqndg/1NU94K+fZDUHZNqqhTurRWR7nIF37zv/eYObLGHaQDa88SVrcG4yV+Jbu9XfHqlGwPzYPQ==
+react-docgen@6.0.4:
+  version "6.0.4"
+  resolved "https://registry.yarnpkg.com/react-docgen/-/react-docgen-6.0.4.tgz#85eeebac5fdeb781dbf610fdc429c20a4f06131c"
+  integrity sha512-gF+p+1ZwC2eO66bt763Tepmh5q9kDiFIrqW3YjUV/a+L96h0m5+/wSFQoOHL2cffyrPMZMxP03IgbggJ11QbOw==
   dependencies:
     "@babel/core" "^7.18.9"
     "@babel/traverse" "^7.18.9"
     "@babel/types" "^7.18.9"
     "@types/babel__core" "^7.18.0"
     "@types/babel__traverse" "^7.18.0"
-    "@types/doctrine" "^0.0.5"
+    "@types/doctrine" "^0.0.6"
     "@types/resolve" "^1.20.2"
     doctrine "^3.0.0"
     resolve "^1.22.1"
