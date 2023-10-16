@@ -17,7 +17,9 @@ export class CodegenActions {
 
   async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
-      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await import('react-docgen/dist/main')
+      // evaling this for now because react-docgen is a module and our typescript settings are set up to transpile to commonjs
+      // which will require the module, which will fail because it's an es module. This is a temporary workaround.
+      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await eval(`import('react-docgen')`)
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
