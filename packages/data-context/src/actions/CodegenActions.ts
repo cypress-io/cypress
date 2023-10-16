@@ -24,7 +24,9 @@ export class CodegenActions {
       let result = parseReactComponent(src, {
         resolver: findAllWithLink(exportResolver, reactDocgenResolvers),
         babelOptions: {
-          plugins: ['typescript', 'jsx'],
+          parserOpts: {
+            plugins: ['typescript', 'jsx'],
+          },
         },
       })
 
