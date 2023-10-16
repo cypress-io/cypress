@@ -86,7 +86,7 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
   const gitStatus = await getGitStatus()
 
   if (gitStatus) {
-    console.error(`\n${chalk.bold.red('This repository has untracked files or uncommmited changes.')}\nThis command will ${chalk.cyan('make changes in the codebase')}, so please remove untracked files, stash or commit any changes, and try again.`)
+    console.error(`\n${chalk.bold.red('This repository has untracked files or uncommitted changes.')}\nThis command will ${chalk.cyan('make changes in the codebase')}, so please remove untracked files, stash or commit any changes, and try again.`)
     process.exit(1)
   }
 

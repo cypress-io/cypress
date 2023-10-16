@@ -331,12 +331,14 @@ export class Http {
 
     const onError = (error: Error): Promise<void> => {
       ctx.error = error
-      if (ctx.req.browserPreRequest) {
+      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled) {
+        ctx.req.browserPreRequest.errorHandled = true
         // browsers will retry requests in the event of network errors, but they will not send pre-requests,
         // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
         const preRequest = {
           ...ctx.req.browserPreRequest,
           requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+          errorHandled: false,
         }
 
         ctx.debug('Re-using pre-request data %o', preRequest)
@@ -423,7 +425,12 @@ export class Http {
     this.preRequests.removePending(requestId)
   }
 
+  addPendingUrlWithoutPreRequest (url: string) {
+    this.preRequests.addPendingUrlWithoutPreRequest(url)
+  }
+
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
+    this.preRequests.setProtocolManager(protocolManager)
   }
 }

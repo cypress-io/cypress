@@ -44,7 +44,7 @@ type ChromePreferences = {
   localState: object
 }
 
-const pathToExtension = extension.getPathToExtension()
+const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
 // Common Chrome Flags for Automation
@@ -83,7 +83,7 @@ const DEFAULT_ARGS = [
   // https://github.com/cypress-io/cypress/issues/1951
   '--disable-site-isolation-trials',
 
-  // the following come frome chromedriver
+  // the following come from chromedriver
   // https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   '--metrics-recording-only',
   '--disable-prompt-on-repost',
@@ -357,15 +357,10 @@ export = {
       return
     }
 
-    // get the string bytes for the final extension file
-    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
     const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
-    await fs.chmod(extensionBg, 0o0644)
-    await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
   },
@@ -521,6 +516,8 @@ export = {
     }
 
     await pageCriClient.send('Page.enable')
+
+    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
 
     await options['onInitializeNewBrowserTab']?.()
 

@@ -250,7 +250,24 @@ export default (Commands, Cypress, cy, state) => {
     .then((responses) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses
+      const ret = responses.length === 1 ? responses[0] : ((resp) => {
+        const respMap = new Map()
+        const respSeq = resp.map((r) => r.routeId)
+
+        // responses are sorted in the order the user specified them. if there are multiples of the same
+        // alias awaited, they're sorted in execution order
+        resp.sort((a, b) => {
+          // sort responses based on browser request ID
+          const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
+          const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
+
+          return parseInt(requestIdSuffixA) < parseInt(requestIdSuffixB) ? -1 : 1
+        }).forEach((r) => {
+          respMap.get(r.routeId)?.push(r) ?? respMap.set(r.routeId, [r])
+        })
+
+        return respSeq.map((routeId) => respMap.get(routeId)?.shift())
+      })(responses)
 
       if (log) {
         log.set('consoleProps', () => {

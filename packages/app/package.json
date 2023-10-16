@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
-    "build-prod-ui": "cross-env NODE_ENV=production vite build",
+    "build": "vite build",
     "clean": "rimraf dist && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "echo 'ok'",
@@ -21,7 +21,7 @@
   "dependencies": {},
   "devDependencies": {
     "@cypress-design/vue-button": "^0.10.1",
-    "@cypress-design/vue-icon": "^0.25.0",
+    "@cypress-design/vue-icon": "^0.26.0",
     "@cypress-design/vue-statusicon": "^0.5.0",
     "@cypress-design/vue-tabs": "^0.5.1",
     "@graphql-typed-document-node/core": "^3.1.0",
@@ -79,5 +79,11 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/data-context",
+      "@packages/graphql"
+    ]
+  }
 }

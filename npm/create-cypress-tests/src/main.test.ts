@@ -110,7 +110,7 @@ describe('create-cypress-tests', () => {
     expect(someOfSpyCallsIncludes(logSpy, 'yarn cypress open')).to.be.true
   })
 
-  it('Fails if git repository have untracked or uncommited files', async () => {
+  it('Fails if git repository have untracked or uncommitted files', async () => {
     mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
@@ -121,7 +121,7 @@ describe('create-cypress-tests', () => {
     await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
 
     expect(
-      someOfSpyCallsIncludes(errorSpy, 'This repository has untracked files or uncommmited changes.'),
+      someOfSpyCallsIncludes(errorSpy, 'This repository has untracked files or uncommitted changes.'),
     ).to.equal(true)
 
     expect(processExitStub).to.be.called
