@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -30,8 +29,6 @@ jobs:
         continue-on-error: true
         run: |
           snyk code test --yarn-workspaces --strict-out-of-sync=false --detection-depth=6 --exclude=docker,Dockerfile --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       # The Following Requires Advanced Security License
       # - name: Upload results to Github Code Scanning
       #   uses: github/codeql-action/upload-sarif@v1
