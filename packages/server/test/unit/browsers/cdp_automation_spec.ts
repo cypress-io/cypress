@@ -26,11 +26,11 @@ context('lib/browsers/cdp_automation', () => {
           protocolEnabled: true,
         } as ProtocolManagerShape
 
-        const localCommmandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
+        const localCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
-        expect(localCommmandStub).to.have.been.calledWith('Network.enable', enabledObject)
+        expect(localCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
 
       it('networkEnabledOptions - protocol disabled', async function () {
@@ -51,13 +51,13 @@ context('lib/browsers/cdp_automation', () => {
           protocolEnabled: false,
         } as ProtocolManagerShape
 
-        const localCommmandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
+        const localCommandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any)
 
-        expect(localCommmandStub).to.have.been.calledTwice
-        expect(localCommmandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
+        expect(localCommandStub).to.have.been.calledTwice
+        expect(localCommandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
       })
     })
 
