@@ -5031,7 +5031,8 @@ exports['e2e events'] = `
   "resetTest": [
     "r3"
   ],
-  "responseEndedWithEmptyBody": []
+  "responseEndedWithEmptyBody": [],
+  "responseStreamTimedOut": []
 }
 `
 
@@ -6687,37 +6688,94 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "responseEndedWithEmptyBody": [
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     }
-  ]
+  ],
+  "responseStreamTimedOut": []
 }
 `
 
@@ -8373,20 +8431,49 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "responseEndedWithEmptyBody": [
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     },
     {
       "requestId": "Any.Number",
-      "isCached": true
+      "isCached": true,
+      "timings": {
+        "cdpRequestWillBeSentTimestamp": "Any.Number",
+        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
+        "proxyRequestReceivedTimestamp": "Any.Number",
+        "cdpLagDuration": "Any.Number",
+        "proxyRequestCorrelationDuration": "Any.Number"
+      }
     }
-  ]
+  ],
+  "responseStreamTimedOut": []
 }
 `

@@ -51,7 +51,7 @@ describe('lib/plugins/util', () => {
       expect(handler).to.be.calledWith('arg1', 'arg2')
     })
 
-    it('#removeListener emoves handler', function () {
+    it('#removeListener removes handler', function () {
       const handler = sinon.spy()
 
       this.ipc.on('event-name', handler)
@@ -94,7 +94,7 @@ describe('lib/plugins/util', () => {
       expect(util.wrapChildPromise(this.ipc, this.invoke, this.ids)).to.be.an.instanceOf(Promise)
     })
 
-    it('sends "promise:fulfilled:{invocatationId}" with value when promise resolves', function () {
+    it('sends "promise:fulfilled:{invocationId}" with value when promise resolves', function () {
       this.invoke.resolves('value')
 
       return util.wrapChildPromise(this.ipc, this.invoke, this.ids).then(() => {
@@ -110,7 +110,7 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('sends "promise:fulfilled:{invocatationId}" with error when promise rejects', function () {
+    it('sends "promise:fulfilled:{invocationId}" with error when promise rejects', function () {
       const err = new Error('fail')
 
       err.code = 'ERM_DUN_FAILED'
