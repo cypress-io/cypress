@@ -15,11 +15,18 @@ export interface ReactComponentDescriptor {
 export class CodegenActions {
   constructor (private ctx: DataContext) {}
 
-  async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
+  async getReactComponentsFromFile (filePath: string, reactDocgen?: typeof import('react-docgen')): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
-      // evaling this for now because react-docgen is a module and our typescript settings are set up to transpile to commonjs
+      // this dance to get react-docgen is for now because react-docgen is a module and our typescript settings are set up to transpile to commonjs
       // which will require the module, which will fail because it's an es module. This is a temporary workaround.
-      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await eval(`import('react-docgen')`)
+      let actualReactDocgen = reactDocgen
+
+      if (!actualReactDocgen) {
+        actualReactDocgen = await import('react-docgen')
+      }
+
+      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = actualReactDocgen
+
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
@@ -175,7 +182,7 @@ export class CodegenActions {
 
 type ExportResolver = Map<string, ReactComponentDescriptor>
 
-function findAllWithLink (exportResolver: ExportResolver, reactDocgenResolvers: any) {
+function findAllWithLink (exportResolver: ExportResolver, reactDocgenResolvers: typeof import('react-docgen').builtinResolvers) {
   return (fileState: any) => {
     visit(fileState.ast, {
       // export const Foo, export { Foo, Bar }, export function FooBar () { ... }
