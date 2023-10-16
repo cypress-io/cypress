@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,

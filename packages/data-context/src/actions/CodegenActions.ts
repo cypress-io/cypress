@@ -17,7 +17,7 @@ export class CodegenActions {
 
   async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
-      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await import('react-docgen/dist/main')
+      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await import('react-docgen')
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
