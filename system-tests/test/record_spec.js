@@ -1070,6 +1070,39 @@ describe('e2e record', () => {
       })
     })
 
+    describe('create run 422 - burn-in config mismatch', () => {
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(422).json({
+              code: 'BURN_IN_MISMATCH',
+              payload: {
+                runUrl: 'https://cloud.cypress.io/runs/12345',
+              },
+            })
+          },
+        },
+      }))
+
+      it('errors when first run burn-in config is different from non-first run', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+          ])
+        })
+      })
+    })
+
     describe('create run 412', () => {
       setupStubbedServer(createRoutes({
         postRun: {
