@@ -5,7 +5,6 @@ import type { DataContext } from '..'
 import { SpecOptions, codeGenerator } from '../codegen'
 import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
-import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import { visit } from 'ast-types'
 
 export interface ReactComponentDescriptor {
@@ -18,10 +17,16 @@ export class CodegenActions {
 
   async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
+      const { parse: parseReactComponent, builtinResolvers: reactDocgenResolvers } = await import('react-docgen/dist/main')
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
-      let result = parseReactComponent(src, findAllWithLink(exportResolver), undefined, { parserOptions: { plugins: ['typescript', 'jsx'] } })
+      let result = parseReactComponent(src, {
+        resolver: findAllWithLink(exportResolver, reactDocgenResolvers),
+        babelOptions: {
+          plugins: ['typescript', 'jsx'],
+        },
+      })
 
       // types appear to be incorrect in react-docgen@6.0.0-alpha.3
       // TODO: update when 6.0.0 stable is out for fixed types.
@@ -166,9 +171,9 @@ export class CodegenActions {
 
 type ExportResolver = Map<string, ReactComponentDescriptor>
 
-function findAllWithLink (exportResolver: ExportResolver) {
-  return (ast: any, parser: any, importer: any) => {
-    visit(ast, {
+function findAllWithLink (exportResolver: ExportResolver, reactDocgenResolvers: any) {
+  return (fileState: any) => {
+    visit(fileState.ast, {
       // export const Foo, export { Foo, Bar }, export function FooBar () { ... }
       visitExportNamedDeclaration: (path) => {
         const declaration = path.node.declaration as any
@@ -228,6 +233,8 @@ function findAllWithLink (exportResolver: ExportResolver) {
       },
     })
 
-    return reactDocgenResolvers.findAllExportedComponentDefinitions(ast, parser, importer)
+    const exportedDefinitionsResolver = new reactDocgenResolvers.FindExportedDefinitionsResolver()
+
+    return exportedDefinitionsResolver.resolve(fileState)
   }
 }

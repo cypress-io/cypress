@@ -931,7 +931,6 @@
     "./node_modules/@babel/helpers/lib/helpers-generated.js",
     "./node_modules/@babel/helpers/lib/helpers.js",
     "./node_modules/@babel/helpers/lib/index.js",
-    "./node_modules/@babel/highlight/lib/index.js",
     "./node_modules/@babel/parser/lib/index.js",
     "./node_modules/@babel/plugin-syntax-jsx/lib/index.js",
     "./node_modules/@babel/plugin-syntax-typescript/lib/index.js",
