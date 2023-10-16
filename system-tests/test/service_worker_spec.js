@@ -7,27 +7,35 @@ const e2ePath = Fixtures.projectPath('e2e')
 let requestsForServiceWorkerCache = 0
 
 const onServer = function (app) {
-  requestsForServiceWorkerCache = 0
-
   app.use(express.static(e2ePath, {
     // force caching to happen
     maxAge: 3600000,
   }))
 
   app.get('/cached-sw', (req, res) => {
-    requestsForServiceWorkerCache += 1
+    // redirect to cached-sw-redirect on a cross origin server
+    return res.redirect('http://localhost:1516/cached-sw-redirect')
+  })
 
-    return res
-    .send('this response will be disk cached by service worker')
+  app.get('/cached-sw-redirect', (req, res) => {
+    requestsForServiceWorkerCache += 1
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+    })
+
+    return res.send('this response will be used by service worker')
   })
 }
 
 describe('e2e browser reset', () => {
   systemTests.setup({
-    servers: {
+    servers: [{
       port: 1515,
       onServer,
-    },
+    }, {
+      port: 1516,
+      onServer,
+    }],
   })
 
   systemTests.it('executes one spec with a cached call', {
@@ -36,7 +44,10 @@ describe('e2e browser reset', () => {
     spec: 'service_worker.cy.js',
     onRun: async (exec, browser) => {
       await exec()
+      // Ensure that we only called this once even though we loaded the
+      // service worker twice
       expect(requestsForServiceWorkerCache).to.eq(1)
     },
+
   })
 })

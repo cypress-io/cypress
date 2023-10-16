@@ -21,7 +21,12 @@ process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
-export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequestWithTimings) => void
+type CorrelationInformation = {
+  browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
+}
+
+export type GetPreRequestCb = (correlationInformation: CorrelationInformation) => void
 
 type PendingRequest = {
   ctxDebug
@@ -157,8 +162,11 @@ export class PreRequests {
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback?.({
-          ...browserPreRequest,
-          ...timings,
+          browserPreRequest: {
+            ...browserPreRequest,
+            ...timings,
+          },
+          noPreRequestExpected: false,
         })
 
         delete pendingRequest.callback
@@ -189,7 +197,10 @@ export class PreRequests {
     if (pendingRequest) {
       debugVerbose('Handling %s without a CDP prerequest', key)
       clearTimeout(pendingRequest.timeout)
-      pendingRequest.callback?.()
+      pendingRequest.callback?.({
+        noPreRequestExpected: true,
+      })
+
       delete pendingRequest.callback
 
       return
@@ -212,7 +223,9 @@ export class PreRequests {
 
       this.activeServiceWorkers.add(req.proxiedUrl)
 
-      callback()
+      callback({
+        noPreRequestExpected: true,
+      })
 
       return
     }
@@ -220,7 +233,9 @@ export class PreRequests {
     if (req.headers['service-worker-navigation-preload'] === 'true') {
       ctxDebug('Ignoring request with service-worker-navigation-preload: true', req.proxiedUrl)
 
-      callback()
+      callback({
+        noPreRequestExpected: true,
+      })
 
       return
     }
@@ -228,7 +243,9 @@ export class PreRequests {
     if (req.headers['referer'] && this.activeServiceWorkers.has(req.headers['referer'])) {
       ctxDebug('Ignoring request with service worker referrer:', req.proxiedUrl)
 
-      callback()
+      callback({
+        noPreRequestExpected: true,
+      })
 
       return
     }
@@ -243,12 +260,15 @@ export class PreRequests {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
       callback({
-        ...pendingPreRequest.browserPreRequest,
-        cdpRequestWillBeSentTimestamp: pendingPreRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp,
-        cdpLagDuration: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
-        proxyRequestCorrelationDuration: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
+        browserPreRequest: {
+          ...pendingPreRequest.browserPreRequest,
+          cdpRequestWillBeSentTimestamp: pendingPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp,
+          cdpLagDuration: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
+          proxyRequestCorrelationDuration: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
+        },
+        noPreRequestExpected: false,
       })
 
       return
@@ -259,7 +279,9 @@ export class PreRequests {
     if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pending url without pre request', key)
-      callback()
+      callback({
+        noPreRequestExpected: true,
+      })
 
       return
     }
@@ -272,7 +294,10 @@ export class PreRequests {
         ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
-        callback()
+        callback({
+          noPreRequestExpected: false,
+        })
+
         delete pendingRequest.callback
       }, this.requestTimeout),
     }
@@ -291,7 +316,9 @@ export class PreRequests {
     this.pendingRequests.forEach(({ callback, timeout }) => {
       clearTimeout(timeout)
       metrics.unmatchedRequests++
-      callback?.()
+      callback?.({
+        noPreRequestExpected: false,
+      })
     })
 
     this.pendingRequests = new QueueMap<PendingRequest>()

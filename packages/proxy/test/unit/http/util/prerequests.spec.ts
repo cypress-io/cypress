@@ -71,19 +71,22 @@ describe('http/util/prerequests', () => {
     preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
     const { args } = cb.getCall(0)
-    const arg = args[0]
+    const browserPreRequest = args[0].browserPreRequest
+    const noPreRequestExpected = args[0].noPreRequestExpected
 
-    expect(arg.requestId).to.eq(secondPreRequest.requestId)
-    expect(arg.url).to.eq(secondPreRequest.url)
-    expect(arg.method).to.eq(secondPreRequest.method)
-    expect(arg.headers).to.deep.eq(secondPreRequest.headers)
-    expect(arg.resourceType).to.eq(secondPreRequest.resourceType)
-    expect(arg.originalResourceType).to.eq(secondPreRequest.originalResourceType)
-    expect(arg.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
-    expect(arg.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(arg.cdpLagDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.proxyRequestCorrelationDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
+    expect(browserPreRequest.requestId).to.eq(secondPreRequest.requestId)
+    expect(browserPreRequest.url).to.eq(secondPreRequest.url)
+    expect(browserPreRequest.method).to.eq(secondPreRequest.method)
+    expect(browserPreRequest.headers).to.deep.eq(secondPreRequest.headers)
+    expect(browserPreRequest.resourceType).to.eq(secondPreRequest.resourceType)
+    expect(browserPreRequest.originalResourceType).to.eq(secondPreRequest.originalResourceType)
+    expect(browserPreRequest.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(browserPreRequest.proxyRequestReceivedTimestamp).to.be.a('number')
+    expect(browserPreRequest.cdpLagDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(browserPreRequest.proxyRequestCorrelationDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.proxyRequestReceivedTimestamp)
+
+    expect(noPreRequestExpected).to.be.false
 
     expectPendingCounts(0, 2)
   })
@@ -103,14 +106,16 @@ describe('http/util/prerequests', () => {
     const { args } = cb.getCall(0)
     const arg = args[0]
 
-    expect(arg).to.be.undefined
+    expect(arg.preRequest).to.be.undefined
+    expect(arg.noPreRequestExpected).to.be.true
 
     expectPendingCounts(0, 0, 2)
   })
 
   it('synchronously matches a pre-request added after the request', (done) => {
-    const cb = (preRequest) => {
-      expect(preRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
+    const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+      expect(browserPreRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
+      expect(noPreRequestExpected).to.be.false
       expectPendingCounts(0, 0)
       done()
     }
@@ -120,8 +125,9 @@ describe('http/util/prerequests', () => {
   })
 
   it('synchronously matches a request without a pre-request added after the request', (done) => {
-    const cb = (preRequest) => {
-      expect(preRequest).to.be.undefined
+    const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+      expect(browserPreRequest).to.be.undefined
+      expect(noPreRequestExpected).to.be.true
       expectPendingCounts(0, 0)
       done()
     }
@@ -133,8 +139,9 @@ describe('http/util/prerequests', () => {
   it('invokes a request callback after a timeout if no pre-request occurs', async () => {
     let cb
     const cbPromise = new Promise<void>((resolve) => {
-      cb = (preRequest) => {
-        expect(preRequest).to.be.undefined
+      cb = ({ browserPreRequest, noPreRequestExpected }) => {
+        expect(browserPreRequest).to.be.undefined
+        expect(noPreRequestExpected).to.be.false
 
         // we should have keep the pending request to eventually be correlated later, but don't block the body in the meantime
         expectPendingCounts(1, 0)
@@ -182,8 +189,9 @@ describe('http/util/prerequests', () => {
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request
     // and assuring that the pre-request wasn't there to be matched anymore.
     setTimeout(() => {
-      const cb = (preRequest) => {
-        expect(preRequest).to.be.undefined
+      const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+        expect(browserPreRequest).to.be.undefined
+        expect(noPreRequestExpected).to.be.false
         expectPendingCounts(1, 0, 0)
         done()
       }
