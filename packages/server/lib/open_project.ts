@@ -176,18 +176,18 @@ export class OpenProject {
 
       // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
       // then we can connect to the new spec
-      if (options.shouldLaunchNewTab) {
-        if (browser.name !== 'electron') {
-          const onInitializeNewBrowserTab = async () => {
-            await this.resetBrowserState()
-          }
-
-          // If we do not launch the browser,
-          // we tell it that we are ready
-          // to receive the next spec
-          return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
+      if (options.shouldLaunchNewTab && browser.name !== 'electron') {
+        const onInitializeNewBrowserTab = async () => {
+          await this.resetBrowserState()
         }
+
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
+
+      options.relaunchBrowser = this.relaunchBrowser
 
       return await browsers.open(browser, options, automation, this._ctx!)
     }
