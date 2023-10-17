@@ -780,7 +780,9 @@ const createRun = Promise.method((options = {}) => {
           case 'BURN_IN_MISMATCH':
             return errors.throwErr('CLOUD_BURN_IN_MISMATCH', {
               runUrl,
-            }, burnInConfig, path.basename(options.configFile))
+              burnInConfig,
+              configFileBaseName: path.basename(options.configFile),
+            })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
