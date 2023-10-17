@@ -348,7 +348,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
+  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
 
   span?.setAttributes({
@@ -365,8 +365,12 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
     if (doesAcceptHeadingIncludeGzip) {
       this.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      this.req.headers['accept-encoding'] = 'identity'
     }
+  } else {
+    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
+    // In that case, we want to explicitly filter that down to `gzip` and identity
+    this.req.headers['accept-encoding'] = 'gzip,identity'
   }
 
   span?.end()

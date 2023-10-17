@@ -292,7 +292,12 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/does-not-exist')
+          return this.rp({
+            url: 'http://localhost:2000/does-not-exist',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(404)
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
