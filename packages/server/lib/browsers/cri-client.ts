@@ -8,6 +8,7 @@ import type WebSocket from 'ws'
 import type CDP from 'chrome-remote-interface'
 
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
+import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -137,6 +138,7 @@ export const create = async (
   host?: string,
   port?: number,
   onReconnect?: (client: CriClient) => void,
+  protocolManager?: ProtocolManagerShape,
 ): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
@@ -252,6 +254,25 @@ export const create = async (
       debug('crash detected')
       crashed = true
     })
+
+    if (host) {
+      await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: false, flatten: true })
+      cri.on('Target.attachedToTarget', async (event) => {
+        if (event.targetInfo.type === 'service_worker') {
+          const networkEnabledOptions = protocolManager?.protocolEnabled ? {
+            maxTotalBufferSize: 0,
+            maxResourceBufferSize: 0,
+            maxPostDataSize: 64 * 1024,
+          } : {
+            maxTotalBufferSize: 0,
+            maxResourceBufferSize: 0,
+            maxPostDataSize: 0,
+          }
+
+          await cri.send('Network.enable', networkEnabledOptions, event.sessionId)
+        }
+      })
+    }
   }
 
   await connect()

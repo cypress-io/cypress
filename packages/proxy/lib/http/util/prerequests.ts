@@ -105,7 +105,6 @@ export class PreRequests {
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
-  activeServiceWorkers: Set<string> = new Set()
 
   constructor (
     requestTimeout = 2000,
@@ -221,28 +220,6 @@ export class PreRequests {
     if (req.headers['sec-fetch-dest'] === 'serviceworker') {
       ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
 
-      this.activeServiceWorkers.add(req.proxiedUrl)
-
-      callback({
-        noPreRequestExpected: true,
-      })
-
-      return
-    }
-
-    if (req.headers['service-worker-navigation-preload'] === 'true') {
-      ctxDebug('Ignoring request with service-worker-navigation-preload: true', req.proxiedUrl)
-
-      callback({
-        noPreRequestExpected: true,
-      })
-
-      return
-    }
-
-    if (req.headers['referer'] && this.activeServiceWorkers.has(req.headers['referer'])) {
-      ctxDebug('Ignoring request with service worker referrer:', req.proxiedUrl)
-
       callback({
         noPreRequestExpected: true,
       })
@@ -323,6 +300,5 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
-    this.activeServiceWorkers = new Set()
   }
 }

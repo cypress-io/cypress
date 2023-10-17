@@ -13,8 +13,12 @@ const onServer = function (app) {
   }))
 
   app.get('/cached-sw', (req, res) => {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+    })
+
     // redirect to cached-sw-redirect on a cross origin server
-    return res.redirect('http://localhost:1516/cached-sw-redirect')
+    return res.redirect('https://localhost:1516/cached-sw-redirect')
   })
 
   app.get('/cached-sw-redirect', (req, res) => {
@@ -30,9 +34,11 @@ const onServer = function (app) {
 describe('e2e browser reset', () => {
   systemTests.setup({
     servers: [{
+      https: true,
       port: 1515,
       onServer,
     }, {
+      https: true,
       port: 1516,
       onServer,
     }],
