@@ -21,7 +21,7 @@ process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
-type CorrelationInformation = {
+export type CorrelationInformation = {
   browserPreRequest?: BrowserPreRequestWithTimings
   noPreRequestExpected?: boolean
 }

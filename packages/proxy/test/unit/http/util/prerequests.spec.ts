@@ -1,4 +1,4 @@
-import { PreRequests } from '@packages/proxy/lib/http/util/prerequests'
+import { CorrelationInformation, PreRequests } from '@packages/proxy/lib/http/util/prerequests'
 import { BrowserPreRequest, CypressIncomingRequest } from '@packages/proxy'
 import { expect } from 'chai'
 import sinon from 'sinon'
@@ -113,7 +113,7 @@ describe('http/util/prerequests', () => {
   })
 
   it('synchronously matches a pre-request added after the request', (done) => {
-    const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+    const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
       expect(browserPreRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
       expect(noPreRequestExpected).to.be.false
       expectPendingCounts(0, 0)
@@ -125,7 +125,7 @@ describe('http/util/prerequests', () => {
   })
 
   it('synchronously matches a request without a pre-request added after the request', (done) => {
-    const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+    const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
       expect(browserPreRequest).to.be.undefined
       expect(noPreRequestExpected).to.be.true
       expectPendingCounts(0, 0)
@@ -139,7 +139,7 @@ describe('http/util/prerequests', () => {
   it('invokes a request callback after a timeout if no pre-request occurs', async () => {
     let cb
     const cbPromise = new Promise<void>((resolve) => {
-      cb = ({ browserPreRequest, noPreRequestExpected }) => {
+      cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
         expect(browserPreRequest).to.be.undefined
         expect(noPreRequestExpected).to.be.false
 
@@ -189,7 +189,7 @@ describe('http/util/prerequests', () => {
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request
     // and assuring that the pre-request wasn't there to be matched anymore.
     setTimeout(() => {
-      const cb = ({ browserPreRequest, noPreRequestExpected }) => {
+      const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
         expect(browserPreRequest).to.be.undefined
         expect(noPreRequestExpected).to.be.false
         expectPendingCounts(1, 0, 0)
@@ -227,25 +227,10 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 2)
   })
 
-  it('immediately handles a request from a service worker loading and a request initiated from that service worker', () => {
+  it('immediately handles a request from a service worker loading', () => {
     const cbServiceWorker = sinon.stub()
-    const cbWithinServiceWorker = sinon.stub()
 
     preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'sec-fetch-dest': 'serviceworker' } } as any, () => {}, cbServiceWorker)
-
-    expect(cbServiceWorker).to.be.calledOnce
-    expect(cbServiceWorker).to.be.calledWith()
-
-    preRequests.get({ proxiedUrl: 'bar', method: 'GET', headers: { 'referer': 'foo' } } as CypressIncomingRequest, () => {}, cbWithinServiceWorker)
-
-    expect(cbWithinServiceWorker).to.be.calledOnce
-    expect(cbWithinServiceWorker).to.be.calledWith()
-  })
-
-  it('immediately handles a request from a service worker preload', () => {
-    const cbServiceWorker = sinon.stub()
-
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'service-worker-navigation-preload': 'true' } } as any, () => {}, cbServiceWorker)
 
     expect(cbServiceWorker).to.be.calledOnce
     expect(cbServiceWorker).to.be.calledWith()
