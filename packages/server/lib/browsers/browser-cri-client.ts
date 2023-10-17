@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
+import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient } from './cri-client'
@@ -123,6 +124,8 @@ interface CreateBrowserCriClientOptions {
   protocolManager?: ProtocolManagerShape
 }
 
+type TargetId = string
+
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
@@ -133,6 +136,7 @@ export class BrowserCriClient {
   closed = false
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
+  extraTargetClients: Map<TargetId, CRI.Client> = new Map()
   onClose: Function | null = null
 
   private constructor (private browserClient: CriClient, private versionInfo: CRI.VersionResult, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
@@ -170,8 +174,81 @@ export class BrowserCriClient {
       const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
 
       if (fullyManageTabs) {
-        await browserClient.send('Target.setDiscoverTargets', { discover: true })
+        const promises = [
+          browserClient.send('Target.setDiscoverTargets', { discover: true }),
+          browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
+        ]
 
+        // TODO: see how this affects nested iframes
+        browserClient.on('Target.attachedToTarget', async ({ sessionId, targetInfo, waitingForDebugger }) => {
+          let { targetId, url } = targetInfo
+
+          async function run () {
+            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+          }
+
+          // the url usually isn't specified with this event, but is available
+          // from Target.getTargets
+          if (!url) {
+            const { targetInfos } = await browserClient.send('Target.getTargets')
+
+            const thisTarget = targetInfos.find((target) => target.targetId === targetId)
+
+            if (thisTarget) {
+              url = thisTarget.url
+            }
+          }
+
+          if (
+            // is the main Cypress tab
+            targetId === browserCriClient.currentlyAttachedTarget?.targetId
+            // is DevTools
+            || url.includes('devtools://')
+            // is the Launchpad
+            || url.includes('__launchpad')
+            // targets created before we started listening won't be waiting
+            // for debugger and are not extras
+            || !waitingForDebugger
+          ) {
+            // in these cases, we don't want to track the targets as extras.
+            // we're only interested in extra tabs or windows
+            return await run()
+          }
+
+          let extraTargetCriClient
+
+          try {
+            extraTargetCriClient = await CRI({
+              host,
+              port,
+              target: targetId,
+              local: true,
+              useHostName: true,
+            })
+          } catch (err: any) {
+            return run()
+          }
+
+          browserCriClient.addExtraTargetClient(targetId, extraTargetCriClient)
+
+          await extraTargetCriClient.send('Fetch.enable')
+
+          extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+            const details: Protocol.Fetch.ContinueRequestRequest = {
+              requestId: params.requestId,
+              headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+            }
+
+            extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
+              // swallow this error so it doesn't crash Cypress
+              debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+            })
+          })
+
+          await run()
+        })
+
+        // TODO: listen to 'Target.targetCrashed' as well? or 'Inspector.targetCrashed'?
         browserClient.on('Target.targetDestroyed', (event) => {
           debug('Target.targetDestroyed %o', {
             event,
@@ -180,9 +257,17 @@ export class BrowserCriClient {
             resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
           })
 
+          const { targetId } = event
+
           // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
           // have already closed/disposed, so unless this matches our current target then bail
-          if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+          if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+            if (browserCriClient.hasExtraTargetClient(targetId)) {
+              browserCriClient.getExtraTargetClient(targetId)!.close().catch(() => { })
+              browserCriClient.removeExtraTargetClient(targetId)
+              // TODO: need to send 'Target.detachFromTarget'?
+            }
+
             return
           }
 
@@ -197,7 +282,7 @@ export class BrowserCriClient {
           // otherwise it means the the browser itself was closed
 
           // always close the connection to the page target because it was destroyed
-          browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+          browserCriClient.currentlyAttachedTarget.close().catch(() => { })
 
           new Bluebird((resolve) => {
             // this event could fire either expectedly or unexpectedly
@@ -244,6 +329,8 @@ export class BrowserCriClient {
             onAsynchronousError(err)
           })
         })
+
+        await Promise.all(promises)
       }
 
       return browserCriClient
@@ -340,6 +427,23 @@ export class BrowserCriClient {
     this.resettingBrowserTargets = false
   }
 
+  addExtraTargetClient (targetId: TargetId, client: CRI.Client) {
+    this.extraTargetClients.set(targetId, client)
+  }
+
+  hasExtraTargetClient (targetId: TargetId) {
+    return this.extraTargetClients.has(targetId)
+  }
+
+  getExtraTargetClient (targetId: TargetId) {
+    return this.extraTargetClients.get(targetId)
+  }
+
+  removeExtraTargetClient (targetId: TargetId) {
+    this.extraTargetClients.delete(targetId)
+  }
+
+  // TODO: use tracked extra targets instead
   async closeExtraTargets () {
     const { targetInfos } = await this.browserClient.send('Target.getTargets')
 

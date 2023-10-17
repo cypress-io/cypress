@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import request from '@cypress/request'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
@@ -33,42 +32,28 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  this.req.isFromMainTarget = !!this.req.headers['x-cypress-is-from-main-target']
+  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
 
-  delete this.req.headers['x-cypress-is-aut-frame']
-  delete this.req.headers['x-cypress-is-from-main-target']
+  if (this.req.headers['x-cypress-is-aut-frame']) {
+    delete this.req.headers['x-cypress-is-aut-frame']
+  }
 
   span?.setAttributes({
     isAUTFrame: this.req.isAUTFrame,
-    isFromMainTarget: this.req.isFromMainTarget,
+    isFromExtraTarget: this.req.isFromExtraTarget,
   })
 
-  // we only want to proxy requests from the main target and not ones from
-  // extra tabs or windows, so skip the rest of the request/response middleware
-  // and pipe the request/response directly through
-  if (!this.req.isFromMainTarget) {
-    this.debug('request for [%s %s] is not from the main target - skip proxying', this.req.method, this.req.proxiedUrl)
+  // we only want to intercept requests from the main target and not ones from
+  // extra tabs or windows, so run the bare minimum request/response middleware
+  // to send the request/response directly through
+  if (this.req.isFromExtraTarget) {
+    this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
 
-    delete this.req.headers['x-cypress-is-from-main-target']
+    delete this.req.headers['x-cypress-is-from-extra-target']
 
-    request({
-      body: this.req.body,
-      headers: this.req.headers,
-      method: this.req.method,
-      url: this.req.proxiedUrl,
-    })
-    .pipe(this.res)
-
-    this.reqMiddlewareSpan?.setAttributes({
-      nonProxiedRequest: true,
-    })
-
-    this.reqMiddlewareSpan?.end()
-    this.handleHttpRequestSpan?.end()
-
-    span?.end()
-
-    return this.end()
+    this.onlyRunMiddleware([
+      'SendRequestOutgoing',
+    ])
   }
 
   span?.end()

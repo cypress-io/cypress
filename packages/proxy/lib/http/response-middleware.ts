@@ -168,11 +168,11 @@ const LogResponse: ResponseMiddleware = function () {
 }
 
 const FilterNonProxiedResponse: ResponseMiddleware = function () {
-  // if the request is not from the main Cypress tab, we want to skip any
-  // manipulation of the response and only run the middleware necessary to
-  // get it back to the browser
-  if (!this.req.isFromMainTarget) {
-    this.debug('response for [%s %s] is not from the main target - skip proxying', this.req.method, this.req.proxiedUrl)
+  // if the request is from an extra target (i.e. not the main Cypress tab, but
+  // an extra tab/window), we want to skip any manipulation of the response and
+  // only run the middleware necessary to get it back to the browser
+  if (this.req.isFromExtraTarget) {
+    this.debug('response for [%s %s] is from extra target', this.req.method, this.req.proxiedUrl)
 
     this.onlyRunMiddleware([
       'AttachPlainTextStreamFn',

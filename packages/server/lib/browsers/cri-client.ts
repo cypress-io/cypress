@@ -27,11 +27,13 @@ type EnqueuedCommand = {
   command: CdpCommand
   params?: object
   p: DeferredPromise
+  sessionId?: string
 }
 
 type EnableCommand = {
   command: CdpCommand
   params?: object
+  sessionId?: string
 }
 
 type Subscription = {
@@ -173,12 +175,12 @@ export const create = async (
 
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
-    await Promise.all(enableCommands.map(({ command, params }) => {
-      return cri.send(command, params)
+    await Promise.all(enableCommands.map(({ command, params, sessionId }) => {
+      return cri.send(command, params, sessionId)
     }))
 
     enqueuedCommands.forEach((cmd) => {
-      cri.send(cmd.command, cmd.params).then(cmd.p.resolve as any, cmd.p.reject as any)
+      cri.send(cmd.command, cmd.params, cmd.sessionId).then(cmd.p.resolve as any, cmd.p.reject as any)
     })
 
     enqueuedCommands = []
@@ -259,7 +261,7 @@ export const create = async (
   client = {
     targetId: target,
 
-    async send (command: CdpCommand, params?: object) {
+    async send (command: CdpCommand, params?: object, sessionId?: string) {
       if (crashed) {
         return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
       }
@@ -277,6 +279,10 @@ export const create = async (
             obj.params = params
           }
 
+          if (sessionId) {
+            obj.sessionId = sessionId
+          }
+
           enqueuedCommands.push(obj)
         })
       }
@@ -292,12 +298,16 @@ export const create = async (
           obj.params = params
         }
 
+        if (sessionId) {
+          obj.sessionId = sessionId
+        }
+
         enableCommands.push(obj)
       }
 
       if (connected) {
         try {
-          return await cri.send(command, params)
+          return await cri.send(command, params, sessionId)
         } catch (err) {
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The
@@ -307,7 +317,7 @@ export const create = async (
             throw err
           }
 
-          debug('encountered closed websocket on send %o', { command, params, err })
+          debug('encountered closed websocket on send %o', { command, params, sessionId, err })
 
           const p = enqueue() as Promise<any>
 

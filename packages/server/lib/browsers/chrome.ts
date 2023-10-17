@@ -346,8 +346,6 @@ export = {
 
   _writeChromePreferences,
 
-  supportsTargetManagement: true,
-
   _getBrowserCriClient () {
     return browserCriClient
   },

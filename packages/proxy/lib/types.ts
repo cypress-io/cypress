@@ -16,7 +16,7 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
-  isFromMainTarget: boolean
+  isFromExtraTarget: boolean
   credentialsLevel?: RequestCredentialLevel
   /**
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
