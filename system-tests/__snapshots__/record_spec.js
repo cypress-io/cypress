@@ -2365,6 +2365,7 @@ Request Sent:
     ""
   ],
   "testingType": "e2e",
+  "burnInConfig": false,
   "runnerCapabilities": {
     "dynamicSpecsInSerialMode": true,
     "skipSpecAction": true,
