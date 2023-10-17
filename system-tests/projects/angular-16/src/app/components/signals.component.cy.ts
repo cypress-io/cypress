@@ -1,6 +1,6 @@
 import { SignalsComponent } from './signals.component'
 
-describe('SiganlsComponent', () => {
+describe('SignalsComponent', () => {
   it('can mount a signals component', () => {
     cy.mount(SignalsComponent)
   })

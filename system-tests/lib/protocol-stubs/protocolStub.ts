@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -29,6 +29,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     pageLoading: [],
     resetTest: [],
     responseEndedWithEmptyBody: [],
+    responseStreamTimedOut: [],
   }
   private cdpClient: any
   private scriptToEvaluateId: any
@@ -54,6 +55,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.events.urlChanged = []
     this.events.pageLoading = []
     this.events.responseEndedWithEmptyBody = []
+    this.events.responseStreamTimedOut = []
   }
 
   connectToBrowser = async (cdpClient) => {
@@ -157,6 +159,10 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
   responseEndedWithEmptyBody = (options: ResponseEndedWithEmptyBodyOptions) => {
     this.events.responseEndedWithEmptyBody.push(options)
+  }
+
+  responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void {
+    this.events.responseStreamTimedOut.push(options)
   }
 
   resetTest (testId: string): void {

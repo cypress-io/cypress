@@ -13,7 +13,7 @@ import pkg from '@packages/root'
 
 import env from '../util/env'
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -221,6 +221,10 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined {
     return this.invokeSync('responseStreamReceived', { isEssential: false }, options)
+  }
+
+  responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void {
+    this.invokeSync('responseStreamTimedOut', { isEssential: false }, options)
   }
 
   canUpload (): boolean {

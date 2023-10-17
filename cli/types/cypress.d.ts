@@ -3334,7 +3334,7 @@ declare namespace Cypress {
 
   interface CypressComponentDependency {
     /**
-     * Unique idenitifer.
+     * Unique identifier.
      * @example 'reactscripts'
      */
     type: string
@@ -3469,7 +3469,7 @@ declare namespace Cypress {
     componentIndexHtml?: () => string
 
     /**
-     * Used for the Create From Comopnent feature.
+     * Used for the Create From Component feature.
      * This is currently not supported for third party frameworks.
      */
     specPattern?: '**/*.cy.ts'

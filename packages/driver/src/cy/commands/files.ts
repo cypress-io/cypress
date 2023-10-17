@@ -106,7 +106,7 @@ export default (Commands, Cypress, cy, state) => {
           })
         }
 
-        // We have a ENOENT error - the file doesn't exist. Whether this is an error or not is deterimened
+        // We have a ENOENT error - the file doesn't exist. Whether this is an error or not is determined
         // by verifyUpcomingAssertions, when the command_queue receives the null file contents.
         fileResult = { contents: null, filePath: err.filePath }
       })
