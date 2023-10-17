@@ -131,15 +131,23 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
+type CreateParams = {
+  target: string
+  onAsynchronousError: Function
+  host?: string
+  port?: number
+  onReconnect?: (client: CriClient) => void
+  protocolManager?: ProtocolManagerShape
+}
 
-export const create = async (
-  target: string,
-  onAsynchronousError: Function,
-  host?: string,
-  port?: number,
-  onReconnect?: (client: CriClient) => void,
-  protocolManager?: ProtocolManagerShape,
-): Promise<CriClient> => {
+export const create = async ({
+  target,
+  onAsynchronousError,
+  host,
+  port,
+  onReconnect,
+  protocolManager,
+}: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
   let enqueuedCommands: EnqueuedCommand[] = []
@@ -257,7 +265,6 @@ export const create = async (
 
     // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
     if (host) {
-      await cri.send('Target.setDiscoverTargets', { discover: true })
       cri.on('Target.targetCreated', async (event) => {
         if (event.targetInfo.type === 'service_worker') {
           const networkEnabledOptions = protocolManager?.protocolEnabled ? {
@@ -278,6 +285,8 @@ export const create = async (
           await cri.send('Network.enable', networkEnabledOptions, sessionId)
         }
       })
+
+      await cri.send('Target.setDiscoverTargets', { discover: true })
     }
   }
 
