@@ -233,7 +233,7 @@ export class BrowserCriClient {
       // for debugger and are not extras
       || !waitingForDebugger
     ) {
-      debug('Not an extra target')
+      debug('Not an extra target (id: %s)', targetId)
 
       // in these cases, we don't want to track the targets as extras.
       // we're only interested in extra tabs or windows
@@ -289,6 +289,7 @@ export class BrowserCriClient {
     // have already closed/disposed, so unless this matches our current target then bail
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
+        debug('Close extra target client (id: %s)')
         browserCriClient.getExtraTargetClient(targetId)!.close().catch(() => { })
         browserCriClient.removeExtraTargetClient(targetId)
       }
@@ -461,30 +462,9 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
-  // TODO: use tracked extra targets instead
   async closeExtraTargets () {
-    const { targetInfos } = await this.browserClient.send('Target.getTargets')
-
-    const targetsToClose = targetInfos.filter((targetInfo) => {
-      // filter these out so they don't get closed
-      if (
-        // the main Cypress tab
-        targetInfo.targetId === this.currentlyAttachedTarget?.targetId
-        // DevTools if it's open
-        || targetInfo.url.includes('devtools://')
-        // if running Electron, this is the Launchpad target
-        || targetInfo.url.includes('__launchpad')
-      ) {
-        return false
-      }
-
-      // everything else gets closed
-      return true
-    })
-
-    for (const { targetId } of targetsToClose) {
-      debug('close extra target with id: %s', targetId)
-
+    for (const [targetId] of this.extraTargetClients) {
+      debug('Close extra target (id: %s)', targetId)
       await this.browserClient.send('Target.closeTarget', { targetId })
     }
   }
