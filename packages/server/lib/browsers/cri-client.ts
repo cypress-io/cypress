@@ -256,8 +256,8 @@ export const create = async (
     })
 
     if (host) {
-      await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: false, flatten: true })
-      cri.on('Target.attachedToTarget', async (event) => {
+      await cri.send('Target.setDiscoverTargets', { discover: true })
+      cri.on('Target.targetCreated', async (event) => {
         if (event.targetInfo.type === 'service_worker') {
           const networkEnabledOptions = protocolManager?.protocolEnabled ? {
             maxTotalBufferSize: 0,
@@ -269,7 +269,12 @@ export const create = async (
             maxPostDataSize: 0,
           }
 
-          await cri.send('Network.enable', networkEnabledOptions, event.sessionId)
+          const { sessionId } = await cri.send('Target.attachToTarget', {
+            targetId: event.targetInfo.targetId,
+            flatten: true,
+          })
+
+          await cri.send('Network.enable', networkEnabledOptions, sessionId)
         }
       })
     }
