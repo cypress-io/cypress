@@ -255,6 +255,7 @@ export const create = async (
       crashed = true
     })
 
+    // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
     if (host) {
       await cri.send('Target.setDiscoverTargets', { discover: true })
       cri.on('Target.targetCreated', async (event) => {
