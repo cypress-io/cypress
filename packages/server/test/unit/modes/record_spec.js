@@ -286,6 +286,12 @@ describe('lib/modes/record', () => {
         const testingType = 'e2e'
         const autoCancelAfterFailures = 4
         const project = {}
+        const config = {
+          experimentalBurnIn: {
+            default: 1,
+            flaky: 2,
+          },
+        }
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -303,6 +309,7 @@ describe('lib/modes/record', () => {
           testingType,
           autoCancelAfterFailures,
           project,
+          config,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -342,6 +349,7 @@ describe('lib/modes/record', () => {
             tags: ['nightly', 'develop'],
             autoCancelAfterFailures: 4,
             project,
+            burnInConfig: config.experimentalBurnIn,
           })
         })
       })
