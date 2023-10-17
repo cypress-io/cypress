@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.3.2
+
+_Released 10/18/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a performance regression where proxy correlation timeouts for requests in service workers were always hit causing slow downs. Fixes [#28054](https://github.com/cypress-io/cypress/issues/28054)
+
 ## 13.3.1
 
 _Released 10/11/2023_
