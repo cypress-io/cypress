@@ -307,7 +307,9 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        await utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+        pageCriClient.send('Network.clearBrowserCache'),
       ])
     }
 

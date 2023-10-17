@@ -189,12 +189,7 @@ export class OpenProject {
         }
       }
 
-      const onBrowserOpen = async () => {
-        options.onBrowserOpen?.()
-        await this.resetBrowserState()
-      }
-
-      return await browsers.open(browser, { onBrowserOpen, ...options }, automation, this._ctx!)
+      return await browsers.open(browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()
