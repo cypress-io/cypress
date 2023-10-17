@@ -2654,10 +2654,36 @@ Warning from Cypress Cloud: You are almost out of time
 Details:
 
 {
+<<<<<<< HEAD
   "code": "OUT_OF_TIME",
   "hadTime": 1000,
   "name": "OutOfTime",
   "spentTime": 999
+=======
+  "ci": null,
+  "specs": [
+    "cypress/e2e/record_pass.cy.js"
+  ],
+  "commit": null,
+  "group": null,
+  "platform": null,
+  "parallel": null,
+  "ciBuildId": null,
+  "projectId": "pid123",
+  "recordKey": "f85...7e1",
+  "specPattern": "cypress/e2e/record_pass*",
+  "tags": [
+    ""
+  ],
+  "testingType": "e2e",
+  "burnInConfig": false,
+  "runnerCapabilities": {
+    "dynamicSpecsInSerialMode": true,
+    "skipSpecAction": true,
+    "protocolMountVersion": 2,
+    "burnInTestAction": true
+  }
+>>>>>>> e4d8e0f0be (update record_spec snapshot)
 }
 
 ====================================================================================================
