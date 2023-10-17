@@ -218,7 +218,7 @@ export class PreRequests {
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     // The initial request that loads the service worker does not get sent to CDP and it happens prior
-    // to the service worker target being added. Thus, we need to explicitly ignore it. We determine 
+    // to the service worker target being added. Thus, we need to explicitly ignore it. We determine
     // it's the service worker request via the `sec-fetch-dest` header
     if (req.headers['sec-fetch-dest'] === 'serviceworker') {
       ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
