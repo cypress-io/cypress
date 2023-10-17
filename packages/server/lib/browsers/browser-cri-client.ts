@@ -174,167 +174,185 @@ export class BrowserCriClient {
       const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
 
       if (fullyManageTabs) {
-        const promises = [
-          browserClient.send('Target.setDiscoverTargets', { discover: true }),
-          browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
-        ]
-
-        // TODO: see how this affects nested iframes
-        browserClient.on('Target.attachedToTarget', async ({ sessionId, targetInfo, waitingForDebugger }) => {
-          let { targetId, url } = targetInfo
-
-          async function run () {
-            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
-          }
-
-          // the url usually isn't specified with this event, but is available
-          // from Target.getTargets
-          if (!url) {
-            const { targetInfos } = await browserClient.send('Target.getTargets')
-
-            const thisTarget = targetInfos.find((target) => target.targetId === targetId)
-
-            if (thisTarget) {
-              url = thisTarget.url
-            }
-          }
-
-          if (
-            // is the main Cypress tab
-            targetId === browserCriClient.currentlyAttachedTarget?.targetId
-            // is DevTools
-            || url.includes('devtools://')
-            // is the Launchpad
-            || url.includes('__launchpad')
-            // targets created before we started listening won't be waiting
-            // for debugger and are not extras
-            || !waitingForDebugger
-          ) {
-            // in these cases, we don't want to track the targets as extras.
-            // we're only interested in extra tabs or windows
-            return await run()
-          }
-
-          let extraTargetCriClient
-
-          try {
-            extraTargetCriClient = await CRI({
-              host,
-              port,
-              target: targetId,
-              local: true,
-              useHostName: true,
-            })
-          } catch (err: any) {
-            return run()
-          }
-
-          browserCriClient.addExtraTargetClient(targetId, extraTargetCriClient)
-
-          await extraTargetCriClient.send('Fetch.enable')
-
-          extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-            const details: Protocol.Fetch.ContinueRequestRequest = {
-              requestId: params.requestId,
-              headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
-            }
-
-            extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
-              // swallow this error so it doesn't crash Cypress
-              debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
-            })
-          })
-
-          await run()
-        })
-
-        // TODO: listen to 'Target.targetCrashed' as well? or 'Inspector.targetCrashed'?
-        browserClient.on('Target.targetDestroyed', (event) => {
-          debug('Target.targetDestroyed %o', {
-            event,
-            closing: browserCriClient.closing,
-            closed: browserCriClient.closed,
-            resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
-          })
-
-          const { targetId } = event
-
-          // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
-          // have already closed/disposed, so unless this matches our current target then bail
-          if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
-            if (browserCriClient.hasExtraTargetClient(targetId)) {
-              browserCriClient.getExtraTargetClient(targetId)!.close().catch(() => { })
-              browserCriClient.removeExtraTargetClient(targetId)
-              // TODO: need to send 'Target.detachFromTarget'?
-            }
-
-            return
-          }
-
-          // otherwise...
-          // the page or browser closed in an unexpected manner and we need to bubble up this error
-          // by calling onError() with either browser or page was closed
-          //
-          // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
-          // OR from process.exit(...) firing
-          // if the browser's websocket connection has been closed then that means the page was closed
-          //
-          // otherwise it means the the browser itself was closed
-
-          // always close the connection to the page target because it was destroyed
-          browserCriClient.currentlyAttachedTarget.close().catch(() => { })
-
-          new Bluebird((resolve) => {
-            // this event could fire either expectedly or unexpectedly
-            // it's not a problem if we're expected to be closing the browser naturally
-            // and not as a result of an unexpected page or browser closure
-            if (browserCriClient.resettingBrowserTargets) {
-              // do nothing, we're good
-              return resolve(true)
-            }
-
-            if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
-              return resolve(browserCriClient.gracefulShutdown)
-            }
-
-            // when process.on('exit') is called, we call onClose
-            browserCriClient.onClose = resolve
-
-            // or when the browser's CDP ws connection is closed
-            browserClient.ws.once('close', () => {
-              resolve(false)
-            })
-          })
-          .timeout(500)
-          .then((expectedDestroyedEvent) => {
-            if (expectedDestroyedEvent === true) {
-              return
-            }
-
-            // browserClient websocket was disconnected
-            // or we've been closed due to process.on('exit')
-            // meaning the browser was closed and not just the page
-            errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch(Bluebird.TimeoutError, () => {
-            debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
-            // the browser websocket didn't close meaning
-            // only the page was closed, not the browser
-            errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch((err) => {
-            // stop the run instead of moving to the next spec
-            err.isFatalApiErr = true
-
-            onAsynchronousError(err)
-          })
-        })
-
-        await Promise.all(promises)
+        await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port })
       }
 
       return browserCriClient
     }, browserName, port)
+  }
+
+  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port }) {
+    const promises = [
+      browserClient.send('Target.setDiscoverTargets', { discover: true }),
+      browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
+    ]
+
+    // TODO: see how this affects nested iframes
+    browserClient.on('Target.attachedToTarget', async (event) => {
+      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port })
+    })
+
+    // TODO: listen to 'Target.targetCrashed' or 'Inspector.targetCrashed' as well?
+    browserClient.on('Target.targetDestroyed', (event) => {
+      this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
+    })
+
+    await Promise.all(promises)
+  }
+
+  static async _onAttachToTarget ({ browserClient, browserCriClient, event, host, port }) {
+    const { sessionId, targetInfo, waitingForDebugger } = event
+    let { targetId, url } = targetInfo
+
+    debug('Attached to target, id: %s', targetId)
+
+    async function run () {
+      await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    }
+
+    // the url usually isn't specified with this event, but is available
+    // from Target.getTargets
+    if (!url) {
+      const { targetInfos } = await browserClient.send('Target.getTargets')
+
+      const thisTarget = targetInfos.find((target) => target.targetId === targetId)
+
+      if (thisTarget) {
+        url = thisTarget.url
+      }
+    }
+
+    if (
+      // is the main Cypress tab
+      targetId === browserCriClient.currentlyAttachedTarget?.targetId
+      // is DevTools
+      || url.includes('devtools://')
+      // is the Launchpad
+      || url.includes('__launchpad')
+      // targets created before we started listening won't be waiting
+      // for debugger and are not extras
+      || !waitingForDebugger
+    ) {
+      debug('Not an extra target')
+
+      // in these cases, we don't want to track the targets as extras.
+      // we're only interested in extra tabs or windows
+      return await run()
+    }
+
+    let extraTargetCriClient
+
+    try {
+      extraTargetCriClient = await CRI({
+        host,
+        port,
+        target: targetId,
+        local: true,
+        useHostName: true,
+      })
+    } catch (err: any) {
+      debug('Errored connecting to target (id: %s): %s', targetId, err?.stack || err)
+
+      return run()
+    }
+
+    browserCriClient.addExtraTargetClient(targetId, extraTargetCriClient)
+
+    await extraTargetCriClient.send('Fetch.enable')
+
+    extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      const details: Protocol.Fetch.ContinueRequestRequest = {
+        requestId: params.requestId,
+        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+      }
+
+      extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
+        // swallow this error so it doesn't crash Cypress
+        debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+      })
+    })
+
+    await run()
+  }
+
+  static async _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }) {
+    debug('Target.targetDestroyed %o', {
+      event,
+      closing: browserCriClient.closing,
+      closed: browserCriClient.closed,
+      resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+    })
+
+    const { targetId } = event
+
+    // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+    // have already closed/disposed, so unless this matches our current target then bail
+    if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+      if (browserCriClient.hasExtraTargetClient(targetId)) {
+        browserCriClient.getExtraTargetClient(targetId)!.close().catch(() => { })
+        browserCriClient.removeExtraTargetClient(targetId)
+      }
+
+      return
+    }
+
+    // otherwise...
+    // the page or browser closed in an unexpected manner and we need to bubble up this error
+    // by calling onError() with either browser or page was closed
+    //
+    // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
+    // OR from process.exit(...) firing
+    // if the browser's websocket connection has been closed then that means the page was closed
+    //
+    // otherwise it means the the browser itself was closed
+
+    // always close the connection to the page target because it was destroyed
+    browserCriClient.currentlyAttachedTarget.close().catch(() => { })
+
+    new Bluebird((resolve) => {
+      // this event could fire either expectedly or unexpectedly
+      // it's not a problem if we're expected to be closing the browser naturally
+      // and not as a result of an unexpected page or browser closure
+      if (browserCriClient.resettingBrowserTargets) {
+        // do nothing, we're good
+        return resolve(true)
+      }
+
+      if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+        return resolve(browserCriClient.gracefulShutdown)
+      }
+
+      // when process.on('exit') is called, we call onClose
+      browserCriClient.onClose = resolve
+
+      // or when the browser's CDP ws connection is closed
+      browserClient.ws.once('close', () => {
+        resolve(false)
+      })
+    })
+    .timeout(500)
+    .then((expectedDestroyedEvent) => {
+      if (expectedDestroyedEvent === true) {
+        return
+      }
+
+      // browserClient websocket was disconnected
+      // or we've been closed due to process.on('exit')
+      // meaning the browser was closed and not just the page
+      errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch(Bluebird.TimeoutError, () => {
+      debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
+      // the browser websocket didn't close meaning
+      // only the page was closed, not the browser
+      errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch((err) => {
+      // stop the run instead of moving to the next spec
+      err.isFatalApiErr = true
+
+      onAsynchronousError(err)
+    })
   }
 
   /**
