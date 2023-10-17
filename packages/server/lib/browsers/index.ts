@@ -268,7 +268,7 @@ export = {
     // TODO: make this a required property
     if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
 
-    options.onBrowserOpen()
+    await options.onBrowserOpen()
     ctx.actions.app.setBrowserStatus('open')
 
     return instance
