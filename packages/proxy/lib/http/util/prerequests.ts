@@ -286,6 +286,10 @@ export class PreRequests {
     this.protocolManager = protocolManager
   }
 
+  setPreRequestTimeout (requestTimeout: number) {
+    this.requestTimeout = requestTimeout
+  }
+
   reset () {
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 

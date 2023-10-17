@@ -436,6 +436,10 @@ export class ProjectBase extends EE {
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
+
+    if (this.browser.family !== 'chromium') {
+      this._server?.setPreRequestTimeout(500)
+    }
   }
 
   get protocolManager (): ProtocolManager | undefined {

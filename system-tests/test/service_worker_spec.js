@@ -46,7 +46,6 @@ describe('e2e browser reset', () => {
 
   systemTests.it('executes one spec with a cached call', {
     project: 'e2e',
-    browser: 'chrome',
     spec: 'service_worker.cy.js',
     onRun: async (exec, browser) => {
       await exec()
@@ -54,6 +53,5 @@ describe('e2e browser reset', () => {
       // service worker twice
       expect(requestsForServiceWorkerCache).to.eq(1)
     },
-
   })
 })

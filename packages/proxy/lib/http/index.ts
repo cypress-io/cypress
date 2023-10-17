@@ -438,4 +438,8 @@ export class Http {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)
   }
+
+  setPreRequestTimeout (timeout: number) {
+    this.preRequests.setPreRequestTimeout(timeout)
+  }
 }
