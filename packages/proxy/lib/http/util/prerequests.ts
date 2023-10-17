@@ -51,12 +51,12 @@ class QueueMap<T> {
 
     this.queues[queueKey].push(value)
   }
-  shift (queueKey: string): T | undefined {
+  pop (queueKey: string): T | undefined {
     const queue = this.queues[queueKey]
 
     if (!queue) return
 
-    const item = queue.shift()
+    const item = queue.pop()
 
     if (queue.length === 0) delete this.queues[queueKey]
 
@@ -95,7 +95,7 @@ export class PreRequests {
   protocolManager?: ProtocolManagerShape
 
   constructor (
-    requestTimeout = 2000,
+    requestTimeout = 500,
     // 10 seconds
     sweepInterval = 10000,
   ) {
@@ -134,7 +134,7 @@ export class PreRequests {
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
     const key = `${browserPreRequest.method}-${browserPreRequest.url}`
-    const pendingRequest = this.pendingRequests.shift(key)
+    const pendingRequest = this.pendingRequests.pop(key)
 
     if (pendingRequest) {
       const timings = {
@@ -174,7 +174,7 @@ export class PreRequests {
 
   addPendingUrlWithoutPreRequest (url: string) {
     const key = `GET-${url}`
-    const pendingRequest = this.pendingRequests.shift(key)
+    const pendingRequest = this.pendingRequests.pop(key)
 
     if (pendingRequest) {
       debugVerbose('Handling %s without a CDP prerequest', key)
@@ -200,7 +200,7 @@ export class PreRequests {
 
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
-    const pendingPreRequest = this.pendingPreRequests.shift(key)
+    const pendingPreRequest = this.pendingPreRequests.pop(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
@@ -217,7 +217,7 @@ export class PreRequests {
       return
     }
 
-    const pendingUrlWithoutPreRequests = this.pendingUrlsWithoutPreRequests.shift(key)
+    const pendingUrlWithoutPreRequests = this.pendingUrlsWithoutPreRequests.pop(key)
 
     if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++

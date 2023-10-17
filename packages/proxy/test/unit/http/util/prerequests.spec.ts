@@ -41,18 +41,6 @@ describe('http/util/prerequests', () => {
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
 
-    const secondPreRequest: BrowserPreRequest = {
-      requestId: '1234',
-      url: 'foo',
-      method: 'GET',
-      headers: {},
-      resourceType: 'xhr',
-      originalResourceType: undefined,
-      cdpRequestWillBeSentTimestamp: 1,
-      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
-    }
-
-    preRequests.addPending(secondPreRequest)
     preRequests.addPending({
       requestId: '1234',
       url: 'foo',
@@ -64,6 +52,19 @@ describe('http/util/prerequests', () => {
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
 
+    const thirdRequest: BrowserPreRequest = {
+      requestId: '1234',
+      url: 'foo',
+      method: 'GET',
+      headers: {},
+      resourceType: 'xhr',
+      originalResourceType: undefined,
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+    }
+
+    preRequests.addPending(thirdRequest)
+
     expectPendingCounts(0, 3)
 
     const cb = sinon.stub()
@@ -73,17 +74,17 @@ describe('http/util/prerequests', () => {
     const { args } = cb.getCall(0)
     const arg = args[0]
 
-    expect(arg.requestId).to.eq(secondPreRequest.requestId)
-    expect(arg.url).to.eq(secondPreRequest.url)
-    expect(arg.method).to.eq(secondPreRequest.method)
-    expect(arg.headers).to.deep.eq(secondPreRequest.headers)
-    expect(arg.resourceType).to.eq(secondPreRequest.resourceType)
-    expect(arg.originalResourceType).to.eq(secondPreRequest.originalResourceType)
-    expect(arg.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(arg.requestId).to.eq(thirdRequest.requestId)
+    expect(arg.url).to.eq(thirdRequest.url)
+    expect(arg.method).to.eq(thirdRequest.method)
+    expect(arg.headers).to.deep.eq(thirdRequest.headers)
+    expect(arg.resourceType).to.eq(thirdRequest.resourceType)
+    expect(arg.originalResourceType).to.eq(thirdRequest.originalResourceType)
+    expect(arg.cdpRequestWillBeSentTimestamp).to.eq(thirdRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.eq(thirdRequest.cdpRequestWillBeSentReceivedTimestamp)
     expect(arg.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(arg.cdpLagDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.proxyRequestCorrelationDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
+    expect(arg.cdpLagDuration).to.eq(thirdRequest.cdpRequestWillBeSentReceivedTimestamp - thirdRequest.cdpRequestWillBeSentTimestamp)
+    expect(arg.proxyRequestCorrelationDuration).to.eq(thirdRequest.cdpRequestWillBeSentReceivedTimestamp - arg.proxyRequestReceivedTimestamp)
 
     expectPendingCounts(0, 2)
   })
