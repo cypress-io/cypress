@@ -307,7 +307,10 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        await utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
+        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+        pageCriClient.send('Network.clearBrowserCache'),
       ])
     }
 
