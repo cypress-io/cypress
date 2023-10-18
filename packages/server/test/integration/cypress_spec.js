@@ -404,7 +404,7 @@ describe('lib/cypress', () => {
     it('runs project headlessly and exits with exit code 0', function () {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+        expect(browsers.open).to.be.calledWithMatch({ browser: ELECTRON_BROWSER })
         this.expectExitWith(0)
       })
     })
@@ -414,7 +414,7 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.todosPath}`, '--headless'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+        expect(browsers.open).to.be.calledWithMatch({ browser: ELECTRON_BROWSER })
         this.expectExitWith(0)
 
         // check how --headless option sets --headed
@@ -444,7 +444,7 @@ describe('lib/cypress', () => {
         return cypress.start(['--', `--run-project=${this.todosPath}`])
         .then(() => {
           expect(argsUtil.toObject).to.have.been.calledWith([`--run-project=${this.todosPath}`])
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          expect(browsers.open).to.be.calledWithMatch({ browser: ELECTRON_BROWSER })
           this.expectExitWith(0)
         })
       })
@@ -453,7 +453,7 @@ describe('lib/cypress', () => {
         return cypress.start([`--run-project=${this.todosPath}`, '--', '--browser=electron'])
         .then(() => {
           expect(argsUtil.toObject).to.have.been.calledWith([`--run-project=${this.todosPath}`, '--browser=electron'])
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          expect(browsers.open).to.be.calledWithMatch({ browser: ELECTRON_BROWSER })
           this.expectExitWith(0)
         })
       })
@@ -491,8 +491,9 @@ describe('lib/cypress', () => {
         `--spec=${relativePath}/tests/test2.coffee`,
       ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-          url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee',
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' },
         })
 
         this.expectExitWith(0)
@@ -502,7 +503,11 @@ describe('lib/cypress', () => {
     it('runs project by specific spec with default configuration', function () {
       return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/**/*qux*`, '--config', 'port=2020'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/qux.cy.js' })
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/qux.cy.js' },
+        })
+
         expect(browsers.open).to.be.calledOnce
         this.expectExitWith(0)
       })
@@ -511,7 +516,11 @@ describe('lib/cypress', () => {
     it('runs project by specific absolute spec and exits with status 0', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' },
+        })
+
         this.expectExitWith(0)
       })
     })
@@ -519,7 +528,11 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' },
+        })
+
         this.expectExitWith(0)
       })
     })
@@ -527,9 +540,16 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' },
+        })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' },
+        })
+
         this.expectExitWith(0)
       })
     })
@@ -560,10 +580,13 @@ describe('lib/cypress', () => {
     it('runs project headed and displays gui', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-          proxyServer: 'http://localhost:8888',
-          browser: {
-            isHeadless: false,
+        expect(browsers.open).to.be.calledWithMatch({
+          browser: ELECTRON_BROWSER,
+          launchOptions: {
+            proxyServer: 'http://localhost:8888',
+            browser: {
+              isHeadless: false,
+            },
           },
         })
 
