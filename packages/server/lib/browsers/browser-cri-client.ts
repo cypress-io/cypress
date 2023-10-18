@@ -223,8 +223,12 @@ export class BrowserCriClient {
     }
 
     if (
+      // if resetting browser targets, the first target attached to is the
+      // main Cypress tab, but hasn't been set as
+      // browserCriClient.currentlyAttachedTarget yet
+      browserCriClient.resettingBrowserTargets
       // is the main Cypress tab
-      targetId === browserCriClient.currentlyAttachedTarget?.targetId
+      || targetId === browserCriClient.currentlyAttachedTarget?.targetId
       // is DevTools
       || url.includes('devtools://')
       // is the Launchpad
@@ -275,7 +279,7 @@ export class BrowserCriClient {
     await run()
   }
 
-  static async _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }) {
+  static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }) {
     debug('Target.targetDestroyed %o', {
       event,
       closing: browserCriClient.closing,
