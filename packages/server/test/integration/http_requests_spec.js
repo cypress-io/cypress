@@ -257,6 +257,7 @@ describe('Routes', () => {
           url: 'http://www.github.com/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -294,6 +295,7 @@ describe('Routes', () => {
           url: 'https://localhost:8443/',
           headers: {
             'Accept': 'text/html, application/xhtml+xml, */*',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -970,6 +972,7 @@ describe('Routes', () => {
           url: 'http://www.github.com/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1138,11 +1141,10 @@ describe('Routes', () => {
         })
       })
 
-      it('removes accept-encoding when nothing is supported', function () {
-        nock(this.server.remoteStates.current().origin, {
-          badheaders: ['accept-encoding'],
-        })
+      it('sets accept-encoding header to "identity" when nothing is supported', function () {
+        nock(this.server.remoteStates.current().origin)
         .get('/accept')
+        .matchHeader('accept-encoding', 'identity')
         .reply(200, '<html>accept</html>')
 
         return this.rp({
@@ -1151,6 +1153,22 @@ describe('Routes', () => {
           headers: {
             'accept-encoding': 'foo,bar,baz',
           },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.eq('<html>accept</html>')
+        })
+      })
+
+      it('sets accept-encoding header to "gzip,identity" when no header is passed', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/accept')
+        .matchHeader('accept-encoding', 'gzip,identity')
+        .reply(200, '<html>accept</html>')
+
+        return this.rp({
+          url: 'http://www.github.com/accept',
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
@@ -1350,6 +1368,7 @@ describe('Routes', () => {
           url: 'http://www.github.com/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1432,7 +1451,12 @@ describe('Routes', () => {
           },
         })
         .then(() => {
-          return this.rp(`${this.proxy}/foo/views/test/index.html`)
+          return this.rp({
+            url: `${this.proxy}/foo/views/test/index.html`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(404)
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
@@ -1459,7 +1483,12 @@ describe('Routes', () => {
             'Content-Type': 'text/html',
           })
 
-          return this.rp('http://www.github.com/index.html')
+          return this.rp({
+            url: 'http://www.github.com/index.html',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(500)
 
@@ -1568,6 +1597,7 @@ describe('Routes', () => {
           url: 'http://localhost:8080/login',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1591,6 +1621,7 @@ describe('Routes', () => {
           url: 'http://localhost:8080/login',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1730,6 +1761,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'x-custom': 'value',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1891,6 +1923,7 @@ describe('Routes', () => {
             'Cookie': '__cypress.initial=false',
             'Origin': 'http://localhost:8080',
             'Accept': 'text/html, application/xhtml+xml, */*',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1908,7 +1941,12 @@ describe('Routes', () => {
           .then(() => {
             this.server.onRequest(fn)
 
-            return this.rp(url)
+            return this.rp({
+              url,
+              headers: {
+                'Accept-Encoding': 'identity',
+              },
+            })
           }).then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -2536,6 +2574,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2558,6 +2597,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2577,6 +2617,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2597,6 +2638,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2619,6 +2661,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2639,6 +2682,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2661,6 +2705,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2683,6 +2728,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2704,6 +2750,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2731,6 +2778,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2738,7 +2786,12 @@ describe('Routes', () => {
           expect(res.headers['location']).to.eq('http://www.cypress.io/foo')
           expect(res.headers['set-cookie']).to.match(/initial=true/)
 
-          return this.rp(res.headers['location'])
+          return this.rp({
+            url: res.headers['location'],
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.headers['set-cookie']).to.match(/initial=;/)
@@ -2762,6 +2815,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2782,6 +2836,7 @@ describe('Routes', () => {
             url: `${this.proxy}/elements.html`,
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2803,6 +2858,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2821,6 +2877,7 @@ describe('Routes', () => {
           url: 'https://localhost:8443/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2844,6 +2901,7 @@ describe('Routes', () => {
             url: 'https://www.google.com/',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2869,6 +2927,7 @@ describe('Routes', () => {
             url: 'https://www.cypress.io/',
             headers: {
               'Accept': 'text/html, application/xhtml+xml, */*',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2889,6 +2948,7 @@ describe('Routes', () => {
           url: 'https://www.foobar.com:8443/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2907,6 +2967,7 @@ describe('Routes', () => {
           url: 'https://docs.foobar.com:8443/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2925,6 +2986,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2949,6 +3011,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2972,6 +3035,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2996,6 +3060,7 @@ describe('Routes', () => {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'X-Cypress-Is-AUT-Frame': 'true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3019,6 +3084,7 @@ describe('Routes', () => {
           json: true,
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3040,6 +3106,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3059,6 +3126,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'application/json',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3082,6 +3150,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
             'X-Requested-With': 'XMLHttpRequest',
           },
         })
@@ -3104,6 +3173,7 @@ describe('Routes', () => {
 
           const headers = {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           }
 
           headers['Accept'] = type
@@ -3140,6 +3210,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3165,12 +3236,14 @@ describe('Routes', () => {
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
+            'Accept-Encoding': 'identity',
           })
 
           return this.rp({
             url: 'http://www.google.com/index.html',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -3189,7 +3262,12 @@ describe('Routes', () => {
             'Content-Type': 'application/javascript',
           })
 
-          return this.rp('http://www.google.com/app.js')
+          return this.rp({
+            url: 'http://www.google.com/app.js',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -3400,6 +3478,7 @@ describe('Routes', () => {
             url: 'http://www.google.com/index.html',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -3418,7 +3497,12 @@ describe('Routes', () => {
             'Content-Type': 'application/javascript',
           })
 
-          return this.rp('http://www.google.com/app.js')
+          return this.rp({
+            url: 'http://www.google.com/app.js',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -3447,6 +3531,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3472,6 +3557,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3504,6 +3590,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=true',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -3521,7 +3608,12 @@ describe('Routes', () => {
       })
 
       it('sets etag', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq('html { color: black; }')
@@ -3538,7 +3630,12 @@ describe('Routes', () => {
       })
 
       it('streams from file system', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3556,7 +3653,12 @@ describe('Routes', () => {
       })
 
       it('disregards anything past the pathname', function () {
-        return this.rp(`${this.proxy}/assets/app.css?foo=bar#hash`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css?foo=bar#hash`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3565,7 +3667,12 @@ describe('Routes', () => {
       })
 
       it('can serve files with spaces in the path', function () {
-        return this.rp(`${this.proxy}/a space/foo.txt`)
+        return this.rp({
+          url: `${this.proxy}/a space/foo.txt`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3595,6 +3702,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3610,6 +3718,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3640,6 +3749,7 @@ describe('Routes', () => {
           json: true,
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3655,6 +3765,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'application/json',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3691,7 +3802,12 @@ describe('Routes', () => {
           'Content-Type': 'text/css',
         })
 
-        return this.rp('http://getbootstrap.com/assets/css/application.css')
+        return this.rp({
+          url: 'http://getbootstrap.com/assets/css/application.css',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3712,7 +3828,12 @@ describe('Routes', () => {
             'Content-Type': 'text/html',
           })
 
-          return this.rp('http://getbootstrap.com/css')
+          return this.rp({
+            url: 'http://getbootstrap.com/css',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
           })
@@ -3726,7 +3847,12 @@ describe('Routes', () => {
           'Content-Type': 'text/css',
         })
 
-        return this.rp('http://getbootstrap.com/assets/css/application.css')
+        return this.rp({
+          url: 'http://getbootstrap.com/assets/css/application.css',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
