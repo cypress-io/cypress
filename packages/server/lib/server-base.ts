@@ -218,6 +218,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy?.setProtocolManager(protocolManager)
   }
 
+  setPreRequestTimeout (timeout: number) {
+    this._networkProxy?.setPreRequestTimeout(timeout)
+  }
+
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:cookies:received', () => {

@@ -83,4 +83,22 @@ describe('testConfigOverrides', () => {
       expectedExitCode: 1,
     })
   })
+
+  describe('experimental retries specific behavior', () => {
+    systemTests.it('fails when attempting to set experimental retries as override', {
+      spec: 'override-with-experimental-retries.cy.js',
+      project: 'experimental-retries',
+      configFile: 'cypress-legacy-retries.config.js',
+      expectedExitCode: 1,
+      browser: '!webkit',
+    })
+
+    systemTests.it('succeeds when setting legacy retries as an override to experimental retries', {
+      spec: 'override-with-legacy-retries.cy.js',
+      project: 'experimental-retries',
+      configFile: 'cypress-experimental-retries.config.js',
+      expectedExitCode: 0,
+      browser: '!webkit',
+    })
+  })
 })
