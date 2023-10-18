@@ -1025,6 +1025,8 @@ describe('lib/cypress', () => {
 
           sinon.stub(chromeBrowser, '_setAutomation').returns(cdpAutomation)
 
+          sinon.stub(ProjectBase.prototype, 'resetBrowserState').resolves()
+
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
             '--browser=chrome',

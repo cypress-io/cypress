@@ -50,7 +50,7 @@ describe('lib/browsers/cri-client', function () {
     })
 
     getClient = () => {
-      return criClient.create(DEBUGGER_URL, onError)
+      return criClient.create({ target: DEBUGGER_URL, onAsynchronousError: onError })
     }
   })
 
