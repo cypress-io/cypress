@@ -12,6 +12,7 @@ export type CypressIncomingRequest = Request & {
   abort: () => void
   requestId: string
   browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
   body?: string
   responseTimeout?: number
   followRedirect?: boolean

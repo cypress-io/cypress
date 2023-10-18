@@ -66,6 +66,7 @@ type HttpMiddlewareCtx<T> = {
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => void
+  addPendingUrlWithoutPreRequest: (url: string) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
@@ -331,6 +332,9 @@ export class Http {
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
+      addPendingUrlWithoutPreRequest: (url) => {
+        this.preRequests.addPendingUrlWithoutPreRequest(url)
+      },
       protocolManager: this.protocolManager,
     }
 
@@ -416,6 +420,7 @@ export class Http {
   reset () {
     this.buffers.reset()
     this.setAUTUrl(undefined)
+    this.preRequests.reset()
   }
 
   setBuffer (buffer) {
@@ -437,5 +442,9 @@ export class Http {
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)
+  }
+
+  setPreRequestTimeout (timeout: number) {
+    this.preRequests.setPreRequestTimeout(timeout)
   }
 }

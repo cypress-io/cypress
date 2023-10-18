@@ -417,6 +417,14 @@ describe('lib/browsers/electron', () => {
       })
     })
 
+    it('expects the browser to be reset', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
+      })
+    })
+
     it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
       sinon.spy(this.automation, 'use')
 

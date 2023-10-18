@@ -39,7 +39,12 @@ describe('lib/browsers/cri-client', () => {
 
     send = sinon.stub()
     close = sinon.stub()
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs('http://web/socket/url', onError).resolves({
+    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs({
+      target: 'http://web/socket/url',
+      onAsynchronousError: onError,
+      onReconnect: undefined,
+      protocolManager: undefined,
+    }).resolves({
       send,
       close,
     })
@@ -49,6 +54,16 @@ describe('lib/browsers/cri-client', () => {
     })
 
     getClient = (protocolManager) => {
+      criClientCreateStub = criClientCreateStub.withArgs({
+        target: 'http://web/socket/url',
+        onAsynchronousError: onError,
+        onReconnect: undefined,
+        protocolManager,
+      }).resolves({
+        send,
+        close,
+      })
+
       return browserCriClient.BrowserCriClient.create({
         browserName: 'Chrome',
         hosts: ['127.0.0.1'],
@@ -160,14 +175,39 @@ describe('lib/browsers/cri-client', () => {
         expect(stripAnsi(err.message)).to.eq(`A minimum CDP version of 1.3 is required, but the current browser has 1.2.`)
       })
     })
+
+    context('#close', function () {
+      it('closes the currently attached target if it exists and the browser client', async function () {
+        const mockCurrentlyAttachedTarget = {
+          close: sinon.stub().resolves(),
+        }
+
+        const browserClient = await getClient() as any
+
+        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+        await browserClient.close()
+
+        expect(mockCurrentlyAttachedTarget.close).to.be.called
+        expect(close).to.be.called
+      })
+
+      it('just the browser client with no currently attached target', async function () {
+        const browserClient = await getClient() as any
+
+        await browserClient.close()
+
+        expect(close).to.be.called
+      })
+    })
   })
 
-  context('#attachToTargetUrl', () => {
-    it('creates a page client when the passed in url is found', async () => {
+  context('#attachToTargetUrl', function () {
+    it('creates a page client when the passed in url is found', async function () {
       const mockPageClient = {}
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -176,14 +216,14 @@ describe('lib/browsers/cri-client', () => {
       expect(client).to.be.equal(mockPageClient)
     })
 
-    it('creates a page client when the passed in url is found and notifies the protocol manager', async () => {
+    it('creates a page client when the passed in url is found and notifies the protocol manager', async function () {
       const mockPageClient = {}
       const protocolManager: any = {
         connectToBrowser: sinon.stub().resolves(),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager }).resolves(mockPageClient)
 
       const browserClient = await getClient(protocolManager)
 
@@ -193,7 +233,7 @@ describe('lib/browsers/cri-client', () => {
       expect(protocolManager.connectToBrowser).to.be.calledWith(client)
     })
 
-    it('retries when the passed in url is not found', async () => {
+    it('retries when the passed in url is not found', async function () {
       sinon.stub(protocol, '_getDelayMsForRetry')
       .onFirstCall().returns(100)
       .onSecondCall().returns(100)
@@ -204,7 +244,7 @@ describe('lib/browsers/cri-client', () => {
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-      criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -213,7 +253,7 @@ describe('lib/browsers/cri-client', () => {
       expect(client).to.be.equal(mockPageClient)
     })
 
-    it('throws when the passed in url is not found after retrying', async () => {
+    it('throws when the passed in url is not found after retrying', async function () {
       sinon.stub(protocol, '_getDelayMsForRetry')
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
@@ -222,11 +262,60 @@ describe('lib/browsers/cri-client', () => {
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
       await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
+    })
+  })
+
+  context('#resetBrowserTargets', function () {
+    it('closes the currently attached target while keeping a tab open', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+      }
+
+      const mockUpdatedCurrentlyAttachedTarget = {
+        targetId: '101',
+      }
+
+      send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
+      send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
+      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined }).resolves(mockUpdatedCurrentlyAttachedTarget)
+
+      const browserClient = await getClient() as any
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.resetBrowserTargets(true)
+
+      expect(mockCurrentlyAttachedTarget.close).to.be.called
+      expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
+    })
+
+    it('closes the currently attached target without keeping a tab open', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+      }
+
+      send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
+
+      const browserClient = await getClient() as any
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.resetBrowserTargets(false)
+
+      expect(mockCurrentlyAttachedTarget.close).to.be.called
+    })
+
+    it('throws when there is no currently attached target', async function () {
+      const browserClient = await getClient() as any
+
+      await expect(browserClient.resetBrowserTargets()).to.be.rejected
     })
   })
 
@@ -243,7 +332,13 @@ describe('lib/browsers/cri-client', () => {
 
       send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
       send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
-      criClientCreateStub.withArgs('101', onError, HOST, PORT).resolves(mockUpdatedCurrentlyAttachedTarget)
+      criClientCreateStub.withArgs({
+        target: '101',
+        onAsynchronousError: onError,
+        host: HOST,
+        port: PORT,
+        protocolManager: undefined,
+      }).resolves(mockUpdatedCurrentlyAttachedTarget)
 
       const browserClient = await getClient() as any
 
@@ -312,73 +407,18 @@ describe('lib/browsers/cri-client', () => {
     })
 
     it('closes extra targets', async () => {
-      browserClient.browserClient.send = sinon.stub().resolves({
-        targetInfos: [
-          {
-            targetId: '1',
-            url: 'the://url',
-          },
-          {
-            targetId: '2',
-            url: 'the://url',
-          },
-        ],
-      })
+      browserClient.extraTargetClients = new Map([
+        ['1', {}],
+        ['2', {}],
+      ])
 
       await browserClient.closeExtraTargets()
 
       const closeCalls = browserClient.browserClient.send.withArgs('Target.closeTarget')
 
       expect(closeCalls).to.be.calledTwice
-      expect(closeCalls.firstCall.args).to.deep.equal(['Target.closeTarget', { targetId: '1' }])
-      expect(closeCalls.secondCall.args).to.deep.equal(['Target.closeTarget', { targetId: '2' }])
-    })
-
-    it('does not close the currently attached target (main Cypress window/tab)', async () => {
-      browserClient.currentlyAttachedTarget = { targetId: '1' }
-
-      browserClient.browserClient.send = sinon.stub().resolves({
-        targetInfos: [
-          {
-            targetId: '1',
-            url: 'the://url',
-          },
-        ],
-      })
-
-      await browserClient.closeExtraTargets()
-
-      expect(browserClient.browserClient.send.withArgs('Target.closeTarget')).not.to.be.called
-    })
-
-    it('does not close DevTools', async () => {
-      browserClient.browserClient.send = sinon.stub().resolves({
-        targetInfos: [
-          {
-            targetId: '1',
-            url: 'devtools://url',
-          },
-        ],
-      })
-
-      await browserClient.closeExtraTargets()
-
-      expect(browserClient.browserClient.send.withArgs('Target.closeTarget')).not.to.be.called
-    })
-
-    it('does not close the Launchpad', async () => {
-      browserClient.browserClient.send = sinon.stub().resolves({
-        targetInfos: [
-          {
-            targetId: '1',
-            url: 'http://localhost:1234/__launchpad/index.html',
-          },
-        ],
-      })
-
-      await browserClient.closeExtraTargets()
-
-      expect(browserClient.browserClient.send.withArgs('Target.closeTarget')).not.to.be.called
+      expect(closeCalls).to.be.calledWith('Target.closeTarget', { targetId: '1' })
+      expect(closeCalls).to.be.calledWith('Target.closeTarget', { targetId: '2' })
     })
   })
 })
