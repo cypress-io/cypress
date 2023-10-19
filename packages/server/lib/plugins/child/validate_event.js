@@ -43,7 +43,9 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
   const validator = eventValidators[event]
 
   if (!validator) {
-    const userEvents = _.reject(_.keys(eventValidators), (event) => event.startsWith('_'))
+    const userEvents = _.reject(_.keys(eventValidators), (event) => {
+      return event.startsWith('_') || event === 'after:browser:launch'
+    })
 
     const error = new Error(`invalid event name registered: ${event}`)
 
