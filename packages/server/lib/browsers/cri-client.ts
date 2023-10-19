@@ -260,13 +260,13 @@ export const create = async ({
       cri.on('disconnect', retryReconnect)
     }
 
-    cri.on('Inspector.targetCrashed', async () => {
-      debug('crash detected')
-      crashed = true
-    })
-
     // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
     if (host) {
+      cri.on('Inspector.targetCrashed', async () => {
+        debug('crash detected for target: %s', target)
+        crashed = true
+      })
+
       cri.on('Target.targetCreated', async (event) => {
         if (event.targetInfo.type === 'service_worker') {
           const networkEnabledOptions = protocolManager?.protocolEnabled ? {
