@@ -6,6 +6,7 @@ const path = require('path')
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
+const minimist = require('minimist')
 
 const currentVersion = require('../package.json').version
 
@@ -34,19 +35,11 @@ if (require.main !== module) {
 (async () => {
   process.chdir(path.join(__dirname, '..'))
 
-  for (const path of paths) {
-    const pathNextVersion = await getNextVersionForPath(path)
+  const args = minimist(process.argv.slice(2))
 
-    if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
-      nextVersion = pathNextVersion
-    }
-  }
+  const nextVersion = args.nextVersion
 
-  if (!nextVersion) {
-    throw new Error('Unable to determine next version.')
-  }
-
-  if (process.argv.includes('--npm')) {
+  if (args.npm && currentVersion !== nextVersion) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
 
     console.log(`Running '${cmd}'...`)
