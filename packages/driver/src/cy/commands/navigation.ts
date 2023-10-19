@@ -216,7 +216,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }
 
-  // this prevents a log occurring when we navigate to about:blank inbetween tests
+  // this prevents a log occurring when we navigate to about:blank in between tests
   // e.g. for new sessions lifecycle
   if (!state('duringUserTestExecution')) {
     return

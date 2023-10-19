@@ -50,7 +50,7 @@ describe('lib/browsers/cri-client', function () {
     })
 
     getClient = () => {
-      return criClient.create(DEBUGGER_URL, onError)
+      return criClient.create({ target: DEBUGGER_URL, onAsynchronousError: onError })
     }
   })
 
@@ -78,6 +78,14 @@ describe('lib/browsers/cri-client', function () {
 
         await expect(client.send('DOM.getDocument', { depth: -1 }))
         .to.be.rejectedWith(err)
+      })
+
+      it('rejects if target has crashed', async function () {
+        const command = 'DOM.getDocument'
+        const client = await getClient()
+
+        await criStub.on.withArgs('Inspector.targetCrashed').args[0][1]()
+        await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
       })
 
       context('retries', () => {

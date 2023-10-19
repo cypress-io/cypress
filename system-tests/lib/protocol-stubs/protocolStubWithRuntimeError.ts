@@ -1,4 +1,4 @@
-import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
@@ -39,4 +39,5 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
+  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => {}
 }

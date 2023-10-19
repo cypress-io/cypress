@@ -8,6 +8,7 @@ import type WebSocket from 'ws'
 import type CDP from 'chrome-remote-interface'
 
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
+import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -130,20 +131,30 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
+type CreateParams = {
+  target: string
+  onAsynchronousError: Function
+  host?: string
+  port?: number
+  onReconnect?: (client: CriClient) => void
+  protocolManager?: ProtocolManagerShape
+}
 
-export const create = async (
-  target: string,
-  onAsynchronousError: Function,
-  host?: string,
-  port?: number,
-  onReconnect?: (client: CriClient) => void,
-): Promise<CriClient> => {
+export const create = async ({
+  target,
+  onAsynchronousError,
+  host,
+  port,
+  onReconnect,
+  protocolManager,
+}: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
   let enqueuedCommands: EnqueuedCommand[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
+  let crashed = false // has this crashed?
 
   let cri: CDPClient
   let client: CriClient
@@ -246,6 +257,37 @@ export const create = async (
     if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       cri.on('disconnect', retryReconnect)
     }
+
+    cri.on('Inspector.targetCrashed', async () => {
+      debug('crash detected')
+      crashed = true
+    })
+
+    // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
+    if (host) {
+      cri.on('Target.targetCreated', async (event) => {
+        if (event.targetInfo.type === 'service_worker') {
+          const networkEnabledOptions = protocolManager?.protocolEnabled ? {
+            maxTotalBufferSize: 0,
+            maxResourceBufferSize: 0,
+            maxPostDataSize: 64 * 1024,
+          } : {
+            maxTotalBufferSize: 0,
+            maxResourceBufferSize: 0,
+            maxPostDataSize: 0,
+          }
+
+          const { sessionId } = await cri.send('Target.attachToTarget', {
+            targetId: event.targetInfo.targetId,
+            flatten: true,
+          })
+
+          await cri.send('Network.enable', networkEnabledOptions, sessionId)
+        }
+      })
+
+      await cri.send('Target.setDiscoverTargets', { discover: true })
+    }
   }
 
   await connect()
@@ -254,8 +296,12 @@ export const create = async (
     targetId: target,
 
     async send (command: CdpCommand, params?: object) {
+      if (crashed) {
+        return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
+      }
+
       const enqueue = () => {
-        debug('enqueing command', { command, params })
+        debug('enqueueing command', { command, params })
 
         return new Promise((resolve, reject) => {
           const obj: EnqueuedCommand = {
