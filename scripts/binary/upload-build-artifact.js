@@ -87,7 +87,7 @@ const validateOptions = (options) => {
 }
 
 const uploadArtifactToS3 = function (args = []) {
-  const supportedOptions = ['type', 'version', 'file', 'hash', 'platform']
+  const supportedOptions = ['type', 'version', 'file', 'hash', 'platform', 'dry-run']
   let options = minimist(args, {
     string: supportedOptions,
   })
@@ -99,13 +99,17 @@ const uploadArtifactToS3 = function (args = []) {
 
   const uploadPath = getUploadPath(options)
 
+  const cdnUrl = getCDN(uploadPath)
+
+  if (options['dry-run']) {
+    return new Promise((resolve) => resolve(cdnUrl))
+  }
+
   return upload.toS3({ file: options.file, uploadPath })
   .then(() => {
     return setChecksum(options.file, uploadPath)
   })
   .then(() => {
-    const cdnUrl = getCDN(uploadPath)
-
     if (options.type === 'binary') {
       console.log('Binary can be downloaded using URL')
       console.log(cdnUrl)
