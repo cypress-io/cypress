@@ -1,4 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.4.0
+
+_Released 10/24/2023 (PENDING)_
+
+**Features:**
+
+- Users can now specify different retry options with the `experimentalRetries` configuration. These configuration options can be useful when detecting flake and figuring out under what conditions you would like to pass a retried test. The `retries` configuration option includes two new keys, `experimentalStrategy` and `experimentalOptions`. The first, `experimentalStrategy`, can be one of two options:
+    - `detect-flake-and-pass-on-threshold`
+    - `detect-flake-but-always-fail`
+
+  `detect-flake-and-pass-on-threshold` is similar to how retries work today. Users will be able to specify a retry limit and specify a required number of passes needed in order for that test to be marked as passed. Today, that limit is `1`, but users can set the limit to whatever they'd like with this strategy by specifying the `experimentalOptions.passesRequired` key in their global configuration. This can be useful if a test is retrying and is known to be flaky, but you want to make sure that the test can at least pass a certain threshold in order to be marked as passed overall, which might help in confidence that the test is just flaky and the failure is not considered legitimate. It's important to note that if the `passesRequired` can not be achieved by the remaining retries of the test, the test will stop retrying and the test will be marked as a failure.
+
+  The other, `detect-flake-but-always-fail`, will always mark a test that enters retries as failed, regardless of how many retried attempts pass. There is an option here, called `experimentalOptions.stopIfAnyPassed`, that will stop the test retries if any retry attempt passes. Without this option, you might want to see what the probability that your test might pass (similar to `detect-flake-and-pass-on-threshold`, but mark the test as failed as you might not want to mark any detected flaky test as a passed test.
+
+  Both of these strategies require the `experimentalOptions.maxRetries` option to be set, which will be the maximum number of retries a test might run. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
+
 ## 13.3.2
 
 _Released 10/18/2023_
@@ -19,18 +35,6 @@ _Released 10/18/2023_
 ## 13.3.1
 
 _Released 10/11/2023_
-
-**Features:**
-
-- Users can now specify different retry options with the `experimentalRetries` configuration. These configuration options can be useful when detecting flake and figuring out under what conditions you would like to pass a retried test. The `retries` configuration option includes two new keys, `experimentalStrategy` and `experimentalOptions`. The first, `experimentalStrategy`, can be one of two options:
-    - `detect-flake-and-pass-on-threshold`
-    - `detect-flake-but-always-fail`
-
-  `detect-flake-and-pass-on-threshold` is similar to how retries work today. Users will be able to specify a retry limit and specify a required number of passes needed in order for that test to be marked as passed. Today, that limit is `1`, but users can set the limit to whatever they'd like with this strategy by specifying the `experimentalOptions.passesRequired` key in their global configuration. This can be useful if a test is retrying and is known to be flaky, but you want to make sure that the test can at least pass a certain threshold in order to be marked as passed overall, which might help in confidence that the test is just flaky and the failure is not considered legitimate. It's important to note that if the `passesRequired` can not be achieved by the remaining retries of the test, the test will stop retrying and the test will be marked as a failure.
-
-  The other, `detect-flake-but-always-fail`, will always mark a test that enters retries as failed, regardless of how many retried attempts pass. There is an option here, called `experimentalOptions.stopIfAnyPassed`, that will stop the test retries if any retry attempt passes. Without this option, you might want to see what the probability that your test might pass (similar to `detect-flake-and-pass-on-threshold`, but mark the test as failed as you might not want to mark any detected flaky test as a passed test.
-
-  Both of these strategies require the `experimentalOptions.maxRetries` option to be set, which will be the maximum number of retries a test might run. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
 
 **Bugfixes:**
 
