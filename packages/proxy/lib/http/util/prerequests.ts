@@ -28,7 +28,7 @@ export type CorrelationInformation = {
 
 export type GetPreRequestCb = (correlationInformation: CorrelationInformation) => void
 
-type PendingRequest = {
+export type PendingRequest = {
   ctxDebug
   callback?: GetPreRequestCb
   timeout: NodeJS.Timeout
@@ -283,6 +283,8 @@ export class PreRequests {
     }
 
     this.pendingRequests.push(key, pendingRequest)
+
+    return pendingRequest
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
