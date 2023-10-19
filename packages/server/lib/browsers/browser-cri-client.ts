@@ -228,6 +228,14 @@ export class BrowserCriClient {
       }
     }
 
+    if (!waitingForDebugger) {
+      debug('Not waiting for debugger (id: %s)', targetId)
+
+      // targets created before we started listening won't be waiting
+      // for debugger and are not extras
+      return
+    }
+
     if (
       // if resetting browser targets, the first target attached to is the
       // main Cypress tab, but hasn't been set as
@@ -239,9 +247,6 @@ export class BrowserCriClient {
       || url.includes('devtools://')
       // is the Launchpad
       || url.includes('__launchpad')
-      // targets created before we started listening won't be waiting
-      // for debugger and are not extras
-      || !waitingForDebugger
     ) {
       debug('Not an extra target (id: %s)', targetId)
 
@@ -249,6 +254,8 @@ export class BrowserCriClient {
       // we're only interested in extra tabs or windows
       return await run()
     }
+
+    debug('Connect as extra target (id: %s)', targetId)
 
     let extraTargetCriClient
 
