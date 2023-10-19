@@ -13,6 +13,8 @@ on:
       - develop
 jobs:
   Snyk_SCA_Scan:
+    # Skip this job on PRs from forks
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     strategy:
       matrix:
