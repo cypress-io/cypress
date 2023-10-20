@@ -1278,7 +1278,7 @@ exports['testConfigOverrides / experimental retries specific behavior / fails wh
          sets the config:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy,experimentalOptions
+The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy, experimentalOptions
 
 https://on.cypress.io/config
       [stack trace lines]
