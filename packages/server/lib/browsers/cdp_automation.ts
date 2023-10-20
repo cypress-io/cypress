@@ -14,6 +14,7 @@ import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import type { CriClient } from './cri-client'
+import utils from './utils'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -198,17 +199,7 @@ export class CdpAutomation implements CDPClient {
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
-    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 64 * 1024,
-    } : {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 0,
-    }
-
-    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
+    await sendDebuggerCommandFn('Network.enable', utils.getNetworkEnableOptions(protocolManager))
 
     return cdpAutomation
   }
