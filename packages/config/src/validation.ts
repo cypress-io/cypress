@@ -120,7 +120,7 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
 }
 
 const isValidExperimentalRetryOptionsConfig = (options: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold'): boolean => {
-  if (options === null) return true
+  if (options == null) return true
 
   // retries must be an integer of 1 or greater
   const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
