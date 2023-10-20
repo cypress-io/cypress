@@ -15,59 +15,9 @@ exports['testConfigOverrides / fails when passing invalid config value browser']
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  invalid-browser.js                                                              (1 of 1)
-
-
-  1) An uncaught error was detected outside of a test
-
-  0 passing
-  1 failing
-
-  1) An uncaught error was detected outside of a test:
-     CypressError: The following error originated from your test code, not from Cypress.
-
-  > Test config value \`{ browser }\` must be passed a string, object, or an array. You passed: \`true\`
-
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-
-Cypress could not associate this error to any specific test.
-
-We dynamically generated a new test to display this failure.
+WebKit was launched, but the experimental feature was not enabled. Please add \`experimentalWebKitSupport: true\` to your config file to launch WebKit.
+Error: WebKit was launched, but the experimental feature was not enabled. Please add \`experimentalWebKitSupport: true\` to your config file to launch WebKit.
       [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     invalid-browser.js                                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid-browser.js/An uncaught error was detect     (1280x720)
-     ed outside of a test (failed).png                                                              
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  invalid-browser.js                       XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -128,9 +78,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail    (2560x1440)
      ed).png                                                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not    (2560x1440)
       run 2 (failed).png                                                                            
 
 
@@ -204,9 +154,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run    (2560x1440)
       (failed).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do    (2560x1440)
      es not run 2 (failed).png                                                                      
 
 
@@ -828,65 +778,6 @@ exports['testConfigOverrides / has originalTitle when skipped due to browser con
 
 `
 
-exports['testConfigOverrides / maintains runnable body when skipped due to browser config'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (skip-browser.js)                                                          │
-  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  skip-browser.js                                                                 (1 of 1)
-
-
-  suite
-    - is skipped due to test-level browser override (skipped due to browser)
-
-  suite 2 (skipped due to browser)
-    - is skipped due to suite-level browser override
-
-
-  0 passing
-  2 pending
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      2                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     skip-browser.js                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  skip-browser.js                          XX:XX        2        -        -        2        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        2        -  
-
-
-`
-
 exports['testConfigOverrides / fails when passing invalid config values - [firefox]'] = `
 
 ====================================================================================================
@@ -1351,6 +1242,131 @@ https://on.cypress.io/config
   │ ✖  only-invalid.js                          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['testConfigOverrides / experimental retries specific behavior / fails when attempting to set experimental retries as override'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (override-with-experimental-retries.cy.js)                                 │
+  │ Searched:   cypress/e2e/override-with-experimental-retries.cy.js                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  override-with-experimental-retries.cy.js                                        (1 of 1)
+
+
+  overriding legacy retries with experimental retries
+    at the describe level
+      1) sets the config
+
+
+  0 passing
+  1 failing
+
+  1) overriding legacy retries with experimental retries
+       at the describe level
+         sets the config:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
+
+The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy,experimentalOptions
+
+https://on.cypress.io/config
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     override-with-experimental-retries.cy.js                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  override-with-experimental-retries.      XX:XX        1        -        1        -        - │
+  │    cy.js                                                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['testConfigOverrides / experimental retries specific behavior / succeeds when setting legacy retries as an override to experimental retries'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (override-with-legacy-retries.cy.js)                                       │
+  │ Searched:   cypress/e2e/override-with-legacy-retries.cy.js                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  override-with-legacy-retries.cy.js                                              (1 of 1)
+
+
+  overriding experimental retries with legacy retries
+    ✓ sets the config
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     override-with-legacy-retries.cy.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  override-with-legacy-retries.cy.js       XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
