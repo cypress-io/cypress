@@ -820,7 +820,6 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css overflow', () => {
-      // TODO: if the parent has no size and overflow is auto, the content should be hidden not visible
       it('is hidden when parent overflow auto and no width/height', function () {
         expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.hidden
       })
