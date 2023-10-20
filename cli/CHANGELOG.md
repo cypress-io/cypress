@@ -1,6 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.3.2
 
+_Released 10/24/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a performance problem with proxy correlation when requests get aborted and then get miscorrelated with follow up requests. Addressed in [#28094](https://github.com/cypress-io/cypress/pull/28094).
+
 _Released 10/18/2023_
 
 **Bugfixes:**
