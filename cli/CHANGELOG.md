@@ -1,11 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.3.2
 
-_Released 10/25/2023 (PENDING)_
+_Released 10/18/2023_
+
+**Bugfixes:**
+
+- Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from service workers. Fixes [#28054](https://github.com/cypress-io/cypress/issues/28054) and [#28056](https://github.com/cypress-io/cypress/issues/28056).
+- Fixed an issue where proxy correlation would leak over from a previous spec causing performance problems, `cy.intercept` problems, and Test Replay asset capturing issues. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue where redirects of requests that knowingly don't have CDP traffic should also be assumed to not have CDP traffic. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue with Accept Encoding headers by forcing gzip when no accept encoding header is sent and using identity if gzip is not sent. Fixes [#28025](https://github.com/cypress-io/cypress/issues/28025).
 
 **Dependency Updates:**
 
-- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) from `7.22.9` to `7.23.2` to address the [SNYK-JS-SEMVER-3247795](https://snyk.io/vuln/SNYK-JS-SEMVER-3247795) security vulnerability. Upgraded [`@babel/traverse`](https://www.npmjs.com/package/@babel/traverse) from `7.22.8` to `7.23.2` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Upgraded [`react-docgen`](https://www.npmjs.com/package/react-docgen) from `6.0.0-alpha.3` to `6.0.4` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) from `7.22.9` to `7.23.2` to address the [SNYK-JS-SEMVER-3247795](https://snyk.io/vuln/SNYK-JS-SEMVER-3247795) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`@babel/traverse`](https://www.npmjs.com/package/@babel/traverse) from `7.22.8` to `7.23.2` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`react-docgen`](https://www.npmjs.com/package/react-docgen) from `6.0.0-alpha.3` to `6.0.4` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
 
 ## 13.3.1
 

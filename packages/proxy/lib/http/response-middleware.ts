@@ -656,6 +656,11 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
+  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
+  if (this.req.noPreRequestExpected) {
+    this.addPendingUrlWithoutPreRequest(newUrl)
+  }
+
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
