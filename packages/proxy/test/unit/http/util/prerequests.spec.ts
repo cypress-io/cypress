@@ -207,7 +207,7 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 3)
 
-    preRequests.removePending('1235')
+    preRequests.removePendingPreRequest('1235')
 
     expectPendingCounts(0, 2)
   })
@@ -222,7 +222,7 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 6)
 
-    preRequests.removePending('1235')
+    preRequests.removePendingPreRequest('1235')
 
     expectPendingCounts(0, 2)
   })

@@ -29,6 +29,7 @@ export type CorrelationInformation = {
 export type GetPreRequestCb = (correlationInformation: CorrelationInformation) => void
 
 export type PendingRequest = {
+  key: string
   ctxDebug
   callback?: GetPreRequestCb
   timeout: NodeJS.Timeout
@@ -74,10 +75,14 @@ class QueueMap<T> {
     })
   }
   removeExact (queueKey: string, value: T) {
-    const i = this.queues[queueKey].findIndex((v) => v === value)
+    const queue = this.queues[queueKey]
 
-    this.queues[queueKey].splice(i, 1)
-    if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
+    if (queue) {
+      const i = queue.findIndex((v) => v === value)
+
+      this.queues[queueKey].splice(i, 1)
+      if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
+    }
   }
 
   forEach (fn: (value: T) => void) {
@@ -210,7 +215,7 @@ export class PreRequests {
     })
   }
 
-  removePending (requestId: string) {
+  removePendingPreRequest (requestId: string) {
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
       return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
     })
@@ -267,6 +272,7 @@ export class PreRequests {
     }
 
     const pendingRequest: PendingRequest = {
+      key,
       ctxDebug,
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
@@ -293,6 +299,12 @@ export class PreRequests {
 
   setPreRequestTimeout (requestTimeout: number) {
     this.requestTimeout = requestTimeout
+  }
+
+  removePendingRequest (pendingRequest: PendingRequest) {
+    this.pendingRequests.removeExact(pendingRequest.key, pendingRequest)
+    clearTimeout(pendingRequest.timeout)
+    delete pendingRequest.callback
   }
 
   reset () {

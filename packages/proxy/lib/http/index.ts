@@ -68,6 +68,7 @@ type HttpMiddlewareCtx<T> = {
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
   addPendingUrlWithoutPreRequest: (url: string) => void
+  removePendingRequest: (pendingRequest: PendingRequest) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
@@ -331,15 +332,18 @@ export class Http {
       addPendingUrlWithoutPreRequest: (url) => {
         this.preRequests.addPendingUrlWithoutPreRequest(url)
       },
+      removePendingRequest: (pendingRequest: PendingRequest) => {
+        this.preRequests.removePendingRequest(pendingRequest)
+      },
       protocolManager: this.protocolManager,
     }
 
     const onError = (error: Error): Promise<void> => {
-      const pendingRequest = ctx.pendingRequest as PendingRequest
+      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
 
       if (pendingRequest) {
-        clearTimeout(pendingRequest.timeout)
-        delete pendingRequest.callback
+        delete ctx.pendingRequest
+        ctx.removePendingRequest(pendingRequest)
       }
 
       ctx.error = error
@@ -435,7 +439,7 @@ export class Http {
   }
 
   removePendingBrowserPreRequest (requestId: string) {
-    this.preRequests.removePending(requestId)
+    this.preRequests.removePendingPreRequest(requestId)
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
