@@ -139,6 +139,7 @@ type CreateParams = {
   port?: number
   onReconnect?: (client: CriClient) => void
   protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
 }
 
 export const create = async ({
@@ -148,6 +149,7 @@ export const create = async ({
   port,
   onReconnect,
   protocolManager,
+  fullyManageTabs,
 }: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
@@ -269,28 +271,32 @@ export const create = async ({
     })
 
     // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
-    if (host) {
+    if (host && fullyManageTabs) {
       // This is frustrating, but regular web workers work differently than any of the other target types. They are not auto detected
       // by Target.setDiscoverTargets so we need to call setAutoAttach to detect them. For all the other types we use the target created event.
       // Once detected we need to enable network traffic so that we can get CDP network events for the workers.
 
       cri.on('Target.targetCreated', async (event) => {
-        if (event.targetInfo.type !== 'worker') {
-          const { sessionId } = await cri.send('Target.attachToTarget', {
-            targetId: event.targetInfo.targetId,
-            flatten: true,
-          })
+        if (event.targetInfo.type !== 'page') {
+          if (event.targetInfo.type !== 'worker') {
+            const { sessionId } = await cri.send('Target.attachToTarget', {
+              targetId: event.targetInfo.targetId,
+              flatten: true,
+            })
 
-          await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), sessionId)
+            await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), sessionId)
+          }
         }
       })
 
       cri.on('Target.attachedToTarget', async (event) => {
-        if (event.targetInfo.type === 'worker') {
-          await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), event.sessionId)
-        }
+        if (event.targetInfo.type !== 'page') {
+          if (event.targetInfo.type === 'worker') {
+            await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), event.sessionId)
+          }
 
-        await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+          await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+        }
       })
 
       await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })

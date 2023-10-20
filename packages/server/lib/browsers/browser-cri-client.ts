@@ -125,7 +125,7 @@ export class BrowserCriClient {
   gracefulShutdown?: Boolean
   onClose: Function | null = null
 
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
+  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape, private fullyManageTabs?: boolean) { }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -151,9 +151,10 @@ export class BrowserCriClient {
         onAsynchronousError,
         onReconnect,
         protocolManager,
+        fullyManageTabs,
       })
 
-      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs)
 
       if (fullyManageTabs) {
         await browserClient.send('Target.setDiscoverTargets', { discover: true })
@@ -270,7 +271,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager })
+      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs })
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
@@ -323,6 +324,7 @@ export class BrowserCriClient {
         host: this.host,
         port: this.port,
         protocolManager: this.protocolManager,
+        fullyManageTabs: this.fullyManageTabs,
       })
     } else {
       this.currentlyAttachedTarget = undefined
