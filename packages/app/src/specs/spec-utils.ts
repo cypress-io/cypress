@@ -1,20 +1,14 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import { ComputedRef, Ref, ref, watch } from 'vue'
-import _, { cloneDeep } from 'lodash'
+import _ from 'lodash'
 import { FuzzyFoundSpec, getPlatform } from './tree/useCollapsibleTree'
 
 export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
-  const normalizedSearchValue = normalizeSpecName(searchValue)
-
-  const clonedSpecs = cloneDeep(specs).map((spec) => {
-    return {
-      ...spec,
-      baseName: normalizeSpecName(spec.baseName) }
-  })
+  const normalizedSearchValue = normalizeSpecValue(searchValue)
 
   const fuzzySortResult = fuzzySort
-  .go(normalizedSearchValue, clonedSpecs, { keys: ['relative', 'baseName'], allowTypo: false, threshold: -3000 })
+  .go(normalizedSearchValue, specs, { keys: ['normalizedRelative', 'normalizedBaseName'], allowTypo: false, threshold: -3000 })
   .map((result) => {
     const [relative, baseName] = result
 
@@ -30,7 +24,7 @@ export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchVal
   return fuzzySortResult
 }
 
-function normalizeSpecName (name: string) {
+function normalizeSpecValue (name: string) {
   const escapedPath = getPlatform() === 'win32' ? name.replaceAll('/', '\\') : name
   // replace dash, underscore and space with common character (in this case dash)
   // they are replaced and not removed to preserve string length (so highlighting works correctly)
@@ -42,6 +36,8 @@ function normalizeSpecName (name: string) {
 export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
   return {
     ...spec,
+    normalizedBaseName: normalizeSpecValue(spec.baseName),
+    normalizedRelative: normalizeSpecValue(spec.relative),
     fuzzyIndexes: {
       relative: [],
       baseName: [],
