@@ -236,6 +236,18 @@ describe('http/util/prerequests', () => {
     expect(cbServiceWorker).to.be.calledWith()
   })
 
+  it('removes a pending request', () => {
+    const cb = sinon.stub()
+
+    const preRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+
+    expectPendingCounts(1, 0)
+
+    preRequests.removePendingRequest(preRequest!)
+
+    expectPendingCounts(0, 0)
+  })
+
   it('resets the queues', () => {
     let callbackCalled = false
 
