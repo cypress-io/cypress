@@ -91,6 +91,7 @@ describe('testConfigOverrides', () => {
       configFile: 'cypress-legacy-retries.config.js',
       expectedExitCode: 1,
       browser: '!webkit',
+      snapshot: true,
     })
 
     systemTests.it('succeeds when setting legacy retries as an override to experimental retries', {
@@ -99,6 +100,7 @@ describe('testConfigOverrides', () => {
       configFile: 'cypress-experimental-retries.config.js',
       expectedExitCode: 0,
       browser: '!webkit',
+      snapshot: true,
     })
   })
 })
