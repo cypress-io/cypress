@@ -53,4 +53,8 @@ export class NetworkProxy {
   setProtocolManager (protocolManager) {
     this.http.setProtocolManager(protocolManager)
   }
+
+  setPreRequestTimeout (timeout) {
+    this.http.setPreRequestTimeout(timeout)
+  }
 }
