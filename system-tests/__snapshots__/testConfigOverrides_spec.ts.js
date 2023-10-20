@@ -1354,3 +1354,128 @@ https://on.cypress.io/config
 
 
 `
+
+exports['testConfigOverrides / experimental retries specific behavior / fails when attempting to set experimental retries as override'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (override-with-experimental-retries.cy.js)                                 │
+  │ Searched:   cypress/e2e/override-with-experimental-retries.cy.js                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  override-with-experimental-retries.cy.js                                        (1 of 1)
+
+
+  overriding legacy retries with experimental retries
+    at the describe level
+      1) sets the config
+
+
+  0 passing
+  1 failing
+
+  1) overriding legacy retries with experimental retries
+       at the describe level
+         sets the config:
+     CypressError: The config passed to your suite-level overrides has the following validation error:
+
+The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy, experimentalOptions
+
+https://on.cypress.io/config
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     override-with-experimental-retries.cy.js                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  override-with-experimental-retries.      XX:XX        1        -        1        -        - │
+  │    cy.js                                                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['testConfigOverrides / experimental retries specific behavior / succeeds when setting legacy retries as an override to experimental retries'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (override-with-legacy-retries.cy.js)                                       │
+  │ Searched:   cypress/e2e/override-with-legacy-retries.cy.js                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  override-with-legacy-retries.cy.js                                              (1 of 1)
+
+
+  overriding experimental retries with legacy retries
+    ✓ sets the config
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     override-with-legacy-retries.cy.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  override-with-legacy-retries.cy.js       XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
