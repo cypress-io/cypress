@@ -28,6 +28,8 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
     steps:
       - name: is-collaborator
+        # Checks if the user that created the issue/PR has write access to the cypress repo
+        # We ignore these PRs and issues since review of those is handled by internal team processes
         run: |
           gh api graphql -f query='
             query($org: String!, $repo: String!, $user: String!) {
@@ -40,11 +42,12 @@ jobs:
 
           echo 'IS_COLLABORATOR='$(jq -r '.data.repository.collaborators.totalCount' collaborators.json) >> $GITHUB_ENV
       - uses: actions/add-to-project@v0.4.1
-        # only add issues/prs from outside contributors to the project
         if: ${{ env.IS_COLLABORATOR == 0 || github.event.repository.name == 'cypress-support-internal' || github.event.pull_request.user.login == 'github-actions[bot]' || github.event.issue.user.login == 'github-actions[bot]' }}
         with:
           project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          labeled: "type: feature", "type: enhancement"          
+          label-operator: NOT
   add-contributor-pr-comment:
     runs-on: ubuntu-latest
     steps:
