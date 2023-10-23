@@ -5,15 +5,28 @@ _Released 10/24/2023 (PENDING)_
 
 **Features:**
 
-- Users can now specify different retry options with the `experimentalRetries` configuration. These configuration options can be useful when detecting flake and figuring out under what conditions you would like to pass a retried test. The `retries` configuration option includes two new keys, `experimentalStrategy` and `experimentalOptions`. The first, `experimentalStrategy`, can be one of two options:
-    - `detect-flake-and-pass-on-threshold`
-    - `detect-flake-but-always-fail`
+- Introduces experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
 
-  `detect-flake-and-pass-on-threshold` is similar to how retries work today. Users will be able to specify a retry limit and specify a required number of passes needed in order for that test to be marked as passed. Today, that limit is `1`, but users can set the limit to whatever they'd like with this strategy by specifying the `experimentalOptions.passesRequired` key in their global configuration. This can be useful if a test is retrying and is known to be flaky, but you want to make sure that the test can at least pass a certain threshold in order to be marked as passed overall, which might help in confidence that the test is just flaky and the failure is not considered legitimate. It's important to note that if the `passesRequired` can not be achieved by the remaining retries of the test, the test will stop retrying and the test will be marked as a failure.
+## 13.3.2
 
-  The other, `detect-flake-but-always-fail`, will always mark a test that enters retries as failed, regardless of how many retried attempts pass. There is an option here, called `experimentalOptions.stopIfAnyPassed`, that will stop the test retries if any retry attempt passes. Without this option, you might want to see what the probability that your test might pass (similar to `detect-flake-and-pass-on-threshold`, but mark the test as failed as you might not want to mark any detected flaky test as a passed test.
+_Released 10/18/2023_
 
-  Both of these strategies require the `experimentalOptions.maxRetries` option to be set, which will be the maximum number of retries a test might run. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
+**Bugfixes:**
+
+- Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from service workers. Fixes [#28054](https://github.com/cypress-io/cypress/issues/28054) and [#28056](https://github.com/cypress-io/cypress/issues/28056).
+- Fixed an issue where proxy correlation would leak over from a previous spec causing performance problems, `cy.intercept` problems, and Test Replay asset capturing issues. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue where redirects of requests that knowingly don't have CDP traffic should also be assumed to not have CDP traffic. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue with Accept Encoding headers by forcing gzip when no accept encoding header is sent and using identity if gzip is not sent. Fixes [#28025](https://github.com/cypress-io/cypress/issues/28025).
+
+**Dependency Updates:**
+
+- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) from `7.22.9` to `7.23.2` to address the [SNYK-JS-SEMVER-3247795](https://snyk.io/vuln/SNYK-JS-SEMVER-3247795) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`@babel/traverse`](https://www.npmjs.com/package/@babel/traverse) from `7.22.8` to `7.23.2` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`react-docgen`](https://www.npmjs.com/package/react-docgen) from `6.0.0-alpha.3` to `6.0.4` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+
+## 13.3.1
+
+_Released 10/11/2023_
 
 ## 13.3.2
 
