@@ -1281,6 +1281,7 @@ exports['testConfigOverrides / experimental retries specific behavior / fails wh
 The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy, experimentalOptions
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
 
