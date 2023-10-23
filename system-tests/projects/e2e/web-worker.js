@@ -4,3 +4,11 @@ importScripts('/ww.js')
 postMessage({
   foo: 'bar',
 })
+
+onmessage = (e) => {
+  if (e.data.foo === 'bar') {
+    postMessage({
+      foo: 'bar2',
+    })
+  }
+}
