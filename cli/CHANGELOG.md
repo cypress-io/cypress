@@ -3,6 +3,8 @@
 
 _Released 10/24/2023 (PENDING)_
 
+**Bugfixes:**
+
 - Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from web and shared workers. Fixes [#28104](https://github.com/cypress-io/cypress/issues/28104).
 
 ## 13.3.2
