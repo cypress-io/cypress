@@ -5,7 +5,7 @@ _Released 10/24/2023 (PENDING)_
 
 **Features:**
 
-- Introduces experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
+- Introduced experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
 
 ## 13.3.2
 
