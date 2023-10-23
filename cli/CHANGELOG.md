@@ -6,6 +6,7 @@ _Released 10/24/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where an element's visibility would return visible when it was actually hidden. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+- Fixed a regression in [10.0.0](#10.0.0), where search would not find a spec if the file name contains "-" or "\_", but search prompt contains " " instead (e.g. search file "spec-file.cy.ts" with prompt "spec file"). Fixes [#25303](https://github.com/cypress-io/cypress/issues/25303).
 
 ## 13.3.2
 
