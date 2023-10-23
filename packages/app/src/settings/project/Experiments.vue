@@ -39,7 +39,7 @@ import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ExperimentsFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import type { CypressResolvedConfig } from './projectSettings'
+import type { CypressResolvedConfig, CypressConfigEntry } from './projectSettings'
 const { t } = useI18n()
 
 gql`
@@ -55,24 +55,31 @@ const props = defineProps<{
 
 const localExperiments = computed(() => {
   // get experiments out of the config
-  const experimentalConfigurations = props.gql?.config ? (props.gql.config as CypressResolvedConfig).filter((item) => item.field.startsWith('experimental')) : []
+  const cfg = (props.gql?.config || []) as CypressResolvedConfig
+
+  const experimentalConfigurations = cfg.filter((item) => item.field.startsWith('experimental'))
 
   // get experimental retry properties on the 'retries' config object. Mutate the experimentalConfigurations array as to not have side effects with props.gql.config
   // TODO: remove this once experimentalRetries becomes GA. This is to be treated as a one off as supported nested experiments inside config is rare.
-  const { value: { experimentalStrategy, experimentalOptions, from } } = props.gql?.config.find((item) => item.field === 'retries')
+  // const { value: { experimentalStrategy, experimentalOptions, from } }
+  const retryConfig = cfg.find((item) => item.field === 'retries')
 
-  experimentalConfigurations.push({
-    field: 'retries.experimentalStrategy',
-    from,
-    value: experimentalStrategy,
-  })
+  if (retryConfig) {
+    const { value: { experimentalStrategy, experimentalOptions, from } } = retryConfig as CypressConfigEntry & { value: Record<string, string> }
 
-  experimentalConfigurations.push({
-    field: 'retries.experimentalOptions',
-    from,
-    value: experimentalOptions,
-  })
+    experimentalConfigurations.push({
+      field: 'retries.experimentalStrategy',
+      from,
+      value: experimentalStrategy,
+    })
+
+    experimentalConfigurations.push({
+      field: 'retries.experimentalOptions',
+      from,
+      value: experimentalOptions,
+    })
   // end TODO removal
+  }
 
   return experimentalConfigurations.map((configItem) => {
     return {
