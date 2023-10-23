@@ -15,10 +15,8 @@ export interface Experiment {
   key: string
 }
 
-export type CypressConfigEntry = {
+export type CypressResolvedConfig = Array<{
   field: string
   from: 'default'| 'config' | 'plugin' | 'env'
   value: string | number | boolean | Record<string, string> | Array<string>
-}
-
-export type CypressResolvedConfig = Array<CypressConfigEntry>
+}>
