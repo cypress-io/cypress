@@ -63,7 +63,7 @@ describe('lib/browsers/cri-client', function () {
         close,
       })
 
-      return browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError, undefined, protocolManager, { fullyManageTabs })
+      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs })
     }
   })
 
@@ -100,7 +100,7 @@ describe('lib/browsers/cri-client', function () {
 
       criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-      await browserCriClient.BrowserCriClient.create(['127.0.0.1', '::1'], THROWS_PORT, 'Chrome', onError)
+      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(criImport.Version).to.be.calledOnce
     })
@@ -111,7 +111,7 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)
+      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(client.attachToTargetUrl).to.be.instanceOf(Function)
 
@@ -123,7 +123,7 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })

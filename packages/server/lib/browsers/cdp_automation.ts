@@ -13,8 +13,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import type { CriClient } from './cri-client'
-import utils from './utils'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS, type CriClient } from './cri-client'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -199,7 +198,7 @@ export class CdpAutomation implements CDPClient {
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
-    await sendDebuggerCommandFn('Network.enable', utils.getNetworkEnableOptions(protocolManager))
+    await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
     return cdpAutomation
   }

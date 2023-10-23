@@ -24,6 +24,7 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: true,
+          networkEnableOptions: enabledObject,
         } as ProtocolManagerShape
 
         const localCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
@@ -49,6 +50,7 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: false,
+          networkEnableOptions: disabledObject,
         } as ProtocolManagerShape
 
         const localCommandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
@@ -91,7 +93,7 @@ context('lib/browsers/cdp_automation', () => {
         const startScreencast = this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
         const screencastFrameAck = this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').resolves()
 
-        await cdpAutomation.startVideoRecording(writeVideoFrame)
+        await cdpAutomation.startVideoRecording(writeVideoFrame, {})
 
         expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
         expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)

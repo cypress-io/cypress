@@ -9,7 +9,6 @@ import type CDP from 'chrome-remote-interface'
 
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
 import type { ProtocolManagerShape } from '@packages/types'
-import utils from './utils'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -44,6 +43,12 @@ type Subscription = {
 interface CDPClient extends CDP.Client {
   off: EventEmitter['off']
   _ws: WebSocket
+}
+
+export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
+  maxTotalBufferSize: 0,
+  maxResourceBufferSize: 0,
+  maxPostDataSize: 0,
 }
 
 export interface CriClient {
@@ -276,6 +281,8 @@ export const create = async ({
       // by Target.setDiscoverTargets so we need to call setAutoAttach to detect them. For all the other types we use the target created event.
       // Once detected we need to enable network traffic so that we can get CDP network events for the workers.
 
+      const networkEnableOptions = protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS
+
       cri.on('Target.targetCreated', async (event) => {
         if (event.targetInfo.type !== 'page') {
           if (event.targetInfo.type !== 'worker') {
@@ -284,7 +291,7 @@ export const create = async ({
               flatten: true,
             })
 
-            await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), sessionId)
+            await cri.send('Network.enable', networkEnableOptions, sessionId)
           }
         }
       })
@@ -292,7 +299,7 @@ export const create = async ({
       cri.on('Target.attachedToTarget', async (event) => {
         if (event.targetInfo.type !== 'page') {
           if (event.targetInfo.type === 'worker') {
-            await cri.send('Network.enable', utils.getNetworkEnableOptions(protocolManager), event.sessionId)
+            await cri.send('Network.enable', networkEnableOptions, event.sessionId)
           }
 
           await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)

@@ -1,7 +1,7 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { BrowserLaunchOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
@@ -419,18 +419,6 @@ const listenForDownload = () => {
   }
 }
 
-const getNetworkEnableOptions = (protocolManager: ProtocolManagerShape | undefined) => {
-  return protocolManager?.protocolEnabled ? {
-    maxTotalBufferSize: 0,
-    maxResourceBufferSize: 0,
-    maxPostDataSize: 64 * 1024,
-  } : {
-    maxTotalBufferSize: 0,
-    maxResourceBufferSize: 0,
-    maxPostDataSize: 0,
-  }
-}
-
 export = {
 
   extendLaunchOptionsFromPlugins,
@@ -468,8 +456,6 @@ export = {
   handleDownloadLinksViaCDP,
 
   listenForDownload,
-
-  getNetworkEnableOptions,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
