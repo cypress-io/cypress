@@ -94,7 +94,7 @@ describe('Routes', () => {
 
     Fixtures.scaffold()
 
-    this.setup = async (initialUrl, obj = {}, spec) => {
+    this.setup = async (initialUrl, obj = {}, spec, shouldCorrelatePreRequests = false) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
@@ -170,6 +170,7 @@ describe('Routes', () => {
                 createRoutes,
                 testingType: 'e2e',
                 exit: false,
+                shouldCorrelatePreRequests: () => shouldCorrelatePreRequests,
               })
               .spread(async (port) => {
                 const automationStub = {
@@ -187,6 +188,8 @@ describe('Routes', () => {
                 this.session = session(this.srv)
 
                 this.proxy = `http://localhost:${port}`
+
+                this.networkProxy = this.server._networkProxy
               }),
             ])
           })
@@ -979,6 +982,108 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           expect(res.body).to.include('hello from bar!')
+        })
+      })
+    })
+
+    context('basic request with correlation', () => {
+      beforeEach(function () {
+        return this.setup('http://www.github.com', undefined, undefined, true)
+      })
+
+      it('properly correlates when CDP failures come first', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/',
+        })
+
+        this.networkProxy.removePendingBrowserPreRequest({
+          requestId: '1',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when proxy failure come first', function () {
+        this.networkProxy.setPreRequestTimeout(50)
+        // If this takes longer than the Promise.delay and the prerequest timeout then the second
+        // call has hit the prerequest timeout which is a problem
+        this.timeout(150)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/')
+        .delay(50)
+        .once()
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        this.rp({
+          url: 'http://www.github.com/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
+          },
+          // Timeout needs to be less than the prerequest timeout + the nock delay
+          timeout: 75,
+        }).catch(() => {})
+
+        // Wait 100 ms to make sure the request times out
+        return Promise.delay(100).then(() => {
+          nock(this.server.remoteStates.current().origin)
+          .get('/')
+          .once()
+          .reply(200, 'hello from baz!', {
+            'Content-Type': 'text/html',
+          })
+
+          // This should not immediately correlate. If it does, then the next request will timeout
+          this.networkProxy.addPendingBrowserPreRequest({
+            requestId: '1',
+            method: 'GET',
+            url: 'http://www.github.com/',
+          })
+
+          const followupRequestPromise = this.rp({
+            url: 'http://www.github.com/',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+
+          return followupRequestPromise.then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('hello from baz!')
+          })
         })
       })
     })

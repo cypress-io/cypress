@@ -5,6 +5,7 @@ _Released 10/24/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed a performance problem with proxy correlation when requests get aborted and then get miscorrelated with follow up requests. Fixed in [#28094](https://github.com/cypress-io/cypress/pull/28094).
 - Fixed a regression in [10.0.0](#10.0.0), where search would not find a spec if the file name contains "-" or "\_", but search prompt contains " " instead (e.g. search file "spec-file.cy.ts" with prompt "spec file"). Fixes [#25303](https://github.com/cypress-io/cypress/issues/25303).
 
 ## 13.3.2

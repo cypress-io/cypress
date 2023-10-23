@@ -207,7 +207,7 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 3)
 
-    preRequests.removePending('1235')
+    preRequests.removePendingPreRequest('1235')
 
     expectPendingCounts(0, 2)
   })
@@ -222,7 +222,7 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 6)
 
-    preRequests.removePending('1235')
+    preRequests.removePendingPreRequest('1235')
 
     expectPendingCounts(0, 2)
   })
@@ -234,6 +234,27 @@ describe('http/util/prerequests', () => {
 
     expect(cbServiceWorker).to.be.calledOnce
     expect(cbServiceWorker).to.be.calledWith()
+  })
+
+  it('removes a pending request', () => {
+    const cb = sinon.stub()
+
+    const firstPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+    const secondPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+
+    expectPendingCounts(2, 0)
+
+    preRequests.removePendingRequest(firstPreRequest!)
+
+    expectPendingCounts(1, 0)
+
+    preRequests.removePendingRequest(firstPreRequest!)
+
+    expectPendingCounts(1, 0)
+
+    preRequests.removePendingRequest(secondPreRequest!)
+
+    expectPendingCounts(0, 0)
   })
 
   it('resets the queues', () => {
