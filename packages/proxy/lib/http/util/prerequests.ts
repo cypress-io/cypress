@@ -75,11 +75,9 @@ class QueueMap<T> {
     })
   }
   removeExact (queueKey: string, value: T) {
-    const queue = this.queues[queueKey]
+    const i = this.queues[queueKey]?.findIndex((v) => v === value)
 
-    if (queue) {
-      const i = queue.findIndex((v) => v === value)
-
+    if (i > -1) {
       this.queues[queueKey].splice(i, 1)
       if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
     }

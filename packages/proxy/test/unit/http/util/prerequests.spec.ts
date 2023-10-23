@@ -239,11 +239,20 @@ describe('http/util/prerequests', () => {
   it('removes a pending request', () => {
     const cb = sinon.stub()
 
-    const preRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+    const firstPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+    const secondPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+
+    expectPendingCounts(2, 0)
+
+    preRequests.removePendingRequest(firstPreRequest!)
 
     expectPendingCounts(1, 0)
 
-    preRequests.removePendingRequest(preRequest!)
+    preRequests.removePendingRequest(firstPreRequest!)
+
+    expectPendingCounts(1, 0)
+
+    preRequests.removePendingRequest(secondPreRequest!)
 
     expectPendingCounts(0, 0)
   })
