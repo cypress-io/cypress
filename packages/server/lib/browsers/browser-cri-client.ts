@@ -3,7 +3,7 @@ import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create, CriClient } from './cri-client'
+import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -195,6 +195,22 @@ export class BrowserCriClient {
       const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
 
       if (fullyManageTabs) {
+        // The basic approach here is we attach to targets and enable network traffic
+        // We must attach in a paused state so that we can enable network traffic before the target starts running.
+        browserClient.on('Target.attachedToTarget', async (event) => {
+          if (event.targetInfo.type !== 'page') {
+            const sessionId = await browserCriClient.currentlyAttachedTarget?.send('Target.attachToTarget', { targetId: event.targetInfo.targetId, flatten: true })
+
+            await browserCriClient.currentlyAttachedTarget?.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, sessionId?.sessionId)
+          }
+
+          if (event.waitingForDebugger) {
+            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+          }
+        })
+
+        await browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
+
         await browserClient.send('Target.setDiscoverTargets', { discover: true })
         browserClient.on('Target.targetDestroyed', (event) => {
           debug('Target.targetDestroyed %o', {

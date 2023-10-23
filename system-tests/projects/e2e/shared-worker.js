@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-importScripts('/ww.js')
+importScripts('/sw.js')
 
 self.addEventListener('connect', (event) => {
   const port = event.ports[0]

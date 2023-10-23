@@ -275,39 +275,24 @@ export const create = async ({
       crashed = true
     })
 
-    // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
+    const networkEnableOptions = protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS
+
+    // We only want to try and add child target traffic if we have a host set. This indicates that this is the child cri client.
+    // Browser cri traffic is handled in browser-cri-client.ts. The basic approach here is we attach to targets and enable network traffic
+    // We must attach in a paused state so that we can enable network traffic before the target starts running.
     if (host && fullyManageTabs) {
-      // This is frustrating, but regular web workers work differently than any of the other target types. They are not auto detected
-      // by Target.setDiscoverTargets so we need to call setAutoAttach to detect them. For all the other types we use the target created event.
-      // Once detected we need to enable network traffic so that we can get CDP network events for the workers.
-
-      const networkEnableOptions = protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS
-
-      cri.on('Target.targetCreated', async (event) => {
-        if (event.targetInfo.type !== 'page') {
-          if (event.targetInfo.type !== 'worker') {
-            const { sessionId } = await cri.send('Target.attachToTarget', {
-              targetId: event.targetInfo.targetId,
-              flatten: true,
-            })
-
-            await cri.send('Network.enable', networkEnableOptions, sessionId)
-          }
-        }
-      })
-
       cri.on('Target.attachedToTarget', async (event) => {
-        if (event.targetInfo.type !== 'page') {
-          if (event.targetInfo.type === 'worker') {
-            await cri.send('Network.enable', networkEnableOptions, event.sessionId)
-          }
+        // Service workers get attached at the page and browser level. We only want to handle them at the browser level
+        if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'service_worker') {
+          await cri.send('Network.enable', networkEnableOptions, event.sessionId)
+        }
 
+        if (event.waitingForDebugger) {
           await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
         }
       })
 
       await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
-      await cri.send('Target.setDiscoverTargets', { discover: true })
     }
   }
 
@@ -316,7 +301,7 @@ export const create = async ({
   client = {
     targetId: target,
 
-    async send (command: CdpCommand, params?: object) {
+    async send (command: CdpCommand, params?: object, sessionId?: string) {
       if (crashed) {
         return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
       }
@@ -354,7 +339,7 @@ export const create = async ({
 
       if (connected) {
         try {
-          return await cri.send(command, params)
+          return await cri.send(command, params, sessionId)
         } catch (err) {
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The

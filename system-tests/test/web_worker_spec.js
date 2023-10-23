@@ -5,6 +5,7 @@ const systemTests = require('../lib/system-tests').default
 const e2ePath = Fixtures.projectPath('e2e')
 
 let requestsForWebWorker = 0
+let requestsForSharedWorker = 0
 
 const onServer = function (app) {
   app.use(express.static(e2ePath, {
@@ -14,6 +15,15 @@ const onServer = function (app) {
 
   app.get('/ww.js', (req, res) => {
     requestsForWebWorker += 1
+
+    res.set('Content-Type', 'application/javascript')
+    res.set('Mime-Type', 'application/javascript')
+
+    return res.send('const x = 1')
+  })
+
+  app.get('/sw.js', (req, res) => {
+    requestsForSharedWorker += 1
 
     res.set('Content-Type', 'application/javascript')
     res.set('Mime-Type', 'application/javascript')
@@ -31,12 +41,13 @@ describe('e2e web worker', () => {
     }],
   })
 
-  systemTests.it('executes one spec with a cached call', {
+  systemTests.it('executes one spec with a web and shared worker', {
     project: 'e2e',
     spec: 'web_worker.cy.js',
     onRun: async (exec, browser) => {
       await exec()
-      expect(requestsForWebWorker).to.eq(2)
+      expect(requestsForWebWorker).to.eq(1)
+      expect(requestsForSharedWorker).to.eq(1)
     },
   })
 })
