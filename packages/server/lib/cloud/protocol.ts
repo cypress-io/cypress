@@ -14,7 +14,6 @@ import pkg from '@packages/root'
 import env from '../util/env'
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
-import { DEFAULT_NETWORK_ENABLE_OPTIONS } from '../browsers/cri-client'
 
 const routes = require('./routes')
 
@@ -78,7 +77,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 64 * 1024,
-    } : DEFAULT_NETWORK_ENABLE_OPTIONS
+    } : undefined
   }
 
   async setupProtocol (script: string, options: ProtocolManagerOptions) {

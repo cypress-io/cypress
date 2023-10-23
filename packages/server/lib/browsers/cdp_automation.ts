@@ -13,7 +13,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import { DEFAULT_NETWORK_ENABLE_OPTIONS, type CriClient } from './cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
