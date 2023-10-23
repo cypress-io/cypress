@@ -9,7 +9,7 @@ import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PreRequests } from './util/prerequests'
+import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
@@ -63,10 +63,12 @@ type HttpMiddlewareCtx<T> = {
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
+  pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getPreRequest: (cb: GetPreRequestCb) => void
+  getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
   addPendingUrlWithoutPreRequest: (url: string) => void
+  removePendingRequest: (pendingRequest: PendingRequest) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
@@ -325,15 +327,25 @@ export class Http {
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
-        this.preRequests.get(ctx.req, ctx.debug, cb)
+        return this.preRequests.get(ctx.req, ctx.debug, cb)
       },
       addPendingUrlWithoutPreRequest: (url) => {
         this.preRequests.addPendingUrlWithoutPreRequest(url)
+      },
+      removePendingRequest: (pendingRequest: PendingRequest) => {
+        this.preRequests.removePendingRequest(pendingRequest)
       },
       protocolManager: this.protocolManager,
     }
 
     const onError = (error: Error): Promise<void> => {
+      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
+
+      if (pendingRequest) {
+        delete ctx.pendingRequest
+        ctx.removePendingRequest(pendingRequest)
+      }
+
       ctx.error = error
       if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled) {
         ctx.req.browserPreRequest.errorHandled = true
@@ -427,7 +439,7 @@ export class Http {
   }
 
   removePendingBrowserPreRequest (requestId: string) {
-    this.preRequests.removePending(requestId)
+    this.preRequests.removePendingPreRequest(requestId)
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
