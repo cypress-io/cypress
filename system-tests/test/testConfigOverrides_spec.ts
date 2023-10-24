@@ -66,7 +66,7 @@ describe('testConfigOverrides', () => {
       spec: 'testConfigOverrides/invalid.js',
       snapshot: true,
       browser: browserList,
-      expectedExitCode: 14,
+      expectedExitCode: 15,
     })
 
     systemTests.it(`fails when passing invalid config values with beforeEach - [${browserList}]`, {

@@ -102,3 +102,11 @@ describe('throws error when invalid config opt in Cypress.config() in afterEach 
     shouldNotExecute()
   })
 })
+
+describe('it throws an error when `never` overrideLevel option is set in suite config', {
+  experimentalCspAllowList: [],
+}, () => {
+  it('should not execute', () => {
+    shouldNotExecute()
+  })
+})
