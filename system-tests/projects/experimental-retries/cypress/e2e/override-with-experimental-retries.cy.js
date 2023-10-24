@@ -26,4 +26,26 @@ describe('overriding legacy retries with experimental retries', () => {
       expect(retries.openMode).to.eq(openMode)
     })
   })
+
+  describe('at the test level', () => {
+    it('sets the config', {
+      retries: {
+        experimentalStrategy,
+        openMode,
+        runMode,
+        experimentalOptions: {
+          maxRetries,
+          passesRequired,
+        },
+      },
+    }, () => {
+      const retries = Cypress.config('retries')
+
+      expect(retries.experimentalStrategy).to.eq(experimentalStrategy)
+      expect(retries.experimentalOptions?.maxRetries).to.eq(maxRetries)
+      expect(retries.experimentalOptions?.passesRequired).to.eq(passesRequired)
+      expect(retries.runMode).to.eq(runMode)
+      expect(retries.openMode).to.eq(openMode)
+    })
+  })
 })

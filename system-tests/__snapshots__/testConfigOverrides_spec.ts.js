@@ -1377,20 +1377,31 @@ exports['testConfigOverrides / experimental retries specific behavior / fails wh
   overriding legacy retries with experimental retries
     at the describe level
       1) sets the config
+    at the test level
+      2) sets the config
 
 
   0 passing
-  1 failing
+  2 failing
 
   1) overriding legacy retries with experimental retries
        at the describe level
          sets the config:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-The following config keys cannot be set per-suite; they must be set globally: experimentalStrategy, experimentalOptions
+CypressError: The \`retries.experimentalStrategy\` configuration can only be set globally.
 
 https://on.cypress.io/config
-  Error
+      [stack trace lines]
+
+  2) overriding legacy retries with experimental retries
+       at the test level
+         sets the config:
+     CypressError: The config passed to your test-level overrides has the following validation error:
+
+CypressError: The \`retries.experimentalStrategy\` configuration can only be set globally.
+
+https://on.cypress.io/config
       [stack trace lines]
 
 
@@ -1399,9 +1410,9 @@ https://on.cypress.io/config
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
+  │ Tests:        2                                                                                │
   │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
+  │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
@@ -1418,10 +1429,10 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  override-with-experimental-retries.      XX:XX        1        -        1        -        - │
+  │ ✖  override-with-experimental-retries.      XX:XX        2        -        2        -        - │
   │    cy.js                                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

@@ -89,7 +89,7 @@ describe('testConfigOverrides', () => {
       spec: 'override-with-experimental-retries.cy.js',
       project: 'experimental-retries',
       configFile: 'cypress-legacy-retries.config.js',
-      expectedExitCode: 1,
+      expectedExitCode: 2,
       browser: '!webkit',
       snapshot: true,
     })

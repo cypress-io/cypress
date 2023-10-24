@@ -52,22 +52,6 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
 
       try {
         testConfig.applied = overrideLevel
-        // this is unique validation, not applied to the general cy config.
-        // it will be removed when we support defining experimental retries
-        // in test config overrides
-
-        // TODO: remove when experimental overriding is supported
-
-        const experimentalRetryCfgKeys = [
-          'experimentalStrategy', 'experimentalOptions',
-        ]
-
-        const experimentalRetryConfigAttempted = Object.keys(testConfigOverride.retries || {})
-        .filter((v) => experimentalRetryCfgKeys.includes(v))
-
-        if (experimentalRetryConfigAttempted.length) {
-          throw new Error(`The following config keys cannot be set per-${overrideLevel}; they must be set globally: ${experimentalRetryConfigAttempted.join(', ')}`)
-        }
 
         config(testConfigOverride)
       } catch (e: any) {
