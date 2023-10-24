@@ -388,9 +388,11 @@ export const create = async ({
       debug('registering CDP on event %o', { eventName })
 
       cri.on(eventName, cb)
-      // This ensures that we are notified about the browser's events that have been registered (e.g. service workers)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
       // Long term we should use flat mode entirely across all of chrome remote interface
-      browserClient?.on(eventName, cb)
+      if (eventName.startsWith('Network.')) {
+        browserClient?.on(eventName, cb)
+      }
     },
 
     off (eventName, cb) {
@@ -399,7 +401,11 @@ export const create = async ({
       }), 1)
 
       cri.off(eventName, cb)
-      browserClient?.off(eventName, cb)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      if (eventName.startsWith('Network.')) {
+        browserClient?.off(eventName, cb)
+      }
     },
 
     get ws () {
