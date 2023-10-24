@@ -1,5 +1,4 @@
 import { getPathForPlatform } from '../../src/paths'
-import path from 'path'
 
 describe('App: Spec List (E2E)', () => {
   const launchApp = (specFilter?: string) => {
@@ -289,7 +288,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.findAllByTestId('spec-list-directory')
         .should('have.length', 1)
-        .and('contain', path.join('cypress', 'e2e', 'a-b_c'))
+        .and('contain', 'a-b_c')
 
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
@@ -299,7 +298,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.findAllByTestId('spec-list-directory')
         .should('have.length', 1)
-        .and('contain', path.join('cypress', 'e2e', 'a-b_c'))
+        .and('contain', 'a-b_c')
 
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
@@ -309,7 +308,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.findAllByTestId('spec-list-directory')
         .should('have.length', 1)
-        .and('contain', path.join('cypress', 'e2e', 'a-b_c'))
+        .and('contain', 'a-b_c')
 
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
