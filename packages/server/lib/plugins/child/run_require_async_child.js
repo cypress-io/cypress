@@ -83,11 +83,14 @@ function run (ipc, file, projectRoot) {
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
+    debug('PNP? ', process.versions.pnp)
+
     try {
       debug('Loading file %s', file)
 
       return require(file)
     } catch (err) {
+      debug('Somethin went wrong', err)
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
       }

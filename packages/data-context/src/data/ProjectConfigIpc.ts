@@ -308,6 +308,8 @@ export class ProjectConfigIpc extends EventEmitter {
         } else {
           childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
         }
+
+        childOptions.env['NODE_OPTIONS'] = `--require ${this.projectRoot}/.pnp.loader.mjs ${ childOptions.env['NODE_OPTIONS']}`
       } else {
         // Not using ES Modules (via "type": "module"),
         // so we just register the standard ts-node module
@@ -324,6 +326,8 @@ export class ProjectConfigIpc extends EventEmitter {
         } else {
           childOptions.env.NODE_OPTIONS = tsNodeLoader
         }
+
+        childOptions.env['NODE_OPTIONS'] = `--require ${this.projectRoot}/.pnp.cjs ${ childOptions.env['NODE_OPTIONS']}`
       }
     } else {
       // Just use Node's built-in ESM support.
@@ -346,6 +350,8 @@ export class ProjectConfigIpc extends EventEmitter {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       })
     }
+
+    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions })
 
     return fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
   }

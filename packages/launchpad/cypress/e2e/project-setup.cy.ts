@@ -556,7 +556,7 @@ describe('Launchpad: Setup Project', () => {
     })
   })
 
-  describe('Command for package managers', () => {
+  describe.only('Command for package managers', () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
@@ -584,7 +584,7 @@ describe('Launchpad: Setup Project', () => {
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
     // Would be great to fully support Plug n Play eventually, but right now it causes issues relating
     // to not correctly detecting dependencies when installing the binary.
-    it.skip('works with Yarn 3 Plug n Play', () => {
+    it.only('works with Yarn 3 Plug n Play', () => {
       scaffoldAndOpenProject('yarn-v3.1.1-pnp')
 
       cy.visitLaunchpad()

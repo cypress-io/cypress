@@ -174,7 +174,7 @@ export async function getAngularCliModules (projectRoot: string) {
 
   try {
     angularVersion = await getInstalledPackageVersion('@angular-devkit/core', projectRoot)
-  } catch {
+  } catch (err) {
     throw new Error(`Could not resolve "@angular-devkit/core". Do you have it installed?`)
   }
 
@@ -189,6 +189,7 @@ export async function getAngularCliModules (projectRoot: string) {
     '@angular-devkit/core/src/index.js',
   ] as const
 
+  debug('SOMETHING!!!')
   const [
     { generateBrowserWebpackConfigFromContext },
     { getCommonConfig },
@@ -196,10 +197,45 @@ export async function getAngularCliModules (projectRoot: string) {
     { logging },
   ] = await Promise.all(angularCLiModules.map((dep) => {
     try {
+      if (process.versions.pnp) {
+        // For some weird reason pnp will not resolve this with the full path, even though it should exist in the
+        // package
+        if (dep === '@angular-devkit/core/src/index.js') {
+          dep = '@angular-devkit/core'
+        }
+
+        // do something with the PnP API ...
+        debug('PNP angular handler?', process.versions.pnp)
+        debug('dep', dep)
+        const { createRequire, findPnpApi } = require(`module`)
+        const targetPnp = findPnpApi(projectRoot)
+        const targetRequire = createRequire(projectRoot)
+
+        const resolved = targetPnp.resolveRequest(dep, projectRoot)
+        const instance = targetRequire(resolved)
+
+        debug('returning instance')
+
+        return instance
+      }
+
+      // fallback
+      debug('PNP angular handler?', process.versions.pnp)
+      debug('dep', dep)
       const depPath = require.resolve(dep, { paths: [projectRoot] })
 
-      return dynamicAbsoluteImport(depPath)
+      debug('Deppath:', depPath)
+
+      const tmp = dynamicAbsoluteImport(depPath)
+
+      debug('tmp:', tmp)
+
+      return tmp
     } catch (e) {
+      debug('catch:', e)
+      // const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+      // sleep(1000000)
       throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
     }
   }))
@@ -272,6 +308,8 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
     getStylesConfig,
     logging,
   } = await getAngularCliModules(projectRoot)
+
+  debug('generateBrowserWebpackConfigFromContext', generateBrowserWebpackConfigFromContext)
 
   // normalize
   const projectConfig = devServerConfig.options?.projectConfig || await getProjectConfig(projectRoot)
