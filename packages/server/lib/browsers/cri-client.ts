@@ -290,7 +290,7 @@ export const create = async ({
             await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
           }
 
-          if (event.waitingForDebugger && event.targetInfo.type !== 'service_worker') {
+          if (event.waitingForDebugger && event.targetInfo.type !== 'shared_worker') {
             await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
           }
         })
