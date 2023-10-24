@@ -205,7 +205,7 @@ export class BrowserCriClient {
           }
 
           if (event.waitingForDebugger) {
-            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
           }
         })
 
