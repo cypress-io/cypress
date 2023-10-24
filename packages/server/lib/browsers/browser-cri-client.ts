@@ -199,18 +199,16 @@ export class BrowserCriClient {
         // We must attach in a paused state so that we can enable network traffic before the target starts running.
         browserClient.on('Target.attachedToTarget', async (event) => {
           if (event.targetInfo.type !== 'page') {
-            const sessionId = await browserCriClient.currentlyAttachedTarget?.send('Target.attachToTarget', { targetId: event.targetInfo.targetId, flatten: true })
-
-            await browserCriClient.currentlyAttachedTarget?.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, sessionId?.sessionId)
+            await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
           }
 
           if (event.waitingForDebugger) {
-            browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
           }
         })
 
+        // Ideally we could use filter rather than checking the type above, but that was added relatively recently
         await browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
-
         await browserClient.send('Target.setDiscoverTargets', { discover: true })
         browserClient.on('Target.targetDestroyed', (event) => {
           debug('Target.targetDestroyed %o', {
@@ -325,7 +323,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs })
+      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs, browserClient: this.browserClient })
 
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 

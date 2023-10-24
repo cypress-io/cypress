@@ -147,6 +147,7 @@ type CreateParams = {
   onReconnect?: (client: CriClient) => void
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
+  browserClient?: CriClient
 }
 
 export const create = async ({
@@ -157,6 +158,7 @@ export const create = async ({
   onReconnect,
   protocolManager,
   fullyManageTabs,
+  browserClient,
 }: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
@@ -284,7 +286,7 @@ export const create = async ({
       if (fullyManageTabs) {
         cri.on('Target.attachedToTarget', async (event) => {
           // Service workers get attached at the page and browser level. We only want to handle them at the browser level
-          if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'service_worker') {
+          if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
             await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
           }
 
@@ -293,6 +295,7 @@ export const create = async ({
           }
         })
 
+        // Ideally we could use filter rather than checking the type above, but that was added relatively recently
         await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
         await cri.send('Target.setDiscoverTargets', { discover: true })
       }
@@ -384,7 +387,10 @@ export const create = async ({
       subscriptions.push({ eventName, cb })
       debug('registering CDP on event %o', { eventName })
 
-      return cri.on(eventName, cb)
+      cri.on(eventName, cb)
+      // This ensures that we are notified about the browser's events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      browserClient?.on(eventName, cb)
     },
 
     off (eventName, cb) {
@@ -392,7 +398,8 @@ export const create = async ({
         return sub.eventName === eventName && sub.cb === cb
       }), 1)
 
-      return cri.off(eventName, cb)
+      cri.off(eventName, cb)
+      browserClient?.off(eventName, cb)
     },
 
     get ws () {
