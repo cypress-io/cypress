@@ -31,7 +31,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e browser reset', () => {
+describe('e2e service worker', () => {
   systemTests.setup({
     servers: [{
       https: true,

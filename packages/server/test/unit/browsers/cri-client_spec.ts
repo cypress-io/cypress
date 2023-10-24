@@ -23,7 +23,7 @@ describe('lib/browsers/cri-client', function () {
     _notifier: EventEmitter
   }
   let onError: sinon.SinonStub
-  let getClient: () => ReturnType<typeof create>
+  let getClient: (options?: { host?: string, fullyManageTabs?: boolean }) => ReturnType<typeof create>
 
   beforeEach(function () {
     send = sinon.stub()
@@ -49,8 +49,8 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = () => {
-      return criClient.create({ target: DEBUGGER_URL, onAsynchronousError: onError })
+    getClient = ({ host, fullyManageTabs } = {}) => {
+      return criClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs })
     }
   })
 
@@ -82,9 +82,9 @@ describe('lib/browsers/cri-client', function () {
 
       it('rejects if target has crashed', async function () {
         const command = 'DOM.getDocument'
-        const client = await getClient()
+        const client = await getClient({ host: '127.0.0.1', fullyManageTabs: true })
 
-        await criStub.on.withArgs('Inspector.targetCrashed').args[0][1]()
+        await criStub.on.withArgs('Target.targetCrashed').args[0][1]({ targetId: DEBUGGER_URL })
         await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
       })
 
