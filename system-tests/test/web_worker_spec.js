@@ -43,10 +43,8 @@ describe('e2e web worker', () => {
 
   systemTests.it('executes one spec with a web and shared worker', {
     project: 'e2e',
-    spec: 'web_worker.cy.js',     
+    spec: 'web_worker.cy.js',
     onRun: async (exec, browser) => {
-      requestsForWebWorker = 0
-      requestsForSharedWorker = 0
       await exec()
       expect(requestsForWebWorker).to.eq(1)
       expect(requestsForSharedWorker).to.eq(1)
