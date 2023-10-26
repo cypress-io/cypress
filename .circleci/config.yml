@@ -213,8 +213,17 @@ commands:
       - attach_workspace:
           at: ~/
       - install-required-node
+      - install_rosetta_2_if_applicable
       - unpack-dependencies
 
+  install_rosetta_2_if_applicable:
+    steps:
+      - run:
+          # We need Rosetta 2 to build/run the V8 snapshot on darwin-arm64
+          # see https://github.com/CircleCI-Public/macos-orb/pull/46/files for reference
+          name: Installing Rosetta 2 if darwin-arm64
+          command: source ./scripts/install-rosetta.sh
+  
   restore_cached_binary:
     steps:
       - attach_workspace:
