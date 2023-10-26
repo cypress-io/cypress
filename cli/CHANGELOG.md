@@ -3,6 +3,10 @@
 
 _Released 11/7/2023 (PENDING)_
 
+**Features:**
+
+ - Adds Component Testing support for Angular version 17. Addresses [#28153](https://github.com/cypress-io/cypress/issues/28153).
+
 **Bugfixes:**
 
 - Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where loading a service worker and immediately reloading the page can cause a crash. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141).
