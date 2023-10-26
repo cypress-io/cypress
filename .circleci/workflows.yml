@@ -3549,64 +3549,64 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         requires:
           - darwin-arm64-build
 
-darwin-workflow: &darwin-workflow
-  jobs:
-    - node_modules_install:
-        name: darwin-node-modules-install
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        only-cache-for-root-user: true
+# darwin-workflow: &darwin-workflow
+#   jobs:
+#     - node_modules_install:
+#         name: darwin-node-modules-install
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         only-cache-for-root-user: true
 
-    - build:
-        name: darwin-arm64-build
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-node-modules-install
+#     - build:
+#         name: darwin-arm64-build
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         requires:
+#           - darwin-node-modules-install
 
-    - create-build-artifacts:
-        name: darwin-create-build-artifacts
-        context:
-          - test-runner:sign-mac-binary
-          - test-runner:upload
-          - test-runner:commit-status-checks
-          - test-runner:build-binary
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-build
+#     - create-build-artifacts:
+#         name: darwin-create-build-artifacts
+#         context:
+#           - test-runner:sign-mac-binary
+#           - test-runner:upload
+#           - test-runner:commit-status-checks
+#           - test-runner:build-binary
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         requires:
+#           - darwin-build
 
-      - test-binary-against-kitchensink-chrome:
-        name: test-binary-arm64-against-kitchensink
-        executor: darwin-arm64
-        requires:
-          - darwin-create-build-artifacts
+#       - test-binary-against-kitchensink-chrome:
+#         name: test-binary-arm64-against-kitchensink
+#         executor: darwin-arm64
+#         requires:
+#           - darwin-create-build-artifacts
       
-       - test-binary-against-kitchensink-chrome:
-        name: test-binary-x84_64-against-kitchensink
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-create-build-artifacts
+#        - test-binary-against-kitchensink-chrome:
+#         name: test-binary-x84_64-against-kitchensink
+#         executor: mac
+#         resource_class: macos.x86.medium.gen2
+#         requires:
+#           - darwin-create-build-artifacts
 
-    - v8-integration-tests:
-        name: darwin-arm64-v8-integration-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-build
-    - driver-integration-memory-tests:
-        name: darwin-arm64-driver-integration-memory-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-build
-    - server-unit-tests-cloud-environment:
-        name: darwin-arm64-server-unit-tests-cloud-environment
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-build
+#     - v8-integration-tests:
+#         name: darwin-arm64-v8-integration-tests
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         requires:
+#           - darwin-build
+#     - driver-integration-memory-tests:
+#         name: darwin-arm64-driver-integration-memory-tests
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         requires:
+#           - darwin-build
+#     - server-unit-tests-cloud-environment:
+#         name: darwin-arm64-server-unit-tests-cloud-environment
+#         executor: darwin-arm64
+#         resource_class: cypress-io/m1-macstadium
+#         requires:
+#           - darwin-build
 
 windows-workflow: &windows-workflow
   jobs:
@@ -3708,9 +3708,9 @@ workflows:
   darwin-arm64:
     <<: *darwin-arm64-workflow
     <<: *darwin-workflow-arm64-filters
-  darwin:
-    <<: *darwin-workflow
-    <<: *darwin-workflow-filters
+  # darwin:
+    # <<: *darwin-workflow
+    # <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
     <<: *windows-workflow-filters
