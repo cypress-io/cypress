@@ -45,7 +45,7 @@ macWorkflowFilters: &darwin-workflow-filters
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
 
-macWorkflowFilters: &darwin-workflow-x64_84-filters
+macWorkflowFilters1: &darwin-workflow-x64_84-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
@@ -56,7 +56,7 @@ macWorkflowFilters: &darwin-workflow-x64_84-filters
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
 
-macWorkflowFilters: &darwin-workflow-arm64-filters
+macWorkflowFilters2: &darwin-workflow-arm64-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
