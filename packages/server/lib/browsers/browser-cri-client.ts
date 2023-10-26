@@ -198,12 +198,17 @@ export class BrowserCriClient {
         // The basic approach here is we attach to targets and enable network traffic
         // We must attach in a paused state so that we can enable network traffic before the target starts running.
         browserClient.on('Target.attachedToTarget', async (event) => {
-          if (event.targetInfo.type !== 'page') {
-            await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
-          }
+          try {
+            if (event.targetInfo.type !== 'page') {
+              await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+            }
 
-          if (event.waitingForDebugger) {
-            await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            if (event.waitingForDebugger) {
+              await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            }
+          } catch (error) {
+            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+            debug('error attaching to target browser', error)
           }
         })
 
