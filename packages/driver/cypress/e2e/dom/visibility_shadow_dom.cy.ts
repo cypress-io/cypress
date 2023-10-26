@@ -138,8 +138,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
   })
 
   describe('css position', () => {
-    // TODO: this is not being handled correctly, the child is visible but it's returning hidden
-    it.skip('is visible if child has position: absolute', () => {
+    it('is visible if child has position: absolute', () => {
       const $childPosAbs = add(
         `<div style='width: 0; height: 100px; overflow: hidden;'>
           <shadow-root id="child-pos-absolute"></shadow-root>
@@ -185,7 +184,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
     })
 
     // TODO: this is not being handled correctly, the child is visible but it's returning hidden
-    it.skip('is visible if descendent from parent has position: absolute and descendent is inside shadow dom', () => {
+    it('is visible if descendent from parent has position: absolute and descendent is inside shadow dom', () => {
       const $descendentPosAbsInside = add(
         `<div style='width: 0; height: 100px; overflow: hidden;'>
           <shadow-root id="descendent-pos-abs-inside"></shadow-root>

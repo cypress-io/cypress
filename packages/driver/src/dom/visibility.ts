@@ -316,12 +316,14 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     return false
   }
 
-  const elProps = $coordinates.getElementPositioning($el)
-
   if (canClipContent($el, $ancestor)) {
+    const elProps = $coordinates.getElementPositioning($el)
     const ancestorProps = $coordinates.getElementPositioning($ancestor)
 
-    // target el is out of bounds
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+      return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
+    }
+
     if (
       // target el is to the right of the ancestor's visible area
       (elProps.fromElWindow.left >= (ancestorProps.width + ancestorProps.fromElWindow.left)) ||
@@ -552,8 +554,13 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 
   return `This element \`${node}\` is not visible.`
 }
-/* eslint-enable no-cond-assign */
 
 export default {
-  isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsHidden, isW3CFocusable, isW3CRendered,
+  isVisible,
+  isHidden,
+  isStrictlyHidden,
+  isHiddenByAncestors,
+  getReasonIsHidden,
+  isW3CFocusable,
+  isW3CRendered,
 }

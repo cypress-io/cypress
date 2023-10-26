@@ -749,8 +749,7 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css position', () => {
-      // TODO: this is not being handled correctly, the child is visible but it's returning hidden
-      it.skip('is visible if child has position: absolute', function () {
+      it('is visible if child has position: absolute', function () {
         expect(this.$childPosAbs.find('span')).to.be.visible
         expect(this.$childPosAbs.find('span')).not.be.hidden
       })
@@ -896,7 +895,7 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css clip-path', () => {
-      // TODO: why is this skipped?
+      // TODO: handle slip path 'hidden' equivalents
       it.skip('is hidden when outside of parents clip-path', function () {
         expect(this.$parentWithClipPathAbsolutePositionElOutsideClipPath.find('span')).to.be.hidden
       })
