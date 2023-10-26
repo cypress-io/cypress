@@ -555,6 +555,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 
   return `This element \`${node}\` is not visible.`
 }
+/* eslint-enable no-cond-assign */
 
 export default {
   isVisible,

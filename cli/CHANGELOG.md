@@ -5,7 +5,7 @@ _Released 11/7/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where an element's visibility would return visible when it was actually hidden. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+- Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
 
 ## 13.3.3
 
