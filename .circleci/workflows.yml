@@ -131,6 +131,14 @@ executors:
     environment:
       PLATFORM: darwin
 
+  mac_m1:
+    macos:
+      # Executor should have Node >= required version
+      xcode: "14.2.0"
+    resource_class: macos.m1.medium.gen1
+    environment:
+      PLATFORM: darwin
+
   # executor to run on Windows - based off of the windows-orb default executor since it is
   # not customizable enough to align with our existing setup.
   # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
@@ -3490,18 +3498,14 @@ darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
     - node_modules_install:
         name: darwin-arm64-node-modules-install
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
+        executor: mac_m1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
+        executor: mac_m1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3514,99 +3518,32 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
-        # executor: darwin-arm64
+        executor: mac_m1
+       # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
+        executor: mac_m1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
+        executor: mac_m1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
     - server-unit-tests-cloud-environment:
         name: darwin-arm64-server-unit-tests-cloud-environment
-        macos:
-          xcode: '14.2.0'
-        resource_class: macos.m1.medium.gen1
+        executor: mac_m1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
-
-# darwin-workflow: &darwin-workflow
-#   jobs:
-#     - node_modules_install:
-#         name: darwin-node-modules-install
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         only-cache-for-root-user: true
-
-#     - build:
-#         name: darwin-arm64-build
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         requires:
-#           - darwin-node-modules-install
-
-#     - create-build-artifacts:
-#         name: darwin-create-build-artifacts
-#         context:
-#           - test-runner:sign-mac-binary
-#           - test-runner:upload
-#           - test-runner:commit-status-checks
-#           - test-runner:build-binary
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         requires:
-#           - darwin-build
-
-#       - test-binary-against-kitchensink-chrome:
-#         name: test-binary-arm64-against-kitchensink
-#         executor: darwin-arm64
-#         requires:
-#           - darwin-create-build-artifacts
-      
-#        - test-binary-against-kitchensink-chrome:
-#         name: test-binary-x84_64-against-kitchensink
-#         executor: mac
-#         resource_class: macos.x86.medium.gen2
-#         requires:
-#           - darwin-create-build-artifacts
-
-#     - v8-integration-tests:
-#         name: darwin-arm64-v8-integration-tests
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         requires:
-#           - darwin-build
-#     - driver-integration-memory-tests:
-#         name: darwin-arm64-driver-integration-memory-tests
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         requires:
-#           - darwin-build
-#     - server-unit-tests-cloud-environment:
-#         name: darwin-arm64-server-unit-tests-cloud-environment
-#         executor: darwin-arm64
-#         resource_class: cypress-io/m1-macstadium
-#         requires:
-#           - darwin-build
 
 windows-workflow: &windows-workflow
   jobs:
@@ -3698,19 +3635,12 @@ workflows:
   linux-arm64:
     <<: *linux-arm64-workflow
     <<: *linux-arm64-workflow-filters
-# 1. can we upgrade to circleci's apple silicon resource machine (no longer user our custom machine)
-# 2. can we combine the mac build step: https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
-#    - verify the binary can execute on both intel & apple devices
-# upgrade path: ---- #2 - if not possible, need to figure out how want to build&test intel binaries
   darwin-x64:
     <<: *darwin-x64-workflow
     <<: *darwin-workflow-x64_84-filters
   darwin-arm64:
     <<: *darwin-arm64-workflow
     <<: *darwin-workflow-arm64-filters
-  # darwin:
-    # <<: *darwin-workflow
-    # <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
     <<: *windows-workflow-filters
