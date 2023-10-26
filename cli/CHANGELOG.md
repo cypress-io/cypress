@@ -1,4 +1,5 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
 ## 13.4.0
 
 _Released 10/25/2023 (PENDING)_
@@ -6,6 +7,10 @@ _Released 10/25/2023 (PENDING)_
 **Features:**
 
 - Introduced experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
+
+**Bugfixes:**
+
+- Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where loading a service worker and immediately reloading the page can cause a crash. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141).
 
 ## 13.3.3
 
