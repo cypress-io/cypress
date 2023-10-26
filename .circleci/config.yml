@@ -1381,6 +1381,39 @@ jobs:
           build-better-sqlite3: <<parameters.build-better-sqlite3>>
       - store-npm-logs
 
+  install_and_build:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+      build-better-sqlite3:
+        type: boolean
+        default: false
+    resource_class: << parameters.resource_class >>
+    steps:
+      - checkout
+      - install-required-node
+      - verify-build-setup:
+          executor: << parameters.executor >>
+      - caching-dependency-installer:
+          only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+          build-better-sqlite3: <<parameters.build-better-sqlite3>>
+      - run:
+          name: Top level packages
+          command: yarn list --depth=0 || true
+      - run:
+          name: Check env canaries on Linux
+          command: |
+            # only Docker has the required env data for this
+            if [[ $CI_DOCKER == 'true' ]]; then
+              node ./scripts/circle-env.js --check-canaries
+            fi
+      - build-and-persist
+      - store-npm-logs
+
+
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
