@@ -187,6 +187,31 @@ describe('lib/browsers/cri-client', function () {
         expect(protocolManager.connectToBrowser).to.be.calledWith(client)
       })
 
+      it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs and attaching to target throws', async function () {
+        const mockPageClient = {}
+        const protocolManager: any = {
+          connectToBrowser: sinon.stub().resolves(),
+        }
+
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+        send.withArgs('Target.setDiscoverTargets', { discover: true })
+        on.withArgs('Target.targetDestroyed', sinon.match.func)
+
+        send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
+
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
+
+        const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
+
+        const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+        expect(client).to.be.equal(mockPageClient)
+        expect(protocolManager.connectToBrowser).to.be.calledWith(client)
+
+        // This would throw if the error was not caught
+        await on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
+      })
+
       it('retries when the passed in url is not found', async function () {
         sinon.stub(protocol, '_getDelayMsForRetry')
         .onFirstCall().returns(100)
