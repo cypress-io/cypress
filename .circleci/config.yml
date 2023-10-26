@@ -3499,6 +3499,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
@@ -3506,6 +3507,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - build:
         name: darwin-arm64-build
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3519,6 +3521,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
        # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3526,6 +3529,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3533,6 +3537,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3540,6 +3545,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - server-unit-tests-cloud-environment:
         name: darwin-arm64-server-unit-tests-cloud-environment
         executor: mac_m1
+        resource_class: macos.m1.medium.gen1
         # executor: darwin-arm64
         # resource_class: cypress-io/m1-macstadium
         requires:
@@ -3623,9 +3629,9 @@ windows-workflow: &windows-workflow
           - windows-build
 
 workflows:
-  linux-x64:
-    <<: *linux-x64-workflow
-    <<: *linux-x64-workflow-exclude-filters
+  # linux-x64:
+  #   <<: *linux-x64-workflow
+  #   <<: *linux-x64-workflow-exclude-filters
   linux-x64-contributor:
     <<: *linux-x64-contributor-workflow
     when:
