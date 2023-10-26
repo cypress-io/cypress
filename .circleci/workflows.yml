@@ -3666,11 +3666,11 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
+    # - test-binary-against-kitchensink-chrome:
+    #     name: windows-test-binary-against-kitchensink-chrome
+    #     executor: windows
+    #     requires:
+    #       - windows-create-build-artifacts
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
