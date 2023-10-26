@@ -124,11 +124,11 @@ describe(`Angular CLI versions`, () => {
     let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
 
     if (version === '13') {
-      spec = `${spec},!src/app/components/standalone.component.cy.ts,!src/app/components/signals.cy.ts`
+      spec = `${spec},!src/app/components/standalone.component.cy.ts,!src/app/components/signals.component.cy.ts`
     }
 
     if (version === '14' || version === '15') {
-      spec = `${spec},!src/app/components/signals.cy.ts`
+      spec = `${spec},!src/app/components/signals.component.cy.ts`
     }
 
     systemTests.it(`v${version} with mount tests`, {
