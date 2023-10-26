@@ -820,6 +820,7 @@ describe('src/cypress/dom/visibility', () => {
 
     describe('css overflow', () => {
       it('is hidden when parent overflow auto and no width/height', function () {
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.not.be.visible
         expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.hidden
       })
 
@@ -895,7 +896,7 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css clip-path', () => {
-      // TODO: handle slip path 'hidden' equivalents
+      // TODO: handle clip path 'hidden' equivalents
       it.skip('is hidden when outside of parents clip-path', function () {
         expect(this.$parentWithClipPathAbsolutePositionElOutsideClipPath.find('span')).to.be.hidden
       })

@@ -183,7 +183,6 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
       cy.wrap($descendentPosAbsOutside).find('span', { includeShadowDom: true }).should('not.be.hidden')
     })
 
-    // TODO: this is not being handled correctly, the child is visible but it's returning hidden
     it('is visible if descendent from parent has position: absolute and descendent is inside shadow dom', () => {
       const $descendentPosAbsInside = add(
         `<div style='width: 0; height: 100px; overflow: hidden;'>
