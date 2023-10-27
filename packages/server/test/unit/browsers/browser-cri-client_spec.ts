@@ -10,6 +10,11 @@ const HOST = '127.0.0.1'
 const PORT = 50505
 const THROWS_PORT = 65535
 
+type GetClientParams = {
+  protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+}
+
 describe('lib/browsers/cri-client', function () {
   let browserCriClient: {
     BrowserCriClient: {
@@ -17,13 +22,14 @@ describe('lib/browsers/cri-client', function () {
     }
   }
   let send: sinon.SinonStub
+  let on: sinon.SinonStub
   let close: sinon.SinonStub
   let criClientCreateStub: sinon.SinonStub
   let criImport: sinon.SinonStub & {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
-  let getClient: (protocolManager?: ProtocolManagerShape) => ReturnType<typeof BrowserCriClient.create>
+  let getClient: (options?: GetClientParams) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
     sinon.stub(protocol, '_connectAsync')
@@ -37,10 +43,12 @@ describe('lib/browsers/cri-client', function () {
     .onSecondCall().throws()
     .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
+    on = sinon.stub()
     send = sinon.stub()
     close = sinon.stub()
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs('http://web/socket/url', onError).resolves({
+    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager: undefined, fullyManageTabs: undefined }).resolves({
       send,
+      on,
       close,
     })
 
@@ -48,7 +56,15 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = (protocolManager) => browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError, undefined, protocolManager)
+    getClient = ({ protocolManager, fullyManageTabs } = {}) => {
+      criClientCreateStub = criClientCreateStub.withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager, fullyManageTabs }).resolves({
+        send,
+        on,
+        close,
+      })
+
+      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs })
+    }
   })
 
   context('.create', function () {
@@ -84,7 +100,7 @@ describe('lib/browsers/cri-client', function () {
 
       criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-      await browserCriClient.BrowserCriClient.create(['127.0.0.1', '::1'], THROWS_PORT, 'Chrome', onError)
+      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(criImport.Version).to.be.calledOnce
     })
@@ -95,7 +111,7 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)
+      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(client.attachToTargetUrl).to.be.instanceOf(Function)
 
@@ -107,7 +123,7 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })
@@ -143,7 +159,7 @@ describe('lib/browsers/cri-client', function () {
         const mockPageClient = {}
 
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
 
         const browserClient = await getClient()
 
@@ -152,21 +168,48 @@ describe('lib/browsers/cri-client', function () {
         expect(client).to.be.equal(mockPageClient)
       })
 
-      it('creates a page client when the passed in url is found and notifies the protocol manager', async function () {
+      it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs', async function () {
         const mockPageClient = {}
         const protocolManager: any = {
           connectToBrowser: sinon.stub().resolves(),
         }
 
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+        send.withArgs('Target.setDiscoverTargets', { discover: true })
+        on.withArgs('Target.targetDestroyed', sinon.match.func)
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-        const browserClient = await getClient(protocolManager)
+        const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
         const client = await browserClient.attachToTargetUrl('http://foo.com')
 
         expect(client).to.be.equal(mockPageClient)
         expect(protocolManager.connectToBrowser).to.be.calledWith(client)
+      })
+
+      it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs and attaching to target throws', async function () {
+        const mockPageClient = {}
+        const protocolManager: any = {
+          connectToBrowser: sinon.stub().resolves(),
+        }
+
+        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+        send.withArgs('Target.setDiscoverTargets', { discover: true })
+        on.withArgs('Target.targetDestroyed', sinon.match.func)
+
+        send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
+
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
+
+        const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
+
+        const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+        expect(client).to.be.equal(mockPageClient)
+        expect(protocolManager.connectToBrowser).to.be.calledWith(client)
+
+        // This would throw if the error was not caught
+        await on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
       })
 
       it('retries when the passed in url is not found', async function () {
@@ -180,7 +223,7 @@ describe('lib/browsers/cri-client', function () {
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
 
         const browserClient = await getClient()
 
@@ -198,7 +241,7 @@ describe('lib/browsers/cri-client', function () {
 
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
         send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
+        criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
 
         const browserClient = await getClient()
 
@@ -219,7 +262,7 @@ describe('lib/browsers/cri-client', function () {
 
         send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
         send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
-        criClientCreateStub.withArgs('101', onError, HOST, PORT).resolves(mockUpdatedCurrentlyAttachedTarget)
+        criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined }).resolves(mockUpdatedCurrentlyAttachedTarget)
 
         const browserClient = await getClient() as any
 

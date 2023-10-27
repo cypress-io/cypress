@@ -2,8 +2,6 @@ require('../../spec_helper')
 
 const os = require('os')
 const mockfs = require('mock-fs')
-const path = require('path')
-const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
@@ -12,6 +10,7 @@ const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
+const { expect } = require('chai')
 
 const openOpts = {
   onError: () => {},
@@ -61,6 +60,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
+      sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
 
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -88,6 +88,8 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+
+        expect(utils.handleDownloadLinksViaCDP).to.be.calledOnce
       })
     })
 
@@ -255,43 +257,6 @@ describe('lib/browsers/chrome', () => {
         ])
 
         expect(onWarning).not.calledOnce
-      })
-    })
-
-    it('install extension and ensure write access', function () {
-      mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
-          'background.js': mockfs.file({
-            mode: 0o0444,
-          }),
-        },
-      })
-
-      const getFile = function (path) {
-        return _.reduce(_.compact(_.split(path, '/')), (acc, item) => {
-          return acc.getItem(item)
-        }, mockfs.getMockRoot())
-      }
-
-      chrome._writeExtension.restore()
-      utils.getProfileDir.restore()
-
-      const profilePath = '/home/foo/snap/chromium/current'
-      const fullPath = `${profilePath}/Cypress/chromium-stable/interactive`
-
-      this.readJson.withArgs(`${fullPath}/Default/Preferences`).rejects({ code: 'ENOENT' })
-      this.readJson.withArgs(`${fullPath}/Default/Secure Preferences`).rejects({ code: 'ENOENT' })
-      this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
-
-      return chrome.open({
-        isHeadless: false,
-        isHeaded: false,
-        profilePath,
-        name: 'chromium',
-        channel: 'stable',
-      }, 'http://', openOpts, this.automation)
-      .then(() => {
-        expect((getFile(fullPath).getMode()) & 0o0700).to.be.above(0o0500)
       })
     })
 

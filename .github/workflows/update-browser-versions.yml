@@ -1,5 +1,7 @@
 name: Update Browser Versions
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
 jobs:
@@ -104,6 +106,7 @@ jobs:
             })
       # Update available and a PR doesn't already exist
       - name: Create Pull Request
+        id: create-pr
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
         uses: actions/github-script@v6
         with:
@@ -117,4 +120,5 @@ jobs:
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
               body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
+              addToProjectBoard: true,
             })

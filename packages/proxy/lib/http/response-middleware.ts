@@ -145,6 +145,18 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
+const requestIdRegEx = /^(.*)-retry-([\d]+)$/
+const getOriginalRequestId = (requestId: string) => {
+  let originalRequestId = requestId
+  const match = requestIdRegEx.exec(requestId)
+
+  if (match) {
+    [, originalRequestId] = match
+  }
+
+  return originalRequestId
+}
+
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
     browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
@@ -644,6 +656,11 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
+  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
+  if (this.req.noPreRequestExpected) {
+    this.addPendingUrlWithoutPreRequest(newUrl)
+  }
+
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
@@ -674,9 +691,18 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+
       this.protocolManager.responseEndedWithEmptyBody({
-        requestId: this.req.browserPreRequest.requestId,
+        requestId,
         isCached: this.incomingRes.statusCode === 304,
+        timings: {
+          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
+        },
       })
     }
 
@@ -783,13 +809,24 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    const preRequest = this.req.browserPreRequest
+    const requestId = getOriginalRequestId(preRequest.requestId)
+
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+
     const resultingStream = this.protocolManager.responseStreamReceived({
-      requestId: this.req.browserPreRequest.requestId,
+      requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
       res: this.res,
+      timings: {
+        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+        cdpLagDuration: preRequest.cdpLagDuration,
+        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+      },
     })
 
     if (resultingStream) {
