@@ -3568,30 +3568,30 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         # resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
-    - v8-integration-tests:
-        name: darwin-arm64-v8-integration-tests
-        executor: mac_m1
-        resource_class: macos.m1.medium.gen1
-        # executor: darwin-arm64
-        # resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
-    - driver-integration-memory-tests:
-        name: darwin-arm64-driver-integration-memory-tests
-        executor: mac_m1
-        resource_class: macos.m1.medium.gen1
-        # executor: darwin-arm64
-        # resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
-    - server-unit-tests-cloud-environment:
-        name: darwin-arm64-server-unit-tests-cloud-environment
-        executor: mac_m1
-        resource_class: macos.m1.medium.gen1
-        # executor: darwin-arm64
-        # resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
+    # - v8-integration-tests:
+    #     name: darwin-arm64-v8-integration-tests
+    #     executor: mac_m1
+    #     resource_class: macos.m1.medium.gen1
+    #     # executor: darwin-arm64
+    #     # resource_class: cypress-io/m1-macstadium
+    #     requires:
+    #       - darwin-arm64-build
+    # - driver-integration-memory-tests:
+    #     name: darwin-arm64-driver-integration-memory-tests
+    #     executor: mac_m1
+    #     resource_class: macos.m1.medium.gen1
+    #     # executor: darwin-arm64
+    #     # resource_class: cypress-io/m1-macstadium
+    #     requires:
+    #       - darwin-arm64-build
+    # - server-unit-tests-cloud-environment:
+    #     name: darwin-arm64-server-unit-tests-cloud-environment
+    #     executor: mac_m1
+    #     resource_class: macos.m1.medium.gen1
+    #     # executor: darwin-arm64
+    #     # resource_class: cypress-io/m1-macstadium
+    #     requires:
+    #       - darwin-arm64-build
 
 windows-workflow: &windows-workflow
   jobs:

@@ -160,6 +160,7 @@ module.exports = {
         .pipe(gulpDebug())
         .pipe(publisher.publish(headers))
         .pipe(awspublish.reporter())
+        .on('finish', (msg) => console.log('..finish..', msg))
         .on('error', reject)
         .on('end', resolve)
       })

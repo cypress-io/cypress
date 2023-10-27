@@ -166,7 +166,7 @@
     "graphql": "^15.5.1",
     "graphql-executor": "0.0.23",
     "gulp": "4.0.2",
-    "gulp-awspublish": "4.0.0",
+    "gulp-awspublish": "7.1.0",
     "gulp-debug": "4.0.0",
     "gulp-rename": "1.4.0",
     "hasha": "5.0.0",

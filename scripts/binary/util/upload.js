@@ -64,14 +64,16 @@ const getPublisher = async function () {
 
   return awspublish.create({
     httpOptions: {
-      timeout: human('10 minutes'),
+      timeout: human('9 minutes'),
     },
     params: {
       Bucket: S3Configuration.bucket,
     },
-    accessKeyId: aws.accessKeyId,
-    secretAccessKey: aws.secretAccessKey,
-    sessionToken: aws.sessionToken,
+    credentials: {
+      accessKeyId: aws.accessKeyId,
+      secretAccessKey: aws.secretAccessKey,
+      sessionToken: aws.sessionToken,
+    },
   })
 }
 
