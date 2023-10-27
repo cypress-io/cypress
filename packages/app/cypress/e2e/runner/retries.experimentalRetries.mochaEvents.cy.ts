@@ -16,7 +16,7 @@ import { snapshots } from './retries.experimentalRetries.mochaEvents.snapshots'
  * 'detect-flake-but-always-fail' projects should have the same passed/failed tests, but different number of attempts depending on stopIfAnyPassed
  */
 describe('Experimental retries: mochaEvents & test status tests', { retries: 0, defaultCommandTimeout: 7500 }, () => {
-  const projects: ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed'] = ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed']
+  const projects: [ 'detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed'] = ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed']
 
   projects.forEach((project) => {
     describe(project, () => {
@@ -391,7 +391,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('cleanses errors before emitting', () => {
         it('does not try to serialize error with err.actual as DOM node', function (done) {
           // because there are more attempts for 'detect-flake-but-always-fail', the timeout needs to be increased
-          this.timeout(15000)
+          this.timeout(20000)
 
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
             snapshots,
