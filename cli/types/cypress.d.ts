@@ -2851,6 +2851,30 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
+  type RetryStrategyWithModeSpecs = RetryStrategy & {
+    openMode: boolean; // defaults to false
+    runMode: boolean; // defaults to true
+  }
+
+  type RetryStrategy =
+    | RetryStrategyDetectFlakeAndPassOnThresholdType
+    | RetryStrategyDetectFlakeButAlwaysFailType
+
+  interface RetryStrategyDetectFlakeAndPassOnThresholdType {
+    experimentalStrategy: "detect-flake-and-pass-on-threshold"
+    experimentalOptions?: {
+      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      passesRequired: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0 and <= maxRetries
+    }
+  }
+
+  interface RetryStrategyDetectFlakeButAlwaysFailType {
+    experimentalStrategy: "detect-flake-but-always-fail"
+    experimentalOptions?: {
+      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      stopIfAnyPassed: boolean; // defaults to false if experimentalOptions is not provided
+    }
+  }
   interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
@@ -3122,7 +3146,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
+    retries: Nullable<number | ({ runMode?: Nullable<number>, openMode?: Nullable<number> }) | RetryStrategyWithModeSpecs>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},

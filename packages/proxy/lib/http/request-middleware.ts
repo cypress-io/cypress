@@ -144,7 +144,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   }
 
   this.debug('waiting for prerequest')
-  this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
+  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
     this.req.browserPreRequest = browserPreRequest
     this.req.noPreRequestExpected = noPreRequestExpected
     copyResourceTypeAndNext()
@@ -470,6 +470,13 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   const onSocketClose = () => {
     this.debug('request aborted')
     // if the request is aborted, close out the middleware span and http span. the response middleware did not run
+
+    const pendingRequest = this.pendingRequest
+
+    if (pendingRequest) {
+      delete this.pendingRequest
+      this.removePendingRequest(pendingRequest)
+    }
 
     this.reqMiddlewareSpan?.setAttributes({
       requestAborted: true,

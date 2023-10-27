@@ -4,7 +4,7 @@ import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create, CriClient } from './cri-client'
+import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -12,6 +12,27 @@ const debug = Debug('cypress:server:browsers:browser-cri-client')
 interface Version {
   major: number
   minor: number
+}
+
+type BrowserCriClientOptions = {
+  browserClient: CriClient
+  versionInfo: CRI.VersionResult
+  host: string
+  port: number
+  browserName: string
+  onAsynchronousError: Function
+  protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+}
+
+type BrowserCriClientCreateOptions = {
+  browserName: string
+  fullyManageTabs?: boolean
+  hosts: string[]
+  onAsynchronousError: Function
+  onReconnect?: (client: CriClient) => void
+  port: number
+  protocolManager?: ProtocolManagerShape
 }
 
 const isVersionGte = (a: Version, b: Version) => {
@@ -114,19 +135,17 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
   return retry()
 }
 
-interface CreateBrowserCriClientOptions {
-  browserName: string
-  fullyManageTabs?: boolean
-  hosts: string[]
-  onAsynchronousError: Function
-  onReconnect?: (client: CriClient) => void
-  port: number
-  protocolManager?: ProtocolManagerShape
-}
-
 type TargetId = string
 
 export class BrowserCriClient {
+  private browserClient: CriClient
+  private versionInfo: CRI.VersionResult
+  private host: string
+  private port: number
+  private browserName: string
+  private onAsynchronousError: Function
+  private protocolManager?: ProtocolManagerShape
+  private fullyManageTabs?: boolean
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -139,7 +158,16 @@ export class BrowserCriClient {
   extraTargetClients: Map<TargetId, CRI.Client> = new Map()
   onClose: Function | null = null
 
-  private constructor (private browserClient: CriClient, private versionInfo: CRI.VersionResult, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
+  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
+    this.browserClient = browserClient
+    this.versionInfo = versionInfo
+    this.host = host
+    this.port = port
+    this.browserName = browserName
+    this.onAsynchronousError = onAsynchronousError
+    this.protocolManager = protocolManager
+    this.fullyManageTabs = fullyManageTabs
+  }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -154,7 +182,7 @@ export class BrowserCriClient {
    * @param protocolManager the protocol manager to use with the browser cri client
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (options: CreateBrowserCriClientOptions): Promise<BrowserCriClient> {
+  static async create (options: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
     const {
       browserName,
       fullyManageTabs,
@@ -175,19 +203,20 @@ export class BrowserCriClient {
         onAsynchronousError,
         onReconnect,
         protocolManager,
+        fullyManageTabs,
       })
 
-      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
 
       if (fullyManageTabs) {
-        await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port })
+        await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
       }
 
       return browserCriClient
     }, browserName, port)
   }
 
-  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port }) {
+  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }) {
     const promises = [
       browserClient.send('Target.setDiscoverTargets', { discover: true }),
       browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
@@ -195,7 +224,7 @@ export class BrowserCriClient {
 
     // TODO: see how this affects nested iframes
     browserClient.on('Target.attachedToTarget', async (event) => {
-      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port })
+      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager })
     })
 
     // TODO: listen to 'Target.targetCrashed' or 'Inspector.targetCrashed' as well?
@@ -206,14 +235,30 @@ export class BrowserCriClient {
     await Promise.all(promises)
   }
 
-  static async _onAttachToTarget ({ browserClient, browserCriClient, event, host, port }) {
+  static async _onAttachToTarget ({ browserClient, browserCriClient, event, host, port, protocolManager }) {
     const { sessionId, targetInfo, waitingForDebugger } = event
     let { targetId, url } = targetInfo
+
+    try {
+      if (event.targetInfo.type !== 'page') {
+        await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+      }
+    } catch (error) {
+      // it's possible that the target was closed before we could enable
+      // network and continue, in that case, just ignore
+      debug('error running Network.enable:', error)
+    }
 
     debug('Attached to target, id: %s', targetId)
 
     async function run () {
-      await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      try {
+        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      } catch (error) {
+        // it's possible that the target was closed before we could enable
+        // network and continue, in that case, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger:', error)
+      }
     }
 
     // the url usually isn't specified with this event, but is available
@@ -302,8 +347,6 @@ export class BrowserCriClient {
 
     const { targetId } = event
 
-    // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
-    // have already closed/disposed, so unless this matches our current target then bail
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
         debug('Close extra target client (id: %s)')
@@ -311,6 +354,8 @@ export class BrowserCriClient {
         browserCriClient.removeExtraTargetClient(targetId)
       }
 
+      // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+      // have already closed/disposed, so unless this matches our current target then bail
       return
     }
 
@@ -325,7 +370,7 @@ export class BrowserCriClient {
     // otherwise it means the the browser itself was closed
 
     // always close the connection to the page target because it was destroyed
-    browserCriClient.currentlyAttachedTarget.close().catch(() => { })
+    browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -408,7 +453,8 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager })
+      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs, browserClient: this.browserClient })
+
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
@@ -461,6 +507,7 @@ export class BrowserCriClient {
         host: this.host,
         port: this.port,
         protocolManager: this.protocolManager,
+        fullyManageTabs: this.fullyManageTabs,
       })
     } else {
       this.currentlyAttachedTarget = undefined

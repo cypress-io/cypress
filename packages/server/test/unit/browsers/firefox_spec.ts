@@ -643,6 +643,14 @@ describe('lib/browsers/firefox', () => {
           on: sinon.stub(),
           off: sinon.stub(),
           close: sinon.stub(),
+          ws: sinon.stub() as any,
+          queue: {
+            enableCommands: [],
+            enqueuedCommands: [],
+            subscriptions: [],
+          },
+          closed: false,
+          connected: false,
         }
 
         const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)

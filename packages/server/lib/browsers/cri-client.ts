@@ -47,6 +47,12 @@ interface CDPClient extends CDP.Client {
   _ws: WebSocket
 }
 
+export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
+  maxTotalBufferSize: 0,
+  maxResourceBufferSize: 0,
+  maxPostDataSize: 0,
+}
+
 export interface CriClient {
   /**
    * The target id attached to by this client
@@ -140,6 +146,8 @@ type CreateParams = {
   port?: number
   onReconnect?: (client: CriClient) => void
   protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+  browserClient?: CriClient
 }
 
 export const create = async ({
@@ -149,6 +157,8 @@ export const create = async ({
   port,
   onReconnect,
   protocolManager,
+  fullyManageTabs,
+  browserClient,
 }: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
@@ -260,35 +270,40 @@ export const create = async ({
       cri.on('disconnect', retryReconnect)
     }
 
-    // We only want to try and add service worker traffic if we have a host set. This indicates that this is the child cri client.
+    // We only want to try and add child target traffic if we have a host set. This indicates that this is the child cri client.
+    // Browser cri traffic is handled in browser-cri-client.ts. The basic approach here is we attach to targets and enable network traffic
+    // We must attach in a paused state so that we can enable network traffic before the target starts running.
     if (host) {
-      cri.on('Inspector.targetCrashed', async () => {
-        debug('crash detected for target: %s', target)
+      cri.on('Target.targetCrashed', async (event) => {
+        if (event.targetId !== target) {
+          return
+        }
+
+        debug('crash detected')
         crashed = true
       })
 
-      cri.on('Target.targetCreated', async (event) => {
-        if (event.targetInfo.type === 'service_worker') {
-          const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-            maxTotalBufferSize: 0,
-            maxResourceBufferSize: 0,
-            maxPostDataSize: 64 * 1024,
-          } : {
-            maxTotalBufferSize: 0,
-            maxResourceBufferSize: 0,
-            maxPostDataSize: 0,
+      if (fullyManageTabs) {
+        cri.on('Target.attachedToTarget', async (event) => {
+          try {
+            // Service workers get attached at the page and browser level. We only want to handle them at the browser level
+            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
+              await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+            }
+
+            if (event.waitingForDebugger) {
+              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            }
+          } catch (error) {
+            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+            debug('error attaching to target cri', error)
           }
+        })
 
-          const { sessionId } = await cri.send('Target.attachToTarget', {
-            targetId: event.targetInfo.targetId,
-            flatten: true,
-          })
-
-          await cri.send('Network.enable', networkEnabledOptions, sessionId)
-        }
-      })
-
-      await cri.send('Target.setDiscoverTargets', { discover: true })
+        // Ideally we could use filter rather than checking the type above, but that was added relatively recently
+        await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
+        await cri.send('Target.setDiscoverTargets', { discover: true })
+      }
     }
   }
 
@@ -377,7 +392,12 @@ export const create = async ({
       subscriptions.push({ eventName, cb })
       debug('registering CDP on event %o', { eventName })
 
-      return cri.on(eventName, cb)
+      cri.on(eventName, cb)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      if (eventName.startsWith('Network.')) {
+        browserClient?.on(eventName, cb)
+      }
     },
 
     off (eventName, cb) {
@@ -385,7 +405,12 @@ export const create = async ({
         return sub.eventName === eventName && sub.cb === cb
       }), 1)
 
-      return cri.off(eventName, cb)
+      cri.off(eventName, cb)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      if (eventName.startsWith('Network.')) {
+        browserClient?.off(eventName, cb)
+      }
     },
 
     get ws () {
