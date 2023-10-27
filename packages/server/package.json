@@ -23,7 +23,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "@babel/parser": "7.22.7",
+    "@babel/parser": "7.23.0",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
@@ -39,7 +39,7 @@
     "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
     "base64url": "^3.0.1",
-    "better-sqlite3": "8.2.0",
+    "better-sqlite3": "8.7.0",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.2",
     "bundle-require": "3.0.4",
@@ -134,7 +134,7 @@
     "widest-line": "3.1.0"
   },
   "devDependencies": {
-    "@babel/core": "7.22.9",
+    "@babel/core": "7.23.2",
     "@babel/preset-env": "7.22.9",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/sinon-chai": "2.9.1",

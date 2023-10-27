@@ -200,7 +200,7 @@ describe('lib/modes/record', () => {
         resetEnv()
       })
 
-      it('calls api.createRun with the commit overrided from environment variables', () => {
+      it('calls api.createRun with the commit overridden from environment variables', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 

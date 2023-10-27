@@ -91,13 +91,13 @@ describe('Vue Router - Pizza Shop', () => {
     cy.get('.order-overview > ul > li').contains('cheese')
   })
 
-  it('order hawaian + peppers pizza without using UI', () => {
+  it('order hawaiian + peppers pizza without using UI', () => {
     cy.wrap(Cypress.vue.$router)
     .then(($router) => $router.push({ name: 'home' }))
     .then(($router) => {
       return $router.push({
         name: 'order',
-        params: { preset: 'hawaian' },
+        params: { preset: 'hawaiian' },
         query: { peppers: true },
       })
     })
