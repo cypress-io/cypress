@@ -9,7 +9,7 @@ _Released 10/27/2023_
 
 **Bugfixes:**
 
-- Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where Cypress would crash with 'Inspected target navigated or closed' or 'Session with given id not found'. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141) and [#28148 ](https://github.com/cypress-io/cypress/issues/28148).
+- Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where Cypress would crash with 'Inspected target navigated or closed' or 'Session with given id not found'. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141) and [#28148](https://github.com/cypress-io/cypress/issues/28148).
 
 ## 13.3.3
 
