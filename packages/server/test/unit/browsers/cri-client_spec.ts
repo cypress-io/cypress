@@ -88,6 +88,14 @@ describe('lib/browsers/cri-client', function () {
         await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
       })
 
+      it('does not reject if attachToTarget work throws', async function () {
+        criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
+        await getClient({ host: '127.0.0.1', fullyManageTabs: true })
+
+        // This would throw if the error was not caught
+        await criStub.on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
+      })
+
       context('retries', () => {
         ([
           'WebSocket is not open',

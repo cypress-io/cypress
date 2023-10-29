@@ -108,6 +108,10 @@ const eventCleanseMap = {
 const keysToEliminate = ['codeFrame', '_testConfig'] as const
 
 function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
+  // with experimental retries, mocha can fire a 'retry' event with an undefined error
+  // this is expected
+  if (obj === undefined) return obj
+
   for (const key of keysToEliminate) {
     delete obj[key]
   }
