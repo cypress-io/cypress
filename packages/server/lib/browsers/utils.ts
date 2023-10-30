@@ -159,7 +159,7 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
 }
 
 interface AfterBrowserLaunchDetails {
-  webSocketDebuggerUrl: string
+  webSocketDebuggerUrl: string | never
 }
 
 async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowserLaunchDetails) {

@@ -147,5 +147,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }
   }
 
+  await utils.executeAfterBrowserLaunch(browser, {
+    get webSocketDebuggerUrl (): never {
+      throw new Error('The `webSocketDebuggerUrl` property is not currently supported in the `after:browser:launch` event handler details argument')
+    },
+  })
+
   return new WkInstance()
 }
