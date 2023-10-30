@@ -1160,7 +1160,7 @@ commands:
               if [[ `yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip` ]]; then
                 URL=`yarn get-binary-cdn-url --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip`
                 echo "Binary found on CDN at $URL, downloading:"
-                wget $URL -o ~/cypress/cypress.zip
+                curl $URL -o ~/cypress/cypress.zip
                 circleci-agent step halt
               fi
               echo "Binary not found on CDN, proceeding to build"
