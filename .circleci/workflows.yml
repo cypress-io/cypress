@@ -1158,12 +1158,11 @@ commands:
             if [[ ! -f ~/cypress/cypress.zip ]]; then
               echo "Binary not found in CI workspace; checking for previous build for this version on CDN"
               if [[ `yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip` ]]; then
-                URL=`yarn get-binary-cdn-url --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip`
-                echo "Binary found on CDN at $URL, downloading:"
-                curl $URL -o ~/cypress/cypress.zip
+                yarn download-binary-from-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip --destination ~/cypress/cypress.zip
                 circleci-agent step halt
+              else
+                echo "Binary not found on CDN, proceeding to build"
               fi
-              echo "Binary not found on CDN, proceeding to build"
             else
               echo "Binary found cached on CI workspace; skipping binary build step"
               circleci-agent step halt

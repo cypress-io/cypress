@@ -14,7 +14,7 @@
     "binary-zip": "node ./scripts/binary.js zip",
     "binary-package": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js package",
     "check-binary-on-cdn": "node ./scripts/binary.js checkIfBinaryExistsOnCdn",
-    "get-binary-cdn-url": "node ./scripts/binary.js getBinaryCdnUrl",
+    "download-binary-from-cdn": "node ./scripts/binary.js downloadBinaryFromCdn",
     "build": "lerna run build --stream && lerna run build-cli --stream",
     "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope create-cypress-tests --scope",
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",

@@ -4,6 +4,7 @@ const cwd = process.cwd()
 const path = require('path')
 const _ = require('lodash')
 const os = require('os')
+const fs = require('fs')
 const simpleGit = require('simple-git')
 const chalk = require('chalk')
 const Promise = require('bluebird')
@@ -355,8 +356,19 @@ const deploy = {
     process.exit(1)
   },
 
-  async getBinaryCdnUrl (args = process.argv) {
-    return uploadArtifactToS3([...args, '--dry-run', 'true'])
+  async downloadBinaryFromCdn (args = process.argv) {
+    const url = uploadArtifactToS3([...args, '--dry-run', 'true'])
+    const options = this.parseOptions(args)
+    const { destination } = options
+
+    console.log(`Downloading binary from ${url} to ${destination}`)
+
+    const destStream = fs.createWriteStream(destination)
+    const artifactResp = await fetch(url)
+
+    await artifactResp.body.pipeTo(destStream)
+
+    console.log('')
   },
 }
 
