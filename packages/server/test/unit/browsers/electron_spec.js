@@ -80,6 +80,7 @@ describe('lib/browsers/electron', () => {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
       close: sinon.stub().resolves(),
+      getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
@@ -212,14 +213,12 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sends after:browser:launch with debugger url', function () {
-      const browser = { isHeadless: true }
-
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
-        expect(plugins.execute).to.be.calledWith('after:browser:launch', browser, {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', 'electron', {
           webSocketDebuggerUrl: 'ws://debugger',
         })
       })
