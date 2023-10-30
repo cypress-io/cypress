@@ -1,515 +1,3 @@
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / only runs the first attempt of the test if the test passes'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (always-passes.cy.js)                                                      │
-  │ Searched:   cypress/e2e/always-passes.cy.js                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  always-passes.cy.js                                                             (1 of 1)
-
-
-  always passes
-    ✓ always passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     always-passes.cy.js                                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  always-passes.cy.js                      XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
-    ✓ deterministically runs pass/fail on this test
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied (max attempts)'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 7 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 8 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 9 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 10 of 10) deterministically runs pass/fail on this test
-    ✓ deterministically runs pass/fail on this test
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / short-circuits if the needed "passesRequired" cannot be satisfied by the remaining attempts available'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 6) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 6) deterministically runs pass/fail on this test
-    ✖(Attempt 3 of 6) deterministically runs pass/fail on this test
-    ✖ deterministically runs pass/fail on this test
-
-
-  0 passing
-  1 failing
-
-  1) deterministic flaky test
-       deterministically runs pass/fail on this test:
-     AssertionError: expected true to be false
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / retries up to the "passesRequired" limit if the config can be satisfied (max attempts possible)'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 7) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 7) deterministically runs pass/fail on this test
-    ✖(Attempt 3 of 7) deterministically runs pass/fail on this test
-    ✓(Attempt 4 of 7) deterministically runs pass/fail on this test
-    ✖(Attempt 5 of 7) deterministically runs pass/fail on this test
-    ✓(Attempt 6 of 7) deterministically runs pass/fail on this test
-    ✖(Attempt 7 of 7) deterministically runs pass/fail on this test
-    ✖ deterministically runs pass/fail on this test
-
-
-  0 passing
-  1 failing
-
-  1) deterministic flaky test
-       deterministically runs pass/fail on this test:
-     AssertionError: expected true to be false
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / passes / only runs the first attempt of the test if the test passes'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (always-passes.cy.js)                                                      │
-  │ Searched:   cypress/e2e/always-passes.cy.js                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  always-passes.cy.js                                                             (1 of 1)
-
-
-  always passes
-    ✓ always passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     always-passes.cy.js                                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  always-passes.cy.js                      XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs all attempts of the test if the first attempt fails and "stopIfAnyPassed=false"'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 7 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 8 of 10) deterministically runs pass/fail on this test
-    ✖(Attempt 9 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 10 of 10) deterministically runs pass/fail on this test
-    ✖ deterministically runs pass/fail on this test
-
-
-  0 passing
-  1 failing
-
-  1) deterministic flaky test
-       deterministically runs pass/fail on this test:
-     [object Object]
-AssertionError: expected true to be false
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs attempts of the test if the first attempt fails until the test passes if "stopIfAnyPassed=true"'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
-  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
-
-
-  deterministic flaky test
-    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
-    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
-    ✖ deterministically runs pass/fail on this test
-
-
-  0 passing
-  1 failing
-
-  1) deterministic flaky test
-       deterministically runs pass/fail on this test:
-     [object Object]
-AssertionError: expected true to be false
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
 exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / exercises experimental-retries suite to verify console reporter and final status code are correct.'] = `
 
 ====================================================================================================
@@ -849,6 +337,527 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │    aEvents.cy.js                                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  2 of 8 failed (25%)                      XX:XX       14       12        2        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (fail-with-afterEach.mochaEvents.cy.js, fail-with-beforeEach.mochaEvents.c │
+  │             y.js, fail-with-after.mochaEvents.cy.js, fail-with-before.mochaEvents.cy.js)       │
+  │ Searched:   cypress/e2e/runner/fail-with-afterEach.mochaEvents.cy.js, cypress/e2e/runner/fail- │
+  │             with-beforeEach.mochaEvents.cy.js, cypress/e2e/runner/fail-with-after.mochaEvents. │
+  │             cy.js, cypress/e2e/runner/fail-with-before.mochaEvents.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-afterEach.mochaEvents.cy.js                                           (1 of 4)
+
+
+  suite 1
+    ✖(Attempt 1 of 10) test 1
+    ✖(Attempt 2 of 10) test 1
+    ✖(Attempt 3 of 10) test 1
+    ✖(Attempt 4 of 10) test 1
+    ✖(Attempt 5 of 10) test 1
+    ✖(Attempt 6 of 10) "after each" hook for "test 1"
+    ✖ "after each" hook for "test 1"
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "after each" hook for "test 1":
+     Error: After each error
+
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      1                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-afterEach.mochaEvents.cy.js                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-beforeEach.mochaEvents.cy.js                                          (2 of 4)
+
+
+  suite 1
+    ✖(Attempt 1 of 10) test 1
+    ✖(Attempt 2 of 10) test 1
+    ✖(Attempt 3 of 10) test 1
+    ✖(Attempt 4 of 10) test 1
+    ✖(Attempt 5 of 10) test 1
+    ✖(Attempt 6 of 10) "before each" hook for "test 1"
+    ✖ "before each" hook for "test 1"
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "before each" hook for "test 1":
+     Error: beforeEach
+
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      1                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-beforeEach.mochaEvents.cy.js                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-after.mochaEvents.cy.js                                               (3 of 4)
+
+
+  suite 1
+    ✓ test 1
+    ✖ "after all" hook for "test 2" (NaNms)
+
+
+  1 passing
+  1 failing
+
+  1) suite 1
+       "after all" hook for "test 2":
+     Error: Error!
+
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+
+Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-after.mochaEvents.cy.js                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-before.mochaEvents.cy.js                                              (4 of 4)
+
+
+  suite 1
+    ✖ "before all" hook for "test 1" (NaNms)
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "before all" hook for "test 1":
+     Error: before
+
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+
+Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-before.mochaEvents.cy.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  fail-with-afterEach.mochaEvents.cy.      XX:XX        2        -        1        -        1 │
+  │    js                                                                                          │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-beforeEach.mochaEvents.cy      XX:XX        2        -        1        -        1 │
+  │    .js                                                                                         │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-after.mochaEvents.cy.js        XX:XX        2        1        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-before.mochaEvents.cy.js       XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  4 of 4 failed (100%)                     XX:XX        7        1        4        -        2  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / only runs the first attempt of the test if the test passes'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (always-passes.cy.js)                                                      │
+  │ Searched:   cypress/e2e/always-passes.cy.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  always-passes.cy.js                                                             (1 of 1)
+
+
+  always passes
+    ✓ always passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     always-passes.cy.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  always-passes.cy.js                      XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
+
+
+  deterministic flaky test
+    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
+    ✓ deterministically runs pass/fail on this test
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / passes / retries up to the "passesRequired" limit if the config can be satisfied (max attempts)'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
+
+
+  deterministic flaky test
+    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 7 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 8 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 9 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 10 of 10) deterministically runs pass/fail on this test
+    ✓ deterministically runs pass/fail on this test
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / short-circuits if the needed "passesRequired" cannot be satisfied by the remaining attempts available'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
+
+
+  deterministic flaky test
+    ✖(Attempt 1 of 6) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 6) deterministically runs pass/fail on this test
+    ✖(Attempt 3 of 6) deterministically runs pass/fail on this test
+    ✖ deterministically runs pass/fail on this test
+
+
+  0 passing
+  1 failing
+
+  1) deterministic flaky test
+       deterministically runs pass/fail on this test:
+     AssertionError: expected true to be false
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / fails / retries up to the "passesRequired" limit if the config can be satisfied (max attempts possible)'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
+
+
+  deterministic flaky test
+    ✖(Attempt 1 of 7) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 7) deterministically runs pass/fail on this test
+    ✖(Attempt 3 of 7) deterministically runs pass/fail on this test
+    ✓(Attempt 4 of 7) deterministically runs pass/fail on this test
+    ✖(Attempt 5 of 7) deterministically runs pass/fail on this test
+    ✓(Attempt 6 of 7) deterministically runs pass/fail on this test
+    ✖(Attempt 7 of 7) deterministically runs pass/fail on this test
+    ✖ deterministically runs pass/fail on this test
+
+
+  0 passing
+  1 failing
+
+  1) deterministic flaky test
+       deterministically runs pass/fail on this test:
+     AssertionError: expected true to be false
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -1290,6 +1299,218 @@ Error: test 2
 
 `
 
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (fail-with-afterEach.mochaEvents.cy.js, fail-with-beforeEach.mochaEvents.c │
+  │             y.js, fail-with-after.mochaEvents.cy.js, fail-with-before.mochaEvents.cy.js)       │
+  │ Searched:   cypress/e2e/runner/fail-with-afterEach.mochaEvents.cy.js, cypress/e2e/runner/fail- │
+  │             with-beforeEach.mochaEvents.cy.js, cypress/e2e/runner/fail-with-after.mochaEvents. │
+  │             cy.js, cypress/e2e/runner/fail-with-before.mochaEvents.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-afterEach.mochaEvents.cy.js                                           (1 of 4)
+
+
+  suite 1
+    ✖(Attempt 1 of 10) test 1
+    ✖(Attempt 2 of 10) test 1
+    ✖(Attempt 3 of 10) test 1
+    ✖(Attempt 4 of 10) test 1
+    ✖(Attempt 5 of 10) test 1
+    ✖(Attempt 6 of 10) test 1
+    ✖(Attempt 7 of 10) test 1
+    ✖(Attempt 8 of 10) test 1
+    ✖(Attempt 9 of 10) test 1
+    ✖(Attempt 10 of 10) "after each" hook for "test 1"
+    ✖ "after each" hook for "test 1"
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "after each" hook for "test 1":
+     Error: After each error
+
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      1                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-afterEach.mochaEvents.cy.js                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-beforeEach.mochaEvents.cy.js                                          (2 of 4)
+
+
+  suite 1
+    ✖(Attempt 1 of 10) test 1
+    ✖(Attempt 2 of 10) test 1
+    ✖(Attempt 3 of 10) test 1
+    ✖(Attempt 4 of 10) test 1
+    ✖(Attempt 5 of 10) test 1
+    ✖(Attempt 6 of 10) test 1
+    ✖(Attempt 7 of 10) test 1
+    ✖(Attempt 8 of 10) test 1
+    ✖(Attempt 9 of 10) test 1
+    ✖(Attempt 10 of 10) "before each" hook for "test 1"
+    ✖ "before each" hook for "test 1"
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "before each" hook for "test 1":
+     Error: beforeEach
+
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      1                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-beforeEach.mochaEvents.cy.js                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-after.mochaEvents.cy.js                                               (3 of 4)
+
+
+  suite 1
+    ✓ test 1
+    ✖ "after all" hook for "test 2" (NaNms)
+
+
+  1 passing
+  1 failing
+
+  1) suite 1
+       "after all" hook for "test 2":
+     Error: Error!
+
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+
+Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-after.mochaEvents.cy.js                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  fail-with-before.mochaEvents.cy.js                                              (4 of 4)
+
+
+  suite 1
+    ✖ "before all" hook for "test 1" (NaNms)
+
+
+  0 passing
+  1 failing
+
+  1) suite 1
+       "before all" hook for "test 1":
+     Error: before
+
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
+
+Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fail-with-before.mochaEvents.cy.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  fail-with-afterEach.mochaEvents.cy.      XX:XX        2        -        1        -        1 │
+  │    js                                                                                          │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-beforeEach.mochaEvents.cy      XX:XX        2        -        1        -        1 │
+  │    .js                                                                                         │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-after.mochaEvents.cy.js        XX:XX        2        1        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  fail-with-before.mochaEvents.cy.js       XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  4 of 4 failed (100%)                     XX:XX        7        1        4        -        2  
+
+
+`
+
 exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries suite to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
 
 ====================================================================================================
@@ -1673,218 +1894,6 @@ Error: test 2
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (fail-with-afterEach.mochaEvents.cy.js, fail-with-beforeEach.mochaEvents.c │
-  │             y.js, fail-with-after.mochaEvents.cy.js, fail-with-before.mochaEvents.cy.js)       │
-  │ Searched:   cypress/e2e/runner/fail-with-afterEach.mochaEvents.cy.js, cypress/e2e/runner/fail- │
-  │             with-beforeEach.mochaEvents.cy.js, cypress/e2e/runner/fail-with-after.mochaEvents. │
-  │             cy.js, cypress/e2e/runner/fail-with-before.mochaEvents.cy.js                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-afterEach.mochaEvents.cy.js                                           (1 of 4)
-
-
-  suite 1
-    ✖(Attempt 1 of 10) test 1
-    ✖(Attempt 2 of 10) test 1
-    ✖(Attempt 3 of 10) test 1
-    ✖(Attempt 4 of 10) test 1
-    ✖(Attempt 5 of 10) test 1
-    ✖(Attempt 6 of 10) test 1
-    ✖(Attempt 7 of 10) test 1
-    ✖(Attempt 8 of 10) test 1
-    ✖(Attempt 9 of 10) test 1
-    ✖(Attempt 10 of 10) "after each" hook for "test 1"
-    ✖ "after each" hook for "test 1"
-
-
-  0 passing
-  1 failing
-
-  1) suite 1
-       "after each" hook for "test 1":
-     Error: After each error
-
-Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-afterEach.mochaEvents.cy.js                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-beforeEach.mochaEvents.cy.js                                          (2 of 4)
-
-
-  suite 1
-    ✖(Attempt 1 of 10) test 1
-    ✖(Attempt 2 of 10) test 1
-    ✖(Attempt 3 of 10) test 1
-    ✖(Attempt 4 of 10) test 1
-    ✖(Attempt 5 of 10) test 1
-    ✖(Attempt 6 of 10) test 1
-    ✖(Attempt 7 of 10) test 1
-    ✖(Attempt 8 of 10) test 1
-    ✖(Attempt 9 of 10) test 1
-    ✖(Attempt 10 of 10) "before each" hook for "test 1"
-    ✖ "before each" hook for "test 1"
-
-
-  0 passing
-  1 failing
-
-  1) suite 1
-       "before each" hook for "test 1":
-     Error: beforeEach
-
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-beforeEach.mochaEvents.cy.js                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-after.mochaEvents.cy.js                                               (3 of 4)
-
-
-  suite 1
-    ✓ test 1
-    ✖ "after all" hook for "test 2" (NaNms)
-
-
-  1 passing
-  1 failing
-
-  1) suite 1
-       "after all" hook for "test 2":
-     Error: Error!
-
-Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-
-Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-after.mochaEvents.cy.js                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-before.mochaEvents.cy.js                                              (4 of 4)
-
-
-  suite 1
-    ✖ "before all" hook for "test 1" (NaNms)
-
-
-  0 passing
-  1 failing
-
-  1) suite 1
-       "before all" hook for "test 1":
-     Error: before
-
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-
-Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-before.mochaEvents.cy.js                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  fail-with-afterEach.mochaEvents.cy.      XX:XX        2        -        1        -        1 │
-  │    js                                                                                          │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-beforeEach.mochaEvents.cy      XX:XX        2        -        1        -        1 │
-  │    .js                                                                                         │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-after.mochaEvents.cy.js        XX:XX        2        1        1        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-before.mochaEvents.cy.js       XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 4 failed (100%)                     XX:XX        7        1        4        -        2  
-
-
-`
-
 exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / exercises experimental-retries hook failures to verify console reporter and final status code are correct (stopIfAnyPassed=true).'] = `
 
 ====================================================================================================
@@ -2097,7 +2106,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
 `
 
-exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-and-pass-on-threshold" / exercises experimental-retries hook failures to verify console reporter and final status code are correct.'] = `
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / passes / only runs the first attempt of the test if the test passes'] = `
 
 ====================================================================================================
 
@@ -2106,159 +2115,92 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (fail-with-afterEach.mochaEvents.cy.js, fail-with-beforeEach.mochaEvents.c │
-  │             y.js, fail-with-after.mochaEvents.cy.js, fail-with-before.mochaEvents.cy.js)       │
-  │ Searched:   cypress/e2e/runner/fail-with-afterEach.mochaEvents.cy.js, cypress/e2e/runner/fail- │
-  │             with-beforeEach.mochaEvents.cy.js, cypress/e2e/runner/fail-with-after.mochaEvents. │
-  │             cy.js, cypress/e2e/runner/fail-with-before.mochaEvents.cy.js                       │
+  │ Specs:      1 found (always-passes.cy.js)                                                      │
+  │ Searched:   cypress/e2e/always-passes.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fail-with-afterEach.mochaEvents.cy.js                                           (1 of 4)
+  Running:  always-passes.cy.js                                                             (1 of 1)
 
 
-  suite 1
-    ✖(Attempt 1 of 10) test 1
-    ✖(Attempt 2 of 10) test 1
-    ✖(Attempt 3 of 10) test 1
-    ✖(Attempt 4 of 10) test 1
-    ✖(Attempt 5 of 10) test 1
-    ✖(Attempt 6 of 10) "after each" hook for "test 1"
-    ✖ "after each" hook for "test 1"
-
-
-  0 passing
-  1 failing
-
-  1) suite 1
-       "after each" hook for "test 1":
-     Error: After each error
-
-Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-afterEach.mochaEvents.cy.js                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-beforeEach.mochaEvents.cy.js                                          (2 of 4)
-
-
-  suite 1
-    ✖(Attempt 1 of 10) test 1
-    ✖(Attempt 2 of 10) test 1
-    ✖(Attempt 3 of 10) test 1
-    ✖(Attempt 4 of 10) test 1
-    ✖(Attempt 5 of 10) test 1
-    ✖(Attempt 6 of 10) "before each" hook for "test 1"
-    ✖ "before each" hook for "test 1"
-
-
-  0 passing
-  1 failing
-
-  1) suite 1
-       "before each" hook for "test 1":
-     Error: beforeEach
-
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-beforeEach.mochaEvents.cy.js                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  fail-with-after.mochaEvents.cy.js                                               (3 of 4)
-
-
-  suite 1
-    ✓ test 1
-    ✖ "after all" hook for "test 2" (NaNms)
+  always passes
+    ✓ always passes
 
 
   1 passing
-  1 failing
-
-  1) suite 1
-       "after all" hook for "test 2":
-     Error: Error!
-
-Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-
-Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
-      [stack trace lines]
-
-
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
+  │ Tests:        1                                                                                │
   │ Passing:      1                                                                                │
-  │ Failing:      1                                                                                │
+  │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-after.mochaEvents.cy.js                                                │
+  │ Spec Ran:     always-passes.cy.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  always-passes.cy.js                      XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs all attempts of the test if the first attempt fails and "stopIfAnyPassed=false"'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fail-with-before.mochaEvents.cy.js                                              (4 of 4)
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
 
 
-  suite 1
-    ✖ "before all" hook for "test 1" (NaNms)
+  deterministic flaky test
+    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 3 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 4 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 5 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 6 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 7 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 8 of 10) deterministically runs pass/fail on this test
+    ✖(Attempt 9 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 10 of 10) deterministically runs pass/fail on this test
+    ✖ deterministically runs pass/fail on this test
 
 
   0 passing
   1 failing
 
-  1) suite 1
-       "before all" hook for "test 1":
-     Error: before
-
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`suite 1\`
-
-Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
+  1) deterministic flaky test
+       deterministically runs pass/fail on this test:
+     [object Object]
+AssertionError: expected true to be false
       [stack trace lines]
 
 
@@ -2275,7 +2217,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     fail-with-before.mochaEvents.cy.js                                               │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2286,17 +2228,75 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  fail-with-afterEach.mochaEvents.cy.      XX:XX        2        -        1        -        1 │
-  │    js                                                                                          │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-beforeEach.mochaEvents.cy      XX:XX        2        -        1        -        1 │
-  │    .js                                                                                         │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-after.mochaEvents.cy.js        XX:XX        2        1        1        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  fail-with-before.mochaEvents.cy.js       XX:XX        1        -        1        -        - │
+  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 4 failed (100%)                     XX:XX        7        1        4        -        2  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-flake-but-always-fail" / fails / runs attempts of the test if the first attempt fails until the test passes if "stopIfAnyPassed=true"'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (deterministic-flaky.cy.js)                                                │
+  │ Searched:   cypress/e2e/deterministic-flaky.cy.js                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  deterministic-flaky.cy.js                                                       (1 of 1)
+
+
+  deterministic flaky test
+    ✖(Attempt 1 of 10) deterministically runs pass/fail on this test
+    ✓(Attempt 2 of 10) deterministically runs pass/fail on this test
+    ✖ deterministically runs pass/fail on this test
+
+
+  0 passing
+  1 failing
+
+  1) deterministic flaky test
+       deterministically runs pass/fail on this test:
+     [object Object]
+AssertionError: expected true to be false
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     deterministic-flaky.cy.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

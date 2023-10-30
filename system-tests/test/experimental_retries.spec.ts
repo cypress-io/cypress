@@ -115,10 +115,10 @@ describe('e2e retries.experimentalStrategy', () => {
       })
 
       /**
-       * exercised additionally in cy-in-cy tests to verify correct mocha snapshots and cypress reporter output:
-       *     packages/app/cypress/e2e/runner/retries.experimentalRetries.mochaEvents.cy.ts
-       *     packages/app/cypress/e2e/runner/runner.experimentalRetries.mochaEvents.cy.ts
-       */
+         * exercised additionally in cy-in-cy tests to verify correct mocha snapshots and cypress reporter output:
+         *     packages/app/cypress/e2e/runner/retries.experimentalRetries.mochaEvents.cy.ts
+         *     packages/app/cypress/e2e/runner/runner.experimentalRetries.mochaEvents.cy.ts
+         */
       systemTests.it('exercises experimental-retries suite to verify console reporter and final status code are correct.', {
         project: 'detect-flake-and-pass-on-threshold',
         browser: '!webkit',
@@ -231,10 +231,10 @@ describe('e2e retries.experimentalStrategy', () => {
       })
 
       /**
-       * exercised additionally in cy-in-cy tests to verify correct mocha snapshots and cypress reporter output:
-       *     packages/app/cypress/e2e/runner/retries.experimentalRetries.mochaEvents.cy.ts
-       *     packages/app/cypress/e2e/runner/runner.experimentalRetries.mochaEvents.cy.ts
-       */
+         * exercised additionally in cy-in-cy tests to verify correct mocha snapshots and cypress reporter output:
+         *     packages/app/cypress/e2e/runner/retries.experimentalRetries.mochaEvents.cy.ts
+         *     packages/app/cypress/e2e/runner/runner.experimentalRetries.mochaEvents.cy.ts
+         */
       systemTests.it('exercises experimental-retries suite to verify console reporter and final status code are correct.', {
         project: 'detect-flake-but-always-fail',
         browser: '!webkit',

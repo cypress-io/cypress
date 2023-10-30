@@ -13,7 +13,7 @@ import pkg from '@packages/root'
 
 import env from '../util/env'
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -25,7 +25,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
-const RETRY_DELAYS = [500, 100, 2000, 4000, 8000]
+const RETRY_DELAYS = [500, 1000, 2000, 4000, 8000, 16000, 32000]
 const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {
@@ -70,6 +70,14 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   get protocolEnabled (): boolean {
     return !!this._protocol
+  }
+
+  get networkEnableOptions () {
+    return this.protocolEnabled ? {
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
+      maxPostDataSize: 64 * 1024,
+    } : undefined
   }
 
   async setupProtocol (script: string, options: ProtocolManagerOptions) {
@@ -223,6 +231,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return this.invokeSync('responseStreamReceived', { isEssential: false }, options)
   }
 
+  responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void {
+    this.invokeSync('responseStreamTimedOut', { isEssential: false }, options)
+  }
+
   canUpload (): boolean {
     return !!this._protocol && !!this._archivePath && !!this._db
   }
@@ -278,7 +290,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug(`uploading %s to %s with a file size of %s`, archivePath, uploadUrl, fileSize)
 
-    const retryRequest = async (retryCount: number) => {
+    const retryRequest = async (retryCount: number, errors: Error[]) => {
       try {
         if (fileSize > dbSizeLimit()) {
           throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
@@ -327,16 +339,18 @@ export class ProtocolManager implements ProtocolManagerShape {
             debug(`retrying upload %o`, { retryCount })
             await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
 
-            return await retryRequest(retryCount + 1)
+            return await retryRequest(retryCount + 1, [...errors, e])
           }
         }
 
-        throw e
+        const totalErrors = [...errors, e]
+
+        throw new AggregateError(totalErrors, e.message)
       }
     }
 
     try {
-      return await retryRequest(0)
+      return await retryRequest(0, [])
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({

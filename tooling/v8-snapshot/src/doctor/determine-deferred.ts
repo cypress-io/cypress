@@ -95,14 +95,14 @@ export async function determineDeferred (
   const {
     deferred: updatedDeferred,
     norewrite: updatedNorewrite,
-    healthy: updatedHealty,
+    healthy: updatedHealthy,
   } = await doctor.heal()
   const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
 
   const updatedMeta = {
     norewrite: opts.nodeModulesOnly ? [...updatedNorewrite, ...projectNoRewrite] : updatedNorewrite,
     deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
-    healthy: opts.nodeModulesOnly ? [...updatedHealty, ...projectHealthy] : updatedHealty,
+    healthy: opts.nodeModulesOnly ? [...updatedHealthy, ...projectHealthy] : updatedHealthy,
     deferredHashFile,
     deferredHash: currentHash,
   }
@@ -122,7 +122,7 @@ export async function determineDeferred (
   return {
     norewrite: updatedNorewrite,
     deferred: updatedDeferred,
-    healthy: updatedHealty,
+    healthy: updatedHealthy,
   }
 }
 

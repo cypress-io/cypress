@@ -120,38 +120,38 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
 }
 
 const isValidExperimentalRetryOptionsConfig = (options: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold'): boolean => {
-  if (options != null) {
-    // retries must be an integer of 1 or greater
-    const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
+  if (options == null) return true
 
-    if (!isValidMaxRetries) {
+  // retries must be an integer of 1 or greater
+  const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
+
+  if (!isValidMaxRetries) {
+    return false
+  }
+
+  // if the strategy is 'detect-flake-but-always-fail', stopIfAnyPassed must be provided and must be a boolean
+  if (strategy === 'detect-flake-but-always-fail') {
+    if (options.passesRequired !== undefined) {
       return false
     }
 
-    // if the strategy is 'detect-flake-but-always-fail', stopIfAnyPassed must be provided and must be a boolean
-    if (strategy === 'detect-flake-but-always-fail') {
-      if (options.passesRequired !== undefined) {
-        return false
-      }
+    const isValidStopIfAnyPasses = _.isBoolean(options.stopIfAnyPassed)
 
-      const isValidStopIfAnyPasses = _.isBoolean(options.stopIfAnyPassed)
+    if (!isValidStopIfAnyPasses) {
+      return false
+    }
+  }
 
-      if (!isValidStopIfAnyPasses) {
-        return false
-      }
+  // if the strategy is 'detect-flake-and-pass-on-threshold', passesRequired must be provided and must be an integer greater than 0
+  if (strategy === 'detect-flake-and-pass-on-threshold') {
+    if (options.stopIfAnyPassed !== undefined) {
+      return false
     }
 
-    // if the strategy is 'detect-flake-and-pass-on-threshold', passesRequired must be provided and must be an integer greater than 0
-    if (strategy === 'detect-flake-and-pass-on-threshold') {
-      if (options.stopIfAnyPassed !== undefined) {
-        return false
-      }
+    const isValidPassesRequired = _.isInteger(options.passesRequired) && options.passesRequired > 0 && options.passesRequired <= options.maxRetries
 
-      const isValidPassesRequired = _.isInteger(options.passesRequired) && options.passesRequired > 0 && options.passesRequired <= options.maxRetries
-
-      if (!isValidPassesRequired) {
-        return false
-      }
+    if (!isValidPassesRequired) {
+      return false
     }
   }
 

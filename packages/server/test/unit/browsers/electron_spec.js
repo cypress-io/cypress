@@ -13,6 +13,7 @@ const savedState = require(`../../../lib/saved_state`)
 const { Automation } = require(`../../../lib/automation`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 const electronApp = require('../../../lib/util/electron-app')
+const utils = require('../../../lib/browsers/utils')
 
 const ELECTRON_PID = 10001
 
@@ -67,6 +68,7 @@ describe('lib/browsers/electron', () => {
     sinon.stub(Windows, 'installExtension').returns()
     sinon.stub(Windows, 'removeAllExtensions').returns()
     sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves(1234)
+    sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
 
     // mock CRI client during testing
     this.pageCriClient = {
@@ -344,6 +346,21 @@ describe('lib/browsers/electron', () => {
           behavior: 'allow',
           downloadPath: 'downloads',
         })
+      })
+    })
+
+    it('handles download links via cdp', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(utils.handleDownloadLinksViaCDP).to.be.calledWith(this.pageCriClient, this.automation)
+      })
+    })
+
+    it('expects the browser to be reset', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
       })
     })
 

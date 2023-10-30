@@ -251,7 +251,7 @@ describe('lib/browsers/firefox', () => {
       }
 
       mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
+        [path.resolve(`${__dirname }../../../../../extension/dist/v2`)]: {
           'background.js': mockfs.file({
             mode: 0o444,
           }),
@@ -532,6 +532,14 @@ describe('lib/browsers/firefox', () => {
           on: sinon.stub(),
           off: sinon.stub(),
           close: sinon.stub(),
+          ws: sinon.stub() as any,
+          queue: {
+            enableCommands: [],
+            enqueuedCommands: [],
+            subscriptions: [],
+          },
+          closed: false,
+          connected: false,
         }
 
         const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
@@ -545,7 +553,7 @@ describe('lib/browsers/firefox', () => {
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
-        expect(BrowserCriClient.create).to.be.calledWith(['127.0.0.1', '::1'], port, 'Firefox', null)
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null })
         expect(CdpAutomation.create).to.be.calledWith(
           criClientStub.send,
           criClientStub.on,

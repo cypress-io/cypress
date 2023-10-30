@@ -384,7 +384,7 @@ describe('src/cy/commands/actions/check', () => {
         })
       })
 
-      it('eventually passes the assertion on multiple :checkboxs', () => {
+      it('eventually passes the assertion on multiple :checkboxes', () => {
         $(':checkbox').click(function () {
           _.delay(() => {
             $(this).addClass('checked')
@@ -598,7 +598,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').check().should('have.class', 'checked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').check(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })
@@ -1189,7 +1189,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').uncheck(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })

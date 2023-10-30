@@ -831,8 +831,7 @@ export const mutation = mutationType({
     /**
      * Currently, this is only used for debugging purposes by running this mutation in GraphiQL
      */
-    t.field('showDebugForCloudRun', {
-      type: Query,
+    t.boolean('showDebugForCloudRun', {
       description: 'Set the route to debug and show the specified CloudRun',
       args: {
         runNumber: nonNull(intArg()),
@@ -840,7 +839,7 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.debugCloudRun(args.runNumber)
 
-        return {}
+        return true
       },
     })
   },
