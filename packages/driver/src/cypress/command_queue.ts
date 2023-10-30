@@ -468,7 +468,14 @@ export class CommandQueue extends Queue<$Command> {
 
       Cypress.action('cy:command:start', command)
 
-      return this.runCommand(command)!
+      console.log('🔵 command:start', command.get('name'))
+
+      console.log('  - document.hasFocus()?', document.hasFocus())
+
+      return Cypress.action<Promise<void>>('cy:command:start:async', command)
+      .then(() => {
+        return this.runCommand(command)!
+      })
       .then(() => {
         // each successful command invocation should
         // always reset the timeout for the current runnable

@@ -76,7 +76,9 @@ const _getAutomation = async function (win, options: BeforeBrowserLaunchOpts, pa
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
+  const activateCurrent = async () => {}
+
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, activateCurrent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {

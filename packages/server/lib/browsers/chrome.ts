@@ -52,7 +52,7 @@ const pathToTheme = extension.getPathToTheme()
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
-  '--start-maximized',
+  // '--start-maximized',
   '--silent-debugger-extension-api',
   '--no-default-browser-check',
   '--no-first-run',
@@ -313,8 +313,12 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
-const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BeforeBrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager)
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, activateMainTab: () => Promise<void>, options: BeforeBrowserLaunchOpts) => {
+  const _activateMainTab = async () => {
+    await client.send('Page.bringToFront')
+  }
+
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, _activateMainTab, options.protocolManager)
 
   automation.use(cdpAutomation)
 
@@ -357,10 +361,14 @@ export = {
       return
     }
 
+    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute, 'v3')
     const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
+    await fs.chmod(extensionBg, 0o0644)
+    await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
   },
@@ -489,7 +497,7 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, browserCriClient.activateCurrentTarget, options)
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BeforeBrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
@@ -517,7 +525,7 @@ export = {
 
     debug('attaching listeners to chrome %o', { url, options })
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, browserCriClient.activateCurrentTarget, options)
 
     onReconnect = (client: CriClient) => {
       // if the client disconnects (e.g. due to a computer sleeping), update

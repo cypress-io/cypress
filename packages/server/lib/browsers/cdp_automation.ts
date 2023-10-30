@@ -150,6 +150,7 @@ type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
 }
+type ActivateMainTab = () => Promise<void>
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -168,11 +169,13 @@ export class CdpAutomation implements CDPClient {
   private frameTree: any
   private gettingFrameTree: any
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private activateMainTab: ActivateMainTab) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
+
+    debugger
 
     this.on = onFn
     this.off = offFn
@@ -195,8 +198,8 @@ export class CdpAutomation implements CDPClient {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, activateMainTab: ActivateMainTab, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, activateMainTab)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
@@ -495,6 +498,8 @@ export class CdpAutomation implements CDPClient {
         ])
       case 'reset:browser:tabs:for:next:test':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
+      case 'activate:main:tab':
+        return this.activateMainTab()
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       case 'get:heap:size:limit':

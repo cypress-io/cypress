@@ -343,6 +343,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return Cypress.backend('close:extra:targets')
     })
 
+    // ensure the main Cypress tab has focus before every command
+    Cypress.on('command:start:async', () => {
+      if (document.hasFocus()) return
+
+      return Cypress.automation('activate:main:tab', {})
+    })
+
     handleCrossOriginCookies(Cypress)
   }
 

@@ -124,6 +124,9 @@ const connect = function (host, path, extraOpts) {
         return invoke('verify', id, data)
       case 'focus:browser:window':
         return invoke('focus', id)
+      case 'activate:main:tab':
+        // not currently supported for firefox
+        return
       case 'take:screenshot':
         return invoke('takeScreenshot', id)
       case 'reset:browser:state':

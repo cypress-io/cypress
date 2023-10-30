@@ -29,6 +29,11 @@ const background = (cb) => {
   })
 }
 
+const v3background = () => {
+  return gulp.src('app/v3/background.js')
+  .pipe(gulp.dest('dist/v3'))
+}
+
 const html = () => {
   return gulp.src('app/**/*.html')
   .pipe(gulp.dest('dist/v2'))
@@ -74,6 +79,7 @@ const build = gulp.series(
     manifest('v2'),
     manifest('v3'),
     background,
+    v3background,
     html,
     css,
   ),

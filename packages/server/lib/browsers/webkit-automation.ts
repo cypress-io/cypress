@@ -368,6 +368,9 @@ export class WebKitAutomation {
         return await this.takeScreenshot(data)
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
+      case 'activate:main:tab':
+        // not currently supported for webkit
+        return
       case 'reset:browser:state':
         debug('stubbed reset:browser:state')
 

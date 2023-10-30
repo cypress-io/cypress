@@ -6,7 +6,12 @@
       "id": "automation-extension-v3@cypress.io"
     }
   },
-  "permissions": [],
+  "permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
   "icons": {
     "16": "icons/icon_16x16.png",
     "48": "icons/icon_48x48.png",
@@ -19,6 +24,9 @@
       "38": "icons/icon_38x38.png"
     },
     "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"

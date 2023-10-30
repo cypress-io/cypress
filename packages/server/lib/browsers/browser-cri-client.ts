@@ -35,6 +35,33 @@ type BrowserCriClientCreateOptions = {
   protocolManager?: ProtocolManagerShape
 }
 
+interface ManageTabsOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  browserName
+  host: string
+  onAsynchronousError: Function
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface AttachedToTargetOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  event: Protocol.Target.AttachedToTargetEvent
+  host: string
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface TargetDestroyedOptions {
+  browserName: string
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  event: Protocol.Target.TargetDestroyedEvent
+  onAsynchronousError: Function
+}
+
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -137,6 +164,11 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 type TargetId = string
 
+interface ExtraTarget {
+  client: CRI.Client
+  targetInfo: Protocol.Target.TargetInfo
+}
+
 export class BrowserCriClient {
   private browserClient: CriClient
   private versionInfo: CRI.VersionResult
@@ -155,7 +187,7 @@ export class BrowserCriClient {
   closed = false
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
-  extraTargetClients: Map<TargetId, CRI.Client> = new Map()
+  extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
 
   private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
@@ -216,31 +248,38 @@ export class BrowserCriClient {
     }, browserName, port)
   }
 
-  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }) {
+  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }: ManageTabsOptions) {
     const promises = [
       browserClient.send('Target.setDiscoverTargets', { discover: true }),
       browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
     ]
 
     // TODO: see how this affects nested iframes
-    browserClient.on('Target.attachedToTarget', async (event) => {
+    browserClient.on('Target.attachedToTarget', async (event: Protocol.Target.AttachedToTargetEvent) => {
       await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager })
     })
 
     // TODO: listen to 'Target.targetCrashed' or 'Inspector.targetCrashed' as well?
-    browserClient.on('Target.targetDestroyed', (event) => {
+    browserClient.on('Target.targetDestroyed', (event: Protocol.Target.TargetDestroyedEvent) => {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
     await Promise.all(promises)
   }
 
-  static async _onAttachToTarget ({ browserClient, browserCriClient, event, host, port, protocolManager }) {
+  static async _onAttachToTarget (options: AttachedToTargetOptions) {
+    const { browserClient, browserCriClient, event, host, port, protocolManager } = options
     const { sessionId, targetInfo, waitingForDebugger } = event
     let { targetId, url } = targetInfo
 
+    debug('Attached to target: %o', targetInfo)
+
+    console.log('🟣 attach to target:', event)
+
     try {
-      if (event.targetInfo.type !== 'page') {
+      // The basic approach here is we attach to targets and enable network traffic
+      // We must attach in a paused state so that we can enable network traffic before the target starts running.
+      if (targetInfo.type !== 'page') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
     } catch (error) {
@@ -248,8 +287,6 @@ export class BrowserCriClient {
       // network and continue, in that case, just ignore
       debug('error running Network.enable:', error)
     }
-
-    debug('Attached to target, id: %s', targetId)
 
     async function run () {
       try {
@@ -292,6 +329,8 @@ export class BrowserCriClient {
       || url.includes('devtools://')
       // is the Launchpad
       || url.includes('__launchpad')
+      // is chrome extension service worker
+      || url.includes('chrome-extension://')
     ) {
       debug('Not an extra target (id: %s)', targetId)
 
@@ -318,7 +357,7 @@ export class BrowserCriClient {
       return run()
     }
 
-    browserCriClient.addExtraTargetClient(targetId, extraTargetCriClient)
+    browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 
     await extraTargetCriClient.send('Fetch.enable')
 
@@ -337,7 +376,7 @@ export class BrowserCriClient {
     await run()
   }
 
-  static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }) {
+  static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }: TargetDestroyedOptions) {
     debug('Target.targetDestroyed %o', {
       event,
       closing: browserCriClient.closing,
@@ -350,7 +389,7 @@ export class BrowserCriClient {
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
         debug('Close extra target client (id: %s)')
-        browserCriClient.getExtraTargetClient(targetId)!.close().catch(() => { })
+        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch(() => { })
         browserCriClient.removeExtraTargetClient(targetId)
       }
 
@@ -462,6 +501,16 @@ export class BrowserCriClient {
   }
 
   /**
+   * Focuses the main Cypress tab without
+   */
+  activateCurrentTarget = async () => {
+    if (!this.currentlyAttachedTarget) return
+
+    await this.browserClient.send('Page.bringToFront')
+    // await this.browserClient.send('Target.activateTarget', { targetId: this.currentlyAttachedTarget.targetId })
+  }
+
+  /**
    * Resets the browser's targets optionally keeping a tab open
    *
    * @param shouldKeepTabOpen whether or not to keep the tab open
@@ -516,8 +565,8 @@ export class BrowserCriClient {
     this.resettingBrowserTargets = false
   }
 
-  addExtraTargetClient (targetId: TargetId, client: CRI.Client) {
-    this.extraTargetClients.set(targetId, client)
+  addExtraTargetClient (targetInfo: Protocol.Target.TargetInfo, client: CRI.Client) {
+    this.extraTargetClients.set(targetInfo.targetId, { client, targetInfo })
   }
 
   hasExtraTargetClient (targetId: TargetId) {
@@ -533,8 +582,13 @@ export class BrowserCriClient {
   }
 
   async closeExtraTargets () {
-    for (const [targetId] of this.extraTargetClients) {
+    // for (const [, client] of this.extraTargetClients) {
+    //   console.log('client:', client.type)
+    // }
+
+    for (const [targetId, extraTarget] of this.extraTargetClients) {
       debug('Close extra target (id: %s)', targetId)
+      console.log('🟣 close target:', extraTarget.targetInfo)
       await this.browserClient.send('Target.closeTarget', { targetId })
     }
   }

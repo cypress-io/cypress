@@ -273,10 +273,15 @@ export class SocketBase {
         socket.on('automation:request', (message, data, cb) => {
           debug('automation:request %s %o', message, data)
 
+          console.log('🟣 automation:request:', message, !!cb)
+
           return automationRequest(message, data)
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
+            console.log('🔴 error cb:', !!cb)
+            console.log('🔴 error:', err.stack)
+
             return cb({ error: errors.cloneErr(err) })
           })
         })

@@ -4,10 +4,10 @@ const { getCookieUrl } = require('./util')
 const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = {
-  getPathToExtension (...args) {
-    args = [__dirname, '..', 'dist', 'v2'].concat(args)
+  getPathToExtension (fileName, version = 'v2') {
+    const args = [__dirname, '..', 'dist', version]
 
-    return path.join.apply(path, args)
+    return path.join.apply(path, fileName ? args.concat(fileName) : args)
   },
 
   getPathToV3Extension (...args) {
@@ -22,8 +22,8 @@ module.exports = {
     return path.join(__dirname, '..')
   },
 
-  setHostAndPath (host, path) {
-    const src = this.getPathToExtension('background.js')
+  setHostAndPath (host, path, version = 'v2') {
+    const src = this.getPathToExtension('background.js', version)
 
     return fs.readFileAsync(src, 'utf8')
     .then((str) => {
