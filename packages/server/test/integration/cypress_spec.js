@@ -1006,6 +1006,7 @@ describe('lib/cypress', () => {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
+            getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }
 
           const cdpAutomation = {
@@ -1076,6 +1077,7 @@ describe('lib/cypress', () => {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
             close: sinon.stub().resolves(),
+            getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }
 
           sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)

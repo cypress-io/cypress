@@ -7,6 +7,7 @@ import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
+import type { Browser } from './types'
 import type { CriClient } from './cri-client'
 
 declare global {
@@ -155,6 +156,27 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   }
 
   return launchOptions
+}
+
+interface AfterBrowserLaunchDetails {
+  webSocketDebuggerUrl: string
+}
+
+async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowserLaunchDetails) {
+  if (plugins.has('after:browser:launch')) {
+    const span = telemetry.startSpan({ name: 'lifecycle:after:browser:launch' })
+
+    span?.setAttribute({
+      name: browser.name,
+      channel: browser.channel,
+      version: browser.version,
+      isHeadless: browser.isHeadless,
+    })
+
+    await plugins.execute('after:browser:launch', browser, options)
+
+    span?.end()
+  }
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
@@ -422,6 +444,8 @@ const listenForDownload = () => {
 export = {
 
   extendLaunchOptionsFromPlugins,
+
+  executeAfterBrowserLaunch,
 
   executeBeforeBrowserLaunch,
 

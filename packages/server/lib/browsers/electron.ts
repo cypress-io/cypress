@@ -533,6 +533,10 @@ export = {
       },
     }) as BrowserInstance
 
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient!.getWebSocketDebuggerUrl(),
+    })
+
     return instance
   },
 }
