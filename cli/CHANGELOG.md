@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.4.1
+
+_Released 11/7/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+
 ## 13.4.0
 
 _Released 10/30/2023_
