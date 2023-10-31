@@ -391,7 +391,7 @@ export class BrowserCriClient {
         browserCriClient.removeExtraTargetClient(targetId)
       }
 
-      // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+      // we may have gotten a delayed "Target.targetDestroyed" event for a page that we
       // have already closed/disposed, so unless this matches our current target then bail
       return
     }
