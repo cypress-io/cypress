@@ -285,13 +285,18 @@ export const create = async ({
 
       if (fullyManageTabs) {
         cri.on('Target.attachedToTarget', async (event) => {
-          // Service workers get attached at the page and browser level. We only want to handle them at the browser level
-          if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
-            await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
-          }
+          try {
+            // Service workers get attached at the page and browser level. We only want to handle them at the browser level
+            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
+              await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+            }
 
-          if (event.waitingForDebugger) {
-            await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            if (event.waitingForDebugger) {
+              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            }
+          } catch (error) {
+            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+            debug('error attaching to target cri', error)
           }
         })
 
