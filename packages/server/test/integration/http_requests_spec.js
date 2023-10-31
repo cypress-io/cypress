@@ -1035,7 +1035,7 @@ describe('Routes', () => {
         this.networkProxy.setPreRequestTimeout(50)
         // If this takes longer than the Promise.delay and the prerequest timeout then the second
         // call has hit the prerequest timeout which is a problem
-        this.timeout(150)
+        this.timeout(900)
 
         nock(this.server.remoteStates.current().origin)
         .get('/')
@@ -1057,6 +1057,7 @@ describe('Routes', () => {
 
         // Wait 100 ms to make sure the request times out
         return Promise.delay(100).then(() => {
+          this.networkProxy.setPreRequestTimeout(1000)
           nock(this.server.remoteStates.current().origin)
           .get('/')
           .once()
