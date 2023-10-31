@@ -13,6 +13,7 @@ describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(ResponseMiddleware)).to.have.ordered.members([
       'LogResponse',
+      'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
@@ -95,6 +96,45 @@ describe('http/response-middleware', function () {
             throw new Error('onError should not be called')
           },
         })
+      })
+    })
+  })
+
+  describe('FilterNonProxiedResponse', () => {
+    const { FilterNonProxiedResponse } = ResponseMiddleware
+    let ctx
+
+    beforeEach(() => {
+      ctx = {
+        onlyRunMiddleware: sinon.stub(),
+        req: {},
+        res: {
+          off: (event, listener) => {},
+        },
+      }
+    })
+
+    it('runs minimal subsequent middleware if request is not from the main target', () => {
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+          'AttachPlainTextStreamFn',
+          'PatchExpressSetHeader',
+          'MaybeSendRedirectToClient',
+          'CopyResponseStatusCode',
+          'MaybeEndWithEmptyBody',
+          'GzipBody',
+          'SendResponseBodyToClient',
+        ])
+      })
+    })
+
+    it('runs all subsequent middleware if request is from the main target', () => {
+      ctx.req.isFromMainTarget = true
+
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.onlyRunMiddleware).not.to.be.called
       })
     })
   })
