@@ -10,6 +10,11 @@ const HOST = '127.0.0.1'
 const PORT = 50505
 const THROWS_PORT = 65535
 
+type GetClientParams = {
+  protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+}
+
 describe('lib/browsers/cri-client', function () {
   let browserCriClient: {
     BrowserCriClient: {
@@ -17,13 +22,14 @@ describe('lib/browsers/cri-client', function () {
     }
   }
   let send: sinon.SinonStub
+  let on: sinon.SinonStub
   let close: sinon.SinonStub
   let criClientCreateStub: sinon.SinonStub
   let criImport: sinon.SinonStub & {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
-  let getClient: (protocolManager?: ProtocolManagerShape) => ReturnType<typeof BrowserCriClient.create>
+  let getClient: (options?: GetClientParams) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
     sinon.stub(protocol, '_connectAsync')
@@ -37,10 +43,12 @@ describe('lib/browsers/cri-client', function () {
     .onSecondCall().throws()
     .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
+    on = sinon.stub()
     send = sinon.stub()
     close = sinon.stub()
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs('http://web/socket/url', onError).resolves({
+    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager: undefined, fullyManageTabs: undefined }).resolves({
       send,
+      on,
       close,
     })
 
@@ -48,7 +56,15 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = (protocolManager) => browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError, undefined, protocolManager)
+    getClient = ({ protocolManager, fullyManageTabs } = {}) => {
+      criClientCreateStub = criClientCreateStub.withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager, fullyManageTabs }).resolves({
+        send,
+        on,
+        close,
+      })
+
+      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs })
+    }
   })
 
   context('.create', function () {
@@ -84,7 +100,7 @@ describe('lib/browsers/cri-client', function () {
 
       criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-      await browserCriClient.BrowserCriClient.create(['127.0.0.1', '::1'], THROWS_PORT, 'Chrome', onError)
+      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(criImport.Version).to.be.calledOnce
     })
@@ -95,7 +111,7 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)
+      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
 
       expect(client.attachToTargetUrl).to.be.instanceOf(Function)
 
@@ -107,177 +123,204 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })
+  })
 
-    context('#ensureMinimumProtocolVersion', function () {
-      function withProtocolVersion (actual, test) {
-        return getClient()
-        .then((client: any) => {
-          client.versionInfo = { 'Protocol-Version': actual }
+  context('#ensureMinimumProtocolVersion', function () {
+    function withProtocolVersion (actual, test) {
+      return getClient()
+      .then((client: any) => {
+        client.versionInfo = { 'Protocol-Version': actual }
 
-          return client.ensureMinimumProtocolVersion(test)
-        })
+        return client.ensureMinimumProtocolVersion(test)
+      })
+    }
+
+    it('resolves if protocolVersion = current', function () {
+      return expect(withProtocolVersion('1.3', '1.3')).to.be.fulfilled
+    })
+
+    it('resolves if protocolVersion > current', function () {
+      return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
+    })
+
+    it('rejects if protocolVersion < current', function () {
+      return expect(withProtocolVersion('1.2', '1.3')).to.be
+      .rejected.then((err) => {
+        expect(stripAnsi(err.message)).to.eq(`A minimum CDP version of 1.3 is required, but the current browser has 1.2.`)
+      })
+    })
+  })
+
+  context('#attachToTargetUrl', function () {
+    it('creates a page client when the passed in url is found', async function () {
+      const mockPageClient = {}
+
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
+
+      const browserClient = await getClient()
+
+      const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+      expect(client).to.be.equal(mockPageClient)
+    })
+
+    it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs', async function () {
+      const mockPageClient = {}
+      const protocolManager: any = {
+        connectToBrowser: sinon.stub().resolves(),
       }
 
-      it('resolves if protocolVersion = current', function () {
-        return expect(withProtocolVersion('1.3', '1.3')).to.be.fulfilled
-      })
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      send.withArgs('Target.setDiscoverTargets', { discover: true })
+      on.withArgs('Target.targetDestroyed', sinon.match.func)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-      it('resolves if protocolVersion > current', function () {
-        return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
-      })
+      const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
-      it('rejects if protocolVersion < current', function () {
-        return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.eq(`A minimum CDP version of 1.3 is required, but the current browser has 1.2.`)
-        })
-      })
+      const client = await browserClient.attachToTargetUrl('http://foo.com')
+
+      expect(client).to.be.equal(mockPageClient)
+      expect(protocolManager.connectToBrowser).to.be.calledWith(client)
     })
 
-    context('#attachToTargetUrl', function () {
-      it('creates a page client when the passed in url is found', async function () {
-        const mockPageClient = {}
+    it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs and attaching to target throws', async function () {
+      const mockPageClient = {}
+      const protocolManager: any = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
 
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      send.withArgs('Target.setDiscoverTargets', { discover: true })
+      on.withArgs('Target.targetDestroyed', sinon.match.func)
 
-        const browserClient = await getClient()
+      send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
 
-        const client = await browserClient.attachToTargetUrl('http://foo.com')
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-        expect(client).to.be.equal(mockPageClient)
-      })
+      const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
-      it('creates a page client when the passed in url is found and notifies the protocol manager', async function () {
-        const mockPageClient = {}
-        const protocolManager: any = {
-          connectToBrowser: sinon.stub().resolves(),
-        }
+      const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError, HOST, PORT).resolves(mockPageClient)
+      expect(client).to.be.equal(mockPageClient)
+      expect(protocolManager.connectToBrowser).to.be.calledWith(client)
 
-        const browserClient = await getClient(protocolManager)
-
-        const client = await browserClient.attachToTargetUrl('http://foo.com')
-
-        expect(client).to.be.equal(mockPageClient)
-        expect(protocolManager.connectToBrowser).to.be.calledWith(client)
-      })
-
-      it('retries when the passed in url is not found', async function () {
-        sinon.stub(protocol, '_getDelayMsForRetry')
-        .onFirstCall().returns(100)
-        .onSecondCall().returns(100)
-        .onThirdCall().returns(100)
-
-        const mockPageClient = {}
-
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
-
-        const browserClient = await getClient()
-
-        const client = await browserClient.attachToTargetUrl('http://foo.com')
-
-        expect(client).to.be.equal(mockPageClient)
-      })
-
-      it('throws when the passed in url is not found after retrying', async function () {
-        sinon.stub(protocol, '_getDelayMsForRetry')
-        .onFirstCall().returns(100)
-        .onSecondCall().returns(undefined)
-
-        const mockPageClient = {}
-
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-        criClientCreateStub.withArgs('1', onError).resolves(mockPageClient)
-
-        const browserClient = await getClient()
-
-        await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
-      })
+      // This would throw if the error was not caught
+      await on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
     })
 
-    context('#resetBrowserTargets', function () {
-      it('closes the currently attached target while keeping a tab open', async function () {
-        const mockCurrentlyAttachedTarget = {
-          targetId: '100',
-          close: sinon.stub().resolves(sinon.stub().resolves()),
-        }
+    it('retries when the passed in url is not found', async function () {
+      sinon.stub(protocol, '_getDelayMsForRetry')
+      .onFirstCall().returns(100)
+      .onSecondCall().returns(100)
+      .onThirdCall().returns(100)
 
-        const mockUpdatedCurrentlyAttachedTarget = {
-          targetId: '101',
-        }
+      const mockPageClient = {}
 
-        send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
-        send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
-        criClientCreateStub.withArgs('101', onError, HOST, PORT).resolves(mockUpdatedCurrentlyAttachedTarget)
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-        const browserClient = await getClient() as any
+      const browserClient = await getClient()
 
-        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      const client = await browserClient.attachToTargetUrl('http://foo.com')
 
-        await browserClient.resetBrowserTargets(true)
-
-        expect(mockCurrentlyAttachedTarget.close).to.be.called
-        expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
-      })
-
-      it('closes the currently attached target without keeping a tab open', async function () {
-        const mockCurrentlyAttachedTarget = {
-          targetId: '100',
-          close: sinon.stub().resolves(sinon.stub().resolves()),
-        }
-
-        send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
-
-        const browserClient = await getClient() as any
-
-        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
-
-        await browserClient.resetBrowserTargets(false)
-
-        expect(mockCurrentlyAttachedTarget.close).to.be.called
-      })
-
-      it('throws when there is no currently attached target', async function () {
-        const browserClient = await getClient() as any
-
-        await expect(browserClient.resetBrowserTargets()).to.be.rejected
-      })
+      expect(client).to.be.equal(mockPageClient)
     })
 
-    context('#close', function () {
-      it('closes the currently attached target if it exists and the browser client', async function () {
-        const mockCurrentlyAttachedTarget = {
-          close: sinon.stub().resolves(),
-        }
+    it('throws when the passed in url is not found after retrying', async function () {
+      sinon.stub(protocol, '_getDelayMsForRetry')
+      .onFirstCall().returns(100)
+      .onSecondCall().returns(undefined)
 
-        const browserClient = await getClient() as any
+      const mockPageClient = {}
 
-        browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-        await browserClient.close()
+      const browserClient = await getClient()
 
-        expect(mockCurrentlyAttachedTarget.close).to.be.called
-        expect(close).to.be.called
-      })
+      await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
+    })
+  })
 
-      it('just the browser client with no currently attached target', async function () {
-        const browserClient = await getClient() as any
+  context('#resetBrowserTargets', function () {
+    it('closes the currently attached target while keeping a tab open', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+      }
 
-        await browserClient.close()
+      const mockUpdatedCurrentlyAttachedTarget = {
+        targetId: '101',
+      }
 
-        expect(close).to.be.called
-      })
+      send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
+      send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
+      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined }).resolves(mockUpdatedCurrentlyAttachedTarget)
+
+      const browserClient = await getClient() as any
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.resetBrowserTargets(true)
+
+      expect(mockCurrentlyAttachedTarget.close).to.be.called
+      expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
+    })
+
+    it('closes the currently attached target without keeping a tab open', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+      }
+
+      send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
+
+      const browserClient = await getClient() as any
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.resetBrowserTargets(false)
+
+      expect(mockCurrentlyAttachedTarget.close).to.be.called
+    })
+
+    it('throws when there is no currently attached target', async function () {
+      const browserClient = await getClient() as any
+
+      await expect(browserClient.resetBrowserTargets()).to.be.rejected
+    })
+  })
+
+  context('#close', function () {
+    it('closes the currently attached target if it exists and the browser client', async function () {
+      const mockCurrentlyAttachedTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const browserClient = await getClient() as any
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.close()
+
+      expect(mockCurrentlyAttachedTarget.close).to.be.called
+      expect(close).to.be.called
+    })
+
+    it('just the browser client with no currently attached target', async function () {
+      const browserClient = await getClient() as any
+
+      await browserClient.close()
+
+      expect(close).to.be.called
     })
   })
 })

@@ -70,7 +70,7 @@ describe('experimentalCspAllowList is custom or true', () => {
     })
 
     it('sample: upgrade-insecure-requests is not stripped', () => {
-      // fake the https automatic upgrade by fulfilling the http request to the express server. verify the requests are actually upraded
+      // fake the https automatic upgrade by fulfilling the http request to the express server. verify the requests are actually upgraded
       const requestsFulfilled = {
         www_foobar_com_script: false,
         app_foobar_com_script: false,
