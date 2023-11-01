@@ -1328,7 +1328,7 @@ commands:
         name: Update known_hosts with github.com keys
         command: |
           mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -T 20 github.com >> ~/.ssh/known_hosts
 
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
