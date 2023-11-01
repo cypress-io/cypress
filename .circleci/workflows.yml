@@ -1349,6 +1349,12 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - run:
+          name: Create SSH folder
+          command: mkdir -p ~/.ssh
+      - run:
+          name: Establish the authenticity of the SSH host
+          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
           name: checkout
           command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
       - install-required-node
