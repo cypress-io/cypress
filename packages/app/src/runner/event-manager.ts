@@ -143,6 +143,7 @@ export class EventManager {
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
         case 'create:download':
+          Cypress.cy.isStable(true, 'download')
           Cypress.downloads.start(data)
           break
         case 'complete:download':
