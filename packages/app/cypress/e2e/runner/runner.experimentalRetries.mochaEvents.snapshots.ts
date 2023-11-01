@@ -1037,6 +1037,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -1289,6 +1292,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -1539,6 +1545,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -1789,6 +1798,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -2038,6 +2050,9 @@ export const snapshots = {
           currentRetry: 4,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -2294,6 +2309,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -2618,6 +2636,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -2870,6 +2891,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -3120,6 +3144,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -3370,6 +3397,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -3619,6 +3649,9 @@ export const snapshots = {
           currentRetry: 4,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -3869,6 +3902,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -4119,6 +4155,9 @@ export const snapshots = {
           currentRetry: 6,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -4369,6 +4408,9 @@ export const snapshots = {
           currentRetry: 7,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -4619,6 +4661,9 @@ export const snapshots = {
           currentRetry: 8,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -4875,6 +4920,9 @@ export const snapshots = {
           currentRetry: 9,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -5199,6 +5247,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -5451,6 +5502,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -5701,6 +5755,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -5951,6 +6008,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -6200,6 +6260,9 @@ export const snapshots = {
           currentRetry: 4,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -6450,6 +6513,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -6700,6 +6766,9 @@ export const snapshots = {
           currentRetry: 6,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -6950,6 +7019,9 @@ export const snapshots = {
           currentRetry: 7,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -7200,6 +7272,9 @@ export const snapshots = {
           currentRetry: 8,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -7456,6 +7531,9 @@ export const snapshots = {
           currentRetry: 9,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -7752,6 +7830,9 @@ export const snapshots = {
           currentRetry: 0,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -8300,6 +8381,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -8846,6 +8930,9 @@ export const snapshots = {
           currentRetry: 0,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -9427,6 +9514,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -9732,6 +9822,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -10035,6 +10128,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -10338,6 +10434,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -10640,6 +10739,9 @@ export const snapshots = {
           currentRetry: 4,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -10951,6 +11053,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -11289,6 +11394,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -11594,6 +11702,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -11897,6 +12008,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -12200,6 +12314,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -12503,6 +12620,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -12805,6 +12925,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -13108,6 +13231,9 @@ export const snapshots = {
           currentRetry: 6,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -13411,6 +13537,9 @@ export const snapshots = {
           currentRetry: 7,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -13714,6 +13843,9 @@ export const snapshots = {
           currentRetry: 8,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -13996,6 +14128,9 @@ export const snapshots = {
           currentRetry: 9,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -14346,6 +14481,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -14610,6 +14748,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -14872,6 +15013,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -15134,6 +15278,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -15395,6 +15542,9 @@ export const snapshots = {
           currentRetry: 4,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -15657,6 +15807,9 @@ export const snapshots = {
           currentRetry: 5,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -15919,6 +16072,9 @@ export const snapshots = {
           currentRetry: 6,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -16181,6 +16337,9 @@ export const snapshots = {
           currentRetry: 7,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -16443,6 +16602,9 @@ export const snapshots = {
           currentRetry: 8,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -16725,6 +16887,9 @@ export const snapshots = {
           currentRetry: 9,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
@@ -27324,6 +27489,9 @@ export const snapshots = {
         retries: 9,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -27693,6 +27861,9 @@ export const snapshots = {
         currentRetry: 0,
         retries: 9,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -28571,6 +28742,9 @@ export const snapshots = {
         retries: 9,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -28940,6 +29114,9 @@ export const snapshots = {
         currentRetry: 0,
         retries: 9,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -29831,6 +30008,9 @@ export const snapshots = {
           retries: 9,
           _slow: 10000,
         },
+        {
+          nextTestHasTestIsolationOn: true,
+        },
       ],
       [
         'mocha',
@@ -30215,6 +30395,9 @@ export const snapshots = {
           currentRetry: 0,
           retries: 9,
           _slow: 10000,
+        },
+        {
+          nextTestHasTestIsolationOn: true,
         },
       ],
       [
