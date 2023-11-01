@@ -6,6 +6,7 @@ _Released 11/7/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+- Fixed an issue where `nextTestHasTestIsolationOn` was incorrectly being set when there isn't a next test. Addressed in [#28213](https://github.com/cypress-io/cypress/pull/28213)
 
 ## 13.4.0
 
