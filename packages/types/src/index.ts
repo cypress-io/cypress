@@ -16,6 +16,8 @@ export * from './auth'
 
 export * from './browser'
 
+export * from './burnIn'
+
 export type { PlatformName } from './platform'
 
 export {

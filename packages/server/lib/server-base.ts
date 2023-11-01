@@ -28,7 +28,7 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
+import type { BurnInAction, FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -216,6 +216,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
+  }
+
+  setBurnInActions (actions: BurnInAction[]) {
+    this._socket?.setBurnInActions(actions)
   }
 
   setupCrossOriginRequestHandling () {

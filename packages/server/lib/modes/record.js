@@ -1084,6 +1084,13 @@ const createRunAndRecordSpecs = (options = {}) => {
           return
         }
 
+        const burnInActions = _.chain(response.actions).filter({ action: 'BURN_IN' }).map((x) => _.omit(x, ['action', 'type'])).value()
+
+        if (_.some(response.actions, { action: 'BURN_IN' })) {
+          debug(`received burn in actions %o`, burnInActions)
+          project.setBurnInActions(burnInActions)
+        }
+
         return cb(response)
       })
 

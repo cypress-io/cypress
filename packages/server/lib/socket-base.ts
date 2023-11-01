@@ -25,7 +25,8 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, BurnInAction } from '@packages/types'
+import { BurnInManager, getBurnInConfig, mergeBurnInConfig } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -35,6 +36,7 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
+const debugBurnIn = Debug('cypress:server:burn-in')
 
 const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
@@ -52,6 +54,7 @@ export class SocketBase {
   protected ended: boolean
   protected _socketIo?: socketIo.SocketIOServer
   protected _cdpIo?: CDPSocketServer
+  protected _burnInManager: BurnInManager
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
@@ -59,6 +62,7 @@ export class SocketBase {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
+    this._burnInManager = new BurnInManager()
   }
 
   protected ensureProp = ensureProp
@@ -478,6 +482,27 @@ export class SocketBase {
                 return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                   debug('error exporting telemetry data from browser %s', err)
                 })
+              case 'burn:in:actions':
+              {
+                debugBurnIn('burn:in:actions')
+
+                return this._burnInManager.getActions()
+                // const id = args[0]
+                // const action = this._burnInManager.getActionDetails(id)
+
+                // const burnInConfig = args[1]
+                // const localBurnInConfig = getBurnInConfig(burnInConfig)
+
+                // const completeBurnInConfig = mergeBurnInConfig(action?.config ?? {}, { values: localBurnInConfig })
+
+                // debugBurnIn('completeBurnInConfig %o', completeBurnInConfig)
+
+                // const result = { completeBurnInConfig, startingScore: action ? action.startingScore : -2 }
+
+                // debugBurnIn('Getting action for %o, result: %o', id, result)
+
+                // return result
+              }
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }
@@ -655,5 +680,13 @@ export class SocketBase {
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
     this._protocolManager = protocolManager
+  }
+
+  setBurnInActions (actions: BurnInAction[]) {
+    this._burnInManager?.setActions(actions)
+  }
+
+  getBurnInActions () {
+    return this._burnInManager?.getActions()
   }
 }

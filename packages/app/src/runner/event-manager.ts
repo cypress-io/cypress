@@ -390,6 +390,15 @@ export class EventManager {
     window.Cypress = Cypress
 
     this._addListeners()
+
+    // let actions: any
+
+    // await new Promise((resolve, reject) => {
+    //   this.ws.emit('burn:in:actions', (res) => {
+    //     actions = res
+    //     resolve(null)
+    //   })
+    // })
   }
 
   isBrowser (browserName) {
@@ -398,8 +407,16 @@ export class EventManager {
     return this.Cypress.isBrowser(browserName)
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
+  async initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
     performance.mark('initialize-start')
+
+    const actions = await Cypress.backend('burn:in:actions')
+
+    window.burnInActions = actions
+
+    console.log('==========================================================================================================================================================================================================================================')
+    console.log(JSON.stringify(actions, null, 2))
+    // console.log('==========================================================================================================================================================================================================================================')
 
     const testFilter = this.specStore.testFilter
 

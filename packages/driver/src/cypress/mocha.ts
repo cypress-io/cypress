@@ -1,3 +1,4 @@
+console.log('root 2')
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import $errUtils, { CypressError } from './error_utils'
@@ -97,10 +98,8 @@ function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig: Comple
 }
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>, completeBurnInConfig: CompleteBurnInConfig) {
-  const latestScore = test.latestScore ?? null
-
-  const neededBurnInAttempts = getNeededBurnInAttempts(latestScore, completeBurnInConfig)
+export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>, completeBurnInConfig: CompleteBurnInConfig, latestScore: 0 | 1 | -1 | -2 | null) {
+  const neededBurnInAttempts = 0 //getNeededBurnInAttempts(latestScore, completeBurnInConfig)
 
   // @ts-expect-error
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
@@ -517,22 +516,38 @@ function patchTestClone () {
   }
 }
 
-function createCalculateTestStatus (Cypress: Cypress.Cypress) {
+function createCalculateTestStatus (cy: Cypress.Cypress) {
   // Adds a method to the test object called 'calculateTestStatus'
   // which is used inside our mocha patch (./driver/patches/mocha+7.0.1.dev.patch)
   // in order to calculate test retries. This prototype functions as a light abstraction around
   // 'calculateTestStatus', which makes the function easier to unit-test
   Test.prototype.calculateTestStatus = function () {
-    let retriesConfig = Cypress.config('retries')
-    let burnInConfig = Cypress.config('experimentalBurnIn')
+    let retriesConfig = cy.config('retries')
+    //const testConfig = originalConfig.randomKey
 
-    // TODO: inject test.latestScore value coming from the cloud via actions
+    const burnInActions = window.burnInActions
 
-    // TODO: use the config value coming from the cloud via actions https://cypress-io.atlassian.net/browse/CYCLOUD-1140
-    const completeBurnInConfig = typeof burnInConfig === 'boolean' ? { enabled: burnInConfig, default: 3, flaky: 5 } : { enabled: true, ...burnInConfig }
+    console.log({ burnInActions })
+    // @ts-expect-error
+    // const burnInConfig = cy.config('experimentalBurnIn')
+
+    // let burnInAction: any = null
+
+    console.log('point 1')
+    // debugger
 
     // @ts-expect-error
-    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions, completeBurnInConfig)
+    const burnInAction = cy.backend('burnIn:action', this.id, burnInConfig)
+
+    console.log('point 2')
+    // debugger
+
+    // const startingScore = burnInAction.startingScore
+
+    // const completeBurnInConfig = burnInAction.completeBurnInConfig
+
+    // @ts-expect-error
+    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions, { default: 3, flaky: 5, enabled: true }, -1)
   }
 }
 

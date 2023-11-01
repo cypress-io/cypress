@@ -18,7 +18,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, BurnInAction } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
@@ -44,6 +44,7 @@ export interface Cfg extends ReceivedCypressOptions {
   component: Partial<Cfg>
   additionalIgnorePattern?: string | string[]
   resolved: ResolvedConfigurationOptions
+  randomKey: string[]
 }
 
 const localCwd = process.cwd()
@@ -70,6 +71,7 @@ export class ProjectBase extends EE {
   public testingType: Cypress.TestingType
   public spec: FoundSpec | null
   public isOpen: boolean = false
+  private _burnInActions: BurnInAction[] = []
   projectRoot: string
 
   constructor ({
@@ -428,6 +430,10 @@ export class ProjectBase extends EE {
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
+  }
+
+  setBurnInActions (actions: BurnInAction[]) {
+    this._server?.setBurnInActions(actions)
   }
 
   get protocolManager (): ProtocolManager | undefined {

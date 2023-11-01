@@ -231,7 +231,7 @@ export function addCrossOriginIframe (location) {
  * Cypress on it.
  *
  */
-function runSpecCT (config, spec: SpecFile) {
+async function runSpecCT (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -261,7 +261,7 @@ function runSpecCT (config, spec: SpecFile) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  await getEventManager().initialize($autIframe, config)
 }
 
 /**
@@ -292,7 +292,7 @@ function setSpecForDriver (spec: SpecFile) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (config, spec: SpecFile) {
+async function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -340,7 +340,7 @@ function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  await getEventManager().initialize($autIframe, config)
 }
 
 export function getRunnerConfigFromWindow () {
@@ -433,11 +433,11 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   await getEventManager().setup(config)
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-    return runSpecE2E(config, spec)
+    return await runSpecE2E(config, spec)
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    return runSpecCT(config, spec)
+    return await runSpecCT(config, spec)
   }
 
   throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
