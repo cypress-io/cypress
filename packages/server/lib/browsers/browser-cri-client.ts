@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
+import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
@@ -25,13 +26,37 @@ type BrowserCriClientOptions = {
 }
 
 type BrowserCriClientCreateOptions = {
-  hosts: string[]
-  port: number
   browserName: string
+  fullyManageTabs?: boolean
+  hosts: string[]
   onAsynchronousError: Function
   onReconnect?: (client: CriClient) => void
+  port: number
   protocolManager?: ProtocolManagerShape
-  fullyManageTabs?: boolean
+}
+
+interface ManageTabsOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  browserName
+  host: string
+  onAsynchronousError: Function
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface AttachedToTargetOptions {
+  browserClient: CriClient
+  event: Protocol.Target.AttachedToTargetEvent
+  protocolManager?: ProtocolManagerShape
+}
+
+interface TargetDestroyedOptions {
+  browserName: string
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  event: Protocol.Target.TargetDestroyedEvent
+  onAsynchronousError: Function
 }
 
 const isVersionGte = (a: Version, b: Version) => {
@@ -169,16 +194,26 @@ export class BrowserCriClient {
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
    * browser target
    *
-   * @param hosts the hosts to which to attempt to connect
-   * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
+   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param hosts the hosts to which to attempt to connect
    * @param onAsynchronousError callback for any cdp fatal errors
    * @param onReconnect callback for when the browser cri client reconnects to the browser
+   * @param port the port to which to connect
    * @param protocolManager the protocol manager to use with the browser cri client
-   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create ({ hosts, port, browserName, onAsynchronousError, onReconnect, protocolManager, fullyManageTabs }: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
+  static async create (options: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
+    const {
+      browserName,
+      fullyManageTabs,
+      hosts,
+      onAsynchronousError,
+      onReconnect,
+      port,
+      protocolManager,
+    } = options
+
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
@@ -195,102 +230,120 @@ export class BrowserCriClient {
       const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
 
       if (fullyManageTabs) {
-        // The basic approach here is we attach to targets and enable network traffic
-        // We must attach in a paused state so that we can enable network traffic before the target starts running.
-        browserClient.on('Target.attachedToTarget', async (event) => {
-          try {
-            if (event.targetInfo.type !== 'page') {
-              await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
-            }
-
-            if (event.waitingForDebugger) {
-              await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
-            }
-          } catch (error) {
-            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
-            debug('error attaching to target browser', error)
-          }
-        })
-
-        // Ideally we could use filter rather than checking the type above, but that was added relatively recently
-        await browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
-        await browserClient.send('Target.setDiscoverTargets', { discover: true })
-        browserClient.on('Target.targetDestroyed', (event) => {
-          debug('Target.targetDestroyed %o', {
-            event,
-            closing: browserCriClient.closing,
-            closed: browserCriClient.closed,
-            resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
-          })
-
-          // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
-          // have already closed/disposed, so unless this matches our current target then bail
-          if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
-            return
-          }
-
-          // otherwise...
-          // the page or browser closed in an unexpected manner and we need to bubble up this error
-          // by calling onError() with either browser or page was closed
-          //
-          // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
-          // OR from process.exit(...) firing
-          // if the browser's websocket connection has been closed then that means the page was closed
-          //
-          // otherwise it means the the browser itself was closed
-
-          // always close the connection to the page target because it was destroyed
-          browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
-
-          new Bluebird((resolve) => {
-            // this event could fire either expectedly or unexpectedly
-            // it's not a problem if we're expected to be closing the browser naturally
-            // and not as a result of an unexpected page or browser closure
-            if (browserCriClient.resettingBrowserTargets) {
-              // do nothing, we're good
-              return resolve(true)
-            }
-
-            if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
-              return resolve(browserCriClient.gracefulShutdown)
-            }
-
-            // when process.on('exit') is called, we call onClose
-            browserCriClient.onClose = resolve
-
-            // or when the browser's CDP ws connection is closed
-            browserClient.ws.once('close', () => {
-              resolve(false)
-            })
-          })
-          .timeout(500)
-          .then((expectedDestroyedEvent) => {
-            if (expectedDestroyedEvent === true) {
-              return
-            }
-
-            // browserClient websocket was disconnected
-            // or we've been closed due to process.on('exit')
-            // meaning the browser was closed and not just the page
-            errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch(Bluebird.TimeoutError, () => {
-            debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
-            // the browser websocket didn't close meaning
-            // only the page was closed, not the browser
-            errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch((err) => {
-            // stop the run instead of moving to the next spec
-            err.isFatalApiErr = true
-
-            onAsynchronousError(err)
-          })
-        })
+        await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
       }
 
       return browserCriClient
     }, browserName, port)
+  }
+
+  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }: ManageTabsOptions) {
+    const promises = [
+      browserClient.send('Target.setDiscoverTargets', { discover: true }),
+      browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
+    ]
+
+    browserClient.on('Target.attachedToTarget', async (event: Protocol.Target.AttachedToTargetEvent) => {
+      await this._onAttachToTarget({ browserClient, event, protocolManager })
+    })
+
+    browserClient.on('Target.targetDestroyed', (event: Protocol.Target.TargetDestroyedEvent) => {
+      this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
+    })
+
+    await Promise.all(promises)
+  }
+
+  static async _onAttachToTarget (options: AttachedToTargetOptions) {
+    const { browserClient, event, protocolManager } = options
+
+    debug('Target.attachedToTarget %o', event.targetInfo)
+
+    try {
+      if (event.targetInfo.type !== 'page') {
+        await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+      }
+
+      if (event.waitingForDebugger) {
+        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+      }
+    } catch (error) {
+      // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+      debug('error attaching to target browser', error)
+    }
+  }
+
+  static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }: TargetDestroyedOptions) {
+    debug('Target.targetDestroyed %o', {
+      event,
+      closing: browserCriClient.closing,
+      closed: browserCriClient.closed,
+      resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+    })
+
+    // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+    // have already closed/disposed, so unless this matches our current target then bail
+    if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+      return
+    }
+
+    // otherwise...
+    // the page or browser closed in an unexpected manner and we need to bubble up this error
+    // by calling onError() with either browser or page was closed
+    //
+    // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
+    // OR from process.exit(...) firing
+    // if the browser's websocket connection has been closed then that means the page was closed
+    //
+    // otherwise it means the the browser itself was closed
+
+    // always close the connection to the page target because it was destroyed
+    browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+
+    new Bluebird((resolve) => {
+      // this event could fire either expectedly or unexpectedly
+      // it's not a problem if we're expected to be closing the browser naturally
+      // and not as a result of an unexpected page or browser closure
+      if (browserCriClient.resettingBrowserTargets) {
+        // do nothing, we're good
+        return resolve(true)
+      }
+
+      if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+        return resolve(browserCriClient.gracefulShutdown)
+      }
+
+      // when process.on('exit') is called, we call onClose
+      browserCriClient.onClose = resolve
+
+      // or when the browser's CDP ws connection is closed
+      browserClient.ws.once('close', () => {
+        resolve(false)
+      })
+    })
+    .timeout(500)
+    .then((expectedDestroyedEvent) => {
+      if (expectedDestroyedEvent === true) {
+        return
+      }
+
+      // browserClient websocket was disconnected
+      // or we've been closed due to process.on('exit')
+      // meaning the browser was closed and not just the page
+      errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch(Bluebird.TimeoutError, () => {
+      debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
+      // the browser websocket didn't close meaning
+      // only the page was closed, not the browser
+      errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch((err) => {
+      // stop the run instead of moving to the next spec
+      err.isFatalApiErr = true
+
+      onAsynchronousError(err)
+    })
   }
 
   /**
