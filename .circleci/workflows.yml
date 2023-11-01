@@ -251,8 +251,6 @@ commands:
           root: ~/
           paths:
             - cypress
-            # - .ssh
-            # - node_modules # contains the npm i -g modules
 
   install_cache_helpers_dependencies:
     steps:
@@ -483,7 +481,6 @@ commands:
     description: Install Node version matching .node-version
     steps:
       # installing NVM will use git+ssh, so update known_hosts
-      # - update_known_hosts
       - run:
           name: Install Node
           command: |
@@ -1346,9 +1343,10 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - update_known_hosts
-      - run:
-          name: checkout
-          command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
+      - checkout
+      # - run:
+          # name: checkout
+          # command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
