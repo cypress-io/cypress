@@ -2914,6 +2914,7 @@ exports['e2e record capture-protocol enabled when the tab crashes in chrome post
                                                                                                     
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
   Estimated: X second(s)
+  
 
   a test suite with a browser crash
     ✓ navigates to about:blank
