@@ -382,6 +382,13 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/auto-cancellation-mismatch`
   },
+  CLOUD_BURN_IN_MISMATCH: (arg1: {runUrl: string, burnInConfig: string, configFileBaseName: string}) => {
+    return errTemplate`\
+        You passed in a ${fmt.highlightSecondary(`experimentalBurnIn`)} configuration, but this run originally started with a different configuration for ${fmt.highlightSecondary(`experimentalBurnIn`)}.
+        This ${fmt.highlightSecondary(`experimentalBurnIn`)} config came from your ${fmt.path(arg1.configFileBaseName)} file or an environment variable.
+        The existing run is: ${fmt.url(arg1.runUrl)}
+        The experimentalBurnIn configuration you tried to pass was: ${fmt.stringify(arg1.burnInConfig)}`
+  },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
       Deprecation Warning: The ${fmt.highlight(`before:browser:launch`)} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}

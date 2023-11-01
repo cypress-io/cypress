@@ -1292,10 +1292,12 @@ Request Sent:
     ""
   ],
   "testingType": "e2e",
+  "burnInConfig": false,
   "runnerCapabilities": {
     "dynamicSpecsInSerialMode": true,
     "skipSpecAction": true,
-    "protocolMountVersion": 2
+    "protocolMountVersion": 2,
+    "burnInTestAction": true
   }
 }
 
@@ -2912,6 +2914,7 @@ exports['e2e record capture-protocol enabled when the tab crashes in chrome post
                                                                                                     
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
   Estimated: X second(s)
+Still waiting to connect to Chrome, retrying in X second(s)(attempt 18/62)
 
 
   a test suite with a browser crash
@@ -3840,5 +3843,13 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+
+`
+
+exports['e2e record api interaction errors create run 422 - burn-in config mismatch errors when first run burn-in config is different from non-first run 1'] = `
+You passed in a experimentalBurnIn configuration, but this run originally started with a different configuration for experimentalBurnIn.
+This experimentalBurnIn config came from your undefined file or an environment variable.
+The existing run is: https://cloud.cypress.io/runs/12345
+The experimentalBurnIn configuration you tried to pass was: undefined
 
 `
