@@ -205,6 +205,16 @@ describe('lib/browsers/cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    it('is a noop sending Runtime.runIfWaitingForDebugger if target is not a tab or window', async () => {
+      options.event.targetInfo.type = 'service_worker'
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(options.CriConstructor).not.to.be.called
+      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
     it('is a noop sending Runtime.runIfWaitingForDebugger if target is DevTools', async () => {
       options.event.targetInfo.url = 'devtools://dev.tools'
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()

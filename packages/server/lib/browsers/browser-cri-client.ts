@@ -323,6 +323,8 @@ export class BrowserCriClient {
       browserCriClient.resettingBrowserTargets
       // is the main Cypress tab
       || targetId === browserCriClient.currentlyAttachedTarget?.targetId
+      // is not a tab/window, such as a service worker
+      || targetInfo.type !== 'page'
       // is DevTools
       || url.includes('devtools://')
       // is the Launchpad
