@@ -197,6 +197,26 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
       return
     }
 
+    // this is unique validation, not applied to the general cy config.
+    // it will be removed when we support defining experimental retries
+    // in test config overrides
+
+    // TODO: remove when experimental retry overriding is supported
+
+    if (configKey === 'retries') {
+      const experimentalRetryCfgKeys = [
+        'experimentalStrategy', 'experimentalOptions',
+      ]
+
+      Object.keys(config.retries || {})
+      .filter((v) => experimentalRetryCfgKeys.includes(v))
+      .forEach((invalidExperimentalCfgOverride) => {
+        onErr({
+          invalidConfigKey: `retries.${invalidExperimentalCfgOverride}`,
+          supportedOverrideLevel: 'global_only',
+        })
+      })
+    }
     // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
     // https://github.com/cypress-io/cypress/issues/24365
 
