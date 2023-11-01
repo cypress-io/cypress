@@ -883,29 +883,27 @@ describe('lib/config', () => {
       })
 
       context('retries', () => {
-        const retriesError = 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy'
-
         // need to keep the const here or it'll get stripped by the build
         // eslint-disable-next-line no-unused-vars
         const cases = [
-          [{ retries: null }, 'with null', true],
-          [{ retries: 3 }, 'when a number', true],
-          [{ retries: 3.2 }, 'when a float', false],
-          [{ retries: -1 }, 'with a negative number', false],
-          [{ retries: true }, 'when true', false],
-          [{ retries: false }, 'when false', false],
-          [{ retries: {} }, 'with an empty object', true],
-          [{ retries: { runMode: 3 } }, 'when runMode is a positive number', true],
-          [{ retries: { runMode: -1 } }, 'when runMode is a negative number', false],
-          [{ retries: { openMode: 3 } }, 'when openMode is a positive number', true],
-          [{ retries: { openMode: -1 } }, 'when openMode is a negative number', false],
-          [{ retries: { openMode: 3, TypoRunMode: 3 } }, 'when there is an additional unknown key', false],
-          [{ retries: { openMode: 3, runMode: 3 } }, 'when both runMode and openMode are positive numbers', true],
-        ].forEach(([config, expectation, shouldPass]) => {
-          it(`${shouldPass ? 'passes' : 'fails'} ${expectation}`, function () {
+          [{ retries: null }, 'with null', null],
+          [{ retries: 3 }, 'when a number', null],
+          [{ retries: 3.2 }, 'when a float', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: -1 }, 'with a negative number', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: true }, 'when true', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: false }, 'when false', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: {} }, 'with an empty object', null],
+          [{ retries: { runMode: 3 } }, 'when runMode is a positive number', null],
+          [{ retries: { runMode: -1 } }, 'when runMode is a negative number', 'Expected retries.runMode to be a positive whole number between 0 and 250 or null.'],
+          [{ retries: { openMode: 3 } }, 'when openMode is a positive number', null],
+          [{ retries: { openMode: -1 } }, 'when openMode is a negative number', 'Expected retries.openMode to be a positive whole number between 0 and 250 or null'],
+          [{ retries: { openMode: 3, TypoRunMode: 3 } }, 'when there is an additional unknown key', 'Expected retries to be an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls.'],
+          [{ retries: { openMode: 3, runMode: 3 } }, 'when both runMode and openMode are positive numbers', null],
+        ].forEach(([config, expectation, expectedError]) => {
+          it(`${expectedError ? 'fails' : 'passes'} ${expectation}`, function () {
             this.setup(config)
 
-            return shouldPass ? this.expectValidationPasses() : this.expectValidationFails(retriesError)
+            return expectedError ? this.expectValidationFails(expectedError) : this.expectValidationPasses()
           })
         })
       })

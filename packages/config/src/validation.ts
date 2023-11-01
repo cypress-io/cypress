@@ -119,43 +119,61 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
   return true
 }
 
-const isValidExperimentalRetryOptionsConfig = (options: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold'): boolean => {
-  if (options == null) return true
+const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold') => {
+  if (value == null) return true
 
-  // retries must be an integer of 1 or greater
-  const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
+  const isValidMaxRetries = isValidRetryValue(`${key}.maxRetries`, value.maxRetries, 1)
 
-  if (!isValidMaxRetries) {
-    return false
+  if (isValidMaxRetries !== true) {
+    return isValidMaxRetries
   }
 
-  // if the strategy is 'detect-flake-but-always-fail', stopIfAnyPassed must be provided and must be a boolean
+  const validKeys = ['maxRetries']
+
+  // if the strategy is 'detect-flake-but-always-fail' and if stopIfAnyPassed is provided it must be a boolean
   if (strategy === 'detect-flake-but-always-fail') {
-    if (options.passesRequired !== undefined) {
-      return false
-    }
+    validKeys.push('stopIfAnyPassed')
+    if (value.stopIfAnyPassed !== undefined) {
+      const isValidStopIfAnyPasses = _.isNull(value.stopIfAnyPassed) || _.isBoolean(value.stopIfAnyPassed)
 
-    const isValidStopIfAnyPasses = _.isBoolean(options.stopIfAnyPassed)
-
-    if (!isValidStopIfAnyPasses) {
-      return false
+      if (!isValidStopIfAnyPasses) {
+        return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'null or boolean')
+      }
     }
   }
 
-  // if the strategy is 'detect-flake-and-pass-on-threshold', passesRequired must be provided and must be an integer greater than 0
+  // if the strategy is 'detect-flake-and-pass-on-threshold' and if passesRequired is provided it must be a valid retry value and less than or equal to maxRetries
   if (strategy === 'detect-flake-and-pass-on-threshold') {
-    if (options.stopIfAnyPassed !== undefined) {
-      return false
-    }
+    validKeys.push('passesRequired')
 
-    const isValidPassesRequired = _.isInteger(options.passesRequired) && options.passesRequired > 0 && options.passesRequired <= options.maxRetries
+    if (value.passesRequired !== undefined) {
+      const isValidPassesRequired = isValidRetryValue(`${key}.passesRequired`, value.passesRequired, 1)
 
-    if (!isValidPassesRequired) {
-      return false
+      if (isValidPassesRequired !== true) {
+        return isValidPassesRequired
+      }
+
+      if (value.passesRequired > value.maxRetries) {
+        return errMsg(`${key}.passesRequired`, value.passesRequired, 'a positive whole number less than or equal to maxRetries')
+      }
     }
+  }
+
+  const extraneousKeys = _.difference(Object.keys(value), validKeys)
+
+  if (extraneousKeys.length > 0) {
+    return errMsg(key, value, `an object with keys ${validKeys.join(', ')}`)
   }
 
   return true
+}
+
+const isValidRetryValue = (key: string, value: any, minimumValue: 0|1): ErrResult | true => {
+  if (_.isNull(value)) return true
+
+  if (Number.isInteger(value) && value >= minimumValue) return true
+
+  return errMsg(key, value, `a positive whole number greater than or equals ${minimumValue} or null`)
 }
 
 export const isValidRetriesConfig = (key: string, value: any): ErrResult | true => {
@@ -163,22 +181,37 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   const experimentalOptions = ['experimentalStrategy', 'experimentalOptions']
   const experimentalStrategyOptions = ['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold']
 
-  const isValidRetryValue = (val: any) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
-  const optionalKeysAreValid = (val: any, k: string) => optionalKeys.includes(k) && isValidRetryValue(val)
+  const optionalKeysAreValid = (key: string) => {
+    return (parentVal: object, optionName: string) => {
+      if (!optionalKeys.includes(optionName)) {
+        return errMsg(key, parentVal, 'an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls')
+      }
 
-  if (isValidRetryValue(value)) {
-    return true
+      const optionValue = _.get(parentVal, optionName)
+
+      if (_.isBoolean(optionValue)) return true
+
+      return isValidRetryValue(`${key}.${optionName}`, _.get(parentVal, optionName), 0)
+    }
   }
 
   if (_.isObject(value)) {
     const traditionalConfigOptions = _.omit(value, experimentalOptions)
     const experimentalConfigOptions = _.pick<any>(value, experimentalOptions)
 
-    const isTraditionalConfigValid = _.every(traditionalConfigOptions, optionalKeysAreValid)
+    for (const optionKey in traditionalConfigOptions) {
+      if (Object.prototype.hasOwnProperty.call(traditionalConfigOptions, optionKey)) {
+        const optionValidation = optionalKeysAreValid(key)(value, optionKey)
+
+        if (optionValidation !== true || _.isObject(optionValidation)) {
+          return optionValidation
+        }
+      }
+    }
 
     // if optionalKeys are only present and are valid, return true.
     // The defaults for 'experimentalStrategy' and 'experimentalOptions' are undefined, but the keys exist, so we need to check for this
-    if (isTraditionalConfigValid && !Object.keys(experimentalConfigOptions).filter((key) => experimentalConfigOptions[key] !== undefined).length) {
+    if (!Object.keys(experimentalConfigOptions).filter((key) => experimentalConfigOptions[key] !== undefined).length) {
       return true
     }
 
@@ -187,20 +220,46 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
       // make sure the strategy provided is one of our valid enums
       const isValidStrategy = experimentalStrategyOptions.includes(experimentalConfigOptions.experimentalStrategy)
 
+      if (!isValidStrategy) {
+        return errMsg(`${key}.experimentalStrategy`, experimentalConfigOptions.experimentalStrategy, `one of ${experimentalStrategyOptions.map((s) => `"${s}"`).join(', ')}`)
+      }
+
       // if a strategy is provided, and traditional options are also provided, such as runMode and openMode, then these values need to be booleans
       const openAndRunModeConfigOptions = _.pick(value, optionalKeys)
-      const isValidRunAndOpenModeConfigWithStrategy = _.every(openAndRunModeConfigOptions, _.isBoolean)
 
-      // if options aren't present (either undefined or null) or are configured correctly, return true
-      if (isValidStrategy && isValidRunAndOpenModeConfigWithStrategy && (
-        experimentalConfigOptions.experimentalOptions == null ||
-        isValidExperimentalRetryOptionsConfig(experimentalConfigOptions.experimentalOptions, experimentalConfigOptions.experimentalStrategy))) {
-        return true
+      for (const optionalKey in openAndRunModeConfigOptions) {
+        if (Object.prototype.hasOwnProperty.call(openAndRunModeConfigOptions, optionalKey)) {
+          const optionalConfigVal = _.get(openAndRunModeConfigOptions, optionalKey)
+
+          if (!_.isBoolean(optionalConfigVal)) {
+            return errMsg(`${key}.${optionalKey}`, optionalConfigVal, 'a boolean since an experimental strategy is provided')
+          }
+        }
+
+        // if options aren't present (either undefined or null) or are configured correctly, return true
+        if (
+          experimentalConfigOptions.experimentalOptions == null) {
+          return true
+        }
       }
+
+      const isValidExperimentalRetryOptions = isValidExperimentalRetryOptionsConfig(`${key}.experimentalOptions`, experimentalConfigOptions.experimentalOptions, experimentalConfigOptions.experimentalStrategy)
+
+      if (isValidExperimentalRetryOptions !== true) {
+        return isValidExperimentalRetryOptions
+      }
+    } else if (experimentalConfigOptions.experimentalOptions) {
+      return errMsg(`${key}.experimentalOptions`, experimentalConfigOptions.experimentalOptions, 'provided only if an experimental strategy is provided')
+    }
+  } else {
+    const isValidValue = isValidRetryValue(key, value, 0)
+
+    if (isValidValue !== true) {
+      return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy')
     }
   }
 
-  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy')
+  return true
 }
 
 /**
