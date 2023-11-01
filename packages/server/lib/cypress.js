@@ -164,19 +164,23 @@ module.exports = {
       options.headed = false
     }
 
+    const electronApp = require('./util/electron-app')
+
     if (options.runProject && !options.headed) {
       debug('scaling electron app in headless mode')
       // scale the electron browser window
       // to force retina screens to not
       // upsample their images when offscreen
       // rendering
-      require('./util/electron-app').scale()
+      electronApp.scale()
     }
+
+    electronApp.setScopeMemoryCachePerContext()
 
     // make sure we have the appData folder
     return Promise.all([
       require('./util/app_data').ensure(),
-      require('./util/electron-app').setRemoteDebuggingPort(),
+      electronApp.setRemoteDebuggingPort(),
     ])
     .then(() => {
       // else determine the mode by
