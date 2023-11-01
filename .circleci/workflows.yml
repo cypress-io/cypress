@@ -45,7 +45,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -60,7 +59,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -253,8 +251,8 @@ commands:
           root: ~/
           paths:
             - cypress
-            - .ssh
-            - node_modules # contains the npm i -g modules
+            # - .ssh
+            # - node_modules # contains the npm i -g modules
 
   install_cache_helpers_dependencies:
     steps:
@@ -485,11 +483,10 @@ commands:
     description: Install Node version matching .node-version
     steps:
       # installing NVM will use git+ssh, so update known_hosts
-      - update_known_hosts
+      # - update_known_hosts
       - run:
           name: Install Node
           command: |
-            node_version=$(cat .node-version)
             source ./scripts/ensure-node.sh
             echo "Installing Yarn"
             npm install yarn --location=global # ensure yarn is installed with the correct node engine
@@ -1348,12 +1345,7 @@ jobs:
         default: false
     resource_class: << parameters.resource_class >>
     steps:
-      - run:
-          name: Create SSH folder
-          command: mkdir -p ~/.ssh
-      - run:
-          name: Establish the authenticity of the SSH host
-          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - update_known_hosts
       - run:
           name: checkout
           command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
@@ -1364,6 +1356,7 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - .ssh
             - .nvm # mac / linux
             - ProgramData/nvm # windows
       - caching-dependency-installer:
@@ -2234,13 +2227,6 @@ jobs:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
-      - run:
-          name: Remove cypress.json
-          description: Remove cypress.json in case it exists
-          working_directory: /tmp/cypress-example-kitchensink
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
           command: yarn --production --ignore-engines
