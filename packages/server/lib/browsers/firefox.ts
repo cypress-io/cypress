@@ -579,3 +579,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   return browserInstance
 }
+
+export async function closeExtraTargets () {
+  debug('Closing extra targets is not currently supported in Firefox')
+}

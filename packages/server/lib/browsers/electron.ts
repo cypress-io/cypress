@@ -535,4 +535,8 @@ export = {
 
     return instance
   },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
+  },
 }

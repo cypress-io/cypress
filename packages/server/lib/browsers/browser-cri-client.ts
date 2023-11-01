@@ -573,6 +573,18 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
+  async closeExtraTargets () {
+    for (const [targetId] of this.extraTargetClients) {
+      debug('Close extra target (id: %s)', targetId)
+
+      try {
+        await this.browserClient.send('Target.closeTarget', { targetId })
+      } catch (err: any) {
+        debug('Closing extra target errored: %s', err?.stack || err)
+      }
+    }
+  }
+
   /**
    * Closes the browser client socket as well as the socket for the currently attached page target
    */

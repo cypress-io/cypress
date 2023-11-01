@@ -9,6 +9,10 @@ _Released 11/7/2023 (PENDING)_
 - Fixed an issue where network requests made from tabs/windows other than the main Cypress tab would be delayed. Fixes [#28113](https://github.com/cypress-io/cypress/issues/28113).
 - Stopped processing CDP events at the end of a spec when Test Isolation is off and Test Replay is enabled. Addressed in [#28213](https://github.com/cypress-io/cypress/pull/28213).
 
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+
 ## 13.4.0
 
 _Released 10/30/2023_

@@ -149,3 +149,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   return new WkInstance()
 }
+
+export async function closeExtraTargets () {
+  debug('Closing extra targets is not currently supported in Webkit')
+}
