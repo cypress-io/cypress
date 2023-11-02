@@ -6,7 +6,7 @@ _Released 11/7/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
-- Fixed an issue where global style updates can trigger flooding of font face requests in DevTools and Test Replay. This can affect performance due to the flooding of messages in CDP. Fixes [#28150](https://github.com/cypress-io/cypress/issues/28150) and [#28215](https://github.com/cypress-io/cypress/issues/28215).
+- Fixed an issue where in chromium based browsers, global style updates can trigger flooding of font face requests in DevTools and Test Replay. This can affect performance due to the flooding of messages in CDP. Fixes [#28150](https://github.com/cypress-io/cypress/issues/28150) and [#28215](https://github.com/cypress-io/cypress/issues/28215).
 - Fixed an issue where network requests made from tabs/windows other than the main Cypress tab would be delayed. Fixes [#28113](https://github.com/cypress-io/cypress/issues/28113).
 
 ## 13.4.0
