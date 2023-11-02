@@ -614,10 +614,11 @@ type ArtifactUploadResultLike = {
   success: boolean
   error?: string
   skipped?: boolean
+  duration?: number
 }
 
 export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike> (artifactUploadResult: T, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
-  const { pathToFile, key, fileSize, success, error, skipped } = artifactUploadResult
+  const { pathToFile, key, fileSize, success, error, skipped, duration } = artifactUploadResult
 
   process.stdout.write(`  - ${labels[key]} `)
 
@@ -627,6 +628,10 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
     process.stdout.write(`- Nothing to Upload ${num}`)
   } else {
     process.stdout.write(`- Failed Uploading ${num}`)
+  }
+
+  if (duration) {
+    process.stdout.write(` ${success ? 'in' : 'after'} ${humanTime.short(duration, 2)}`)
   }
 
   if (pathToFile && key !== 'protocol') {
