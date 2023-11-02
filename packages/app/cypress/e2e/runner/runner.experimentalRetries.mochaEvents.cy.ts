@@ -13,7 +13,7 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
  * In context to experimentalRetries, the end state of the tests should be identical regardless of strategy for these tests.
  * However, the total amount of attempts on a test will differ based on the strategy used and is documented below
  */
-describe('experimental retries: runner tests', { defaultCommandTimeout: 10000 }, () => {
+describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, () => {
   const projects: ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed'] = ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed']
 
   projects.forEach((project) => {

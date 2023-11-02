@@ -8,7 +8,7 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
  * so we have increased the command timeout to allow the inner spec more time to complete and report
  * its mocha event log.
  */
-describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 10000 }, () => {
+describe('src/cypress/runner', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {
       it('fail in [before]', (done) => {

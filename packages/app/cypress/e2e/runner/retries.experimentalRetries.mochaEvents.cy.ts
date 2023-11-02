@@ -14,7 +14,7 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
  * 'detect-flake-and-pass-on-threshold' will have a passed test as long as the config passesRequired is satisfied on retries.
  * 'detect-flake-but-always-fail' projects should have the same passed/failed tests, but different number of attempts depending on stopIfAnyPassed
  */
-describe('Experimental retries: mochaEvents & test status tests', { retries: 0, defaultCommandTimeout: 10000 }, () => {
+describe('Experimental retries: mochaEvents & test status tests', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   const projects: ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed'] = ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed']
 
   projects.forEach((project) => {
@@ -380,7 +380,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       // 'detect-flake-and-pass-on-threshold': will run a total of 6 times. All attempts fail. The test fails
       // 'detect-flake-but-always-fail': will run a total of 10 times. All attempts fail. The test fails.
       // 'detect-flake-but-always-fail-stop-any-passed': will run a total of 10 times. All attempts fail. The test fails.
-      describe('cleanses errors before emitting', () => {
+      describe('cleanses errors before emitting', { defaultCommandTimeout: 15000 }, () => {
         it('does not try to serialize error with err.actual as DOM node', function (done) {
           // because there are more attempts for 'detect-flake-but-always-fail', the timeout needs to be increased
           this.timeout(20000)

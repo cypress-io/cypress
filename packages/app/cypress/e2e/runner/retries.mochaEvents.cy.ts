@@ -8,7 +8,7 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
  * so we have increased the command timeout to allow the inner spec more time to complete and report
  * its mocha event log.
  */
-describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 10000 }, () => {
+describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
   it('simple retry', (done) => {
     const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
@@ -101,7 +101,7 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     })
   })
 
-  describe('cleanses errors before emitting', () => {
+  describe('cleanses errors before emitting', { defaultCommandTimeout: 15000 }, () => {
     it('does not try to serialize error with err.actual as DOM node', (done) => {
       const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
         'src/cypress/runner retries mochaEvents cleanses errors before emitting does not try to serialize error with err.actual as DOM node #1',
