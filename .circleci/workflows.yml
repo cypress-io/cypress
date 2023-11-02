@@ -1325,7 +1325,7 @@ commands:
         name: Update known_hosts with github.com keys
         command: |
           mkdir -p ~/.ssh
-          ssh-keyscan -T 20 github.com >> ~/.ssh/known_hosts
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
@@ -1343,10 +1343,18 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - update_known_hosts
-      - checkout
-      # - run:
-          # name: checkout
-          # command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
+      - when:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps: # issue with ssh keys on windows
+            - checkout
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: checkout
+                command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
