@@ -5,7 +5,7 @@ _Released 11/7/2023 (PENDING)_
 
 **Features:**
 
-- When artifacts are uploaded to the Cypress cloud, the duration of each upload will now be displayed in the console.
+- When artifacts are uploaded to the Cypress cloud, the duration of each upload will now be displayed in the console. Addressed in [#28226](https://github.com/cypress-io/cypress/pull/28226).
 
 ## 13.4.0
 
