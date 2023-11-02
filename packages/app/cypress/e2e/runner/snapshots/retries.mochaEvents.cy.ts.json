@@ -3499,6 +3499,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -4000,6 +4003,9 @@
         "currentRetry": 1,
         "retries": 1,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -4495,6 +4501,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -5050,6 +5059,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -5448,6 +5460,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -5770,6 +5785,9 @@
         "currentRetry": 1,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -6119,6 +6137,9 @@
         "currentRetry": 2,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -7274,6 +7295,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -7617,6 +7641,9 @@
         "currentRetry": 0,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -7927,6 +7954,9 @@
         "currentRetry": 1,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -8276,6 +8306,9 @@
         "currentRetry": 2,
         "retries": 2,
         "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
