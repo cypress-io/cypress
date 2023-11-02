@@ -681,9 +681,7 @@ exports['e2e events'] = `
         "retries": 0,
         "_slow": 10000
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     },
     {
       "test": {
@@ -1385,9 +1383,7 @@ exports['e2e events'] = `
         "retries": 0,
         "_slow": 10000
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     }
   ],
   "afterTest": [
@@ -5273,9 +5269,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "retries": 0,
         "_slow": 250
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     },
     {
       "test": {
@@ -5373,9 +5367,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "retries": 0,
         "_slow": 250
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     }
   ],
   "afterTest": [
@@ -7016,9 +7008,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "retries": 0,
         "_slow": 250
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     },
     {
       "test": {
@@ -7116,9 +7106,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "retries": 0,
         "_slow": 250
       },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
+      "options": {}
     }
   ],
   "afterTest": [
