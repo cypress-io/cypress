@@ -175,6 +175,7 @@ module.exports = {
       electronApp.scale()
     }
 
+    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
     electronApp.setScopeMemoryCachePerContext()
 
     // make sure we have the appData folder
