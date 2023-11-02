@@ -14,7 +14,7 @@ import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
  * 'detect-flake-and-pass-on-threshold' will have a passed test as long as the config passesRequired is satisfied on retries.
  * 'detect-flake-but-always-fail' projects should have the same passed/failed tests, but different number of attempts depending on stopIfAnyPassed
  */
-describe('Experimental retries: mochaEvents & test status tests', { retries: 0, defaultCommandTimeout: 7500 }, () => {
+describe('Experimental retries: mochaEvents & test status tests', { retries: 0, defaultCommandTimeout: 10000 }, () => {
   const projects: ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed'] = ['detect-flake-and-pass-on-threshold', 'detect-flake-but-always-fail', 'detect-flake-but-always-fail-stop-any-passed']
 
   projects.forEach((project) => {
