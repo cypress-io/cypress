@@ -30,6 +30,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     resetTest: [],
     responseEndedWithEmptyBody: [],
     responseStreamTimedOut: [],
+    numberOfFontRequests: 0,
   }
   private cdpClient: any
   private scriptToEvaluateId: any
@@ -72,6 +73,14 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     )
 
     this.scriptToEvaluateId = scriptToEvaluateResult.identifier
+
+    this.cdpClient.on('Network.requestWillBeSent', (params) => {
+      // For the font flooding test, we want to count the number of font requests.
+      // There should only be 2 requests. One for each test in the spec.
+      if (params.type === 'Font') {
+        this.events.numberOfFontRequests += 1
+      }
+    })
   }
 
   addRunnables = (runnables) => {
