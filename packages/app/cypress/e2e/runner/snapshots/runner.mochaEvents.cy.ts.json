@@ -506,9 +506,6 @@
         "currentRetry": 0,
         "retries": 0,
         "_slow": 10000
-      },
-      {
-        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -815,9 +812,6 @@
         "currentRetry": 0,
         "retries": 0,
         "_slow": 10000
-      },
-      {
-        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -1420,9 +1414,6 @@
         "currentRetry": 0,
         "retries": 0,
         "_slow": 10000
-      },
-      {
-        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -3355,9 +3346,6 @@
         "currentRetry": 0,
         "retries": 0,
         "_slow": 10000
-      },
-      {
-        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -3738,9 +3726,6 @@
         "currentRetry": 0,
         "retries": 0,
         "_slow": 10000
-      },
-      {
-        "nextTestHasTestIsolationOn": true
       }
     ],
     [
