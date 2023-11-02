@@ -7,6 +7,10 @@ _Released 11/7/2023 (PENDING)_
 
 - When artifacts are uploaded to the Cypress cloud, the duration of each upload will now be displayed in the console. Addressed in [#28226](https://github.com/cypress-io/cypress/pull/28226).
 
+**Bugfixes:**
+
+- Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+
 ## 13.4.0
 
 _Released 10/30/2023_
