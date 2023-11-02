@@ -712,6 +712,9 @@ class $Cypress {
       case 'app:navigation:changed':
         return this.emit('navigation:changed', ...args)
 
+      case 'app:download:received':
+        return this.emit('download:received')
+
       case 'app:form:submitted':
         return this.emit('form:submitted', args[0])
 

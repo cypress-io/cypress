@@ -298,11 +298,17 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
   })
 
   client.on('Page.downloadProgress', (data) => {
-    if (data.state !== 'completed') return
+    if (data.state === 'completed') {
+      automation.push('complete:download', {
+        id: data.guid,
+      })
+    }
 
-    automation.push('complete:download', {
-      id: data.guid,
-    })
+    if (data.state === 'canceled') {
+      automation.push('canceled:download', {
+        id: data.guid,
+      })
+    }
   })
 
   await client.send('Page.setDownloadBehavior', {
@@ -521,13 +527,12 @@ export = {
 
     await pageCriClient.send('Page.enable')
 
-    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
-
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)
