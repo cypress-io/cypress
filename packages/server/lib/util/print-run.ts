@@ -631,7 +631,9 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   }
 
   if (duration) {
-    process.stdout.write(` ${success ? 'in' : 'after'} ${humanTime.short(duration, 2)}`)
+    const durationOut = env.get('CYPRESS_INTERNAL_ENV') === 'test' ? 'Xm, Ys ZZms' : humanTime.short(duration, 2)
+
+    process.stdout.write(` ${success ? 'in' : 'after'} ${durationOut}`)
   }
 
   if (pathToFile && key !== 'protocol') {

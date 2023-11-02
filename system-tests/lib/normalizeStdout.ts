@@ -62,10 +62,6 @@ const replaceTime = (str: string, p1: string) => {
   return _.padEnd('X second(s)', p1.length)
 }
 
-const replaceShortDuration = (str: string, prefix: string): string => {
-  return `${prefix} Xm, Ys ZZ.ZZms`
-}
-
 const replaceScreenshotDims = (str: string, p1: string) => _.padStart('(YxX)', p1.length)
 
 const replaceUploadingResults = function (orig: string, ...rest: string[]) {
@@ -153,8 +149,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
-  // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) => '(in|after) XXm, YYs, ZZ.ZZms'
-  .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms))/g, replaceShortDuration)
   .replace(/\r/g, '')
   // replaces multiple lines of uploading screenshots & results (since order not guaranteed)
   .replace(/(Uploading Screenshots & Videos.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
