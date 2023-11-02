@@ -109,35 +109,42 @@ function cypressGrepPlugin (config) {
 
       debug('found grep "%s" in %d specs', grep, greppedSpecs.length)
       debug('%o', greppedSpecs)
-    } else if (grepTags) {
-      const parsedGrep = parseGrep(null, grepTags)
-
-      debug('parsed grep tags %o', parsedGrep)
+    } else if (grepTags || grepUntagged) {
+      const parsedGrep = parseGrep(null, grepTags);
+      
       greppedSpecs = specFiles.filter((specFile) => {
-        const text = fs.readFileSync(specFile, { encoding: 'utf8' })
-
-        try {
-          const testInfo = getTestNames(text)
-
-          debug('spec file %s', specFile)
-          debug('test info: %o', testInfo.tests)
-
-          return testInfo.tests.some((info) => {
-            const shouldRun = shouldTestRun(parsedGrep, null, info.tags)
-
-            return shouldRun
-          })
-        } catch (err) {
-          console.error('Could not determine test names in file: %s', specFile)
-          console.error('Will run it to let the grep filter the tests')
-
-          return true
-        }
-      })
-
-      debug('found grep tags "%s" in %d specs', grepTags, greppedSpecs.length)
-      debug('%o', greppedSpecs)
-    }
+          const text = fs.readFileSync(specFile, { encoding: 'utf8' });
+  
+          try {
+              const testInfo = getTestNames(text);
+              
+              debug('spec file %s', specFile);
+              debug('test info: %o', testInfo.tests);
+  
+              return testInfo.tests.some((info) => {
+                  const shouldRun = shouldTestRun(parsedGrep, null, info.tags);
+                  if(grepUntagged && info.tags.length !== 0) {
+                      // If grepUntagged is true, and the test has tags, it should not run
+                      return false;
+                  }
+  
+                  return shouldRun;
+              });
+          } catch (err) {
+              console.error('Could not determine test names in file: %s', specFile);
+              console.error('Will run it to let the grep filter the tests');
+              
+              return true;
+          }
+      });
+  
+      if (grepUntagged) {
+          debug('filtered for untagged tests in %d specs', greppedSpecs.length);
+      } else {
+          debug('found grep tags "%s" in %d specs', grepTags, greppedSpecs.length);
+      }
+      debug('%o', greppedSpecs);
+  }
 
     if (greppedSpecs.length) {
       config.specPattern = greppedSpecs
