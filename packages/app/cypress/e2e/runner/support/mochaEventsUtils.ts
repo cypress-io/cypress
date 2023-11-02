@@ -139,15 +139,18 @@ declare global {
   }
 }
 
-export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
+export function runCypressInCypressMochaEventsTest (snapToCompare: string, done: Mocha.Done) {
   const bus = new EventEmitter()
   const outerRunner = window.top!.window
+  const filename = getCallerFile()
+  let snapshots
+
+  cy.task('readMochaEventSnapshot', { filename }).then((existingSnapshots) => {
+    snapshots = existingSnapshots
+  })
 
   outerRunner.bus = bus
 
-  // TODO: Can we automate writing the snapshots to disk?
-  // For some reason `cy.task('getSnapshot')` has problems when executed in
-  // "cypress in cypress"
   bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
     const expected = snapshots[snapToCompare]
     const diff = disparity.unifiedNoColor(JSON.stringify(expected, null, 2), JSON.stringify(snapshot, null, 2), {})
@@ -156,7 +159,7 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
       /* eslint-disable no-console */
       console.info('Received snapshot:', JSON.stringify(snapshot, null, 2))
 
-      return cy.fail(new Error(`The captured mocha events did not match the "${String(snapToCompare)}" snapshot.\n${diff}`), { async: false })
+      return cy.fail(new Error(`The captured mocha events did not match the "${String(snapToCompare)}" snapshot. You can automatically update the snapshot by setting the CYPRESS_SNAPSHOT_UPDATE environment variable.\n${diff}`), { async: false })
     }
 
     Cypress.log({
@@ -169,10 +172,20 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
   })
 
   const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {
-    win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
-      const data = sanitizeMochaEvents(args)
-
-      bus.emit('assert:cypress:in:cypress', data)
+    return new Promise((resolve) => {
+      win.getEventManager().on('cypress:in:cypress:run:complete', (args: CypressInCypressMochaEvent[]) => {
+        resolve(sanitizeMochaEvents(args))
+      })
+    }).then((snapshot) => {
+      if (Cypress.env('SNAPSHOT_UPDATE') === 1) {
+        // overwrite the existing snapshot and write it to disk
+        snapshots[snapToCompare] = snapshot
+        cy.task('writeMochaEventSnapshot', { filename, snapshots }).then(() => {
+          bus.emit('assert:cypress:in:cypress', snapshot)
+        })
+      } else {
+        bus.emit('assert:cypress:in:cypress', snapshot)
+      }
     })
   }
 
@@ -189,4 +202,8 @@ function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
       return removeUnusedKeysForTestSnapshot(payload)
     })
   })
+}
+
+function getCallerFile () {
+  return (new Error()).stack!.split('\n')[1].split('/').slice(-1)[0].split(':')[0]
 }

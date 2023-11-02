@@ -1,6 +1,5 @@
 import { loadSpec, runSpec } from './support/spec-loader'
 import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
-import { snapshots } from './retries.experimentalRetries.mochaEvents.snapshots'
 
 /**
  * The mochaEvent tests require a spec to be loaded and executed within an inner Cypress context.
@@ -28,7 +27,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('simple retry', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents simple retry #1`,
             done,
           )
@@ -38,7 +36,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             projectName: project,
 
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -60,7 +58,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('test retry with hooks', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents test retry with hooks #1`,
             done,
           )
@@ -69,7 +66,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/test-retry-with-hooks.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -91,7 +88,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('test retry with [only]', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents test retry with [only] #1`,
             done,
           )
@@ -100,7 +96,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/test-retry-with-only.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -122,7 +118,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('can retry from [beforeEach]', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents can retry from [beforeEach] #1`,
             done,
           )
@@ -131,7 +126,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/can-retry-from-beforeEach.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -247,7 +242,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('can retry from [afterEach]', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents can retry from [afterEach] #1`,
             done,
           )
@@ -256,7 +250,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/can-retry-from-afterEach.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -274,7 +268,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('cant retry from [before]', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents cant retry from [before] #1`,
             done,
           )
@@ -283,7 +276,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/cant-retry-from-before.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -360,7 +353,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
       describe('three tests with retry', () => {
         it('matches mocha snapshot', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents three tests with retry #1`,
             done,
           )
@@ -369,7 +361,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             fileName: 'experimental-retries/three-tests-with-retry.retries.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
@@ -394,7 +386,6 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
           this.timeout(20000)
 
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": retries mochaEvents cleanses errors before emitting does not try to serialize error with err.actual as DOM node #1`,
             done,
           )
@@ -404,7 +395,7 @@ describe('Experimental retries: mochaEvents & test status tests', { retries: 0, 
             projectName: project,
           }).then((win) => {
             // should not have err.actual, expected properties since the subject is a DOM element
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
       })
