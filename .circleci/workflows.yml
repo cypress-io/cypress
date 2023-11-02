@@ -87,6 +87,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/fix/better-sqlite3', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/test-before-after-run-async', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
