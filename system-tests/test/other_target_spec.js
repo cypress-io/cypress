@@ -16,11 +16,17 @@ describe('e2e other target', () => {
     servers: [{
       port: 1515,
       onServer,
+    }, {
+      https: true,
+      port: 1516,
+      onServer,
     }],
   })
 
   systemTests.it.only(`executes a page with a target type of 'other'`, {
     project: 'e2e',
     spec: 'other_target.cy.js',
+    headed: true,
+    noExit: true,
   })
 })

@@ -6,13 +6,16 @@
   <body>
     <!-- Video Player -->
     <h2>Video Player</h2>
-    <video width="640" height="360" controls>
-      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+
+    <object
+      type="video/mp4"
+      data="https://localhost:1516/other-target.webm"
+      width="320"
+      height="180">
+    </object>
 
     <!-- Objects -->
     <h2>Objects</h2>
-    <object type="application/pdf" data="/other-target.pdf" width="250" height="200"></object>
+    <object type="text/html" data="http://localhost:1515/other-target.pdf" width="250" height="200"></object>
   </body>
 </html>
