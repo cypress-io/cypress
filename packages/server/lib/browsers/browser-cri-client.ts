@@ -289,8 +289,8 @@ export class BrowserCriClient {
     if (!waitingForDebugger) {
       debug('Not waiting for debugger (id: %s)', targetId)
 
-      // targets created before we started listening won't be waiting
-      // for debugger and are not extras
+      // a target created before we started listening won't be waiting
+      // for the debugger and is therefore not an extra target
       return
     }
 
