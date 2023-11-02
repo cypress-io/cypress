@@ -73,27 +73,27 @@ describe('http/request-middleware', () => {
       })
     })
 
-    context('x-cypress-is-from-main-target', () => {
-      it('when it exists, removes header and sets in on the req', async () => {
-        const ctx = prepareContext({
-          'x-cypress-is-from-main-target': 'true',
-        })
-
-        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
-        .then(() => {
-          expect(ctx.req.headers!['x-cypress-is-from-main-target']).not.to.exist
-          expect(ctx.req.isFromMainTarget).to.be.true
-        })
-      })
-
-      it('when it does not exist, sets in on the req and only runs necessary middleware', async () => {
+    context('x-cypress-is-from-extra-target', () => {
+      it('when it exists, sets in on the req and only runs necessary middleware', async () => {
         const ctx = prepareContext()
 
         await testMiddleware([ExtractCypressMetadataHeaders], ctx)
         .then(() => {
-          expect(ctx.req.headers!['x-cypress-is-from-main-target']).not.to.exist
-          expect(ctx.req.isFromMainTarget).to.be.false
+          expect(ctx.req.headers!['x-cypress-is-from-extra-target']).not.to.exist
+          expect(ctx.req.isFromExtraTarget).to.be.true
           expect(ctx.onlyRunMiddleware).to.be.calledWith(['SendRequestOutgoing'])
+        })
+      })
+
+      it('when it does not exist, removes header and sets in on the req', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-from-extra-target': 'true',
+        })
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+        .then(() => {
+          expect(ctx.req.headers!['x-cypress-is-from-extra-target']).not.to.exist
+          expect(ctx.req.isFromExtraTarget).to.be.false
         })
       })
     })

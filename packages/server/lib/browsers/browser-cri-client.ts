@@ -361,6 +361,8 @@ export class BrowserCriClient {
 
     await extraTargetCriClient.send('Fetch.enable')
 
+    // we mark extra targets with this header, so that the proxy can recognize
+    // where they came from and run only the minimal middleware necessary
     extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
       const details: Protocol.Fetch.ContinueRequestRequest = {
         requestId: params.requestId,

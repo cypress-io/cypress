@@ -114,7 +114,9 @@ describe('http/response-middleware', function () {
       }
     })
 
-    it('runs minimal subsequent middleware if request is not from the main target', () => {
+    it('runs minimal subsequent middleware if request is from an extra target', () => {
+      ctx.req.isFromExtraTarget = true
+
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
         expect(ctx.onlyRunMiddleware).to.be.calledWith([
@@ -129,8 +131,8 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('runs all subsequent middleware if request is from the main target', () => {
-      ctx.req.isFromMainTarget = true
+    it('runs all subsequent middleware if request is not from an extra target', () => {
+      ctx.req.isFromMainTarget = false
 
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
