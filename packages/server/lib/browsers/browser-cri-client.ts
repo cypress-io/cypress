@@ -260,7 +260,8 @@ export class BrowserCriClient {
     debug('Target.attachedToTarget %o', event.targetInfo)
 
     try {
-      if (event.targetInfo.type !== 'page') {
+      // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+      if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
 

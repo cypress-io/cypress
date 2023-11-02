@@ -6,6 +6,7 @@ _Released 11/7/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+- Fixed an issue with 'other' targets (e.g. pdf documents embedded in an object tag) not fully loading. Fixes [#28228](https://github.com/cypress-io/cypress/issues/28228)
 
 ## 13.4.0
 
