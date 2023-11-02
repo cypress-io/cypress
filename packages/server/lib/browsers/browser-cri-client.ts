@@ -555,13 +555,6 @@ export class BrowserCriClient {
     this.resettingBrowserTargets = false
   }
 
-  /**
-   * @returns the websocket debugger URL for the currently connected browser
-   */
-  getWebSocketDebuggerUrl () {
-    return this.versionInfo.webSocketDebuggerUrl
-  }
-
   addExtraTargetClient (targetInfo: Protocol.Target.TargetInfo, client: CRI.Client) {
     this.extraTargetClients.set(targetInfo.targetId, { client, targetInfo })
   }
