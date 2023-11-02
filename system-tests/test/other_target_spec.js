@@ -26,7 +26,5 @@ describe('e2e other target', () => {
   systemTests.it(`executes a page with a target type of 'other'`, {
     project: 'e2e',
     spec: 'other_target.cy.js',
-    headed: true,
-    noExit: true,
   })
 })
