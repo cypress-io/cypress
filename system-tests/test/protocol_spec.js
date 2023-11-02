@@ -36,7 +36,7 @@ describe('capture-protocol', () => {
   enableCaptureProtocol()
 
   describe('e2e', () => {
-    it(`verifies the protocol events are correct`, function () {
+    it('verifies the protocol events are correct', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'protocol',
@@ -52,7 +52,7 @@ describe('capture-protocol', () => {
       }).then(() => {
         const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-        systemTests.snapshot(`e2e events`, normalizeEvents(protocolEvents))
+        systemTests.snapshot('e2e events', normalizeEvents(protocolEvents))
 
         fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
       })
@@ -61,7 +61,7 @@ describe('capture-protocol', () => {
 
   describe('component', () => {
     [true, false].forEach((experimentalSingleTabRunMode) => {
-      it(`verifies the protocol events are correct - experimentalSingleTabRunMode: ${experimentalSingleTabRunMode ? 'On' : 'Off'}`, function () {
+      it('verifies the protocol events are correct', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           project: 'protocol',
