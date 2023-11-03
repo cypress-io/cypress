@@ -277,7 +277,8 @@ export class BrowserCriClient {
     try {
       // The basic approach here is we attach to targets and enable network traffic
       // We must attach in a paused state so that we can enable network traffic before the target starts running.
-      if (targetInfo.type !== 'page') {
+      // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+      if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
     } catch (error) {
