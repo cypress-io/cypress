@@ -142,16 +142,11 @@ declare global {
 export function runCypressInCypressMochaEventsTest (snapToCompare: string, done: Mocha.Done) {
   const bus = new EventEmitter()
   const outerRunner = window.top!.window
-  const filename = getCallerFile()
-  let snapshots
-
-  cy.task('readMochaEventSnapshot', { filename }).then((existingSnapshots) => {
-    snapshots = existingSnapshots
-  })
+  const filename = getCallerFilename()
 
   outerRunner.bus = bus
 
-  bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
+  bus.on('assert:cypress:in:cypress', (snapshots: Record<string, CypressInCypressMochaEvent[]>, snapshot: CypressInCypressMochaEvent[]) => {
     const expected = snapshots[snapToCompare]
     const diff = disparity.unifiedNoColor(JSON.stringify(expected, null, 2), JSON.stringify(snapshot, null, 2), {})
 
@@ -177,15 +172,19 @@ export function runCypressInCypressMochaEventsTest (snapToCompare: string, done:
         resolve(sanitizeMochaEvents(args))
       })
     }).then((snapshot) => {
-      if (Cypress.env('SNAPSHOT_UPDATE') === 1) {
-        // overwrite the existing snapshot and write it to disk
-        snapshots[snapToCompare] = snapshot
-        cy.task('writeMochaEventSnapshot', { filename, snapshots }).then(() => {
-          bus.emit('assert:cypress:in:cypress', snapshot)
-        })
-      } else {
-        bus.emit('assert:cypress:in:cypress', snapshot)
-      }
+      cy.task('readMochaEventSnapshot', { filename }).then((existingSnapshots: any) => {
+        existingSnapshots ||= {}
+
+        if (Cypress.env('SNAPSHOT_UPDATE') === 1) {
+          // overwrite the existing snapshot and write it to disk
+          existingSnapshots[snapToCompare] = snapshot
+          cy.task('writeMochaEventSnapshot', { filename, snapshots: existingSnapshots }).then(() => {
+            bus.emit('assert:cypress:in:cypress', existingSnapshots, snapshot)
+          })
+        } else {
+          bus.emit('assert:cypress:in:cypress', existingSnapshots, snapshot)
+        }
+      })
     })
   }
 
@@ -204,6 +203,6 @@ function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
   })
 }
 
-function getCallerFile () {
+function getCallerFilename () {
   return (new Error()).stack!.split('\n')[1].split('/').slice(-1)[0].split(':')[0]
 }
