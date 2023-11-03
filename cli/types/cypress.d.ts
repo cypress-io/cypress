@@ -6013,7 +6013,8 @@ declare namespace Cypress {
     webSocketDebuggerUrl: string
   }
 
-  interface BeforeBrowserLaunchOptions {    extensions: string[]
+  interface BeforeBrowserLaunchOptions {
+    extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
     env: { [key: string]: any }
