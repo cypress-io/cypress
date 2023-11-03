@@ -338,6 +338,21 @@ describe('lib/browsers/chrome', () => {
           })
         })
       })
+
+      it('pushes canceled:download when download is incomplete', function () {
+        const downloadData = {
+          guid: '1',
+          state: 'canceled',
+        }
+        const options = { downloadsFolder: 'downloads' }
+
+        return this.onCriEvent('Page.downloadProgress', downloadData, options)
+        .then(() => {
+          expect(this.automation.push).to.be.calledWith('canceled:download', {
+            id: '1',
+          })
+        })
+      })
     })
 
     describe('adding header to AUT iframe request', function () {
