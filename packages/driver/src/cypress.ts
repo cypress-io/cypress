@@ -571,7 +571,7 @@ class $Cypress {
         return this.emitThen('test:before:run:async', ...args)
 
       case 'runner:test:before:after:run:async':
-        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0])
+        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0], args[2])
 
         return this.emitThen('test:before:after:run:async', ...args)
 
