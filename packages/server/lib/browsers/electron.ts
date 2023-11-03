@@ -349,7 +349,7 @@ export = {
 
       downloadItem.once('done', (_event, state) => {
         if (state === 'completed') {
-          automation.push('complete:download', {
+          return automation.push('complete:download', {
             id: downloadItem.getETag(),
           })
         }
