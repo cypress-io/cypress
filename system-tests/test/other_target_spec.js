@@ -23,7 +23,9 @@ describe('e2e other target', () => {
     }],
   })
 
-  systemTests.it(`executes a page with a target type of 'other'`, {
+  // The goal of this test is to load a page containing a target type of 'other' (e.g. embedded pdfs)
+  // This is to ensure that we don't hang on the cy.visit (https://github.com/cypress-io/cypress/issues/28228)
+  systemTests.it(`executes a page containing a target type of 'other'`, {
     project: 'e2e',
     spec: 'other_target.cy.js',
   })
