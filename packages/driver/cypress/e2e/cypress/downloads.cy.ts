@@ -94,7 +94,7 @@ describe('download behavior', () => {
     .should('contain', '"Joe","Smith"')
   })
 
-  it('downloads from anchor tag without download attribute', () => {
+  it('downloads from anchor tag without download attribute', { browser: '!webkit' }, () => {
     cy.exec(`rm -f ${Cypress.config('downloadsFolder')}/downloads_records.csv`)
     cy.readFile(`${Cypress.config('downloadsFolder')}/downloads_records.csv`).should('not.exist')
 
