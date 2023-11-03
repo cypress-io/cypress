@@ -3504,6 +3504,9 @@ export const snapshots = {
         retries: 2,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -4005,6 +4008,9 @@ export const snapshots = {
         retries: 1,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -4499,6 +4505,9 @@ export const snapshots = {
         currentRetry: 0,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -5054,6 +5063,9 @@ export const snapshots = {
         currentRetry: 0,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -5453,6 +5465,9 @@ export const snapshots = {
         retries: 2,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -5774,6 +5789,9 @@ export const snapshots = {
         currentRetry: 1,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -6123,6 +6141,9 @@ export const snapshots = {
         currentRetry: 2,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -7281,6 +7302,9 @@ export const snapshots = {
         retries: 2,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -7624,6 +7648,9 @@ export const snapshots = {
         retries: 2,
         _slow: 10000,
       },
+      {
+        nextTestHasTestIsolationOn: true,
+      },
     ],
     [
       'mocha',
@@ -7933,6 +7960,9 @@ export const snapshots = {
         currentRetry: 1,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
@@ -8282,6 +8312,9 @@ export const snapshots = {
         currentRetry: 2,
         retries: 2,
         _slow: 10000,
+      },
+      {
+        nextTestHasTestIsolationOn: true,
       },
     ],
     [
