@@ -101,7 +101,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   removeBadExitListener()
 
-  const pwBrowser = await pw.webkit.connect(pwServer.wsEndpoint())
+  const websocketUrl = pwServer.wsEndpoint()
+  const pwBrowser = await pw.webkit.connect(websocketUrl)
 
   wkAutomation = await WebKitAutomation.create({
     automation,
@@ -148,9 +149,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   await utils.executeAfterBrowserLaunch(browser, {
-    get webSocketDebuggerUrl (): never {
-      throw new Error('The `webSocketDebuggerUrl` property is not currently supported in the `after:browser:launch` event handler details argument')
-    },
+    webSocketDebuggerUrl: websocketUrl,
   })
 
   return new WkInstance()
