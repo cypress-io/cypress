@@ -6,6 +6,7 @@ const { setTimeout } = require('node:timers/promises');
 
 /**
  * Semantic Pull Request:
+ *
  * - check PR title
  * - check for packages/cli file changes
  *   - If YES - verify changelog entry for user-facing commits
