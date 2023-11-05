@@ -2,7 +2,7 @@ const { validatePrTitle } = require('./validate-pr-title')
 const { validateChangelog } = require('../../semantic-commits/validate-changelog')
 const { getLinkedIssues } = require('../../semantic-commits/get-linked-issues')
 const { exec } = require("child_process");
-import { setTimeout } from "timers/promises";
+const { setTimeout } = require('node:timers/promises');
 
 /**
  * Semantic Pull Request:
