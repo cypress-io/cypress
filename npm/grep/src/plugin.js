@@ -81,7 +81,7 @@ function cypressGrepPlugin (config) {
       console.log('@cypress/grep: filtering specs using "%s" in the title', grep)
       const parsedGrep = parseGrep(grep)
 
-      debug('parsed grep %o', parsedGrep)
+      debug('parsed grep tags %o', parsedGrep)
       greppedSpecs = specFiles.filter((specFile) => {
         const text = fs.readFileSync(specFile, { encoding: 'utf8' })
 
