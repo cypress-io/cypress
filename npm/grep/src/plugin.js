@@ -81,7 +81,7 @@ function cypressGrepPlugin (config) {
       console.log('@cypress/grep: filtering specs using "%s" in the title', grep)
       const parsedGrep = parseGrep(grep)
 
-      debug('parsed grep tags %o', parsedGrep)
+      debug('parsed grep %o', parsedGrep)
       greppedSpecs = specFiles.filter((specFile) => {
         const text = fs.readFileSync(specFile, { encoding: 'utf8' })
 
@@ -112,6 +112,7 @@ function cypressGrepPlugin (config) {
     } else if (grepTags || grepUntagged) {
       const parsedGrep = parseGrep(null, grepTags);
       
+      debug('parsed grep tags %o', parsedGrep)
       greppedSpecs = specFiles.filter((specFile) => {
           const text = fs.readFileSync(specFile, { encoding: 'utf8' });
   
