@@ -3571,7 +3571,7 @@ exports['capture-protocol api errors upload 500 - retries 8 times and fails cont
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms undefined, 3s 2/2 - Internal Server Error
+  - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Internal Server Error
 
 ====================================================================================================
 
@@ -3653,7 +3653,7 @@ exports['capture-protocol api errors upload 500 - retries 7 times and succeeds o
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms undefined, 3s 2/2
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 
