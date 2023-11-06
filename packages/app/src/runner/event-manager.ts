@@ -148,6 +148,9 @@ export class EventManager {
         case 'complete:download':
           Cypress.downloads.end(data)
           break
+        case 'canceled:download':
+          Cypress.downloads.end(data, true)
+          break
         default:
           break
       }
