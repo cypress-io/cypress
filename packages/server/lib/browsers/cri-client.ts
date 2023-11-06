@@ -287,7 +287,8 @@ export const create = async ({
         cri.on('Target.attachedToTarget', async (event) => {
           try {
             // Service workers get attached at the page and browser level. We only want to handle them at the browser level
-            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
+            // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
               await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
             }
 
