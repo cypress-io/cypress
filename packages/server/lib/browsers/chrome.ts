@@ -103,6 +103,10 @@ const DEFAULT_ARGS = [
   `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
+  // Disable manual option and popup prompt of Chrome translation
+  // https://github.com/cypress-io/cypress/issues/28225
+  '--disable-features=Translate',
+
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
   '--use-fake-ui-for-media-stream',
