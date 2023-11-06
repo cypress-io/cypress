@@ -46,6 +46,7 @@ const getMidPoint = (el) => {
 
 const isFirefox = Cypress.isBrowser('firefox')
 const isWebKit = Cypress.isBrowser('webkit')
+const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -4448,13 +4449,12 @@ describe('mouse state', () => {
       btn.on('pointerover', onAction)
 
       cy.get('#btn').click()
-      // cy.wrap(onAction).should('calledOnce')
 
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
 
       // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
       cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit ? shouldBeCalled : shouldNotBeCalled)
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit || isChromium116OrLater ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 

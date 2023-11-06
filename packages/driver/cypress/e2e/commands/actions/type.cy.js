@@ -2425,7 +2425,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('releases modfier keys at the end of the shortcut sequence', () => {
+    it('releases modifier keys at the end of the shortcut sequence', () => {
       cy.get(':text:first').type('h{ctrl+alt++}i')
       .then(function ($input) {
         const table = this.lastLog.invoke('consoleProps').table[2]()

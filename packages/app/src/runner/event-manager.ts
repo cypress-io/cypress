@@ -32,6 +32,7 @@ let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
   return undefined
 }
 let crossOriginLogs: {[key: string]: Cypress.Log} = {}
+let hasMochaRunEnded: boolean = false
 
 interface AddGlobalListenerOptions {
   element: AutomationElementId
@@ -564,12 +565,14 @@ export class EventManager {
     })
 
     Cypress.on('run:start', async () => {
+      hasMochaRunEnded = false
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
     })
 
     Cypress.on('run:end', async () => {
+      hasMochaRunEnded = true
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }
@@ -720,8 +723,8 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
     Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
-      // If the test is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
-      if (Cypress.state('test')?.final) return
+      // If the mocha run is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
+      if (hasMochaRunEnded) return
 
       // Create a new local log representation of the cross origin log.
       // It will be attached to the current command.

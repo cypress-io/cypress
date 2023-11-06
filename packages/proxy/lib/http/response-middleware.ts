@@ -167,6 +167,27 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
+const FilterNonProxiedResponse: ResponseMiddleware = function () {
+  // if the request is from an extra target (i.e. not the main Cypress tab, but
+  // an extra tab/window), we want to skip any manipulation of the response and
+  // only run the middleware necessary to get it back to the browser
+  if (this.req.isFromExtraTarget) {
+    this.debug('response for [%s %s] is from extra target', this.req.method, this.req.proxiedUrl)
+
+    this.onlyRunMiddleware([
+      'AttachPlainTextStreamFn',
+      'PatchExpressSetHeader',
+      'MaybeSendRedirectToClient',
+      'CopyResponseStatusCode',
+      'MaybeEndWithEmptyBody',
+      'GzipBody',
+      'SendResponseBodyToClient',
+    ])
+  }
+
+  this.next()
+}
+
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
     const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -656,6 +677,11 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
+  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
+  if (this.req.noPreRequestExpected) {
+    this.addPendingUrlWithoutPreRequest(newUrl)
+  }
+
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
@@ -691,6 +717,13 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
       this.protocolManager.responseEndedWithEmptyBody({
         requestId,
         isCached: this.incomingRes.statusCode === 304,
+        timings: {
+          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
+        },
       })
     }
 
@@ -797,15 +830,24 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+    const preRequest = this.req.browserPreRequest
+    const requestId = getOriginalRequestId(preRequest.requestId)
 
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+
     const resultingStream = this.protocolManager.responseStreamReceived({
       requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
       res: this.res,
+      timings: {
+        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+        cdpLagDuration: preRequest.cdpLagDuration,
+        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+      },
     })
 
     if (resultingStream) {
@@ -848,6 +890,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,

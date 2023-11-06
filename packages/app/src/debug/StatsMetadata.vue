@@ -49,7 +49,8 @@ import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
 import type { TestingTypeEnum, StatsMetadata_GroupsFragment } from '../generated/graphql'
-import { IconTimeStopwatch,
+import {
+  IconTimeClock,
   IconOsLinux,
   IconOsApple,
   IconOsGeneric,
@@ -154,7 +155,7 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
   return {
     'DURATION': {
       value: props.specDuration,
-      icon: IconTimeStopwatch,
+      icon: IconTimeClock,
       name: 'spec-duration',
     },
     'OS': {

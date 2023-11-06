@@ -1,9 +1,10 @@
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
+import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create, CriClient } from './cri-client'
+import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -11,6 +12,55 @@ const debug = Debug('cypress:server:browsers:browser-cri-client')
 interface Version {
   major: number
   minor: number
+}
+
+type BrowserCriClientOptions = {
+  browserClient: CriClient
+  versionInfo: CRI.VersionResult
+  host: string
+  port: number
+  browserName: string
+  onAsynchronousError: Function
+  protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+}
+
+type BrowserCriClientCreateOptions = {
+  browserName: string
+  fullyManageTabs?: boolean
+  hosts: string[]
+  onAsynchronousError: Function
+  onReconnect?: (client: CriClient) => void
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface ManageTabsOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  browserName
+  host: string
+  onAsynchronousError: Function
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface AttachedToTargetOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  CriConstructor?: typeof CRI
+  event: Protocol.Target.AttachedToTargetEvent
+  host: string
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
+interface TargetDestroyedOptions {
+  browserName: string
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  event: Protocol.Target.TargetDestroyedEvent
+  onAsynchronousError: Function
 }
 
 const isVersionGte = (a: Version, b: Version) => {
@@ -113,7 +163,22 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
   return retry()
 }
 
+type TargetId = string
+
+interface ExtraTarget {
+  client: CRI.Client
+  targetInfo: Protocol.Target.TargetInfo
+}
+
 export class BrowserCriClient {
+  private browserClient: CriClient
+  private versionInfo: CRI.VersionResult
+  private host: string
+  private port: number
+  private browserName: string
+  private onAsynchronousError: Function
+  private protocolManager?: ProtocolManagerShape
+  private fullyManageTabs?: boolean
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -123,111 +188,276 @@ export class BrowserCriClient {
   closed = false
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
+  extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
 
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
+  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
+    this.browserClient = browserClient
+    this.versionInfo = versionInfo
+    this.host = host
+    this.port = port
+    this.browserName = browserName
+    this.onAsynchronousError = onAsynchronousError
+    this.protocolManager = protocolManager
+    this.fullyManageTabs = fullyManageTabs
+  }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
    * browser target
    *
-   * @param hosts the hosts to which to attempt to connect
-   * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
+   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param hosts the hosts to which to attempt to connect
    * @param onAsynchronousError callback for any cdp fatal errors
    * @param onReconnect callback for when the browser cri client reconnects to the browser
+   * @param port the port to which to connect
    * @param protocolManager the protocol manager to use with the browser cri client
-   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape, { fullyManageTabs }: { fullyManageTabs?: boolean } = {}): Promise<BrowserCriClient> {
+  static async create (options: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
+    const {
+      browserName,
+      fullyManageTabs,
+      hosts,
+      onAsynchronousError,
+      onReconnect,
+      port,
+      protocolManager,
+    } = options
+
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
-      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+      const browserClient = await create({
+        target: versionInfo.webSocketDebuggerUrl,
+        onAsynchronousError,
+        onReconnect,
+        protocolManager,
+        fullyManageTabs,
+      })
+
+      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
 
       if (fullyManageTabs) {
-        await browserClient.send('Target.setDiscoverTargets', { discover: true })
-
-        browserClient.on('Target.targetDestroyed', (event) => {
-          debug('Target.targetDestroyed %o', {
-            event,
-            closing: browserCriClient.closing,
-            closed: browserCriClient.closed,
-            resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
-          })
-
-          // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
-          // have already closed/disposed, so unless this matches our current target then bail
-          if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
-            return
-          }
-
-          // otherwise...
-          // the page or browser closed in an unexpected manner and we need to bubble up this error
-          // by calling onError() with either browser or page was closed
-          //
-          // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
-          // OR from process.exit(...) firing
-          // if the browser's websocket connection has been closed then that means the page was closed
-          //
-          // otherwise it means the the browser itself was closed
-
-          // always close the connection to the page target because it was destroyed
-          browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
-
-          new Bluebird((resolve) => {
-            // this event could fire either expectedly or unexpectedly
-            // it's not a problem if we're expected to be closing the browser naturally
-            // and not as a result of an unexpected page or browser closure
-            if (browserCriClient.resettingBrowserTargets) {
-              // do nothing, we're good
-              return resolve(true)
-            }
-
-            if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
-              return resolve(browserCriClient.gracefulShutdown)
-            }
-
-            // when process.on('exit') is called, we call onClose
-            browserCriClient.onClose = resolve
-
-            // or when the browser's CDP ws connection is closed
-            browserClient.ws.once('close', () => {
-              resolve(false)
-            })
-          })
-          .timeout(500)
-          .then((expectedDestroyedEvent) => {
-            if (expectedDestroyedEvent === true) {
-              return
-            }
-
-            // browserClient websocket was disconnected
-            // or we've been closed due to process.on('exit')
-            // meaning the browser was closed and not just the page
-            errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch(Bluebird.TimeoutError, () => {
-            debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
-            // the browser websocket didn't close meaning
-            // only the page was closed, not the browser
-            errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
-          })
-          .catch((err) => {
-            // stop the run instead of moving to the next spec
-            err.isFatalApiErr = true
-
-            onAsynchronousError(err)
-          })
-        })
+        await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
       }
 
       return browserCriClient
     }, browserName, port)
+  }
+
+  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }: ManageTabsOptions) {
+    const promises = [
+      browserClient.send('Target.setDiscoverTargets', { discover: true }),
+      browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
+    ]
+
+    browserClient.on('Target.attachedToTarget', async (event: Protocol.Target.AttachedToTargetEvent) => {
+      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager })
+    })
+
+    browserClient.on('Target.targetDestroyed', (event: Protocol.Target.TargetDestroyedEvent) => {
+      this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
+    })
+
+    await Promise.all(promises)
+  }
+
+  static async _onAttachToTarget (options: AttachedToTargetOptions) {
+    const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager } = options
+    const CreateCRI = CriConstructor || CRI
+    const { sessionId, targetInfo, waitingForDebugger } = event
+    let { targetId, url } = targetInfo
+
+    debug('Target.attachedToTarget %o', targetInfo)
+
+    try {
+      // The basic approach here is we attach to targets and enable network traffic
+      // We must attach in a paused state so that we can enable network traffic before the target starts running.
+      // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+      if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
+        await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+      }
+    } catch (error) {
+      // it's possible that the target was closed before we could enable
+      // network and continue, in that case, just ignore
+      debug('error running Network.enable:', error)
+    }
+
+    if (!waitingForDebugger) {
+      debug('Not waiting for debugger (id: %s)', targetId)
+
+      // a target created before we started listening won't be waiting
+      // for the debugger and is therefore not an extra target
+      return
+    }
+
+    async function run () {
+      try {
+        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      } catch (error) {
+        // it's possible that the target was closed before we could enable
+        // network and continue, in that case, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger:', error)
+      }
+    }
+
+    // the url often isn't specified with this event, so we get it
+    // from Target.getTargets
+    if (!url) {
+      const { targetInfos } = await browserClient.send('Target.getTargets')
+
+      const thisTarget = targetInfos.find((target) => target.targetId === targetId)
+
+      if (thisTarget) {
+        url = thisTarget.url
+      }
+    }
+
+    if (
+      // if resetting browser targets, the first target attached to is the
+      // main Cypress tab, but hasn't been set as
+      // browserCriClient.currentlyAttachedTarget yet
+      browserCriClient.resettingBrowserTargets
+      // is the main Cypress tab
+      || targetId === browserCriClient.currentlyAttachedTarget?.targetId
+      // is not a tab/window, such as a service worker
+      || targetInfo.type !== 'page'
+      // is DevTools
+      || url.includes('devtools://')
+      // is the Launchpad
+      || url.includes('__launchpad')
+      // is chrome extension service worker
+      || url.includes('chrome-extension://')
+    ) {
+      debug('Not an extra target (id: %s)', targetId)
+
+      // in these cases, we don't want to track the targets as extras.
+      // we're only interested in extra tabs or windows
+      return await run()
+    }
+
+    debug('Connect as extra target (id: %s)', targetId)
+
+    let extraTargetCriClient
+
+    try {
+      extraTargetCriClient = await CreateCRI({
+        host,
+        port,
+        target: targetId,
+        local: true,
+        useHostName: true,
+      })
+    } catch (err: any) {
+      debug('Errored connecting to target (id: %s): %s', targetId, err?.stack || err)
+
+      return await run()
+    }
+
+    browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
+
+    await extraTargetCriClient.send('Fetch.enable')
+
+    // we mark extra targets with this header, so that the proxy can recognize
+    // where they came from and run only the minimal middleware necessary
+    extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      const details: Protocol.Fetch.ContinueRequestRequest = {
+        requestId: params.requestId,
+        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+      }
+
+      extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
+        // swallow this error so it doesn't crash Cypress
+        debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+      })
+    })
+
+    await run()
+  }
+
+  static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }: TargetDestroyedOptions) {
+    debug('Target.targetDestroyed %o', {
+      event,
+      closing: browserCriClient.closing,
+      closed: browserCriClient.closed,
+      resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+    })
+
+    const { targetId } = event
+
+    if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+      if (browserCriClient.hasExtraTargetClient(targetId)) {
+        debug('Close extra target client (id: %s)')
+        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch(() => { })
+        browserCriClient.removeExtraTargetClient(targetId)
+      }
+
+      // we may have gotten a delayed "Target.targetDestroyed" event for a page that we
+      // have already closed/disposed, so unless this matches our current target then bail
+      return
+    }
+
+    // otherwise...
+    // the page or browser closed in an unexpected manner and we need to bubble up this error
+    // by calling onError() with either browser or page was closed
+    //
+    // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
+    // OR from process.exit(...) firing
+    // if the browser's websocket connection has been closed then that means the page was closed
+    //
+    // otherwise it means the the browser itself was closed
+
+    // always close the connection to the page target because it was destroyed
+    browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+
+    new Bluebird((resolve) => {
+      // this event could fire either expectedly or unexpectedly
+      // it's not a problem if we're expected to be closing the browser naturally
+      // and not as a result of an unexpected page or browser closure
+      if (browserCriClient.resettingBrowserTargets) {
+        // do nothing, we're good
+        return resolve(true)
+      }
+
+      if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+        return resolve(browserCriClient.gracefulShutdown)
+      }
+
+      // when process.on('exit') is called, we call onClose
+      browserCriClient.onClose = resolve
+
+      // or when the browser's CDP ws connection is closed
+      browserClient.ws.once('close', () => {
+        resolve(false)
+      })
+    })
+    .timeout(500)
+    .then((expectedDestroyedEvent) => {
+      if (expectedDestroyedEvent === true) {
+        return
+      }
+
+      // browserClient websocket was disconnected
+      // or we've been closed due to process.on('exit')
+      // meaning the browser was closed and not just the page
+      errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch(Bluebird.TimeoutError, () => {
+      debug('browser websocket did not close, page was closed %o', { targetId })
+      // the browser websocket didn't close meaning
+      // only the page was closed, not the browser
+      errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+    })
+    .catch((err) => {
+      // stop the run instead of moving to the next spec
+      err.isFatalApiErr = true
+
+      onAsynchronousError(err)
+    })
   }
 
   /**
@@ -265,7 +495,8 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs, browserClient: this.browserClient })
+
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
@@ -312,12 +543,35 @@ export class BrowserCriClient {
     }
 
     if (target) {
-      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      this.currentlyAttachedTarget = await create({
+        target: target.targetId,
+        onAsynchronousError: this.onAsynchronousError,
+        host: this.host,
+        port: this.port,
+        protocolManager: this.protocolManager,
+        fullyManageTabs: this.fullyManageTabs,
+      })
     } else {
       this.currentlyAttachedTarget = undefined
     }
 
     this.resettingBrowserTargets = false
+  }
+
+  addExtraTargetClient (targetInfo: Protocol.Target.TargetInfo, client: CRI.Client) {
+    this.extraTargetClients.set(targetInfo.targetId, { client, targetInfo })
+  }
+
+  hasExtraTargetClient (targetId: TargetId) {
+    return this.extraTargetClients.has(targetId)
+  }
+
+  getExtraTargetClient (targetId: TargetId) {
+    return this.extraTargetClients.get(targetId)
+  }
+
+  removeExtraTargetClient (targetId: TargetId) {
+    this.extraTargetClients.delete(targetId)
   }
 
   /**

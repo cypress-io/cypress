@@ -8,7 +8,7 @@ documentFilters: &documentFilters
   avoidOptionals: true
 
 vueOperations: &vueOperations
-  schema: './packages/graphql/schemas/schema.graphql'
+  schema: './schemas/schema.graphql'
   config:
     <<: *documentFilters
   plugins:
@@ -22,7 +22,7 @@ vueOperations: &vueOperations
         flattenGeneratedTypes: true
 
 vueTesting: &vueTesting
-  schema: './packages/graphql/schemas/schema.graphql'
+  schema: './schemas/schema.graphql'
   config:
     <<: *documentFilters
   plugins:
@@ -48,28 +48,28 @@ generates:
   # Generates types for us to infer the correct "source types" when we mock out on the frontend
   # This ensures we have proper type checking when we're using cy.mountFragment in component tests
   ###
-  './packages/frontend-shared/cypress/support/generated/test-graphql-types.gen.ts':
-    schema: 'packages/graphql/schemas/schema.graphql'
+  '../frontend-shared/cypress/support/generated/test-graphql-types.gen.ts':
+    schema: 'schemas/schema.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
       - 'typescript':
           nonOptionalTypename: true
-      - 'packages/frontend-shared/script/codegen-type-map.js'
+      - '../frontend-shared/script/codegen-type-map.js'
 
-  './packages/graphql/src/gen/test-cloud-graphql-types.gen.ts':
-    schema: 'packages/graphql/schemas/cloud.graphql'
+  './src/gen/test-cloud-graphql-types.gen.ts':
+    schema: 'schemas/cloud.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
       - 'typescript':
           nonOptionalTypename: true
-      - 'packages/frontend-shared/script/codegen-type-map.js'
+      - '../frontend-shared/script/codegen-type-map.js'
 
-  './packages/graphql/src/gen/cloud-source-types.gen.ts':
+  './src/gen/cloud-source-types.gen.ts':
     config:
       useTypeImports: true
-    schema: 'packages/graphql/schemas/cloud.graphql'
+    schema: 'schemas/cloud.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
@@ -79,10 +79,10 @@ generates:
   ###
   # Generates types for us to infer the correct keys for graphcache
   ###
-  './packages/data-context/src/gen/graphcache-config.gen.ts':
+  '../data-context/src/gen/graphcache-config.gen.ts':
     config:
       useTypeImports: true
-    schema: 'packages/graphql/schemas/schema.graphql'
+    schema: 'schemas/schema.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
@@ -93,39 +93,39 @@ generates:
   # All of the GraphQL Query/Mutation documents we import for use in the .{vue,ts,tsx,js,jsx}
   # files for useQuery / useMutation, as well as types associated with the fragments
   ###
-  './packages/launchpad/src/generated/graphql.ts':
+  '../launchpad/src/generated/graphql.ts':
     documents: 
-      - './packages/launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueOperations
 
-  './packages/app/src/generated/graphql.ts':
+  '../app/src/generated/graphql.ts':
     documents: 
-      - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../app/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueOperations
 
-  './packages/frontend-shared/src/generated/graphql.ts':
-    documents: './packages/frontend-shared/src/{gql-components,graphql,composables}/**/*.{vue,ts,tsx,js,jsx}'
+  '../frontend-shared/src/generated/graphql.ts':
+    documents: '../frontend-shared/src/{gql-components,graphql,composables}/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueOperations
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
   # Similar to generated/graphql.ts, except it doesn't include the flattening for the document nodes,
   # so we can actually use the document in cy.mountFragment
   ###
-  './packages/launchpad/src/generated/graphql-test.ts':
+  '../launchpad/src/generated/graphql-test.ts':
     documents: 
-      - './packages/launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
 
-  './packages/app/src/generated/graphql-test.ts':
+  '../app/src/generated/graphql-test.ts':
     documents: 
-      - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+      - '../app/src/**/*.{vue,ts,tsx,js,jsx}'
+      - '../frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
 
-  './packages/frontend-shared/src/generated/graphql-test.ts':
+  '../frontend-shared/src/generated/graphql-test.ts':
     documents: 
-      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+      - '../frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
