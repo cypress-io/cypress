@@ -1,12 +1,10 @@
-require('../../spec_helper')
-
+import { proxyquire } from '../../spec_helper'
 import { expect } from 'chai'
-import proxyquire from 'proxyquire'
 import utils from '../../../lib/browsers/utils'
 import * as plugins from '../../../lib/plugins'
 
 function getWebkit (dependencies = {}) {
-  return proxyquire('../../../lib/browsers/webkit', dependencies) as typeof import('../../../lib/browsers/webkit')
+  return proxyquire('../lib/browsers/webkit', dependencies) as typeof import('../../../lib/browsers/webkit')
 }
 
 describe('lib/browsers/webkit', () => {
