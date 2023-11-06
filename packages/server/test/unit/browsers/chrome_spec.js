@@ -33,6 +33,7 @@ describe('lib/browsers/chrome', () => {
         attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
         ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
+        getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
       }
 
       this.automation = {
@@ -93,14 +94,14 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('is noop without before:browser:launch', function () {
+    it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', function () {
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        expect(plugins.execute).not.to.be.called
+        expect(plugins.execute).not.to.be.calledWith('before:browser:launch')
       })
     })
 
-    it('is noop if newArgs are not returned', function () {
+    it('uses default args if new args are not returned from before:browser:launch', function () {
       const args = []
 
       sinon.stub(chrome, '_getArgs').returns(args)
@@ -302,6 +303,30 @@ describe('lib/browsers/chrome', () => {
       this.browserCriClient.ensureMinimumProtocolVersion.throws()
 
       return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+    })
+
+    it('sends after:browser:launch with debugger url', function () {
+      const args = []
+      const browser = { isHeadless: true }
+
+      sinon.stub(chrome, '_getArgs').returns(args)
+      sinon.stub(plugins, 'has').returns(true)
+
+      plugins.execute.resolves(null)
+
+      return chrome.open(browser, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', browser, {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
     })
 
     describe('downloads', function () {
