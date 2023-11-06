@@ -631,7 +631,7 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   }
 
   if (duration) {
-    const durationOut = env.get('CYPRESS_INTERNAL_ENV') === 'test' ? 'Xm, Ys ZZms' : humanTime.short(duration, 2)
+    const durationOut = humanTime.short(duration, 2)
 
     process.stdout.write(` ${success ? 'in' : 'after'} ${durationOut}`)
   }
