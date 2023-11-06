@@ -1,7 +1,7 @@
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
-import { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL, S3 } from "@aws-sdk/client-s3";
+import { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL, S3 } from '@aws-sdk/client-s3'
 
 export const hasOnlyStringValues = (o) => {
   return Object.values(o).every((v) => is.unemptyString(v))
@@ -25,9 +25,9 @@ export const s3helpers = {
       credentials: {
         accessKeyId: aws.accessKeyId,
         secretAccessKey: aws.secretAccessKey,
-        sessionToken: aws.sessionToken
-      }
-    });
+        sessionToken: aws.sessionToken,
+      },
+    })
   },
 
   verifyZipFileExists (zipFile: string, bucket: string, s3: S3): Promise<null> {
@@ -109,7 +109,7 @@ export const s3helpers = {
         debug('%o', data)
         resolve(data)
       })
-    });
+    })
   },
 
   /**
@@ -168,6 +168,6 @@ export const s3helpers = {
         debug('%o', data)
         resolve(data)
       })
-    });
+    })
   },
 }
