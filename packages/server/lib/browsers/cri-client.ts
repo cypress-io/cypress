@@ -59,10 +59,6 @@ export interface CriClient {
    */
   targetId: string
   /**
-   * The version info for the client
-   */
-  versionInfo: CRI.VersionResult
-  /**
    * The underlying websocket connection
    */
   ws: CDPClient['_ws']
@@ -144,10 +140,10 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 type CreateParams = {
-  target?: string
+  target: string
   onAsynchronousError: Function
-  host: string
-  port: number
+  host?: string
+  port?: number
   onReconnect?: (client: CriClient) => void
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
@@ -175,7 +171,7 @@ export const create = async ({
   let cri: CDPClient
   let client: CriClient
 
-  const reconnect = async (retryIndex, target) => {
+  const reconnect = async (retryIndex) => {
     connected = false
 
     if (closed) {
@@ -214,14 +210,14 @@ export const create = async ({
     }
   }
 
-  const retryReconnect = async (target) => {
+  const retryReconnect = async () => {
     debug('disconnected, starting retries to reconnect... %o', { closed, target })
 
     const retry = async (retryIndex = 0) => {
       retryIndex++
 
       try {
-        return await reconnect(retryIndex, target)
+        return await reconnect(retryIndex)
       } catch (err) {
         if (closed) {
           debug('could not reconnect because client is closed %o', { closed, target })
@@ -253,13 +249,7 @@ export const create = async ({
   const connect = async () => {
     await cri?.close()
 
-    debug('connecting %o', { connected })
-
-    const versionInfo = await CRI.Version({ host, port, useHostName: true })
-
-    // if target isn't specified by callee, use the freshly queried
-    // version info debugger url
-    target ||= versionInfo.webSocketDebuggerUrl
+    debug('connecting %o', { connected, target })
 
     cri = await CRI({
       host,
@@ -277,7 +267,7 @@ export const create = async ({
 
     // Only reconnect when we're not running cypress in cypress. There are a lot of disconnects that happen that we don't want to reconnect on
     if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      cri.on('disconnect', () => retryReconnect(target))
+      cri.on('disconnect', retryReconnect)
     }
 
     // We only want to try and add child target traffic if we have a host set. This indicates that this is the child cri client.
@@ -316,18 +306,12 @@ export const create = async ({
         await cri.send('Target.setDiscoverTargets', { discover: true })
       }
     }
-
-    return {
-      target,
-      versionInfo,
-    }
   }
 
-  const { target: targetId, versionInfo } = await connect()
+  await connect()
 
   client = {
-    targetId,
-    versionInfo,
+    targetId: target,
 
     async send (command: CdpCommand, params?: object, sessionId?: string) {
       if (crashed) {
@@ -389,7 +373,7 @@ export const create = async ({
 
           const p = enqueue() as Promise<any>
 
-          await retryReconnect(target)
+          await retryReconnect()
 
           // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
           if (enqueuedCommands.length === 0 && closed) {
