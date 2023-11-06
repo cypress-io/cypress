@@ -587,6 +587,12 @@ export class EventManager {
         // is emitted from cypress/driver when running e2e tests using
         // "cypress in cypress"
         if (event === 'cypress:in:cypress:runner:event') {
+          // TODO: we sometimes receive multiple mocha:start events
+          // which causes the the mochaEvent snapshots to fail. We should investigate further.
+          if (args[0] === 'mocha' && args[1] === 'start') {
+            this.cypressInCypressMochaEvents = []
+          }
+
           this.cypressInCypressMochaEvents.push(args as CypressInCypressMochaEvent[])
 
           if (args[0] === 'mocha' && args[1] === 'end') {
