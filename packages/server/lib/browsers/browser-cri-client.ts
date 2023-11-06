@@ -16,7 +16,6 @@ interface Version {
 
 type BrowserCriClientOptions = {
   browserClient: CriClient
-  versionInfo: CRI.VersionResult
   host: string
   port: number
   browserName: string
@@ -191,9 +190,9 @@ export class BrowserCriClient {
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
 
-  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
+  private constructor ({ browserClient, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
     this.browserClient = browserClient
-    this.versionInfo = versionInfo
+    this.versionInfo = browserClient.versionInfo
     this.host = host
     this.port = port
     this.browserName = browserName
@@ -229,17 +228,16 @@ export class BrowserCriClient {
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
-      const versionInfo = await CRI.Version({ host, port, useHostName: true })
-
       const browserClient = await create({
-        target: versionInfo.webSocketDebuggerUrl,
+        host,
+        port,
         onAsynchronousError,
         onReconnect,
         protocolManager,
         fullyManageTabs,
       })
 
-      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
+      const browserCriClient = new BrowserCriClient({ browserClient, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
