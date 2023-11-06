@@ -586,6 +586,13 @@ export class BrowserCriClient {
   }
 
   /**
+   * @returns the websocket debugger URL for the currently connected browser
+   */
+  getWebSocketDebuggerUrl () {
+    return this.versionInfo.webSocketDebuggerUrl
+  }
+
+  /**
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async (gracefulShutdown) => {
