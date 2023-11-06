@@ -645,6 +645,10 @@ export = {
 
     await this.attachListeners(url, pageCriClient, automation, options, browser)
 
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    })
+
     // return the launched browser process
     // with additional method to close the remote connection
     return launchedBrowser
