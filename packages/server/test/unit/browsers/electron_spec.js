@@ -322,7 +322,7 @@ describe('lib/browsers/electron', () => {
         getFilename: () => 'file.csv',
         getMimeType: () => 'text/csv',
         getURL: () => 'http://localhost:1234/file.csv',
-        once: sinon.stub().yields(),
+        once: sinon.stub().yields({}, 'completed'),
       }
 
       this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
@@ -332,6 +332,27 @@ describe('lib/browsers/electron', () => {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.push).to.be.calledWith('complete:download', {
+          id: '1',
+        })
+      })
+    })
+
+    it('pushes canceled:download when download is incomplete', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub().yields({}, 'canceled'),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('canceled:download', {
           id: '1',
         })
       })
