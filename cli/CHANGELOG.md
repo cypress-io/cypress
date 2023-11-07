@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.0
+
+_Released 11/21/2023 (PENDING)_
+
+**Features:**
+
+ - Adds an activity indicator to CLI output when artifacts (screenshots, videos, or Test Replay) are being uploaded to the cloud. Addresses [#28239](https://github.com/cypress-io/cypress/issues/28239).
+ 
 ## 13.5.0
 
 _Released 11/7/2023_
