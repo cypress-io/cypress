@@ -69,7 +69,7 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
     passedAttemptsCount: passedTests.length,
     failedAttemptsCount: failedTests.length,
     currentAttemptResult: test.state,
-    previousInitialStrategy: test.prevAttempts?.length ? test.prevAttempts[test.prevAttempts.length - 1].nextAttemptStrategy : undefined,
+    potentialInitialStrategy: test.prevAttempts?.length ? test.prevAttempts[test.prevAttempts.length - 1].nextAttemptStrategy : undefined,
     maxAttempts: test.retries() + 1,
   }
 

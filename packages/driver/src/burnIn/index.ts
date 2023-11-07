@@ -35,12 +35,12 @@ export type EvaluateAttemptInput = {
   passedAttemptsCount: number
   failedAttemptsCount: number
   currentAttemptResult?: string
-  previousInitialStrategy?: AttemptStrategy
+  potentialInitialStrategy?: AttemptStrategy
   maxAttempts: number
 }
 
 export type EvaluateAttemptOutput = {
-  initialStrategy?: AttemptStrategy
+  initialStrategy: AttemptStrategy
   nextInitialStrategy?: AttemptStrategy
   final: boolean
   forceState?: 'passed'
@@ -64,17 +64,20 @@ export function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig:
 }
 
 export function evaluateAttempt (input: EvaluateAttemptInput) {
-  const { latestScore, burnInConfig, passedAttemptsCount, failedAttemptsCount, previousInitialStrategy, retriesConfig, maxAttempts, currentAttemptResult } = input
+  const {
+    latestScore,
+    burnInConfig,
+    passedAttemptsCount,
+    failedAttemptsCount,
+    potentialInitialStrategy,
+    retriesConfig,
+    maxAttempts,
+    currentAttemptResult,
+  } = input
 
-  const result: EvaluateAttemptOutput = { final: true }
+  const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE' }
 
   const totalAttemptsAlreadyExecuted = passedAttemptsCount + failedAttemptsCount
-
-  if (totalAttemptsAlreadyExecuted === 0) {
-    result.initialStrategy = 'NONE'
-  } else {
-    result.initialStrategy = previousInitialStrategy
-  }
 
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
