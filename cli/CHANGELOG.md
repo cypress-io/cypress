@@ -15,6 +15,10 @@ _Released 11/7/2023_
 
  - Adds Component Testing support for Angular version 17. Addresses [#28153](https://github.com/cypress-io/cypress/issues/28153).
 
+**Features:**
+
+ - Adds Component Testing support for Angular version 17. Addresses [#28153](https://github.com/cypress-io/cypress/issues/28153).
+
 **Bugfixes:**
 
 - Fixed an issue where clicking a link to download a file could cause a page load timeout when the download attribute was missing. Note: download behaviors in experimental Webkit are still an issue. Fixes [#14857](https://github.com/cypress-io/cypress/issues/14857).
