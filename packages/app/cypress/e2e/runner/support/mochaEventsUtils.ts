@@ -3,7 +3,6 @@ import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
 import EventEmitter from 'events'
 import disparity from 'disparity'
-import path from 'path'
 
 const hooks = {
   before: ['before all', 'before each'],
@@ -205,5 +204,8 @@ function sanitizeMochaEvents (args: CypressInCypressMochaEvent[]) {
 }
 
 function getCallerFilename () {
-  return (new Error()).stack!.split('\n')[1].split(path.sep).slice(-1)[0].split(':')[0]
+  const line = (new Error()).stack!.split('\n')[1]
+  const pathSep = line.includes('\\') ? '\\' : '/'
+
+  return line.split(pathSep).slice(-1)[0].split(':')[0]
 }
