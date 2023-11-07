@@ -80,6 +80,7 @@ describe('lib/browsers/electron', () => {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
       close: sinon.stub().resolves(),
+      getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
@@ -111,8 +112,11 @@ describe('lib/browsers/electron', () => {
   })
 
   context('.open', () => {
-    beforeEach(function () {
-      return this.stubForOpen()
+    beforeEach(async function () {
+      // shortcut to set the browserCriClient singleton variable
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
     })
 
     it('calls render with url, state, and options', function () {
@@ -152,7 +156,7 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('is noop when before:browser:launch yields null', function () {
+    it('executeBeforeBrowserLaunch is noop when before:browser:launch yields null', function () {
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
@@ -205,6 +209,25 @@ describe('lib/browsers/electron', () => {
 
         // called once before installing extensions, once on exit
         expect(Windows.removeAllExtensions).to.be.calledTwice
+      })
+    })
+
+    it('sends after:browser:launch with debugger url', function () {
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', 'electron', {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
       })
     })
   })
@@ -322,7 +345,7 @@ describe('lib/browsers/electron', () => {
         getFilename: () => 'file.csv',
         getMimeType: () => 'text/csv',
         getURL: () => 'http://localhost:1234/file.csv',
-        once: sinon.stub().yields(),
+        once: sinon.stub().yields({}, 'completed'),
       }
 
       this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
@@ -332,6 +355,27 @@ describe('lib/browsers/electron', () => {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.push).to.be.calledWith('complete:download', {
+          id: '1',
+        })
+      })
+    })
+
+    it('pushes canceled:download when download is incomplete', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub().yields({}, 'canceled'),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('canceled:download', {
           id: '1',
         })
       })
@@ -353,6 +397,14 @@ describe('lib/browsers/electron', () => {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(utils.handleDownloadLinksViaCDP).to.be.calledWith(this.pageCriClient, this.automation)
+      })
+    })
+
+    it('expects the browser to be reset', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
       })
     })
 
@@ -792,7 +844,10 @@ describe('lib/browsers/electron', () => {
         expect(electron._launchChild).to.be.calledWith(this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation)
       })
 
-      it('adds pid of new BrowserWindow to allPids list', function () {
+      it('adds pid of new BrowserWindow to allPids list', async function () {
+        // shortcut to set the browserCriClient singleton variable
+        await electron._getAutomation({}, { onError: () => {} }, {})
+
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2

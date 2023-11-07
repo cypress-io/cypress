@@ -2,7 +2,7 @@ import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
-import type { ProxyTimings } from '@packages/types'
+import type { ProxyTimings } from './proxy'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -85,6 +85,7 @@ export type ProtocolManagerOptions = {
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
+  networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>

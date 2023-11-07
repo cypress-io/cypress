@@ -10,6 +10,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
+
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -31,13 +32,28 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-
-  span?.setAttributes({
-    isAUTFrame: this.req.isAUTFrame,
-  })
+  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  span?.setAttributes({
+    isAUTFrame: this.req.isAUTFrame,
+    isFromExtraTarget: this.req.isFromExtraTarget,
+  })
+
+  // we only want to intercept requests from the main target and not ones from
+  // extra tabs or windows, so run the bare minimum request/response middleware
+  // to send the request/response directly through
+  if (this.req.isFromExtraTarget) {
+    this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
+
+    delete this.req.headers['x-cypress-is-from-extra-target']
+
+    this.onlyRunMiddleware([
+      'SendRequestOutgoing',
+    ])
   }
 
   span?.end()
@@ -128,8 +144,9 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   }
 
   this.debug('waiting for prerequest')
-  this.getPreRequest(((browserPreRequest) => {
+  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
     this.req.browserPreRequest = browserPreRequest
+    this.req.noPreRequestExpected = noPreRequestExpected
     copyResourceTypeAndNext()
   }))
 }
@@ -348,7 +365,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
+  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
 
   span?.setAttributes({
@@ -365,8 +382,12 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
     if (doesAcceptHeadingIncludeGzip) {
       this.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      this.req.headers['accept-encoding'] = 'identity'
     }
+  } else {
+    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
+    // In that case, we want to explicitly filter that down to `gzip` and identity
+    this.req.headers['accept-encoding'] = 'gzip,identity'
   }
 
   span?.end()
@@ -449,6 +470,13 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   const onSocketClose = () => {
     this.debug('request aborted')
     // if the request is aborted, close out the middleware span and http span. the response middleware did not run
+
+    const pendingRequest = this.pendingRequest
+
+    if (pendingRequest) {
+      delete this.pendingRequest
+      this.removePendingRequest(pendingRequest)
+    }
 
     this.reqMiddlewareSpan?.setAttributes({
       requestAborted: true,

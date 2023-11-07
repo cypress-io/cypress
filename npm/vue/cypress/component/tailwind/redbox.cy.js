@@ -24,7 +24,7 @@ describe('RedBox 1', () => {
 
   it('displays red Hello RedBox', () => {
     mount({ template }, options)
-    // shoud have injected the inline styling.
+    // should have injected the inline styling.
     cy.get('style').should('contain.text', inlineStyle)
 
     cy.contains('Hello RedBox')

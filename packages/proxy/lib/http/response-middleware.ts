@@ -167,6 +167,27 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
+const FilterNonProxiedResponse: ResponseMiddleware = function () {
+  // if the request is from an extra target (i.e. not the main Cypress tab, but
+  // an extra tab/window), we want to skip any manipulation of the response and
+  // only run the middleware necessary to get it back to the browser
+  if (this.req.isFromExtraTarget) {
+    this.debug('response for [%s %s] is from extra target', this.req.method, this.req.proxiedUrl)
+
+    this.onlyRunMiddleware([
+      'AttachPlainTextStreamFn',
+      'PatchExpressSetHeader',
+      'MaybeSendRedirectToClient',
+      'CopyResponseStatusCode',
+      'MaybeEndWithEmptyBody',
+      'GzipBody',
+      'SendResponseBodyToClient',
+    ])
+  }
+
+  this.next()
+}
+
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
     const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -656,6 +677,11 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
+  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
+  if (this.req.noPreRequestExpected) {
+    this.addPendingUrlWithoutPreRequest(newUrl)
+  }
+
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
@@ -864,6 +890,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,

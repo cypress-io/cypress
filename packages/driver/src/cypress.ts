@@ -278,7 +278,16 @@ class $Cypress {
       }
 
       if (_.isObject(testRetries)) {
-        return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+        const retriesAsNumberOrBoolean = testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+
+        // If experimentalRetries are configured, an experimentalStrategy is present, and the retries configured is a boolean
+        // then we need to set the mocha '_retries' to 'maxRetries' present in the 'experimentalOptions' configuration.
+        if (testRetries['experimentalStrategy'] && _.isBoolean(retriesAsNumberOrBoolean) && retriesAsNumberOrBoolean) {
+          return testRetries['experimentalOptions'].maxRetries
+        }
+
+        // Otherwise, this is a number and falls back to default
+        return retriesAsNumberOrBoolean
       }
 
       return null
@@ -562,7 +571,7 @@ class $Cypress {
         return this.emitThen('test:before:run:async', ...args)
 
       case 'runner:test:before:after:run:async':
-        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0])
+        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0], args[2])
 
         return this.emitThen('test:before:after:run:async', ...args)
 
@@ -702,6 +711,9 @@ class $Cypress {
 
       case 'app:navigation:changed':
         return this.emit('navigation:changed', ...args)
+
+      case 'app:download:received':
+        return this.emit('download:received')
 
       case 'app:form:submitted':
         return this.emit('form:submitted', args[0])

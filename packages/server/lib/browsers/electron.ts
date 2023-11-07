@@ -54,7 +54,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {}, undefined, { fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: 'electron', onAsynchronousError: options.onError, onReconnect: () => {}, fullyManageTabs: true })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
@@ -307,7 +307,10 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        await utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
+        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+        pageCriClient.send('Network.clearBrowserCache'),
       ])
     }
 
@@ -334,7 +337,7 @@ export = {
   },
 
   _handleDownloads (win, dir, automation) {
-    const onWillDownload = (event, downloadItem) => {
+    const onWillDownload = (_event, downloadItem) => {
       const savePath = path.join(dir, downloadItem.getFilename())
 
       automation.push('create:download', {
@@ -344,8 +347,14 @@ export = {
         url: downloadItem.getURL(),
       })
 
-      downloadItem.once('done', () => {
-        automation.push('complete:download', {
+      downloadItem.once('done', (_event, state) => {
+        if (state === 'completed') {
+          return automation.push('complete:download', {
+            id: downloadItem.getETag(),
+          })
+        }
+
+        automation.push('canceled:download', {
           id: downloadItem.getETag(),
         })
       })
@@ -529,6 +538,10 @@ export = {
         return tryToCall(win, 'removeAllListeners')
       },
     }) as BrowserInstance
+
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient!.getWebSocketDebuggerUrl(),
+    })
 
     return instance
   },

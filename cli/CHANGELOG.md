@@ -1,21 +1,75 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.4.1
+
+_Released 11/7/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where clicking a link to download a file could cause a page load timeout when the download attribute was missing. Note: download behaviors in experimental Webkit are still an issue. Fixes [#14857](https://github.com/cypress-io/cypress/issues/14857).
+- Fixed an issue to account for canceled and failed downloads to correctly reflect these status in Command log as a download failure where previously it would be pending. Fixed in [#28222](https://github.com/cypress-io/cypress/pull/28222).
+- Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
+- We now pass a flag to Chromium browsers to disable Chrome translation, both the manual option and the popup prompt, when a page with a differing language is detected. Fixes [#28225](https://github.com/cypress-io/cypress/issues/28225).
+- Fixed an issue where in chromium based browsers, global style updates can trigger flooding of font face requests in DevTools and Test Replay. This can affect performance due to the flooding of messages in CDP. Fixes [#28150](https://github.com/cypress-io/cypress/issues/28150) and [#28215](https://github.com/cypress-io/cypress/issues/28215).
+- Fixed an issue with 'other' targets (e.g. pdf documents embedded in an object tag) not fully loading. Fixes [#28228](https://github.com/cypress-io/cypress/issues/28228) and [#28162](https://github.com/cypress-io/cypress/issues/28162).
+- Fixed an issue where network requests made from tabs/windows other than the main Cypress tab would be delayed. Fixes [#28113](https://github.com/cypress-io/cypress/issues/28113).
+- Stopped processing CDP events at the end of a spec when Test Isolation is off and Test Replay is enabled. Addressed in [#28213](https://github.com/cypress-io/cypress/pull/28213).
+- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
+
+**Dependency Updates:**
+
+- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
+
+## 13.4.0
+
+_Released 10/30/2023_
+
+**Features:**
+
+- Introduced experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
+
+**Bugfixes:**
+
+- Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where Cypress would crash with 'Inspected target navigated or closed' or 'Session with given id not found'. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141) and [#28148](https://github.com/cypress-io/cypress/issues/28148).
+
+## 13.3.3
+
+_Released 10/24/2023_
+
+**Bugfixes:**
+
+- Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from web and shared workers. Fixes [#28104](https://github.com/cypress-io/cypress/issues/28104).
+- Fixed a performance problem with proxy correlation when requests get aborted and then get miscorrelated with follow up requests. Addressed in [#28094](https://github.com/cypress-io/cypress/pull/28094).
+- Fixed a regression in [10.0.0](#10.0.0), where search would not find a spec if the file name contains "-" or "\_", but search prompt contains " " instead (e.g. search file "spec-file.cy.ts" with prompt "spec file"). Fixes [#25303](https://github.com/cypress-io/cypress/issues/25303).
+
+## 13.3.2
+
+_Released 10/18/2023_
+
+**Bugfixes:**
+
+- Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from service workers. Fixes [#28054](https://github.com/cypress-io/cypress/issues/28054) and [#28056](https://github.com/cypress-io/cypress/issues/28056).
+- Fixed an issue where proxy correlation would leak over from a previous spec causing performance problems, `cy.intercept` problems, and Test Replay asset capturing issues. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue where redirects of requests that knowingly don't have CDP traffic should also be assumed to not have CDP traffic. Addressed in [#28060](https://github.com/cypress-io/cypress/pull/28060).
+- Fixed an issue with Accept Encoding headers by forcing gzip when no accept encoding header is sent and using identity if gzip is not sent. Fixes [#28025](https://github.com/cypress-io/cypress/issues/28025).
+
+**Dependency Updates:**
+
+- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) from `7.22.9` to `7.23.2` to address the [SNYK-JS-SEMVER-3247795](https://snyk.io/vuln/SNYK-JS-SEMVER-3247795) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`@babel/traverse`](https://www.npmjs.com/package/@babel/traverse) from `7.22.8` to `7.23.2` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+- Upgraded [`react-docgen`](https://www.npmjs.com/package/react-docgen) from `6.0.0-alpha.3` to `6.0.4` to address the [SNYK-JS-BABELTRAVERSE-5962462](https://snyk.io/vuln/SNYK-JS-BABELTRAVERSE-5962462) security vulnerability. Addressed in [#28063](https://github.com/cypress-io/cypress/pull/28063).
+
 ## 13.3.1
 
-_Released 10/09/2023 (PENDING)_
+_Released 10/11/2023_
 
 **Bugfixes:**
 
 - Fixed an issue where requests were correlated in the wrong order in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27892](https://github.com/cypress-io/cypress/pull/27892).
 - Fixed an issue where a crashed Chrome renderer can cause the Test Replay recorder to hang. Addressed in [#27909](https://github.com/cypress-io/cypress/pull/27909).
 - Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
-- Fixed an issue where requests were timing out in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27976](https://github.com/cypress-io/cypress/pull/27976)
+- Fixed an issue where requests were timing out in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27976](https://github.com/cypress-io/cypress/pull/27976).
 - Fixed an issue where Test Replay couldn't record tests due to issues involving `GLIBC`. Fixed deprecation warnings during the rebuild of better-sqlite3. Fixes [#27891](https://github.com/cypress-io/cypress/issues/27891) and [#27902](https://github.com/cypress-io/cypress/issues/27902).
-- Enables test replay for executed specs in runs that have a spec that causes a browser crash. Addressed in [#27786](https://github.com/cypress-io/cypress/pull/27786)
-- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
-
-**Dependency Updates:**
-
-- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
+- Enables test replay for executed specs in runs that have a spec that causes a browser crash. Addressed in [#27786](https://github.com/cypress-io/cypress/pull/27786).
 
 ## 13.3.0
 
@@ -41,7 +95,7 @@ _Released 09/12/2023_
 **Bugfixes:**
 
 - Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for Test Replay have been addressed. Addressed in [#27771](https://github.com/cypress-io/cypress/pull/27771).
-- Fixed an issue where `enter`, `keyup`, and `space` events were not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). 
+- Fixed an issue where `enter`, `keyup`, and `space` events were not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715).
 - Fixed a regression in `13.0.0` where tests using Basic Authorization can potentially hang indefinitely on chromium browsers. Addressed in [#27781](https://github.com/cypress-io/cypress/pull/27781).
 - Fixed a regression in `13.0.0` where component tests using an intercept that matches all requests can potentially hang indefinitely. Addressed in [#27788](https://github.com/cypress-io/cypress/pull/27788).
 

@@ -12,11 +12,13 @@ export type CypressIncomingRequest = Request & {
   abort: () => void
   requestId: string
   browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
   credentialsLevel?: RequestCredentialLevel
+  isFromExtraTarget: boolean
   /**
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
    */
