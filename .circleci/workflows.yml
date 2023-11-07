@@ -32,7 +32,7 @@ mainBuildFilters: &mainBuildFilters
         - 'update-v8-snapshot-cache-on-develop'
         - 'feature/test-burn-in'
         - 'publish-binary'
-        - 'ryanm/fix/better-sqlite3'
+        - 'em/shallow-checkout'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -46,7 +46,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'feature/test-burn-in', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/better-sqlite3', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -63,7 +62,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/better-sqlite3', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -89,7 +87,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'feature/test-burn-in', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/better-sqlite3', << pipeline.git.branch >> ]
+    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -256,8 +254,6 @@ commands:
           root: ~/
           paths:
             - cypress
-            - .ssh
-            - node_modules # contains the npm i -g modules
 
   install_cache_helpers_dependencies:
     steps:
@@ -487,12 +483,9 @@ commands:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     steps:
-      # installing NVM will use git+ssh, so update known_hosts
-      - update_known_hosts
       - run:
           name: Install Node
           command: |
-            node_version=$(cat .node-version)
             source ./scripts/ensure-node.sh
             echo "Installing Yarn"
             npm install yarn --location=global # ensure yarn is installed with the correct node engine
@@ -1351,7 +1344,19 @@ jobs:
         default: false
     resource_class: << parameters.resource_class >>
     steps:
-      - checkout
+      - update_known_hosts
+      - when:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps: # issue with ssh keys on windows
+            - checkout
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: checkout
+                command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
@@ -1359,6 +1364,7 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - .ssh
             - .nvm # mac / linux
             - ProgramData/nvm # windows
       - caching-dependency-installer:
@@ -2229,13 +2235,6 @@ jobs:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
-      - run:
-          name: Remove cypress.json
-          description: Remove cypress.json in case it exists
-          working_directory: /tmp/cypress-example-kitchensink
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
           command: yarn --production --ignore-engines
