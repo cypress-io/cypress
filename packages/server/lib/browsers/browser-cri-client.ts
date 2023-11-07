@@ -263,6 +263,17 @@ export class BrowserCriClient {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
+    browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
+      try {
+        // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
+        // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
+        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      } catch (error) {
+      // it's possible that the target was closed before we can run. If so, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger:', error)
+      }
+    })
+
     await Promise.all(promises)
   }
 
@@ -572,6 +583,13 @@ export class BrowserCriClient {
 
   removeExtraTargetClient (targetId: TargetId) {
     this.extraTargetClients.delete(targetId)
+  }
+
+  /**
+   * @returns the websocket debugger URL for the currently connected browser
+   */
+  getWebSocketDebuggerUrl () {
+    return this.versionInfo.webSocketDebuggerUrl
   }
 
   /**
