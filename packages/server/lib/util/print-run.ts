@@ -642,10 +642,10 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
 
 export const beginUploadActivityOutput = () => {
   console.log('')
-  process.stdout.write('Uploading Cloud Artifacts: ')
+  process.stdout.write('Uploading Cloud Artifacts: . ')
   const uploadActivityInterval = setInterval(() => {
     process.stdout.write('. ')
-  })
+  }, 15000)
 
   return () => {
     clearInterval(uploadActivityInterval)

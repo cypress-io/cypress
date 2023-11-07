@@ -241,7 +241,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
   let stopUploadActivityOutput
 
-  if (!quiet) {
+  if (!quiet && preparedArtifacts.filter(({ skip }) => !skip).length) {
     stopUploadActivityOutput = beginUploadActivityOutput()
   }
 

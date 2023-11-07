@@ -64,15 +64,8 @@ const replaceTime = (str: string, p1: string) => {
 
 const replaceScreenshotDims = (str: string, p1: string) => _.padStart('(YxX)', p1.length)
 
-const replaceUploadingResults = function (orig: string, ...rest: string[]) {
-  const adjustedLength = Math.max(rest.length, 2)
-  const match = rest.slice(0, adjustedLength - 2)
-  const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
-  .sort()
-  .join('\n')
-  const ret = match[0] + results + match[3]
-
-  return ret
+const replaceUploadActivityIndicator = function (str: string, preamble: string, activity: string, ..._) {
+  return `${preamble}. . . . .`
 }
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
@@ -150,8 +143,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
-  // replaces multiple lines of uploading screenshots & results (since order not guaranteed)
-  .replace(/(Uploading Screenshots & Videos.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
+  // normalizes upload indicator to a consistent number of dots
+  .replace(/(Uploading Cloud Artifacts\: )([\. ]+)/g, replaceUploadActivityIndicator)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
