@@ -1,11 +1,19 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.5.0
+## 13.6.0
 
-_Released 11/7/2023 (PENDING)_
+_Released 11/21/2023 (PENDING)_
 
 **Features:**
 
 - When artifacts are uploaded to the Cypress cloud, the duration of each upload will now be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
+
+## 13.5.0
+
+_Released 11/7/2023_
+
+**Features:**
+
+ - Adds Component Testing support for Angular version 17. Addresses [#28153](https://github.com/cypress-io/cypress/issues/28153).
 
 **Bugfixes:**
 
