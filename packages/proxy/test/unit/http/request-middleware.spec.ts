@@ -33,49 +33,66 @@ describe('http/request-middleware', () => {
   describe('ExtractCypressMetadataHeaders', () => {
     const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
-    it('removes x-cypress-is-aut-frame header when it exists, sets in on the req', async () => {
-      const ctx = {
+    function prepareContext (headers = {}) {
+      return {
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        onlyRunMiddleware: sinon.stub(),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
         },
         req: {
-          headers: {
-            'x-cypress-is-aut-frame': 'true',
-          },
+          headers,
         } as Partial<CypressIncomingRequest>,
         res: {
           on: (event, listener) => {},
           off: (event, listener) => {},
         },
       }
+    }
 
-      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
-      .then(() => {
-        expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
-        expect(ctx.req.isAUTFrame).to.be.true
+    context('x-cypress-is-aut-frame', () => {
+      it('when it exists, removes header and sets in on the req', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-aut-frame': 'true',
+        })
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+        .then(() => {
+          expect(ctx.req.headers!['x-cypress-is-aut-frame']).not.to.exist
+          expect(ctx.req.isAUTFrame).to.be.true
+        })
+      })
+
+      it('when it does not exist, sets in on the req', async () => {
+        const ctx = prepareContext()
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx).then(() => {
+          expect(ctx.req.headers!['x-cypress-is-aut-frame']).not.to.exist
+          expect(ctx.req.isAUTFrame).to.be.false
+        })
       })
     })
 
-    it('removes x-cypress-is-aut-frame header when it does not exist, sets in on the req', async () => {
-      const ctx = {
-        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
-        remoteStates: {
-          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
-        },
-        req: {
-          headers: {},
-        } as Partial<CypressIncomingRequest>,
-        res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        },
-      }
+    context('x-cypress-is-from-extra-target', () => {
+      it('when it exists, sets in on the req and only runs necessary middleware', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-from-extra-target': 'true',
+        })
 
-      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
-      .then(() => {
-        expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
-        expect(ctx.req.isAUTFrame).to.be.false
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-from-extra-target']).not.to.exist
+        expect(ctx.req.isFromExtraTarget).to.be.true
+        expect(ctx.onlyRunMiddleware).to.be.calledWith(['SendRequestOutgoing'])
+      })
+
+      it('when it does not exist, removes header and sets in on the req', async () => {
+        const ctx = prepareContext()
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-from-extra-target']).not.to.exist
+        expect(ctx.req.isFromExtraTarget).to.be.false
       })
     })
   })
