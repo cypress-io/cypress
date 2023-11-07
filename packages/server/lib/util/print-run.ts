@@ -639,3 +639,16 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
 
   process.stdout.write('\n')
 }
+
+export const beginUploadActivityOutput = () => {
+  console.log('')
+  process.stdout.write('Uploading Cloud Artifacts: ')
+  const uploadActivityInterval = setInterval(() => {
+    process.stdout.write('. ')
+  })
+
+  return () => {
+    clearInterval(uploadActivityInterval)
+    console.log('')
+  }
+}
