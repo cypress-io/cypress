@@ -315,7 +315,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         }
       }
     }),
-  ).finally(stopUploadActivityOutput)
+  ).finally(() => {
+    if (stopUploadActivityOutput) {
+      stopUploadActivityOutput()
+    }
+  })
 
   const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
     return !skipped
