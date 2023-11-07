@@ -176,7 +176,13 @@ export const isAncestor = ($el, $maybeAncestor) => {
 }
 
 export const isChild = ($el, $maybeChild) => {
-  return $el.children().index($maybeChild) >= 0
+  let children = $el.children()
+
+  if (children.length && children[0].nodeName === 'SHADOW-ROOT') {
+    return isDescendent($el, $maybeChild)
+  }
+
+  return children.index($maybeChild) >= 0
 }
 
 export const isDescendent = ($el1, $el2) => {
