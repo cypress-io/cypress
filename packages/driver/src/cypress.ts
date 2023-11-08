@@ -311,14 +311,14 @@ class $Cypress {
     }
   }
 
-  run (cachedTestState: CachedTestState, fn) {
+  run (cachedTestState: CachedTestState, response, fn) {
     if (!this.runner) {
       $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
 
     this.state(cachedTestState)
 
-    return this.runner.run(fn)
+    return this.runner.run(fn, response)
   }
 
   // Method to manually re-execute Runner (usually within $autIframe)

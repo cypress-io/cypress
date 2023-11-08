@@ -446,11 +446,9 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
     const retriesConfig = getNormalizedRetriesConfig(Cypress)
 
     //@ts-expect-error
-    const actions = Cypress.actions
+    const actions = Cypress.__actions
 
     const action = actions?.find((a) => a.clientId === this.id && a.action === 'BURN_IN') ?? {}
-
-    // console.log('action', action)
 
     const latestScore = action?.payload?.startingScore ?? -2
 

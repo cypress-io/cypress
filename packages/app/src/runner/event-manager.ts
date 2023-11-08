@@ -423,8 +423,8 @@ export class EventManager {
           const run = (response) => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
-            Cypress.actions = response?.actions
-            this._runDriver(runState, testState)
+
+            this._runDriver(runState, testState, response)
           }
 
           if (!hideCommandLog) {
@@ -802,9 +802,10 @@ export class EventManager {
     window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
-  _runDriver (runState: RunState, testState: CachedTestState) {
+  _runDriver (runState: RunState, testState: CachedTestState, response) {
     performance.mark('run-s')
-    Cypress.run(testState, () => {
+
+    Cypress.run(testState, response, () => {
       performance.mark('run-e')
       performance.measure('run', 'run-s', 'run-e')
     })
