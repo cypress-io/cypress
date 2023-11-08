@@ -420,10 +420,10 @@ export class EventManager {
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
-          const run = () => {
+          const run = (response) => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
-
+            Cypress.actions = response?.actions
             this._runDriver(runState, testState)
           }
 
