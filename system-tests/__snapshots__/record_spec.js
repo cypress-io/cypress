@@ -1292,6 +1292,7 @@ Request Sent:
     ""
   ],
   "testingType": "e2e",
+  "burnInConfig": false,
   "runnerCapabilities": {
     "dynamicSpecsInSerialMode": true,
     "skipSpecAction": true,
@@ -3841,5 +3842,18 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+
+`
+
+exports['e2e record api interaction errors create run 422 - burn-in config mismatch errors when first run burn-in config is different from non-first run 1'] = `
+You passed in a experimentalBurnIn configuration, but this run originally started with a different configuration for experimentalBurnIn.
+
+This experimentalBurnIn config came from your cypress-with-project-id.config.js file or an environment variable.
+
+The existing run is: https://cloud.cypress.io/runs/12345
+
+The experimentalBurnIn configuration you tried to pass was: 
+
+false
 
 `
