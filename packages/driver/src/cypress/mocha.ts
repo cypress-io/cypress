@@ -61,10 +61,14 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
     failedTests.push(test)
   }
 
+  // @ts-expect-error
+  const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
+
   const input: EvaluateAttemptInput = {
     retriesConfig: config,
     burnInConfig: completeBurnInConfig,
     latestScore,
+    totalAttemptsAlreadyExecuted,
     passedAttemptsCount: passedTests.length,
     failedAttemptsCount: failedTests.length,
     currentAttemptResult: test.state,
@@ -85,7 +89,7 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
   return {
     strategy: config.strategy,
     shouldAttemptsContinue,
-    attempts: passedTests.length + failedTests.length,
+    attempts: totalAttemptsAlreadyExecuted,
     outerStatus: output.outerTestStatus,
   }
 }

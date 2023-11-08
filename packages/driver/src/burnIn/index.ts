@@ -36,6 +36,7 @@ export type EvaluateAttemptInput = {
   latestScore: LatestScore
   passedAttemptsCount: number
   failedAttemptsCount: number
+  totalAttemptsAlreadyExecuted: number
   currentAttemptResult?: string
   potentialInitialStrategy?: AttemptStrategy
   maxAttempts: number
@@ -120,11 +121,10 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
     retriesConfig,
     maxAttempts,
     currentAttemptResult,
+    totalAttemptsAlreadyExecuted,
   } = input
 
   const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE' }
-
-  const totalAttemptsAlreadyExecuted = passedAttemptsCount + failedAttemptsCount
 
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
