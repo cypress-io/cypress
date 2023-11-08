@@ -1,3 +1,5 @@
+import { merge } from 'lodash'
+
 export type Strategy = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
 
 export type NormalizedRetriesConfig = {
@@ -46,6 +48,51 @@ export type EvaluateAttemptOutput = {
   forceState?: 'passed'
   reasonToStop?: ReasonToStop
   outerTestStatus?: 'passed' | 'failed'
+}
+
+export type BurnInConfig = {
+  default?: number | undefined
+  enabled?: boolean | undefined
+  flaky?: number | undefined
+}
+
+export type BurnInConfigInstructions = {
+  overrides?: BurnInConfig
+  values?: BurnInConfig
+}
+
+export type UserFacingBurnInConfig = boolean | {
+  default: number
+  flaky: number
+}
+
+export function getBurnInConfig (burnInConfig: UserFacingBurnInConfig): BurnInConfig {
+  return typeof burnInConfig === 'boolean' ? { enabled: burnInConfig } : { enabled: true, ...burnInConfig }
+}
+
+export function mergeBurnInConfig (
+  layer1Config:
+  | BurnInConfigInstructions
+  | BurnInConfig,
+  layer2Config:
+  | BurnInConfigInstructions
+  | BurnInConfig,
+) {
+  const layer1Overrides =
+    'overrides' in layer1Config ? layer1Config.overrides ?? {} : {}
+  const layer1Values =
+    'values' in layer1Config ? layer1Config.values ?? {} : (layer1Config as BurnInConfig)
+
+  const layer2Overrides =
+    'overrides' in layer2Config ? layer2Config.overrides ?? {} : {}
+  const layer2Values =
+    'values' in layer2Config ? layer2Config.values ?? {} : (layer2Config as BurnInConfig)
+
+  const overrides = merge(layer2Overrides, layer1Overrides) // precedence is given to layer1 overrides
+  const combinedValues = merge(layer1Values, layer2Values) // precedence is given to layer2 values
+  const result = merge(combinedValues, overrides) // precedence is given to overrides
+
+  return { enabled: result.enabled ?? false, default: result.default ?? 3, flaky: result.flaky ?? 5 }
 }
 
 export function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig: CompleteBurnInConfig) {

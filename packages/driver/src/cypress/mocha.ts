@@ -7,7 +7,8 @@ import $stackUtils from './stack_utils'
 // in the browser mocha is coming back
 // as window
 import * as mocha from 'mocha'
-import { evaluateAttempt, type AttemptStrategy, type CompleteBurnInConfig, type EvaluateAttemptInput, type LatestScore, type NormalizedRetriesConfig, type ReasonToStop } from '../burnIn'
+import type { AttemptStrategy, CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, ReasonToStop } from '../burnIn'
+import { evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burnIn'
 
 const { getTestFromRunnable } = $utils
 
@@ -49,9 +50,7 @@ interface CypressTest extends Mocha.Test {
 }
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, config: NormalizedRetriesConfig, completeBurnInConfig: CompleteBurnInConfig) {
-  const latestScore = test.latestScore ?? null
-
+export function calculateTestStatus (test: CypressTest, config: NormalizedRetriesConfig, completeBurnInConfig: CompleteBurnInConfig, latestScore: LatestScore) {
   const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
   const failedTests = _.filter(test.prevAttempts, (o) => o.state === 'failed')
 
@@ -446,14 +445,30 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
   Test.prototype.calculateTestStatus = function () {
     const retriesConfig = getNormalizedRetriesConfig(Cypress)
 
-    let burnInConfig = Cypress.config('experimentalBurnIn')
+    //@ts-expect-error
+    const actions = Cypress.actions
 
-    // TODO: inject test.latestScore value coming from the cloud via actions
+    const action = actions?.find((a) => a.clientId === this.id && a.action === 'BURN_IN') ?? {}
 
-    // TODO: use the config value coming from the cloud via actions https://cypress-io.atlassian.net/browse/CYCLOUD-1140
-    const completeBurnInConfig = typeof burnInConfig === 'boolean' ? { enabled: burnInConfig, default: 3, flaky: 5 } : { enabled: true, ...burnInConfig }
+    // console.log('action', action)
 
-    return calculateTestStatus(this, retriesConfig, completeBurnInConfig)
+    const latestScore = action?.payload?.startingScore ?? -2
+
+    // console.log('latestScore', latestScore)
+
+    const userFacingBurnInConfig = Cypress.config('experimentalBurnIn')
+
+    // console.log('userFacingBurnInConfig', userFacingBurnInConfig)
+
+    const localBurnInConfig = getBurnInConfig(userFacingBurnInConfig)
+
+    // console.log('localBurnInConfig', localBurnInConfig)
+
+    const completeBurnInConfig = mergeBurnInConfig(action?.payload?.config ?? {}, { values: localBurnInConfig })
+
+    // console.log('completeBurnInConfig', completeBurnInConfig)
+
+    return calculateTestStatus(this, retriesConfig, completeBurnInConfig, latestScore)
   }
 }
 
