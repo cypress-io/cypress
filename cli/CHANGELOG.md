@@ -21,7 +21,7 @@ _Released 11/8/2023_
 
 **Misc:**
 
-- Browser tabs and windows other than the Cypress tab are now closed between tests. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+- Browser tabs and windows other than the Cypress tab are now closed between tests for Chromimum-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
 
 ## 13.4.0
 
