@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.1
+
+_Released 11/22/2023 (PENDING)_
+
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests for Chromimum-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+
 ## 13.5.0
 
 _Released 11/8/2023_
@@ -18,10 +26,6 @@ _Released 11/8/2023_
 - Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
 - We now pass a flag to Chromium browsers to disable Chrome translation, both the manual option and the popup prompt, when a page with a differing language is detected. Fixes [#28225](https://github.com/cypress-io/cypress/issues/28225).
 - Stopped processing CDP events at the end of a spec when Test Isolation is off and Test Replay is enabled. Addressed in [#28213](https://github.com/cypress-io/cypress/pull/28213).
-
-**Misc:**
-
-- Browser tabs and windows other than the Cypress tab are now closed between tests for Chromimum-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
 
 ## 13.4.0
 
