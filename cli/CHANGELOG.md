@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.1
+
+_Released 11/9/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a regression in [`13.5.0`](https://docs.cypress.io/guides/references/changelog/13.5.0) where requests cached within a given spec may take longer to load than they did previously. Addresses [#28295](https://github.com/cypress-io/cypress/issues/28295).
+
 ## 13.5.0
 
 _Released 11/7/2023_

@@ -20,7 +20,8 @@ const getFilePath = (filename) => {
 
 const BROWSERS = ['chrome', 'electron']
 
-describe('capture-protocol', () => {
+// TODO: Our original fix for font flooding is having adverse effects. Undoing the fix for now. This test should be re-enabled once we have a better fix.
+describe.skip('capture-protocol', () => {
   setupStubbedServer(createRoutes())
   enableCaptureProtocol(PROTOCOL_STUB_FONT_FLOODING)
 
