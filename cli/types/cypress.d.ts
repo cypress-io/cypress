@@ -6009,7 +6009,11 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
-  interface BrowserLaunchOptions {
+  interface AfterBrowserLaunchDetails {
+    webSocketDebuggerUrl: string
+  }
+
+  interface BeforeBrowserLaunchOptions {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
@@ -6090,12 +6094,13 @@ declare namespace Cypress {
   }
 
   interface PluginEvents {
+    (action: 'after:browser:launch', fn: (browser: Browser, browserLaunchDetails: AfterBrowserLaunchDetails) => void | Promise<void>): void
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
     (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
-    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, afterBrowserLaunchOptions: BeforeBrowserLaunchOptions) => void | Promise<void> | BeforeBrowserLaunchOptions | Promise<BeforeBrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void

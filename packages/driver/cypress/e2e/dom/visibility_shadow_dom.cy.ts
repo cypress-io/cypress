@@ -303,7 +303,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         `<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <shadow-root id="el-out-of-parent-bounds-to-left"></shadow-root>
         </div>`,
-        `<span style='position: absolute; left: -400px; top: 0;'>position: absolute, out of bounds left</span>`,
+        `<span style='position: absolute; width: 100px; height: 100px; left: -100px; top: 0;'>position: absolute, out of bounds left</span>`,
         '#el-out-of-parent-bounds-to-left',
       )
 
@@ -316,7 +316,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         `<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <shadow-root id="el-out-of-parent-bounds-to-right"></shadow-root>
         </div>`,
-        `<span style='position: absolute; left: 200px; top: 0;'>position: absolute, out of bounds right</span>`,
+        `<span style='position: absolute; width: 100px; height: 100px; right: -100px; top: 0;'>position: absolute, out of bounds right</span>`,
         '#el-out-of-parent-bounds-to-right',
       )
 
@@ -329,7 +329,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         `<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <shadow-root id="el-out-of-parent-bounds-above"></shadow-root>
         </div>`,
-        `<span style='position: absolute; top: -100px; left: 0;'>position: absolute, out of bounds above</span>`,
+        `<span style='position: absolute; width: 100px; height: 100px; top: -100px; left: 0;'>position: absolute, out of bounds above</span>`,
         '#el-out-of-parent-bounds-above',
       )
 
@@ -342,7 +342,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         `<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
           <shadow-root id="el-out-of-parent-bounds-below"></shadow-root>
         </div>`,
-        `<span style='position: absolute; top: 200px; left: 0;'>position: absolute, out of bounds below</span>`,
+        `<span style='position: absolute; width: 100px; height: 100px; bottom: -100px; left: 0;'>position: absolute, out of bounds below</span>`,
         '#el-out-of-parent-bounds-below',
       )
 

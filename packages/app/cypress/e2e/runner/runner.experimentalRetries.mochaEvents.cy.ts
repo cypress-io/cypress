@@ -1,6 +1,5 @@
 import { runSpec } from './support/spec-loader'
 import { runCypressInCypressMochaEventsTest } from './support/mochaEventsUtils'
-import { snapshots } from './runner.experimentalRetries.mochaEvents.snapshots'
 
 /**
  * The mochaEvent tests require a spec to be loaded and executed within an inner Cypress context.
@@ -24,7 +23,6 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           // regardless of strategy, this should fail the suite immediately and not run any additional attempts, so the snapshots should be near identical
           it(`fail in [before]`, (done) => {
             const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-              snapshots,
               `"${project}": tests finish with correct state hook failures fail in [before] #1`,
               done,
             )
@@ -33,7 +31,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
               fileName: 'fail-with-before.mochaEvents.cy.js',
               projectName: project,
             }).then((win) => {
-              assertMatchingSnapshot(win)
+              return assertMatchingSnapshot(win)
             })
           })
 
@@ -45,7 +43,6 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           // 'detect-flake-but-always-fail-stop-any-passed': will run a total of 10 times and fail 10 times config is satisfied, the test fails, and the suite is skipped
           it(`fail in [beforeEach]`, (done) => {
             const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-              snapshots,
               `"${project}": tests finish with correct state hook failures fail in [beforeEach] #1`,
               done,
             )
@@ -54,14 +51,13 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
               fileName: 'fail-with-beforeEach.mochaEvents.cy.js',
               projectName: project,
             }).then((win) => {
-              assertMatchingSnapshot(win)
+              return assertMatchingSnapshot(win)
             })
           })
 
           // regardless of strategy, this should fail the suite immediately and not run any additional attempts, so the snapshots should be near identical
           it(`fail in [after]`, (done) => {
             const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-              snapshots,
               `"${project}": tests finish with correct state hook failures fail in [after] #1`,
               done,
             )
@@ -70,7 +66,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
               fileName: 'fail-with-after.mochaEvents.cy.js',
               projectName: project,
             }).then((win) => {
-              assertMatchingSnapshot(win)
+              return assertMatchingSnapshot(win)
             })
           })
 
@@ -82,7 +78,6 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           // 'detect-flake-but-always-fail-stop-any-passed': will run a total of 10 times and fail 10 times config is satisfied, the test fails, and the suite is skipped
           it(`fail in [afterEach]`, (done) => {
             const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-              snapshots,
               `"${project}": tests finish with correct state hook failures fail in [afterEach] #1`,
               done,
             )
@@ -91,7 +86,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
               fileName: 'fail-with-afterEach.mochaEvents.cy.js',
               projectName: project,
             }).then((win) => {
-              assertMatchingSnapshot(win)
+              return assertMatchingSnapshot(win)
             })
           })
         })
@@ -106,7 +101,6 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
         // 'detect-flake-but-always-fail-stop-any-passed': will run a total of 10 times and fail 10 times config is satisfied, the test fails,but the suite is NOT skipped
         it('fail with [only]', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": tests finish with correct state mocha grep fail with [only] #1`,
             done,
           )
@@ -115,14 +109,13 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
             fileName: 'fail-with-only.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
 
         // This will be the same per strategy, as the test passes and retries don't get invoked
         it('pass with [only]', (done) => {
           const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-            snapshots,
             `"${project}": tests finish with correct state mocha grep pass with [only] #1`,
             done,
           )
@@ -131,7 +124,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
             fileName: 'pass-with-only.mochaEvents.cy.js',
             projectName: project,
           }).then((win) => {
-            assertMatchingSnapshot(win)
+            return assertMatchingSnapshot(win)
           })
         })
       })
@@ -141,7 +134,6 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
     describe('mocha events', () => {
       it('simple single test', (done) => {
         const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-          snapshots,
           `"${project}": mocha events simple single test #1`,
           done,
         )
@@ -150,13 +142,12 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           fileName: 'simple-single-test.mochaEvents.cy.js',
           projectName: project,
         }).then((win) => {
-          assertMatchingSnapshot(win)
+          return assertMatchingSnapshot(win)
         })
       })
 
       it('simple three tests', (done) => {
         const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-          snapshots,
           `"${project}": mocha events simple three tests #1`,
           done,
         )
@@ -165,7 +156,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           fileName: 'three-tests-with-hooks.mochaEvents.cy.js',
           projectName: project,
         }).then((win) => {
-          assertMatchingSnapshot(win)
+          return assertMatchingSnapshot(win)
         })
       })
     })
