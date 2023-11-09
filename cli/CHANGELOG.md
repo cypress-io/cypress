@@ -9,7 +9,7 @@ _Released 11/9/2023 (PENDING)_
 
 ## 13.5.0
 
-_Released 11/7/2023_
+_Released 11/8/2023_
 
 **Features:**
 
