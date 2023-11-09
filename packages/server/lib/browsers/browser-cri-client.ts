@@ -263,6 +263,17 @@ export class BrowserCriClient {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
+    browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
+      try {
+        // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
+        // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
+        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      } catch (error) {
+      // it's possible that the target was closed before we can run. If so, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger:', error)
+      }
+    })
+
     await Promise.all(promises)
   }
 
@@ -277,7 +288,8 @@ export class BrowserCriClient {
     try {
       // The basic approach here is we attach to targets and enable network traffic
       // We must attach in a paused state so that we can enable network traffic before the target starts running.
-      if (targetInfo.type !== 'page') {
+      // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+      if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
     } catch (error) {
@@ -583,6 +595,13 @@ export class BrowserCriClient {
         debug('Closing extra target errored: %s', err?.stack || err)
       }
     }
+  }
+
+  /**
+   * @returns the websocket debugger URL for the currently connected browser
+   */
+  getWebSocketDebuggerUrl () {
+    return this.versionInfo.webSocketDebuggerUrl
   }
 
   /**

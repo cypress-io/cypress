@@ -43,6 +43,7 @@ describe('capture-protocol', () => {
         record: true,
         expectedExitCode: 0,
         port: 2121,
+        spec: 'protocol.cy.js,test-isolation.cy.js',
         config: {
           hosts: {
             '*foobar.com': '127.0.0.1',
