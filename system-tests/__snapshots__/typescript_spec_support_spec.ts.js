@@ -186,7 +186,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
 
 `
 
-exports['e2e typescript in spec and support file project wtih custom supportFile passes 1'] = `
+exports['e2e typescript in spec and support file project with custom supportFile passes 1'] = `
 
 ====================================================================================================
 

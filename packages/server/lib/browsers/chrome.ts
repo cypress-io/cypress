@@ -83,7 +83,7 @@ const DEFAULT_ARGS = [
   // https://github.com/cypress-io/cypress/issues/1951
   '--disable-site-isolation-trials',
 
-  // the following come frome chromedriver
+  // the following come from chromedriver
   // https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
   '--metrics-recording-only',
   '--disable-prompt-on-repost',
@@ -102,6 +102,10 @@ const DEFAULT_ARGS = [
   // This prevents an 'update' from displaying til the given date
   `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
+
+  // Disable manual option and popup prompt of Chrome translation
+  // https://github.com/cypress-io/cypress/issues/28225
+  '--disable-features=Translate',
 
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
@@ -298,11 +302,17 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
   })
 
   client.on('Page.downloadProgress', (data) => {
-    if (data.state !== 'completed') return
+    if (data.state === 'completed') {
+      automation.push('complete:download', {
+        id: data.guid,
+      })
+    }
 
-    automation.push('complete:download', {
-      id: data.guid,
-    })
+    if (data.state === 'canceled') {
+      automation.push('canceled:download', {
+        id: data.guid,
+      })
+    }
   })
 
   await client.send('Page.setDownloadBehavior', {
@@ -427,6 +437,9 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
+    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
+    args.push('--enable-features=ScopeMemoryCachePerContext')
+
     return args
   },
 
@@ -473,7 +486,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, undefined, { fullyManageTabs: false })
+    const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, fullyManageTabs: false })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
@@ -488,7 +501,11 @@ export = {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
-    pageCriClient.on('Inspector.targetCrashed', async () => {
+    pageCriClient.on('Target.targetCrashed', async (event) => {
+      if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
+        return
+      }
+
       const err = errors.get('RENDERER_CRASHED', browser.displayName)
 
       await memory.endProfiling()
@@ -522,6 +539,7 @@ export = {
     await Promise.all([
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)
@@ -595,7 +613,7 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, options.protocolManager, { fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, protocolManager: options.protocolManager, fullyManageTabs: true })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -626,6 +644,10 @@ export = {
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(url, pageCriClient, automation, options, browser)
+
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    })
 
     // return the launched browser process
     // with additional method to close the remote connection

@@ -595,6 +595,16 @@
         "name": "Modify obstructive third party code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
       },
+      "retries": {
+        "experimentalStrategy": {
+          "name": "Retries Strategy",
+          "description": "Applies a strategy for test retries according to your \"flake tolerance\"; options are `detect-flake-but-always-fail` or `detect-flake-and-pass-on-threshold`."
+        },
+        "experimentalOptions": {
+          "name": "Retries Strategy Options",
+          "description": "Sets retries strategy-specific options like `maxRetries`, `passesRequired`, and `stopIfAnyPassed`."
+        }
+      },
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."

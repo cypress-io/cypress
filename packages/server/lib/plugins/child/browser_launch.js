@@ -3,7 +3,7 @@ const util = require('../util')
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
 module.exports = {
-  wrap (ipc, invoke, ids, args) {
+  wrapBefore (ipc, invoke, ids, args) {
     // TODO: remove in next breaking release
     // This will send a warning message when a deprecated API is used
     // define array-like functions on this object so we can warn about using deprecated array API
