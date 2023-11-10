@@ -32,3 +32,12 @@ it('loads web workers', { defaultCommandTimeout: 1900 }, () => {
   .then(webWorker)
   .then(sharedWorker)
 })
+
+// Timeout of 1900 will ensure that the proxy correlation timeout is not hit
+it('reloads web workers', { defaultCommandTimeout: 1900 }, () => {
+  cy.visit('https://localhost:1515/web_worker.html')
+
+  cy.reload()
+  .then(webWorker)
+  .then(sharedWorker)
+})
