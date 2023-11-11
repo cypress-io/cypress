@@ -1387,6 +1387,10 @@ export default {
       message: `${cmd('request')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
       docsUrl: 'https://on.cypress.io/request',
     },
+    body_and_fixture: {
+      message: `${cmd('request')} was called with a body and a fixture which cannot be combined.`,
+      docsUrl: 'https://on.cypress.io/request',
+    },
     form_invalid: {
       message: stripIndent`\
         ${cmd('request')} requires the \`form\` option to be a boolean.

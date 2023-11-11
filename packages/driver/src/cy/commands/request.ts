@@ -26,6 +26,7 @@ const REQUEST_DEFAULTS = {
   encoding: 'utf8',
   gzip: true,
   timeout: null,
+  fixture: null,
   followRedirect: true,
   failOnStatusCode: true,
   retryIntervals: [0, 100, 200, 200],
@@ -67,10 +68,6 @@ const needsFormSpecified = (options: any = {}) => {
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
-const hasFixturePrefix = (val) => {
-  return typeof val === 'string' && val.startsWith('fx:')
-}
-
 interface BackendError {
   backend: boolean
   message?: string
@@ -83,61 +80,52 @@ export default (Commands, Cypress, cy, state, config) => {
     // METHOD / URL / BODY
     // or object literal with all expanded options
     request (...args) {
-      let fxArg = ''
+      const o: any = {}
+      const userOptions = o
 
-      if (args.length === 2) {
-        fxArg = args[1]
-        // Default to POST
-        if (hasFixturePrefix(fxArg)) {
-          args = ['POST', ...args]
+      if (_.isObject(args[0])) {
+        _.extend(userOptions, args[0])
+      } else if (args.length === 1) {
+        o.url = args[0]
+      } else if (args.length === 2) {
+        // if our first arg is a valid
+        // HTTP method then set method + url
+        if ($utils.isValidHttpMethod(args[0])) {
+          o.method = args[0]
+          o.url = args[1]
+        } else {
+          // set url + body
+          o.url = args[0]
+          o.body = args[1]
         }
       } else if (args.length === 3) {
-        fxArg = args[2]
+        o.method = args[0]
+        o.url = args[1]
+        o.body = args[2]
       }
 
-      if (hasFixturePrefix(fxArg)) {
-        const fxName = fxArg.split(':')[1]
+      let options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
+        log: true,
+      })
 
-        return cy.fixture(fxName).then((fixtureData) => {
-          args[2] = fixtureData
+      if (options.fixture) {
+        if (options.body) {
+          $errUtils.throwErrByPath('request.body_and_fixture')
+        }
 
-          return requestHandler(...args)
+        return cy.fixture(options.fixture).then((fixtureData) => {
+          options.body = fixtureData
+          options.method = 'POST'
+
+          return requestHandler(options)
         })
       }
 
-      return requestHandler(...args)
+      return requestHandler(options)
     },
   })
 
-  const requestHandler = function (...args) {
-    const o: any = {}
-    const userOptions = o
-
-    if (_.isObject(args[0])) {
-      _.extend(userOptions, args[0])
-    } else if (args.length === 1) {
-      o.url = args[0]
-    } else if (args.length === 2) {
-      // if our first arg is a valid
-      // HTTP method then set method + url
-      if ($utils.isValidHttpMethod(args[0])) {
-        o.method = args[0]
-        o.url = args[1]
-      } else {
-        // set url + body
-        o.url = args[0]
-        o.body = args[1]
-      }
-    } else if (args.length === 3) {
-      o.method = args[0]
-      o.url = args[1]
-      o.body = args[2]
-    }
-
-    let options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
-      log: true,
-    })
-
+  const requestHandler = function (options) {
     // if timeout is not supplied, use the configured default
     if (!options.timeout) {
       options.timeout = config('responseTimeout')

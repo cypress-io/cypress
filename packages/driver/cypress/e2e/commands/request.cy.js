@@ -111,22 +111,22 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts fixture argument without method', () => {
-        cy.request('http://localhost:8080/users', 'fx:number').then(function () {
-          this.expectOptionsToBe({
-            url: 'http://localhost:8080/users',
-            method: 'POST',
-            body: 14,
-          })
+        cy.intercept('POST', 'http://localhost:8080/users', (req) => {
+          expect(req.body).to.equal(14)
         })
+
+        cy.request({ url: 'http://localhost:8080/users', fixture: 'number' })
       })
 
       it('accepts fixture argument with method', () => {
-        cy.request('POST', 'http://localhost:8080/users', 'fx:number').then(function () {
-          this.expectOptionsToBe({
-            url: 'http://localhost:8080/users',
-            method: 'POST',
-            body: 14,
-          })
+        cy.intercept('POST', 'http://localhost:8080/users', (req) => {
+          expect(req.body).to.equal(14)
+        })
+
+        cy.request({
+          url: 'http://localhost:8080/users',
+          fixture: 'number',
+          method: 'POST',
         })
       })
 
@@ -904,6 +904,20 @@ describe('src/cy/commands/request', () => {
         })
 
         cy.request()
+      })
+
+      it('throws when body is combined with fixture', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+
+          done()
+        })
+
+        cy.request({ url: 'http://localhost:8080/users', fixture: 'number', body: { data: 14 } })
       })
 
       it('throws when url is not FQDN', {
