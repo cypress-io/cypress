@@ -103,22 +103,28 @@ describe('http/response-middleware', function () {
   describe('FilterNonProxiedResponse', () => {
     const { FilterNonProxiedResponse } = ResponseMiddleware
     let ctx
+    let headers
 
     beforeEach(() => {
+      headers = { 'header-name': 'header-value' }
       ctx = {
         onlyRunMiddleware: sinon.stub(),
+        incomingRes: { headers },
         req: {},
         res: {
+          set: sinon.stub(),
           off: (event, listener) => {},
         },
       }
     })
 
-    it('runs minimal subsequent middleware if request is from an extra target', () => {
+    it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', () => {
       ctx.req.isFromExtraTarget = true
 
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
+        expect(ctx.res.set).to.be.calledWith(headers)
+
         expect(ctx.onlyRunMiddleware).to.be.calledWith([
           'AttachPlainTextStreamFn',
           'PatchExpressSetHeader',
