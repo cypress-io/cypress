@@ -563,6 +563,18 @@ describe('visual error templates', () => {
         }],
       }
     },
+    CLOUD_BURN_IN_MISMATCH: () => {
+      return {
+        default: [{
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+          burnInConfig: `{
+            default: 1,
+            flaky:2
+          }`,
+          configFileBaseName: 'cypress.config.json',
+        }],
+      }
+    },
     DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
       return {
         default: [],
