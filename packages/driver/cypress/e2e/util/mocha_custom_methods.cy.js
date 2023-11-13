@@ -56,9 +56,12 @@ describe('mocha custom methods', () => {
     })
 
     describe('undefined (GA implementation/original)', () => {
+      const gaConfig = { maxRetries: 2, passesRequired: 1 }
+
       it('passed: keeps signaling to retry until test passes', function () {
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1)
+
+        const attempt1 = calculateTestStatus(mockTest1, gaConfig)
 
         expect(attempt1.outerStatus).to.be.undefined
         expect(attempt1.attempts).to.equal(1)
@@ -66,7 +69,7 @@ describe('mocha custom methods', () => {
         expect(attempt1.strategy).to.be.undefined
 
         const mockTest2 = createMockTest('passed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2)
+        const attempt2 = calculateTestStatus(mockTest2, gaConfig)
 
         expect(attempt2.outerStatus).to.equal('passed')
         expect(attempt2.attempts).to.equal(2)
@@ -78,7 +81,7 @@ describe('mocha custom methods', () => {
       // this happens inside ./driver/src/cypress/runner.ts
       it('failed: keeps signaling to retry until retry limit is reached', function () {
         const mockTest1 = createMockTest('failed')
-        const attempt1 = calculateTestStatus(mockTest1)
+        const attempt1 = calculateTestStatus(mockTest1, gaConfig)
 
         expect(attempt1.outerStatus).to.be.undefined
         expect(attempt1.attempts).to.equal(1)
@@ -86,7 +89,7 @@ describe('mocha custom methods', () => {
         expect(attempt1.strategy).to.be.undefined
 
         const mockTest2 = createMockTest('failed', [mockTest1])
-        const attempt2 = calculateTestStatus(mockTest2)
+        const attempt2 = calculateTestStatus(mockTest2, gaConfig)
 
         expect(attempt2.outerStatus).to.be.undefined
         expect(attempt2.attempts).to.equal(2)
@@ -94,7 +97,7 @@ describe('mocha custom methods', () => {
         expect(attempt2.strategy).to.be.undefined
 
         const mockTest3 = createMockTest('failed', [mockTest1, mockTest2])
-        const attempt3 = calculateTestStatus(mockTest3)
+        const attempt3 = calculateTestStatus(mockTest3, gaConfig)
 
         expect(attempt3.outerStatus).to.equal('failed')
         expect(attempt3.attempts).to.equal(3)

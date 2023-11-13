@@ -452,7 +452,7 @@ export class EventManager {
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
-          return run()
+          return run(undefined)
         })
       },
     })

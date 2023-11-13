@@ -50,7 +50,7 @@ interface CypressTest extends Mocha.Test {
 }
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, config: NormalizedRetriesConfig, completeBurnInConfig: CompleteBurnInConfig, latestScore: LatestScore) {
+export function calculateTestStatus (test: CypressTest, config?: NormalizedRetriesConfig, completeBurnInConfig?: CompleteBurnInConfig, latestScore?: LatestScore) {
   const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
   const failedTests = _.filter(test.prevAttempts, (o) => o.state === 'failed')
 
@@ -65,9 +65,9 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
 
   const input: EvaluateAttemptInput = {
-    retriesConfig: config,
-    burnInConfig: completeBurnInConfig,
-    latestScore,
+    retriesConfig: config ?? {},
+    burnInConfig: completeBurnInConfig ?? { enabled: false, default: 3, flaky: 5 },
+    latestScore: latestScore ?? -2,
     totalAttemptsAlreadyExecuted,
     passedAttemptsCount: passedTests.length,
     failedAttemptsCount: failedTests.length,
@@ -87,7 +87,7 @@ export function calculateTestStatus (test: CypressTest, config: NormalizedRetrie
   const shouldAttemptsContinue = !output.final
 
   return {
-    strategy: config.strategy,
+    strategy: config?.strategy,
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: output.outerTestStatus,
