@@ -47,14 +47,14 @@
       "command": "yarn cypress:open"
     },
     {
-      "name": "packages/app dev",
+      "name": "root dev",
       "focus": true,
       "onlySingle": true,
-      "cwd": "[cwd]/packages/app",
+      "cwd": "[cwd]",
       "command": "yarn dev"
     },
     {
-      "name": "packages/app watch",
+      "name": "root watch",
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]",
