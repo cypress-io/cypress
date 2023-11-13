@@ -6,6 +6,7 @@ _Released 11/21/2023 (PENDING)_
 **Bugfixes:**
 
 - We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
+- Fixes [#24653](https://github.com/cypress-io/cypress/issues/24653). Dynamic intercept aliases now shown with name instead of "no alias" in driver. Addressed in [#28326](https://github.com/cypress-io/cypress/pull/28326)
 
 ## 13.5.0
 
