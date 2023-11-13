@@ -1,0 +1,21 @@
+{
+  "name": "cypress",
+  "dockerFile": "Dockerfile",
+  "runArgs": [
+    "--cap-add=SYS_ADMIN"
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=8192"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  
+  "remoteUser": "vscode"
+}
