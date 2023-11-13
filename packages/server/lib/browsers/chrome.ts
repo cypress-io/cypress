@@ -438,9 +438,6 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
-    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
-    args.push('--enable-features=ScopeMemoryCachePerContext')
-
     return args
   },
 

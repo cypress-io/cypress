@@ -48,5 +48,3 @@ export const PROTOCOL_STUB_BEFORESPEC_ERROR = stub('protocolStubWithBeforeSpecEr
 export const PROTOCOL_STUB_NONFATAL_ERROR = stub('protocolStubWithNonFatalError.ts')
 
 export const PROTOCOL_STUB_BEFORETEST_ERROR = stub('protocolStubWithBeforeTestError.ts')
-
-export const PROTOCOL_STUB_FONT_FLOODING = stub('protocolStubFontFlooding.ts')
