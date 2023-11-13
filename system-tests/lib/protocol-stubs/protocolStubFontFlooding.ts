@@ -36,7 +36,6 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     }
 
     this.cdpClient.on('Network.requestWillBeSent', (params) => {
-      console.log(params)
       // For the font flooding test, we want to count the number of font requests.
       // There should only be 2 requests. One for each test in the spec.
       if (params.type === 'Font') {
