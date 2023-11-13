@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.1
+
+_Released 11/21/2023 (PENDING)_
+
+**Bugfixes:**
+
+- We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
+
 ## 13.5.0
 
 _Released 11/8/2023_

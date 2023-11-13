@@ -73,6 +73,7 @@ const DEFAULT_ARGS = [
   '--reduce-security-for-testing',
   '--enable-automation',
   '--disable-print-preview',
+  '--disable-component-extensions-with-background-pages',
 
   '--disable-device-discovery-notifications',
 
