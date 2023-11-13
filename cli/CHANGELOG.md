@@ -7,6 +7,10 @@ _Released 11/21/2023 (PENDING)_
 
 - When artifacts are uploaded to the Cypress cloud, the duration of each upload will now be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
 
+**Bugfixes:**
+
+- We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
+
 ## 13.5.0
 
 _Released 11/8/2023_
