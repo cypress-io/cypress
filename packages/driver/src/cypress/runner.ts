@@ -365,7 +365,7 @@ const isLastSuite = (suite, tests) => {
 // if we're the last test in the tests array or
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
-const lastTestThatWillRunInSuite = (test, tests) => {
+const lastTestThatWillRunInSuite = (test, tests): boolean => {
   return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
@@ -522,14 +522,20 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         const isRunMode = !Cypress.config('isInteractive')
         const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
         const shouldAlwaysResetPage = isRunMode && !isHeadedNoExit
+        const isLastTestThatWillRunInSuite = lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
 
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
-        if (shouldAlwaysResetPage || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
-          const nextTest = nextTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
-          const nextTestIsolationOverride = nextTest?._testConfig.unverifiedTestConfig.testIsolation
-          const topLevelTestIsolation = Cypress.originalConfig['testIsolation']
-          const nextTestHasTestIsolationOn = nextTestIsolationOverride || (nextTestIsolationOverride === undefined && topLevelTestIsolation)
+        if (shouldAlwaysResetPage || !isLastTestThatWillRunInSuite) {
+          let nextTestHasTestIsolationOn
+
+          if (!isLastTestThatWillRunInSuite) {
+            const nextTest = nextTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
+            const nextTestIsolationOverride = nextTest?._testConfig.unverifiedTestConfig.testIsolation
+            const topLevelTestIsolation = Cypress.originalConfig['testIsolation']
+
+            nextTestHasTestIsolationOn = nextTestIsolationOverride || (nextTestIsolationOverride === undefined && topLevelTestIsolation)
+          }
 
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
