@@ -42,17 +42,6 @@ const setRemoteDebuggingPort = async () => {
   }
 }
 
-const setScopeMemoryCachePerContext = () => {
-  try {
-    const { app } = require('electron')
-
-    app.commandLine.appendSwitch('enable-features', 'ScopeMemoryCachePerContext')
-  } catch (err) {
-    // Catch errors for when we're running outside of electron in development
-    return
-  }
-}
-
 const isRunning = () => {
   // are we in the electron or the node process?
   return Boolean(process.env.ELECTRON_RUN_AS_NODE || process.versions && process.versions.electron)
@@ -70,8 +59,6 @@ const isRunningAsElectronProcess = ({ debug } = {}) => {
 
 module.exports = {
   scale,
-
-  setScopeMemoryCachePerContext,
 
   getRemoteDebuggingPort,
 
