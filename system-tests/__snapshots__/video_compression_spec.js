@@ -187,7 +187,7 @@ exports['video compression true / coerces true to 32 CRF'] = `
   - Screenshot - Nothing to upload 
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
