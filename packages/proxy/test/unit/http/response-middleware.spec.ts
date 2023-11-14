@@ -13,6 +13,7 @@ describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(ResponseMiddleware)).to.have.ordered.members([
       'LogResponse',
+      'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
@@ -95,6 +96,53 @@ describe('http/response-middleware', function () {
             throw new Error('onError should not be called')
           },
         })
+      })
+    })
+  })
+
+  describe('FilterNonProxiedResponse', () => {
+    const { FilterNonProxiedResponse } = ResponseMiddleware
+    let ctx
+    let headers
+
+    beforeEach(() => {
+      headers = { 'header-name': 'header-value' }
+      ctx = {
+        onlyRunMiddleware: sinon.stub(),
+        incomingRes: { headers },
+        req: {},
+        res: {
+          set: sinon.stub(),
+          off: (event, listener) => {},
+        },
+      }
+    })
+
+    it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', () => {
+      ctx.req.isFromExtraTarget = true
+
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.res.set).to.be.calledWith(headers)
+
+        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+          'AttachPlainTextStreamFn',
+          'PatchExpressSetHeader',
+          'MaybeSendRedirectToClient',
+          'CopyResponseStatusCode',
+          'MaybeEndWithEmptyBody',
+          'GzipBody',
+          'SendResponseBodyToClient',
+        ])
+      })
+    })
+
+    it('runs all subsequent middleware if request is not from an extra target', () => {
+      ctx.req.isFromMainTarget = false
+
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.onlyRunMiddleware).not.to.be.called
       })
     })
   })
@@ -1827,6 +1875,11 @@ describe('http/response-middleware', function () {
         req: {
           browserPreRequest: {
             requestId: '123',
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
           },
         },
         incomingRes: {
@@ -1840,6 +1893,11 @@ describe('http/response-middleware', function () {
           sinon.match(function (actual) {
             expect(actual.requestId).to.equal('123')
             expect(actual.isCached).to.equal(true)
+            expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
+            expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
+            expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
+            expect(actual.timings.cdpLagDuration).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationDuration).to.equal(5)
 
             return true
           }),
@@ -1847,14 +1905,14 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is not cached', function () {
+    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and retried request is correlated and response must have empty body and response is not cached', function () {
       prepareContext({
         protocolManager: {
           responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
         },
         req: {
           browserPreRequest: {
-            requestId: '123',
+            requestId: '123-retry-1',
           },
         },
         incomingRes: {
@@ -2259,6 +2317,57 @@ describe('http/response-middleware', function () {
         req: {
           browserPreRequest: {
             requestId: '123',
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.responseHeaders).to.equal(headers)
+            expect(actual.isAlreadyGunzipped).to.equal(true)
+            expect(actual.responseStream).to.equal(stream)
+            expect(actual.res).to.equal(res)
+            expect(actual.timings.cdpRequestWillBeSentTimestamp).to.equal(1)
+            expect(actual.timings.cdpRequestWillBeSentReceivedTimestamp).to.equal(2)
+            expect(actual.timings.proxyRequestReceivedTimestamp).to.equal(3)
+            expect(actual.timings.cdpLagDuration).to.equal(4)
+            expect(actual.timings.proxyRequestCorrelationDuration).to.equal(5)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('calls responseStreamReceived on protocolManager if protocolManager present and retried request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123-retry-1',
           },
         },
         res,

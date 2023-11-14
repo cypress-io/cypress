@@ -24,13 +24,14 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: true,
+          networkEnableOptions: enabledObject,
         } as ProtocolManagerShape
 
-        const localCommmandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
+        const localCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
-        expect(localCommmandStub).to.have.been.calledWith('Network.enable', enabledObject)
+        expect(localCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
 
       it('networkEnabledOptions - protocol disabled', async function () {
@@ -49,15 +50,16 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: false,
+          networkEnableOptions: disabledObject,
         } as ProtocolManagerShape
 
-        const localCommmandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
+        const localCommandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any)
 
-        expect(localCommmandStub).to.have.been.calledTwice
-        expect(localCommmandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
+        expect(localCommandStub).to.have.been.calledTwice
+        expect(localCommandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
       })
     })
 
@@ -91,7 +93,7 @@ context('lib/browsers/cdp_automation', () => {
         const startScreencast = this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
         const screencastFrameAck = this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').resolves()
 
-        await cdpAutomation.startVideoRecording(writeVideoFrame)
+        await cdpAutomation.startVideoRecording(writeVideoFrame, {})
 
         expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
         expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
@@ -109,20 +111,23 @@ context('lib/browsers/cdp_automation', () => {
             url: 'https://www.google.com',
             headers: {},
           },
+          wallTime: 100.100100,
         }
 
         this.onFn
         .withArgs('Network.requestWillBeSent')
         .yield(browserPreRequest)
 
-        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
-          requestId: browserPreRequest.requestId,
-          method: browserPreRequest.request.method,
-          url: browserPreRequest.request.url,
-          headers: browserPreRequest.request.headers,
-          resourceType: browserPreRequest.type,
-          originalResourceType: browserPreRequest.type,
-        })
+        const arg = this.automation.onBrowserPreRequest.getCall(0).args[0]
+
+        expect(arg.requestId).to.eq(browserPreRequest.requestId)
+        expect(arg.method).to.eq(browserPreRequest.request.method)
+        expect(arg.url).to.eq(browserPreRequest.request.url)
+        expect(arg.headers).to.eq(browserPreRequest.request.headers)
+        expect(arg.resourceType).to.eq(browserPreRequest.type)
+        expect(arg.originalResourceType).to.eq(browserPreRequest.type)
+        expect(arg.cdpRequestWillBeSentTimestamp).to.be.closeTo(100100.100, 0.001)
+        expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.be.a('number')
       })
 
       it('removes # from a url', function () {
@@ -134,20 +139,23 @@ context('lib/browsers/cdp_automation', () => {
             url: 'https://www.google.com/foo#',
             headers: {},
           },
+          wallTime: 100.100100,
         }
 
         this.onFn
         .withArgs('Network.requestWillBeSent')
         .yield(browserPreRequest)
 
-        expect(this.automation.onBrowserPreRequest).to.have.been.calledWith({
-          requestId: browserPreRequest.requestId,
-          method: browserPreRequest.request.method,
-          url: 'https://www.google.com/foo', // we only care about the url
-          headers: browserPreRequest.request.headers,
-          resourceType: browserPreRequest.type,
-          originalResourceType: browserPreRequest.type,
-        })
+        const arg = this.automation.onBrowserPreRequest.getCall(0).args[0]
+
+        expect(arg.requestId).to.eq(browserPreRequest.requestId)
+        expect(arg.method).to.eq(browserPreRequest.request.method)
+        expect(arg.url).to.eq('https://www.google.com/foo')
+        expect(arg.headers).to.eq(browserPreRequest.request.headers)
+        expect(arg.resourceType).to.eq(browserPreRequest.type)
+        expect(arg.originalResourceType).to.eq(browserPreRequest.type)
+        expect(arg.cdpRequestWillBeSentTimestamp).to.be.closeTo(100100.100, 0.001)
+        expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.be.a('number')
       })
 
       it('ignore events with data urls', function () {
@@ -180,6 +188,23 @@ context('lib/browsers/cdp_automation', () => {
             headers: browserResponseReceived.response.headers,
           },
         )
+      })
+
+      it('cleans up prerequests when response is cached from disk', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromDiskCache: true,
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).not.to.have.been.called
       })
     })
 

@@ -22,12 +22,11 @@
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
-    "@packages/config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "8.2.2",
-    "@types/node": "16.18.39",
+    "@types/node": "18.17.5",
     "@types/pngjs": "^6.0.1",
     "@types/strip-ansi": "^5.2.1",
     "ansi-styles": "^5",

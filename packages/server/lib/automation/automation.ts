@@ -14,7 +14,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void) {
     this.requests = {}
 
     // set the middleware
@@ -127,6 +127,7 @@ export class Automation {
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':
+        case 'canceled:download':
         case 'complete:download':
           return data
         default:

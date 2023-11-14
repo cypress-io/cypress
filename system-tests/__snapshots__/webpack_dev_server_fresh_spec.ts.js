@@ -22,7 +22,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ℹ ｢wdm｣: Compiled successfully.
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -76,7 +76,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
    41 modules
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -136,7 +136,7 @@ webpack x.x.x compiled successfully in xxx ms
 ℹ ｢wdm｣: Compiled successfully.
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -192,7 +192,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 webpack x.x.x compiled successfully in xxx ms
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -321,7 +321,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x603)
      s detected outside of a test (failed).png                                                      
 
 
@@ -404,12 +404,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x603)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x603)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x603)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x603)
      ).png                                                                                          
 
 
@@ -455,7 +455,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x603)
      ng                                                                                             
 
 
@@ -493,7 +493,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x603)
      his file (failed).png                                                                          
 
 
@@ -590,7 +590,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -744,7 +744,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x603)
      s detected outside of a test (failed).png                                                      
 
 
@@ -827,12 +827,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x603)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x603)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x603)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x603)
      ).png                                                                                          
 
 
@@ -878,7 +878,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x603)
      ng                                                                                             
 
 
@@ -916,7 +916,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x603)
      his file (failed).png                                                                          
 
 
@@ -1013,7 +1013,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1158,7 +1158,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x603)
      s detected outside of a test (failed).png                                                      
 
 
@@ -1241,12 +1241,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x603)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x603)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x603)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x603)
      ).png                                                                                          
 
 
@@ -1292,7 +1292,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x603)
      ng                                                                                             
 
 
@@ -1330,7 +1330,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x603)
      his file (failed).png                                                                          
 
 
@@ -1427,7 +1427,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1584,7 +1584,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x603)
      s detected outside of a test (failed).png                                                      
 
 
@@ -1667,12 +1667,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x603)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x603)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x603)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x603)
      ).png                                                                                          
 
 
@@ -1718,7 +1718,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x603)
      ng                                                                                             
 
 
@@ -1756,7 +1756,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x603)
      his file (failed).png                                                                          
 
 
@@ -1853,7 +1853,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 

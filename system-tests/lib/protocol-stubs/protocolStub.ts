@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -28,7 +28,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     urlChanged: [],
     pageLoading: [],
     resetTest: [],
+    responseEndedWithEmptyBody: [],
+    responseStreamTimedOut: [],
   }
+  private cdpClient: any
+  private scriptToEvaluateId: any
 
   getDbMetadata (): { offset: number, size: number } {
     return {
@@ -50,12 +54,24 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.events.viewportChanged = []
     this.events.urlChanged = []
     this.events.pageLoading = []
+    this.events.responseEndedWithEmptyBody = []
+    this.events.responseStreamTimedOut = []
   }
 
-  connectToBrowser = (cdpClient) => {
-    if (cdpClient) this.events.connectToBrowser.push(true)
+  connectToBrowser = async (cdpClient) => {
+    if (cdpClient) {
+      this.events.connectToBrowser.push(true)
+      this.cdpClient = cdpClient
+    }
 
-    return Promise.resolve()
+    const scriptToEvaluateResult = await this.cdpClient.send(
+      'Page.addScriptToEvaluateOnNewDocument',
+      {
+        source: `(function () {})()`,
+      },
+    )
+
+    this.scriptToEvaluateId = scriptToEvaluateResult.identifier
   }
 
   addRunnables = (runnables) => {
@@ -74,8 +90,13 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     }
   }
 
-  afterSpec = () => {
+  async afterSpec (): Promise<void> {
     this.events.afterSpec.push(true)
+
+    // since the order of the logs can vary per run, we sort them by id to ensure the snapshot can be compared
+    this.events.commandLogChanged.sort((log1, log2) => {
+      return log1.id.localeCompare(log2.id)
+    })
 
     try {
       fs.outputFileSync(this.filename, JSON.stringify(this.events, null, 2))
@@ -83,7 +104,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
       console.log('error writing protocol events', e)
     }
 
-    return Promise.resolve()
+    await this.cdpClient.send('Page.removeScriptToEvaluateOnNewDocument', {
+      identifier: this.scriptToEvaluateId || '',
+    })
+    .catch(() => {
+    })
   }
 
   beforeTest = (test) => {
@@ -93,13 +118,17 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   commandLogAdded = (log) => {
-    this.events.commandLogAdded.push(log)
+    // we only care about logs that occur during a test
+    if (log.testId) {
+      this.events.commandLogAdded.push(log)
+    }
   }
 
   commandLogChanged = (log) => {
+    // we only care about logs that occur during a test and
     // since the number of log changes can vary per run, we only want to record
     // the passed/failed ones to ensure the snapshot can be compared
-    if (log.state === 'passed' || log.state === 'failed') {
+    if (log.testId && (log.state === 'passed' || log.state === 'failed')) {
       this.events.commandLogChanged.push(log)
     }
   }
@@ -128,11 +157,17 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
+  responseEndedWithEmptyBody = (options: ResponseEndedWithEmptyBodyOptions) => {
+    this.events.responseEndedWithEmptyBody.push(options)
+  }
+
+  responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void {
+    this.events.responseStreamTimedOut.push(options)
+  }
+
   resetTest (testId: string): void {
     this.resetEvents()
 
     this.events.resetTest.push(testId)
   }
-
-  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
 }

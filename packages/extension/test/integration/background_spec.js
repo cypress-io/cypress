@@ -4,7 +4,7 @@ const http = require('http')
 const socket = require('@packages/socket')
 const Promise = require('bluebird')
 const mockRequire = require('mock-require')
-const client = require('../../app/client')
+const client = require('../../app/v2/client')
 
 const browser = {
   cookies: {
@@ -48,7 +48,7 @@ const browser = {
 
 mockRequire('webextension-polyfill', browser)
 
-const background = require('../../app/background')
+const background = require('../../app/v2/background')
 const { expect } = require('chai')
 
 const PORT = 12345
@@ -227,6 +227,23 @@ describe('app/background', () => {
       const ws = await this.connect()
 
       expect(ws.emit).to.be.calledWith('automation:push:request', 'complete:download', {
+        id: `${downloadDelta.id}`,
+      })
+    })
+
+    it('onChanged emits automation:push:request canceled:download', async function () {
+      const downloadDelta = {
+        id: '1',
+        state: {
+          current: 'canceled',
+        },
+      }
+
+      sinon.stub(browser.downloads.onChanged, 'addListener').yields(downloadDelta)
+
+      const ws = await this.connect()
+
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'canceled:download', {
         id: `${downloadDelta.id}`,
       })
     })

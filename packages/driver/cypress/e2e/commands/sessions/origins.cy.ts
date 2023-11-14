@@ -38,7 +38,7 @@ describe('src/cy/commands/sessions/origins', () => {
       expect(CypressInstance.backend).not.to.be.calledWith('get:rendered:html:origins')
     })
 
-    it('returns specific origin when requesitng a specific origin', async () => {
+    it('returns specific origin when requesting a specific origin', async () => {
       cy.stub(CypressInstance, 'backend').callThrough().withArgs('get:rendered:html:origins')
 
       const origins = await mapOrigins(CypressInstance, 'https://example.com/random_page?1')
