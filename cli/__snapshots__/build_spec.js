@@ -4,7 +4,7 @@ exports['package.json build outputs expected properties 1'] = {
   'version': 'x.y.z',
   'buildInfo': 'replaced by normalizePackageJson',
   'description': 'Cypress is a next generation front end testing tool built for the modern web',
-  'homepage': 'https://github.com/cypress-io/cypress',
+  'homepage': 'https://cypress.io',
   'license': 'MIT',
   'bugs': {
     'url': 'https://github.com/cypress-io/cypress/issues',

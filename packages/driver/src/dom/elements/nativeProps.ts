@@ -207,7 +207,6 @@ const nativeGetters = {
   body: descriptor('Document', 'body').get,
   frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement')!.get,
   maxLength: _getMaxLength,
-  style: descriptor('HTMLElement', 'style').get,
 }
 
 const nativeSetters = {
@@ -225,16 +224,12 @@ const nativeMethods = {
   execCommand: window.document.execCommand,
   getAttribute: window.Element.prototype.getAttribute,
   setAttribute: window.Element.prototype.setAttribute,
-  removeAttribute: window.Element.prototype.removeAttribute,
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
   hasFocus: window.document.hasFocus,
   blur: _nativeBlur,
   select: _nativeSelect,
-  getStyleProperty: window.CSSStyleDeclaration.prototype.getPropertyValue,
-  setStyleProperty: window.CSSStyleDeclaration.prototype.setProperty,
-  removeStyleProperty: window.CSSStyleDeclaration.prototype.removeProperty,
 }
 
 export const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {

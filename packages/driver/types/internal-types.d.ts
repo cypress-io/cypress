@@ -96,4 +96,13 @@ interface CypressRunnable extends Mocha.Runnable {
   hookName: string
   id: any
   err: any
+  // Added by Cypress to Tests in order to calculate continue conditions for retries
+  calculateTestStatus?: () => {
+    strategy: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
+    shouldAttemptsContinue: boolean
+    attempts: number
+    outerStatus: 'passed' | failed
+  }
+  // Added by Cypress to Tests in order to determine if the experimentalRetries test run passed so we can leverage in the retry logic.
+  hasAttemptPassed?: boolean
 }
