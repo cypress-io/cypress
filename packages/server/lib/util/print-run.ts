@@ -640,8 +640,8 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   process.stdout.write('\n')
 }
 
-const UPLOAD_ACTIVITY_INTERVAL = env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') || 15000
-const UPLOAD_ACTIVITY_DELAY = env.get('CYPRESS_UPLOAD_ACTIVITY_DELAY') || 5000
+const UPLOAD_ACTIVITY_INTERVAL = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') === undefined ? 15000 : env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL')
+const UPLOAD_ACTIVITY_DELAY = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_DELAY') === 'undefined' ? 5000 : env.get('CYPRESS_UPLOAD_ACTIVITY_DELAY')
 
 export const beginUploadActivityOutput = () => {
   console.log('')
@@ -655,8 +655,11 @@ export const beginUploadActivityOutput = () => {
   }, UPLOAD_ACTIVITY_DELAY)
 
   return () => {
+    if (uploadActivityInterval) {
+      console.log('')
+    }
+
     clearTimeout(beginUploadActivity)
     clearInterval(uploadActivityInterval)
-    console.log('')
   }
 }
