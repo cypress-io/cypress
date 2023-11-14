@@ -66,8 +66,7 @@ function getAlias (selector, log, cy) {
      */
 
     if (command.get('name') === 'intercept') {
-      // Intercept aliases are fairly similar, but `getAliasedRequests` does *not* handle indexes
-      // and we have to do it ourselves here.
+      // `getAliasedRequests` does *not* handle indexes and we have to do it ourselves here.
 
       const requests = getAliasedRequests(aliasObj.alias, cy.state)
 
@@ -251,7 +250,7 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    // find elements by the :cy-contains psuedo selector
+    // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 

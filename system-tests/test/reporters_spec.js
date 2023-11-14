@@ -187,6 +187,7 @@ describe('e2e reporters', () => {
     return systemTests.exec(this, {
       spec: 'slowTestThreshold.cy.js',
       snapshot: false,
+      stripAnsi: false,
       config: {
         slowTestThreshold: 1,
       },

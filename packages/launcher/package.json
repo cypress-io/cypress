@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "clean": "rimraf --glob \"lib/*.js\" && rimraf --glob \"lib/**/*.js\" || true",
     "clean-deps": "rimraf node_modules",
@@ -18,7 +19,7 @@
     "execa": "4.0.0",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "plist": "3.0.6",
+    "plist": "3.1.0",
     "semver": "7.5.2",
     "which": "2.0.2",
     "win-version-info": "5.0.1"
@@ -29,7 +30,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "mocha": "3.5.3",
-    "mock-fs": "5.1.2",
+    "mock-fs": "5.2.0",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",
     "typescript": "^4.7.4"
@@ -38,5 +39,10 @@
     "index.js",
     "lib"
   ],
-  "types": "index.ts"
+  "types": "index.ts",
+  "nx": {
+    "implicitDependencies": [
+      "@packages/graphql"
+    ]
+  }
 }

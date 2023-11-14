@@ -4,8 +4,7 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { TestingType } from '@packages/types'
-import type { BreakingErrResult } from '@packages/config'
+import type { BreakingErrResult, TestingType } from '@packages/types'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
@@ -530,6 +529,16 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while confirming the upload of artifacts.
+
+        These results will not display artifacts.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.highlightSecondary(apiErr)}`
+  },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error communicating with our servers.
@@ -624,9 +633,11 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
-  RENDERER_CRASHED: () => {
+  RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
-        We detected that the Chromium Renderer process just crashed.
+        We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
+
+        We have failed the current spec but will continue running the next spec.
 
         This can happen for a number of different reasons.
 
@@ -639,11 +650,11 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/renderer-process-crashed`
   },
-  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
+  BROWSER_CRASHED: (browserName: string, code: string | number, signal: string) => {
     return errTemplate`\
-        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
+        We detected that the ${fmt.highlight(browserName)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
 
-        We have failed the current test and have relaunched ${fmt.highlight(browser)}.
+        We have failed the current spec but will continue running the next spec.
 
         This can happen for many different reasons:
 
@@ -1012,14 +1023,6 @@ export const AllCypressErrors = {
 
         Please verify that this is the path to a valid, unpacked WebExtension.`
   },
-  COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
-    return errTemplate`\
-        ${fmt.highlight(`nodeVersion`)} is set to ${fmt.highlightTertiary(`system`)} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
-
-        Make sure that your Node executable exists and can be run by the current user.
-
-        Cypress will use the built-in Node version ${fmt.highlightSecondary(nodeVersion)} instead.`
-  },
   INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
         We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${fmt.highlight(val)}
@@ -1065,6 +1068,18 @@ export const AllCypressErrors = {
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
+  },
+  BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
+    return errTemplate`\
+      We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
+
+      We have failed the current spec and aborted the run.`
+  },
+  BROWSER_PAGE_CLOSED_UNEXPECTEDLY: (browserName: string) => {
+    return errTemplate`\
+      We detected that the ${fmt.highlight(browserName)} tab running Cypress tests closed unexpectedly.
+
+      We have failed the current spec and aborted the run.`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
@@ -1289,28 +1304,6 @@ export const AllCypressErrors = {
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
   },
-  NODE_VERSION_DEPRECATION_SYSTEM: (arg1: {name: string, value: any, configFile: string}) => {
-    return errTemplate`\
-      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
-
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
-
-      Please remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
-      `
-  },
-
-  // TODO: does this need to change since its a warning?
-  NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
-    return errTemplate`\
-      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
-
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
-
-      When ${fmt.highlight(arg1.name)} is set to ${fmt.highlightSecondary(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
-
-      As the ${fmt.highlight(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
-      `
-  },
 
   // V10 Added:
 
@@ -1397,6 +1390,15 @@ export const AllCypressErrors = {
         This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
 
         ${fmt.code(code)}
+
+        https://on.cypress.io/migration-guide`
+  },
+
+  VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {
+    return errTemplate`\
+        The ${fmt.highlight(`videoUploadOnPasses`)} configuration option was removed in ${fmt.cypressVersion(`13.0.0`)}.
+
+        You can safely remove this option from your config.
 
         https://on.cypress.io/migration-guide`
   },

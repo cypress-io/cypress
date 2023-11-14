@@ -235,8 +235,9 @@ describe('src/cy/commands/querying/within', () => {
           const consoleProps = lastLog.get('consoleProps')()
 
           expect(consoleProps).to.be.an('object')
-          expect(consoleProps.Command).to.eq('within')
-          expect(consoleProps.Yielded).to.not.be.null
+          expect(consoleProps.name).to.eq('within')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Yielded).to.not.be.null
         })
       })
     })

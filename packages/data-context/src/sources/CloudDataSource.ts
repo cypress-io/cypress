@@ -43,7 +43,6 @@ type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
 export interface CloudExecuteQuery {
-  operation: string
   operationHash?: string
   operationDoc: DocumentNode
   operationVariables: any
@@ -74,6 +73,9 @@ export interface CloudDataSourceParams {
    * and we need to clear both the server & client side cache
    */
   invalidateClientUrqlCache(): void
+  headers?: {
+    getMachineId: Promise<string | null>
+  }
 }
 
 /**
@@ -100,10 +102,11 @@ export class CloudDataSource {
     return this.params.getUser()
   }
 
-  get #additionalHeaders () {
+  async #additionalHeaders () {
     return {
       'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
       'x-cypress-version': pkg.version,
+      'x-machine-id': await this.params.headers?.getMachineId || '',
     }
   }
 
@@ -157,7 +160,7 @@ export class CloudDataSource {
           ...init,
           headers: {
             ...init?.headers,
-            ...this.#additionalHeaders,
+            ...await this.#additionalHeaders(),
           },
         })
       },
@@ -167,7 +170,7 @@ export class CloudDataSource {
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
     return delegateToSchema({
       operation: 'query',
-      schema: params.ctx.schemaCloud,
+      schema: params.ctx.config.schemaCloud,
       fieldName: params.field,
       fieldNodes: params.info.fieldNodes,
       info: params.info,
@@ -184,7 +187,9 @@ export class CloudDataSource {
   #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
-    return `${config.operationHash ?? this.#sha1(config.operation)}-${stringifyVariables(config.operationVariables)}`
+    const operation = print(config.operationDoc)
+
+    return `${config.operationHash ?? this.#sha1(operation)}-${stringifyVariables(config.operationVariables)}`
   }
 
   #sha1 (str: string) {

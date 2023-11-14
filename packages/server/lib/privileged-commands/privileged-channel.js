@@ -16,6 +16,8 @@
   const filter = win.Array.prototype.filter
   const arrayIncludes = win.Array.prototype.includes
   const map = win.Array.prototype.map
+  const slice = win.Array.prototype.slice
+  const isArray = win.Array.isArray
   const stringIncludes = win.String.prototype.includes
   const replace = win.String.prototype.replace
   const split = win.String.prototype.split
@@ -23,8 +25,12 @@
   const fetch = win.fetch
   const parse = win.JSON.parse
   const stringify = win.JSON.stringify
+  const charCodeAt = win.String.prototype.charCodeAt
+  const imul = Math.imul
 
   const queryStringRegex = /\?.*$/
+
+  let hasValidCallbackContext = false
 
   // since this function is eval'd, the scripts are included as stringified JSON
   if (scripts) {
@@ -65,6 +71,18 @@
     return filteredLines.length > 0
   }
 
+  const isInCallback = (err) => {
+    return stringIncludes.call(err.stack, 'thenFn@') || stringIncludes.call(err.stack, 'withinFn@')
+  }
+
+  const hasCallbackInsideEval = (err) => {
+    if (browserFamily === 'webkit') {
+      return isInCallback(err) && hasValidCallbackContext
+    }
+
+    return isInCallback(err) && stringIncludes.call(err.stack, '> eval line')
+  }
+
   // in non-chromium browsers, the stack will include either the spec file url
   // or the support file
   const hasStackLinesFromSpecOrSupportFile = (err) => {
@@ -92,21 +110,57 @@
     'task',
   ]
 
+  const callbackCommands = [
+    'each',
+    'then',
+    'within',
+  ]
+
   function stackIsFromSpecFrame (err) {
     if (isSpecBridge) {
       return hasSpecBridgeInvocation(err)
     }
 
     if (browserFamily === 'chromium') {
-      return hasSpecFrameStackLines(err)
+      return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 
-    return hasStackLinesFromSpecOrSupportFile(err)
+    return hasCallbackInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
   }
 
-  async function onCommandInvocation (command) {
-    if (!arrayIncludes.call(privilegedCommands, command.name)) return
+  // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
+  function hash (str) {
+    const seed = 0
+    let h1 = 0xdeadbeef ^ seed
+    let h2 = 0x41c6ce57 ^ seed
 
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = charCodeAt.call(str, i)
+      h1 = imul(h1 ^ ch, 2654435761)
+      h2 = imul(h2 ^ ch, 1597334677)
+    }
+    h1 = imul(h1 ^ (h1 >>> 16), 2246822507)
+    h1 ^= imul(h2 ^ (h2 >>> 13), 3266489909)
+    h2 = imul(h2 ^ (h2 >>> 16), 2246822507)
+    h2 ^= imul(h1 ^ (h1 >>> 13), 3266489909)
+
+    return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
+  }
+
+  // removes trailing undefined args
+  function dropRightUndefined (array) {
+    if (!isArray(array)) return []
+
+    let index = array.length
+
+    // find index of last non-undefined arg
+    // eslint-disable-next-line no-empty
+    while (index-- && array[index] === undefined) {}
+
+    return slice.call(array, 0, index + 1)
+  }
+
+  function onCommandInvocation (command) {
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
 
@@ -116,23 +170,36 @@
       captureStackTrace.call(Err, err, onCommandInvocation)
     }
 
+    if (arrayIncludes.call(callbackCommands, command.name)) {
+      hasValidCallbackContext = stackIsFromSpecFrame(err)
+    }
+
+    if (!arrayIncludes.call(privilegedCommands, command.name)) return
+
     // if stack is not validated as being from the spec frame, don't add
     // it as a verified command
     if (!stackIsFromSpecFrame(err)) return
 
-    const args = map.call([...command.args], (arg) => {
-      if (typeof arg === 'function') {
-        return functionToString.call(arg)
+    // hash the args to avoid `413 Request Entity Too Large` error from express.
+    // see https://github.com/cypress-io/cypress/issues/27099 and
+    // https://github.com/cypress-io/cypress/issues/27097
+    const args = map.call(dropRightUndefined([...(command.args || [])]), (arg) => {
+      if (arg === undefined) {
+        arg = null
       }
 
-      return arg
+      if (typeof arg === 'function') {
+        arg = functionToString.call(arg)
+      }
+
+      return hash(stringify(arg))
     })
 
     // if we verify a privileged command was invoked from the spec frame, we
     // send it to the server, where it's stored in state. when the command is
     // run and it sends its message to the server via websocket, we check
     // that verified status before allowing the command to continue running
-    await fetch(`/${namespace}/add-verified-command`, {
+    const promise = fetch(`/${namespace}/add-verified-command`, {
       body: stringify({
         args,
         name: command.name,
@@ -148,12 +215,18 @@
       // verified command failed, the default behavior is NOT to allow
       // the privileged command to run
     })
+
+    return {
+      args,
+      promise,
+    }
   }
 
   win.Cypress.on('command:invocation', onCommandInvocation)
 
   // returned for testing purposes only
   return {
+    dropRightUndefined,
     onCommandInvocation,
   }
 })

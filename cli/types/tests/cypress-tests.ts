@@ -292,6 +292,11 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+  Cypress.Commands.overwrite<'screenshot', 'element'>('screenshot', (originalFn, subject, fileName, options) => {
+    subject // $ExpectType JQueryWithSelector<HTMLElement>
+    fileName // $ExpectType string
+    options // $ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions> | undefined
+  })
 
   Cypress.Commands.addQuery('newQuery', function(arg) {
     this // $ExpectType Command
@@ -661,6 +666,9 @@ namespace CypressFilterTests {
 }
 
 namespace CypressScreenshotTests {
+  cy.screenshot().then((result) => {
+    result // $ExpectType undefined
+  })
   cy.screenshot('example-name')
   cy.screenshot('example', { log: false })
   cy.screenshot({ log: false })
@@ -671,6 +679,10 @@ namespace CypressScreenshotTests {
   cy.screenshot('example', {
     log: true,
     blackout: []
+  })
+  cy.get<HTMLDivElement>('#id').screenshot('example-name', { log: false })
+  cy.get<HTMLDivElement>('#id').screenshot().then((result) => {
+    result // $ExpectType JQuery<HTMLDivElement>
   })
 }
 
@@ -1147,6 +1159,39 @@ namespace CypressLocalStorageTests {
   cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
 }
 
+namespace CypressRetriesSpec {
+  Cypress.config('retries', {
+    openMode: 0,
+    runMode: 1
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-and-pass-on-threshold",
+    experimentalOptions: {
+      maxRetries: 2,
+      passesRequired: 2
+    }
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-but-always-fail",
+    experimentalOptions: {
+      maxRetries: 2,
+      stopIfAnyPassed: true
+    }
+  })
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { passesRequired: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { stopIfAnyPassed: true} }) // $ExpectError
+}
+
 namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).prevUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1188,4 +1233,21 @@ namespace CypressRequireTests {
   Cypress.require() // $ExpectError
   Cypress.require({}) // $ExpectError
   Cypress.require(123) // $ExpectError
+}
+
+namespace CypressGlobalsTests {
+  Cypress
+  cy
+  expect
+  assert
+
+  window.Cypress
+  window.cy
+  window.expect
+  window.assert
+
+  globalThis.Cypress
+  globalThis.cy
+  globalThis.expect
+  globalThis.assert
 }

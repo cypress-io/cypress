@@ -4,7 +4,7 @@ const http = require('http')
 const socket = require('@packages/socket')
 const Promise = require('bluebird')
 const mockRequire = require('mock-require')
-const client = require('../../app/client')
+const client = require('../../app/v2/client')
 
 const browser = {
   cookies: {
@@ -48,7 +48,7 @@ const browser = {
 
 mockRequire('webextension-polyfill', browser)
 
-const background = require('../../app/background')
+const background = require('../../app/v2/background')
 const { expect } = require('chai')
 
 const PORT = 12345
@@ -231,6 +231,23 @@ describe('app/background', () => {
       })
     })
 
+    it('onChanged emits automation:push:request canceled:download', async function () {
+      const downloadDelta = {
+        id: '1',
+        state: {
+          current: 'canceled',
+        },
+      }
+
+      sinon.stub(browser.downloads.onChanged, 'addListener').yields(downloadDelta)
+
+      const ws = await this.connect()
+
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'canceled:download', {
+        id: `${downloadDelta.id}`,
+      })
+    })
+
     it('onChanged does not emit if state does not exist', async function () {
       const downloadDelta = {
         id: '1',
@@ -285,7 +302,7 @@ describe('app/background', () => {
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.deep.equal({ requestHeaders: [] })
+      expect(result).to.be.undefined
     })
 
     it('does not add header if it is a nested frame', async function () {
@@ -299,22 +316,7 @@ describe('app/background', () => {
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.deep.equal({ requestHeaders: [] })
-    })
-
-    it('does not add header if it is not a sub frame request', async function () {
-      const details = {
-        parentFrameId: 0,
-        type: 'stylesheet',
-      }
-
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.deep.equal({ requestHeaders: [] })
+      expect(result).to.be.undefined
     })
 
     it('does not add header if it is a spec frame request', async function () {
@@ -329,7 +331,7 @@ describe('app/background', () => {
       await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.deep.equal({ requestHeaders: [] })
+      expect(result).to.be.undefined
     })
 
     it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
@@ -355,60 +357,6 @@ describe('app/background', () => {
           },
           {
             name: 'X-Cypress-Is-AUT-Frame',
-            value: 'true',
-          },
-        ],
-      })
-    })
-
-    it('appends X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is "xmlhttprequest"', async function () {
-      const details = {
-        parentFrameId: 0,
-        type: 'xmlhttprequest',
-        url: 'http://localhost:3000/index.html',
-        requestHeaders: [
-          { name: 'X-Foo', value: 'Bar' },
-        ],
-      }
-
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.deep.equal({
-        requestHeaders: [
-          {
-            name: 'X-Foo',
-            value: 'Bar',
-          },
-          {
-            name: 'X-Cypress-Is-XHR-Or-Fetch',
-            value: 'true',
-          },
-        ],
-      })
-    })
-
-    it('does not append X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is not an "xmlhttprequest"', async function () {
-      const details = {
-        parentFrameId: 0,
-        type: 'sub_frame',
-        url: 'http://localhost:3000/index.html',
-        requestHeaders: [
-          { name: 'X-Foo', value: 'Bar' },
-        ],
-      }
-
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.not.deep.equal({
-        requestHeaders: [
-          {
-            name: 'X-Cypress-Is-XHR-Or-Fetch',
             value: 'true',
           },
         ],
@@ -898,7 +846,6 @@ describe('app/background', () => {
 
     describe('reset:browser:tabs:for:next:test', () => {
       beforeEach(() => {
-        sinon.stub(browser.tabs, 'create').withArgs({ url: 'about:blank' })
         sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
         sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
       })
@@ -908,7 +855,6 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
 
-          expect(browser.tabs.create).to.be.called
           expect(browser.windows.getCurrent).to.be.called
           expect(browser.tabs.remove).to.be.called
 

@@ -1,6 +1,7 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import os from 'os'
 import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 import { Response } from 'cross-fetch'
 
 import { DataContext } from '../../../src'
@@ -10,16 +11,17 @@ import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages
 
 const pkg = require('@packages/root')
 
+chai.use(sinonChai)
+
 describe('VersionsDataSource', () => {
   context('.versions', () => {
     let ctx: DataContext
     let fetchStub: sinon.SinonStub
     let isDependencyInstalledByNameStub: sinon.SinonStub
     let mockNow: Date = new Date()
-    let versionsDataSource: VersionsDataSource
     let currentCypressVersion: string = pkg.version
 
-    before(() => {
+    beforeEach(() => {
       ctx = createTestDataContext('open')
 
       ;(ctx.lifecycleManager as any)._cachedInitialConfig = {
@@ -36,10 +38,22 @@ describe('VersionsDataSource', () => {
       ctx.coreData.currentTestingType = 'e2e'
 
       fetchStub = sinon.stub()
-      isDependencyInstalledByNameStub = sinon.stub()
-    })
 
-    beforeEach(() => {
+      fetchStub
+      .withArgs(NPM_CYPRESS_REGISTRY_URL)
+      .resolves({
+        json: sinon.stub().resolves({
+          'time': {
+            modified: '2022-01-31T21:14:41.593Z',
+            created: '2014-03-09T01:07:35.219Z',
+            [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
+            '15.0.0': '2015-05-07T00:09:41.109Z',
+          },
+        }),
+      })
+
+      isDependencyInstalledByNameStub = sinon.stub()
+
       sinon.stub(ctx.util, 'fetch').callsFake(fetchStub)
       sinon.stub(ctx.util, 'isDependencyInstalledByName').callsFake(isDependencyInstalledByNameStub)
       sinon.stub(os, 'platform').returns('darwin')
@@ -70,19 +84,8 @@ describe('VersionsDataSource', () => {
           version: '15.0.0',
         }),
       })
-      .withArgs(NPM_CYPRESS_REGISTRY_URL)
-      .resolves({
-        json: sinon.stub().resolves({
-          'time': {
-            modified: '2022-01-31T21:14:41.593Z',
-            created: '2014-03-09T01:07:35.219Z',
-            [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
-            '15.0.0': '2015-05-07T00:09:41.109Z',
-          },
-        }),
-      })
 
-      versionsDataSource = new VersionsDataSource(ctx)
+      const versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
@@ -101,22 +104,38 @@ describe('VersionsDataSource', () => {
     })
 
     it('resets telemetry data triggering a new call to get the latest version', async () => {
-      const currentCypressVersion = pkg.version
-
       ctx.coreData.machineId = Promise.resolve(null)
       ctx.coreData.currentTestingType = 'component'
 
+      const mockRequest = {
+        'Content-Type': 'application/json',
+        'x-cypress-version': currentCypressVersion,
+        'x-os-name': 'darwin',
+        'x-arch': 'x64',
+        'x-initial-launch': String(true),
+        'x-testing-type': 'component',
+        'x-logged-in': 'false',
+      }
+
       fetchStub
       .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match({
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(false),
-          'x-testing-type': 'component',
-          'x-logged-in': 'false',
+        headers: sinon.match(mockRequest),
+      }).resolves({
+        json: sinon.stub().resolves({
+          name: 'Cypress',
+          version: '15.0.0',
         }),
+      })
+
+      const mockRequest2 = {
+        ...mockRequest,
+        'x-initial-launch': String(false),
+        'x-testing-type': 'e2e',
+      }
+
+      fetchStub
+      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
+        headers: sinon.match(mockRequest2),
       }).resolves({
         json: sinon.stub().resolves({
           name: 'Cypress',
@@ -124,15 +143,17 @@ describe('VersionsDataSource', () => {
         }),
       })
 
-      const privateVersionsDataSource = versionsDataSource as any
+      const versionsDataSource = new VersionsDataSource(ctx)
 
-      privateVersionsDataSource.ctx.coreData.currentTestingType = 'component'
+      await versionsDataSource.versionData()
+
+      expect(await ctx.coreData.versionData?.latestVersion).to.eql('15.0.0')
+
+      ctx.coreData.currentTestingType = 'e2e'
 
       versionsDataSource.resetLatestVersionTelemetry()
 
-      const latestVersion = await ctx.coreData.versionData?.latestVersion
-
-      expect(latestVersion).to.eql('16.0.0')
+      expect(await ctx.coreData.versionData?.latestVersion).to.eql('16.0.0')
     })
 
     it('handles errors fetching version data', async () => {
@@ -153,7 +174,7 @@ describe('VersionsDataSource', () => {
       .withArgs(NPM_CYPRESS_REGISTRY_URL)
       .rejects()
 
-      versionsDataSource = new VersionsDataSource(ctx)
+      const versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
@@ -178,7 +199,7 @@ describe('VersionsDataSource', () => {
       .withArgs(NPM_CYPRESS_REGISTRY_URL)
       .callsFake(async () => new Response('Error'))
 
-      versionsDataSource = new VersionsDataSource(ctx)
+      const versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
@@ -237,7 +258,8 @@ describe('VersionsDataSource', () => {
       })
 
       ctx.coreData.currentTestingType = 'component'
-      versionsDataSource = new VersionsDataSource(ctx)
+      const versionsDataSource = new VersionsDataSource(ctx)
+
       ctx.coreData.currentTestingType = 'e2e'
       versionsDataSource.resetLatestVersionTelemetry()
       await versionsDataSource.versionData()
@@ -249,6 +271,29 @@ describe('VersionsDataSource', () => {
             'x-framework': 'react',
             'x-dev-server': 'vite',
             'x-dependencies': 'react@1.2.3,vue@4.5.6,@builder.io/qwik@1.1.4,@playwright/experimental-ct-core@1.33.0',
+          }),
+        },
+      )
+    })
+
+    it('generates x-notifications header', async () => {
+      (ctx.config.localSettingsApi.getPreferences as sinon.SinonStub).callsFake(() => {
+        return {
+          notifyWhenRunCompletes: ['errored'],
+          notifyWhenRunStarts: true,
+          notifyWhenRunStartsFailing: true,
+        }
+      })
+
+      const versionsDataSource = new VersionsDataSource(ctx)
+
+      await versionsDataSource.versionData()
+
+      expect(fetchStub).to.have.been.calledWith(
+        CYPRESS_REMOTE_MANIFEST_URL,
+        {
+          headers: sinon.match({
+            'x-notifications': 'errored,started,failing',
           }),
         },
       )

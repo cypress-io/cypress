@@ -55,7 +55,7 @@ export interface ProjectApiShape {
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
-  routeToDebug(): void
+  routeToDebug(runNumber: number): void
 }
 
 export interface FindSpecs<T> {
@@ -96,6 +96,7 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    // Clear data associated with local project
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
@@ -108,7 +109,11 @@ export class ProjectActions {
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
+      d.app.browserUserAgent = null
     })
+
+    // Also clear any data associated with the linked cloud project
+    this.ctx.actions.cloudProject.clearCloudProject()
 
     this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
@@ -116,12 +121,10 @@ export class ProjectActions {
     await this.api.closeActiveProject()
   }
 
-  private get projects () {
-    return this.ctx.projectsList
-  }
-
   private set projects (projects: ProjectShape[]) {
-    this.ctx.coreData.app.projects = projects
+    this.ctx.update((d) => {
+      d.app.projects = projects
+    })
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -165,11 +168,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.ctx.update((d) => {
-      d.app.projects = [...projectRoots]
-    })
-
-    return this.projects
+    return this.projects = [...projectRoots]
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
@@ -450,7 +449,7 @@ export class ProjectActions {
       return
     }
 
-    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+    const baseUrlWarning = this.ctx.coreData.diagnostics.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
 
     if (baseUrlWarning) {
       this.ctx.actions.error.clearWarning(baseUrlWarning.id)
@@ -641,7 +640,9 @@ export class ProjectActions {
   }
 
   async debugCloudRun (runNumber: number) {
+    debug('attempting to switch to run #%s', runNumber)
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
-    this.api.routeToDebug()
+    debug('navigating to Debug page')
+    this.api.routeToDebug(runNumber)
   }
 }

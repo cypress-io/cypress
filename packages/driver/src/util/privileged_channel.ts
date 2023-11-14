@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 /**
@@ -10,7 +9,7 @@ export function setSpecContentSecurityPolicy (specWindow) {
   const metaEl = specWindow.document.createElement('meta')
 
   metaEl.setAttribute('http-equiv', 'Content-Security-Policy')
-  metaEl.setAttribute('content', `script-src 'unsafe-eval'`)
+  metaEl.setAttribute('content', `script-src 'unsafe-eval'; worker-src * data: blob: 'unsafe-eval' 'unsafe-inline'`)
   specWindow.document.querySelector('head')!.appendChild(metaEl)
 }
 
@@ -19,22 +18,18 @@ interface RunPrivilegedCommandOptions {
   cy: Cypress.cy
   Cypress: InternalCypress.Cypress
   options: any
-  userArgs: any[]
 }
 
-export function runPrivilegedCommand ({ commandName, cy, Cypress, options, userArgs }: RunPrivilegedCommandOptions): Bluebird<any> {
-  return Bluebird.try(() => {
-    return cy.state('current').get('verificationPromise')[0]
-  })
+export function runPrivilegedCommand ({ commandName, cy, Cypress, options }: RunPrivilegedCommandOptions): Bluebird<any> {
+  const { args, promise } = (cy.state('current').get('privilegeVerification') || [])[0] || {}
+
+  return Bluebird
+  .try(() => promise)
   .then(() => {
     return Cypress.backend('run:privileged', {
       commandName,
       options,
-      userArgs,
+      args,
     })
   })
-}
-
-export function trimUserArgs (args: any[]) {
-  return _.dropRightWhile(args, _.isUndefined)
 }

@@ -389,7 +389,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise(undefined, this.fn, {
         url: 'http://www.github.com/foo',
         cookies: false,
         body: 'foobarbaz',
@@ -441,7 +441,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise(undefined, this.fn, {
         url: 'http://www.github.com/dashboard',
         cookies: false,
       })
@@ -583,11 +583,7 @@ describe('lib/request', () => {
       .get('/foo')
       .reply(200, 'derp')
 
-      const headers = {}
-
-      headers['user-agent'] = 'foobarbaz'
-
-      return request.sendPromise(headers, this.fn, {
+      return request.sendPromise('foobarbaz', this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })

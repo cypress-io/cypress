@@ -31,7 +31,7 @@ exports['e2e screenshot in nested spec / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_nested_file.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -41,11 +41,6 @@ exports['e2e screenshot in nested spec / passes'] = `
 
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_nested_file.cy.js/nests the file bas     (1280x720)
      ed on spec path.png                                                                            
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_nested_file.cy.js.mp4
 
 
 ====================================================================================================

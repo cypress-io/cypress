@@ -1100,7 +1100,7 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // TODO: Re-think skipping text insert if non-shift modifers
+    // TODO: Re-think skipping text insert if non-shift modifiers
     // @see https://github.com/cypress-io/cypress/issues/5622
     // if (hasModifierBesidesShift(modifiers)) {
     //   details.text = ''
@@ -1194,7 +1194,7 @@ export class Keyboard {
         ) {
           if (
             shouldIgnoreEvent('textInput', key.events) ||
-          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+            this.fireSimulatedEvent(elToType, 'textInput', key, options)
           ) {
             return this.performSimulatedDefault(elToType, key, options)
           }

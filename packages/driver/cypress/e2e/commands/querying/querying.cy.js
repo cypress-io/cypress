@@ -435,10 +435,13 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps', () => {
         cy.get('body').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Selector: 'body',
-            Yielded: $body.get(0),
-            Elements: 1,
+            name: 'get',
+            type: 'command',
+            props: {
+              Selector: 'body',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -446,10 +449,13 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with an alias', () => {
         cy.get('body').as('b').get('@b').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@b',
-            Yielded: $body.get(0),
-            Elements: 1,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@b',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -457,9 +463,12 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with a primitive alias', () => {
         cy.noop({ foo: 'foo' }).as('obj').get('@obj').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@obj',
-            Yielded: obj,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@obj',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -472,9 +481,12 @@ describe('src/cy/commands/querying', () => {
           return win.$.get('/users')
         }).wait('@getUsers').get('@getUsers').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@getUsers',
-            Yielded: obj,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@getUsers',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -950,8 +962,8 @@ describe('src/cy/commands/querying', () => {
           expect(getLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = getLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)
@@ -1654,11 +1666,14 @@ space
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'contains',
-            Content: 'nested contains',
-            'Applied To': $complex.get(0),
-            Yielded: $label.get(0),
-            Elements: 1,
+            name: 'contains',
+            type: 'command',
+            props: {
+              Content: 'nested contains',
+              'Applied To': $complex.get(0),
+              Yielded: $label.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -1794,8 +1809,8 @@ space
           expect(containsLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = containsLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)

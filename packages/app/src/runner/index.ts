@@ -248,9 +248,13 @@ function runSpecCT (config, spec: SpecFile) {
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  // the iframe controller will forward the specpath via header to the devserver.
+  // using a query parameter allows us to recognize relative requests and proxy them to the devserver.
+  const specIndexUrl = `index.html?specPath=${encodeURI(spec.absolute)}`
+
   const specSrc = getSpecUrl({
     namespace: config.namespace,
-    specSrc: spec.absolute,
+    specSrc: specIndexUrl,
   })
 
   autIframe._showInitialBlankPage()
@@ -346,7 +350,7 @@ export function getRunnerConfigFromWindow () {
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
- * It is bundlded via webpack and consumed like a third party module.
+ * It is bundled via webpack and consumed like a third party module.
  *
  * This only needs to happen once, prior to running the first spec.
  */
