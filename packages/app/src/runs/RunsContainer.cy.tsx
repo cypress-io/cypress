@@ -1,19 +1,10 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
-import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { defaultMessages } from '@cy/i18n'
 
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
-  const cloudViewer = {
-    ...CloudUserStubs.me,
-    organizations: null,
-    firstOrganization: {
-      nodes: [],
-    },
-  }
-
   context('when the user is logged in', () => {
     beforeEach(() => {
       const userProjectStatusStore = useUserProjectStatusStore()
@@ -23,18 +14,18 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
     it('renders with expected runs if there is a cloud project id', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
+          const runIds: string[] = runs?.[0]?.id ? [runs?.[0]?.id] : [] as string[]
+
+          return <RunsContainer gql={gqlVal} runs={runs} online allRunIds={runIds} />
         },
       })
 
       const statuses = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
 
       cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
+        cy.get(`[data-cy="runCard-status-${status}"]`).should('exist')
       })
 
       cy.percySnapshot()
@@ -43,7 +34,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
     it('renders instructions and "connect" link without a project id', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         onResult: (result) => {
-          result.cloudViewer = cloudViewer
           if (result.currentProject?.projectId) {
             result.currentProject.projectId = ''
           }
@@ -79,34 +69,28 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
   context('when the user has no recorded runs', () => {
     it('renders instructions and record prompt', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult (gql) {
-          gql.cloudViewer = cloudViewer
-          if (gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            gql.currentProject.cloudProject.runs = {
-              __typename: 'CloudRunConnection',
-              pageInfo: null as any,
-              nodes: [],
-            }
-          }
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          return <RunsContainer gql={gqlVal} runs={[]} online />
         },
       })
 
       const text = defaultMessages.runs.empty
 
       cy.contains(text.title).should('be.visible')
-      cy.percySnapshot()
     })
   })
 
   context('with errors', () => {
     it('renders connection failed', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
       cy.mountFragment(RunsContainerFragmentDoc, {
         onResult (result) {
-          result.cloudViewer = cloudViewer
           result.currentProject!.cloudProject = null
         },
         render (gqlVal) {
@@ -135,11 +119,11 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -154,11 +138,11 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -181,13 +165,13 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       setProjectFlag('isConfigLoaded', true)
       setProjectFlag('isUsingGit', true)
 
-      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      expect(cloudStatusMatches('needsRecordedRun'), 'status should be needsRecordedRun').equals(true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -210,11 +194,11 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
       expect(cloudStatusMatches('needsRecordedRun')).equals(true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 

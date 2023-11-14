@@ -33,7 +33,7 @@ exports['e2e only spec failing 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     only.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -62,7 +62,7 @@ exports['e2e only spec failing 1'] = `
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     only_multiple.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

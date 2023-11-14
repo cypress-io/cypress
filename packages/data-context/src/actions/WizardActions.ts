@@ -20,10 +20,6 @@ export class WizardActions {
     return this.ctx.currentProject
   }
 
-  private get data () {
-    return this.ctx.wizardData
-  }
-
   setFramework (framework: Cypress.ResolvedComponentFrameworkDefinition | null): void {
     const next = this.ctx.coreData.wizard.frameworks.find((x) => x.type === framework?.type)
 

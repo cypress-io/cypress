@@ -36,7 +36,7 @@ Only the last attempt will be registered.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     multiple_task_registrations.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -120,7 +120,7 @@ https://on.cypress.io/api/task
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     task.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

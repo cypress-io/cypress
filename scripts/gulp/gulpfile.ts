@@ -11,15 +11,14 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, generateShikiTheme, viteClean } from './tasks/gulpVite'
-import { checkTs } from './tasks/gulpTsc'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, viteClean } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
-import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackReporter, webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 import dedent from 'dedent'
+import { ensureCloudValidations, syncCloudValidations } from './tasks/gulpSyncValidations'
 
 if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
   process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
@@ -64,6 +63,7 @@ gulp.task(
       makePathMap,
       // Before dev, fetch the latest "remote" schema from Cypress Cloud
       syncRemoteGraphQL,
+      syncCloudValidations,
       gulp.parallel(
         viteClean,
         e2eTestScaffoldWatch,
@@ -115,30 +115,6 @@ gulp.task('open', startCypressWatch)
  *  Tasks that aren't watched. Usually composed together with other tasks.
  *------------------------------------------------------------------------**/
 
-gulp.task('buildProd',
-  gulp.series(
-    viteClean,
-    e2eTestScaffold,
-
-    nexusCodegen,
-    graphqlCodegen,
-    generateShikiTheme,
-
-    // Build the frontend(s) for production.
-    gulp.parallel(
-      viteBuildApp,
-      viteBuildLaunchpad,
-    ),
-  ))
-
-gulp.task(
-  'postinstall',
-  gulp.series(
-    'buildProd',
-    exitAfterAll,
-  ),
-)
-
 gulp.task('watchForE2E', gulp.series(
   'codegen',
   gulp.series(
@@ -169,9 +145,6 @@ gulp.task('watchForE2E', gulp.series(
 *------------------------------------------------------------------------**/
 
 gulp.task('cyRunLaunchpadE2E', gulp.series(
-  // 1. Build the Cypress App itself
-  'buildProd',
-
   // Ensure we have no existing cypress processes running
   killExistingCypress,
 
@@ -182,9 +155,6 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
 ))
 
 gulp.task('cyRunAppE2E', gulp.series(
-  // 1. Build the Cypress App itself
-  'buildProd',
-
   killExistingCypress,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
@@ -248,13 +218,10 @@ gulp.task('cyOpenAppE2E', gulp.series(
 
 /**------------------------------------------------------------------------
  *                             Utilities
- * checkTs: Runs `check-ts` in each of the packages & prints errors when
- *          all are completed
  *
  * makePackage: Scaffolds a new package in the packages/ directory
  *------------------------------------------------------------------------**/
 
-gulp.task(checkTs)
 gulp.task(makePackage)
 
 /**------------------------------------------------------------------------
@@ -264,6 +231,8 @@ gulp.task(makePackage)
  * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
  *------------------------------------------------------------------------**/
 
+gulp.task(ensureCloudValidations)
+gulp.task(syncCloudValidations)
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)

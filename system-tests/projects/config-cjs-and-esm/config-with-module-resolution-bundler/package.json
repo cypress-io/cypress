@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "typescript": "4.7.3"
+  },
+  "projectFixtureDirectory": "simple_passing"
+}

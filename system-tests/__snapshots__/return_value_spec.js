@@ -80,7 +80,7 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     return_value.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

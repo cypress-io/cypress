@@ -16,6 +16,8 @@ describe('<GroupedDebugFailedTest/>', () => {
         stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
         hasVideo: true,
         videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
+        hasReplay: true,
+        replayUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/replay',
       },
     },
     {
@@ -31,6 +33,8 @@ describe('<GroupedDebugFailedTest/>', () => {
         stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
         hasVideo: true,
         videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
+        hasReplay: true,
+        replayUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/replay',
       },
     },
   ]
@@ -82,10 +86,8 @@ describe('<GroupedDebugFailedTest/>', () => {
     cy.findAllByTestId(`grouped-row`).should('have.length', 2).each((el) => cy.wrap(el).within(() => {
       cy.findByTestId('debug-artifacts').should('not.be.visible')
       cy.findByTestId('test-failed-metadata').realHover()
-      cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
+      cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 4)
       cy.findByTestId('stats-metadata').children().should('have.length', 3)
     }))
-
-    cy.percySnapshot()
   })
 })

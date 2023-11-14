@@ -295,8 +295,11 @@ describe('src/cy/commands/actions/focus', () => {
       it('#consoleProps', () => {
         cy.get('input:first').focus().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focus',
-            'Applied To': $input.get(0),
+            name: 'focus',
+            type: 'command',
+            props: {
+              'Applied To': $input.get(0),
+            },
           })
         })
       })
@@ -744,8 +747,11 @@ describe('src/cy/commands/actions/focus', () => {
       it('#consoleProps', () => {
         cy.get('input:first').focus().blur().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'blur',
-            'Applied To': $input.get(0),
+            name: 'blur',
+            type: 'command',
+            props: {
+              'Applied To': $input.get(0),
+            },
           })
         })
       })

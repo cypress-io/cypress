@@ -807,18 +807,21 @@ describe('src/cy/commands/connectors', () => {
           it('logs obj with arguments', function () {
             cy.noop(this.obj).invoke({ log: true }, 'attr', 'numbers', [1, 2, 3]).then(function () {
               expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'invoke',
-                Function: '.attr(numbers, [1, 2, 3])',
-                'With Arguments': ['numbers', [1, 2, 3]],
-                Subject: this.obj,
-                Yielded: { numbers: [1, 2, 3] },
+                name: 'invoke',
+                type: 'command',
+                props: {
+                  Function: '.attr(numbers, [1, 2, 3])',
+                  'With Arguments': ['numbers', [1, 2, 3]],
+                  Subject: this.obj,
+                  Yielded: { numbers: [1, 2, 3] },
+                },
               })
             })
           })
 
           it('can be disabled', function () {
             cy.noop(this.obj).invoke({ log: true }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog.invoke('consoleProps')).to.have.property('Function', '.sum(1, 2)')
+              expect(this.lastLog.invoke('consoleProps').props).to.have.property('Function', '.sum(1, 2)')
               this.lastLog = undefined
             })
 
@@ -900,11 +903,14 @@ describe('src/cy/commands/connectors', () => {
         it('logs obj with arguments', function () {
           cy.noop(this.obj).invoke('attr', 'numbers', [1, 2, 3]).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.attr(numbers, [1, 2, 3])',
-              'With Arguments': ['numbers', [1, 2, 3]],
-              Subject: this.obj,
-              Yielded: { numbers: [1, 2, 3] },
+              name: 'invoke',
+              type: 'command',
+              props: {
+                Function: '.attr(numbers, [1, 2, 3])',
+                'With Arguments': ['numbers', [1, 2, 3]],
+                Subject: this.obj,
+                Yielded: { numbers: [1, 2, 3] },
+              },
             })
           })
         })
@@ -912,11 +918,14 @@ describe('src/cy/commands/connectors', () => {
         it('#consoleProps as a function property without args', function () {
           cy.noop(this.obj).invoke('bar').then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.bar()',
-              Subject: this.obj,
-              'With Arguments': [],
-              Yielded: 'bar',
+              name: 'invoke',
+              type: 'command',
+              props: {
+                Function: '.bar()',
+                Subject: this.obj,
+                'With Arguments': [],
+                Yielded: 'bar',
+              },
             })
           })
         })
@@ -924,11 +933,14 @@ describe('src/cy/commands/connectors', () => {
         it('#consoleProps as a deep function property with args', function () {
           cy.noop(this.obj).invoke('math.sum', 1, 2, 3).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.math.sum(1, 2, 3)',
-              'With Arguments': [1, 2, 3],
-              Subject: this.obj,
-              Yielded: 6,
+              name: 'invoke',
+              type: 'command',
+              props: {
+                Function: '.math.sum(1, 2, 3)',
+                'With Arguments': [1, 2, 3],
+                Subject: this.obj,
+                Yielded: 6,
+              },
             })
           })
         })
@@ -938,11 +950,14 @@ describe('src/cy/commands/connectors', () => {
             const consoleProps = this.lastLog.invoke('consoleProps')
 
             expect(consoleProps).to.deep.eq({
-              Command: 'invoke',
-              Function: '.hide()',
-              Subject: $btn,
-              'With Arguments': [],
-              Yielded: $btn,
+              name: 'invoke',
+              type: 'command',
+              props: {
+                Function: '.hide()',
+                Subject: $btn,
+                'With Arguments': [],
+                Yielded: $btn,
+              },
             })
           })
         })
@@ -1389,17 +1404,20 @@ describe('src/cy/commands/connectors', () => {
         it('#consoleProps as a regular property', function () {
           cy.noop(this.obj).its('num').then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'its',
-              Property: '.num',
-              Subject: this.obj,
-              Yielded: 123,
+              name: 'its',
+              type: 'command',
+              props: {
+                Property: '.num',
+                Subject: this.obj,
+                Yielded: 123,
+              },
             })
           })
         })
 
         it('can be disabled', function () {
           cy.noop(this.obj).its('num', { log: true }).then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.have.property('Property', '.num')
+            expect(this.lastLog.invoke('consoleProps').props).to.have.property('Property', '.num')
             this.lastLog = undefined
           })
 
@@ -1545,7 +1563,7 @@ describe('src/cy/commands/connectors', () => {
           cy.once('fail', (err) => {
             const { itsLog, lastLog } = this
 
-            expect(itsLog.invoke('consoleProps').Property).to.eq('.foo.bar.baz')
+            expect(itsLog.invoke('consoleProps').props.Property).to.eq('.foo.bar.baz')
 
             expect(itsLog.get('state')).to.eq('passed')
             expect(itsLog.get('error')).to.be.undefined
@@ -1726,11 +1744,14 @@ describe('src/cy/commands/connectors', () => {
         it('consoleProps subject', function (done) {
           cy.on('fail', (err) => {
             expect(this.itsLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'its',
-              Property: '.fizz.buzz',
-              Error: this.itsLog.get('error').stack,
-              Subject: { foo: 'bar' },
-              Yielded: undefined,
+              name: 'its',
+              type: 'command',
+              error: this.itsLog.get('error').stack,
+              props: {
+                Property: '.fizz.buzz',
+                Subject: { foo: 'bar' },
+                Yielded: undefined,
+              },
             })
 
             done()
@@ -1836,7 +1857,7 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      it('works with nested eaches', () => {
+      it('works when the "each" is nested', () => {
         let count = 0
 
         cy.get('#list li').each(($li, i, arr) => {

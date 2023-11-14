@@ -37,9 +37,11 @@ const specs: CloudDebugSpec[] = [{
       instance: {
         id: '123',
         groupId: '',
+        hasReplay: false,
         hasScreenshots: false,
         hasStdout: false,
         hasVideo: false,
+        replayUrl: '',
         status: 'FAILED',
         screenshotsUrl: '',
         stdoutUrl: '',

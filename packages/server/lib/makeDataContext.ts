@@ -164,8 +164,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async runSpec (spec: Cypress.Spec): Promise<void> {
         openProject.changeUrlToSpec(spec)
       },
-      routeToDebug () {
-        openProject.changeUrlToDebug()
+      routeToDebug (runNumber: number) {
+        openProject.changeUrlToDebug(runNumber)
       },
     },
     electronApi: {

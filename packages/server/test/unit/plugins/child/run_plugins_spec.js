@@ -141,6 +141,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
     describe(`on 'execute:plugins' message`, () => {
       let onFilePreprocessor
+      let afterBrowserLaunch
       let beforeBrowserLaunch
       let taskRequested
       let setupNodeEventsFn
@@ -149,11 +150,13 @@ describe('lib/plugins/child/run_plugins', () => {
         sinon.stub(preprocessor, 'wrap')
 
         onFilePreprocessor = sinon.stub().resolves()
+        afterBrowserLaunch = sinon.stub().resolves()
         beforeBrowserLaunch = sinon.stub().resolves()
         taskRequested = sinon.stub().resolves('foo')
 
         setupNodeEventsFn = (on) => {
           on('file:preprocessor', onFilePreprocessor)
+          on('after:browser:launch', afterBrowserLaunch)
           on('before:browser:launch', beforeBrowserLaunch)
           on('task', taskRequested)
         }
@@ -202,6 +205,35 @@ describe('lib/plugins/child/run_plugins', () => {
         })
 
         it('wraps child promise', () => {
+          expect(util.wrapChildPromise).to.be.calledWith(ipc, sinon.match.func, ids, args)
+        })
+
+        it('invokes registered function when invoked by handler', () => {
+          // console.log(util.wrapChildPromise.withArgs(ipc, sinon.match.func, ids, args).args)
+          util.wrapChildPromise.withArgs(ipc, sinon.match.func, ids, args).args[0][1](5, args)
+
+          expect(beforeBrowserLaunch).to.be.calledWith(...args)
+        })
+      })
+
+      context('after:browser:launch', () => {
+        let args
+        const ids = { eventId: 2, invocationId: '00' }
+
+        beforeEach(async () => {
+          sinon.stub(util, 'wrapChildPromise')
+
+          await runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
+
+          const browser = {}
+          const launchOptions = browserUtils.getDefaultLaunchOptions({})
+
+          args = [browser, launchOptions]
+
+          ipc.on.withArgs('execute:plugins').yield('after:browser:launch', ids, args)
+        })
+
+        it('wraps child promise', () => {
           expect(util.wrapChildPromise).to.be.called
           expect(util.wrapChildPromise.lastCall.args[0]).to.equal(ipc)
           expect(util.wrapChildPromise.lastCall.args[1]).to.be.a('function')
@@ -212,7 +244,7 @@ describe('lib/plugins/child/run_plugins', () => {
         it('invokes registered function when invoked by handler', () => {
           util.wrapChildPromise.lastCall.args[1](4, args)
 
-          expect(beforeBrowserLaunch).to.be.calledWith(...args)
+          expect(afterBrowserLaunch).to.be.calledWith(...args)
         })
       })
 

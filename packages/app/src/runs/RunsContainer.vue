@@ -1,17 +1,17 @@
 <template>
-  <div class="h-full ">
+  <div class="h-full">
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
-      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
+      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !runs?.length }"
     />
 
     <RunsConnect
-      v-if="!currentProject?.projectId || !cloudViewer?.id"
-      :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
+      v-if="!userProjectStatusStore.user.isLoggedIn || !currentProject?.projectId"
+      :campaign="!userProjectStatusStore.user.isLoggedIn ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -20,7 +20,7 @@
     />
 
     <RunsEmpty
-      v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      v-else-if="!runs?.length"
     />
     <div
       v-else
@@ -60,25 +60,25 @@
       >
         {{ t('runs.empty.ensureGitSetupCorrectly') }}
       </TrackedBanner>
-      <RunCard
-        v-for="run of currentProject?.cloudProject?.runs?.nodes"
-        :key="run.id"
-        :gql="run"
+      <RunsLayout
+        :runs="runs"
+        :all-run-ids="allRunIds"
+        :is-using-git="userProjectStatusStore.project.isUsingGit"
+        :latest-run-url="latestRunUrl"
+        :current-commit-info="props.currentCommitInfo"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { gql, useMutation } from '@urql/vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
-import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
-import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
+import RunsLayout from './RunsLayout.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -88,6 +88,7 @@ import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import TrackedBanner from '../specs/banners/TrackedBanner.vue'
 import { BannerIds } from '@packages/types/src'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
+import type { RunCardFragment, RunsContainerFragment, RunsGitTreeQuery } from '../generated/graphql'
 
 const { t } = useI18n()
 
@@ -99,133 +100,33 @@ const emit = defineEmits<{
   (e: 'reExecuteRunsQuery'): void
 }>()
 
-gql`
-fragment RunsContainer_RunsConnection on CloudRunConnection {
-  nodes {
-    id
-    ...RunCard
-  }
-  pageInfo {
-    startCursor
-  }
-}
-`
-
-gql`
-fragment RunsContainer on Query {
-  ...RunsErrorRenderer
-  currentProject {
-    id
-    projectId
-    ...RunsConnectSuccessAlert
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        runs(first: 10) {
-          ...RunsContainer_RunsConnection
-        }
-      }
-    }
-  }
-  cloudViewer {
-    id
-  }
-}`
-
-gql`
-mutation RunsContainer_FetchNewerRuns(
-  $cloudProjectNodeId: ID!, 
-  $beforeCursor: String, 
-  $hasBeforeCursor: Boolean!,
-  $refreshPendingRuns: [ID!]!,
-  $hasRefreshPendingRuns: Boolean!
-) {
-  refetchRemote {
-    cloudNode(id: $cloudProjectNodeId) {
-      id
-      __typename
-      ... on CloudProject {
-        runs(first: 10) @skip(if: $hasBeforeCursor) {
-          ...RunsContainer_RunsConnection
-        }
-        newerRuns: runs(last: 10, before: $beforeCursor) @include(if: $hasBeforeCursor) {
-          ...RunsContainer_RunsConnection
-        }
-      }
-    }
-    cloudNodesByIds(ids: $refreshPendingRuns) @include(if: $hasRefreshPendingRuns) {
-      id
-      ... on CloudRun {
-        ...RunCard
-      }
-    }
-  }
-}
-`
-
 const currentProject = computed(() => props.gql.currentProject)
-const cloudViewer = computed(() => props.gql.cloudViewer)
-
-const variables = computed(() => {
-  if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
-    const toRefresh = currentProject.value?.cloudProject.runs?.nodes?.map((r) => r.status === 'RUNNING' ? r.id : null).filter((f) => f) ?? []
-
-    return {
-      cloudProjectNodeId: currentProject.value?.cloudProject.id,
-      beforeCursor: currentProject.value?.cloudProject.runs?.pageInfo.startCursor,
-      hasBeforeCursor: Boolean(currentProject.value?.cloudProject.runs?.pageInfo.startCursor),
-      refreshPendingRuns: toRefresh,
-      hasRefreshPendingRuns: toRefresh.length > 0,
-    }
-  }
-
-  return undefined as any
-})
-
-const refetcher = useMutation(RunsContainer_FetchNewerRunsDocument)
-
-// 15 seconds polling
-const POLL_FOR_LATEST = 1000 * 15
-let timeout: null | number = null
-
-function startPolling () {
-  timeout = window.setTimeout(function fetchNewerRuns () {
-    if (variables.value && props.online) {
-      refetcher.executeMutation(variables.value)
-      .then(() => {
-        startPolling()
-      })
-    } else {
-      startPolling()
-    }
-  }, POLL_FOR_LATEST)
-}
-
-onMounted(() => {
-  // Always fetch when the component mounts, and we're not already fetching
-  if (props.online && !refetcher.fetching) {
-    refetcher.executeMutation(variables.value)
-  }
-
-  startPolling()
-})
-
-onUnmounted(() => {
-  if (timeout) {
-    clearTimeout(timeout)
-  }
-
-  timeout = null
-})
 
 const props = defineProps<{
-  gql: RunsContainerFragment
+  gql: RunsContainerFragment | RunsGitTreeQuery
+  runs?: RunCardFragment[]
   online: boolean
+  allRunIds?: string[]
+  currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const latestRunUrl = computed(() => {
+  if (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject') {
+    return '#'
+  }
+
+  return getUrlWithParams({
+    url: props.gql.currentProject?.cloudProject?.cloudProjectUrl,
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'View runs in Cypress Cloud',
+    },
+  })
+})
 
 const noRunsForBranchMessage = computed(() => {
   const learnMoreLink = getUrlWithParams({

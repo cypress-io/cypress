@@ -1,4 +1,3 @@
-import { URL } from 'url'
 import path from 'path'
 import * as _ from 'lodash'
 import * as is from 'check-more-types'
@@ -33,12 +32,27 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
   return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value: any): ErrResult | boolean => {
+const isStringArray = (value: any): ErrResult | boolean => {
   return _.isArray(value) && _.every(value, _.isString)
 }
 
 const isFalse = (value: any): boolean => {
   return value === false
+}
+
+type ValidationResult = ErrResult | boolean | string;
+type ValidationFn = (key: string, value: any) => ValidationResult
+
+export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
+  return (key: string, value: any): ValidationResult => {
+    return validations.reduce((result: ValidationResult, validation: ValidationFn) => {
+      if (result === true) {
+        return result
+      }
+
+      return validation(key, value)
+    }, false)
+  }
 }
 
 /**
@@ -105,8 +119,50 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
   return true
 }
 
+const isValidExperimentalRetryOptionsConfig = (options: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold'): boolean => {
+  if (options == null) return true
+
+  // retries must be an integer of 1 or greater
+  const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
+
+  if (!isValidMaxRetries) {
+    return false
+  }
+
+  // if the strategy is 'detect-flake-but-always-fail', stopIfAnyPassed must be provided and must be a boolean
+  if (strategy === 'detect-flake-but-always-fail') {
+    if (options.passesRequired !== undefined) {
+      return false
+    }
+
+    const isValidStopIfAnyPasses = _.isBoolean(options.stopIfAnyPassed)
+
+    if (!isValidStopIfAnyPasses) {
+      return false
+    }
+  }
+
+  // if the strategy is 'detect-flake-and-pass-on-threshold', passesRequired must be provided and must be an integer greater than 0
+  if (strategy === 'detect-flake-and-pass-on-threshold') {
+    if (options.stopIfAnyPassed !== undefined) {
+      return false
+    }
+
+    const isValidPassesRequired = _.isInteger(options.passesRequired) && options.passesRequired > 0 && options.passesRequired <= options.maxRetries
+
+    if (!isValidPassesRequired) {
+      return false
+    }
+  }
+
+  return true
+}
+
 export const isValidRetriesConfig = (key: string, value: any): ErrResult | true => {
   const optionalKeys = ['runMode', 'openMode']
+  const experimentalOptions = ['experimentalStrategy', 'experimentalOptions']
+  const experimentalStrategyOptions = ['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold']
+
   const isValidRetryValue = (val: any) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
   const optionalKeysAreValid = (val: any, k: string) => optionalKeys.includes(k) && isValidRetryValue(val)
 
@@ -114,11 +170,37 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
     return true
   }
 
-  if (_.isObject(value) && _.every(value, optionalKeysAreValid)) {
-    return true
+  if (_.isObject(value)) {
+    const traditionalConfigOptions = _.omit(value, experimentalOptions)
+    const experimentalConfigOptions = _.pick<any>(value, experimentalOptions)
+
+    const isTraditionalConfigValid = _.every(traditionalConfigOptions, optionalKeysAreValid)
+
+    // if optionalKeys are only present and are valid, return true.
+    // The defaults for 'experimentalStrategy' and 'experimentalOptions' are undefined, but the keys exist, so we need to check for this
+    if (isTraditionalConfigValid && !Object.keys(experimentalConfigOptions).filter((key) => experimentalConfigOptions[key] !== undefined).length) {
+      return true
+    }
+
+    // check experimental configuration. experimentalStrategy MUST be present if experimental config is provided and set to one of the provided enumerations
+    if (experimentalConfigOptions.experimentalStrategy) {
+      // make sure the strategy provided is one of our valid enums
+      const isValidStrategy = experimentalStrategyOptions.includes(experimentalConfigOptions.experimentalStrategy)
+
+      // if a strategy is provided, and traditional options are also provided, such as runMode and openMode, then these values need to be booleans
+      const openAndRunModeConfigOptions = _.pick(value, optionalKeys)
+      const isValidRunAndOpenModeConfigWithStrategy = _.every(openAndRunModeConfigOptions, _.isBoolean)
+
+      // if options aren't present (either undefined or null) or are configured correctly, return true
+      if (isValidStrategy && isValidRunAndOpenModeConfigWithStrategy && (
+        experimentalConfigOptions.experimentalOptions == null ||
+        isValidExperimentalRetryOptionsConfig(experimentalConfigOptions.experimentalOptions, experimentalConfigOptions.experimentalStrategy))) {
+        return true
+      }
+    }
   }
 
-  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
+  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy')
 }
 
 /**
@@ -145,6 +227,29 @@ export const isOneOf = (...values: any[]): ((key: string, value: any) => ErrResu
     const strings = values.map((a) => str(a)).join(', ')
 
     return errMsg(key, value, `one of these values: ${strings}`)
+  }
+}
+
+/**
+ * Checks if given array value for a key includes only members of the provided values.
+ * @example
+  ```
+  validate = v.isArrayIncludingAny("foo", "bar", "baz")
+  validate("example", ["foo"]) // true
+  validate("example", ["bar", "baz"]) // true
+  validate("example", ["foo", "else"]) // error message string
+  validate("example", ["foo", "bar", "baz", "else"]) // error message string
+  ```
+  */
+export const isArrayIncludingAny = (...values: any[]): ((key: string, value: any) => ErrResult | true) => {
+  const validValues = values.map((a) => str(a)).join(', ')
+
+  return (key, value) => {
+    if (!Array.isArray(value) || !value.every((v) => values.includes(v))) {
+      return errMsg(key, value, `an array including any of these values: [${validValues}]`)
+    }
+
+    return true
   }
 }
 
@@ -301,6 +406,16 @@ export function isNumberOrFalse (key: string, value: any): ErrResult | true {
   return errMsg(key, value, 'a number or false')
 }
 
+export function isValidCrfOrBoolean (key: string, value: any): ErrResult | true {
+  // a valid number that is between 1-51 including 1 or 51
+  // or a boolean. false or 0 disables compression and true sets compression to 32 CRF by default.
+  if (_.isBoolean(value) || (_.isNumber(value) && _.inRange(value, 0, 52))) {
+    return true
+  }
+
+  return errMsg(key, value, 'a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
+}
+
 export function isStringOrFalse (key: string, value: any): ErrResult | true {
   if (_.isString(value) || isFalse(value)) {
     return true
@@ -322,7 +437,7 @@ export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true 
 }
 
 export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isString(value) || isArrayOfStrings(value)) {
+  if (_.isString(value) || isStringArray(value)) {
     return true
   }
 
@@ -330,7 +445,7 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
 }
 
 export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isNull(value) || isArrayOfStrings(value)) {
+  if (_.isNull(value) || isStringArray(value)) {
     return true
   }
 

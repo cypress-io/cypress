@@ -4,7 +4,7 @@ import path from 'path'
 import _ from 'lodash'
 import del from 'del'
 import chalk from 'chalk'
-import electron from '@packages/electron'
+import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
@@ -24,6 +24,8 @@ import * as electronBuilder from 'electron-builder'
 const globAsync = promisify(glob)
 
 const CY_ROOT_DIR = path.join(__dirname, '..', '..')
+
+const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
 const log = function (msg) {
   const time = new Date()
@@ -74,7 +76,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false } = options
+  const { platform, version, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -98,7 +100,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
+    await execa('yarn', ['lerna', 'run', 'build', '--concurrency', '4'], {
+      stdio: 'inherit',
+      cwd: CY_ROOT_DIR,
+    })
+
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
@@ -107,9 +114,19 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   // Copy Packages: We want to copy the package.json, files, and output
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
-  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
 
-  const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
+  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'), {
+    // in some cases the dependency tree for nested dependencies changes when running
+    // a `yarn install` vs a `yarn install --production`. This is the case for `whatwg-url@7`,
+    // which i as a dependency of `source-map`, which is a devDependency in @packages/driver.
+    // This package gets hoisted by lerna to the root monorepo directory, but when install
+    // is run with --production, the directory structure changes and `whatwg-url@5` is
+    // installed and hoisted, which causes problems with patch-package.
+
+    // since we are only installing production level dependencies in this case, we do not need to copy
+    // dev patches into the DIST_DIR as they will not be applied anyway, allowing us to work around this problem.
+    filter: (src, _) => !src.includes('.dev.patch'),
+  })
 
   const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',
@@ -121,6 +138,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
     scripts: {
+      // After the `yarn --production` install, we need to patch packages
       postinstall: 'patch-package',
     },
   }, { spaces: 2 })
@@ -139,6 +157,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     cwd: DIST_DIR,
     stdio: 'inherit',
   })
+
+  log('#copying better-sqlite3')
+  fs.copySync(
+    path.join(CY_ROOT_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+    path.join(DIST_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+  )
 
   // TODO: Validate no-hoists / single copies of libs
 
@@ -204,6 +228,10 @@ require('./packages/server/index.js')
 
   log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
+}
+
+export async function packageElectronApp (options: BuildCypressAppOpts) {
+  const { platform, version, skipSigning = false } = options
 
   log('#removeCyAndBinFolders')
   await del([
@@ -227,6 +255,8 @@ require('./packages/server/index.js')
   // See the internal wiki document "Signing Test Runner on MacOS"
   // to learn how to get the right Mac certificate for signing and notarizing
   // the built Test Runner application
+
+  const electronVersion = electron.getElectronVersion()
 
   const appFolder = meta.distDir()
   const outputFolder = meta.buildRootDir()

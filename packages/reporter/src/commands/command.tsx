@@ -19,10 +19,10 @@ import { determineTagType } from '../sessions/utils'
 import CommandModel, { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
-import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
-import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
-import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
-import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
+import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
+import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
 const md = new Markdown({ breaks: true })
 

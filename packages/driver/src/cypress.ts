@@ -45,6 +45,7 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
+import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
 import { telemetry } from '@packages/telemetry/src/browser'
 
@@ -56,6 +57,8 @@ declare global {
     Cypress: Cypress.Cypress
     Runner: any
     cy: Cypress.cy
+    // eval doesn't exist on the built-in Window type for some reason
+    eval (expression: string): any
   }
 }
 
@@ -275,7 +278,16 @@ class $Cypress {
       }
 
       if (_.isObject(testRetries)) {
-        return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+        const retriesAsNumberOrBoolean = testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+
+        // If experimentalRetries are configured, an experimentalStrategy is present, and the retries configured is a boolean
+        // then we need to set the mocha '_retries' to 'maxRetries' present in the 'experimentalOptions' configuration.
+        if (testRetries['experimentalStrategy'] && _.isBoolean(retriesAsNumberOrBoolean) && retriesAsNumberOrBoolean) {
+          return testRetries['experimentalOptions'].maxRetries
+        }
+
+        // Otherwise, this is a number and falls back to default
+        return retriesAsNumberOrBoolean
       }
 
       return null
@@ -344,7 +356,17 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $scriptUtils.runScripts(specWindow, scripts)
+    $scriptUtils.runScripts({
+      browser: this.config('browser'),
+      scripts,
+      specWindow,
+      testingType: this.testingType,
+    })
+    .then(() => {
+      if (this.testingType === 'e2e') {
+        return setSpecContentSecurityPolicy(specWindow)
+      }
+    })
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -543,8 +565,20 @@ class $Cypress {
         break
 
       case 'runner:test:before:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:run:async', args[0])
+
         // TODO: handle timeouts here? or in the runner?
         return this.emitThen('test:before:run:async', ...args)
+
+      case 'runner:test:before:after:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0], args[2])
+
+        return this.emitThen('test:before:after:run:async', ...args)
+
+      case 'runner:test:after:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:after:run:async', args[0])
+
+        return this.emitThen('test:after:run:async', ...args)
 
       case 'runner:runnable:after:run:async':
         return this.emitThen('runnable:after:run:async', ...args)
@@ -649,6 +683,9 @@ class $Cypress {
       case 'cy:snapshot':
         return this.emit('snapshot', ...args)
 
+      case 'cy:protocol-snapshot':
+        return this.emit('cy:protocol-snapshot', ...args)
+
       case 'cy:before:stability:release':
         return this.emitThen('before:stability:release')
 
@@ -674,6 +711,9 @@ class $Cypress {
 
       case 'app:navigation:changed':
         return this.emit('navigation:changed', ...args)
+
+      case 'app:download:received':
+        return this.emit('download:received')
 
       case 'app:form:submitted':
         return this.emit('form:submitted', args[0])

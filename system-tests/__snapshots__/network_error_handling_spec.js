@@ -53,7 +53,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     https_passthru.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -108,7 +108,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -163,7 +163,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -218,7 +218,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -346,7 +346,7 @@ https://on.cypress.io/request
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_handling.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

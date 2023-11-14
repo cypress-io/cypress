@@ -17,7 +17,7 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts'])
+      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts', '--component'])
       cy.startAppServer('component')
     })
 

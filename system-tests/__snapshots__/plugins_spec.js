@@ -51,7 +51,7 @@ exports['e2e plugins / works with user extensions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -262,7 +262,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -324,7 +324,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot_overwrite.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -495,7 +495,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -31,14 +31,4 @@ describe('e2e remote debugging disconnect', () => {
       currentConnectionCount: 1,
     })
   })
-
-  it('errors if CDP connection cannot be reestablished', () => {
-    cy.task('destroy:server')
-    cy.task('kill:active:connections')
-
-    cy.then(() => {
-      // this will cause a project-level error once we realize we can't talk to CDP anymore
-      return callAutomation()
-    })
-  })
 })

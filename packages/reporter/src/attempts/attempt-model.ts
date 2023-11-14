@@ -23,6 +23,7 @@ export default class Attempt {
   @observable isActive: boolean | null = null
   @observable routes: Route[] = []
   @observable _state?: TestState | null = null
+  @observable _testOuterStatus?: TestState = undefined
   @observable _invocationCount: number = 0
   @observable invocationDetails?: FileDetails
   @observable hookCount: { [name in HookName]: number } = {
@@ -107,8 +108,7 @@ export default class Attempt {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
-        // @ts-ignore satisfied by CommandProps
-        if (props.sessionInfo) {
+        if ((props as CommandProps).sessionInfo) {
           this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
         }
 
@@ -171,6 +171,10 @@ export default class Attempt {
   @action update (props: UpdatableTestProps) {
     if (props.state) {
       this._state = props.state
+    }
+
+    if (props._cypressTestStatusInfo?.outerStatus) {
+      this._testOuterStatus = props._cypressTestStatusInfo.outerStatus
     }
 
     if (props.err) {

@@ -18,19 +18,19 @@ export const Query = objectType({
   definition (t) {
     t.field('baseError', {
       type: ErrorWrapper,
-      resolve: (root, args, ctx) => ctx.baseError,
+      resolve: (root, args, ctx) => ctx.coreData.diagnostics.error,
     })
 
     t.field('cachedUser', {
       type: CachedUser,
-      resolve: (root, args, ctx) => ctx.user,
+      resolve: (root, args, ctx) => ctx.coreData.user,
     })
 
     t.nonNull.list.nonNull.field('warnings', {
       type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
-        return ctx.warnings
+        return ctx.coreData.diagnostics.warnings
       },
     })
 
@@ -87,7 +87,7 @@ export const Query = objectType({
     t.nonNull.list.nonNull.field('projects', {
       type: ProjectLike,
       description: 'All known projects for the app',
-      resolve: (root, args, ctx) => ctx.appData.projects,
+      resolve: (root, args, ctx) => ctx.coreData.app.projects,
     })
 
     t.nonNull.boolean('isGlobalMode', {
@@ -127,7 +127,7 @@ export const Query = objectType({
         name: nonNull(stringArg({ description: 'the name of the cohort to find' })),
       },
       resolve: async (source, args, ctx) => {
-        return await ctx.cohortsApi.getCohort(args.name) ?? null
+        return await ctx.config.cohortsApi.getCohort(args.name) ?? null
       },
     })
 
@@ -145,6 +145,17 @@ export const Query = objectType({
     t.string('machineId', {
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
+    })
+
+    t.string('videoEmbedHtml', {
+      description: 'Markup for the migration landing page video embed',
+      resolve: (source, args, ctx) => {
+        // NOTE: embedded video is not always a part of the v9 - v10 migration experience
+        // in the case of v1x - v13, we want to show an embedded video to users installing the major
+        // version for the first time without going through the steps of the migration resolver, hence
+        // why this lives in the root resolver but the migration context
+        return ctx.migration.getVideoEmbedHtml()
+      },
     })
   },
   sourceType: {
