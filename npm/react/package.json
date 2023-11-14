@@ -19,7 +19,7 @@
     "@cypress/mount-utils": "0.0.0-development",
     "@types/semver": "7.5.0",
     "@vitejs/plugin-react": "4.0.0",
-    "axios": "0.21.2",
+    "axios": "1.6.0",
     "cypress": "0.0.0-development",
     "prop-types": "15.7.2",
     "react": "16.8.6",
