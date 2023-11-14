@@ -1,6 +1,8 @@
 import type { BannersState, Editor, MajorVersionWelcomeDismissed } from '.'
 
-export type NotifyWhenRunCompletes = 'passed' | 'failed' | 'cancelled' | 'errored'
+export const NotifyCompletionStatuses = ['passed', 'failed', 'cancelled', 'errored'] as const
+
+export type NotifyWhenRunCompletes = typeof NotifyCompletionStatuses[number]
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
@@ -35,6 +37,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'firstOpened',
   'lastOpened',
   'lastProjectId',
+  'lastTestCountsEvent',
   'promptsShown',
   'specFilter',
   'preferredEditorBinary',
@@ -74,6 +77,7 @@ export type AllowedState = Partial<{
   lastProjectId: Maybe<string>
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
+  lastTestCountsEvent: Maybe<number>
   promptsShown: Maybe<object>
   specFilter: Maybe<string>
   preferredEditorBinary: Maybe<string>

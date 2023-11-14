@@ -51,15 +51,10 @@ exports['e2e plugins / works with user extensions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================
@@ -267,7 +262,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -278,11 +273,6 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/ignored-values.png                (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/invalid-return.png                (YxX)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/after_screenshot.cy.js.mp4
 
 
 ====================================================================================================
@@ -334,7 +324,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot_overwrite.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -343,11 +333,6 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   (Screenshots)
 
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite.cy.js.mp4
 
 
 ====================================================================================================
@@ -510,15 +495,10 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================

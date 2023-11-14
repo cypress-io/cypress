@@ -680,7 +680,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('calls resolve:url with http:// when localhost', () => {
-      const backend = cy.spy(Cypress, 'backend')
+      const backend = cy.spy(Cypress, 'backend').log(false)
 
       cy
       .visit('localhost:3500/timeout')
@@ -720,7 +720,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('strips username + password out of the url when provided', () => {
-      const backend = cy.spy(Cypress, 'backend')
+      const backend = cy.spy(Cypress, 'backend').log(false)
 
       cy
       .visit('http://cypress:password123@localhost:3500/timeout')
@@ -730,7 +730,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('passes auth options', () => {
-      const backend = cy.spy(Cypress, 'backend')
+      const backend = cy.spy(Cypress, 'backend').log(false)
 
       const auth = {
         username: 'cypress',
@@ -764,9 +764,14 @@ describe('src/cy/commands/navigation', () => {
     // https://github.com/cypress-io/cypress/issues/14445
     // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
     it('should eventually fail on assertion despite redirects', { browser: '!webkit' }, (done) => {
+      let hasDoneBeenCalled = false
+
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
-        done()
+        if (!hasDoneBeenCalled) {
+          hasDoneBeenCalled = true
+          done()
+        }
       })
 
       // One time, set the amount of times we want the page to perform it's redirect loop.
@@ -894,7 +899,7 @@ describe('src/cy/commands/navigation', () => {
 
     describe('when origins don\'t match', () => {
       beforeEach(() => {
-        Cypress.emit('test:before:run', { id: 888 })
+        Cypress.emit('test:before:run', { id: 'r2' })
 
         cy.stub(Cypress.runner, 'getEmissions').returns([])
         cy.stub(Cypress.runner, 'getTestsState').returns([])
@@ -908,7 +913,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('emits preserve:run:state with title + fn', (done) => {
         const obj = {
-          currentId: 888,
+          currentId: 'r2',
           tests: [],
           emissions: [],
           startTime: '12345',
@@ -926,7 +931,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         }
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -957,7 +962,7 @@ describe('src/cy/commands/navigation', () => {
         .withArgs('http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js')
         .callsFake(fn)
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1123,7 +1128,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays file attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1137,17 +1142,20 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/jquery.html').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'File Served': '/path/to/foo/bar',
-            'Resolved Url': 'http://localhost:3500/foo/bar',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'File Served': '/path/to/foo/bar',
+              'Resolved Url': 'http://localhost:3500/foo/bar',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
 
       it('displays http attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1161,16 +1169,19 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Resolved Url': 'http://localhost:3500/foo',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Resolved Url': 'http://localhost:3500/foo',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
 
       it('displays originalUrl http attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1184,17 +1195,20 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Original Url': 'http://localhost:3500/foo',
-            'Resolved Url': 'http://localhost:3500/foo/bar',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Original Url': 'http://localhost:3500/foo',
+              'Resolved Url': 'http://localhost:3500/foo/bar',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
 
       it('indicates redirects in the message', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1232,8 +1246,11 @@ describe('src/cy/commands/navigation', () => {
         .visit('http://localhost:3500/fixtures/generic.html#foo')
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Note': 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Note': 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
+            },
           })
         })
       })
@@ -1247,7 +1264,7 @@ describe('src/cy/commands/navigation', () => {
           notReal: 'baz',
         })
         .then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Options']).to.deep.eq({
+          expect(this.lastLog.invoke('consoleProps').props['Options']).to.deep.eq({
             url: 'http://localhost:3500/fixtures/generic.html',
             headers: {
               'foo': 'bar',
@@ -1259,7 +1276,7 @@ describe('src/cy/commands/navigation', () => {
       it('does not log options if they are not supplied', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html')
         .then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Options']).to.be.undefined
+          expect(this.lastLog.invoke('consoleProps').props['Options']).to.be.undefined
         })
       })
     })
@@ -1281,7 +1298,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('sets error command state', function (done) {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(new Error)
 
@@ -1298,7 +1315,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('logs once on error', function (done) {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(new Error)
 
@@ -1338,7 +1355,7 @@ describe('src/cy/commands/navigation', () => {
           })
         }
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .callsFake(fn)
 
@@ -1442,7 +1459,7 @@ describe('src/cy/commands/navigation', () => {
         // dont log else we create an endless loop!
         const emit = cy.spy(Cypress, 'emit').log(false)
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(err1)
 
@@ -1491,7 +1508,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves(obj)
 
@@ -1540,7 +1557,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves(obj)
 
@@ -1590,7 +1607,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 
@@ -1639,7 +1656,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 
@@ -1733,7 +1750,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 
@@ -2306,9 +2323,12 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/dimensions.html',
-            'Url Updated By': 'page navigation event (before:load)',
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/dimensions.html',
+              'Url Updated By': 'page navigation event (before:load)',
+            },
           })
         })
       })
@@ -2488,10 +2508,13 @@ describe('src/cy/commands/navigation', () => {
             expect(lastLog.get('event')).to.be.true
 
             expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              'Event': 'new url',
-              'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
-              'Url Updated By': 'hashchange',
-              'Args': ohc,
+              name: 'new url',
+              type: 'event',
+              props: {
+                'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
+                'Url Updated By': 'hashchange',
+                'Args': ohc,
+              },
             })
           })
         })
@@ -2570,14 +2593,17 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/pushState.html',
-            'Url Updated By': 'pushState',
-            'Args': [
-              { foo: 'bar' },
-              null,
-              'pushState.html',
-            ],
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/pushState.html',
+              'Url Updated By': 'pushState',
+              'Args': [
+                { foo: 'bar' },
+                null,
+                'pushState.html',
+              ],
+            },
           })
         })
       })
@@ -2622,14 +2648,17 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/replaceState.html',
-            'Url Updated By': 'replaceState',
-            'Args': [
-              { foo: 'bar' },
-              null,
-              'replaceState.html',
-            ],
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/replaceState.html',
+              'Url Updated By': 'replaceState',
+              'Args': [
+                { foo: 'bar' },
+                null,
+                'replaceState.html',
+              ],
+            },
           })
         })
       })
@@ -2671,9 +2700,12 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'form sub',
-            'Originated From': $form.get(0),
-            'Args': event,
+            name: 'form sub',
+            type: 'event',
+            props: {
+              'Originated From': $form.get(0),
+              'Args': event,
+            },
           })
         })
       })

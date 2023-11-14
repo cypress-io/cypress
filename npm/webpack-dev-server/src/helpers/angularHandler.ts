@@ -136,9 +136,11 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
   }
 
-  const cypressTypes = getProjectFilePath(workspaceRoot, 'node_modules', 'cypress', 'types', 'index.d.ts')
+  const typeRoots = [
+    getProjectFilePath(workspaceRoot, 'node_modules'),
+  ]
 
-  includePaths.push(cypressTypes)
+  const types = ['cypress']
 
   const tsConfigContent = JSON.stringify({
     extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
@@ -146,19 +148,21 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
+      types,
+      typeRoots,
     },
     include: includePaths,
-  })
+  }, null, 2)
 
-  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot)), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
 }
 
-export async function getTempDir (): Promise<string> {
-  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
+export async function getTempDir (projectName: string): Promise<string> {
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', projectName)
 
   await fs.ensureDir(cypressTempDir)
 

@@ -220,7 +220,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       },
 
       consoleProps: () => {
-        obj = { Command: 'assert' }
+        obj = { name: 'assert' }
 
         _.extend(obj, parseValueActualAndExpected(value, actual, expected))
 

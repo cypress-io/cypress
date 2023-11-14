@@ -73,6 +73,9 @@ export interface CloudDataSourceParams {
    * and we need to clear both the server & client side cache
    */
   invalidateClientUrqlCache(): void
+  headers?: {
+    getMachineId: Promise<string | null>
+  }
 }
 
 /**
@@ -99,10 +102,11 @@ export class CloudDataSource {
     return this.params.getUser()
   }
 
-  get #additionalHeaders () {
+  async #additionalHeaders () {
     return {
       'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
       'x-cypress-version': pkg.version,
+      'x-machine-id': await this.params.headers?.getMachineId || '',
     }
   }
 
@@ -156,7 +160,7 @@ export class CloudDataSource {
           ...init,
           headers: {
             ...init?.headers,
-            ...this.#additionalHeaders,
+            ...await this.#additionalHeaders(),
           },
         })
       },
@@ -166,7 +170,7 @@ export class CloudDataSource {
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
     return delegateToSchema({
       operation: 'query',
-      schema: params.ctx.schemaCloud,
+      schema: params.ctx.config.schemaCloud,
       fieldName: params.field,
       fieldNodes: params.info.fieldNodes,
       info: params.info,

@@ -301,6 +301,15 @@
       "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
       "passing": "Relevant run is passing",
       "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
+    },
+    "runs": {
+      "running": "Latest run is in progress",
+      "failing": "Latest run is failing with {n} test failure | Latest run is failing with {n} test failures",
+      "passed": "Latest run passed",
+      "failed": "Latest run had {n} test failure | Latest run had {n} test failures",
+      "cancelled": "Latest run has been cancelled",
+      "errored": "Latest run had an error",
+      "erroredWithFailures": "Latest run had an error with {n} test failure | Latest run had an error with {n} test failures"
     }
   },
   "topNav": {
@@ -586,6 +595,16 @@
         "name": "Modify obstructive third party code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
       },
+      "retries": {
+        "experimentalStrategy": {
+          "name": "Retries Strategy",
+          "description": "Applies a strategy for test retries according to your \"flake tolerance\"; options are `detect-flake-but-always-fail` or `detect-flake-and-pass-on-threshold`."
+        },
+        "experimentalOptions": {
+          "name": "Retries Strategy Options",
+          "description": "Sets retries strategy-specific options like `maxRetries`, `passesRequired`, and `stopIfAnyPassed`."
+        }
+      },
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
@@ -756,6 +775,18 @@
         "link": "Support page",
         "button": "Try again"
       }
+    },
+    "card": {
+      "branchName": "Branch Name:",
+      "commitAuthor": "Commit Author:",
+      "totalDuration": "Run Total Duration:",
+      "debugLabel": "Debug",
+      "debugDescription": "View debug for run {runNumber}",
+      "noDebugAvailable": "You can only debug runs for your most recent commits."
+    },
+    "layout": {
+      "viewCloudRuns": "View runs in Cypress Cloud",
+      "checkedOut": "Checked out"
     }
   },
   "debugPage": {
@@ -865,6 +896,7 @@
       "browsers": "{n} browser | {n} browsers"
     },
     "artifacts": {
+      "replay": "View Test Replay",
       "stdout": "View Log",
       "screenshots": "View Screenshots",
       "video": "View Video"

@@ -145,12 +145,49 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
+const requestIdRegEx = /^(.*)-retry-([\d]+)$/
+const getOriginalRequestId = (requestId: string) => {
+  let originalRequestId = requestId
+  const match = requestIdRegEx.exec(requestId)
+
+  if (match) {
+    [, originalRequestId] = match
+  }
+
+  return originalRequestId
+}
+
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
     browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
   })
+
+  this.next()
+}
+
+const FilterNonProxiedResponse: ResponseMiddleware = function () {
+  // if the request is from an extra target (i.e. not the main Cypress tab, but
+  // an extra tab/window), we want to skip any manipulation of the response and
+  // only run the middleware necessary to get it back to the browser
+  if (this.req.isFromExtraTarget) {
+    this.debug('response for [%s %s] is from extra target', this.req.method, this.req.proxiedUrl)
+
+    // this is normally done in the OmitProblematicHeaders middleware, but we
+    // don't want to omit any headers in this case
+    this.res.set(this.incomingRes.headers)
+
+    this.onlyRunMiddleware([
+      'AttachPlainTextStreamFn',
+      'PatchExpressSetHeader',
+      'MaybeSendRedirectToClient',
+      'CopyResponseStatusCode',
+      'MaybeEndWithEmptyBody',
+      'GzipBody',
+      'SendResponseBodyToClient',
+    ])
+  }
 
   this.next()
 }
@@ -220,6 +257,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
+  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -580,7 +618,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: this.req.requestedWith,
+      resourceType: this.req.resourceType,
       credentialLevel: this.req.credentialsLevel,
     },
   })
@@ -643,6 +681,11 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
+  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
+  if (this.req.noPreRequestExpected) {
+    this.addPendingUrlWithoutPreRequest(newUrl)
+  }
+
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
@@ -672,6 +715,22 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+
+      this.protocolManager.responseEndedWithEmptyBody({
+        requestId,
+        isCached: this.incomingRes.statusCode === 304,
+        timings: {
+          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
+        },
+      })
+    }
+
     this.res.end()
 
     return this.end()
@@ -732,7 +791,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     streamSpan?.end()
     this.next()
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     span?.end()
   })
 }
@@ -765,7 +824,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     streamSpan?.end()
   })
 
@@ -773,7 +832,37 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = async function () {
+  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    const preRequest = this.req.browserPreRequest
+    const requestId = getOriginalRequestId(preRequest.requestId)
+
+    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+    const resultingStream = this.protocolManager.responseStreamReceived({
+      requestId,
+      responseHeaders: this.incomingRes.headers,
+      isAlreadyGunzipped: this.isGunzipped,
+      responseStream: this.incomingResStream,
+      res: this.res,
+      timings: {
+        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+        cdpLagDuration: preRequest.cdpLagDuration,
+        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+      },
+    })
+
+    if (resultingStream) {
+      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
+        span?.end()
+      })
+    } else {
+      span?.end()
+    }
+  }
+
   if (this.isGunzipped) {
     this.debug('regzipping response body')
     const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -781,7 +870,7 @@ const GzipBody: ResponseMiddleware = function () {
     this.incomingResStream = this.incomingResStream
     .pipe(zlib.createGzip(zlibOptions))
     .on('error', this.onError)
-    .once('finish', () => {
+    .once('close', () => {
       span?.end()
     })
   }
@@ -805,6 +894,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,

@@ -6,14 +6,12 @@
   "main": "dist/v8-snapshot.js",
   "scripts": {
     "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
-    "build-prod": "yarn build",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -55,5 +53,10 @@
     "@cypress/snapbuild-linux-ppc64le": "1.0.2",
     "@cypress/snapbuild-windows-32": "1.0.2",
     "@cypress/snapbuild-windows-64": "1.0.2"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "@packages/graphql"
+    ]
   }
 }

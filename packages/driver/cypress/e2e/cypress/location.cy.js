@@ -188,7 +188,7 @@ describe('src/cypress/location', () => {
       expect(str).to.eq('?q=books')
     })
 
-    it('returns an empty string with no seach params', function () {
+    it('returns an empty string with no search params', function () {
       const str = this.setup('google').getSearch()
 
       expect(str).to.eq('')

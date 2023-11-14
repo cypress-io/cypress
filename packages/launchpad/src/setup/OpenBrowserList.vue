@@ -166,7 +166,6 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument, OpenBrowserList_BrowserStatusChangeDocument } from '../generated/graphql'
@@ -228,11 +227,8 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const browsers = computed(() => {
-  if (!props.gql.browsers) {
-    return undefined
-  }
-
-  return sortBrowsers([...props.gql.browsers])
+  // Need to slice(). `sort()` mutates, and props are supposed to be `readonly`.
+  return (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
@@ -240,9 +236,7 @@ const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 const selectedBrowserId = computed({
   get: () => {
     // NOTE: The activeBrowser is set during project initialization. It should always be defined.
-    if (!props.gql.activeBrowser) throw new Error('Missing activeBrowser in selectedBrowserId')
-
-    return props.gql.activeBrowser.id
+    return props.gql.activeBrowser?.id
   },
   set (browserId) {
     if (browserId) {

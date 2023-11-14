@@ -8,7 +8,7 @@ const evilDns = require('evil-dns')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const Fixtures = require('@tooling/system-tests')
 const { createRoutes } = require(`../../lib/routes`)
@@ -26,7 +26,7 @@ describe('Server', () => {
   require('mocha-banner').register()
 
   beforeEach(() => {
-    return sinon.stub(ServerE2E.prototype, 'reset')
+    return sinon.stub(ServerBase.prototype, 'reset')
   })
 
   context('resolving url', () => {
@@ -83,7 +83,7 @@ describe('Server', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerE2E()),
+            (this.server = new ServerBase()),
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
@@ -292,7 +292,12 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/does-not-exist')
+          return this.rp({
+            url: 'http://localhost:2000/does-not-exist',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(404)
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
@@ -430,11 +435,9 @@ describe('Server', () => {
           'Cache-Control': 'public, max-age=3600',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://getbootstrap.com/', headers, this.automationRequest)
+        return this.server._onResolveUrl('http://getbootstrap.com/', userAgent, this.automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -833,11 +836,9 @@ describe('Server', () => {
           'Cache-Control': 'public, max-age=3600',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://cypress.io/foo', headers, this.automationRequest, { failOnStatusCode: false })
+        return this.server._onResolveUrl('http://cypress.io/foo', userAgent, this.automationRequest, { failOnStatusCode: false })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -890,11 +891,9 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://google.com/index', headers, this.automationRequest, { auth })
+        return this.server._onResolveUrl('http://google.com/index', userAgent, this.automationRequest, { auth })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,

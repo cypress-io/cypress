@@ -13,8 +13,6 @@ import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
-import { ServerCt } from './server-ct'
-import { ServerE2E } from './server-e2e'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
@@ -23,12 +21,18 @@ import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
+import type ProtocolManager from './cloud/protocol'
+import { ServerBase } from './server-base'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
+  protocolEnabled?: boolean
+  hideCommandLog?: boolean
+  hideRunnerUi?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -48,16 +52,15 @@ const debug = Debug('cypress:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export type Server = ServerE2E | ServerCt
-
-export class ProjectBase<TServer extends Server> extends EE {
+export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
 
   protected ctx: DataContext
   protected _cfg?: Cfg
-  protected _server?: TServer
+  protected _server?: ServerBase<any>
   protected _automation?: Automation
+  private _protocolManager?: ProtocolManager
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
@@ -137,12 +140,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._server?.remoteStates
   }
 
-  createServer (testingType: Cypress.TestingType) {
-    return testingType === 'e2e'
-      ? new ServerE2E() as TServer
-      : new ServerCt() as TServer
-  }
-
   async open () {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
@@ -151,7 +148,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     process.chdir(this.projectRoot)
 
-    this._server = this.createServer(this.testingType)
+    this._server = new ServerBase()
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
@@ -164,7 +161,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
     })
 
-    this.ctx.setAppServerPort(port)
+    this.ctx.actions.servers.setAppServerPort(port)
     this._isServerOpen = true
 
     // if we didnt have a cfg.port
@@ -273,8 +270,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.__reset()
 
-    this.ctx.setAppServerPort(undefined)
-    this.ctx.setAppSocketServer(undefined)
+    this.ctx.actions.servers.setAppServerPort(undefined)
+    this.ctx.actions.servers.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -316,8 +313,8 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
-  // if we've passed down reporter
-  // then record these via mocha reporter
+    // if we've passed down reporter
+    // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
       report,
       reporter,
@@ -333,9 +330,21 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
+    const onRequestServedFromCache = (requestId: string) => {
+      this.server.removeBrowserPreRequest(requestId)
+    }
 
-    const io = this.server.startWebsockets(this.automation, this.cfg, {
+    const onRequestFailed = (requestId: string) => {
+      this.server.removeBrowserPreRequest(requestId)
+    }
+
+    const onDownloadLinkClicked = (downloadUrl: string) => {
+      this.server.addPendingUrlWithoutPreRequest(downloadUrl)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)
+
+    const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -355,10 +364,11 @@ export class ProjectBase<TServer extends Server> extends EE {
         debug('received runnables %o', runnables)
 
         if (reporterInstance) {
-          reporterInstance.setRunnables(runnables)
+          reporterInstance.setRunnables(runnables, this.getConfig())
         }
 
         if (this._recordTests) {
+          this._protocolManager?.addRunnables(runnables)
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
@@ -370,7 +380,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
 
       onMocha: async (event, runnable) => {
-        debug('onMocha', event)
         // bail if we dont have a
         // reporter instance
         if (!reporterInstance) {
@@ -379,7 +388,12 @@ export class ProjectBase<TServer extends Server> extends EE {
 
         reporterInstance.emit(event, runnable)
 
-        if (event === 'end') {
+        if (event === 'test:before:run') {
+          this.emit('test:before:run', {
+            runnable,
+            previousResults: reporterInstance?.results() || {},
+          })
+        } else if (event === 'end') {
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
@@ -392,7 +406,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
     })
 
-    this.ctx.setAppSocketServer(io)
+    this.ctx.actions.servers.setAppSocketServer(ios)
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
@@ -422,6 +436,22 @@ export class ProjectBase<TServer extends Server> extends EE {
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
+
+    if (this.browser.family !== 'chromium') {
+      // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
+      // in order to not hang for 2 seconds, we override the prerequest timeout to be 500 ms (which is what it has been historically)
+      this._server?.setPreRequestTimeout(500)
+    }
+  }
+
+  get protocolManager (): ProtocolManager | undefined {
+    return this._protocolManager
+  }
+
+  set protocolManager (protocolManager: ProtocolManager | undefined) {
+    this._protocolManager = protocolManager
+
+    this._server?.setProtocolManager(protocolManager)
   }
 
   getAutomation () {
@@ -458,12 +488,23 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     debug('project has config %o', this._cfg)
 
+    const protocolEnabled = this._protocolManager?.protocolEnabled ?? false
+
+    // hide the runner if explicitly requested or if the protocol is enabled and the runner is not explicitly enabled
+    const hideRunnerUi = this.options?.args?.runnerUi === false || (protocolEnabled && !this.options?.args?.runnerUi)
+
+    // hide the command log if explicitly requested or if we are hiding the runner
+    const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
+
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
+      protocolEnabled,
+      hideCommandLog,
+      hideRunnerUi,
     }
   }
 

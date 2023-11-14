@@ -152,7 +152,7 @@ describe('App: Spec List (E2E)', () => {
 
       it('displays only matching spec', function () {
         cy.get('button')
-        .contains('24 matches')
+        .contains('26 matches')
         .should('not.contain.text', 'of')
 
         clearSearchAndType('content')
@@ -160,13 +160,13 @@ describe('App: Spec List (E2E)', () => {
         .should('have.length', 3)
         .and('contain', 'dom-content.spec.js')
 
-        cy.get('button').contains('3 of 24 matches')
+        cy.get('button').contains('3 of 26 matches')
 
         cy.findByLabelText('Search specs').clear().type('asdf')
         cy.findAllByTestId('spec-item')
         .should('have.length', 0)
 
-        cy.get('button').contains('0 of 24 matches')
+        cy.get('button').contains('0 of 26 matches')
       })
 
       it('only shows matching folders', () => {
@@ -217,7 +217,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByLabelText('Search specs')
         .should('have.value', '')
 
-        cy.get('button').contains('24 matches')
+        cy.get('button').contains('26 matches')
       })
 
       it('clears the filter if the user presses ESC key', function () {
@@ -226,7 +226,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.get('@searchField').should('have.value', '')
 
-        cy.get('button').contains('24 matches')
+        cy.get('button').contains('26 matches')
       })
 
       it('shows empty message if no results', function () {
@@ -242,13 +242,73 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('Clear search').click()
         cy.focused().should('have.id', 'spec-filter')
 
-        cy.get('button').contains('24 matches')
+        cy.get('button').contains('26 matches')
       })
 
       it('normalizes directory path separators for Windows', function () {
         // On Windows, when a user types `e2e/accounts`, it should match `e2e\accounts`
         clearSearchAndType('e2e/accounts')
         cy.findAllByTestId('spec-item').should('have.length', 2)
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains space', function () {
+        clearSearchAndType('accounts list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('accounts-list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('accounts_list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains space', function () {
+        clearSearchAndType('a b c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('a-b-c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('a_b_c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
 
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })

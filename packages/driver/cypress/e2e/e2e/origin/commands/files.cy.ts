@@ -28,7 +28,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
-      cy.stub(Cypress, 'backend').resolves({
+      cy.stub(Cypress, 'backend').log(false).resolves({
         contents,
         filePath: 'foo.json',
       })
@@ -37,8 +37,8 @@ context('cy.origin files', { browser: '!webkit' }, () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['6998637248317671', '4581875909943693'],
             commandName: 'writeFile',
-            userArgs: ['6998637248317671', '4581875909943693'],
             options: {
               fileName: 'foo.json',
               contents,
@@ -68,11 +68,12 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
+        const log = findCrossOriginLogs('readFile', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('readFile')
-        expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
-        expect(consoleProps.Contents).to.deep.equal({ example: true })
+        expect(log.consoleProps.name).to.equal('readFile')
+        expect(log.consoleProps.type).to.equal('command')
+        expect(log.consoleProps.props['File Path']).to.include('cypress/fixtures/example.json')
+        expect(log.consoleProps.props.Contents).to.deep.equal({ example: true })
       })
     })
 
@@ -80,7 +81,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
 
-        cy.stub(Cypress, 'backend').resolves({
+        cy.stub(Cypress, 'backend').log(false).resolves({
           contents,
           filePath: 'foo.json',
         })
@@ -91,9 +92,10 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('writeFile')
-        expect(consoleProps['File Path']).to.equal('foo.json')
-        expect(consoleProps.Contents).to.equal('{"foo":"bar"}')
+        expect(consoleProps.name).to.equal('writeFile')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['File Path']).to.equal('foo.json')
+        expect(consoleProps.props.Contents).to.equal('{"foo":"bar"}')
       })
     })
   })
