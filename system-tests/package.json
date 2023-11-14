@@ -6,6 +6,7 @@
   "main": "lib/fixtures.ts",
   "browser": "lib/fixtureDirs.ts",
   "scripts": {
+    "build": "node ./scripts/scaffold.js",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "type-check": "tsc --project .",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
@@ -18,7 +19,7 @@
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
-    "@babel/core": "7.22.9",
+    "@babel/core": "7.23.2",
     "@babel/preset-env": "7.22.9",
     "@cypress/commit-info": "2.2.0",
     "@cypress/debugging-proxy": "2.0.1",
@@ -26,7 +27,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@ffprobe-installer/ffprobe": "1.1.0",
+    "@ffprobe-installer/ffprobe": "2.1.2",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
     "@packages/network": "0.0.0-development",
@@ -92,5 +93,17 @@
   "types": "lib/fixtures.ts",
   "license": "ISC",
   "author": "",
-  "keywords": []
+  "keywords": [],
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/lib/fixtureDirs.ts"
+        ],
+        "dependsOn": [
+          "!@packages/data-context:build"
+        ]
+      }
+    }
+  }
 }

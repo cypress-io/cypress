@@ -17,15 +17,15 @@ program
     unique: true,
   })
 
-  const srcOuput = './src/'
-  let destinationOuput = destination.replace('/\\/g', '/')
+  const srcOutput = './src/'
+  let destinationOutput = destination.replace('/\\/g', '/')
 
-  if (!destinationOuput.endsWith('/')) {
-    destinationOuput += '/'
+  if (!destinationOutput.endsWith('/')) {
+    destinationOutput += '/'
   }
 
   const relOutput = (template, forSource) => {
-    return `${forSource ? srcOuput : destinationOuput}${template}`
+    return `${forSource ? srcOutput : destinationOutput}${template}`
   }
 
   const result = await Promise.all(templates.map(async (template) => {
