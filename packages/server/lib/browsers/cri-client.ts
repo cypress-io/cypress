@@ -265,15 +265,26 @@ export const create = async ({
 
     maybeDebugCdpMessages(cri)
 
-    // Only reconnect when we're not running cypress in cypress. There are a lot of disconnects that happen that we don't want to reconnect on
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    // Having a host set indicates that this is the child cri target, a.k.a.
+    // the main Cypress tab (as opposed to the root browser cri target)
+    const isChildTarget = !!host
+
+    // don't reconnect in these circumstances
+    if (
+      // is a child target. we only need to reconnect the root browser target
+      !isChildTarget
+      // running cypress in cypress - there are a lot of disconnects that happen
+      // that we don't want to reconnect on
+      && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    ) {
       cri.on('disconnect', retryReconnect)
     }
 
-    // We only want to try and add child target traffic if we have a host set. This indicates that this is the child cri client.
-    // Browser cri traffic is handled in browser-cri-client.ts. The basic approach here is we attach to targets and enable network traffic
-    // We must attach in a paused state so that we can enable network traffic before the target starts running.
-    if (host) {
+    // We're only interested in child target traffic. Browser cri traffic is
+    // handled in browser-cri-client.ts. The basic approach here is we attach
+    // to targets and enable network traffic. We must attach in a paused state
+    // so that we can enable network traffic before the target starts running.
+    if (isChildTarget) {
       cri.on('Target.targetCrashed', async (event) => {
         if (event.targetId !== target) {
           return
@@ -285,13 +296,19 @@ export const create = async ({
 
       if (fullyManageTabs) {
         cri.on('Target.attachedToTarget', async (event) => {
-          // Service workers get attached at the page and browser level. We only want to handle them at the browser level
-          if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page') {
-            await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
-          }
+          try {
+            // Service workers get attached at the page and browser level. We only want to handle them at the browser level
+            // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
+              await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+            }
 
-          if (event.waitingForDebugger) {
-            await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            if (event.waitingForDebugger) {
+              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            }
+          } catch (error) {
+            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+            debug('error attaching to target cri', error)
           }
         })
 
