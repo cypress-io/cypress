@@ -474,14 +474,24 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
     })
 
-    it('call run with --auto-cancel-after-failures', () => {
+    it('calls run with --auto-cancel-after-failures', () => {
       this.exec('run --auto-cancel-after-failures 4')
       expect(run.start).to.be.calledWith({ autoCancelAfterFailures: '4' })
     })
 
-    it('call run with --auto-cancel-after-failures with false', () => {
+    it('calls run with --auto-cancel-after-failures with false', () => {
       this.exec('run --auto-cancel-after-failures false')
       expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
+    })
+
+    it('calls run with --runner-ui', () => {
+      this.exec('run --runner-ui')
+      expect(run.start).to.be.calledWith({ runnerUi: true })
+    })
+
+    it('calls run with --no-runner-ui', () => {
+      this.exec('run --no-runner-ui')
+      expect(run.start).to.be.calledWith({ runnerUi: false })
     })
   })
 
@@ -625,7 +635,7 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('spawns server with correct args for depricated component-testing command', () => {
+    it('spawns server with correct args for deprecated component-testing command', () => {
       this.exec('open-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
@@ -637,7 +647,7 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('runs server with correct args for depricated component-testing command', () => {
+    it('runs server with correct args for deprecated component-testing command', () => {
       this.exec('run-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')

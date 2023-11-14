@@ -64,6 +64,8 @@
                 "totalPending": 0,
                 "totalSkipped": 0,
                 "totalRunning": 0,
+                "hasReplay": true,
+                "replayUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/136/overview/aeb56dee-6dae-4858-b1c2-16ed34088dbb/replay",
                 "hasStdout": true,
                 "stdoutUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/136/overview/aeb56dee-6dae-4858-b1c2-16ed34088dbb/stdout",
                 "hasScreenshots": false,
@@ -78,10 +80,10 @@
           "specs": [
             {
               "id": "Q2xvdWRTcGVjUnVuOmY0YzE3OGIxLWRlZjktNGI1NC1hOTU1LWQ3MGU0NDhjMTg5MTpNekExTlRVNE1UWXRNalZqTmkxak0yWmlMVEU0WWpFdFkyWTVaV1JrWkRFM05qTmk=",
-              "path": "src/components/InfoPanel/InfoPanel.cy.ts",
-              "basename": "InfoPanel.cy.ts",
-              "extension": ".cy.ts",
-              "shortPath": "src/components/InfoPanel/InfoPanel.cy.ts",
+              "path": "src/NewComponent.spec.jsx",
+              "basename": "NewComponent.spec.jsx",
+              "extension": ".spec.jsx",
+              "shortPath": "src/NewComponent.spec.jsx",
               "groupIds": [
                 "Q2xvdWRSdW5Hcm91cDo2Njg2MTI4NjpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ=="
               ],

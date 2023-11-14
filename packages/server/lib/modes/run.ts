@@ -20,12 +20,14 @@ import trash from '../util/trash'
 import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
-import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
-import type { Cfg } from '../project-base'
+import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
+import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
+import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -35,17 +37,12 @@ type BeforeSpecRun = any
 type AfterSpecRun = any
 type Project = NonNullable<ReturnType<typeof openProject['getProject']>>
 
-let exitEarly = (err) => {
-  debug('set early exit error: %s', err.stack)
-
-  earlyExitErr = err
-}
-let earlyExitErr: Error
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
-
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+let earlyExitTerminator = new EarlyExitTerminator()
 
 const relativeSpecPattern = (projectRoot, pattern) => {
   if (typeof pattern === 'string') {
@@ -65,7 +62,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
   const ranSpecs: SpecFile[] = []
 
   async function parallelAndSerialWithRecord (runs) {
-    const { spec, claimedInstances, totalInstances, estimated } = await beforeSpecRun()
+    const { spec, claimedInstances, totalInstances, estimated, instanceId } = await beforeSpecRun()
 
     // no more specs to run? then we're done!
     if (!spec) return runs
@@ -84,6 +81,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
       claimedInstances - 1,
       totalInstances,
       estimated,
+      instanceId,
     )
 
     runs.push(results)
@@ -322,17 +320,24 @@ const warnVideoCompressionFailed = (err) => {
   errors.warning('VIDEO_COMPRESSION_FAILED', err)
 }
 
-async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
+async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
   debug('ending the video recording %o', options)
 
   // once this ended promises resolves
   // then begin compressing the file
   // don't compress anything if videoCompress is off
   // or we've been told not to upload the video
-  if (options.videoCompression === false || options.videoCompression === 0 || options.shouldUploadVideo === false) {
+  if (options.videoCompression === false || options.videoCompression === 0) {
     debug('skipping compression')
 
     return
+  }
+
+  // if a user passes in videoCompression='true' into their config, coerce the value
+  // to the default CRF value which is 32
+  if (options.videoCompression === true) {
+    debug('coercing compression to 32 CRF')
+    options.videoCompression = 32
   }
 
   const processOptions: ProcessOptions = {
@@ -353,12 +358,13 @@ async function compressRecording (options: { quiet: boolean, videoCompression: n
   return continueWithCompression(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
-  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
+  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError, protocolManager } = options
 
   const warnings = {}
 
   const browserOpts: OpenProjectLaunchOpts = {
+    protocolManager,
     projectRoot,
     shouldLaunchNewTab,
     onError,
@@ -401,60 +407,37 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-function listenForProjectEnd (project, exit): Bluebird<any> {
+async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
-  return new Bluebird((resolve, reject) => {
-    if (exit === false) {
-      resolve = () => {
+  // if exit is false, we need to intercept the resolution of tests - whether
+  // an early exit with intermediate results, or a full run.
+  return new Promise((resolve, reject) => {
+    Promise.race([
+      new Promise((res) => {
+        project.once('end', (results) => {
+          debug('project ended with results %O', results)
+          res(results)
+        })
+      }),
+      earlyExitTerminator.waitForEarlyExit(project, exit),
+    ]).then((results) => {
+      if (exit === false) {
+        // eslint-disable-next-line no-console
         console.log('not exiting due to options.exit being false')
+      } else {
+        resolve(results)
       }
-    }
-
-    const onEarlyExit = function (err) {
-      if (err.isFatalApiErr) {
-        return reject(err)
-      }
-
-      console.log('')
-      errors.log(err)
-
-      const obj = {
-        error: errors.stripAnsi(err.message),
-        stats: {
-          failures: 1,
-          tests: 0,
-          passes: 0,
-          pending: 0,
-          suites: 0,
-          skipped: 0,
-          wallClockDuration: 0,
-          wallClockStartedAt: new Date().toJSON(),
-          wallClockEndedAt: new Date().toJSON(),
-        },
-      }
-
-      return resolve(obj)
-    }
-
-    project.once('end', (results) => resolve(results))
-
-    // if we already received a reason to exit early, go ahead and do it
-    if (earlyExitErr) {
-      return onEarlyExit(earlyExitErr)
-    }
-
-    // otherwise override exitEarly so we exit as soon as there is a reason
-    exitEarly = (err) => {
-      onEarlyExit(err)
-    }
+    }).catch((err) => {
+      reject(err)
+    })
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
-  const { project, socketId, onError, spec } = options
+  const { project, socketId, onError, spec, browser, protocolManager } = options
   const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
   let browserLaunchAttempt = 1
 
@@ -473,7 +456,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
@@ -482,8 +465,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       openProject.updateTelemetryContext(JSON.stringify(telemetry.getActiveContextObject()))
     }
 
+    // since we aren't going to be opening a new tab,
+    // we need to tell the protocol manager to reconnect to the existing browser
+    if (protocolManager) {
+      await openProject.connectProtocolToBrowser({ browser, foundBrowsers: project.options.browsers, protocolManager })
+    }
+
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
-    debug('navigating to next spec %s', spec)
+    debug('navigating to next spec %s', createPublicSpec(spec))
 
     return openProject.changeUrlToSpec(spec)
   }
@@ -556,14 +545,14 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
-  debug('received project end %o', results)
+  debug('received project end')
 
   // https://github.com/cypress-io/cypress/issues/2370
   // delay 1 second if we're recording a video to give
@@ -599,7 +588,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   results.spec = spec
 
-  const { tests, stats } = results
+  const { tests } = results
   const attempts = _.flatMap(tests, (test) => test.attempts)
 
   let videoCaptureFailed = false
@@ -626,9 +615,16 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
+  const [publicSpec, publicResults] = createPublicSpecResults(spec, results)
+
+  debug('spec results: %o', publicResults)
+
   debug('execute after:spec')
-  await runEvents.execute('after:spec', spec, results)
+
+  await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
+
+  await protocolManager?.afterSpec()
 
   const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
@@ -641,18 +637,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     results.video = null
   }
 
-  const hasFailingTests = _.get(stats, 'failures') > 0
-  // we should upload the video if we upload on passes (by default)
-  // or if we have any failures and have started the video
-  const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((/* startedVideoCapture */ videoExists && hasFailingTests))
-
-  results.shouldUploadVideo = shouldUploadVideo
-
-  if (!shouldUploadVideo) {
-    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip compressing video. Video path: ${videoName}`)
-    results.video = null
-  }
-
   if (!quiet && !skippedSpec) {
     printResults.displayResults(results, estimated)
   }
@@ -660,12 +644,12 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  if (usingExperimentalSingleTabMode) {
+  if (usingExperimentalSingleTabMode && !isLastSpec) {
     await project.server.destroyAut()
   }
 
-  // we do not support experimentalSingleTabRunMode for e2e
-  if (!usingExperimentalSingleTabMode) {
+  // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
+  if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
     await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
@@ -675,9 +659,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     project.server.reset()
   }
 
+  let videoCompressionFailed = false
+
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
     const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+    printResults.printVideoHeader()
 
     try {
       debug('compressing recording')
@@ -689,7 +677,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       })
 
       await compressRecording({
-        shouldUploadVideo,
         quiet,
         videoCompression,
         processOptions: {
@@ -700,15 +687,28 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         },
       })
     } catch (err) {
-      videoCaptureFailed = true
+      videoCompressionFailed = true
       warnVideoCompressionFailed(err)
     }
     span?.end()
   }
 
-  if (videoCaptureFailed) {
+  // only fail to print the video if capturing the video fails.
+  // otherwise, print the video path to the console if it exists regardless of whether compression fails or not
+  if (!videoCaptureFailed && videoExists) {
+    printResults.printVideoPath(videoName)
+  }
+
+  if (videoCaptureFailed || videoCompressionFailed) {
     results.video = null
   }
+
+  // the early exit terminator persists between specs,
+  // so if this spec crashed, the next one will report as
+  // a crash too unless it is reset. Would like to not rely
+  // on closure, but threading through fn props via options is also not
+  // great.
+  earlyExitTerminator = new EarlyExitTerminator()
 
   return results
 }
@@ -727,10 +727,10 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures, protocolManager } = options
 
   const isHeadless = !headed
 
@@ -751,9 +751,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     })
   }
 
-  let isFirstSpec = true
+  let isFirstSpecInBrowser = true
 
-  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
+  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number, instanceId: string) {
     const span = telemetry.startSpan({
       name: 'run:spec',
       active: true,
@@ -762,18 +762,26 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     span?.setAttributes({
       specName: spec.name,
       type: spec.specType,
-      firstSpec: isFirstSpec,
+      firstSpec: isFirstSpecInBrowser,
+    })
+
+    await protocolManager?.beforeSpec({
+      ...spec,
+      instanceId,
     })
 
     if (!options.quiet) {
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    isFirstSpec = false
-
-    debug('spec results %o', results)
+    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
+      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
+      isFirstSpecInBrowser = true
+    } else {
+      isFirstSpecInBrowser = false
+    }
 
     span?.end()
 
@@ -822,7 +830,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     beforeSpecRun,
   })
 
-  const results: CypressCommandLine.CypressRunResult = {
+  const results: CypressRunResult = {
     status: 'finished',
     startedTestsAt: getRun(_.first(runs), 'stats.wallClockStartedAt'),
     endedTestsAt: getRun(_.last(runs), 'stats.wallClockEndedAt'),
@@ -841,67 +849,33 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     osVersion: sys.osVersion,
     cypressVersion: pkg.version,
     runUrl,
-    // @ts-expect-error slight type mismatch in public types vs internal types
     config,
   }
 
-  debug('final results of all runs: %o', results)
-
-  const { each, remapKeys, remove, renameKey, setValue } = objUtils
-
-  // Remap results for module API/after:run to remove private props and
-  // rename props to make more user-friendly
-  const moduleAPIResults = remapKeys(results, {
-    runs: each((run) => ({
-      tests: each((test) => ({
-        attempts: each((attempt, i) => ({
-          timings: remove,
-          failedFromHookId: remove,
-          wallClockDuration: renameKey('duration'),
-          wallClockStartedAt: renameKey('startedAt'),
-          wallClockEndedAt: renameKey('endedAt'),
-          screenshots: setValue(
-            _(run.screenshots)
-            .filter({ testId: test.testId, testAttemptIndex: i })
-            .map((screenshot) => _.omit(screenshot,
-              ['screenshotId', 'testId', 'testAttemptIndex']))
-            .value(),
-          ),
-        })),
-        testId: remove,
-      })),
-      hooks: each({
-        hookId: remove,
-      }),
-      stats: {
-        wallClockDuration: renameKey('duration'),
-        wallClockStartedAt: renameKey('startedAt'),
-        wallClockEndedAt: renameKey('endedAt'),
-      },
-      screenshots: remove,
-    })),
-  })
-
   const afterRunSpan = telemetry.startSpan({ name: 'lifecycle:after:run' })
 
-  await runEvents.execute('after:run', moduleAPIResults)
+  const publicResults = createPublicRunResults(results)
+
+  debug('final results of all runs: %o', publicResults)
+
+  await runEvents.execute('after:run', publicResults)
   afterRunSpan?.end()
 
-  await writeOutput(outputPath, moduleAPIResults)
+  await writeOutput(outputPath, publicResults)
   runSpan?.end()
 
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
 
   debug('about to run spec %o', {
-    spec,
+    spec: createPublicSpec(spec),
     isHeadless,
-    browser,
+    browser: createPublicBrowser(browser),
   })
 
   if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
@@ -918,7 +892,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpec && project.videoRecording) {
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -944,9 +918,10 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       exit: options.exit,
       testingType: options.testingType,
       videoCompression: options.videoCompression,
-      videoUploadOnPasses: options.videoUploadOnPasses,
       quiet: options.quiet,
       shouldKeepTabOpen: !isLastSpec,
+      isLastSpec,
+      protocolManager: options.protocolManager,
     }),
     waitForBrowserToConnect({
       spec,
@@ -959,16 +934,39 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
       testingType: options.testingType,
-      isFirstSpec,
+      isFirstSpecInBrowser,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-      shouldLaunchNewTab: !isFirstSpec,
+      shouldLaunchNewTab: !isFirstSpecInBrowser,
+      protocolManager: options.protocolManager,
     }),
   ])
 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, autoCancelAfterFailures: number | false, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
+interface ReadyOptions {
+  autoCancelAfterFailures: number | false
+  browser: string
+  browsers?: FoundBrowser[]
+  ciBuildId: string
+  exit: boolean
+  group: string
+  headed: boolean
+  key: string
+  onError?: (err: Error) => void
+  outputPath: string
+  parallel: boolean
+  projectRoot: string
+  quiet: boolean
+  record: boolean
+  socketId: string
+  spec: string | RegExp | string[]
+  tag: string
+  testingType: TestingType
+  webSecurity: boolean
+}
+
+async function ready (options: ReadyOptions) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -988,7 +986,11 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // this needs to be a closure over `exitEarly` and not a reference
   // because `exitEarly` gets overwritten in `listenForProjectEnd`
   // TODO: refactor this so we don't need to extend options
-  const onError = options.onError = (err) => exitEarly(err)
+
+  const onError = options.onError = (err) => {
+    debug('onError')
+    earlyExitTerminator.exitEarly(err)
+  }
 
   // alias and coerce to null
   let specPatternFromCli = options.spec || null
@@ -997,13 +999,13 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // and open up the project
   const browsers = await browserUtils.get()
 
-  debug('found all system browsers %o', browsers)
+  debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
   const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
-  debug('project created and opened with config %o', config)
+  debug('project created and opened with config %o', createPublicConfig(config))
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
@@ -1050,7 +1052,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     chromePolicyCheck.run(onWarning)
   }
 
-  async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean}) {
+  async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
     const results = await runSpecs({
       autoCancelAfterFailures,
       beforeSpecRun,
@@ -1073,13 +1075,13 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       videosFolder: config.videosFolder,
       video: config.video,
       videoCompression: config.videoCompression,
-      videoUploadOnPasses: config.videoUploadOnPasses,
       headed: options.headed,
       quiet: options.quiet,
       outputPath: options.outputPath,
       testingType: options.testingType,
       exit: options.exit,
       webSecurity: options.webSecurity,
+      protocolManager: project.protocolManager,
     })
 
     if (!options.quiet) {
@@ -1123,6 +1125,8 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 }
 
 export async function run (options, loading: Promise<void>) {
+  debug('run start')
+  // Check if running as electron process
   if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
     const app = require('electron').app
 
@@ -1143,6 +1147,8 @@ export async function run (options, loading: Promise<void>) {
   try {
     return ready(options)
   } catch (e) {
-    return exitEarly(e)
+    debug('caught outer error', e)
+
+    return earlyExitTerminator.exitEarly(e)
   }
 }

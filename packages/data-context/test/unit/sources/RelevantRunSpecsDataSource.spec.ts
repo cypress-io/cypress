@@ -2,7 +2,7 @@ import chai from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import debugLib from 'debug'
-import { GraphQLString } from 'graphql'
+import { GraphQLInt, GraphQLString, print } from 'graphql'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
@@ -47,7 +47,7 @@ describe('RelevantRunSpecsDataSource', () => {
   })
 
   describe('polling', () => {
-    let clock
+    let clock: sinon.SinonFakeTimers
 
     beforeEach(() => {
       clock = sinon.useFakeTimers()
@@ -56,34 +56,6 @@ describe('RelevantRunSpecsDataSource', () => {
     afterEach(() => {
       clock.restore()
     })
-
-    const configureGraphQL = (cb: (info: Parameters<typeof dataSource.pollForSpecs>[1]) => any) => {
-      const query = `
-        query Test {
-          test {
-            value
-            value2
-          }
-        }
-      `
-
-      const fields = {
-        value: {
-          type: GraphQLString,
-        },
-        value2: {
-          type: GraphQLString,
-        },
-      }
-
-      return createGraphQL(
-        query,
-        fields,
-        (source, args, context, info) => {
-          return cb(info)
-        },
-      )
-    }
 
     it('polls and emits changes', async () => {
       const testData = FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC
@@ -95,7 +67,41 @@ describe('RelevantRunSpecsDataSource', () => {
 
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT)
 
-      return configureGraphQL(async (info) => {
+      const query = `
+        query Test {
+          test {
+            id
+            runNumber
+            completedInstanceCount
+            totalInstanceCount
+            totalTests
+            status
+          }
+        }
+      `
+
+      const fields = {
+        id: {
+          type: GraphQLString,
+        },
+        runNumber: {
+          type: GraphQLString,
+        },
+        completedInstanceCount: {
+          type: GraphQLInt,
+        },
+        totalInstanceCount: {
+          type: GraphQLInt,
+        },
+        totalTests: {
+          type: GraphQLInt,
+        },
+        status: {
+          type: GraphQLString,
+        },
+      }
+
+      return createGraphQL(query, fields, async (source, args, context, info) => {
         const subscriptionIterator = dataSource.pollForSpecs(runId, info)
 
         const firstEmit = await subscriptionIterator.next()
@@ -145,8 +151,12 @@ describe('RelevantRunSpecsDataSource', () => {
         const expected = {
           data: {
             test: {
-              value: null,
-              value2: null,
+              completedInstanceCount: null,
+              id: null,
+              runNumber: null,
+              status: null,
+              totalInstanceCount: null,
+              totalTests: null,
             },
           },
         }
@@ -155,14 +165,46 @@ describe('RelevantRunSpecsDataSource', () => {
       })
     })
 
-    it('should create query', () => {
-      const gqlStub = sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
+    it('should create query', async () => {
+      const gqlStub = sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves({ data: {} })
 
-      return configureGraphQL(async (info) => {
-        const subscriptionIterator = dataSource.pollForSpecs('runId', info)
+      const fields = {
+        value: {
+          type: GraphQLString,
+        },
+        value2: {
+          type: GraphQLString,
+        },
+        value3: {
+          type: GraphQLString,
+        },
+      }
 
-        subscriptionIterator.return(undefined)
-      }).then((result) => {
+      const query = `
+        query Test {
+          test {
+            value
+            value2
+          }
+        }
+      `
+
+      const query2 = `
+        query Test {
+          test {
+            value2
+            value3
+          }
+        }
+      `
+
+      let iterator1: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']>
+      let iterator2: ReturnType<RelevantRunSpecsDataSource['pollForSpecs']>
+
+      return createGraphQL(query, fields, async (source, args, context, info) => {
+        iterator1 = dataSource.pollForSpecs('runId', info)
+      })
+      .then(() => {
         const expected =
           dedent`query RelevantRunSpecsDataSource_Specs($ids: [ID!]!) {
                 cloudNodesByIds(ids: $ids) {
@@ -186,8 +228,52 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
         expect(gqlStub).to.have.been.called
-        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operation')
-        expect(gqlStub.firstCall.args[0].operation).to.eql(`${expected }\n`)
+        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operationDoc')
+        expect(print(gqlStub.firstCall.args[0].operationDoc), 'should match initial query with one fragment').to.eql(`${expected }\n`)
+      })
+      .then(() => {
+        return createGraphQL(query2, fields, async (source, args, context, info) => {
+          iterator2 = dataSource.pollForSpecs('runId', info)
+
+          await clock.nextAsync()
+        })
+      })
+      .then(() => {
+        const expected =
+          dedent`query RelevantRunSpecsDataSource_Specs($ids: [ID!]!) {
+                cloudNodesByIds(ids: $ids) {
+                  id
+                  ... on CloudRun {
+                    ...Subscriptions
+                  }
+                }
+                pollingIntervals {
+                  runByNumber
+                }
+              }
+
+              fragment Subscriptions on Test {
+                ...Fragment0
+                ...Fragment1
+              }
+              
+              fragment Fragment0 on Test {
+                value
+                value2
+              }
+              
+              fragment Fragment1 on Test {
+                value2
+                value3
+              }`
+
+        expect(gqlStub).to.have.been.calledTwice
+        expect(gqlStub.secondCall.args[0]).to.haveOwnProperty('operationDoc')
+        expect(print(gqlStub.secondCall.args[0].operationDoc), 'should match second query with two fragments').to.eql(`${expected }\n`)
+      })
+      .then(() => {
+        iterator1.return(undefined)
+        iterator2.return(undefined)
       })
     })
   })

@@ -216,7 +216,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }
 
-  // this prevents a log occurring when we navigate to about:blank inbetween tests
+  // this prevents a log occurring when we navigate to about:blank in between tests
   // e.g. for new sessions lifecycle
   if (!state('duringUserTestExecution')) {
     return
@@ -302,6 +302,23 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
+      const handleDownloadUnloadEvent = () => {
+        cy.state('onPageLoadErr', null)
+        cy.isStable(true, 'download')
+
+        options._log
+        .set({
+          message: 'download fired beforeUnload event',
+          consoleProps () {
+            return {
+              Note: 'This event fired when the download was initiated.',
+            }
+          },
+        }).snapshot().end()
+
+        resolve()
+      }
+
       const onWindowLoad = ({ url }) => {
         const href = state('autLocation').href
         const count = getRedirectionCount(href)
@@ -351,6 +368,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
         }
       }
 
+      cy.once('download:received', handleDownloadUnloadEvent)
       cy.once('internal:window:load', onInternalWindowLoad)
 
       // If this request is still pending after the test run, resolve it, no commands were waiting on its result.

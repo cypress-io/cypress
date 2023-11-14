@@ -43,7 +43,7 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     runnable-run-count.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -178,7 +178,7 @@ exports['e2e runnable execution / can navigate in before hook and test'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     beforehook-and-test-navigation.cy.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

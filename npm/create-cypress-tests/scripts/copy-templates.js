@@ -1,4 +1,4 @@
-const fg = require('fast-glob')
+const globby = require('globby')
 const fs = require('fs-extra')
 const chalk = require('chalk')
 const path = require('path')
@@ -11,21 +11,21 @@ program
   const srcPath = path.resolve(__dirname, '..', 'src')
   const destinationPath = path.resolve(process.cwd(), destination)
 
-  const templates = await fg('**/*.template.js', {
+  const templates = await globby('**/*.template.js', {
     cwd: srcPath,
     onlyFiles: true,
     unique: true,
   })
 
-  const srcOuput = './src/'
-  let destinationOuput = destination.replace('/\\/g', '/')
+  const srcOutput = './src/'
+  let destinationOutput = destination.replace('/\\/g', '/')
 
-  if (!destinationOuput.endsWith('/')) {
-    destinationOuput += '/'
+  if (!destinationOutput.endsWith('/')) {
+    destinationOutput += '/'
   }
 
   const relOutput = (template, forSource) => {
-    return `${forSource ? srcOuput : destinationOuput}${template}`
+    return `${forSource ? srcOutput : destinationOutput}${template}`
   }
 
   const result = await Promise.all(templates.map(async (template) => {

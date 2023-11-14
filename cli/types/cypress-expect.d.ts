@@ -1,3 +1,3 @@
 // Cypress adds chai expect and assert to global
-declare const expect: Chai.ExpectStatic
-declare const assert: Chai.AssertStatic
+declare var expect: Chai.ExpectStatic
+declare var assert: Chai.AssertStatic

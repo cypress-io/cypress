@@ -26,6 +26,7 @@ import type {
   CloudSpecRun,
   CloudTestResult,
   CloudRunGroup,
+  CloudProjectRunsByCommitShasArgs,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 import type { DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
@@ -135,6 +136,22 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
         nodes: connectionData.edges.map((e) => e.node),
       }
     },
+    runsByCommitShas (args: CloudProjectRunsByCommitShasArgs) {
+      return args.commitShas?.map((sha, i) => {
+        const statusIndex = i % STATUS_ARRAY.length
+        const status = STATUS_ARRAY[statusIndex]
+
+        return createCloudRun({
+          status,
+          totalPassed: i,
+          url: `http://dummy.cypress.io/runs/${i}`,
+          commitInfo: createCloudRunCommitInfo({
+            sha,
+            summary: `fix: using Git data ${status}`,
+          }),
+        })
+      })
+    },
     ...config,
   } as CloudProject
 
@@ -195,6 +212,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     ci: {
       __typename: 'CloudCiBuildInfo',
       id: 'ci_id',
+      ciBuildNumber: '12345',
       formattedProvider: 'CircleCI',
       ciBuildNumberFormatted: '12345',
       url: 'http://ci.com',
@@ -210,6 +228,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     commitInfo: createCloudRunCommitInfo({
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
+      branch: 'feature/test-branch',
     }),
     ...config,
   }
@@ -263,7 +282,9 @@ function addFailedTests (run: CloudRun) {
       id: 'instanceID',
       status: 'FAILED',
       groupId: 'groupID1',
+      hasReplay: true,
       hasStdout: true,
+      replayUrl: 'www.cypress.io',
       stdoutUrl: 'www.cypress.io',
       hasScreenshots: true,
       screenshotsUrl: 'www.cypress.io',
@@ -356,7 +377,10 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
     },
     specRunsForRunIds: [],
     averageDurationForRunIds: 1234,
-    flakyStatusForRunIds: null,
+    flakyStatusForRunIds: {
+      __typename: 'CloudProjectSpecFlakyStatus',
+      severity: 'NONE',
+    },
     isConsideredFlakyForRunIds: false,
     ...config,
   }
@@ -518,10 +542,10 @@ export const CloudQuery: MaybeResolver<Query> = {
   },
   cloudViewer (args, ctx) {
     if (ctx.__server__) {
-      return ctx.__server__.user ? {
+      return ctx.__server__.coreData.user ? {
         ...CloudUserStubs.me,
-        email: ctx.__server__.user.email,
-        fullName: ctx.__server__.user.name,
+        email: ctx.__server__.coreData.user.email,
+        fullName: ctx.__server__.coreData.user.name,
       } : null
     }
 

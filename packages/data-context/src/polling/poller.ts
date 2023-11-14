@@ -30,7 +30,7 @@ export class Poller<E extends EventType, T = never, M = never> {
 
     debug(`subscribing to ${this.event} with initial value %o and meta %o`, config?.initialValue, config?.meta)
     this.#subscriptions[subscriptionId] = { meta: config.meta }
-    debug('subscriptions before subscribe', this.#subscriptions)
+    debug('subscriptions after subscribe', this.#subscriptions)
 
     if (!this.#isPolling) {
       this.#isPolling = true
@@ -57,13 +57,14 @@ export class Poller<E extends EventType, T = never, M = never> {
   }
 
   async #poll () {
+    debug(`polling for ${this.event}`)
     if (!this.#isPolling) {
       debug('terminating poll after being stopped')
 
       return
     }
 
-    debug(`polling for ${this.event} with interval of ${this.pollingInterval} seconds`)
+    debug(`calling poll callback for ${this.event}`)
 
     await this.callback(this.subscriptions)
 
@@ -73,6 +74,7 @@ export class Poller<E extends EventType, T = never, M = never> {
       return
     }
 
+    debug(`setting timeout with interval of ${this.pollingInterval} second`)
     this.#timeout = setTimeout(async () => {
       this.#timeout = undefined
       await this.#poll()

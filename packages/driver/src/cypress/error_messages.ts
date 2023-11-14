@@ -272,6 +272,10 @@ export default {
         message: `The \`{{invalidConfigKey}}\` configuration can only be overridden from a suite-level override.`,
         docsUrl: 'https://on.cypress.io/config',
       },
+      global_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be set globally.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_test_override: {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
@@ -520,6 +524,12 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
+    read_timed_out (obj) {
+      return {
+        message: `${cmd('readFile', '"{{file}}"')} timed out.`,
+        docsUrl: `https://on.cypress.io/readfile`,
+      }
+    },
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,
@@ -747,6 +757,7 @@ export default {
   },
 
   miscellaneous: {
+    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\

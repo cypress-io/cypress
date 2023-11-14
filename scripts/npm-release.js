@@ -138,7 +138,7 @@ const releasePackages = async (packages) => {
     // workspace. When npm executes commands that modify the workspace, it will
     // check the validity of the workspace. We don't want this to happen since
     // since we don't use npm and our links/peerDependencies make npm unhappy.
-    // We disable the workspace update via the NPM_CONFIG_WORKSPACES_UDPATE=false
+    // We disable the workspace update via the NPM_CONFIG_WORKSPACES_UPDATE=false
     // env variable.
     try {
       const { stdout } = await execa(

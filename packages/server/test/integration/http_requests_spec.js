@@ -19,7 +19,7 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const config = require(`../../lib/config`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
@@ -34,6 +34,7 @@ const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
+const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -86,14 +87,14 @@ describe('Routes', () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
-    sinon.stub(ServerE2E.prototype, 'reset')
+    sinon.stub(ServerBase.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
     nock.enableNetConnect()
 
     Fixtures.scaffold()
 
-    this.setup = async (initialUrl, obj = {}, spec) => {
+    this.setup = async (initialUrl, obj = {}, spec, shouldCorrelatePreRequests = false) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
@@ -160,7 +161,7 @@ describe('Routes', () => {
               httpsServer.start(8443),
 
               // and open our cypress server
-              (this.server = new ServerE2E()),
+              (this.server = new ServerBase()),
 
               this.server.open(cfg, {
                 SocketCtor: SocketE2E,
@@ -169,6 +170,7 @@ describe('Routes', () => {
                 createRoutes,
                 testingType: 'e2e',
                 exit: false,
+                shouldCorrelatePreRequests: () => shouldCorrelatePreRequests,
               })
               .spread(async (port) => {
                 const automationStub = {
@@ -186,6 +188,8 @@ describe('Routes', () => {
                 this.session = session(this.srv)
 
                 this.proxy = `http://localhost:${port}`
+
+                this.networkProxy = this.server._networkProxy
               }),
             ])
           })
@@ -256,6 +260,7 @@ describe('Routes', () => {
           url: 'http://www.github.com/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -293,6 +298,7 @@ describe('Routes', () => {
           url: 'https://localhost:8443/',
           headers: {
             'Accept': 'text/html, application/xhtml+xml, */*',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -969,12 +975,116 @@ describe('Routes', () => {
           url: 'http://www.github.com/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
           expect(res.body).to.include('hello from bar!')
+        })
+      })
+    })
+
+    context('basic request with correlation', () => {
+      beforeEach(function () {
+        return this.setup('http://www.github.com', undefined, undefined, true)
+      })
+
+      it('properly correlates when CDP failures come first', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/',
+        })
+
+        this.networkProxy.removePendingBrowserPreRequest({
+          requestId: '1',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when proxy failure come first', function () {
+        this.networkProxy.setPreRequestTimeout(50)
+        // If this takes longer than the Promise.delay and the prerequest timeout then the second
+        // call has hit the prerequest timeout which is a problem
+        this.timeout(900)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/')
+        .delay(50)
+        .once()
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        this.rp({
+          url: 'http://www.github.com/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
+          },
+          // Timeout needs to be less than the prerequest timeout + the nock delay
+          timeout: 75,
+        }).catch(() => {})
+
+        // Wait 100 ms to make sure the request times out
+        return Promise.delay(100).then(() => {
+          this.networkProxy.setPreRequestTimeout(1000)
+          nock(this.server.remoteStates.current().origin)
+          .get('/')
+          .once()
+          .reply(200, 'hello from baz!', {
+            'Content-Type': 'text/html',
+          })
+
+          // This should not immediately correlate. If it does, then the next request will timeout
+          this.networkProxy.addPendingBrowserPreRequest({
+            requestId: '1',
+            method: 'GET',
+            url: 'http://www.github.com/',
+          })
+
+          const followupRequestPromise = this.rp({
+            url: 'http://www.github.com/',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+
+          return followupRequestPromise.then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('hello from baz!')
+          })
         })
       })
     })
@@ -1137,11 +1247,10 @@ describe('Routes', () => {
         })
       })
 
-      it('removes accept-encoding when nothing is supported', function () {
-        nock(this.server.remoteStates.current().origin, {
-          badheaders: ['accept-encoding'],
-        })
+      it('sets accept-encoding header to "identity" when nothing is supported', function () {
+        nock(this.server.remoteStates.current().origin)
         .get('/accept')
+        .matchHeader('accept-encoding', 'identity')
         .reply(200, '<html>accept</html>')
 
         return this.rp({
@@ -1150,6 +1259,22 @@ describe('Routes', () => {
           headers: {
             'accept-encoding': 'foo,bar,baz',
           },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.eq('<html>accept</html>')
+        })
+      })
+
+      it('sets accept-encoding header to "gzip,identity" when no header is passed', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/accept')
+        .matchHeader('accept-encoding', 'gzip,identity')
+        .reply(200, '<html>accept</html>')
+
+        return this.rp({
+          url: 'http://www.github.com/accept',
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
@@ -1349,6 +1474,7 @@ describe('Routes', () => {
           url: 'http://www.github.com/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1431,7 +1557,12 @@ describe('Routes', () => {
           },
         })
         .then(() => {
-          return this.rp(`${this.proxy}/foo/views/test/index.html`)
+          return this.rp({
+            url: `${this.proxy}/foo/views/test/index.html`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(404)
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
@@ -1458,7 +1589,12 @@ describe('Routes', () => {
             'Content-Type': 'text/html',
           })
 
-          return this.rp('http://www.github.com/index.html')
+          return this.rp({
+            url: 'http://www.github.com/index.html',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(500)
 
@@ -1567,6 +1703,7 @@ describe('Routes', () => {
           url: 'http://localhost:8080/login',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1590,6 +1727,7 @@ describe('Routes', () => {
           url: 'http://localhost:8080/login',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1729,6 +1867,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'x-custom': 'value',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1754,7 +1893,7 @@ describe('Routes', () => {
         })
       })
 
-      it('omits content-security-policy', function () {
+      it('omits content-security-policy by default', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
@@ -1775,7 +1914,7 @@ describe('Routes', () => {
         })
       })
 
-      it('omits content-security-policy-report-only', function () {
+      it('omits content-security-policy-report-only by default', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
@@ -1890,6 +2029,7 @@ describe('Routes', () => {
             'Cookie': '__cypress.initial=false',
             'Origin': 'http://localhost:8080',
             'Accept': 'text/html, application/xhtml+xml, */*',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -1907,7 +2047,12 @@ describe('Routes', () => {
           .then(() => {
             this.server.onRequest(fn)
 
-            return this.rp(url)
+            return this.rp({
+              url,
+              headers: {
+                'Accept-Encoding': 'identity',
+              },
+            })
           }).then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -1956,6 +2101,326 @@ describe('Routes', () => {
             .get('/app.css')
             .reply(200, '{}', {
               'Content-Type': 'text/css',
+            })
+          })
+        })
+      })
+
+      describe('CSP Header', () => {
+        describe('provided', () => {
+          describe('experimentalCspAllowList: false', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: false,
+                },
+              })
+            })
+
+            it('strips all CSP headers for text/html content-type when "experimentalCspAllowList" is false', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).not.to.have.property('content-security-policy')
+              })
+            })
+          })
+
+          describe('experimentalCspAllowList: true', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: true,
+                },
+              })
+            })
+
+            it('does not append a "script-src" nonce to CSP header for text/html content-type when no valid directive exists', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+              })
+            })
+          })
+
+          describe('experimentalCspAllowList: ["script-src-element", "script-src", "default-src"]', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+                },
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "script-src-elem" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "script-src" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "default-src" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to both CSP header directive "script-src" and "default-src" for text/html content-type when in CSP header when both exist', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to all valid CSP header directives for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\'; script-src \'fake-src\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('does not remove original CSP header for text/html content-type', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/foo 'bar'/)
+              })
+            })
+
+            it('does not append a nonce to CSP header if request is not for html', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'application/json',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).not.to.match(/script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
+              })
+            })
+
+            it('does not remove original CSP header if request is not for html', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'application/json',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+              })
+            })
+
+            // The following directives are not supported by Cypress and should be stripped
+            unsupportedCSPDirectives.forEach((directive) => {
+              const headerValue = `${directive} 'none'`
+
+              it(`removes the "${directive}" CSP directive for text/html content-type`, function () {
+                nock(this.server.remoteStates.current().origin)
+                .get('/bar')
+                .reply(200, 'OK', {
+                  'Content-Type': 'text/html',
+                  'content-security-policy': `foo \'bar\'; ${headerValue};`,
+                })
+
+                return this.rp({
+                  url: 'http://localhost:8080/bar',
+                  headers: {
+                    'Cookie': '__cypress.initial=false',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                  },
+                })
+                .then((res) => {
+                  expect(res.statusCode).to.eq(200)
+                  expect(res.headers).to.have.property('content-security-policy')
+                  expect(res.headers['content-security-policy']).to.match(/^foo 'bar'/)
+                  expect(res.headers['content-security-policy']).not.to.match(new RegExp(headerValue))
+                })
+              })
+            })
+          })
+        })
+
+        describe('not provided', () => {
+          it('does not append a nonce to CSP header for text/html content-type', function () {
+            nock(this.server.remoteStates.current().origin)
+            .get('/bar')
+            .reply(200, 'OK', {
+              'Content-Type': 'text/html',
+            })
+
+            return this.rp({
+              url: 'http://localhost:8080/bar',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers).not.to.have.property('content-security-policy')
+            })
+          })
+
+          it('does not append a nonce to CSP header if request is not for html', function () {
+            nock(this.server.remoteStates.current().origin)
+            .get('/bar')
+            .reply(200, 'OK', {
+              'Content-Type': 'application/json',
+            })
+
+            return this.rp({
+              url: 'http://localhost:8080/bar',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers).not.to.have.property('content-security-policy')
             })
           })
         })
@@ -2215,6 +2680,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2237,6 +2703,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2256,6 +2723,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2276,6 +2744,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2298,6 +2767,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2318,6 +2788,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2340,6 +2811,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2362,6 +2834,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2383,6 +2856,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2410,6 +2884,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2417,7 +2892,12 @@ describe('Routes', () => {
           expect(res.headers['location']).to.eq('http://www.cypress.io/foo')
           expect(res.headers['set-cookie']).to.match(/initial=true/)
 
-          return this.rp(res.headers['location'])
+          return this.rp({
+            url: res.headers['location'],
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.headers['set-cookie']).to.match(/initial=;/)
@@ -2441,6 +2921,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2461,6 +2942,7 @@ describe('Routes', () => {
             url: `${this.proxy}/elements.html`,
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2482,6 +2964,7 @@ describe('Routes', () => {
           url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2500,6 +2983,7 @@ describe('Routes', () => {
           url: 'https://localhost:8443/',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2523,6 +3007,7 @@ describe('Routes', () => {
             url: 'https://www.google.com/',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2548,6 +3033,7 @@ describe('Routes', () => {
             url: 'https://www.cypress.io/',
             headers: {
               'Accept': 'text/html, application/xhtml+xml, */*',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2568,6 +3054,7 @@ describe('Routes', () => {
           url: 'https://www.foobar.com:8443/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2586,6 +3073,7 @@ describe('Routes', () => {
           url: 'https://docs.foobar.com:8443/index.html',
           headers: {
             'Cookie': '__cypress.initial=true',
+            'Accept-Encoding': 'identity',
           },
         })
         const body = cleanResponseBody(res.body)
@@ -2604,6 +3092,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2628,6 +3117,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2651,6 +3141,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2675,6 +3166,7 @@ describe('Routes', () => {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'X-Cypress-Is-AUT-Frame': 'true',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2698,6 +3190,7 @@ describe('Routes', () => {
           json: true,
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2719,6 +3212,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2738,6 +3232,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'application/json',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2761,6 +3256,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
             'X-Requested-With': 'XMLHttpRequest',
           },
         })
@@ -2783,6 +3279,7 @@ describe('Routes', () => {
 
           const headers = {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           }
 
           headers['Accept'] = type
@@ -2819,6 +3316,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -2844,12 +3342,14 @@ describe('Routes', () => {
           .get('/index.html')
           .reply(200, html, {
             'Content-Type': 'text/html',
+            'Accept-Encoding': 'identity',
           })
 
           return this.rp({
             url: 'http://www.google.com/index.html',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -2868,7 +3368,12 @@ describe('Routes', () => {
             'Content-Type': 'application/javascript',
           })
 
-          return this.rp('http://www.google.com/app.js')
+          return this.rp({
+            url: 'http://www.google.com/app.js',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -3079,6 +3584,7 @@ describe('Routes', () => {
             url: 'http://www.google.com/index.html',
             headers: {
               'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -3097,7 +3603,12 @@ describe('Routes', () => {
             'Content-Type': 'application/javascript',
           })
 
-          return this.rp('http://www.google.com/app.js')
+          return this.rp({
+            url: 'http://www.google.com/app.js',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
@@ -3126,6 +3637,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3151,6 +3663,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3183,6 +3696,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=true',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
@@ -3200,7 +3714,12 @@ describe('Routes', () => {
       })
 
       it('sets etag', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq('html { color: black; }')
@@ -3217,7 +3736,12 @@ describe('Routes', () => {
       })
 
       it('streams from file system', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3235,7 +3759,12 @@ describe('Routes', () => {
       })
 
       it('disregards anything past the pathname', function () {
-        return this.rp(`${this.proxy}/assets/app.css?foo=bar#hash`)
+        return this.rp({
+          url: `${this.proxy}/assets/app.css?foo=bar#hash`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3244,7 +3773,12 @@ describe('Routes', () => {
       })
 
       it('can serve files with spaces in the path', function () {
-        return this.rp(`${this.proxy}/a space/foo.txt`)
+        return this.rp({
+          url: `${this.proxy}/a space/foo.txt`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3274,6 +3808,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3289,6 +3824,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3319,6 +3855,7 @@ describe('Routes', () => {
           json: true,
           headers: {
             'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3334,6 +3871,7 @@ describe('Routes', () => {
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'application/json',
+            'Accept-Encoding': 'identity',
           },
         })
         .then((res) => {
@@ -3370,7 +3908,12 @@ describe('Routes', () => {
           'Content-Type': 'text/css',
         })
 
-        return this.rp('http://getbootstrap.com/assets/css/application.css')
+        return this.rp({
+          url: 'http://getbootstrap.com/assets/css/application.css',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
@@ -3391,7 +3934,12 @@ describe('Routes', () => {
             'Content-Type': 'text/html',
           })
 
-          return this.rp('http://getbootstrap.com/css')
+          return this.rp({
+            url: 'http://getbootstrap.com/css',
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
           })
@@ -3405,7 +3953,12 @@ describe('Routes', () => {
           'Content-Type': 'text/css',
         })
 
-        return this.rp('http://getbootstrap.com/assets/css/application.css')
+        return this.rp({
+          url: 'http://getbootstrap.com/assets/css/application.css',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 

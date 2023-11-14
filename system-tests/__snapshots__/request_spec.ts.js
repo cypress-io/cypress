@@ -46,7 +46,7 @@ exports['e2e requests / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -138,7 +138,7 @@ https://on.cypress.io/request
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_http_network_error_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -250,7 +250,7 @@ https://on.cypress.io/request
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_status_code_failing.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -370,7 +370,7 @@ https://on.cypress.io/request
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_long_http_props_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

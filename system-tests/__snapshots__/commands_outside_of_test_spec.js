@@ -29,7 +29,7 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     assertions_passing_outside_of_test.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -98,7 +98,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     assertions_failing_outside_of_test.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -181,7 +181,7 @@ https://on.cypress.io/cannot-execute-commands-outside-test
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     commands_outside_of_test.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

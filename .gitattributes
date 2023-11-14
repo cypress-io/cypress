@@ -5,3 +5,4 @@
 **/.eslintrc text eol=lf
 
 packages/errors/__snapshot-html__/** linguist-generated=true
+system-tests/lib/validations/** linguist-generated=true

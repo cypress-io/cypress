@@ -195,23 +195,18 @@ describe('src/cy/commands/traversals', () => {
 
         it('#consoleProps', () => {
           cy.get('#list')[name](arg).then(function ($el) {
-            const obj = { Command: name }
-
-            if (_.isFunction(arg)) {
-              obj.Selector = ''
-            } else {
-              obj.Selector = [].concat(arg).join(', ')
-            }
-
             const yielded = Cypress.dom.getElements($el)
 
-            _.extend(obj, {
-              'Applied To': cy.$$('#list')[0],
-              Yielded: yielded,
-              Elements: $el.length,
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              name,
+              type: 'command',
+              props: {
+                Selector: _.isFunction(arg) ? '' : [].concat(arg).join(', '),
+                'Applied To': cy.$$('#list')[0],
+                Yielded: yielded,
+                Elements: $el.length,
+              },
             })
-
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
           })
         })
 
@@ -360,8 +355,8 @@ describe('src/cy/commands/traversals', () => {
         expect(findLog.get('$el').get(0)).to.eq(button.get(0))
         const consoleProps = findLog.invoke('consoleProps')
 
-        expect(consoleProps.Yielded).to.eq(button.get(0))
-        expect(consoleProps.Elements).to.eq(button.length)
+        expect(consoleProps.props.Yielded).to.eq(button.get(0))
+        expect(consoleProps.props.Elements).to.eq(button.length)
 
         expect(assertionLog.get('state')).to.eq('failed')
         expect(err.message).to.include(assertionLog.get('error').message)

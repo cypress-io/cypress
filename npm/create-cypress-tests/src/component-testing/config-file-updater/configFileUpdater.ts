@@ -71,7 +71,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
   const splicers: Splicer[] = []
 
   if (!objectLiteralNode) {
-    // if the export is no object litteral
+    // if the export is no object literal
     throw new Error('Cypress was unable to add/update values in your configuration file.')
   }
 
