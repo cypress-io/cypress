@@ -18,7 +18,7 @@ export default defineConfig({
             '@angular/platform-browser': require.resolve('@angular/platform-browser'),
             '@angular/platform-browser-dynamic/testing': require.resolve('@angular/platform-browser-dynamic/testing'),
             '@angular/platform-browser-dynamic': require.resolve('@angular/platform-browser-dynamic'),
-            'zone.js/testing': require.resolve('zone.js/dist/zone-testing'),
+            'zone.js/testing': require.resolve('zone.js/testing'),
             'zone.js': require.resolve('zone.js'),
           },
         },

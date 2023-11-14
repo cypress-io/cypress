@@ -73,6 +73,7 @@ const DEFAULT_ARGS = [
   '--reduce-security-for-testing',
   '--enable-automation',
   '--disable-print-preview',
+  '--disable-component-extensions-with-background-pages',
 
   '--disable-device-discovery-notifications',
 
@@ -102,6 +103,10 @@ const DEFAULT_ARGS = [
   // This prevents an 'update' from displaying til the given date
   `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
+
+  // Disable manual option and popup prompt of Chrome translation
+  // https://github.com/cypress-io/cypress/issues/28225
+  '--disable-features=Translate',
 
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
@@ -298,11 +303,17 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
   })
 
   client.on('Page.downloadProgress', (data) => {
-    if (data.state !== 'completed') return
+    if (data.state === 'completed') {
+      automation.push('complete:download', {
+        id: data.guid,
+      })
+    }
 
-    automation.push('complete:download', {
-      id: data.guid,
-    })
+    if (data.state === 'canceled') {
+      automation.push('canceled:download', {
+        id: data.guid,
+      })
+    }
   })
 
   await client.send('Page.setDownloadBehavior', {
@@ -521,13 +532,12 @@ export = {
 
     await pageCriClient.send('Page.enable')
 
-    await utils.handleDownloadLinksViaCDP(pageCriClient, automation)
-
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)
@@ -632,6 +642,10 @@ export = {
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(url, pageCriClient, automation, options, browser)
+
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    })
 
     // return the launched browser process
     // with additional method to close the remote connection
