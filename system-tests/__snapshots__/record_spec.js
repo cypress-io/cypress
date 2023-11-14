@@ -67,7 +67,7 @@ Fix the error in your code and re-run your tests.
   - Screenshot - Nothing to upload 
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -132,7 +132,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -182,7 +182,7 @@ plugin stdout
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -250,7 +250,7 @@ We dynamically generated a new test to display this failure.
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1068,7 +1068,7 @@ plugin stdout
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1586,7 +1586,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1681,7 +1681,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1789,7 +1789,7 @@ We will retry 3 more times in X second(s)...
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2034,7 +2034,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2121,7 +2121,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2210,7 +2210,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2297,7 +2297,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2384,7 +2384,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2471,7 +2471,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2558,7 +2558,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2645,7 +2645,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2738,7 +2738,7 @@ Details:
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2821,7 +2821,7 @@ exports['e2e record capture-protocol disabled messaging displays disabled messag
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is only supported in Chromium browsers
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2904,7 +2904,7 @@ exports['e2e record capture-protocol enabled passing retrieves the capture proto
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2992,7 +2992,7 @@ https://on.cypress.io/renderer-process-crashed
   - Screenshot - Nothing to upload 
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3040,7 +3040,7 @@ Uploading Cloud Artifacts: . . . . .
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay 
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3122,7 +3122,7 @@ Error: Async error from plugins file
   - Screenshot - Nothing to upload 
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3205,7 +3205,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3289,7 +3289,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error instantiating Protocol Capture
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3372,7 +3372,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error in beforeSpec
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3455,7 +3455,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - error in beforeTest
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3538,7 +3538,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors non-fatal e
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3622,7 +3622,7 @@ exports['capture-protocol api errors upload 500 - retries 8 times and fails cont
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay 
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3706,7 +3706,7 @@ exports['capture-protocol api errors upload 500 - retries 7 times and succeeds o
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3796,7 +3796,7 @@ We will retry 1 more time in X second(s)...
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error downloading capture code: 500 - "500 - Internal Server Error"
 
-Uploading Cloud Artifacts: . . . . .
+
 
   (Uploaded Cloud Artifacts)
 
@@ -3879,7 +3879,7 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-Uploading Cloud Artifacts: . . . . .
+
 
   (Uploaded Cloud Artifacts)
 

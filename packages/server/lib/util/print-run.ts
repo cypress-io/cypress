@@ -640,14 +640,22 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   process.stdout.write('\n')
 }
 
+const UPLOAD_ACTIVITY_INTERVAL = env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') || 15000
+const UPLOAD_ACTIVITY_DELAY = env.get('CYPRESS_UPLOAD_ACTIVITY_DELAY') || 5000
+
 export const beginUploadActivityOutput = () => {
   console.log('')
-  process.stdout.write('Uploading Cloud Artifacts: . ')
-  const uploadActivityInterval = setInterval(() => {
-    process.stdout.write('. ')
-  }, 15000)
+  let uploadActivityInterval
+  const beginUploadActivity = setTimeout(() => {
+    process.stdout.write(chalk.bold.blue('  Uploading Cloud Artifacts: '))
+    process.stdout.write(chalk.bold.blue('. '))
+    uploadActivityInterval = setInterval(() => {
+      process.stdout.write(chalk.bold.blue('. '))
+    }, UPLOAD_ACTIVITY_INTERVAL)
+  }, UPLOAD_ACTIVITY_DELAY)
 
   return () => {
+    clearTimeout(beginUploadActivity)
     clearInterval(uploadActivityInterval)
     console.log('')
   }
