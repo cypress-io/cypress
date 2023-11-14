@@ -45,7 +45,7 @@ describe('deprecated before:browser:launch args', () => {
 
   systemTests.it('using non-deprecated API - no warning', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
@@ -69,7 +69,7 @@ describe('deprecated before:browser:launch args', () => {
 
   systemTests.it('concat return returns once', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
@@ -95,7 +95,7 @@ describe('deprecated before:browser:launch args', () => {
   // https://github.com/cypress-io/cypress/issues/20436
   systemTests.it.skip('no mutate return', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     config: {

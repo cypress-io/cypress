@@ -1857,7 +1857,7 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      it('works with nested eaches', () => {
+      it('works when the "each" is nested', () => {
         let count = 0
 
         cy.get('#list li').each(($li, i, arr) => {

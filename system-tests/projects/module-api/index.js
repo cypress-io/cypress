@@ -5,7 +5,7 @@ const cypress = require('cypress')
 console.log('cypress is', cypress)
 
 const onSuccess = (runResult) => {
-  banner('Cypresss results')
+  banner('Cypress results')
   console.log('%o', runResult)
   banner('Results paths')
   // TODO find a better way to show all available properties in the runResult object

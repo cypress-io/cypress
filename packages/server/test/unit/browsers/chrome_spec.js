@@ -10,6 +10,7 @@ const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
+const { expect } = require('chai')
 
 const openOpts = {
   onError: () => {},
@@ -32,6 +33,7 @@ describe('lib/browsers/chrome', () => {
         attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
         ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
+        getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
       }
 
       this.automation = {
@@ -59,6 +61,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
+      sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
 
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -86,17 +89,19 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+
+        expect(utils.handleDownloadLinksViaCDP).to.be.calledOnce
       })
     })
 
-    it('is noop without before:browser:launch', function () {
+    it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', function () {
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        expect(plugins.execute).not.to.be.called
+        expect(plugins.execute).not.to.be.calledWith('before:browser:launch')
       })
     })
 
-    it('is noop if newArgs are not returned', function () {
+    it('uses default args if new args are not returned from before:browser:launch', function () {
       const args = []
 
       sinon.stub(chrome, '_getArgs').returns(args)
@@ -300,6 +305,30 @@ describe('lib/browsers/chrome', () => {
       return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
+    it('sends after:browser:launch with debugger url', function () {
+      const args = []
+      const browser = { isHeadless: true }
+
+      sinon.stub(chrome, '_getArgs').returns(args)
+      sinon.stub(plugins, 'has').returns(true)
+
+      plugins.execute.resolves(null)
+
+      return chrome.open(browser, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', browser, {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
+    })
+
     describe('downloads', function () {
       it('pushes create:download after download begins', function () {
         const downloadData = {
@@ -330,6 +359,21 @@ describe('lib/browsers/chrome', () => {
         return this.onCriEvent('Page.downloadProgress', downloadData, options)
         .then(() => {
           expect(this.automation.push).to.be.calledWith('complete:download', {
+            id: '1',
+          })
+        })
+      })
+
+      it('pushes canceled:download when download is incomplete', function () {
+        const downloadData = {
+          guid: '1',
+          state: 'canceled',
+        }
+        const options = { downloadsFolder: 'downloads' }
+
+        return this.onCriEvent('Page.downloadProgress', downloadData, options)
+        .then(() => {
+          expect(this.automation.push).to.be.calledWith('canceled:download', {
             id: '1',
           })
         })

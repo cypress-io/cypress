@@ -285,6 +285,22 @@ const deploy = {
     return moveBinaries(args)
   },
 
+  // purge all URLs from Cloudflare cache from file
+  'purge-urls' (args = process.argv) {
+    console.log('#purge-urls')
+
+    const options = minimist(args, {
+      string: 'filePath',
+      alias: {
+        filePath: 'f',
+      },
+    })
+
+    la(check.unemptyString(options.filePath), 'missing file path to url list', options)
+
+    return uploadUtils.purgeUrlsFromCloudflareCache(options.filePath)
+  },
+
   // purge all platforms of a desktop app for specific version
   'purge-version' (args = process.argv) {
     console.log('#purge-version')
