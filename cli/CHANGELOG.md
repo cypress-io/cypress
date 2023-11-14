@@ -8,6 +8,11 @@ _Released 11/21/2023 (PENDING)_
 
  - Adds an activity indicator to CLI output when artifacts (screenshots, videos, or Test Replay) are being uploaded to the cloud. Addresses [#28239](https://github.com/cypress-io/cypress/issues/28239). Addressed in [#28277](https://github.com/cypress-io/cypress/pull/28277).
 
+**Bugfixes:**
+
+- Fixed an issue where pages opened in a new tab were missing response headers, causing them not to load properly. Fixes [#28293](https://github.com/cypress-io/cypress/issues/28293) and [#28303](https://github.com/cypress-io/cypress/issues/28303).
+- We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
+
 ## 13.5.0
 
 _Released 11/8/2023_

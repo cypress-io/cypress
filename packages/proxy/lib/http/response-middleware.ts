@@ -174,6 +174,10 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
   if (this.req.isFromExtraTarget) {
     this.debug('response for [%s %s] is from extra target', this.req.method, this.req.proxiedUrl)
 
+    // this is normally done in the OmitProblematicHeaders middleware, but we
+    // don't want to omit any headers in this case
+    this.res.set(this.incomingRes.headers)
+
     this.onlyRunMiddleware([
       'AttachPlainTextStreamFn',
       'PatchExpressSetHeader',
