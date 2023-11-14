@@ -70,8 +70,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.441.0",
-    "@aws-sdk/credential-providers": "3.341.0",
+    "@aws-sdk/client-s3": "3.450.0",
+    "@aws-sdk/credential-providers": "3.450.0",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "^3.0.0",
     "@cypress/request-promise": "^5.0.0",
