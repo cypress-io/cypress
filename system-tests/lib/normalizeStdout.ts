@@ -144,7 +144,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
   // normalizes upload indicator to a consistent number of dots
-  .replace(/(Uploading Cloud Artifacts\: )([\. ]+)/g, replaceUploadActivityIndicator)
+  .replace(/(Uploading Cloud Artifacts\: )([\. ]*)/g, replaceUploadActivityIndicator)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
