@@ -1597,7 +1597,9 @@ export default {
         )
       },
 
-      run (fn) {
+      run (fn, response) {
+        Cypress.__actions = response?.actions
+
         if (_startTime == null) {
           _startTime = dayjs().toJSON()
         }

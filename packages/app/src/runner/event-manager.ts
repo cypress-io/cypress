@@ -423,11 +423,11 @@ export class EventManager {
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
-          const run = () => {
+          const run = (response) => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
 
-            this._runDriver(runState, testState)
+            this._runDriver(runState, testState, response)
           }
 
           if (!hideCommandLog) {
@@ -455,7 +455,7 @@ export class EventManager {
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
-          return run()
+          return run(undefined)
         })
       },
     })
@@ -811,9 +811,10 @@ export class EventManager {
     window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
-  _runDriver (runState: RunState, testState: CachedTestState) {
+  _runDriver (runState: RunState, testState: CachedTestState, response) {
     performance.mark('run-s')
-    Cypress.run(testState, () => {
+
+    Cypress.run(testState, response, () => {
       performance.mark('run-e')
       performance.measure('run', 'run-s', 'run-e')
     })
