@@ -351,7 +351,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -754,7 +754,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1157,7 +1157,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1560,7 +1560,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1629,7 +1629,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   Running:  port.cy.jsx                                                                     (1 of 1)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1682,7 +1682,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   Running:  port.cy.jsx                                                                     (1 of 1)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1735,7 +1735,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite3.
   Running:  port.cy.jsx                                                                     (1 of 1)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1788,7 +1788,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite4.
   Running:  port.cy.jsx                                                                     (1 of 1)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 

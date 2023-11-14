@@ -7,7 +7,7 @@ Cypress works on Linux, macOS and Windows. This includes both installing from np
 Throughout the code base, we access the file system in various ways, and need to be conscious of how we do so to ensure Cypress can be used and developed seamlessly on multiple platforms. One thing to keep in mind is file paths and file separators. macOS and Linux systems use `/`, and Windows uses `\`.
 
 
-As a general rule, we want to use **native paths** where possible. There are a few reasons for this. Whereever we display a file path, we want to use the native file separator, since that is what the user will expect on their platform. In general, we can use the Node.js `path` module to handle this:
+As a general rule, we want to use **native paths** where possible. There are a few reasons for this. Wherever we display a file path, we want to use the native file separator, since that is what the user will expect on their platform. In general, we can use the Node.js `path` module to handle this:
 
 ```js
 // on linux-like systems
@@ -40,7 +40,7 @@ path.resolve('../', '/../', '../')
 // 'C:\\Users' on Windows
 ```
 
-In general, you want to avoid writing file system code using `/` and `\`, and use Node.js APIs where possible - those are cross platform and guarenteed to work.
+In general, you want to avoid writing file system code using `/` and `\`, and use Node.js APIs where possible - those are cross platform and guaranteed to work.
 
 ## Use Node.js Scripts 
 

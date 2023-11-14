@@ -119,7 +119,7 @@ const priorityElement = 'input[type=\'submit\'], button, a, label'
 export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   // iterate through all of the elements in pairs
   // and check if the next item in the array is a
-  // descedent of the current. if it is continue
+  // descendent of the current. if it is continue
   // to recurse. if not, or there is no next item
   // then return the current
   const $current = $el.slice(index, index + 1)
@@ -176,7 +176,13 @@ export const isAncestor = ($el, $maybeAncestor) => {
 }
 
 export const isChild = ($el, $maybeChild) => {
-  return $el.children().index($maybeChild) >= 0
+  let children = $el.children()
+
+  if (children.length && children[0].nodeName === 'SHADOW-ROOT') {
+    return isDescendent($el, $maybeChild)
+  }
+
+  return children.index($maybeChild) >= 0
 }
 
 export const isDescendent = ($el1, $el2) => {
@@ -233,12 +239,12 @@ export const getElements = ($el) => {
  *
  *   $.expr[':']['cy-contains'] = $.expr.createPseudo()
  *
- * is equivelent to
+ * is equivalent to
  *
  *   Sizzle.selectors.pseudos['cy-contains'] = Sizzle.selectors.createPseudo()
  *
  * in the documentation linked above. $.expr[':'] is jquery's alias for
- * Sizzle.selectors.psuedos.
+ * Sizzle.selectors.pseudos.
  *
  * These custom expressions are used exclusively by cy.contains; see
  * `getContainsSelector` below.

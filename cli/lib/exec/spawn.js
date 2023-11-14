@@ -239,7 +239,7 @@ module.exports = {
               return
             }
 
-            // if we have a callback and this explictly returns
+            // if we have a callback and this explicitly returns
             // false then bail
             if (onStderrData && onStderrData(str) === false) {
               return

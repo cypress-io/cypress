@@ -16,7 +16,7 @@ It is using the following technologies:
 
 - [Vue 3](https://v3.vuejs.org/guide/introduction.html) for the UI framework
   - code is written with the [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html) 
-  - uses the new [`<script setup>`](https://v3.vuejs.org/api/sfc-script-setup.html#basic-syntax) syntax for beter TypeScript support
+  - uses the new [`<script setup>`](https://v3.vuejs.org/api/sfc-script-setup.html#basic-syntax) syntax for better TypeScript support
 - [Vite](https://vitejs.dev/) for the dev server
 - TypeScript
 - [Urql](https://formidable.com/open-source/urql/) for the GraphQL client

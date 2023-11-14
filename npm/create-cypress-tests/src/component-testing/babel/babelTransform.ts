@@ -98,10 +98,10 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
             babelTypes.blockStatement(statementToInject as babelTypes.Statement[] | babelTypes.Statement[]),
           )
 
-          path.get('body').pushContainer('body' as never, ifComponentMode as babel.Node)
+          path.get('body').pushContainer('body' as never, ifComponentMode as never)
 
           if (ast.requiresReturnConfig) {
-            path.get('body').pushContainer('body' as never, returnConfigAst)
+            path.get('body').pushContainer('body' as never, returnConfigAst as never)
           }
         }
       },

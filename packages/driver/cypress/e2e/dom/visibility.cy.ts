@@ -333,25 +333,25 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$elOutOfParentBoundsToLeft = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; left: -400px; top: 0px;'>position: absolute, out of bounds left</span>
+  <span style='position: absolute; width: 100px; height: 100px; left: -100px; top: 0px;'>position: absolute, out of bounds left</span>
 </div>\
 `)
 
       this.$elOutOfParentBoundsToRight = add(`\
 <div id="elOutOfParentBoundsToRight" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; left: 200px; top: 0px;'>position: absolute, out of bounds right</span>
+  <span style='position: absolute; width: 100px; height: 100px; right: -100px; top: 0px;'>position: absolute, out of bounds right</span>
 </div>\
 `)
 
       this.$elOutOfParentBoundsAbove = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
+  <span style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
 </div>\
 `)
 
       this.$elOutOfParentBoundsBelow = add(`\
 <div id="elOutOfParentBoundsBelow" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
+  <span style='position: absolute; width: 100px; height: 100px; left: 0px; bottom: -100px;'>position: absolute, out of bounds below</span>
 </div>\
 `)
 
@@ -796,10 +796,9 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css overflow', () => {
-      it('is visible when parent doesnt have overflow hidden', function () {
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.visible
-
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.not.be.hidden
+      it('is hidden when parent overflow auto and no width/height', function () {
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.not.be.visible
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.hidden
       })
 
       it('is hidden when parent overflow hidden and out of bounds to left', function () {
@@ -874,7 +873,7 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css clip-path', () => {
-      // TODO: why is this skipped?
+      // TODO: handle clip path 'hidden' equivalents
       it.skip('is hidden when outside of parents clip-path', function () {
         expect(this.$parentWithClipPathAbsolutePositionElOutsideClipPath.find('span')).to.be.hidden
       })

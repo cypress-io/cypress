@@ -883,7 +883,7 @@ describe('lib/config', () => {
       })
 
       context('retries', () => {
-        const retriesError = 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls'
+        const retriesError = 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy'
 
         // need to keep the const here or it'll get stripped by the build
         // eslint-disable-next-line no-unused-vars

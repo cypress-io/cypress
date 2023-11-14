@@ -1006,6 +1006,7 @@ describe('lib/cypress', () => {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
+            getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }
 
           const cdpAutomation = {
@@ -1024,6 +1025,8 @@ describe('lib/cypress', () => {
           sinon.stub(chromeBrowser, '_recordVideo').resolves()
 
           sinon.stub(chromeBrowser, '_setAutomation').returns(cdpAutomation)
+
+          sinon.stub(ProjectBase.prototype, 'resetBrowserState').resolves()
 
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
@@ -1074,6 +1077,7 @@ describe('lib/cypress', () => {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
             close: sinon.stub().resolves(),
+            getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }
 
           sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)

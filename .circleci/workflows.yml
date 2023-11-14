@@ -29,8 +29,9 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+        - 'feature/experimental-retries'
         - 'publish-binary'
-        - 'chore/update_electron25_and_node18'
+        - 'em/shallow-checkout'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +42,9 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -51,9 +54,11 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'jordanpowell88/update-angular-tsconfig-path', << pipeline.git.branch >> ]
-    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -63,6 +68,9 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
+    - matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
     - false
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
@@ -73,7 +81,11 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
+    - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -143,7 +155,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "chore/update_electron25_and_node18" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "lerna-optimize-tasks" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -154,6 +166,16 @@ commands:
           command: |
             if [[ -z "$SHOULD_PERSIST_ARTIFACTS" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
+              circleci-agent step halt
+            fi
+
+  maybe_skip_binary_jobs:
+    steps:
+      - run:
+          name: Skip binary job if external PR
+          command: |
+            if [[ -z "$CIRCLE_TOKEN" ]]; then
+              echo "There is no CIRCLE_TOKEN set for this job. Cannot trigger binary build. Skipping job."
               circleci-agent step halt
             fi
 
@@ -210,10 +232,9 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Build all codegen
+          name: Sync Cloud Validations
           command: |
             source ./scripts/ensure-node.sh
-            yarn gulp buildProd
             yarn gulp syncCloudValidations
       - run:
           name: Build packages
@@ -231,8 +252,6 @@ commands:
           root: ~/
           paths:
             - cypress
-            - .ssh
-            - node_modules # contains the npm i -g modules
 
   install_cache_helpers_dependencies:
     steps:
@@ -329,6 +348,9 @@ commands:
       only-cache-for-root-user:
         type: boolean
         default: false
+      build-better-sqlite3:
+        type: boolean
+        default: false
     steps:
       - install_cache_helpers_dependencies
       - run:
@@ -337,9 +359,18 @@ commands:
       - run:
           name: Generate platform key
           command: node ./scripts/get-platform-key.js > platform_key
-      - restore_cache:
-          name: Restore cache state, to check for known modules cache existence
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - restore_cache:
+                name: Restore cache state, to check for known modules cache existence
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-{{ checksum "centos7-builder.Dockerfile" }}
+      - unless:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - restore_cache:
+                name: Restore cache state, to check for known modules cache existence
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -361,6 +392,10 @@ commands:
             PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - build-better-sqlite3
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
@@ -383,11 +418,22 @@ commands:
                 paths:
                   - /tmp/node_modules_cache
       - run: touch node_modules_installed
-      - save_cache:
-          name: Saving node-modules cache state key
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
-          paths:
-            - node_modules_installed
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - save_cache:
+                name: Saving node-modules cache state key
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-{{ checksum "centos7-builder.Dockerfile" }}
+                paths:
+                  - node_modules_installed
+      - unless:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - save_cache:
+                name: Saving node-modules cache state key
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
@@ -435,12 +481,9 @@ commands:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     steps:
-      # installing NVM will use git+ssh, so update known_hosts
-      - update_known_hosts
       - run:
           name: Install Node
           command: |
-            node_version=$(cat .node-version)
             source ./scripts/ensure-node.sh
             echo "Installing Yarn"
             npm install yarn --location=global # ensure yarn is installed with the correct node engine
@@ -472,6 +515,63 @@ commands:
             which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+  
+  # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
+  # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
+  # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
+  # Since this is running Docker remote, we need to copy the project into the container, and copy the built plugin out
+  # of the container because the host running docker does not have access to the project directory so volume mounts are
+  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.  
+  build-better-sqlite3:
+    description: Build better-sqlite3 for CentOS 7
+    steps:
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+      - restore_cache:
+          keys:
+            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
+      - run:
+          name: Build or load centos7-builder image
+          command: |
+            if [[ ! -f better_sqlite3.node ]]; then
+              set -x
+              apt update && apt install -y docker.io
+              if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
+                  echo "*" > .dockerignore
+                  docker build -t centos7-builder -f centos7-builder.Dockerfile .
+                  docker save centos7-builder > centos7-builder.tar
+                  rm .dockerignore
+              else
+                  docker load < centos7-builder.tar
+              fi
+            fi
+      - save_cache:
+          key: cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
+          paths:
+            - centos7-builder.tar
+      - run:
+          name: Build better-sqlite3 for CentOS 7
+          command: |
+            if [[ ! -f better_sqlite3.node ]]; then
+              docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
+              docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
+              docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 25.0.0 --include-regex 'better_sqlite3.node$'"
+              docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+              docker rm -f centos7-builder
+              cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
+            else
+              cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            fi
+      - save_cache:
+          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}-{{ checksum "centos7-builder.Dockerfile" }}
+          paths:
+            - better_sqlite3.node
+      - run:
+          name: Clean up top level better-sqlite3 file
+          command: |
+            rm ~/cypress/better_sqlite3.node
 
   run-driver-integration-tests:
     parameters:
@@ -1045,25 +1145,6 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-  build-binary:
-    steps:
-      - run:
-          name: Build the Cypress binary
-          no_output_timeout: "45m"
-          command: |
-            source ./scripts/ensure-node.sh
-            node --version
-            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
-              # these are missing on Circle and there is no way to pre-install them on Arm
-              sudo apt-get update
-              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
-            else
-              yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
-            fi
-      - store_artifacts:
-          path: cypress-dist.tgz
-
   check-if-binary-exists:
     steps:
       - run:
@@ -1181,11 +1262,7 @@ commands:
           name: Build NPM package
           command: |
             source ./scripts/ensure-node.sh
-            yarn build --scope cypress
-      - run:
-          name: Copy Re-exported NPM Packages
-          command: node ./scripts/post-build.js
-          working_directory: cli
+            yarn lerna run build-cli
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -1260,8 +1337,12 @@ jobs:
       resource_class:
         type: string
         default: medium
+      build-better-sqlite3:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
+      - update_known_hosts
       - checkout
       - install-required-node
       - verify-build-setup:
@@ -1270,10 +1351,12 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - .ssh
             - .nvm # mac / linux
             - ProgramData/nvm # windows
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+          build-better-sqlite3: <<parameters.build-better-sqlite3>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -1518,8 +1601,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1645,6 +1726,7 @@ jobs:
       docker_layer_caching: true
     resource_class: medium
     steps:
+      - maybe_skip_binary_jobs
       - run-binary-system-tests
 
   system-tests-chrome:
@@ -1902,7 +1984,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn lerna run build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1960,7 +2042,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1969,7 +2051,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn lerna run build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1986,7 +2068,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2003,7 +2085,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn lerna run build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2025,7 +2107,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: yarn lerna run build --scope create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2042,8 +2124,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build
-          working_directory: npm/cypress-schematic
+            yarn lerna run build --scope @cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2088,10 +2169,10 @@ jobs:
         default: xlarge
     resource_class: << parameters.resource_class >>
     steps:
+      - maybe_skip_binary_jobs
       - restore_cached_workspace
       - check-if-binary-exists
       - setup_should_persist_artifacts
-      - build-binary
       - trigger-publish-binary-pipeline
 
   get-published-artifacts:
@@ -2103,6 +2184,7 @@ jobs:
         default: large
     resource_class: << parameters.resource_class >>
     steps:
+      - maybe_skip_binary_jobs
       - restore_cached_workspace
       - run:
           name: Check pipeline info
@@ -2140,13 +2222,6 @@ jobs:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
-      - run:
-          name: Remove cypress.json
-          description: Remove cypress.json in case it exists
-          working_directory: /tmp/cypress-example-kitchensink
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
           command: yarn --production --ignore-engines
@@ -2244,6 +2319,7 @@ jobs:
     docker:
       - image: cypress/base-internal:18.15.0
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir test-binary
       - run:
@@ -2280,6 +2356,7 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
       - run:
@@ -2319,6 +2396,7 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
       - run:
@@ -2381,10 +2459,12 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
+    parallelism: 4
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          command: npm run test:ci
+          # Split the specs up across 4 different machines to run in parallel
+          command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks $CIRCLE_NODE_TOTAL
           browser: electron
 
   # This is a special job. It allows you to test the current
@@ -2411,6 +2491,7 @@ jobs:
   test-binary-against-kitchensink:
     <<: *defaults
     steps:
+      - maybe_skip_binary_jobs
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: electron
@@ -2473,6 +2554,7 @@ jobs:
   test-binary-as-specific-user:
     <<: *defaults
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       # the user should be "node"
       - run: whoami
@@ -2519,7 +2601,8 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
         requires:
@@ -2826,15 +2909,19 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-npm-module-on-minimum-node-version:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-types-cypress-and-jest:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-full-typescript-project:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-against-kitchensink:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-npm-module-and-verify-binary:
@@ -2878,13 +2965,393 @@ linux-x64-workflow: &linux-x64-workflow
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
+        context: publish-binary
         requires:
           - get-published-artifacts
     - binary-system-tests:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+          - system-tests-node-modules-install
+
+linux-x64-contributor-workflow: &linux-x64-contributor-workflow
+  jobs:
+    - node_modules_install
+    - build:
+        requires:
+          - node_modules_install
+
+    # In subsequent jobs, we use some contexts that are restricted to members of the Cypress organization.
+    # This job will allow for a Cypress member to approve and run the rest of the restricted jobs in the pipeline after the contributor code has been reviewed.
+    - contributor-pr:
+        type: approval
+        requires:
+          - build
+
+    - check-ts:
+        requires:
+          - build
+    - lint:
+        name: linux-lint
+        requires:
+          - build
+    - percy-finalize:
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+        requires:
+          - contributor-pr
+    - lint-types:
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - cli-visual-tests:
+        context: test-runner:percy
+        requires:
+          - contributor-pr
+    - unit-tests:
+        requires:
+          - build
+    - verify-release-readiness:
+        context: test-runner:npm-release
+        requires:
+          - contributor-pr
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-performance-tests:
+        requires:
+          - build
+    - system-tests-node-modules-install:
+        context: test-runner:performance-tracking
+        requires:
+          - contributor-pr
+    - system-tests-chrome:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-electron:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-firefox:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-webkit:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-non-root:
+        context: test-runner:performance-tracking
+        executor: non-root-docker-user
+        requires:
+          - system-tests-node-modules-install
+    - driver-integration-tests-chrome:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
+    - driver-integration-tests-chrome-beta:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
+    - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
+    - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
+    - driver-integration-tests-webkit:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
+    - driver-integration-memory-tests:
+        requires:
+          - build
+    - run-frontend-shared-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - run-launchpad-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - run-launchpad-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - run-app-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - run-webpack-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-vite-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-app-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - run-reporter-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
+        requires:
+          - contributor-pr
+    - reporter-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - contributor-pr
+    - npm-webpack-dev-server:
+        requires:
+          - system-tests-node-modules-install
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-vite-plugin-cypress-esm:
+        requires:
+          - build
+    - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-vue:
+        requires:
+          - build
+    - npm-react:
+        requires:
+          - build
+    - npm-angular:
+        requires:
+          - build
+    - npm-mount-utils:
+        requires:
+          - build
+    - npm-create-cypress-tests:
+        requires:
+          - build
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-cypress-schematic:
+        requires:
+          - build
+    - v8-integration-tests:
+        requires:
+          - system-tests-node-modules-install
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-types-cypress-and-jest
+          - test-full-typescript-project
+          - test-binary-against-kitchensink
+          - test-npm-module-on-minimum-node-version
+          - binary-system-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
+    - npm-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
+    - create-and-trigger-packaging-artifacts:
+        context: [test-runner:upload, test-runner:build-binary, publish-binary]
+        requires:
+          - contributor-pr
+    - get-published-artifacts:
+        context: [publish-binary, test-runner:commit-status-checks]
+        requires:
+          - create-and-trigger-packaging-artifacts
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - test-kitchensink:
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - test-npm-module-on-minimum-node-version:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - test-types-cypress-and-jest:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - test-full-typescript-project:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - test-binary-against-kitchensink:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - test-npm-module-and-verify-binary:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-kitchensink-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-recipes-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-recipes:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-kitchensink-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-todomvc-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-against-cypress-realworld-app:
+        context: test-runner:cypress-record-key
+        <<: *mainBuildFilters
+        requires:
+          - get-published-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
+        executor: non-root-docker-user
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+    - binary-system-tests:
+        context: publish-binary
         requires:
           - get-published-artifacts
           - system-tests-node-modules-install
@@ -2906,11 +3373,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - create-and-trigger-packaging-artifacts:
         name: linux-arm64-create-and-trigger-packaging-artifacts
-        context:
-          - test-runner:upload
-          - test-runner:commit-status-checks
-          - test-runner:build-binary
-          - publish-binary
+        context: [test-runner:upload, test-runner:commit-status-checks, test-runner:build-binary, publish-binary]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -2924,9 +3387,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - get-published-artifacts:
         name: linux-arm64-get-published-artifacts
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
+        context: [publish-binary, test-runner:commit-status-checks]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -3131,6 +3592,12 @@ workflows:
   linux-x64:
     <<: *linux-x64-workflow
     <<: *linux-x64-workflow-exclude-filters
+  linux-x64-contributor:
+    <<: *linux-x64-contributor-workflow
+    when:
+      matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
   linux-arm64:
     <<: *linux-arm64-workflow
     <<: *linux-arm64-workflow-filters
