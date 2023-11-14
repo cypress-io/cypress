@@ -31,7 +31,7 @@ exports['e2e issue 2891 passes 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     default_layout.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

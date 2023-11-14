@@ -34,6 +34,15 @@ export const LocalSettingsPreferences = objectType({
     })
 
     t.boolean('debugSlideshowComplete')
+    t.boolean('desktopNotificationsEnabled')
+    t.dateTime('dismissNotificationBannerUntil')
+    t.boolean('notifyWhenRunStarts')
+    t.boolean('notifyWhenRunStartsFailing')
+    t.json('notifyWhenRunCompletes', {
+      resolve: async (source, args, ctx) => {
+        return ctx.coreData.localSettings.preferences.notifyWhenRunCompletes || []
+      },
+    })
   },
 })
 

@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "webpack": "^5",
+    "webpack-dev-server": "^4"
+  }
+}

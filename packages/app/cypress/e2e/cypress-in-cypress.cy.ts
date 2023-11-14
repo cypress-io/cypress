@@ -1,3 +1,4 @@
+import type { ReceivedCypressOptions } from '@packages/types'
 import type { DraggablePanel } from '../../src/runner/useRunnerStyle'
 
 const testingTypes = ['component', 'e2e'] as const
@@ -11,9 +12,19 @@ const dragHandleToClientX = (panel: DraggablePanel, x: number) => {
 function startAtSpecsPage (testingType: typeof testingTypes[number]) {
   cy.scaffoldProject('cypress-in-cypress')
   cy.findBrowsers()
-  cy.openProject('cypress-in-cypress')
+
+  openProject(testingType)
+
   cy.startAppServer(testingType)
   cy.visitApp()
+}
+
+function openProject (testingType: typeof testingTypes[number]) {
+  if (testingType === 'e2e') {
+    cy.openProject('cypress-in-cypress')
+  } else {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  }
 }
 
 // For Cypress-in-Cypress tests that do not vary based on testing type
@@ -26,7 +37,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.waitForSpecToFinish()
 
       cy.withCtx((ctx) => {
-        ctx.coreData.servers.appSocketServer?.emit('automation:disconnected')
+        ctx.coreData.servers.cdpSocketServer?.emit('automation:disconnected')
       })
 
       cy.contains('h3', 'The Cypress extension has disconnected')
@@ -102,7 +113,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      openProject(testingType)
       cy.withCtx((ctx) => {
         ctx.coreData.localSettings.preferences.reporterWidth = 800
         ctx.coreData.localSettings.preferences.specListWidth = 250
@@ -227,21 +238,18 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
-    it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
+    it(`hides the command log when hideCommandLog is set in open mode for ${testingType}`, () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.withCtx(async (ctx, o) => {
-        const config = await ctx.project.getConfig()
+        const config = ctx._apis.projectApi.getConfig()
 
-        o.sinon.stub(ctx.project, 'getConfig').resolves({
+        o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
           ...config,
-          env: {
-            ...config.env,
-            NO_COMMAND_LOG: 1,
-          },
-        })
+          hideCommandLog: true,
+        } as ReceivedCypressOptions)
       })
 
       cy.visitApp()
@@ -393,6 +401,41 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
     cy.withRetryableCtx((ctx) => {
       expect(ctx.actions.project.initializeActiveProject).to.be.called
+    })
+  })
+
+  describe('runSpec mutation', () => {
+    it('should trigger expected spec from POST', () => {
+      startAtSpecsPage('e2e')
+
+      cy.contains('E2E specs').should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const currentProject = ctx.currentProject?.replaceAll('\\', '/')
+        const specPath = `${currentProject}/cypress/e2e/dom-content.spec.js`
+        const url = `http://127.0.0.1:${ctx.coreData.servers.gqlServerPort}/__launchpad/graphql?`
+        const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"${specPath}\\"){\\n__typename\\n... on RunSpecResponse{\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}\\n}","variables":null}`
+
+        ctx.coreData.app.browserStatus = 'open'
+
+        /*
+        Note: If this test starts failing, this fetch is the likely culprit.
+        Validate the GQL payload above is still valid by logging the fetch response JSON
+        */
+
+        await ctx.util.fetch(
+          url,
+          {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: payload,
+          },
+        )
+      })
+
+      cy.contains('Dom Content').should('be.visible')
     })
   })
 })

@@ -16,7 +16,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -240,6 +240,18 @@ export class ProjectLifecycleManager {
 
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
+          // If we received a cypressConfig.port we want to null it out
+          // because we propagated it into the devServer.port and it is
+          // later set as baseUrl which cypress is launched into
+          //
+          // The special case is cypress in cypress testing. If that's the case, we still need
+          // the wrapper cypress to be running on 4455
+          if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+            finalConfig.port = null
+          } else {
+            finalConfig.port = 4455
+          }
+
           span?.end()
 
           if (!devServerOptions?.port) {
@@ -433,6 +445,11 @@ export class ProjectLifecycleManager {
         },
       })
 
+      s.eventCollectorSource?.destroy()
+      if (this.ctx.isOpenMode) {
+        s.eventCollectorSource = new EventCollectorSource(this.ctx)
+      }
+
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
@@ -574,6 +591,7 @@ export class ProjectLifecycleManager {
 
     await this.ctx.coreData.currentProjectGitInfo?.destroy()
     await this.ctx.project.destroy()
+    await this.ctx.coreData.eventCollectorSource?.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
     this._cachedFullConfig = undefined
@@ -584,7 +602,7 @@ export class ProjectLifecycleManager {
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
-    assert(this._configManager, 'Cannot get full config a config manager')
+    assert(this._configManager, 'Cannot get full config without a config manager')
 
     return this._configManager.getFullInitialConfig(options, withBrowsers)
   }

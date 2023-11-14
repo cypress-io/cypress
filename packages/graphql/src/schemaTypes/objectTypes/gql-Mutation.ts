@@ -1,8 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
+import { CodeGenTypeEnum, TestingTypeEnum, PreferencesTypeEnum } from '../enumTypes'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -10,11 +8,9 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
-import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
-
-const debug = debugLib('cypress:graphql:mutation')
+import { RunSpecResult } from '../unions'
 
 export const mutation = mutationType({
   definition (t) {
@@ -25,7 +21,7 @@ export const mutation = mutationType({
         text: nonNull(stringArg()),
       },
       resolve: (_, { text }, ctx) => {
-        ctx.electronApi.copyTextToClipboard(text)
+        ctx.config.electronApi.copyTextToClipboard(text)
 
         return true
       },
@@ -219,7 +215,7 @@ export const mutation = mutationType({
         // signal to launchpad to reload the data context
         ctx.emitter.toLaunchpad()
 
-        return ctx.wizardData
+        return ctx.coreData.wizard
       },
     })
 
@@ -634,6 +630,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('runSpec', {
+      description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
+      type: RunSpecResult,
+      args: {
+        specPath: nonNull(stringArg({
+          description: 'Absolute path of the spec to run - must match e2e or component specPattern',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.actions.project.runSpec({
+          specPath: args.specPath,
+        })
+      },
+    })
+
     t.field('dismissWarning', {
       type: Query,
       args: {
@@ -667,25 +678,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('purgeCloudSpecByPathCache', {
-      type: 'Boolean',
-      args: {
-        projectSlug: nonNull(stringArg({})),
-        specPaths: nonNull(list(nonNull(stringArg({})))),
-      },
-      description: 'Removes the cache entries for specified cloudSpecByPath query records',
-      resolve: async (source, args, ctx) => {
-        const { projectSlug, specPaths } = args
-
-        debug('Purging %d `cloudSpecByPath` cache records for project %s: %o', specPaths.length, projectSlug, specPaths)
-        for (let specPath of specPaths) {
-          await ctx.cloud.invalidate('Query', 'cloudSpecByPath', { projectSlug, specPath })
-        }
-
-        return true
-      },
-    })
-
     t.field('refetchRemote', {
       type: Query,
       description: 'Signal that we are explicitly refetching remote data and should not use the server cache',
@@ -711,11 +703,11 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
-        includeMachineId: booleanArg({}),
-        campaign: nonNull(stringArg({})),
-        messageId: nonNull(stringArg({})),
-        medium: nonNull(stringArg({})),
-        cohort: stringArg({}),
+        includeMachineId: booleanArg(),
+        campaign: nonNull(stringArg()),
+        messageId: nonNull(stringArg()),
+        medium: nonNull(stringArg()),
+        cohort: stringArg(),
         payload: stringArg({
           description: '(optional) stringified JSON object with supplemental data',
         }),
@@ -761,6 +753,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.boolean('showSystemNotification', {
+      description: 'Show system notification via Electron',
+      args: {
+        title: nonNull(stringArg()),
+        body: nonNull(stringArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.electron.showSystemNotification(args.title, args.body, async () => {
+          await ctx.actions.browser.focusActiveBrowserWindow()
+        })
+
+        return true
+      },
+    })
+
     t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       args: {
@@ -773,7 +780,7 @@ export const mutation = mutationType({
       },
     })
 
-    //Using a mutation to just return data in order to be able to await the results in the component
+    // Using a mutation to just return data in order to be able to await the results in the component
     t.list.nonNull.string('testsForRun', {
       description: 'Return the set of test titles for the given spec path',
       args: {
@@ -782,11 +789,11 @@ export const mutation = mutationType({
         })),
       },
       resolve: (source, args, ctx) => {
-        if (!ctx.coreData.cloud.testsForRunResults) {
+        if (!ctx.coreData.cloudProject.testsForRunResults) {
           return []
         }
 
-        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+        const testsForSpec = ctx.coreData.cloudProject.testsForRunResults[args.spec]
 
         return testsForSpec || []
       },
@@ -800,7 +807,7 @@ export const mutation = mutationType({
         })))),
       },
       resolve: (source, args, ctx) => {
-        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
           acc[spec.specPath] = spec.tests
 
           return acc
@@ -816,6 +823,21 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         await ctx.actions.wizard.detectFrameworks()
         await ctx.actions.wizard.initializeFramework()
+
+        return true
+      },
+    })
+
+    /**
+     * Currently, this is only used for debugging purposes by running this mutation in GraphiQL
+     */
+    t.boolean('showDebugForCloudRun', {
+      description: 'Set the route to debug and show the specified CloudRun',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.debugCloudRun(args.runNumber)
 
         return true
       },

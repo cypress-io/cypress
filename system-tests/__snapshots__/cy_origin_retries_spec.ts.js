@@ -43,7 +43,7 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cy_origin_retries.cy.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

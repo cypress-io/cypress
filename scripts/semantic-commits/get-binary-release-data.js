@@ -1,3 +1,4 @@
+const Bluebird = require('bluebird')
 const childProcess = require('child_process')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
@@ -33,6 +34,66 @@ const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
   return stdout.split('\n')
 }
 
+// returns number of milliseconds to wait for retry
+const getRetryAfter = (headers) => {
+  // retry-after header is number of seconds to wait
+  if (headers['retry-after'] && headers['retry-after'] !== '0') {
+    return parseInt(headers['retry-after'], 10) * 1000
+  }
+
+  // x-ratelimit-reset header is the time in seconds since epoch after
+  // which to retry
+  if (headers['x-ratelimit-reset']) {
+    const epochSeconds = parseInt(headers['x-ratelimit-reset'], 10)
+
+    // turn it into milliseconds to wait and pad it by a second for good measure
+    return (epochSeconds - (Date.now() / 1000)) * 1000 + 1000
+  }
+
+  // otherwise, just wait a minute
+  return 6000
+}
+
+// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#secondary-rate-limits
+const parseRateLimit = (err) => {
+  if (err.status === 403 && err.response?.data?.message.includes('secondary rate limit')) {
+    const retryAfter = getRetryAfter(err.response?.headers)
+
+    return {
+      rateLimitHit: true,
+      retryAfter,
+    }
+  }
+
+  return {
+    rateLimitHit: false,
+  }
+}
+
+const fetchPullRequest = async (octokit, pullNumber) => {
+  try {
+    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+      owner: 'cypress-io',
+      repo: 'cypress',
+      pull_number: pullNumber,
+    })
+
+    return pullRequest
+  } catch (err) {
+    console.log(`Error while fetching PR #${pullNumber}:`, err)
+
+    const { rateLimitHit, retryAfter } = parseRateLimit(err)
+
+    if (rateLimitHit) {
+      console.log(`Rate limit hit - Retry fetching PR #${pullNumber} after ${retryAfter}ms`)
+
+      return Bluebird.delay(retryAfter).then(() => fetchPullRequest(octokit, pullNumber))
+    }
+
+    throw err
+  }
+}
+
 /**
  * Get the next release version given the semantic commits in the git history. Then using the commit history,
  * determine which files have changed, list of PRs merged and issues resolved since the latest tag was
@@ -61,33 +122,36 @@ const getReleaseData = async (latestReleaseInfo) => {
   const prsInRelease = []
   const commits = []
 
-  await Promise.all(semanticCommits.map(async (semanticResult) => {
+  await Bluebird.each(semanticCommits, (async (semanticResult) => {
     if (!semanticResult) return
 
     const { type: semanticType, references } = semanticResult
 
-    if (!references.length || !references[0].issue) {
+    if (!references.length) {
       console.log('Commit does not have an associated pull request number...')
 
       return
     }
 
-    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-      owner: 'cypress-io',
-      repo: 'cypress',
-      pull_number: references[0].issue,
-    })
+    const ref = references.find((r) => !r.raw.includes('revert #'))
 
-    const associatedIssues = getLinkedIssues(pullRequest.body)
+    if (!ref) {
+      console.log('Commit does not have an associated pull request number...')
+
+      return
+    }
+
+    const pullRequest = await fetchPullRequest(octokit, ref.issue)
+    const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
 
     commits.push({
       commitMessage: semanticResult.header,
       semanticType,
-      prNumber: references[0].issue,
+      prNumber: ref.issue,
       associatedIssues,
     })
 
-    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${references[0].issue}`)
+    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${ref.issue}`)
 
     associatedIssues.forEach((issueNumber) => {
       issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)

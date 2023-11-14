@@ -16,6 +16,7 @@ import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { RelevantRunInfo } from '../../src/gen/graphcache-config.gen'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
@@ -46,7 +47,12 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {
-      getPreferences: sinon.stub().resolves({ majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 } }),
+      getPreferences: sinon.stub().resolves({
+        majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 },
+        notifyWhenRunCompletes: ['failed'],
+      }),
+      getAvailableEditors: sinon.stub(),
+      setPreferences: sinon.stub(),
     } as unknown as LocalSettingsApiShape,
     authApi: {
       logIn: sinon.stub().throws('not stubbed'),
@@ -56,6 +62,8 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       closeActiveProject: sinon.stub(),
       insertProjectToCache: sinon.stub().resolves(),
       getProjectRootsFromCache: sinon.stub().resolves([]),
+      runSpec: sinon.stub(),
+      routeToDebug: sinon.stub(),
     } as unknown as ProjectApiShape,
     electronApi: {
       isMainWindowFocused: sinon.stub().returns(false),
@@ -102,4 +110,15 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
   }
 
   return ctx
+}
+
+export function createRelevantRun (runNumber: number): RelevantRunInfo {
+  return {
+    runNumber,
+    ciBuildNumber: '123',
+    branch: 'feature/branch',
+    organizationId: 'org-id',
+    sha: 'sha-123',
+    totalFailed: 0,
+  }
 }

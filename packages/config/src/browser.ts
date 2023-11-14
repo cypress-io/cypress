@@ -2,13 +2,14 @@ import _ from 'lodash'
 import Debug from 'debug'
 import {
   defaultSpecPattern,
+  defaultExcludeSpecPattern,
   options,
   breakingOptions,
   breakingRootOptions,
   testingTypeBreakingOptions,
 } from './options'
 
-import type { TestingType } from '@packages/types'
+import type { BreakingErrResult, TestingType } from '@packages/types'
 import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
 
@@ -17,6 +18,7 @@ import * as validation from './validation'
 
 export {
   defaultSpecPattern,
+  defaultExcludeSpecPattern,
   options,
   breakingOptions,
   BreakingOption,
@@ -56,14 +58,6 @@ const issuedWarnings = new Set()
 export type InvalidTestOverrideResult = {
   invalidConfigKey: string
   supportedOverrideLevel: string
-}
-
-export type BreakingErrResult = {
-  name: string
-  newName?: string
-  value?: any
-  configFile: string
-  testingType?: TestingType
 }
 
 type ErrorHandler = (
@@ -203,6 +197,26 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
       return
     }
 
+    // this is unique validation, not applied to the general cy config.
+    // it will be removed when we support defining experimental retries
+    // in test config overrides
+
+    // TODO: remove when experimental retry overriding is supported
+
+    if (configKey === 'retries') {
+      const experimentalRetryCfgKeys = [
+        'experimentalStrategy', 'experimentalOptions',
+      ]
+
+      Object.keys(config.retries || {})
+      .filter((v) => experimentalRetryCfgKeys.includes(v))
+      .forEach((invalidExperimentalCfgOverride) => {
+        onErr({
+          invalidConfigKey: `retries.${invalidExperimentalCfgOverride}`,
+          supportedOverrideLevel: 'global_only',
+        })
+      })
+    }
     // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
     // https://github.com/cypress-io/cypress/issues/24365
 

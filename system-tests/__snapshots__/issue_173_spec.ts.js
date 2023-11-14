@@ -39,7 +39,7 @@ exports['e2e issue 173 / failing'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_173.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

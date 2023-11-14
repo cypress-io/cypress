@@ -9,8 +9,5 @@ describe('plugins not supported in v10', () => {
     spec: '*',
     snapshot: true,
     expectedExitCode: 1,
-    config: {
-      video: false,
-    },
   })
 })

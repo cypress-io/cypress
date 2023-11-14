@@ -70,7 +70,7 @@ exports['e2e cookies with baseurl'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cookies_spec_baseurl.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -129,7 +129,7 @@ exports['e2e cookies with no baseurl'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cookies_spec_no_baseurl.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

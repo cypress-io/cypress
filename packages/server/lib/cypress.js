@@ -153,9 +153,7 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
-    if (options.key) {
-      telemetry.exporter()?.attachRecordKey(options.key)
-    }
+    telemetry.exporter()?.attachRecordKey(options.key)
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -166,19 +164,24 @@ module.exports = {
       options.headed = false
     }
 
+    const electronApp = require('./util/electron-app')
+
     if (options.runProject && !options.headed) {
       debug('scaling electron app in headless mode')
       // scale the electron browser window
       // to force retina screens to not
       // upsample their images when offscreen
       // rendering
-      require('./util/electron-app').scale()
+      electronApp.scale()
     }
+
+    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
+    electronApp.setScopeMemoryCachePerContext()
 
     // make sure we have the appData folder
     return Promise.all([
       require('./util/app_data').ensure(),
-      require('./util/electron-app').setRemoteDebuggingPort(),
+      electronApp.setRemoteDebuggingPort(),
     ])
     .then(() => {
       // else determine the mode by

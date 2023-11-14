@@ -646,6 +646,9 @@ type CloudRunInstance implements Node {
   """The ID of the group that this instance belongs to"""
   groupId: String!
 
+  """Used to determine if the instance has test replay"""
+  hasReplay: Boolean
+
   """Used to determine if the instance has screenshots"""
   hasScreenshots: Boolean!
 
@@ -655,6 +658,9 @@ type CloudRunInstance implements Node {
   """Used to determine if the instance has screenshots"""
   hasVideo: Boolean!
   id: ID!
+
+  """Link to Cypress Cloud to view test replay, if available"""
+  replayUrl: String
 
   """Link to Cypress Cloud to view stdout, if available"""
   screenshotsUrl: String
@@ -840,6 +846,12 @@ enum CloudTestResultStateEnum {
   SKIPPED
   TIMEDOUT
   UNKNOWN
+}
+
+"""Type of tests"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -1103,6 +1115,8 @@ enum ErrorTypeEnum {
   BROWSER_CRASHED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
+  BROWSER_PAGE_CLOSED_UNEXPECTEDLY
+  BROWSER_PROCESS_CLOSED_UNEXPECTEDLY
   BROWSER_UNSUPPORTED_LAUNCH_OPTION
   BUNDLE_ERROR
   CANNOT_CONNECT_BASE_URL
@@ -1127,6 +1141,7 @@ enum ErrorTypeEnum {
   CLOUD_CANNOT_PROCEED_IN_PARALLEL
   CLOUD_CANNOT_PROCEED_IN_SERIAL
   CLOUD_CANNOT_UPLOAD_ARTIFACTS
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL
   CLOUD_GRAPHQL_ERROR
   CLOUD_INVALID_RUN_REQUEST
   CLOUD_PARALLEL_DISALLOWED
@@ -1156,7 +1171,6 @@ enum ErrorTypeEnum {
   CONFIG_FILE_UNEXPECTED_ERROR
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
-  COULD_NOT_FIND_SYSTEM_NODE
   COULD_NOT_PARSE_ARGUMENTS
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
@@ -1202,8 +1216,6 @@ enum ErrorTypeEnum {
   MIGRATION_CYPRESS_NOT_FOUND
   MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
-  NODE_VERSION_DEPRECATION_BUNDLED
-  NODE_VERSION_DEPRECATION_SYSTEM
   NOT_LOGGED_IN
   NO_DEFAULT_CONFIG_FILE_FOUND
   NO_PROJECT_FOUND_AT_PROJECT_ROOT
@@ -1239,6 +1251,7 @@ enum ErrorTypeEnum {
   VIDEO_CAPTURE_FAILED
   VIDEO_COMPRESSION_FAILED
   VIDEO_RECORDING_FAILED
+  VIDEO_UPLOAD_ON_PASSES_REMOVED
 }
 
 """Base error"""
@@ -1410,15 +1423,46 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
   wasBrowserSetInCLI: Boolean
+}
+
+"""Counts for specs and tests from a local project at a point in time"""
+input LocalTestCountsInput {
+  """Current Git branch name for local project"""
+  branch: String
+
+  """Total number of example specs found in project"""
+  exampleSpecs: Int!
+
+  """Total number of tests found in example specs. This can be an estimate"""
+  exampleTests: Int!
+
+  """Project slug for project"""
+  projectSlug: String
+
+  """Testing type"""
+  testingType: CloudTestingTypeEnum!
+
+  """Total number of specs found in project"""
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
 }
 
 type ManualMigration implements Node {
@@ -1593,6 +1637,9 @@ type Mutation {
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """Record event"""
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
   completeSetup: Query
 
   """add the passed text to the local clipboard"""
@@ -1704,9 +1751,6 @@ type Mutation {
   """Ping configured Base URL"""
   pingBaseUrl: Query
 
-  """Removes the cache entries for specified cloudSpecByPath query records"""
-  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
-
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
@@ -1748,6 +1792,16 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+
+  """
+  Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
+  """
+  runSpec(
+    """
+    Absolute path of the spec to run - must match e2e or component specPattern
+    """
+    specPath: String!
+  ): RunSpecResult
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -1775,6 +1829,12 @@ type Mutation {
 
   """Set failed tests for the current run to be used by the runner"""
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
+  """Set the route to debug and show the specified CloudRun"""
+  showDebugForCloudRun(runNumber: Int!): Boolean
+
+  """Show system notification via Electron"""
+  showSystemNotification(body: String!, title: String!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1995,6 +2055,9 @@ type Query {
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
+
   """A list of warnings"""
   warnings: [ErrorWrapper!]!
 
@@ -2041,12 +2104,18 @@ type RelevantRun {
   """Information about the current commit for the local project"""
   currentCommitInfo: CommitInfo
 
+  """Latest relevant runs to fetch for the specs and runs page"""
+  latest: [RelevantRunInfo!]!
+
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
 }
 
 """runNumber and commitSha for a given run"""
 type RelevantRunInfo {
+  """The run id"""
+  runId: ID!
+
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
@@ -2055,11 +2124,16 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {
   DEBUG
+  RUNS
   SIDEBAR
+  SPECS
 }
 
 """
@@ -2177,6 +2251,39 @@ enum RunInstanceStatusEnum {
   TIMEDOUT
   UNCLAIMED
 }
+
+"""Error encountered during a runSpec mutation"""
+type RunSpecError {
+  code: RunSpecErrorCode!
+
+  """
+  Contextual information for the error (typically an expanded error message)
+  """
+  detailMessage: String
+}
+
+enum RunSpecErrorCode {
+  GENERAL_ERROR
+  NO_PROJECT
+  NO_SPEC_PATH
+  NO_SPEC_PATTERN_MATCH
+  SPEC_NOT_FOUND
+  TESTING_TYPE_NOT_CONFIGURED
+}
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser!
+
+  """Matched spec that was launched"""
+  spec: Spec!
+
+  """Testing Type that spec was launched in"""
+  testingType: String!
+}
+
+union RunSpecResult = RunSpecError | RunSpecResponse
 
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
@@ -2298,11 +2405,6 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
-
-  """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
-  """
-  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

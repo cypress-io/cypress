@@ -40,6 +40,8 @@ module.exports = {
     'cli/types/**',
     // these fixtures are supposed to fail linting
     'npm/eslint-plugin-dev/test/fixtures/**',
+    // Cloud generated
+    'system-tests/lib/validations/**',
   ],
   overrides: [
     {
@@ -57,7 +59,6 @@ module.exports = {
       rules: {
         'no-restricted-properties': 'off',
         'no-restricted-syntax': 'off',
-        'no-console': 'off',
       },
     },
   ],

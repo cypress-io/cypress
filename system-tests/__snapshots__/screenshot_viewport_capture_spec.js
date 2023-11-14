@@ -32,7 +32,7 @@ exports['e2e screenshot viewport capture / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  27                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_viewport_capture.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

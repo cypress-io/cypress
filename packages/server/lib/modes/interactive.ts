@@ -142,7 +142,7 @@ export = {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },
       getGraphQLPort: () => {
-        return ctx?.gqlServerPort
+        return ctx?.coreData.servers.gqlServerPort
       },
     })
 
@@ -157,6 +157,11 @@ export = {
   },
 
   async run (options: LaunchArgs, _loading: Promise<void>) {
+    // Need to set this for system notifications to appear as "Cypress" on Windows
+    if (app.setAppUserModelId) {
+      app.setAppUserModelId('Cypress')
+    }
+
     // Note: We do not await the `_loading` promise here since initializing
     // the data context can significantly delay initial render of the UI
     // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
@@ -173,7 +178,7 @@ export = {
     // the electron process to throw.
     // https://github.com/cypress-io/cypress/issues/22026
 
-    app.once('will-quit', (event: Event) => {
+    app.once('will-quit', (event: Electron.Event) => {
       // We must call synchronously call preventDefault on the will-quit event
       // to halt the current quit lifecycle
       event.preventDefault()

@@ -44,6 +44,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/index.js',
+    'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
@@ -87,7 +88,11 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         '@swc/core',
         'emitter',
         'ts-loader',
+        'uglify-js',
+        'esbuild',
+        'enhanced-resolve/lib/createInnerCallback',
         '@babel/preset-typescript/package.json',
+        './addon/addon-native',
       ],
     })
 
@@ -184,8 +189,12 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
 
   // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
   await consolidateDeps({ projectBaseDir: buildAppDir })
+}
 
+const cleanupUnneededDependencies = async (buildAppDir) => {
+  console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
   // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // this is it's own function as we always want to clean out unneeded dependencies
   await del([
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
@@ -219,6 +228,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'JSV', 'docs'),
     path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
     // Files used as part of prebuilding are not necessary
+    path.join(buildAppDir, '**', 'node_gyp_bins'),
+    path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
@@ -245,4 +256,5 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
 
 module.exports = {
   buildEntryPointAndCleanup,
+  cleanupUnneededDependencies,
 }

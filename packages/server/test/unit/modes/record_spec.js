@@ -200,7 +200,7 @@ describe('lib/modes/record', () => {
         resetEnv()
       })
 
-      it('calls api.createRun with the commit overrided from environment variables', () => {
+      it('calls api.createRun with the commit overridden from environment variables', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 
@@ -285,6 +285,7 @@ describe('lib/modes/record', () => {
         const tag = 'nightly,develop'
         const testingType = 'e2e'
         const autoCancelAfterFailures = 4
+        const project = {}
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -301,6 +302,7 @@ describe('lib/modes/record', () => {
           tag,
           testingType,
           autoCancelAfterFailures,
+          project,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -339,6 +341,7 @@ describe('lib/modes/record', () => {
             },
             tags: ['nightly', 'develop'],
             autoCancelAfterFailures: 4,
+            project,
           })
         })
       })

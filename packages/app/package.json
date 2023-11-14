@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
-    "build-prod-ui": "cross-env NODE_ENV=production vite build",
+    "build": "vite build",
     "clean": "rimraf dist && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "echo 'ok'",
@@ -13,16 +13,18 @@
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project .",
+    "cypress:run:e2e:update:snapshots": "CYPRESS_SNAPSHOT_UPDATE=1 yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --spec **/*mochaEvents* --browser chrome",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
-    "start": "echo \"run 'yarn dev' from the root\" && exit 1",
-    "watch": "echo \"run 'yarn dev' from the root\" && exit 1",
+    "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
+    "watch": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@cypress-design/vue-button": "0.9.2",
-    "@cypress-design/vue-icon": "0.22.2",
-    "@cypress-design/vue-statusicon": "0.4.3",
+    "@cypress-design/vue-button": "^0.10.1",
+    "@cypress-design/vue-icon": "^0.26.0",
+    "@cypress-design/vue-statusicon": "^0.5.0",
+    "@cypress-design/vue-tabs": "^0.5.1",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/iconify": "2.1.2",
@@ -78,5 +80,11 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/data-context",
+      "@packages/graphql"
+    ]
+  }
 }

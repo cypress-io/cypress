@@ -36,7 +36,7 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     typescript_passing.cy.ts                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -81,7 +81,9 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/e2e/typescript_syntax_error.cy.tsXX:XX
+[tsl] ERROR in /foo/bar/.projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts(3,19)
+      TS1109: Expression expected.
+
 Module parse failed: Unexpected token (3:19)
 File was processed with these loaders:
  * relative/path/to/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
@@ -89,7 +91,10 @@ You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint
 | // because it tests failing spec.
 > describe('fail', - > );
-|
+| 
+
+[tsl] ERROR in /foo/bar/.projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts(3,21)
+      TS1109: Expression expected.
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
@@ -108,7 +113,7 @@ Fix the error in your code and re-run your tests.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     typescript_syntax_error.cy.ts                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -161,7 +166,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.ts                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -181,7 +186,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
 
 `
 
-exports['e2e typescript in spec and support file project wtih custom supportFile passes 1'] = `
+exports['e2e typescript in spec and support file project with custom supportFile passes 1'] = `
 
 ====================================================================================================
 
@@ -215,7 +220,7 @@ exports['e2e typescript in spec and support file project wtih custom supportFile
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.ts                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

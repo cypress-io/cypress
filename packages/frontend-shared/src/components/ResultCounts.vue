@@ -1,5 +1,5 @@
 <template>
-  <div class="border rounded flex border-gray-200 h-6 text-gray-700 text-[14px] leading-[20px]">
+  <div class="bg-white border rounded flex border-gray-200 h-6 text-gray-700 text-[14px] leading-[20px]">
     <div
       v-for="(result, i) in results"
       :key="i"
@@ -11,6 +11,7 @@
         :is="result.icon"
         class="mt-px h-[12px] mr-1 w-[12px]"
         :class="result.class"
+        aria-hidden="true"
       />
       <span
         class="sr-only"

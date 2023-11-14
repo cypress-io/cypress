@@ -1,7 +1,6 @@
 import { gql } from '@urql/core'
-import { print } from 'graphql'
 import debugLib from 'debug'
-import { isEqual, takeWhile } from 'lodash'
+import { isEqual, take, takeWhile } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunInfo, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
@@ -23,6 +22,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
           id
           runNumber
           status
+          totalFailed
           commitInfo {
             sha
           }
@@ -35,9 +35,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
   }
 `
 
-const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
-
-export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [] }
+export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [], latest: [] }
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
@@ -82,7 +80,6 @@ export class RelevantRunsDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_OPERATION_DOC,
-      operation: RELEVANT_RUN_UPDATE_OPERATION,
       operationVariables: {
         projectSlug,
         shas,
@@ -116,11 +113,13 @@ export class RelevantRunsDataSource {
 
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
       return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
-    }).map((run) => {
+    }).map((run): RelevantRunInfo => {
       return {
+        runId: run.id,
         runNumber: run.runNumber!,
         status: run.status!,
         sha: run.commitInfo?.sha!,
+        totalFailed: run.totalFailed || 0,
       }
     }) || []
 
@@ -140,8 +139,9 @@ export class RelevantRunsDataSource {
     if (run) {
       //filter relevant runs in case moving causes the previously selected run to no longer be relevant
       const relevantRuns = this.#takeRelevantRuns(this.#cached.all)
+      const latestRuns = this.#cached.latest
 
-      await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun: run, shas })
+      await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun: run, shas, latestRuns })
     }
   }
 
@@ -181,6 +181,8 @@ export class RelevantRunsDataSource {
 
     const relevantRuns: RelevantRunInfo[] = this.#takeRelevantRuns(runs)
 
+    const latestRuns: RelevantRunInfo[] = this.#takeLatestRuns(runs)
+
     // If there is a selected run that is no longer considered relevant,
     // make sure to still add it to the list of runs
     const selectedRunNumber = selectedRun?.runNumber
@@ -196,7 +198,7 @@ export class RelevantRunsDataSource {
       }
     }
 
-    await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas })
+    await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas, latestRuns })
   }
 
   #takeRelevantRuns (runs: RelevantRunInfo[]) {
@@ -210,20 +212,30 @@ export class RelevantRunsDataSource {
       return run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun
     })
 
-    debug('runs after take', relevantRuns)
+    debug('relevant runs after take', relevantRuns)
 
     return relevantRuns
   }
 
-  async #emitRelevantRunsIfChanged ({ relevantRuns, selectedRun, shas }: {
+  #takeLatestRuns (runs: RelevantRunInfo[]) {
+    const latestRuns = take(runs, 100)
+
+    debug('latest runs after take', latestRuns)
+
+    return latestRuns
+  }
+
+  async #emitRelevantRunsIfChanged ({ relevantRuns, selectedRun, shas, latestRuns }: {
     relevantRuns: RelevantRunInfo[]
     selectedRun: RelevantRunInfo | undefined
     shas: string[]
+    latestRuns: RelevantRunInfo[]
   }) {
     const commitsAhead = selectedRun?.sha ? shas.indexOf(selectedRun.sha) : -1
 
     const toCache: RelevantRun = {
       all: relevantRuns,
+      latest: latestRuns,
       commitsAhead,
       selectedRunNumber: selectedRun?.runNumber,
     }
@@ -243,10 +255,17 @@ export class RelevantRunsDataSource {
     if (!isEqual(toCache, this.#cached)) {
       debug('Values changed')
 
+      debug('current cache: %o, new values: %o', this.#cached, toCache)
+
       //TODO is the right thing to invalidate?  Can we just invalidate the runsByCommitShas field?
       const projectSlug = await this.ctx.project.projectId()
 
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+
+      // If the cache is empty, then we're just starting up. Don't send notifications
+      if (this.#cached.all[0] && toCache.all[0] && !isEqual(toCache.all[0], this.#cached.all[0])) {
+        this.ctx.actions.notification.maybeSendRunNotification(this.#cached.all[0], toCache.all[0])
+      }
 
       this.#cached = {
         ...toCache,

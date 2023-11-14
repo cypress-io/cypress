@@ -78,8 +78,6 @@ system-tests/lib/fixtureDirs.ts
 # from npm/webpack-dev-server
 /npm/webpack-dev-server/cypress/videos
 
-# from npm/xpath
-/npm/xpath/cypress/videos
 # from npm/grep
 /npm/grep/cypress/videos
 
@@ -397,3 +395,6 @@ tooling/v8-snapshot/cache/dev-win32
 tooling/v8-snapshot/cache/prod-darwin
 tooling/v8-snapshot/cache/prod-linux
 tooling/v8-snapshot/cache/prod-win32
+
+# Cloud API validations
+system-tests/lib/validations

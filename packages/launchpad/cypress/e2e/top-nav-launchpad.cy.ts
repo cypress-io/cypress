@@ -482,7 +482,7 @@ describe('Launchpad Top Nav Workflows', () => {
             return obj.result
           })
 
-          cy.contains('Component Testing').click()
+          cy.contains('E2E Testing').click()
 
           cy.contains(defaultMessages.setupWizard.chooseBrowser.title).should('be.visible')
 

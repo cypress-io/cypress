@@ -124,6 +124,8 @@
     "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
+    "componentSpecsHeaderShort": "Component",
+    "e2eSpecsHeaderShort": "E2E",
     "lastUpdated": {
       "header": "Last updated",
       "tooltip": {
@@ -222,9 +224,56 @@
         "primaryAction": "Quick setup",
         "secondaryAction": "Read our guide",
         "dismissAction": "Give feedback"
+      },
+      "enableNotifications": {
+        "title": "Start debugging as soon as your first tests fail",
+        "subtitle": "Cypress can notify you about Cloud test runs for your branch.",
+        "enableDesktopNotifications": "Enable desktop notifications",
+        "remindMeLater": "Remind me later",
+        "notificationsEnabledTitle": "Notifications Enabled",
+        "notificationsEnabledBody": "Nice, notifications are enabled!",
+        "dismissBanner": "Dismiss banner"
       }
     },
-    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs",
+    "testingTypePromo": {
+      "e2e": {
+        "header": {
+          "title": "End-to-end testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is end-to-end testing?",
+          "description": "End-to-end tests are perfect for testing your entire application from a user's perspective. Visit any URL and test full user journeys across pages and domains.",
+          "listItem1": "Test full user journeys across multiple pages using {0} to load up a web page for your test.",
+          "listItem1Command": "cy.visit()",
+          "listItem2": "Work with live API calls or mock them with {0} to test all possible states of your app.",
+          "listItem2Command": "cy.intercept()",
+          "listItem3": "Use {0} to maintain consistent browser sessions in your tests, and work with features like cookies and local storage, all while keeping your tests properly isolated.",
+          "listItem3Command": "cy.session()"
+        }
+      },
+      "ct": {
+        "header": {
+          "title": "Component testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is Component Testing?",
+          "description": "Cypress Component Testing is a technique for developers to write, test, and debug components in isolation without ever leaving the browser - and without having to run your entire application.",
+          "listItem1": "Instead of visiting a page, use {0} to render your components directly in the browser.",
+          "listItem1Command": "cy.mount()",
+          "listItem2": "Test from a user's perspective with all the same Cypress commands that are available in end-to-end testing.",
+          "listItem3": "To get started, you can generate the config for {0}, {1}, and {2} (and {3}!).",
+          "listItem3Link": "more",
+          "link": "Give feedback"
+        }
+      }
+    }
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -252,6 +301,15 @@
       "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
       "passing": "Relevant run is passing",
       "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
+    },
+    "runs": {
+      "running": "Latest run is in progress",
+      "failing": "Latest run is failing with {n} test failure | Latest run is failing with {n} test failures",
+      "passed": "Latest run passed",
+      "failed": "Latest run had {n} test failure | Latest run had {n} test failures",
+      "cancelled": "Latest run has been cancelled",
+      "errored": "Latest run had an error",
+      "erroredWithFailures": "Latest run had an error with {n} test failure | Latest run had an error with {n} test failures"
     }
   },
   "topNav": {
@@ -471,6 +529,23 @@
       "noEditorSelectedPlaceholder": "Choose your editor...",
       "customPathPlaceholder": "/path/to/editor"
     },
+    "notifications": {
+      "title": "Desktop notifications",
+      "description": "Cypress can notify you about Cloud test runs for your branch.",
+      "notifyMeWhenRunStarts": "Notify me when a run starts",
+      "notifyMeWhenRunIsFailing": "Notify me when a run begins to fail",
+      "notifyMeWhenRunCompletes": "Notify me when a run completes",
+      "passed": "Passed",
+      "failed": "Failed",
+      "canceled": "Canceled",
+      "errored": "Errored",
+      "sendTestNotification": "Send a test notification",
+      "notReceivingNotifications": "Not receiving notifications? You might need to allow notifications from Cypress in your computer's system preferences. {0}",
+      "testNotificationTitle": "Hello From Cypress",
+      "testNotificationBody": "This is a test notification",
+      "troubleshoot": "Troubleshoot",
+      "enableNotificationsLabel": "To modify notification settings, enable desktop notifications"
+    },
     "projectId": {
       "title": "Project ID",
       "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
@@ -504,6 +579,10 @@
     "experiments": {
       "title": "Experiments",
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
+      "experimentalCspAllowList": {
+        "name": "CSP Allow List",
+        "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
+      },
       "experimentalFetchPolyfill": {
         "name": "Fetch polyfill",
         "description": "Automatically replaces `window.fetch` with a polyfill that Cypress can spy on and stub. Note: `experimentalFetchPolyfill` has been deprecated in Cypress 6.0.0 and will be removed in a future release. Consider using [`cy.intercept()`](https://on.cypress.io/intercept) to intercept `fetch` requests instead."
@@ -515,6 +594,16 @@
       "experimentalModifyObstructiveThirdPartyCode": {
         "name": "Modify obstructive third party code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
+      },
+      "retries": {
+        "experimentalStrategy": {
+          "name": "Retries Strategy",
+          "description": "Applies a strategy for test retries according to your \"flake tolerance\"; options are `detect-flake-but-always-fail` or `detect-flake-and-pass-on-threshold`."
+        },
+        "experimentalOptions": {
+          "name": "Retries Strategy Options",
+          "description": "Sets retries strategy-specific options like `maxRetries`, `passesRequired`, and `stopIfAnyPassed`."
+        }
       },
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
@@ -686,6 +775,18 @@
         "link": "Support page",
         "button": "Try again"
       }
+    },
+    "card": {
+      "branchName": "Branch Name:",
+      "commitAuthor": "Commit Author:",
+      "totalDuration": "Run Total Duration:",
+      "debugLabel": "Debug",
+      "debugDescription": "View debug for run {runNumber}",
+      "noDebugAvailable": "You can only debug runs for your most recent commits."
+    },
+    "layout": {
+      "viewCloudRuns": "View runs in Cypress Cloud",
+      "checkedOut": "Checked out"
     }
   },
   "debugPage": {
@@ -795,6 +896,7 @@
       "browsers": "{n} browser | {n} browsers"
     },
     "artifacts": {
+      "replay": "View Test Replay",
       "stdout": "View Log",
       "screenshots": "View Screenshots",
       "video": "View Video"
