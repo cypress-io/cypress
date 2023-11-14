@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
@@ -9,7 +10,12 @@ function moveToRunsPage (): void {
 
 function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component'): void {
   cy.scaffoldProject('cypress-in-cypress')
-  cy.openProject('cypress-in-cypress')
+  if (testingType === 'component') {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  } else {
+    cy.openProject('cypress-in-cypress')
+  }
+
   cy.startAppServer(testingType)
 
   cy.loginUser()
@@ -32,7 +38,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs Page', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -54,7 +60,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
       cy.findByTestId('sidebar-link-runs-page').click()
-      cy.get('[data-cy="runs-loader"]')
+      cy.get('[data-cy*="runsSkeleton-"]')
       cy.get('[data-cy="runs"]')
     })
   })
@@ -62,7 +68,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Login', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -97,7 +103,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
 
       moveToRunsPage()
-      cy.contains('a', 'OVERLIMIT').click()
+      cy.findByTestId('runNumber-status-OVERLIMIT').click()
 
       cy.withCtx((ctx, o) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/4')
@@ -108,7 +114,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Connect Org', () => {
     it('opens create Org modal after clicking Connect Project button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -150,7 +156,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens create Org modal after clicking Connect Project button and refetch data from the cloud', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -187,7 +193,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('refetches cloudViewer data on open', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
@@ -219,7 +225,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Connect Project', () => {
     it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
@@ -253,7 +259,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows "Connect project" button if a project is not connected after login', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.visitApp()
@@ -413,7 +419,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -463,7 +469,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -549,7 +555,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Pending authorization to project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -581,7 +587,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - No Runs', { viewportWidth: 1280 }, () => {
     it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -616,26 +622,26 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a copy button and copies correct command in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
 
     it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
   })
@@ -644,7 +650,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     context('no Git data', () => {
       beforeEach(() => {
         cy.scaffoldProject('component-tests')
-        cy.openProject('component-tests')
+        cy.openProject('component-tests', ['--component'])
         cy.startAppServer('component')
       })
 
@@ -660,29 +666,25 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-          cy.findByText('fix: make gql work CANCELLED')
-          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/1"]').first().within(() => {
-          cy.findByText('fix: make gql work ERRORED')
-          cy.get('[data-cy="run-card-icon-ERRORED"]')
+        cy.get('[data-cy="runCard-status-ERRORED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-ERRORED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/2"]').first().within(() => {
-          cy.findByText('fix: make gql work FAILED')
-          cy.get('[data-cy="run-card-icon-FAILED"]')
+        cy.get('[data-cy="runCard-status-FAILED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-FAILED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-card-branch"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
-          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')
@@ -696,7 +698,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
 
         moveToRunsPage()
-        cy.get('[data-cy^="runCard-"]').first().click()
+        cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
 
         cy.withCtx((ctx) => {
           expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
@@ -742,7 +744,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.scaffoldProject('component-tests')
         .then((projectPath) => {
           cy.task('initGitRepoForTestProject', projectPath)
-          cy.openProject('component-tests')
+          cy.openProject('component-tests', ['--component'])
           cy.startAppServer('component')
         })
       })
@@ -759,19 +761,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
+        cy.findByText('fix: using Git data CANCELLED')
         cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-          cy.findByText('fix: using Git data CANCELLED')
-          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+          cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-card-branch"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
-          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')
@@ -785,7 +786,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
 
         moveToRunsPage()
-        cy.get('[data-cy^="runCard-"]').first().click()
+        cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
 
         cy.withCtx((ctx) => {
           expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
@@ -797,7 +798,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   describe('no internet connection', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -835,7 +836,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows correct message on create org modal', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept((obj) => {
@@ -872,7 +873,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows correct message on connect project modal', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -910,7 +911,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   describe('refetching', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {
@@ -949,7 +950,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
 
     itSkipIfWindows('should re-query for executing runs', () => {
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+      cy.get('[data-cy="runNumber-status-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
         await new Promise((resolve) => setTimeout(resolve, 100))
@@ -970,7 +971,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       function completeNext (passed) {
-        cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+        cy.get('[data-cy="runNumber-status-PASSED"]').should('have.length', passed).should('be.visible')
         if (passed < RUNNING_COUNT) {
           completeNext(passed + 1)
         }

@@ -457,7 +457,7 @@ describe('detectLanguage', () => {
       expect(actual).to.eq('ts')
     })
 
-    it('with a TypeScript commponent spec', async () => {
+    it('with a TypeScript component spec', async () => {
       const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
       fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])

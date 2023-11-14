@@ -253,7 +253,7 @@ export default function (Commands, Cypress, cy, state) {
     const itsFn = cy.now('its', path, options)
 
     // .its() has an implicit assertions that the return value shouldn't be null, but
-    // .invoke() has no such requirement. Removing ensureExistenceFor resests implicit
+    // .invoke() has no such requirement. Removing ensureExistenceFor resets implicit
     // assertion that .its() added
     this.set('ensureExistenceFor', null)
 
@@ -280,7 +280,7 @@ export default function (Commands, Cypress, cy, state) {
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps: () => {
           return {
-            Command: 'invoke',
+            name: 'invoke',
             Function: `.${path}(${$utils.stringify(args)})`,
             Subject: subject,
             'With Arguments': args,

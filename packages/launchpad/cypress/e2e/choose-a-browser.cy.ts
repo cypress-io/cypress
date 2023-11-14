@@ -142,19 +142,19 @@ describe.skip('Choose a browser page', () => {
       })
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('opening')
+        ctx.actions.app.setBrowserStatus('opening')
       })
 
       cy.contains('button', 'Opening E2E Testing in Chrome')
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('open')
+        ctx.actions.app.setBrowserStatus('open')
       })
 
       cy.contains('button', 'Running Chrome')
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('closed')
+        ctx.actions.app.setBrowserStatus('closed')
       })
 
       cy.contains('button', 'Start E2E Testing in Chrome')
@@ -207,7 +207,7 @@ describe.skip('Choose a browser page', () => {
       cy.visitLaunchpad()
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('open')
+        ctx.actions.app.setBrowserStatus('open')
       })
 
       cy.contains('button', 'Running Chrome')
@@ -224,7 +224,7 @@ describe.skip('Choose a browser page', () => {
       cy.visitLaunchpad()
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('open')
+        ctx.actions.app.setBrowserStatus('open')
       })
 
       cy.get('h1').should('contain', 'Choose a browser')
@@ -287,7 +287,7 @@ describe.skip('Choose a browser page', () => {
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible').click()
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('open')
+        ctx.actions.app.setBrowserStatus('open')
       })
 
       cy.contains('button', 'Running Chrome')
@@ -296,7 +296,7 @@ describe.skip('Choose a browser page', () => {
       // both are reflected in the UI.
       cy.withCtx(async (ctx) => {
         await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers!.find((browser) => browser.name === 'firefox') as FoundBrowser)
-        ctx.browser.setBrowserStatus('closed')
+        ctx.actions.app.setBrowserStatus('closed')
       })
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')

@@ -16,7 +16,7 @@ export interface SpecChannelOptions {
 
 interface SpecOriginatedCommand {
   name: string
-  args: any[]
+  args: string[]
 }
 
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
@@ -72,16 +72,16 @@ class PrivilegedCommandsManager {
   // also removes that command from the verified commands array
   hasVerifiedCommand (command) {
     const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
+      return command.name === name && _.isEqual(args, command.args)
     })
 
     return !!matchingCommand
   }
 
-  runPrivilegedCommand (config, { commandName, options, userArgs }) {
+  runPrivilegedCommand (config, { commandName, options, args }) {
     // the presence of the command within the verifiedCommands array indicates
     // the command being run is verified
-    const hasCommand = this.hasVerifiedCommand({ name: commandName, args: userArgs })
+    const hasCommand = this.hasVerifiedCommand({ name: commandName, args })
 
     if (config.testingType === 'e2e' && !hasCommand) {
       // this error message doesn't really matter as each command will catch it

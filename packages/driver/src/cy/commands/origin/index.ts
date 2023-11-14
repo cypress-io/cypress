@@ -9,7 +9,7 @@ import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
-import { runPrivilegedCommand, trimUserArgs } from '../../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../../util/privileged_channel'
 
 const reHttp = /^https?:\/\//
 
@@ -27,28 +27,14 @@ const normalizeOrigin = (urlOrDomain) => {
 type OptionsOrFn<T> = { args: T } | (() => {})
 type Fn<T> = (args?: T) => {}
 
-function stringifyFn (fn?: any) {
-  return _.isFunction(fn) ? fn.toString() : undefined
-}
-
-function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>) {
-  return trimUserArgs([
-    urlOrDomain,
-    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : stringifyFn(optionsOrFn),
-    fn ? stringifyFn(fn) : undefined,
-  ])
-}
-
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
   const communicator = Cypress.primaryOriginCommunicator
 
   Commands.addAll({
-    origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>) {
+    origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>, ...extras: never[]) {
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }
-
-      const userArgs = getUserArgs<T>(urlOrDomain, optionsOrFn, fn)
 
       const userInvocationStack = state('current').get('userInvocationStack')
 
@@ -213,7 +199,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                 options: {
                   specBridgeOrigin,
                 },
-                userArgs,
               })
 
               // once the secondary origin page loads, send along the

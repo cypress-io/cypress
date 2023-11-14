@@ -5,7 +5,6 @@
   "main": "dist/src/main.js",
   "scripts": {
     "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",
-    "build-prod": "yarn build",
     "prepare-example": "node scripts/example copy-to ./initial-template",
     "prepare-copy-templates": "node scripts/copy-templates copy-to ./dist/src",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
@@ -23,21 +22,22 @@
     "commander": "6.2.1",
     "find-up": "5.0.0",
     "fs-extra": "^9.1.0",
-    "inquirer": "7.3.3",
+    "glob": "^7.1.6",
+    "inquirer": "8.2.4",
     "ora": "^5.1.0",
     "recast": "0.20.4",
     "semver": "7.5.2"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",
-    "@types/inquirer": "7.3.1",
+    "@types/inquirer": "8.2.4",
     "@types/mock-fs": "4.10.0",
-    "@types/node": "14.14.31",
+    "@types/node": "18.17.5",
     "@types/ora": "^3.2.0",
-    "@types/semver": "7.3.9",
+    "@types/semver": "7.5.0",
     "copy": "0.3.2",
     "mocha": "7.1.1",
-    "mock-fs": "5.1.1",
+    "mock-fs": "5.2.0",
     "snap-shot-it": "7.9.3",
     "typescript": "^4.7.4"
   },
@@ -50,5 +50,10 @@
   },
   "license": "MIT",
   "repository": "https://github.com/cypress-io/cypress.git",
-  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/create-cypress-tests/#readme"
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/create-cypress-tests/#readme",
+  "nx": {
+    "implicitDependencies": [
+      "@packages/example"
+    ]
+  }
 }

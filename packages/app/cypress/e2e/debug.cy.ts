@@ -14,7 +14,7 @@ Cypress.on('window:before:load', (win) => {
 describe('App - Debug Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress', ['--component'])
     cy.startAppServer('component')
 
     cy.loginUser()
@@ -30,26 +30,52 @@ describe('App - Debug Page', () => {
         obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas.data
       }
 
-      if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug') {
+      if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug' || obj.operationName === 'SideBarNavigationContainer_currentProject_cloudProject_cloudProjectBySlug') {
         if (obj.result.data) {
+          // Standard Calls
           obj.result.data.cloudProjectBySlug.runByNumber = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          // Aliased Calls
+          obj.result.data.cloudProjectBySlug.latestRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          obj.result.data.cloudProjectBySlug.selectedRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
         }
       }
 
       return obj.result
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataPassing })
 
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.spy(ctx.actions.eventCollector, 'recordEvent')
+    })
+
     cy.visitApp()
 
+    cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
+
+    cy.intercept('mutation-useRecordEvent_recordEvent').as('recordEvent')
     cy.findByTestId('sidebar-link-debug-page').click()
+
     cy.findByTestId('debug-container').should('be.visible')
+
+    cy.wait('@recordEvent')
+
+    cy.withCtx((ctx, { sinon }) => {
+      expect(ctx.actions.eventCollector.recordEvent).to.have.been.calledWith(sinon.match({
+        campaign: 'Navigated To Debug Page',
+        medium: 'sidebar',
+        payload: {
+          projectId: 'abc123',
+          runNumber: '2',
+          userUuid: '1',
+        },
+      }))
+    })
 
     cy.findByTestId('header-top').contains('update projectId')
     cy.findByTestId('debug-header-dashboard-link')
     .contains('View in Cypress Cloud')
     .should('have.attr', 'href', 'https://cloud.cypress.io/projects/7p5uce/runs/2?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+App')
 
-    cy.findByTestId('debug-runNumber-PASSED').contains('#2')
+    cy.findByTestId('runNumber-status-PASSED').contains('#2')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {
@@ -67,8 +93,6 @@ describe('App - Debug Page', () => {
     cy.findByTestId('debug-passed').contains('All your tests passed.')
     cy.findByLabelText('Relevant run passed').should('be.visible').contains('0')
     cy.findByTestId('run-failures').should('not.exist')
-
-    cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
   })
 
   it('shows information about a failed spec', () => {
@@ -112,7 +136,7 @@ describe('App - Debug Page', () => {
 
     cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
 
-    cy.findByTestId('debug-runNumber-FAILED').contains('#136')
+    cy.findByTestId('runNumber-status-FAILED').contains('#136')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {

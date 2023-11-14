@@ -181,3 +181,16 @@ export async function hasNonExampleSpec (testTemplateDir: string, specs: string[
 
   return specs.some((spec) => !specInTemplates(spec))
 }
+
+export async function getExampleSpecPaths (testTemplateDir: string): Promise<string[]> {
+  debug(`getExampleSpecPaths - calling with template directory "${testTemplateDir}"`)
+  const dirExists = await fileExists(testTemplateDir)
+
+  if (!dirExists) {
+    throw new Error(`Template directory does not exist: ${testTemplateDir}`)
+  }
+
+  const templateFiles = await allFilesInDir(testTemplateDir)
+
+  return templateFiles.map((templateFile) => templateFile.substring(testTemplateDir.length + 1))
+}

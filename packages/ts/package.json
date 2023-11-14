@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",

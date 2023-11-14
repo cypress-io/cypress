@@ -6,7 +6,6 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
@@ -23,13 +22,14 @@
     "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "local-pkg": "0.4.1",
-    "semver": "^7.3.2",
+    "semver": "^7.5.3",
     "speed-measure-webpack-plugin": "1.4.2",
     "tslib": "^2.3.1",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
+    "@types/node": "18.17.5",
     "@types/proxyquire": "^1.3.28",
     "@types/speed-measure-webpack-plugin": "^1.3.4",
     "@types/webpack-dev-server-3": "npm:@types/webpack-dev-server@^3",
@@ -56,5 +56,14 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

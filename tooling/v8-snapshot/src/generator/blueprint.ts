@@ -64,7 +64,7 @@ const pathSep = path.sep === '\\' ? '\\\\' : path.sep
  * When rendering the snapshot script we take care of the following
  * (in order of occurrence in the rendered script):
  *
- * 1. We embedd the path separator so that we have it available inside the
+ * 1. We embed the path separator so that we have it available inside the
  *    snapshot without having to refer to the `path` module
  *
  * 2. We also include helper methods like `cannotAccess` which are invoked

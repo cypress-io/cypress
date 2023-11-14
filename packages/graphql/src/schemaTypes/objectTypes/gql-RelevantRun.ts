@@ -20,6 +20,10 @@ export const RelevantRunInfo = objectType({
       type: 'CloudRunStatus',
       description: 'Status for run',
     })
+
+    t.nonNull.int('totalFailed', {
+      description: 'The total number of failed specs in the run.',
+    })
   },
 })
 

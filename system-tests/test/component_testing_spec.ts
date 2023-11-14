@@ -86,7 +86,7 @@ describe(`React major versions with Vite`, function () {
     it(`executes all of the tests for React v${majorVersion} with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
-        configFile: 'cypress-vite.config.ts',
+        configFile: 'cypress-vite-default.config.ts',
         spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
@@ -115,7 +115,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['13', '14', '15', '16', '16.1']
+const ANGULAR_VERSIONS = ['13', '14', '15', '16', '17']
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
@@ -124,7 +124,11 @@ describe(`Angular CLI versions`, () => {
     let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
 
     if (version === '13') {
-      spec = `${spec},!src/app/components/standalone.component.cy.ts`
+      spec = `${spec},!src/app/components/standalone.component.cy.ts,!src/app/components/signals.component.cy.ts`
+    }
+
+    if (version === '14' || version === '15') {
+      spec = `${spec},!src/app/components/signals.component.cy.ts`
     }
 
     systemTests.it(`v${version} with mount tests`, {
