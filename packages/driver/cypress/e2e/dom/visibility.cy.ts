@@ -53,13 +53,36 @@ describe('src/cypress/dom/visibility', () => {
       expect(fn()).to.be.true
     })
 
-    it('returns false window and body > window height', () => {
+    it('returns false if window and body < window height', () => {
       cy.$$('body').html('<div>foo</div>')
 
       const win = cy.state('window')
 
       const fn = () => {
         return dom.isScrollable(win)
+      }
+
+      expect(fn()).to.be.false
+    })
+
+    it('returns true if document element and body > window height', function () {
+      this.add('<div style="height: 1000px; width: 10px;" />')
+      const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
+
+      const fn = () => {
+        return dom.isScrollable(documentElement)
+      }
+
+      expect(fn()).to.be.true
+    })
+
+    it('returns false if document element and body < window height', () => {
+      cy.$$('body').html('<div>foo</div>')
+
+      const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
+
+      const fn = () => {
+        return dom.isScrollable(documentElement)
       }
 
       expect(fn()).to.be.false
