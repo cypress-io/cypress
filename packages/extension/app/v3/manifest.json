@@ -1,6 +1,6 @@
 {
   "name": "Cypress",
-  "description": "Adds Themes for testing with Cypress",
+  "description": "Adds theme and WebExtension APIs for testing with Cypress",
   "applications": {
     "gecko": {
       "id": "automation-extension-v3@cypress.io"
