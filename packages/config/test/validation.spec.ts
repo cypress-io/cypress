@@ -176,6 +176,20 @@ describe('config/src/validation', () => {
       snapshot('invalid retry object', result)
     })
 
+    it('returns error message for openMode as boolean without strategy', () => {
+      let result = validation.isValidRetriesConfig(mockKey, { openMode: true })
+
+      expect(result).to.not.be.true
+      snapshot(result)
+    })
+
+    it('returns error message for runMode as boolean without strategy', () => {
+      let result = validation.isValidRetriesConfig(mockKey, { runMode: true })
+
+      expect(result).to.not.be.true
+      snapshot(result)
+    })
+
     it('returns true for valid retry object with experimental keys (default)', () => {
       let result = validation.isValidRetriesConfig(mockKey, {
         openMode: 0,

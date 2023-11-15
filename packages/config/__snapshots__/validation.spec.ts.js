@@ -269,13 +269,9 @@ exports['config/src/validation .isValidRetriesConfig experimental options fails 
 }
 
 exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy w/ other options (valid) 1'] = {
-  'key': 'mockConfigKey',
-  'value': {
-    'runMode': true,
-    'openMode': false,
-    'experimentalStrategy': 'bar',
-  },
-  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+  'key': 'mockConfigKey.experimentalStrategy',
+  'value': 'bar',
+  'type': 'one of "detect-flake-but-always-fail", "detect-flake-and-pass-on-threshold"',
 }
 
 exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: maxRetries is negative 1'] = {
@@ -372,12 +368,6 @@ exports['config/src/validation .isValidRetriesConfig experimental options fails 
   'type': 'null or boolean',
 }
 
-exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy w/ other options (valid) 1'] = {
-  'key': 'mockConfigKey.experimentalStrategy',
-  'value': 'bar',
-  'type': 'one of "detect-flake-but-always-fail", "detect-flake-and-pass-on-threshold"',
-}
-
 exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: valid strategy w/ other invalid options with experiment 1'] = {
   'key': 'mockConfigKey.runMode',
   'value': 1,
@@ -388,4 +378,16 @@ exports['config/src/validation .isValidRetriesConfig experimental options fails 
   'key': 'mockConfigKey.runMode',
   'value': 1,
   'type': 'a boolean since an experimental strategy is provided',
+}
+
+exports['config/src/validation .isValidRetriesConfig returns error message for openMode as boolean without strategy 1'] = {
+  'key': 'mockConfigKey.openMode',
+  'value': true,
+  'type': 'a number since no experimental strategy is provided',
+}
+
+exports['config/src/validation .isValidRetriesConfig returns error message for runMode as boolean without strategy 1'] = {
+  'key': 'mockConfigKey.runMode',
+  'value': true,
+  'type': 'a number since no experimental strategy is provided',
 }

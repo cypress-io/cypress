@@ -198,6 +198,7 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   if (_.isObject(value)) {
     const traditionalConfigOptions = _.omit(value, experimentalOptions)
     const experimentalConfigOptions = _.pick<any>(value, experimentalOptions)
+    const openAndRunModeConfigOptions = _.pick(value, optionalKeys)
 
     for (const optionKey in traditionalConfigOptions) {
       if (Object.prototype.hasOwnProperty.call(traditionalConfigOptions, optionKey)) {
@@ -207,12 +208,6 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
           return optionValidation
         }
       }
-    }
-
-    // if optionalKeys are only present and are valid, return true.
-    // The defaults for 'experimentalStrategy' and 'experimentalOptions' are undefined, but the keys exist, so we need to check for this
-    if (!Object.keys(experimentalConfigOptions).filter((key) => experimentalConfigOptions[key] !== undefined).length) {
-      return true
     }
 
     // check experimental configuration. experimentalStrategy MUST be present if experimental config is provided and set to one of the provided enumerations
@@ -225,7 +220,6 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
       }
 
       // if a strategy is provided, and traditional options are also provided, such as runMode and openMode, then these values need to be booleans
-      const openAndRunModeConfigOptions = _.pick(value, optionalKeys)
 
       for (const optionalKey in openAndRunModeConfigOptions) {
         if (Object.prototype.hasOwnProperty.call(openAndRunModeConfigOptions, optionalKey)) {
@@ -235,12 +229,12 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
             return errMsg(`${key}.${optionalKey}`, optionalConfigVal, 'a boolean since an experimental strategy is provided')
           }
         }
+      }
 
-        // if options aren't present (either undefined or null) or are configured correctly, return true
-        if (
-          experimentalConfigOptions.experimentalOptions == null) {
-          return true
-        }
+      // if options aren't present (either undefined or null) or are configured correctly, return true
+      if (
+        experimentalConfigOptions.experimentalOptions == null) {
+        return true
       }
 
       const isValidExperimentalRetryOptions = isValidExperimentalRetryOptionsConfig(`${key}.experimentalOptions`, experimentalConfigOptions.experimentalOptions, experimentalConfigOptions.experimentalStrategy)
@@ -248,8 +242,19 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
       if (isValidExperimentalRetryOptions !== true) {
         return isValidExperimentalRetryOptions
       }
-    } else if (experimentalConfigOptions.experimentalOptions) {
-      return errMsg(`${key}.experimentalOptions`, experimentalConfigOptions.experimentalOptions, 'provided only if an experimental strategy is provided')
+    } else {
+      for (const optionalKey in openAndRunModeConfigOptions) {
+        if (Object.prototype.hasOwnProperty.call(openAndRunModeConfigOptions, optionalKey)) {
+          const optionalConfigVal = _.get(openAndRunModeConfigOptions, optionalKey)
+
+          if (!_.isNumber(optionalConfigVal)) {
+            return errMsg(`${key}.${optionalKey}`, optionalConfigVal, 'a number since no experimental strategy is provided')
+          }
+        }
+      }
+      if (experimentalConfigOptions.experimentalOptions) {
+        return errMsg(`${key}.experimentalOptions`, experimentalConfigOptions.experimentalOptions, 'provided only if an experimental strategy is provided')
+      }
     }
   } else {
     const isValidValue = isValidRetryValue(key, value, 0)
