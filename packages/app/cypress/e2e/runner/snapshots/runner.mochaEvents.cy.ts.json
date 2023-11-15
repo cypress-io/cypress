@@ -725,7 +725,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -758,7 +759,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -791,7 +793,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -827,7 +830,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -861,7 +865,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -1004,7 +1009,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -1067,7 +1073,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -1116,7 +1123,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -1333,7 +1341,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -1381,7 +1390,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -1432,7 +1442,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -1481,7 +1492,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -1767,7 +1779,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_NO_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -1914,7 +1927,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_NO_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -1996,7 +2010,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_NO_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -2064,7 +2079,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_NO_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -2428,7 +2444,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2489,7 +2506,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2565,7 +2583,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2627,7 +2646,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2801,7 +2821,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2834,7 +2855,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2882,7 +2904,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -2916,7 +2939,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3202,7 +3226,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3256,7 +3281,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3310,7 +3336,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3367,7 +3394,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3422,7 +3450,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -3606,7 +3635,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -3653,7 +3683,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -3700,7 +3731,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -3750,7 +3782,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -3798,7 +3831,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -4012,7 +4046,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -4066,7 +4101,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -4135,7 +4171,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -4190,7 +4227,8 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
