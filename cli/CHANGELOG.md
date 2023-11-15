@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.2
+
+_Released xx/xx/xxxx (PENDING)_
+
+**Bugfixes:**
+
+- Fixed incorrect type definition of "dom.getContainsSelector". Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
+
 ## 13.5.1
 
 _Released 11/14/2023_
