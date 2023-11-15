@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.2
+
+_Released 11/21/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed not using agent in the first preflight request. Fixed in [#28340](https://github.com/cypress-io/cypress/pull/28340).
+
 ## 13.5.1
 
 _Released 11/14/2023_
