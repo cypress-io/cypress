@@ -126,8 +126,6 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
 
   const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE' }
 
-  const impliedStrategy = retriesConfig?.strategy ?? 'detect-flake-and-pass-on-threshold'
-
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
   // meaning retry logic does NOT need to be applied.
@@ -136,20 +134,20 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
     const remainingAttempts = maxAttempts - totalAttemptsAlreadyExecuted
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
-    let passesRequired = impliedStrategy !== 'detect-flake-but-always-fail' ?
+    let passesRequired = retriesConfig?.strategy === 'detect-flake-and-pass-on-threshold' ?
       (retriesConfig.passesRequired || 1) :
       null
 
-    const neededPassingAttemptsLeft = impliedStrategy !== 'detect-flake-but-always-fail' ?
+    const neededPassingAttemptsLeft = retriesConfig?.strategy === 'detect-flake-and-pass-on-threshold' ?
       (passesRequired as number) - passedAttemptsCount :
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
-    let stopIfAnyPassed = impliedStrategy === 'detect-flake-but-always-fail' ?
+    let stopIfAnyPassed = retriesConfig?.strategy === 'detect-flake-but-always-fail' ?
       (retriesConfig.stopIfAnyPassed || false) :
       null
 
-    switch (impliedStrategy) {
+    switch (retriesConfig?.strategy) {
       case 'detect-flake-and-pass-on-threshold':
         if (passedAttemptsCount >= (passesRequired as number)) {
           // we met the threshold, so we can stop retrying and pass the test

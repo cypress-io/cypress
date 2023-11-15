@@ -67,7 +67,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
   const input: EvaluateAttemptInput = {
     retriesConfig: config ?? {},
     burnInConfig: completeBurnInConfig ?? { enabled: false, default: 3, flaky: 5 },
-    latestScore: latestScore ?? -2,
+    latestScore: latestScore === undefined ? -2 : latestScore,
     totalAttemptsAlreadyExecuted,
     passedAttemptsCount: passedTests.length,
     failedAttemptsCount: failedTests.length,
@@ -91,6 +91,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: output.outerTestStatus,
+    reasonToStop: output.reasonToStop,
   }
 }
 
