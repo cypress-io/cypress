@@ -269,6 +269,9 @@ export const create = async ({
     // the main Cypress tab (as opposed to the root browser cri target)
     const isChildTarget = !!host
 
+    debug('isChildTarget?', isChildTarget)
+    debug('!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF?', !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF)
+    debug('try reconnecting', !isChildTarget && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF)
     // don't reconnect in these circumstances
     if (
       // is a child target. we only need to reconnect the root browser target
@@ -277,7 +280,10 @@ export const create = async ({
       // that we don't want to reconnect on
       && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     ) {
+      debug('disconnected...retryReconnect')
       cri.on('disconnect', retryReconnect)
+    } else {
+      cri.on('disconnect', debug)
     }
 
     // We're only interested in child target traffic. Browser cri traffic is
