@@ -619,7 +619,7 @@ module.exports = {
       }
 
       const postReqs = async () => {
-        return makeReq({ baseUrl: preflightBaseProxy, agent: null })
+        return makeReq({ baseUrl: preflightBaseProxy, agent })
         .catch((err) => {
           if (err.statusCode === 412) {
             throw err
