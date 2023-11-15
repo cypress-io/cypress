@@ -8,22 +8,14 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
-  context('when the tab crashes in chrome', () => {
-    systemTests.it('fails', {
-      browser: 'chrome',
-      spec: 'chrome_tab_crash.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
-  context('when the tab crashes in electron', () => {
-    systemTests.it('fails', {
-      browser: 'electron',
-      spec: 'chrome_tab_crash.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
+  ;['chrome', 'electron'].forEach((browser) => {
+    context(`when the tab crashes in ${browser}`, () => {
+      systemTests.it('fails', {
+        browser,
+        spec: 'chrome_tab_crash.cy.js,simple.cy.js',
+        snapshot: true,
+        expectedExitCode: 1,
+      })
     })
   })
 

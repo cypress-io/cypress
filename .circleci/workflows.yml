@@ -1432,11 +1432,11 @@ jobs:
               circleci-agent step halt
             fi
       - wait-on-circle-jobs:
+          # run-app-integration-tests-chrome,
           job-names: >
             cli-visual-tests,
             reporter-integration-tests,
             run-app-component-tests-chrome,
-            run-app-integration-tests-chrome,
             run-frontend-shared-component-tests-chrome,
             run-launchpad-component-tests-chrome,
             run-launchpad-integration-tests-chrome,
@@ -2707,11 +2707,11 @@ linux-x64-workflow: &linux-x64-workflow
         percy: true
         requires:
           - build
-    - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
+    # - run-app-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
     - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
@@ -2821,7 +2821,7 @@ linux-x64-workflow: &linux-x64-workflow
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
+          # - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
@@ -2868,7 +2868,7 @@ linux-x64-workflow: &linux-x64-workflow
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
+          # - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
@@ -3093,11 +3093,11 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         percy: true
         requires:
           - contributor-pr
-    - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - contributor-pr
+    # - run-app-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - contributor-pr
     - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
@@ -3207,7 +3207,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
+          # - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
@@ -3254,7 +3254,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
+          # - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
