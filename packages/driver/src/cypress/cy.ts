@@ -32,6 +32,7 @@ import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
+import { handleTabActivation } from '../util/tab_activation'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -338,41 +339,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue($Command.create(attrs))
     })
 
-    function activateMainTab () {
-      // don't need to activate the main tab if it already has focus
-      if (document.hasFocus()) return
-
-      return new Promise<void>((resolve) => {
-        // this sends a message on the window that the extension content script
-        // listens for in order to carry out activating the main tab
-        window.postMessage({ message: 'extension:activate:main:tab', url: window.location.href }, '*')
-
-        function onMessage ({ data, source }) {
-          // only accept messages from ourself
-          if (source !== window) return
-
-          if (data.message === 'main:tab:activated') {
-            window.removeEventListener('message', onMessage)
-
-            resolve()
-          }
-        }
-
-        // the ack from the extension comes back via the same means, a message
-        // sent on the window
-        window.addEventListener('message', onMessage)
-      })
-    }
-
-    // only implemented for Chromium right now. Electron doesn't have tabs.
-    // Support for Firefox/webkit could be added later
-    if (Cypress.isBrowser({ family: 'chromium' }) && !Cypress.isBrowser({ name: 'electron' })) {
-      // ensure the main Cypress tab has focus before every command
-      // and at the end of the test run
-      Cypress.on('command:start:async', activateMainTab)
-      Cypress.on('test:after:run:async', activateMainTab)
-    }
-
+    handleTabActivation(Cypress)
     handleCrossOriginCookies(Cypress)
   }
 
