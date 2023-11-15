@@ -41,7 +41,6 @@ describe('e2e record', () => {
   beforeEach(() => {
     // uploads happen too fast to be captured by these tests without tuning these values
     process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
-    process.env.CYPRESS_UPLOAD_ACTIVITY_DELAY = 0
   })
 
   context('passing', () => {
@@ -2517,6 +2516,11 @@ describe('e2e record', () => {
 })
 
 describe('capture-protocol api errors', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   enableCaptureProtocol()
 
   const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {

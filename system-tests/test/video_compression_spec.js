@@ -42,7 +42,6 @@ describe('e2e video compression', () => {
   beforeEach(() => {
     // uploads happen too fast to be captured by these tests without tuning these values
     process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 1000
-    process.env.CYPRESS_UPLOAD_ACTIVITY_DELAY = 0
   })
 
   return [
