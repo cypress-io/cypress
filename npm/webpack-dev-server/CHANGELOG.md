@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.1...@cypress/webpack-dev-server-v3.7.0) (2023-11-07)
+
+
+### Features
+
+* add support for angular 17 ([#28152](https://github.com/cypress-io/cypress/issues/28152)) ([e8fc268](https://github.com/cypress-io/cypress/commit/e8fc26895354366211ace7e6550fe38c348c28bd))
+
 # [@cypress/webpack-dev-server-v3.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.0...@cypress/webpack-dev-server-v3.6.1) (2023-09-07)
 
 # [@cypress/webpack-dev-server-v3.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.3...@cypress/webpack-dev-server-v3.6.0) (2023-09-07)
