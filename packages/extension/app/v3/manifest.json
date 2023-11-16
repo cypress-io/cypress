@@ -1,12 +1,20 @@
 {
   "name": "Cypress",
-  "description": "Adds Themes for testing with Cypress",
+  "description": "Adds theme and WebExtension APIs for testing with Cypress",
   "applications": {
     "gecko": {
       "id": "automation-extension-v3@cypress.io"
     }
   },
-  "permissions": [],
+  "permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "<all_urls>"
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAugoxpSqfoblTYUGvyXZpmBgjYQUY9k2Hx3PaDwquyaTH6GBxitwVMSu5sZuDYgPHpGYoF4ol6A4PZHhd6JvfuUDS9ZrxTW0XzP+dSS9AwmJo3uLuP88zBs4mhpje1+WE5NGM0pTzyCXYTPoyzyPRmToALWD96cahSGuhG8bSmaBw3py+16qNKm8SOlANbUvHtEaTpmrSWBUIq7YV8SIPLtR8G47vjqPTE1yEsBQ3GAgllhi0cJolwk/629fRLr3KVckICmU6spXD/jVhIgAeyHhFuFGYNuubzbel8trBVw5Q/HE5F6j66sBvEvW64tH4lPxnM5JPv0qie5wouPiT0wIDAQAB",
   "icons": {
     "16": "icons/icon_16x16.png",
     "48": "icons/icon_48x48.png",
@@ -20,6 +28,21 @@
     },
     "default_popup": "popup.html"
   },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
