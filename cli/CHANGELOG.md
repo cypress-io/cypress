@@ -9,7 +9,7 @@ _Released 11/21/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where dynamic intercept aliases now shown with alias name instead of "no alias" in driver. Addressed in [#28326](https://github.com/cypress-io/cypress/pull/28326)
+- Fixed an issue where dynamic intercept aliases now shown with alias name instead of "no alias" in driver. Addresses [#24653](https://github.com/cypress-io/cypress/issues/24653)
 
 **Misc:**
 
