@@ -339,6 +339,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue($Command.create(attrs))
     })
 
+    // clears out any extra tabs/windows between tests
+    Cypress.on('test:before:run:async', () => {
+      return Cypress.backend('close:extra:targets')
+    })
+
     handleTabActivation(Cypress)
     handleCrossOriginCookies(Cypress)
   }

@@ -9,6 +9,7 @@ _Released 11/21/2023 (PENDING)_
 
 **Misc:**
 
+- Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
 - Cypress now ensures the main browser tab is active before running eaech command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
 
 ## 13.5.1
