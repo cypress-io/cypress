@@ -7,10 +7,14 @@ _Released 11/21/2023 (PENDING)_
 
 - When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
 
+**Bugfixes:**
+
+- Fixed an issue getting a dynamic route alias using .all. Addresses [#25448](https://github.com/cypress-io/cypress/issues/25448)
+
 **Misc:**
 
 - Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
-- Cypress now ensures the main browser tab is active before running eaech command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
+- Cypress now ensures the main browser tab is active before running each command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
 
 ## 13.5.1
 
