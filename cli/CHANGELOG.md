@@ -11,6 +11,11 @@ _Released 11/21/2023 (PENDING)_
 
 - The URL of the app-under-test and command error "Learn more" links now open externally instead of in the Cypress-launched browser. Fixes [#24572](https://github.com/cypress-io/cypress/issues/24572).
 
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+- Cypress now ensures the main browser tab is active before running eaech command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
+
 ## 13.5.1
 
 _Released 11/14/2023_
