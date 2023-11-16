@@ -15,7 +15,7 @@ function activateMainTab () {
       // only accept messages from ourself
       if (source !== window) return
 
-      if (data.message === 'main:tab:activated') {
+      if (data.message === 'cypress:extension:main:tab:activated') {
         window.removeEventListener('message', onMessage)
 
         resolve()

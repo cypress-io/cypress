@@ -27,6 +27,6 @@ port.onMessage.addListener(({ message }) => {
   // the main tab was successful, so we in turn send it on to Cypress
   // via postMessage
   if (message === 'main:tab:activated') {
-    window.postMessage({ message }, '*')
+    window.postMessage({ message: 'cypress:extension:main:tab:activated' }, '*')
   }
 })
