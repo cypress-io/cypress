@@ -148,7 +148,7 @@ export class PreRequests {
 
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${browserPreRequest.url}`
+    const key = `${browserPreRequest.method}-${decodeURI(browserPreRequest.url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -193,7 +193,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${url}`
+    const key = `GET-${decodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -236,7 +236,7 @@ export class PreRequests {
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${req.proxiedUrl}`
+    const key = `${req.method}-${decodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
