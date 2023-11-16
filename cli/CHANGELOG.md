@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.5.2
+
+_Released 11/21/2023 (PENDING)_
+
+**Bugfixes:**
+
+- The URL of the app-under-test and command error "Learn more" links now open externally instead of in the Cypress-launched browser. Fixes [#24572](https://github.com/cypress-io/cypress/issues/24572).
+
 ## 13.5.1
 
 _Released 11/14/2023_
