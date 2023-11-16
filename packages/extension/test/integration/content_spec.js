@@ -70,12 +70,12 @@ describe('app/v3/content', () => {
 
   describe('messages from port (i.e. service worker)', () => {
     it('posts message to window', () => {
-      port.onMessage.addListener.yield({ message: 'cypress:extension:main:tab:activated' })
+      port.onMessage.addListener.yield({ message: 'main:tab:activated' })
 
       expect(window.postMessage).to.be.calledWith({ message: 'cypress:extension:main:tab:activated' }, '*')
     })
 
-    it('is a noop if message is not cypress:extension:main:tab:activated', () => {
+    it('is a noop if message is not main:tab:activated', () => {
       const data = { message: 'unsupported' }
 
       port.onMessage.addListener.yield({ data, source: window })

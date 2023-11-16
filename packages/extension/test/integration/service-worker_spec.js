@@ -83,6 +83,6 @@ describe('app/v3/service-worker', () => {
     await port.onMessage.addListener.yield({ message: 'activate:main:tab', url: 'the://url' })[0]
 
     // eslint-disable-next-line no-console
-    expect(console.log).to.be.calledWith('Activating Cypress main tab errored:', err)
+    expect(console.log).to.be.calledWith('Activating main Cypress tab errored:', err)
   })
 })
