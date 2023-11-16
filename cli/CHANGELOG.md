@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.5.2
+## 13.6.0
 
 _Released 11/21/2023 (PENDING)_
+
+**Features:**
+
+- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
 
 **Bugfixes:**
 
