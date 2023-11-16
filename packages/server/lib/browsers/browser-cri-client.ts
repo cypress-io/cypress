@@ -586,7 +586,7 @@ export class BrowserCriClient {
   }
 
   async closeExtraTargets () {
-    for (const [targetId] of this.extraTargetClients) {
+    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
       debug('Close extra target (id: %s)', targetId)
 
       try {
@@ -594,7 +594,7 @@ export class BrowserCriClient {
       } catch (err: any) {
         debug('Closing extra target errored: %s', err?.stack || err)
       }
-    }
+    }))
   }
 
   /**
