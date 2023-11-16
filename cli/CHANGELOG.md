@@ -1,7 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.5.1
+## 13.6.0
 
 _Released 11/21/2023 (PENDING)_
+
+**Features:**
+
+- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
+
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+- Cypress now ensures the main browser tab is active before running eaech command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
+
+## 13.5.1
+
+_Released 11/14/2023_
 
 **Bugfixes:**
 
