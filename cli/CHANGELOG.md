@@ -10,6 +10,7 @@ _Released 11/21/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where [aliasing individual requests](https://docs.cypress.io/api/commands/intercept#Aliasing-individual-requests) with `cy.intercept()` led to an error when retrieving all of the aliases with `cy.get(@alias.all)` . Addresses [#25448](https://github.com/cypress-io/cypress/issues/25448)
+- The URL of the application under test and command error "Learn more" links now open externally instead of in the Cypress-launched browser. Fixes [#24572](https://github.com/cypress-io/cypress/issues/24572).
 
 **Misc:**
 
