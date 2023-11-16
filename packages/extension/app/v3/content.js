@@ -16,7 +16,7 @@ window.addEventListener('message', ({ data, source }) => {
 
   // this is the only message we're currently interested in, which tells us
   // to activate the main tab
-  if (data.message === 'extension:activate:main:tab') {
+  if (data.message === 'cypress:extension:activate:main:tab') {
     port.postMessage({ message: 'activate:main:tab', url: data.url })
   }
 })

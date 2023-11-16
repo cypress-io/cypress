@@ -9,7 +9,7 @@ function activateMainTab () {
 
     // This sends a message on the window that the extension content script
     // listens for in order to carry out activating the main tab
-    window.postMessage({ message: 'extension:activate:main:tab', url }, '*')
+    window.postMessage({ message: 'cypress:extension:activate:main:tab', url }, '*')
 
     function onMessage ({ data, source }) {
       // only accept messages from ourself

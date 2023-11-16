@@ -42,8 +42,8 @@ describe('app/v3/content', () => {
   })
 
   describe('messages from window (i.e Cypress)', () => {
-    it('posts message to port if message is extension:activate:main:tab', () => {
-      const data = { message: 'extension:activate:main:tab', url: 'the://url' }
+    it('posts message to port if message is cypress:extension:activate:main:tab', () => {
+      const data = { message: 'cypress:extension:activate:main:tab', url: 'the://url' }
 
       window.addEventListener.yield({ data, source: window })
 
@@ -59,7 +59,7 @@ describe('app/v3/content', () => {
       expect(port.postMessage).not.to.be.called
     })
 
-    it('is a noop if message is not extension:activate:main:tab', () => {
+    it('is a noop if message is not cypress:extension:activate:main:tab', () => {
       const data = { message: 'unsupported' }
 
       window.addEventListener.yield({ data, source: window })

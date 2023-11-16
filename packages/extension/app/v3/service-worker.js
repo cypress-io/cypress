@@ -26,7 +26,7 @@ async function activateMainTab (url) {
     // the service worker, so it won't clutter up the console for users
 
     // eslint-disable-next-line no-console
-    console.log('Activating main tab errored:', err)
+    console.log('Activating main Cypress tab errored:', err)
   }
 }
 
