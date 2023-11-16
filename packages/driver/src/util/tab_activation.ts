@@ -1,5 +1,7 @@
 import type { ICypress } from '../cypress'
 
+const isCypressInCypress = document.defaultView !== top
+
 function activateMainTab () {
   // Don't need to activate the main tab if it already has focus
   if (document.hasFocus()) return
@@ -36,7 +38,12 @@ export function handleTabActivation (Cypress: ICypress) {
   // - Electron doesn't have tabs
   // - Focus doesn't matter for headless browsers and old headless Chrome
   //   doesn't run the extension
-  if (!Cypress.isBrowser({ family: 'chromium', name: '!electron', isHeadless: false })) return
+  // - Don't need to worry about tabs for Cypress in Cypress tests (and they
+  //   can't currently communicate with the extension anyway)
+  if (
+    !Cypress.isBrowser({ family: 'chromium', name: '!electron', isHeadless: false })
+    || isCypressInCypress
+  ) return
 
   Cypress.on('command:start:async', activateMainTab)
   Cypress.on('test:after:run:async', activateMainTab)
