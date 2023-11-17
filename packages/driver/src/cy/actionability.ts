@@ -8,6 +8,7 @@ import $utils from './../cypress/utils'
 import type { ElWindowPostion, ElViewportPostion, ElementPositioning } from '../dom/coordinates'
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
+import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
 const debug = debugFn('cypress:driver:actionability')
 
 const delay = 50
@@ -460,24 +461,46 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
   // make scrolling occur instantly. we do this by adding a style tag
   // and then removing it after we finish scrolling
   // https://github.com/cypress-io/cypress/issues/3200
-  const addScrollBehaviorFix = () => {
-    let style
+  const addScrollBehaviorFix = (element: JQuery<HTMLElement>) => {
+    const affectedParents: Map<HTMLElement, string> = new Map()
 
     try {
-      const doc = $el.get(0).ownerDocument
+      let parent: JQuery<HTMLElement> | null = element
 
-      style = doc.createElement('style')
-      style.innerHTML = '* { scroll-behavior: inherit !important; }'
-      // there's guaranteed to be a <script> tag, so that's the safest thing
-      // to query for and add the style tag after
-      doc.querySelector('script').after(style)
+      do {
+        if ($dom.isScrollable(parent)) {
+          const parentElement = parent[0]
+          const style = getNativeProp(parentElement, 'style')
+          const styles = getComputedStyle(parentElement)
+
+          if (styles.scrollBehavior === 'smooth') {
+            affectedParents.set(parentElement, callNativeMethod(style, 'getStyleProperty', 'scroll-behavior'))
+            callNativeMethod(style, 'setStyleProperty', 'scroll-behavior', 'auto')
+          }
+        }
+
+        parent = $dom.getParent(parent)
+      } while (parent.length)
     } catch (err) {
       // the above shouldn't error, but out of an abundance of caution, we
       // ignore any errors since this fix isn't worth failing the test over
     }
 
     return () => {
-      if (style) style.remove()
+      for (const [parent, value] of affectedParents) {
+        const style = getNativeProp(parent, 'style')
+
+        if (value === '') {
+          if (callNativeMethod(style, 'getStyleProperty', 'length') === 1) {
+            callNativeMethod(parent, 'removeAttribute', 'style')
+          } else {
+            callNativeMethod(style, 'removeProperty', 'scroll-behavior')
+          }
+        } else {
+          callNativeMethod(style, 'setStyleProperty', 'scroll-behavior', value)
+        }
+      }
+      affectedParents.clear()
     }
   }
 
@@ -500,8 +523,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         if (options.scrollBehavior !== false) {
           // scroll the element into view
           const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
-
-          const removeScrollBehaviorFix = addScrollBehaviorFix()
+          const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
           debug('scrollIntoView:', $el[0])
           $el.get(0).scrollIntoView({ block: scrollBehavior })

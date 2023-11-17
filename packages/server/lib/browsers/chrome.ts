@@ -73,6 +73,7 @@ const DEFAULT_ARGS = [
   '--reduce-security-for-testing',
   '--enable-automation',
   '--disable-print-preview',
+  '--disable-component-extensions-with-background-pages',
 
   '--disable-device-discovery-notifications',
 
@@ -437,9 +438,6 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
-    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
-    args.push('--enable-features=ScopeMemoryCachePerContext')
-
     return args
   },
 
@@ -660,5 +658,9 @@ export = {
     // return the launched browser process
     // with additional method to close the remote connection
     return launchedBrowser
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }
