@@ -351,6 +351,7 @@ export class DataContext {
   }
 
   _reset () {
+    DataContext.#activeRequestCount = 0
     this.actions.servers.setAppSocketServer(undefined)
     this.actions.servers.setGqlSocketServer(undefined)
 
@@ -419,10 +420,6 @@ export class DataContext {
   }
 
   static async waitForActiveRequestsToFlush () {
-    // @ts-ignore
-    console.log(`waitForActiveRequestsToFlush -- ${this.#activeRequestCount}`)
-
-    return
     if (this.#activeRequestCount === 0) {
       return
     }

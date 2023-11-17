@@ -204,8 +204,6 @@ async function makeE2ETasks () {
       process.chdir(cachedCwd)
       testState = {}
       remoteGraphQLOptions = {}
-      console.log('_____DEBUG____ await waitForActiveRequestsToFlush')
-      await DataContext.waitForActiveRequestsToFlush()
 
       await globalPubSub.emitThen('test:cleanup')
       console.log('_____DEBUG____ await removeAppDataDir')
