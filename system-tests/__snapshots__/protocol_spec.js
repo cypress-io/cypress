@@ -614,7 +614,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -689,7 +690,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -777,7 +779,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -865,7 +868,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -953,7 +957,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -1041,7 +1046,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -1129,7 +1135,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -1217,7 +1224,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -1305,7 +1313,8 @@ exports['e2e events'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [
@@ -5179,7 +5188,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -5229,7 +5239,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -5277,7 +5288,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -5327,7 +5339,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -6918,7 +6931,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -6968,7 +6982,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -7016,7 +7031,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
@@ -7066,7 +7082,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "_testConfig": {
           "testConfigList": [],
