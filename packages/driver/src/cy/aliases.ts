@@ -12,7 +12,7 @@ const requestXhrRe = /\.request$/
 
 const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
 
-export const aliasDisplayName = (name) => {
+const aliasDisplayName = (name) => {
   return name.replace(aliasDisplayRe, '')
 }
 

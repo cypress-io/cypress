@@ -3732,25 +3732,6 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       })
 
-      // @see https://github.com/cypress-io/cypress/issues/25448
-      it('gets all aliased Interceptions by alias.all when assigning an alias using req.alias', function () {
-        const url = uniqueRoute('/foo')
-
-        cy.intercept(`${url}*`, (req) => {
-          req.alias = 'alias'
-          req.reply({ bar: 'baz' })
-        })
-        .then(() => {
-          $.get(url)
-          $.get(url)
-        })
-        .wait('@alias').wait('@alias')
-
-        cy.get('@alias.all').then((interceptions) => {
-          expect(interceptions).to.have.length(2)
-        })
-      })
-
       // TODO: fix+document this behavior
       // @see https://github.com/cypress-io/cypress/issues/7663
       it.skip('gets indexed Interception by alias.number', function () {
