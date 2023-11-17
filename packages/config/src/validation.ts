@@ -130,32 +130,32 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
 
   const validKeys = ['maxRetries']
 
-  // if the strategy is 'detect-flake-but-always-fail' and if stopIfAnyPassed is provided it must be a boolean
+  // if the strategy is 'detect-flake-but-always-fail' and the stopIfAnyPassed is required and must be a boolean
   if (strategy === 'detect-flake-but-always-fail') {
     validKeys.push('stopIfAnyPassed')
-    if (value.stopIfAnyPassed !== undefined) {
-      const isValidStopIfAnyPasses = _.isNull(value.stopIfAnyPassed) || _.isBoolean(value.stopIfAnyPassed)
+    if (_.isNull(value.stopIfAnyPassed) || value.stopIfAnyPassed === undefined) {
+      return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'is required when using the "detect-flake-but-always-fail" strategy')
+    }
 
-      if (!isValidStopIfAnyPasses) {
-        return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'null or boolean')
-      }
+    const isValidStopIfAnyPasses = _.isBoolean(value.stopIfAnyPassed)
+
+    if (!isValidStopIfAnyPasses) {
+      return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'a boolean')
     }
   }
 
-  // if the strategy is 'detect-flake-and-pass-on-threshold' and if passesRequired is provided it must be a valid retry value and less than or equal to maxRetries
+  // if the strategy is 'detect-flake-and-pass-on-threshold' then passesRequired is required and must be a valid retry value and less than or equal to maxRetries
   if (strategy === 'detect-flake-and-pass-on-threshold') {
     validKeys.push('passesRequired')
 
-    if (value.passesRequired !== undefined) {
-      const isValidPassesRequired = isValidRetryValue(`${key}.passesRequired`, value.passesRequired, 1)
+    if (_.isNull(value.passesRequired) || value.passesRequired === undefined) {
+      return errMsg(`${key}.passesRequired`, value.stopIfAnyPassed, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
+    }
 
-      if (isValidPassesRequired !== true) {
-        return isValidPassesRequired
-      }
+    const isValidPassesRequired = Number.isInteger(value.passesRequired) && value.passesRequired >= 1 && value.passesRequired <= value.maxRetries
 
-      if (value.passesRequired > value.maxRetries) {
-        return errMsg(`${key}.passesRequired`, value.passesRequired, 'a positive whole number less than or equal to maxRetries')
-      }
+    if (!isValidPassesRequired) {
+      return errMsg(`${key}.passesRequired`, value.passesRequired, 'a positive whole number less than or equals to maxRetries')
     }
   }
 

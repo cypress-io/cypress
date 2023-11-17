@@ -228,7 +228,7 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.be.true
+            expect(result).to.not.be.true
           })
         })
 
@@ -421,6 +421,7 @@ describe('config/src/validation', () => {
               experimentalStrategy: 'detect-flake-and-pass-on-threshold',
               experimentalOptions: {
                 maxRetries: 3,
+                passesRequired: 2,
                 stopIfAnyPassed: true,
               },
             })
@@ -437,6 +438,7 @@ describe('config/src/validation', () => {
               experimentalOptions: {
                 maxRetries: 3,
                 passesRequired: 2,
+                stopIfAnyPassed: true,
               },
             })
 
@@ -449,6 +451,18 @@ describe('config/src/validation', () => {
               experimentalStrategy: 'detect-flake-but-always-fail',
               experimentalOptions: {
                 stopIfAnyPassed: false,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides maxRetries without stopIfAnyPassed', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-but-always-fail',
+              experimentalOptions: {
+                maxRetries: 2,
               },
             })
 
