@@ -167,6 +167,8 @@ const toAttemptProps = (runnable) => {
     'failedFromHookId',
     'wallClockStartedAt',
     'wallClockDuration',
+    'reasonToStop',
+    'thisAttemptInitialStrategy',
   ])
 }
 
@@ -572,6 +574,8 @@ class Reporter {
           wallClockStartedAt: orNull(attempt.wallClockStartedAt && new Date(attempt.wallClockStartedAt)),
           wallClockDuration: orNull(attempt.wallClockDuration),
           videoTimestamp: null,
+          reasonToStop: orNull(attempt.reasonToStop),
+          initialStrategy: orNull(attempt.thisAttemptInitialStrategy),
         }
       }),
     }

@@ -1,3 +1,5 @@
+import type { AttemptStrategy, ReasonToStop } from '@packages/types'
+
 interface ReporterTestAttempt {
   state: 'skipped' | 'failed' | 'passed'
   error: any
@@ -6,6 +8,8 @@ interface ReporterTestAttempt {
   wallClockStartedAt: Date
   wallClockDuration: number
   videoTimestamp: any
+  initialStrategy: AttemptStrategy
+  reasonToStop: ReasonToStop
 }
 interface ReporterTest {
   testId: string

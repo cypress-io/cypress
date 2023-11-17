@@ -45,3 +45,5 @@ export * from './video'
 export * from './protocol'
 
 export * from './proxy'
+
+export * from './burnIn'
