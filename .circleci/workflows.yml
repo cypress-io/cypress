@@ -2707,12 +2707,12 @@ linux-x64-workflow: &linux-x64-workflow
     #     percy: true
     #     requires:
     #       - build
-    # # - run-app-integration-tests-chrome:
-    # #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-    # #     percy: true
-    # #     requires:
-    # #       - build
-    # #       - system-tests-node-modules-install
+    - run-app-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+          # - system-tests-node-modules-install
 
     # - run-webpack-dev-server-integration-tests:
     #     context: [test-runner:cypress-record-key, test-runner:percy]
