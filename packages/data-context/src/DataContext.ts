@@ -410,9 +410,6 @@ export class DataContext {
   static finishActiveRequest () {
     this.#activeRequestCount--
 
-    // @ts-ignore
-    console.log(`finishActiveRequest -- ${this.#activeRequestCount}`)
-
     if (this.#activeRequestCount === 0) {
       this.#awaitingEmptyRequestCount.forEach((fn) => fn())
       this.#awaitingEmptyRequestCount = []

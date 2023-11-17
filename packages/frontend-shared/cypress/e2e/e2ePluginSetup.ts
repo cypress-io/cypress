@@ -199,18 +199,13 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
-      const now = new Date().getTime()
-
       process.chdir(cachedCwd)
       testState = {}
       remoteGraphQLOptions = {}
 
       await globalPubSub.emitThen('test:cleanup')
-      console.log('_____DEBUG____ await removeAppDataDir')
       await ctx.actions.app.removeAppDataDir()
-      console.log('_____DEBUG____ await ensureAppDataDirExists')
       await ctx.actions.app.ensureAppDataDirExists()
-      console.log('_____DEBUG____ await reinitializeCypress')
       await ctx.reinitializeCypress()
       sinon.reset()
       sinon.restore()
@@ -353,8 +348,6 @@ async function makeE2ETasks () {
 
         return fetchApi(url, init)
       })
-
-      console.log('_____DEBUG____ __internal__beforeEach finished in', new Date().getTime() - now, 'ms')
 
       return null
     },
