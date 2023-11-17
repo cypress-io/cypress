@@ -585,6 +585,18 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
+  async closeExtraTargets () {
+    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
+      debug('Close extra target (id: %s)', targetId)
+
+      try {
+        await this.browserClient.send('Target.closeTarget', { targetId })
+      } catch (err: any) {
+        debug('Closing extra target errored: %s', err?.stack || err)
+      }
+    }))
+  }
+
   /**
    * @returns the websocket debugger URL for the currently connected browser
    */
