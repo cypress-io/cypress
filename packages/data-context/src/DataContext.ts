@@ -409,7 +409,8 @@ export class DataContext {
   static finishActiveRequest () {
     this.#activeRequestCount--
 
-    debug(`finishActiveRequest -- ${this.#activeRequestCount}`)
+    // @ts-ignore
+    debugNs(`finishActiveRequest -- ${this.#activeRequestCount}`)
 
     if (this.#activeRequestCount === 0) {
       this.#awaitingEmptyRequestCount.forEach((fn) => fn())
@@ -418,7 +419,8 @@ export class DataContext {
   }
 
   static async waitForActiveRequestsToFlush () {
-    debug(`waitForActiveRequestsToFlush -- ${this.#activeRequestCount}`)
+    // @ts-ignore
+    debugNs(`waitForActiveRequestsToFlush -- ${this.#activeRequestCount}`)
 
     return
     if (this.#activeRequestCount === 0) {
