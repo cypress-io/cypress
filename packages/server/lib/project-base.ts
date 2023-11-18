@@ -349,6 +349,7 @@ export class ProjectBase extends EE {
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
       onSavedStateChanged: (state: any) => this.saveState(state),
+      closeExtraTargets: this.closeExtraTargets,
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware
@@ -364,7 +365,7 @@ export class ProjectBase extends EE {
         debug('received runnables %o', runnables)
 
         if (reporterInstance) {
-          reporterInstance.setRunnables(runnables)
+          reporterInstance.setRunnables(runnables, this.getConfig())
         }
 
         if (this._recordTests) {
@@ -417,6 +418,10 @@ export class ProjectBase extends EE {
     return this.server.socket.resetBrowserState()
   }
 
+  closeExtraTargets () {
+    return browsers.closeExtraTargets()
+  }
+
   isRunnerSocketConnected () {
     return this.server.socket.isRunnerSocketConnected()
   }
@@ -436,6 +441,12 @@ export class ProjectBase extends EE {
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
+
+    if (this.browser.family !== 'chromium') {
+      // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
+      // in order to not hang for 2 seconds, we override the prerequest timeout to be 500 ms (which is what it has been historically)
+      this._server?.setPreRequestTimeout(500)
+    }
   }
 
   get protocolManager (): ProtocolManager | undefined {

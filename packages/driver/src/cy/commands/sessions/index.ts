@@ -33,7 +33,7 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
-      if (nextTestHasTestIsolationOn) {
+      if (nextTestHasTestIsolationOn || nextTestHasTestIsolationOn === undefined) {
         return navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
       }
 

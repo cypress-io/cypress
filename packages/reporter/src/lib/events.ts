@@ -98,7 +98,9 @@ const events: Events = {
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps, isInteractive: boolean) => {
       runnablesStore.runnableFinished(runnable, isInteractive)
       if (runnable.final && !appState.studioActive) {
-        statsStore.incrementCount(runnable.state!)
+        // When displaying the overall test status, we want to reference the test outerStatus
+        // as the last runnable (test attempt) may have passed, but the outerStatus might mark the test run as a failure.
+        statsStore.incrementCount(runnable?._cypressTestStatusInfo?.outerStatus || runnable.state!)
       }
     }))
 

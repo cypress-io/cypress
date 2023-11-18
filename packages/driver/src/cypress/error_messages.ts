@@ -272,6 +272,10 @@ export default {
         message: `The \`{{invalidConfigKey}}\` configuration can only be overridden from a suite-level override.`,
         docsUrl: 'https://on.cypress.io/config',
       },
+      global_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be set globally.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_test_override: {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,

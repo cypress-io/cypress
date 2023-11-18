@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.3.1",
+  "version": "13.5.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -221,7 +221,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress",
+  "homepage": "https://cypress.io",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },

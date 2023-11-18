@@ -13,7 +13,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import type { CriClient } from './cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -140,9 +140,9 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0]) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
 
-export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
 
 export type OffFn = (eventName: string, cb: (data: any) => void) => void
 
@@ -198,17 +198,7 @@ export class CdpAutomation implements CDPClient {
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
-    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 64 * 1024,
-    } : {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 0,
-    }
-
-    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
+    await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
     return cdpAutomation
   }
