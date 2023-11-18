@@ -662,13 +662,17 @@ module.exports = function (options = {}) {
       })
     },
 
-    sendPromise (userAgent, automationFn, options = {}) {
+    async sendPromise (userAgent, automationFn, getFixture, options = {}) {
       _.defaults(options, {
         headers: {},
         gzip: true,
         cookies: true,
         followRedirect: true,
       })
+
+      if (options.fixture) {
+        options.form = await getFixture(options.fixture)
+      }
 
       if (!caseInsensitiveGet(options.headers, 'user-agent') && userAgent) {
         options.headers['user-agent'] = userAgent

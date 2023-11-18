@@ -534,9 +534,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (userAgent, automationRequest, options) {
+  _onRequest (userAgent, automationRequest, getFixture, options) {
     // @ts-ignore
-    return this.request.sendPromise(userAgent, automationRequest, options)
+    return this.request.sendPromise(userAgent, automationRequest, getFixture, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {
