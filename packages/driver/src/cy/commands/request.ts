@@ -108,14 +108,6 @@ export default (Commands, Cypress, cy, state, config) => {
         log: true,
       })
 
-      if (options.fixture) {
-        if (options.body) {
-          $errUtils.throwErrByPath('request.body_and_fixture')
-        }
-
-        options.method = 'POST'
-      }
-
       // if timeout is not supplied, use the configured default
       if (!options.timeout) {
         options.timeout = config('responseTimeout')
@@ -145,6 +137,16 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (!_.isString(options.url)) {
         $errUtils.throwErrByPath('request.url_wrong_type')
+      }
+
+      if (options.fixture) {
+        if (options.body) {
+          $errUtils.throwErrByPath('request.body_and_fixture')
+        }
+
+        if (!userOptions.method) {
+          options.method = 'POST'
+        }
       }
 
       // normalize the url by prepending it with our current origin

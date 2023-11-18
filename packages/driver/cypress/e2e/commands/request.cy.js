@@ -110,26 +110,6 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      it('accepts fixture argument without method', () => {
-        cy.intercept('POST', 'http://localhost:8080/users', (req) => {
-          expect(req.body).to.equal(14)
-        })
-
-        cy.request({ url: 'http://localhost:8080/users', fixture: 'number' })
-      })
-
-      it('accepts fixture argument with method', () => {
-        cy.intercept('POST', 'http://localhost:8080/users', (req) => {
-          expect(req.body).to.equal(14)
-        })
-
-        cy.request({
-          url: 'http://localhost:8080/users',
-          fixture: 'number',
-          method: 'POST',
-        })
-      })
-
       it('accepts url + body', () => {
         cy.request('http://www.github.com/projects/foo', { commits: true }).then(function () {
           this.expectOptionsToBe({
@@ -913,6 +893,8 @@ describe('src/cy/commands/request', () => {
           assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.request()` was called with a body and a fixture which cannot be combined.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
           done()
         })
