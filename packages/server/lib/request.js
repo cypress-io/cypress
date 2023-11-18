@@ -671,7 +671,7 @@ module.exports = function (options = {}) {
       })
 
       if (options.fixture) {
-        options.form = await getFixture(options.fixture)
+        options.form = await getFixture(...options.fixture.split(',', 2))
       }
 
       if (!caseInsensitiveGet(options.headers, 'user-agent') && userAgent) {
