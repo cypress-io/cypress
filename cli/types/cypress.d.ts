@@ -1877,14 +1877,6 @@ declare namespace Cypress {
      */
     request<T = any>(url: string, body?: RequestBody): Chainable<Response<T>>
     /**
-     * Make an HTTP POST request with fixture.
-     *
-     * @see https://on.cypress.io/request
-     * @example
-     *    cy.request('http://dev.local/seed', 'fx:data')
-     */
-    request<T = any>(url: string, fixture: string): Chainable<Response<T>>
-    /**
      * Make an HTTP request with specific method.
      *
      * @see https://on.cypress.io/request
@@ -1892,14 +1884,6 @@ declare namespace Cypress {
      *    cy.request('POST', 'http://localhost:8888/users', {name: 'Jane'})
      */
     request<T = any>(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response<T>>
-    /**
-     * Make an HTTP request with specific method using fixture data in body.
-     *
-     * @see https://on.cypress.io/request
-     * @example
-     *    cy.request('POST', 'http://localhost:8888/users', 'fx:data')
-     */
-    request<T = any>(method: HttpMethod, url: string, fixture: string): Chainable<Response<T>>
     /**
      * Make an HTTP request with specific behavior.
      *
