@@ -95,7 +95,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   if ($dom.isJquery(value)) {
     obj.subject = value
 
-    if (_.isUndefined(actual) || (actual !== expected)) {
+    if (actual !== expected) {
       delete obj.actual
       delete obj.expected
     }
