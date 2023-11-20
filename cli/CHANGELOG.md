@@ -5,7 +5,8 @@ _Released 11/21/2023 (PENDING)_
 
 **Features:**
 
-- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
+- Added an activity indicator to CLI output when artifacts (screenshots, videos, or Test Replay) are being uploaded to the cloud. Addresses [#28239](https://github.com/cypress-io/cypress/issues/28239). Addressed in [#28277](https://github.com/cypress-io/cypress/pull/28277).
+- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the terminal. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
 
 **Bugfixes:**
 
