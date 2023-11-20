@@ -17,6 +17,10 @@ _Released 11/21/2023 (PENDING)_
 - Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
 - Cypress now ensures the main browser tab is active before running each command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
 
+**Dependency Updates:**
+
+- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
+
 ## 13.5.1
 
 _Released 11/14/2023_
@@ -98,10 +102,6 @@ _Released 10/11/2023_
 - Fixed an issue where requests were timing out in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27976](https://github.com/cypress-io/cypress/pull/27976).
 - Fixed an issue where Test Replay couldn't record tests due to issues involving `GLIBC`. Fixed deprecation warnings during the rebuild of better-sqlite3. Fixes [#27891](https://github.com/cypress-io/cypress/issues/27891) and [#27902](https://github.com/cypress-io/cypress/issues/27902).
 - Enables test replay for executed specs in runs that have a spec that causes a browser crash. Addressed in [#27786](https://github.com/cypress-io/cypress/pull/27786).
-
-**Dependency Updates:**
-
-- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
 
 ## 13.3.0
 
