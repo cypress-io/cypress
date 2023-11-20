@@ -20,6 +20,10 @@ _Released 11/21/2023 (PENDING)_
 - Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
 - Cypress now ensures the main browser tab is active before running each command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
 
+**Dependency Updates:**
+
+- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
+
 ## 13.5.1
 
 _Released 11/14/2023_

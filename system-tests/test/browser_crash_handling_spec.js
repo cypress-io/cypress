@@ -8,22 +8,14 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
-  context('when the tab crashes in chrome', () => {
-    systemTests.it('fails', {
-      browser: 'chrome',
-      spec: 'chrome_tab_crash.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
-  context('when the tab crashes in electron', () => {
-    systemTests.it('fails', {
-      browser: 'electron',
-      spec: 'chrome_tab_crash.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
+  ;['chrome', 'electron'].forEach((browser) => {
+    context(`when the tab crashes in ${browser}`, () => {
+      systemTests.it('fails', {
+        browser,
+        spec: 'chrome_tab_crash.cy.js,simple.cy.js',
+        snapshot: true,
+        expectedExitCode: 1,
+      })
     })
   })
 
@@ -59,10 +51,7 @@ describe('Browser Crash Handling', () => {
     })
   })
 
-  // Because electron does not have any concepts with regard to a "page" aka a tab
-  // ...when the tab itself closes, the whole browser process is also closed
-  // so we actually want the same behavior as the "browser process is killed"
-  // and not to recover or continue, we should exit early
+  // It should fail the chrome_tab_close spec, and exit early, do not move onto the next spec
   context('when the tab closes in electron', () => {
     systemTests.it('fails', {
       browser: 'electron',
