@@ -818,7 +818,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args: any[]) => any[] | void
+    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
 
     /**
      * Load files
