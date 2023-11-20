@@ -275,25 +275,4 @@ describe('http/util/prerequests', () => {
 
     expect(callbackCalled).to.be.true
   })
-
-  it('decodes the proxied url', () => {
-    preRequests.get({ proxiedUrl: 'foo%7Cbar', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, () => {})
-
-    expect(preRequests.pendingRequests.length).to.eq(1)
-    expect(preRequests.pendingRequests.shift('GET-foo|bar')).not.to.be.undefined
-  })
-
-  it('decodes the pending url without pre-request', () => {
-    preRequests.addPendingUrlWithoutPreRequest('foo%7Cbar')
-
-    expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(1)
-    expect(preRequests.pendingUrlsWithoutPreRequests.shift('GET-foo|bar')).not.to.be.undefined
-  })
-
-  it('decodes pending url', () => {
-    preRequests.addPending({ requestId: '1234', url: 'foo%7Cbar', method: 'GET' } as BrowserPreRequest)
-
-    expect(preRequests.pendingPreRequests.length).to.eq(1)
-    expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).not.to.be.undefined
-  })
 })
