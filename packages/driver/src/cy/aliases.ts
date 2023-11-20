@@ -3,29 +3,30 @@ import type { $Cy } from '../cypress/cy'
 
 import $errUtils from '../cypress/error_utils'
 
-const aliasRe = /^@.+/
+export const aliasRe = /^@.+/
+
+export const aliasIndexRe = /\.(all|[\d]+)$/
+
 const aliasDisplayRe = /^([@]+)/
 const requestXhrRe = /\.request$/
 
 const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
 
-const aliasDisplayName = (name) => {
+export const aliasDisplayName = (name) => {
   return name.replace(aliasDisplayRe, '')
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (cy: $Cy) => ({
   addAlias (ctx, aliasObj) {
-    const { alias, subject } = aliasObj
+    const { alias } = aliasObj
 
     const aliases = cy.state('aliases') || {}
 
     aliases[alias] = aliasObj
     cy.state('aliases', aliases)
 
-    const remoteSubject = cy.getRemotejQueryInstance(subject)
-
-    ctx[alias] = remoteSubject ?? subject
+    ctx[alias] = cy.getSubjectFromChain(aliasObj.subjectChain)
   },
 
   getAlias (name, cmd, log) {

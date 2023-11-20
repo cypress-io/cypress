@@ -213,8 +213,6 @@ describe('command log', () => {
         cy.root(options)
       })
 
-      // Ignore cy.route() because it doesn't log to reporter.
-
       testOptions('screenshot', { capture: 'viewport' }, 0, (options) => {
         cy.screenshot(options)
       })
@@ -231,11 +229,10 @@ describe('command log', () => {
         cy.get('#fruits').select('apples', options)
       })
 
-      // Ignore cy.server() because it doesn't log to reporter.
-
-      testOptions('setCookie', { httpOnly: true }, 0, (options) => {
-        cy.setCookie('auth_key', '123key', options)
-      })
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      // testOptions('setCookie', { httpOnly: true }, 0, (options) => {
+      //   cy.setCookie('auth_key', '123key', options)
+      // })
 
       // Ignore cy.should() because it doesn't have options.
 

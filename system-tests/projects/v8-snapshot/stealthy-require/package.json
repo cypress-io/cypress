@@ -1,0 +1,6 @@
+{
+  "name": "sr",
+  "dependencies": {
+    "stealthy-require": "^1.1.1"
+  }
+}

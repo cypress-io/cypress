@@ -13,7 +13,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       const isOpen = ref(true)
 
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={isOpen.value}
         title={title}
       >{body}
@@ -35,9 +35,33 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.percySnapshot()
     })
 
+    it('does not render helpLink when noHelp is true', () => {
+      cy.mount(
+        <StandardModal
+          class="w-[400px]"
+          modelValue={true}
+          noHelp={true}
+          title={title}
+        >
+          {body}
+        </StandardModal>,
+      )
+
+      cy.contains('a', defaultMessages.links.needHelp).should('not.exist')
+
+      cy.findByLabelText(defaultMessages.actions.close, {
+        selector: 'button',
+      })
+      .should('be.visible')
+      .and('not.be.disabled')
+
+      cy.contains('h2', title).should('be.visible')
+      cy.contains(body).should('be.visible')
+    })
+
     it('bare variant renders without padding in body', () => {
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={true}
         title={title}
         variant="bare"
@@ -53,7 +77,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       const testClass = 'text-pink-400'
 
       cy.mount(<StandardModal
-        class={`${testClass } w-400px`}
+        class={`${testClass } w-[400px]`}
         modelValue={true}
         title={title}
       >{body}
@@ -63,7 +87,8 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       .closest(`[data-cy=standard-modal].${testClass}`)
       .should('exist')
 
-      cy.percySnapshot()
+      cy.findByTestId('external').should('be.visible').should('have.attr', 'href', 'https://on.cypress.io')
+      cy.findByLabelText('Close').should('be.visible')
     })
 
     it('automatically closes tooltips on open', () => {
@@ -97,9 +122,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
 
       // Verify tooltip is no longer open once modal was opened
       cy.findByTestId('tooltip-content')
-      .should('not.be.visible')
-
-      cy.percySnapshot()
+      .should('not.exist')
     })
   })
 
@@ -116,7 +139,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       }
 
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={isOpen.value}
         title={title}
         {...props}

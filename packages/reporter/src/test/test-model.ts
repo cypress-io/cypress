@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { FileDetails } from '@packages/types'
 
+import { FileDetails, TestState } from '@packages/types'
 import Attempt from '../attempts/attempt-model'
 import Err, { ErrProps } from '../errors/err-model'
 import { HookProps } from '../hooks/hook-model'
@@ -10,14 +10,15 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { SessionProps } from '../sessions/sessions-model'
-
-export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
 export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
   state: TestState | null
+  // the final state of the test (the attempt might pass, but the test might be marked as failed)
+  _cypressTestStatusInfo?: {
+    outerStatus?: TestState
+  }
   err?: ErrProps
   isOpen?: boolean
   agents?: Array<AgentProps>
@@ -34,6 +35,10 @@ export interface TestProps extends RunnableProps {
 export interface UpdatableTestProps {
   id: TestProps['id']
   state?: TestProps['state']
+  // the final state of the test (the attempt might pass, but the test might be marked as failed)
+  _cypressTestStatusInfo?: {
+    outerStatus?: TestState
+  }
   err?: TestProps['err']
   hookId?: string
   failedFromHookId?: string
@@ -92,7 +97,9 @@ export default class Test extends Runnable {
   }
 
   @computed get state () {
-    return this.lastAttempt ? this.lastAttempt.state : 'active'
+    // Use the outerStatus of the last attempt to determine overall test status, if present,
+    // as the last attempt may have 'passed', but the outerStatus may be marked as failed.
+    return this.lastAttempt ? (this.lastAttempt._testOuterStatus || this.lastAttempt.state) : 'active'
   }
 
   @computed get err () {
@@ -120,34 +127,26 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
-  @computed get studioIsNotEmpty () {
-    return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
-      return attempt.studioIsNotEmpty
-    })
-  }
-
   isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
 
   addLog = (props: LogProps) => {
-    return this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    // NOTE: The 'testCurrentRetry' prop may be zero, which means we really care about nullish coalescing the value
+    // to make sure logs on the first attempt are still accounted for even if the attempt has finished.
+    return this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
   }
 
-  addSession (props: SessionProps) {
-    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
-  }
-
   updateLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
     })
   }
 
   removeLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       attempt.removeLog(props)
     })
   }
@@ -163,6 +162,10 @@ export default class Test extends Runnable {
   }
 
   @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
+    if (this.state === 'processing' && !props.state) {
+      cb()
+    }
+
     if (props.isOpen != null) {
       this.setIsOpenWhenActive(props.isOpen)
 
@@ -195,11 +198,11 @@ export default class Test extends Runnable {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish (props: UpdatableTestProps, isInteractive: boolean) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
-    this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
-      attempt.finish(props)
+    this._withAttempt(props.currentRetry ?? 0, (attempt: Attempt) => {
+      attempt.finish(props, isInteractive)
     })
   }
 

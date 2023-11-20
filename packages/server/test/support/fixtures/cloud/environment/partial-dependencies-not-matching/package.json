@@ -1,0 +1,7 @@
+{
+  "name": "all-tracked-dependencies",
+  "version": "1.0.0",
+  "dependencies": {
+    "bar": "2.0.0"
+  }
+}

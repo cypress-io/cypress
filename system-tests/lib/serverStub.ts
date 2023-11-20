@@ -1,17 +1,72 @@
+import crypto from 'crypto'
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
-import { api as jsonSchemas } from '@cypress/json-schemas'
+import Debug from 'debug'
+import type { RequestHandler } from 'express'
+
+import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
+
+import * as jose from 'jose'
+import base64Url from 'base64url'
+
 import systemTests from './system-tests'
 
-export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
+let CAPTURE_PROTOCOL_ENABLED = false
+let CAPTURE_PROTOCOL_MESSAGE: string | undefined
 
-export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+import {
+  TEST_PRIVATE,
+  PROTOCOL_STUB_VALID,
+} from './protocol-stubs/protocolStubResponse'
 
-export const postInstanceTestsResponse = jsonSchemas.getExample('postInstanceTestsResponse')('1.0.0')
+const debug = Debug('cypress:system-tests:server-stub')
+
+export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
+
+export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
+
+export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res')
 
 postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
+
+// mocked here rather than attempting to intercept and mock an s3 req
+export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
+
+let protocolStub: {
+  value: string
+  compressed: Buffer
+  hash: string
+  sign: string
+} | undefined = undefined
+
+export const postRunResponseWithProtocolEnabled = () => {
+  debug('protocol enabled post run response with hash: ', protocolStub?.hash)
+
+  return {
+    ...postRunResponse,
+    captureProtocolUrl: protocolStub?.hash ? `http://localhost:1234/capture-protocol/script/${protocolStub?.hash}.js` : '',
+    capture: {
+      url: protocolStub?.hash ? `http://localhost:1234/capture-protocol/script/${protocolStub?.hash}.js` : '',
+    },
+  }
+}
+
+export const postRunResponseWithProtocolDisabled = (response = postRunResponse) => {
+  debug('protocol disabled post run response with message')
+  const disabledMessage = CAPTURE_PROTOCOL_MESSAGE || postRunResponse.capture?.disabledMessage
+
+  return {
+    ...response,
+    captureProtocolUrl: '',
+
+    capture: {
+      url: '',
+      disabledMessage,
+    },
+  }
+}
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -38,6 +93,10 @@ const sendUploadUrls = function (req, res) {
 
   json.screenshotUploadUrls = screenshotUploadUrls
 
+  if (CAPTURE_PROTOCOL_ENABLED) {
+    json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+  }
+
   return res.json(json)
 }
 const mockServerState = {
@@ -50,12 +109,45 @@ const mockServerState = {
   specs: [],
 }
 
-const routeHandlers = {
+export const encryptBody = async (req, res, body) => {
+  const enc = new jose.GeneralEncrypt(Buffer.from(JSON.stringify(body)))
+
+  enc
+  .setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' })
+  .addRecipient(req.unwrappedSecretKey())
+
+  res.header('x-cypress-encrypted', 'true')
+
+  return await enc.encrypt()
+}
+
+type RouteHandler = {
+  method: 'get' | 'post' | 'put' | 'delete'
+  url: string
+  reqSchema?: {
+    [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
+  }[keyof RecordSchemaVersions]
+  resSchema?: {
+    [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
+  }[keyof RecordSchemaVersions]
+  res?: RequestHandler | object
+}
+
+export const routeHandlers: Record<string, RouteHandler> = {
+  sendPreflight: {
+    method: 'post',
+    url: '/preflight',
+    res: async (req, res) => {
+      const preflightResponse = { encrypt: true, apiUrl: req.body.apiUrl }
+
+      return res.json(await encryptBody(req, res, preflightResponse))
+    },
+  },
   postRun: {
     method: 'post',
     url: '/runs',
-    reqSchema: 'postRunRequest@2.4.0',
-    resSchema: 'postRunResponse@2.2.0',
+    reqSchema: ['createRun', 4],
+    resSchema: ['createRun', 4],
     res: (req, res) => {
       if (!req.body.specs) {
         throw new Error('expected for Test Runner to post specs')
@@ -63,14 +155,18 @@ const routeHandlers = {
 
       mockServerState.setSpecs(req)
 
-      return res.json(postRunResponse)
+      const postRunResponseReturnVal = (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 2) ?
+        (postRunResponseWithProtocolEnabled()) :
+        (postRunResponseWithProtocolDisabled())
+
+      return res.json(postRunResponseReturnVal)
     },
   },
   postRunInstance: {
     method: 'post',
     url: '/runs/:id/instances',
-    reqSchema: 'postRunInstanceRequest@2.1.0',
-    resSchema: 'postRunInstanceResponse@2.1.0',
+    reqSchema: ['createInstance', 5],
+    resSchema: ['createInstance', 5],
     res: (req, res) => {
       const response = {
         ...postRunInstanceResponse,
@@ -85,21 +181,29 @@ const routeHandlers = {
   postInstanceTests: {
     method: 'post',
     url: '/instances/:id/tests',
-    reqSchema: 'postInstanceTestsRequest@1.0.0',
-    resSchema: 'postInstanceTestsResponse@1.0.0',
+    reqSchema: ['postInstanceTests', 1],
+    resSchema: ['postInstanceTests', 1],
     res: postInstanceTestsResponse,
   },
   postInstanceResults: {
     method: 'post',
     url: '/instances/:id/results',
-    reqSchema: 'postInstanceResultsRequest@1.1.0',
-    resSchema: 'postInstanceResultsResponse@1.0.0',
+    reqSchema: ['postInstanceResults', 1],
+    resSchema: ['postInstanceResults', 1],
     res: sendUploadUrls,
+  },
+  putArtifacts: {
+    method: 'put',
+    url: '/instances/:id/artifacts',
+    // reqSchema: TODO(protocol): export this as part of manifest from cloud
+    res: async (req, res) => {
+      return res.sendStatus(200)
+    },
   },
   putInstanceStdout: {
     method: 'put',
     url: '/instances/:id/stdout',
-    reqSchema: 'putInstanceStdoutRequest@1.0.0',
+    reqSchema: ['updateInstanceStdout', 1],
     res (req, res) {
       return res.sendStatus(200)
     },
@@ -121,7 +225,35 @@ const routeHandlers = {
       })
     },
   },
-
+  getCaptureScript: {
+    method: 'get',
+    url: '/capture-protocol/script/*',
+    res: async (req, res) => {
+      if (protocolStub) {
+        res.header('Content-Encoding', 'gzip')
+        res.header('x-cypress-signature', protocolStub.sign)
+        res.status(200).send(protocolStub.compressed)
+      } else {
+        res.status(404).send('')
+      }
+    },
+  },
+  putCaptureProtocolUpload: {
+    method: 'put',
+    url: '/capture-protocol/upload',
+    res: (req, res) => {
+      return res.status(200).json({
+        ok: true,
+      })
+    },
+  },
+  postCaptureProtocolErrors: {
+    method: 'post',
+    url: '/capture-protocol/errors',
+    res: (req, res) => {
+      return res.status(200).send('')
+    },
+  },
 }
 
 export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
@@ -135,20 +267,11 @@ beforeEach(() => {
 })
 
 export const getRequestUrls = () => {
-  return _.map(mockServerState.requests, 'url')
+  return _.map(mockServerState.requests, 'url').filter((u) => u !== 'POST /preflight')
 }
 
 export const getRequests = () => {
-  return mockServerState.requests
-}
-
-const getSchemaErr = (tag, err, schema) => {
-  return {
-    errors: err.errors,
-    object: err.object,
-    example: err.example,
-    message: `${tag} should follow ${schema} schema`,
-  }
+  return mockServerState.requests.filter((r) => r.url !== 'POST /preflight')
 }
 
 const getResponse = function (responseSchema) {
@@ -160,9 +283,10 @@ const getResponse = function (responseSchema) {
     return responseSchema
   }
 
-  const [name, version] = responseSchema.split('@')
+  const [name, version] = responseSchema
 
-  return jsonSchemas.getExample(name)(version)
+  // @ts-expect-error
+  return getExample(name, version, 'res')
 }
 
 const sendResponse = function (req, res, responseBody) {
@@ -188,7 +312,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
   let reqName; let reqVersion
 
   if (expectedRequestSchema) {
-    [reqName, reqVersion] = expectedRequestSchema.split('@')
+    [reqName, reqVersion] = expectedRequestSchema
   }
 
   return async function (req, res) {
@@ -200,7 +324,8 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
 
     try {
       if (expectedRequestSchema) {
-        jsonSchemas.assertSchema(reqName, reqVersion)(body)
+        // @ts-expect-error
+        assertSchema(reqName, reqVersion, 'req')(body)
       }
 
       res.expectedResponseSchema = expectedResponseSchema
@@ -214,9 +339,11 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
         body,
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
+      debug(err)
 
-      return res.status(412).json(getSchemaErr('request', err, expectedRequestSchema))
+      return res.status(412).json(err)
     }
   }
 }
@@ -243,14 +370,15 @@ const assertResponseBodySchema = function (req, res, next) {
     if (res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)) {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
 
-      const [resName, resVersion] = res.expectedResponseSchema.split('@')
+      const [resName, resVersion] = res.expectedResponseSchema
 
       try {
-        jsonSchemas.assertSchema(resName, resVersion)(body)
+        assertSchema(resName, resVersion, 'res')(body)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
-        return res.status(412).json(getSchemaErr('response', err, res.expectedResponseSchema))
+        return res.status(412).json(err)
       }
     }
 
@@ -267,6 +395,27 @@ const assertResponseBodySchema = function (req, res, next) {
 const onServer = (routes) => {
   return (function (app) {
     app.use(bodyParser.json())
+    app.use((req, res, next) => {
+      if (req.headers['x-cypress-encrypted']) {
+        const jwe = req.body
+
+        req.unwrappedSecretKey = () => {
+          return crypto.createSecretKey(
+            crypto.privateDecrypt(
+              TEST_PRIVATE,
+              Buffer.from(base64Url.toBase64(jwe.recipients[0].encrypted_key), 'base64'),
+            ),
+          )
+        }
+
+        return jose.generalDecrypt(jwe, TEST_PRIVATE).then(({ plaintext }) => Buffer.from(plaintext).toString('utf8')).then((body) => {
+          req.body = JSON.parse(body)
+          next()
+        }).catch(next)
+      }
+
+      return next()
+    })
 
     app.use(assertResponseBodySchema)
 
@@ -278,6 +427,31 @@ const onServer = (routes) => {
         route.resSchema,
       ))
     })
+  })
+}
+
+export const enableCaptureProtocol = (stub = PROTOCOL_STUB_VALID) => {
+  beforeEach(() => {
+    protocolStub = stub
+    CAPTURE_PROTOCOL_ENABLED = true
+    CAPTURE_PROTOCOL_MESSAGE = undefined
+  })
+
+  afterEach(() => {
+    protocolStub = undefined
+    CAPTURE_PROTOCOL_ENABLED = false
+    CAPTURE_PROTOCOL_MESSAGE = undefined
+  })
+}
+
+export const disableCaptureProtocolWithMessage = (message: string) => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = false
+    CAPTURE_PROTOCOL_MESSAGE = message
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 }
 

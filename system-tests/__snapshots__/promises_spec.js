@@ -43,7 +43,7 @@ exports['e2e promises / failing1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     promises.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -55,12 +55,6 @@ exports['e2e promises / failing1'] = `
      failed).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/promises.cy.js/catches promise errors and calls     (1280x720)
       done with err even when async (failed).png                                                    
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises.cy.js.mp4                  (X second)
 
 
 ====================================================================================================

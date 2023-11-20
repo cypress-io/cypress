@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('../spec_helper')
 
 const capture = require(`../../lib/capture`)

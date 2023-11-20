@@ -1,43 +1,67 @@
 <template>
-  <div
-    data-cy="runs-loader"
+  <ul
+    v-if="isUsingGit"
+    data-cy="runsSkeleton-git"
+    class="flex flex-col mb-[24px] gap-[16px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
   >
-    <div
-      v-for="i in numberOfLines"
+    <li
+      v-for="i in numberOfLinesGit"
       :key="i"
-      class="mb-4"
     >
-      <ListRowHeader
-        disabled
-        class="border border-gray-100"
+      <div
+        class="flex items-center my-[10px] gap-[8px] children:h-[14px]"
+        :class="{ 'mt-0': i === 0 }"
       >
-        <template #icon>
-          <div class="h-20px w-20px bg-gray-100 rounded-xl mx-2px" />
-        </template>
-        <template #header>
-          <div class="w-256px rounded-xl h-16px bg-gray-50 my-4px" />
-        </template>
-        <template #description>
-          <div
-            v-for="j in 4"
-            :key="j"
-            class="rounded-lg h-8px bg-gray-50 mr-20px inline-block"
-            :class="j === 4 ? 'w-64px' : 'w-80px'"
-          />
-        </template>
-        <template #right>
-          <div
-            v-if="i >= 2"
-            class="rounded-lg h-16px bg-gray-50 w-216px"
-          />
-        </template>
-      </ListRowHeader>
-    </div>
-  </div>
+        <div
+          class="relative w-[16px] rounded-lg bg-gray-50"
+        />
+        <div
+          class="w-[46px] max-w-[46px] rounded-lg bg-gray-50"
+        />
+        <div
+          class="flex items-center text-gray-50"
+        >
+          •
+        </div>
+        <div
+          class="w-[240px] max-w-[240px] rounded-lg bg-gray-50"
+        />
+      </div>
+      <ul
+        class="relative bg-white border border-gray-100 rounded border-1 overflow-hidden"
+      >
+        <li
+          v-for="j in (i %2 === 0 ? 2 : 1)"
+          :key="j"
+          class="border-gray-100 [&:not(:last-child)]:border-b w-full block overflow-auto"
+        >
+          <RunsSkeletonRow />
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <ul
+    v-else
+    data-cy="runsSkeleton-default"
+    class="relative bg-white border border-gray-100 rounded border-1 overflow-hidden mb-[24px]"
+  >
+    <li
+      v-for="i of numberOfLinesDefault"
+      :key="i"
+      class="border-gray-100 [&:not(:last-child)]:border-b w-full block overflow-auto"
+    >
+      <RunsSkeletonRow />
+    </li>
+  </ul>
 </template>
 
 <script lang="ts" setup>
-import ListRowHeader from '@cy/components/ListRowHeader.vue'
+import RunsSkeletonRow from './RunsSkeletonRow.vue'
 
-const numberOfLines = 20
+defineProps<{
+  isUsingGit?: boolean
+}>()
+
+const numberOfLinesDefault = 7
+const numberOfLinesGit = 5
 </script>

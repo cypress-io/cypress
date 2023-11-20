@@ -1,7 +1,7 @@
-import { Component } from "@angular/core";
+import { Component } from '@angular/core'
 
 @Component({
-  selector: "with-directives-component",
+  selector: 'with-directives-component',
   template: ` <button (click)="show = !show">Toggle Message</button>
     <ul *ngIf="show">
       <li *ngFor="let item of items">{{ item }}</li>
@@ -10,5 +10,5 @@ import { Component } from "@angular/core";
 export class WithDirectivesComponent {
   show = true;
 
-  items = ["breakfast", "lunch", "dinner"];
+  items = ['breakfast', 'lunch', 'dinner'];
 }

@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
+import $utils from './utils'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -51,6 +52,16 @@ const cmd = (command, args = '') => {
   const prefix = command.startsWith('Cypress') ? '' : 'cy.'
 
   return `\`${prefix}${command}(${args})\``
+}
+
+const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
+
+export const subjectChainToString = (subjectChain) => {
+  const [initial, ...queryFns] = subjectChain
+
+  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)}${queryFns.length ? ' -> ' : ''}`
+
+  return prefix + queryFns.map(queryFnToString).join('')
 }
 
 const getScreenshotDocsPath = (cmd) => {
@@ -130,28 +141,8 @@ export default {
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
     },
-  },
-
-  selectFile: {
-    docsUrl: 'https://on.cypress.io/selectfile',
-    invalid_action: {
-      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
-    },
-    invalid_array_file_reference: {
-      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
-    },
-    invalid_single_file_reference: {
-      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
-    },
-    multiple_elements: {
-      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
-    },
-    not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
-    },
-    invalid_alias: {
-      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
-    },
+    invalid_options: `${cmd('as')} only accepts an options object for its second argument. You passed: \`{{arg}}\``,
+    invalid_options_type: `${cmd('as')} only accepts a \`type\` of \`'query'\` or \`'static'\`. You passed: \`{{type}}\``,
   },
 
   blur: {
@@ -266,19 +257,29 @@ export default {
   },
 
   config: {
-    invalid_argument: {
-      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
-      docsUrl: 'https://on.cypress.io/config',
+    cypress_config_api: {
+      read_only: {
+        message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+    },
+    invalid_mocha_config_override: {
+      read_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can never be overridden because it is a read-only configuration option.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      suite_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be overridden from a suite-level override.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
+      global_only: {
+        message: `The \`{{invalidConfigKey}}\` configuration can only be set globally.`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_test_override: {
-      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
-    },
-    invalid_cypress_config_override: {
-      message: `\`Cypress.config()\` cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
-    },
-    invalid_test_config_override: {
-      message: `Cypress test configuration cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
     },
   },
 
@@ -292,7 +293,7 @@ export default {
       docsUrl: 'https://on.cypress.io/contains',
     },
     length_option: {
-      message: `${cmd('contains')} cannot be passed a \`length\` option because it will only ever return 1 element.`,
+      message: `${cmd('contains')} only ever returns one element, so you cannot assert on a \`length\` greater than one.`,
       docsUrl: 'https://on.cypress.io/contains',
     },
     regex_conflict: {
@@ -313,10 +314,16 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    deprecated (obj) {
+    removed (obj) {
       return {
-        message: `${cmd(obj.cmd)} has been deprecated and will be removed in a future release. Consider using ${cmd('session')} instead.`,
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
+      }
+    },
+    invalid_domain (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
     invalid_name (obj) {
@@ -329,11 +336,6 @@ export default {
       return {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
-      }
-    },
-    whitelist_renamed (obj) {
-      return {
-        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
       }
     },
   },
@@ -522,6 +524,12 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
+    read_timed_out (obj) {
+      return {
+        message: `${cmd('readFile', '"{{file}}"')} timed out.`,
+        docsUrl: `https://on.cypress.io/readfile`,
+      }
+    },
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,
@@ -557,10 +565,6 @@ export default {
   },
 
   get: {
-    alias_invalid: {
-      message: '`{{prop}}` is not a valid alias property. Only `numbers` or `all` is permitted.',
-      docsUrl: 'https://on.cypress.io/get',
-    },
     alias_zero: {
       message: '`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`',
       docsUrl: 'https://on.cypress.io/get',
@@ -753,6 +757,7 @@ export default {
   },
 
   miscellaneous: {
+    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\
@@ -859,9 +864,25 @@ export default {
       message: '`Cypress.Commands.add()` cannot create a new command named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
+    invalid_new_query: {
+      message: '`Cypress.Commands.addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
+    },
+    reserved_command_query: {
+      message: '`Cypress.Commands.addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
+    },
     invalid_overwrite: {
-      message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
-      docsUrl: 'https://on.cypress.io/api',
+      message: 'Cannot overwite command for: `{{name}}`. An existing {{type}} does not exist by that name.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
+    },
+    invalid_overwrite_command_with_query: {
+      message: 'Cannot overwite the `{{name}}` command. Commands can only be overwritten with `Cypress.Commands.overwrite()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
+    },
+    invalid_overwrite_query_with_command: {
+      message: 'Cannot overwite the `{{name}}` query. Queries can only be overwritten with `Cypress.Commands.overwriteQuery()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
       return stripIndent`\
@@ -908,11 +929,23 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin }) {
-      return stripIndent`\
-        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
+    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+      return {
+        message: stripIndent`\
+        The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
-        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+        ${isSkipDomainInjectionEnabled ? `
+        If \`experimentalSkipDomainInjection\` is enabled for this domain, a ${cmd('origin')} command is required.
+        ` : ''}
+        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+
+        \`cy.origin('${autOrigin}', () => {\`
+        \`  <commands targeting ${autOrigin} go here>\`
+        \`})\`
+        `,
+        docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-fail',
+      }
     },
   },
 
@@ -971,23 +1004,59 @@ export default {
       ].join('\n'),
       docsUrl: 'https://on.cypress.io/mount',
     },
+    removed_style_mounting_options (key: string) {
+      return {
+        message: `The \`${key}\` mounting option is no longer supported.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
+    },
+    cleanup_styles: {
+      message: `\`cleanupStyles\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    inject_styles_before_element: {
+      message: `\`injectStylesBeforeElement\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_hook: {
+      message: `\`mountHook\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    unmount: {
+      message: `\`unmount\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_callback: {
+      message: `\`mountCallback\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    vue_yielded_value: {
+      message: 'As of Cypress 11, mount now yields an object with VueWrapper and the component as properties. Destructure using `{ wrapper, component }` to access the VueWrapper and component.',
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    alias (alias: string) {
+      return {
+        message: `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${alias}') instead.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
+    },
   },
 
   navigation: {
-    cross_origin ({ message, originPolicy, configFile, projectRoot }) {
+    cross_origin ({ message, origin, configFile, projectRoot }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
 
             > ${message}
 
-          Before the page load, you were bound to the origin policy:
+          Before the page load, you were bound to the origin:
 
-            > ${originPolicy}
+            > ${origin}
 
-          A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+          A cross origin error happens when your application navigates to a new URL which does not match the origin above.
 
-          A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+          A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.
 
           Cypress does not allow you to navigate to a different origin URL within a single test.
 
@@ -1014,29 +1083,6 @@ export default {
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
 
         If so, increase \`redirectionLimit\` value in configuration.`
-    },
-    cross_origin_load_timed_out ({ ms, projectRoot, configFile, crossOriginUrl, originPolicies }) {
-      return {
-        message: stripIndent`\
-          Timed out after waiting \`${ms}ms\` for your remote page to load on origin(s):
-
-          - ${originPolicies.map((originPolicy) => `\`${originPolicy}\``).join('\n       -')}
-
-          A cross-origin request for \`${crossOriginUrl.href}\` was detected.
-
-          A command that triggers cross-origin navigation must be immediately followed by a ${cmd('origin')} command:
-
-          \`cy.origin('${crossOriginUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${crossOriginUrl.origin} go here>\`
-          \`})\`
-
-          If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(projectRoot, configFile)} to wait longer.
-
-          Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
-
-          When this \`load\` event occurs, Cypress will continue running commands.`,
-        docsUrl: 'https://on.cypress.io/origin',
-      }
     },
   },
 
@@ -1100,6 +1146,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
+      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
@@ -1160,11 +1207,15 @@ export default {
 
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
-    experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalSessionAndOrigin flag`,
-    },
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
+    },
+    invalid_url_argument_same_origin ({ originUrl, topOrigin, policy }) {
+      return stripIndent`\
+      ${cmd('origin')} requires the first argument to be a different ${policy === 'same-origin' ? 'origin' : 'domain' } than top. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
+
+      Either the intended page was not visited prior to running the cy.origin block or the cy.origin block may not be needed at all.
+      `
     },
     invalid_options_argument: {
       message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
@@ -1195,7 +1246,9 @@ export default {
       message: stripIndent`
         {{error}}
 
-        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.`,
+        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
+
+        Using \`require()\` or \`import()\` within the ${cmd('origin')} callback is not supported. Use ${cmd('Cypress.require')} to include dependencies instead, but note that it currently requires enabling the \`experimentalOriginDependencies\` flag.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
@@ -1208,6 +1261,12 @@ export default {
         You likely forgot to properly chain the cy commands using another \`cy.then()\`.
 
         The value you synchronously returned was: \`{{value}}\``,
+    },
+    failed_to_get_callback: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to run the callback function due to the following error:
+
+      {{error}}`,
     },
     failed_to_serialize_object: {
       message: stripIndent`\
@@ -1227,23 +1286,14 @@ export default {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
+    failed_to_create_spec_bridge: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to create a spec bridge to communicate with the specified origin. This can happen when you attempt to create a spec bridge to an insecure (http) frame from a secure (https) frame.
+
+      Check your Developer Tools Console for the actual error - it should be printed there.
+      `,
+    },
     unsupported: {
-      route: {
-        message: `${cmd('route')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      server: {
-        message: `${cmd('server')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Server: {
-        message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Cookies_preserveOnce: {
-        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/session',
-      },
       origin: {
         message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20718',
@@ -1257,24 +1307,30 @@ export default {
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
       Cypress_session: {
-        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
+        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('origin')} callback. Consider using them outside of the callback instead.`,
         docsUrl: 'https://on.cypress.io/session-api',
       },
     },
-    cannot_visit_previous_origin (args) {
+    aut_error_prior_to_spec_bridge_attach ({ args }) {
+      const { errorMessage, autLocation } = args
+
       return {
         message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
+          ${errorMessage}
 
-          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
+          This error was thrown by a cross origin page. If you wish to suppress this error you will have to use the cy.origin command to handle the error prior to visiting the page.
 
-          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
-
-          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
+          \`cy.origin('${autLocation.origin}', () => {\`
+          \`  cy.on('uncaught:exception', (e) => {\`
+          \`    if (e.message.includes('Things went bad')) {\`
+          \`      // we expected this error, so let's ignore it\`
+          \`      // and let the test continue\`
+          \`      return false\`
+          \`    }\`
+          \`  })\`
           \`})\`
-
-          \`cy.visit('${args.originalUrl}')\``,
+          \`cy.visit('${autLocation.href}')\`
+          `,
       }
     },
   },
@@ -1448,42 +1504,26 @@ export default {
     },
   },
 
-  route: {
-    deprecated: {
-      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
+  require: {
+    invalid_inside_origin: {
+      message: `${cmd('Cypress.require')} is supposed to be replaced with a \`require()\` statement before the test code using it is run. If this error is being thrown, something unexpected has occurred. Please submit an issue.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
-    failed_prerequisites: {
-      message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
-      docsUrl: 'https://on.cypress.io/server',
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback and requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
-    invalid_arguments: {
-      message: `${cmd('route')} was not provided any arguments. You must provide valid arguments.`,
-      docsUrl: 'https://on.cypress.io/route',
+    invalid_without_flag: {
+      message: `Using ${cmd('Cypress.require')} requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
-    method_invalid: {
-      message: `${cmd('route')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    response_invalid: {
-      message: `${cmd('route')} cannot accept an \`undefined\` or \`null\` response. It must be set to something, even an empty string will work.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_invalid: {
-      message: `${cmd('route')} was called with an invalid \`url\`. \`url\` must be either a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_missing: {
-      message: `${cmd('route')} must be called with a \`url\`. It can be a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_percentencoding_warning ({ decodedUrl }) {
-      return {
-        message: stripIndent`\
-          A \`url\` with percent-encoded characters was passed to ${cmd('route')}, but ${cmd('route')} expects a decoded \`url\`.
+  },
 
-          Did you mean to pass "${decodedUrl}"?`,
-        docsUrl: 'https://on.cypress.io/route',
+  route: {
+    removed (obj) {
+      return {
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
       }
     },
   },
@@ -1602,10 +1642,6 @@ export default {
       message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
-    disabled: {
-      message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/select',
-    },
     invalid_element: {
       message: `${cmd('select')} can only be called on a \`<select>\`. Your subject is a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
@@ -1640,6 +1676,61 @@ export default {
     },
   },
 
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing a file input, but received the element:
+
+      > \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
+    },
+  },
+
+  query_command: {
+    docsUrl: 'https://on.cypress.io/custom-commands',
+
+    returned_promise (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you returned a promise from a query.
+
+        Queries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.`
+    },
+    invoked_action (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you invoked a command inside a query.
+
+        Queries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.
+
+        The command invoked was:
+
+          > ${cmd(obj.action)}`
+    },
+    returned_non_function (obj) {
+      return stripIndent`
+        ${cmd(obj.name)} failed because you returned a value other than a function from a query.
+
+        Queries must be synchronous functions that return a function.
+
+        The returned value was:
+
+          > \`${obj.returned}\``
+    },
+  },
+
   selector_playground: {
     defaults_invalid_arg: {
       message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
@@ -1660,48 +1751,51 @@ export default {
   },
 
   server: {
-    deprecated: {
-      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
+    removed (obj) {
+      return {
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      }
     },
-    invalid_argument: {
-      message: `${cmd('server')} accepts only an object literal as its argument.`,
-      docsUrl: 'https://on.cypress.io/server',
-    },
-    xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
-    unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
-    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   sessions: {
     validate_callback_false: {
-      message: 'Your `cy.session` **validate** callback {{reason}}.',
-    },
-    experimentNotEnabled ({ experimentalSessionSupport }) {
-      if (experimentalSessionSupport) {
-        return {
-          message: stripIndent`
-          ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.`,
-          docsUrl: 'https://on.cypress.io/session',
-        }
-      }
-
-      return {
-        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag.`,
-        docsUrl: 'https://on.cypress.io/session',
-      }
+      message: 'Your `cy.session` **validate** {{reason}}.',
     },
     session: {
-      duplicateId: {
-        message: stripIndent`
-        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
+        const differences: string[] = []
+
+        if (hasUniqSetupDefinition) {
+          differences.push('setup function')
+        }
+
+        if (hasUniqValidateDefinition) {
+          differences.push('validate function')
+        }
+
+        if (hasUniqPersistence) {
+          differences.push('persistence')
+        }
+
+        return {
+          message: stripIndent`
+           This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different ${differences.join(' and ')}, please call ${cmd('session')} with a unique identifier other than **${id}**.`,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgId: {
         message: stripIndent`
         ${cmd('session')} was passed an invalid argument. The first argument \`id\` must be an string or serializable object.
         `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgSetup: {
+        message: stripIndent`
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       wrongArgOptions: {
@@ -1787,6 +1881,16 @@ export default {
       message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
       docsUrl: 'https://on.cypress.io/assertions',
     },
+
+    command_inside_should (obj) {
+      return stripIndent`\
+        ${cmd('should')} failed because you invoked a command inside the callback. ${cmd('should')} retries the inner function, which would result in commands being added to the queue multiple times. Use ${cmd('then')} instead of ${cmd('should')}, or move any commands outside the callback function.
+
+        The command invoked was:
+
+          > ${cmd(obj.action)}
+      `
+    },
   },
 
   spread: {
@@ -1811,26 +1915,49 @@ export default {
 
         Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
     },
-    not_attached (obj) {
+    detached_during_actionability (obj) {
       return {
         message: stripIndent`\
-          ${cmd(obj.cmd)} failed because this element is detached from the DOM.
+          ${cmd(obj.name)} failed because the page updated while this command was executing. Cypress tried to locate elements based on this query:
 
-          \`${obj.node}\`
+          > ${subjectChainToString(obj.subjectChain)}
 
-          Cypress requires elements be attached in the DOM to interact with them.
+          We initially found matching element(s), but while waiting for them to become actionable, they disappeared from the page. Common situations why this happens:
+            - Your JS framework re-rendered asynchronously
+            - Your app code reacted to an event firing and removed the element
 
-          The previous command that ran was:
+          You can typically solve this by breaking up a chain. For example, rewrite:
 
-            > ${cmd(obj.prev)}
+          > \`cy.get('button').click().click()\`
 
-          This DOM element likely became detached somewhere between the previous and current command.
+          to
+
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').click()\`
+
+            `,
+        docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
+      }
+    },
+    detached_after_command (obj) {
+      return {
+        message: stripIndent`\
+          ${cmd(obj.name)} failed because the page updated as a result of this command, but you tried to continue the command chain. The subject is no longer attached to the DOM, and Cypress cannot requery the page after commands such as ${cmd(obj.name)}.
 
           Common situations why this happens:
             - Your JS framework re-rendered asynchronously
             - Your app code reacted to an event firing and removed the element
 
-          You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.`,
+          You can typically solve this by breaking up a chain. For example, rewrite:
+
+          > \`cy.get('button').click().should('have.class', 'active')\`
+
+          to
+
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').should('have.class', 'active')\`
+
+            `,
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
       }
     },
@@ -1858,8 +1985,19 @@ export default {
 
           > ${cmd(obj.previous)}`
     },
+    not_element_empty_subject (obj) {
+      return stripIndent`\
+        ${cmd(obj.name)} failed because it requires a DOM element.
+
+        No elements in the current DOM matched your query:
+
+          > ${subjectChainToString(obj.subjectChain)}`
+    },
     state_subject_deprecated: {
-      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,
+      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('subject')} instead.`,
+    },
+    state_withinsubject_deprecated: {
+      message: `${cmd('state', '\'withinSubject\'')} has been deprecated and will be removed in a future release. You should read ${cmd('state', '\'withinSubjectChain\'')} once at the top of your command / query, and resolve it into a value with ${cmd('getSubjectFromChain', 'withinSubjectChain')} as needed.`,
     },
   },
 
@@ -2042,11 +2180,11 @@ export default {
       if (obj.unsupportedPlugin && obj.errMessage) {
         msg = `${stripIndent`\
           Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version
-          
+
           The following error was caught:
-          
+
           > ${obj.errMessage}
-          
+
           Because this error occurred during a \`${obj.hookName}\` hook we are skipping` } `
       } else {
         msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
@@ -2144,49 +2282,42 @@ export default {
       message: `${cmd('visit')} requires the \`qs\` option to be an object, but received: \`{{qs}}\``,
       docsUrl: 'https://on.cypress.io/visit',
     },
+    invalid_cross_origin_on_load (args) {
+      return {
+        message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.
+
+          \`cy.origin('${args.autLocation.origin}', () => {\`
+          \`  cy.on('window:load', () => {\`
+          \`    <onLoad callback goes here>\`
+          \`  })\`
+          \`})\`
+          \`cy.visit('${args.url}')\`
+        `,
+        docsUrl: 'https://on.cypress.io/visit',
+      }
+    },
+    invalid_cross_origin_on_before_load (args) {
+      return {
+        message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.
+
+        \`cy.origin('${args.autLocation.origin}', () => {\`
+        \`  cy.on('window:before:load', () => {\`
+        \`    <onBeforeLoad callback goes here>\`
+        \`  })\`
+        \`})\`
+        \`cy.visit('${args.url}')\`
+      `,
+        docsUrl: 'https://on.cypress.io/visit',
+      }
+    },
     no_duplicate_url: {
       message: stripIndent`\
         ${cmd('visit')} must be called with only one \`url\`. You specified two urls:
         \`url\` from the \`options\` object: {{optionsUrl}}
         \`url\` from the \`url\` parameter: {{url}}`,
       docsUrl: 'https://on.cypress.io/visit',
-    },
-    cannot_visit_different_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-          ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
-
-          ${args.isCrossOriginSpecBridge ?
-          `\`cy.origin('${args.previousUrl.originPolicy}', () => {\`
-          \`  cy.visit('${args.previousUrl}')\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`` :
-          `\`cy.visit('${args.previousUrl}')\`
-          \`<commands targeting ${args.previousUrl.origin} go here>\``
-          }
-
-          \`cy.origin('${args.attemptedUrl.originPolicy}', () => {\`
-          \`  cy.visit('${args.originalUrl}')\`
-          \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
-          \`})\`
-
-          The new URL is considered a different origin because the following parts of the URL are different:
-
-            > {{differences}}
-
-          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
-
-          The previous URL you visited was:
-
-            > '${args.previousUrl.origin}'
-
-          You're attempting to visit this URL:
-
-            > '${args.attemptedUrl.origin}'`,
-        docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
-      }
     },
     loading_network_failed: stripIndent`\
       ${cmd('visit')} failed trying to load:
@@ -2291,6 +2422,11 @@ export default {
     },
   },
 
+  webkit: {
+    docsUrl: 'https://on.cypress.io/webkit-experiment',
+    origin: '`cy.origin()` is not currently supported in experimental WebKit.',
+  },
+
   window: {
     iframe_doc_undefined: 'The remote iframe\'s document is `undefined`',
     iframe_undefined: 'The remote iframe is `undefined`',
@@ -2300,6 +2436,20 @@ export default {
     invalid_argument: {
       message: `${cmd('within')} must be called with a function.`,
       docsUrl: 'https://on.cypress.io/within',
+    },
+    multiple_elements (args) {
+      return {
+        message: stripIndent`
+        ${cmd('within')} can only be called on a single element. Your subject contained {{num}} elements. Narrow down your subject to a single element (using \`.first()\`, for example) before calling \`.within()\`.
+
+        To run \`.within()\` over multiple subjects, use \`.each()\`.
+
+          \`cy.get('div').each($div => {\`
+          \`  cy.wrap($div).within(() => { ... })\`
+          \`})\`
+        `,
+        docsUrl: 'https://on.cypress.io/within',
+      }
     },
   },
 

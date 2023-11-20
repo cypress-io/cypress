@@ -1,6 +1,6 @@
-import { Http, HttpStages } from '../../../lib/http'
 import { expect } from 'chai'
 import sinon from 'sinon'
+import { Http, HttpStages } from '../../../lib/http'
 
 describe('http', function () {
   context('Http.handle', function () {
@@ -10,12 +10,16 @@ describe('http', function () {
     let incomingResponse
     let error
     let httpOpts
+    let on
+    let off
 
     beforeEach(function () {
       config = {}
       incomingRequest = sinon.stub()
       incomingResponse = sinon.stub()
       error = sinon.stub()
+      on = sinon.stub()
+      off = sinon.stub()
 
       middleware = {
         [HttpStages.IncomingRequest]: [incomingRequest],
@@ -45,11 +49,13 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, {})
+      .handleHttpRequest({}, { on, off })
       .then(function () {
         expect(incomingRequest, 'incomingRequest').to.be.calledOnce
         expect(incomingResponse, 'incomingResponse').to.be.calledOnce
         expect(error).to.not.be.called
+        expect(on).to.be.calledOnce
+        expect(off).to.be.calledTwice
       })
     })
 
@@ -57,17 +63,50 @@ describe('http', function () {
       incomingRequest.throws(new Error('oops'))
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('oops')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
         this.end()
       })
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, {})
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.not.be.called
         expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
+    it('ensures not to create fake pending browser pre requests on multiple errors', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          errorHandled: true,
+        }
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-ignore
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(http.addPendingBrowserPreRequest).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
       })
     })
 
@@ -80,17 +119,19 @@ describe('http', function () {
       incomingResponse.throws(new Error('oops'))
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('oops')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
         this.end()
       })
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, {})
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.be.calledOnce
         expect(error).to.be.calledOnce
+        expect(on).to.be.calledOnce
+        expect(off).to.have.callCount(4)
       })
     })
 
@@ -131,7 +172,7 @@ describe('http', function () {
       })
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('goto error stack')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 1:\ngoto error stack')
         expect(this).to.include.keys(expectedKeys)
         this.errorAdded = errorAdded
         this.next()
@@ -149,7 +190,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, {})
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         [
           incomingRequest, incomingRequest2,
@@ -158,6 +199,9 @@ describe('http', function () {
         ].forEach(function (fn) {
           expect(fn).to.be.calledOnce
         })
+
+        expect(on).to.be.calledTwice
+        expect(off).to.have.callCount(10)
       })
     })
   })

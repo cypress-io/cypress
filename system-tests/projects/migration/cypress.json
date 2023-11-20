@@ -6,7 +6,6 @@
   "componentFolder": "src",
   "testFiles": "**/*.spec.{tsx,js}",
   "pluginsFile": "cypress/plugins/index.js",
-  "experimentalSessionAndOrigin": true,
   "e2e": {
     "defaultCommandTimeout": 10000,
     "slowTestThreshold": 5000

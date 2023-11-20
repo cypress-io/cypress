@@ -19,9 +19,7 @@
   },
   "rules": {
     "mocha/no-global-tests": "off",
-    "no-unused-vars": "off",
     "no-console": "off",
-    "@typescript-eslint/no-unused-vars": "off",
     "vue/multi-word-component-names": "off"
   }
 }

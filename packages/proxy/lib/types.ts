@@ -1,5 +1,8 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
+import type { ProxyTimings } from '@packages/types'
+import type { ResourceType } from '@packages/net-stubbing'
+import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 
 /**
  * An incoming request to the Cypress web server.
@@ -8,12 +11,25 @@ export type CypressIncomingRequest = Request & {
   proxiedUrl: string
   abort: () => void
   requestId: string
-  browserPreRequest?: BrowserPreRequest
+  browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
+  credentialsLevel?: RequestCredentialLevel
+  isFromExtraTarget: boolean
+  /**
+   * Resource type from browserPreRequest. Copied to req so intercept matching can work.
+   */
+  resourceType?: ResourceType
+  /**
+   * Stack-ordered list of `cy.intercept()`s matching this request.
+   */
+  matchingRoutes?: BackendRoute[]
 }
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
@@ -21,6 +37,7 @@ export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | fal
  * An outgoing response to an incoming request to the Cypress web server.
  */
 export type CypressOutgoingResponse = Response & {
+  injectionNonce?: string
   isInitial: null | boolean
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: null | boolean
@@ -33,7 +50,7 @@ export { RequestMiddleware } from './http/request-middleware'
 
 export { ResponseMiddleware } from './http/response-middleware'
 
-export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+export { ResourceType }
 
 /**
  * Metadata about an HTTP request, according to the browser's pre-request event.
@@ -45,7 +62,12 @@ export type BrowserPreRequest = {
   headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined
+  errorHandled?: boolean
+  cdpRequestWillBeSentTimestamp: number
+  cdpRequestWillBeSentReceivedTimestamp: number
 }
+
+export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings
 
 /**
  * Notification that the browser has received a response for a request for which a pre-request may have been emitted.

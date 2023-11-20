@@ -4,6 +4,7 @@ const webpackConfig = require('./webpack.config.js')
 
 module.exports = {
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       bundler: 'webpack',
       webpackConfig,

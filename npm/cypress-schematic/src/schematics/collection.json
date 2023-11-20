@@ -6,13 +6,23 @@
       "factory": "./ng-add/index",
       "schema": "./ng-add/schema.json"
     },
-    "e2e": {
-      "description": "Create an e2e spec file",
-      "factory": "./ng-generate/e2e/index",
-      "schema": "./ng-generate/e2e/schema.json",
+    "spec": {
+      "description": "Create a single spec file",
+      "factory": "./ng-generate/cypress-test/index",
+      "schema": "./ng-generate/cypress-test/schema.json"
+    },
+    "specs-ct": {
+      "description": "Create spec files for all Angular components in a project",
+      "factory": "./ng-generate/cypress-ct-tests/index",
+      "schema": "./ng-generate/cypress-ct-tests/schema.json"
+    },
+    "component": {
+      "description": "Creates a new, generic component definition in the given or default project.",
       "aliases": [
-        "e2e-spec"
-      ]
+        "c"
+      ],
+      "factory": "./ng-generate/component/index",
+      "schema": "./ng-generate/component/schema.json"
     }
   }
 }

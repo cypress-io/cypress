@@ -1,0 +1,43 @@
+name: Snyk Software Composition Analysis Scan
+# This git workflow leverages Snyk actions to perform a Software Composition
+# Analysis scan on our Opensource libraries upon Pull Requests to the
+# "develop" branch. We use this as a control to prevent vulnerable packages
+# from being introduced into the codebase.
+# Enhancements were made to this action to build the yarn packages to reduce
+# Snyk scan errors that were complaining about the yarn.locks etc.  Also
+# implemented PAT token for actions to resolve an issue with the action not
+# running and reporting back to the PR status checks
+on:
+  pull_request:
+    branches:
+      - develop
+jobs:
+  Snyk_SCA_Scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+      - name: Run yarn
+        run: yarn
+      - name: Run build
+        run: yarn build
+      - name: Installing snyk-delta and dependencies
+        run: npm i -g snyk-delta
+      - uses: snyk/actions/setup@master
+      - name: Perform SCA Scan
+        continue-on-error: false
+        run: |
+          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=system-tests,tooling,docker,Dockerfile --severity-threshold=critical
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

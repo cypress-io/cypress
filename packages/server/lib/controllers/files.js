@@ -1,50 +1,80 @@
 const _ = require('lodash')
 const path = require('path')
-const Promise = require('bluebird')
 const cwd = require('../cwd')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
+const { cors } = require('@packages/network')
+const { privilegedCommandsManager } = require('../privileged-commands/privileged-commands-manager')
 
 module.exports = {
 
-  handleIframe (req, res, config, remoteStates, extraOptions) {
+  async handleIframe (req, res, config, remoteStates, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, config, extraOptions)
-    .then((specs) => {
-      const supportFileJs = this.getSupportFile(config)
-      const allFilesToSend = specs
+    const specs = await this.getSpecs(test, config, extraOptions)
+    const supportFileJs = this.getSupportFile(config)
+    const allFilesToSend = specs
 
-      if (supportFileJs) {
-        allFilesToSend.unshift(supportFileJs)
-      }
+    if (supportFileJs) {
+      allFilesToSend.unshift(supportFileJs)
+    }
 
-      debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+    debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-      const iframeOptions = {
-        title: this.getTitle(test),
-        domain: remoteStates.getPrimary().domainName,
-        scripts: JSON.stringify(allFilesToSend),
-      }
+    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    }) ?
+      remoteStates.getPrimary().domainName :
+      undefined
 
-      debug('iframe %s options %o', test, iframeOptions)
-
-      return res.render(iframePath, iframeOptions)
+    const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
+      browserFamily: req.query.browserFamily,
+      isSpecBridge: false,
+      namespace: config.namespace,
+      scripts: allFilesToSend,
+      url: req.proxiedUrl,
     })
-  },
-
-  handleCrossOriginIframe (req, res) {
-    const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
-    const domain = req.hostname
 
     const iframeOptions = {
-      domain,
-      title: `Cypress for ${domain}`,
+      superDomain,
+      title: this.getTitle(test),
+      scripts: JSON.stringify(allFilesToSend),
+      privilegedChannel,
+    }
+
+    debug('iframe %s options %o', test, iframeOptions)
+
+    res.render(iframePath, iframeOptions)
+  },
+
+  async handleCrossOriginIframe (req, res, config) {
+    const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
+    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    }) ?
+      cors.getSuperDomain(req.proxiedUrl) :
+      undefined
+
+    const origin = cors.getOrigin(req.proxiedUrl)
+
+    const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
+      browserFamily: req.query.browserFamily,
+      isSpecBridge: true,
+      namespace: config.namespace,
+      scripts: [],
+      url: req.proxiedUrl,
+    })
+
+    const iframeOptions = {
+      superDomain,
+      title: `Cypress for ${origin}`,
+      namespace: config.namespace,
+      privilegedChannel,
     }
 
     debug('cross origin iframe with options %o', iframeOptions)
@@ -67,17 +97,6 @@ module.exports = {
       return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
-    const specFilter = _.get(extraOptions, 'specFilter')
-
-    debug('specFilter %o', { specFilter })
-    const specFilterContains = (spec) => {
-      // only makes sense if there is specFilter string
-      // the filter should match the logic in
-      // desktop-gui/src/specs/specs-store.js
-      return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
-    }
-    const specFilterFn = specFilter ? specFilterContains : () => true
-
     const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
       if (spec === '__all') {
@@ -85,36 +104,18 @@ module.exports = {
 
         const ctx = getCtx()
 
-        const [e2ePatterns, componentPatterns] = await Promise.all([
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
-        ])
+        // In case the user clicked "run all specs" and deleted a spec in the list, we will
+        // only include specs we know to exist
+        const existingSpecs = new Set(ctx.project.specs.map(({ relative }) => relative))
+        const filteredSpecs = ctx.project.runAllSpecs.reduce((acc, relSpec) => {
+          if (existingSpecs.has(relSpec)) {
+            acc.push(convertSpecPath(relSpec))
+          }
 
-        // It's possible that the E2E pattern matches some component tests, for example
-        // e2e.specPattern: src/**/*.cy.ts
-        // component.specPattern: src/components/**/*.cy.ts
-        // in this case, we want to remove anything that matches
-        // - the component.specPattern
-        // - the e2e.excludeSpecPattern
-        return ctx.project.findSpecs({
-          projectRoot: config.projectRoot,
-          testingType: 'e2e',
-          specPattern: e2ePatterns.specPattern,
-          configSpecPattern: e2ePatterns.specPattern,
-          excludeSpecPattern: e2ePatterns.excludeSpecPattern,
-          additionalIgnorePattern: componentPatterns.specPattern,
-        })
-        .then((specs) => {
-          debug('found __all specs %o', specs)
+          return acc
+        }, [])
 
-          return specs
-        })
-        .filter(specFilterFn)
-        .then((specs) => {
-          debug('filtered __all specs %o', specs)
-
-          return specs
-        }).map(convertSpecPath)
+        return filteredSpecs
       }
 
       debug('normalizing spec %o', { spec })
@@ -123,10 +124,7 @@ module.exports = {
       return [convertSpecPath(spec)]
     }
 
-    return Promise
-    .try(() => {
-      return getSpecsHelper()
-    })
+    return getSpecsHelper()
   },
 
   prepareForBrowser (filePath, projectRoot, namespace) {

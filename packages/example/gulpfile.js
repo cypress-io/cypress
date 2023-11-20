@@ -1,5 +1,4 @@
 const gulp = require('gulp')
-const ghPages = require('gulp-gh-pages')
 const gulpClean = require('gulp-clean')
 const RevAll = require('gulp-rev-all')
 
@@ -26,13 +25,6 @@ const clean = () => {
   .pipe(gulpClean())
 }
 
-const pushGhPages = () => {
-  return gulp.src('build/**/*')
-  .pipe(ghPages())
-}
-
 const build = gulp.series(clean, gulp.parallel(assets, cname))
 
 exports.build = build
-
-exports.deploy = gulp.series(build, pushGhPages)

@@ -8,7 +8,7 @@ const browsers = require('../browsers')
 const plugins = require('../plugins')
 
 type Group = 'browser' | 'cypress' | 'launchpad' | 'plugin' | 'ffmpeg' | 'electron-shared' | 'other'
-type Process = si.Systeminformation.ProcessesProcessData & {
+export type Process = si.Systeminformation.ProcessesProcessData & {
   group?: Group
 }
 
@@ -37,7 +37,7 @@ const formatPidDisplay = (groupedProcesses) => {
   return display
 }
 
-export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
+export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
   const cyProcesses: Process[] = []
   const thisProcess: Process = _.find(list, { pid: process.pid })!
 
@@ -51,9 +51,9 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
   const isBrowserProcess = (proc: Process): boolean => {
     const instance = browsers.getBrowserInstance()
     // electron will return a list of pids, since it's not a hierarchy
-    const pid: number | number[] = instance && instance.pid
+    const pids: number[] = instance?.allPids ? instance.allPids : [instance?.pid]
 
-    return (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid)
+    return (pids.includes(proc.pid))
       || isParentProcessInGroup(proc, 'browser')
   }
 
@@ -231,7 +231,7 @@ export const _printGroupedProcesses = (groupTotals) => {
 
 function _checkProcesses () {
   return si.processes()
-  .then(_groupCyProcesses)
+  .then(groupCyProcesses)
   .then(_renameBrowserGroup)
   .then(_aggregateGroups)
   .then(_printGroupedProcesses)

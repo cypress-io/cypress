@@ -1,10 +1,14 @@
-/// <reference path="./cy/commands/session.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
 // All of the types needed by packages/app, without any of the additional APIs used in the driver only
 
 declare namespace Cypress {
+  interface Cypress {
+    runner: any
+    state: State
+  }
+
   interface Actions {
     (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
@@ -14,12 +18,22 @@ declare namespace Cypress {
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
+    (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
+    (action: 'page:loading', fn: (loading: boolean) => void)
+    (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
+    (action: 'cy:protocol-snapshot', fn: () => void)
+    (action: 'test:before:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test, options: ObjectLike) => void | Promise<any>): Cypress
   }
 
   interface Backend {
-    (task: 'cross:origin:release:html'): boolean
-    (task: 'cross:origin:bridge:ready', args: { originPolicy?: string }): boolean
-    (task: 'cross:origin:finished', originPolicy: string): boolean
+    (task: 'protocol:command:log:added', log: any): Promise<void>
+    (task: 'protocol:command:log:changed', log: any): Promise<void>
+    (task: 'protocol:viewport:changed', input: any): Promise<void>
+    (task: 'protocol:test:before:run:async', attributes: any): Promise<void>
+    (task: 'protocol:test:after:run:async', attributes: any): Promise<void>
+    (task: 'protocol:test:before:after:run:async', attributes: any, options: any): Promise<void>
+    (task: 'protocol:url:changed', input: any): Promise<void>
+    (task: 'protocol:page:loading', input: any): Promise<void>
   }
 
   interface cy {
@@ -28,6 +42,7 @@ declare namespace Cypress {
      */
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
+    now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
     state: State
@@ -37,10 +52,11 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
-    isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
-    fail: (err: Error, options:{ async?: boolean }) => Error
+    fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
-    createSnapshot:  ISnapshots['createSnapshot']
+    subjectChain: (chainerId?: string) => SubjectChain
+
+    createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
   }
 }

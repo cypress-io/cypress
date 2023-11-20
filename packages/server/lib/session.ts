@@ -1,33 +1,47 @@
-import type { CyCookie } from './browsers/cdp_automation'
+import type { StoredSessions } from '@packages/types'
 
-interface SessionData {
-  cookies: CyCookie[]
-  id: string
-  localStorage: object
-  sessionStorage: object
-}
-const state = {
-  sessions: {},
+type State = {
+  globalSessions: StoredSessions
+  specSessions: StoredSessions
 }
 
-export function saveSession (data: SessionData) {
+const state: State = {
+  globalSessions: {},
+  specSessions: {},
+}
+
+export function saveSession (data: Cypress.ServerSessionData): void {
   if (!data.id) throw new Error('session data had no id')
 
-  state.sessions[data.id] = data
+  if (data.cacheAcrossSpecs) {
+    state.globalSessions[data.id] = data
+
+    return
+  }
+
+  state.specSessions[data.id] = data
 }
 
-export function getSession (id: string): SessionData {
-  const session = state.sessions[id]
+export function getActiveSessions (): StoredSessions {
+  return state.globalSessions
+}
+
+export function getSession (id: string): Cypress.ServerSessionData {
+  const session = state.globalSessions[id] || state.specSessions[id]
 
   if (!session) throw new Error(`session with id "${id}" not found`)
 
   return session
 }
 
-export function getState () {
+export function getState (): State {
   return state
 }
 
-export function clearSessions () {
-  state.sessions = {}
+export function clearSessions (clearAllSessions: boolean = false): void {
+  state.specSessions = {}
+
+  if (clearAllSessions) {
+    state.globalSessions = {}
+  }
 }

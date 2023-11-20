@@ -68,7 +68,7 @@ CANNOT_TRASH_ASSETS: (arg1: string) => {
   return errTemplate`\
       Warning: We failed to trash the existing run results.
 
-      This error will not alter the exit code.
+      This error will not affect or change the exit code.
 
       ${details(arg1)}`
 },

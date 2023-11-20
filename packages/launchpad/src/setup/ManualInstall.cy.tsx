@@ -9,7 +9,7 @@ describe('<ManualInstall />', () => {
   it('playground', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),
@@ -24,7 +24,7 @@ describe('<ManualInstall />', () => {
 
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),
@@ -41,7 +41,7 @@ describe('<ManualInstall />', () => {
     const installCommand = `npm install -D react-scripts typescript`
 
     cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
-    cy.findByText(installCommand).should('be.visible')
+    cy.findByDisplayValue(installCommand).should('be.visible')
     cy.findByRole('button', { name: 'Copy' }).click()
     cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
 
@@ -61,7 +61,7 @@ describe('<ManualInstall />', () => {
   it('flags packages already installed', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),

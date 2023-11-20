@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DOM Fixture</title>
+  </head>
+  <body>
+    <div id="dom">
+      <style>
+
+        /* a small css reset stylesheet */
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+          font-family: inherit; /* 1 */
+          font-size: 100%; /* 1 */
+          line-height: 1.15; /* 1 */
+          margin: 2px 0;
+          /* border: 0px outset; */
+          border: 2px outset;
+          padding:0
+        }
+
+
+        button,
+        input { /* 1 */
+          overflow: visible;
+        }
+        button {
+          padding: 1px 6px;
+
+        }
+
+
+        button,
+        select { /* 1 */
+          text-transform: none;
+        }
+
+
+        button,
+        [type="button"],
+        [type="reset"],
+        [type="submit"] {
+          -webkit-appearance: button;
+        }
+
+        body {
+          display: block;
+          padding: 0;
+          margin: 8px;
+        }
+
+        :focus {
+          background-color: red;
+        }
+        #overflow-auto-container {
+          width: 100px;
+          height: 50px;
+          border: 1px solid #999;
+          overflow: auto;
+        }
+
+        #overflow-auto-container li {
+          line-height: 33px;
+        }
+
+        #animation-container {
+          overflow: hidden;
+        }
+
+        #button {
+          margin: 0;
+          padding: 0;
+          width: 100px;
+          height: 50px;
+        }
+
+        .slidein {
+          background-color: yellow;
+          border: 1px solid red;
+          width: 100px;
+          float: left;
+          margin: 0;
+          animation-timing-function: linear;
+          animation-name: slidein;
+        }
+
+        @keyframes slidein {
+          from {
+            margin-left: 100%;
+          }
+
+          to {
+            margin-left: 0%;
+          }
+        }
+
+        [contenteditable] p {
+          display: block
+        }
+
+        #contenteditable {
+          min-height: 20px;
+          min-width: 200px;
+        }
+
+        .content-box {
+          box-sizing: content-box;
+        }
+
+        #button {
+          width: 60px;
+        }
+
+      </style>
+
+      DOM Fixture
+
+      <div id="nested-find">
+        Nested Find
+      </div>
+
+      <div id="animation-container">
+      </div>
+
+      <div id="specific-contains">
+        <span>foo</span>
+        <div id="nested-div">
+          <span>foo</span>
+        </div>
+      </div>
+
+      <div id="edge-case-contains">
+        <div class="badge">5</div>
+        <div class="badge-multi">1</div>
+        <div class="badge-multi">2</div>
+        <div class="badge-multi">3</div>
+        <div class="badge-multi">4</div>
+        <span class="count">
+          <i class="fa fa-icon"></i>
+          1
+        </span>
+        <span class="count">
+          <i class="fa fa-icon"></i>
+          2
+        </span>
+        <span class="count">
+          <i class="fa fa-icon"></i>
+          3
+        </span>
+        <span>
+          <i>25</i>
+        </span>
+        <span>25</span>
+      </div>
+
+      <div id="fixed-nav-test">
+
+      </div>
+
+      <div id="wrapper">
+        <div id="upper">
+          <div class="item"><em>New</em> York</div>
+        </div>
+        <div id="lower">
+          <div class="item"><em>New</em> York</div>
+        </div>
+      </div>
+
+      <ul id="list">
+        <li class="item">li 0</li>
+        <li class="item">li 1</li>
+        <li class="item">li 2</li>
+      </ul>
+
+      <ul id="asdf">
+        <li>asdf 1</li>
+        <li>asdf 2</li>
+        <li>asdf 3</li>
+      </ul>
+
+      <ul>
+        <li><span>jkl 1</span></li>
+        <li><span>jkl 2</span></li>
+        <li><span>jkl 3</span></li>
+      </ul>
+
+      <ul>
+        <li><span>jkl 4</span></li>
+        <li><span>jkl 5</span></li>
+        <li><span>jkl 6</span></li>
+      </ul>
+
+      <div id="tabindex" tabindex="1" style="height: 50px">
+        el with tabindex
+      </div>
+
+      <button id="button">button</button>
+
+      <form id="by-id">
+        <input id="input" />
+        <input id="name" />
+        <input id="age" />
+      </form>
+
+      <form id="by-name">
+        <input name="name" />
+        <input name="age" />
+        <input type="radio" name="gender" value="male" />
+        <input type="radio" name="gender" value="female" />
+        <input type="checkbox" name="colors" value="blue" />
+        <input type="checkbox" name="colors" value="green" />
+        <input type="checkbox" name="colors" value="red" />
+        <input type="checkbox" name="dogs" value="husky" />
+        <input type="checkbox" name="dogs" value="poodle" />
+        <input type="checkbox" name="dogs" value="on" />
+        <input type="checkbox" name="dogs" data-no-value="true" />
+        <input type="tel">
+      </form>
+
+      <form>
+        <textarea id="comments"></textarea>
+      </form>
+
+      <form id="checkboxes">
+        <input type="checkbox" name="birds" value="cockatoo" checked="true" />
+        <input type="checkbox" name="birds" value="amazon" checked="true" />
+      </form>
+
+      <input type="submit" value="input contains submit" />
+
+      <form id="input-type-submit">
+        <a href="#">
+          <input type="submit" value="click me" />
+        </a>
+      </form>
+
+      <form id="button-inside-a">
+        <button>
+          <span>click button</span>
+        </button>
+      </form>
+
+      <form action="/timeout?ms=2000" id="click-me">
+        <input type="hidden" name="ms" value="100" />
+        <a href="#">
+          <span>click me 1</span>
+        </a>
+        <button>
+          <span>click me 2</span>
+        </button>
+        <input type="submit" value="click me" />
+      </form>
+
+      <form id="complex-contains">
+        <button>
+          <a href="#">
+            <label>nested contains</label>
+          </a>
+        </button>
+      </form>
+
+      <form id="button-text">
+        <a href="#">
+          <span>click button 1</span>
+        </a>
+        <button>
+          <span>click button 2</span>
+        </button>
+      </form>
+
+      <form id="anchor-text">
+        <a href="#">
+          <span>Home Page</span>
+        </a>
+      </form>
+
+      <form id="focus">
+        <div>
+          <span>
+            <input type="text" />
+            <button>focusable button</button>
+          </span>
+        </div>
+      </form>
+
+      <div id="form-submits">
+        <form id="single-input">
+          <div>
+            <input name="fname" />
+          </div>
+        </form>
+
+        <form id="no-buttons-more-than-one-input-allowing-implicit-submission">
+          <input /> <!-- default is type='text' -->
+          <input /> <!-- default is type='text' -->
+        </form>
+
+        <!-- https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission -->
+        <form id="no-buttons-and-only-one-input-allowing-implicit-submission">
+          <input type="text" />
+          <input type="hidden" />
+        </form>
+
+        <form id="one-button-type-button">
+          <input name="fname" />
+          <input name="lname" />
+          <button type="button">submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-input-submit">
+          <input name="fname" />
+          <input name="lname" />
+          <input type="submit" value="submit me" />
+        </form>
+
+        <form id="multiple-inputs-and-button-submit">
+          <input name="fname" />
+          <input name="lname" />
+          <button type="button">button</button>
+          <button type="submit">submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-reset-and-submit-buttons">
+          <input name="fname" />
+          <input name="lname" />
+          <button type="reset">reset</button>
+          <button type="submit">submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-button-with-no-type">
+          <input name="fname" />
+          <input name="lname" />
+          <button>submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-other-type-buttons-and-button-with-no-type">
+          <input name="fname" />
+          <input name="lname" />
+          <button type='button'>button</button>
+          <button type='reset'>reset</button>
+          <button>submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-multiple-submits">
+          <input name="fname" />
+          <input name="lname" />
+          <button>submit me</button>
+          <input type="submit" value ="submit me2" />
+        </form>
+
+        <form id="readonly">
+          <!-- All values are valid readonly -->
+          <input id="readonly-attr" readonly />
+          <input id="readonly-readonly" readonly="readonly" />
+          <input id="readonly-empty-str" readonly="" />
+
+          <!-- Although not strictly part of spec, Chrome respects any string -->
+          <input id="readonly-str" readonly="abc" />
+
+          <!-- readonly doesn't enforce on non typeable inputs -->
+          <input type="checkbox" id="readonly-checkbox" readonly />
+          <input type="submit" id="readonly-submit" value="readonly click" readonly />
+          <select name="hunter" readonly>
+            <option value="gon-val" readonly>gon</option>
+          </select>
+        </form>
+      </div>
+
+      <div id="input-types">
+        <input id="input-with-value" value="foo" />
+        <input id="input-without-value" />
+
+        <input id="number-with-value" type="number" value="12" />
+        <input id="number-without-value" type="number" />
+
+        <input id="email-with-value" type="email" value="brian@foo.c" />
+        <input id="email-without-value" type="email" />
+
+        <input id="password-with-value" type="password" value="pass" />
+        <input id="password-without-value" type="password" />
+
+        <input id="date-with-value" type="date" value="2016-01-01" />
+        <input id="date-without-value" type="date" />
+
+        <input id="month-with-value" type="month" value="2017-05" />
+        <input id="month-without-value" type="month" />
+
+        <input id="week-with-value" type="week" value="2017-W05" />
+        <input id="week-without-value" type="week" />
+
+        <input id="time-with-value" type="time" value="01:23:45" />
+        <input id="time-without-value" type="time" />
+
+        <input id="tel-with-value" type="tel" value="678-999-8212" />
+        <input id="text-with-value" type="text" value="foo" />
+        <input id="datetime-with-value" type="datetime" value="2018-01-01T01:00" />
+        <input id="datetime-local-with-value" type="datetime-local" value="2018-01-01T01:00" />
+        <input id="search-with-value" type="search" value="query" />
+        <input id="url-with-value" type="url" value="cool.biz" />
+
+        <div contenteditable="true"><br></div>
+        <textarea></textarea>
+        <input id="bad-type" type="asdf" />
+      </div>
+
+      <table id="table">
+        <thead>
+          header
+        </thead>
+        <tbody>
+          <tr>
+            <td>cell</td>
+          </tr>
+        <tbody>
+      </table>
+
+      <div id="sequential-clicks">
+        <a href="#">1</a>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">4</a>
+        <a href="#">5</a>
+      </div>
+
+      <select id="select-maps" name="maps">
+        <option value="de_dust2">dust2</option>
+        <option value="de_aztec">inferno</option>
+        <option value="de_nuke">nuke</option>
+        <option value="de_train">train</option>
+        <option value="cs_italy">
+            italy
+          <br>
+        </option>
+      </select>
+
+      <select name="foods">
+        <option value="Japanese">Ramen</option>
+        <option value="Ramen">Japanese</option>
+      </select>
+
+      <select name="names">
+        <option value="bm">brian m</option>
+        <option value="ss">sam s</option>
+        <option value="bm">bryan m</option>
+      </select>
+
+      <select name="movies" multiple="multiple">
+        <option value="apoc">Apocalypse Now</option>
+        <option value="thc">The Human Condition</option>
+        <option value="br">Blade Runner</option>
+        <option value="2001">2001: A Space Odyssey</option>
+        <option value="co">Clockwork Orange</option>
+        <option value="twbb">There Will Be Blood</option>
+        <option value="gone&nbsp;with&nbsp;the&nbsp;wind">Gone with the Wind</option>
+      </select>
+
+      <select name="disabled" disabled>
+        <option value="foo">foo</option>
+        <option value="bar">bar</option>
+      </select>
+
+      <fieldset disabled>
+        <select name="fieldset-disabled">
+          <option value="foo">foo</option>
+          <option value="bar">bar</option>
+        </select>
+      </fieldset>
+
+      <select name="optgroup-disabled">
+        <optgroup label="foobar" disabled>
+          <option value="foo">foo</option>
+          <option value="bar">bar</option>
+        </optgroup>
+      </select>
+
+      <select name="opt-disabled">
+        <option value="foo">foo</option>
+        <option disabled value="bar">bar</option>
+      </select>
+
+      <select name="starwars">
+        <optgroup label="Light Side">
+          <option value="luke">Luke</option>
+          <option value="leia">Leia</option>
+          <option value="rey">Rey</option>
+        </optgroup>
+        <optgroup label="Dark Side">
+          <option value="vader">Vader</option>
+          <option value="palpatine">Palpatine</option>
+          <option value="jarjar">Jar Jar</option>
+        </optgroup>
+      </select>
+
+      <select name="startrek-same">
+        <option value="same">Kirk</option>
+        <option value="same">Spock</option>
+        <option value="same">Uhura</option>
+        <option value="same">Sulu</option>
+      </select>
+
+      <select name="startrek-some-same">
+        <option value="different">Kirk</option>
+        <option value="same">Spock</option>
+        <option value="same">Uhura</option>
+        <option value="same">Sulu</option>
+      </select>
+
+      <div id="contenteditable" contenteditable="true">
+        content should be editable
+      </div>
+
+      <div id="invisible" style="display: none;">i am not visible</div>
+
+      <button class="content-box">content-box</button>
+
+      <div id="svgs">
+        <svg data-cy="line" width="300" height="200">
+          <line x1="50" y1="50" x2="250" y2="150" style="stroke:red; stroke-width:20;" />
+        </svg>
+        <svg tabindex="0" data-cy="rect" width="300" height="200">
+          <rect x="50" y="50" width="200" height="100" style="fill:orange; stroke:black; stroke-width:3;" />
+        </svg>
+        <svg data-cy="circle" width="300" height="200">
+          <circle cx="150" cy="100" r="70" style="fill:lime; stroke:black; stroke-width:3;" />
+        </svg>
+      </div>
+
+      <canvas id="canvas"></canvas>
+
+      <div id="contains-multiple-filter-match">
+        <ul class="k-group k-treeview-lines" role="group">
+          <li role="treeitem" class="k-item k-first" data-uid="82e99592-f200-4ae3-b96d-cbbd53cfd1a1">
+            <div class="k-top treeview-parent-wrapper">
+              <span class="k-icon k-minus" role="presentation"></span>
+              <span class="k-in">
+                <div class="treeview-parent pull-left">
+                  Assessments
+                </div>
+                <div class="pull-right">
+                  1 Folder Type
+                </div>
+              </span>
+            </div>
+            <ul class="k-group" role="group" style="display: block;">
+              <li role="treeitem" class="k-item k-last" data-uid="d0fd09f6-b1fd-4155-b4aa-bee3890f0029">
+                <div class="k-bot">
+                  <span class="k-in">
+                    <span class="square-small" style="background-color: #589d46;"></span>
+                    Inspection
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li role="treeitem" class="k-item k-last" data-uid="8a691b97-98b9-475b-b54f-50d8441e3a78">
+            <div class="k-bot treeview-parent-wrapper">
+              <span class="k-icon k-minus" role="presentation"></span>
+              <span class="k-in">
+                <div class="treeview-parent pull-left">
+                  Folders
+                </div>
+                <div class="pull-right">
+                  2 Folder Types
+                </div>
+              </span>
+            </div>
+            <ul class="k-group" role="group" style="display: block;">
+              <li role="treeitem" class="k-item active" data-uid="bfc39753-ff6b-4237-a53c-e62c4161ba99" aria-selected="true" id="treeview_tv_active">
+                <div class="k-top">
+                  <span class="k-state-selected k-in">
+                    <span class="square-small" style="background-color: #705092;"></span>
+                    Maintenance
+                  </span>
+                </div>
+              </li>
+              <li role="treeitem" class="k-item k-last" data-uid="27acc697-71da-4c19-a755-78f93931303b">
+                <div class="k-bot">
+                  <span class="k-in">
+                    <span class="square-small" style="background-color: #000000;"></span>
+                    Quality Control
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <foobarbazquux>custom element</foobarbazquux>
+      <div id="ajax-get-container">
+        <button id="get-json">get ajax</button>
+      </div>
+      <span id="not-hidden">my hidden content</span>
+      <div id="three-buttons">
+        <button>1</button>
+        <button>2</button>
+        <button>3</button>
+      </div>
+      <ul id="overflow-auto-container">
+        <li>foo</li>
+        <li>bar</li>
+        <li>baz</li>
+        <li>quux</li>
+      </ul>
+
+      <div id="overflow-link" style="width:260px"><p>
+
+        this is some text that will <span class="wrapped" style="color:rgb(0, 0, 192)">wrap to a newline</span>
+        and cause the click to miss
+
+      </p>
+      </div>
+
+      <div style="width: 30px; line-height: 2;">
+        <a href="#" id="overflow-link-width">
+          <i style="display: inline-block;"></i>
+          foofoofoofoofoo bar
+        </a>
+      </div>
+
+      <span id="opacity-0" style="opacity: 0;">opacity 0</span>
+      <input type="checkbox" style="opacity: 0;" name="opacity" value="val" />
+      <div style="opacity: 0;">
+        <span id="opacity-0-parent">parent opacity 0</span>
+      </div>
+      <div style="height:25px; width:25px; overflow: hidden;">
+        <span id="opacity-0-hidden" style="opacity: 0; margin-left: 30px;">opacity 0</span>
+      </div>
+
+      <div id="massively-long-div" style="height: 500px; width: 200px; background-color: gray;"></div>
+      <div id="form-header-region">
+        <div>
+          <div id="header" class="navbar navbar-green">
+            <div class="navbar-header">
+              <ul>
+                <li>
+                  <span id="homebutton" data-js="done" class="btn btn-no-bg full-screen-btn pull-left navbar-btn" style="display: block;"><i class="fa fa-arrow-circle-o-left"></i> Done</span>
+                </li>
+                <li>
+                  <span id="backbutton" data-js="back" class="btn btn-no-bg full-screen-btn pull-left navbar-btn" style="display: none;"><i class="fa fa-caret-left"></i> Back</span>
+                </li>
+              </ul>
+              <div class="form-template-name-wrapper">
+                <div class="form-template-name">
+                  EyeProtection -
+                  129083
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="diff-els-1">
+        <a href="">Sakura</a>
+        <a href="">Naruto</a>
+        <button>Sarada</button>
+        <button>Boruto</button>
+      </div>
+      <div>
+        iframe:<br>
+        <iframe id="iframe" src="/fixtures/generic.html"></iframe>
+      </div>
+      <div id="does-not-wrap-input">Text</div>
+      <div id="input-wrap">
+        <input style="width:100%" />
+      </div>
+      <div>
+        Cross domain iframe:<br>
+        <iframe id="iframe-cross-domain" src="http://localhost:3501/fixtures/generic.html"></iframe>
+      </div>
+    </div>
+  </body>
+</html>

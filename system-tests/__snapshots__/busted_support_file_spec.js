@@ -23,21 +23,7 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/support/e2e.js
 Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
-Looked for and couldn't find the file at the following paths:
-[/foo/bar/.projects/busted-support-file/cypress/support/package.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
- @ ./cypress/support/e2e.js 3:0-27
- 
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
@@ -56,16 +42,10 @@ Fix the error in your code and re-run your tests.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
 
 
 ====================================================================================================

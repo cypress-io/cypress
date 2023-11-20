@@ -23,11 +23,11 @@ describe('cli', () => {
 
   beforeEach(() => {
     logger.reset()
-    sinon.stub(process, 'exit')
+    sinon.stub(process, 'exit').returns(null)
 
     os.platform.returns('darwin')
-    // sinon.stub(util, 'exit')
-    sinon.stub(util, 'logErrorExit1')
+    sinon.stub(util, 'logErrorExit1').returns(null)
+
     sinon.stub(util, 'pkgBuildInfo').returns({ stable: true })
     this.exec = (args) => {
       const cliArgs = `node test ${args}`.split(' ')
@@ -136,189 +136,169 @@ describe('cli', () => {
     })
   })
 
-  context('cypress version', () => {
-    let restoreEnv
+  ;['--version', '-v', 'version'].forEach((versionCommand) => {
+    context(`cypress ${versionCommand}`, () => {
+      let restoreEnv
 
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
-    })
+      afterEach(() => {
+        if (restoreEnv) {
+          restoreEnv()
+          restoreEnv = null
+        }
+      })
 
-    const binaryDir = '/binary/dir'
+      const binaryDir = '/binary/dir'
 
-    beforeEach(() => {
-      sinon.stub(state, 'getBinaryDir').returns(binaryDir)
-    })
-
-    describe('individual package versions', () => {
       beforeEach(() => {
+        sinon.stub(state, 'getBinaryDir').returns(binaryDir)
+      })
+
+      describe('individual package versions', () => {
+        beforeEach(() => {
+          sinon.stub(util, 'pkgVersion').returns('1.2.3')
+          sinon
+          .stub(state, 'getBinaryPkgAsync')
+          .withArgs(binaryDir)
+          .resolves({
+            version: 'X.Y.Z',
+            electronVersion: '10.9.8',
+            electronNodeVersion: '7.7.7',
+          })
+        })
+
+        it('reports just the package version', (done) => {
+          this.exec(`${versionCommand} --component package`)
+          process.exit.callsFake((exitCode) => {
+            expect(logger.print()).to.equal('1.2.3')
+            done()
+          })
+        })
+
+        it('reports just the binary version', (done) => {
+          this.exec(`${versionCommand} --component binary`)
+          process.exit.callsFake(() => {
+            expect(logger.print()).to.equal('X.Y.Z')
+            done()
+          })
+        })
+
+        it('reports just the electron version', (done) => {
+          this.exec(`${versionCommand} --component electron`)
+          process.exit.callsFake(() => {
+            expect(logger.print()).to.equal('10.9.8')
+            done()
+          })
+        })
+
+        it('reports just the bundled Node version', (done) => {
+          this.exec(`${versionCommand} --component node`)
+          process.exit.callsFake(() => {
+            expect(logger.print()).to.equal('7.7.7')
+            done()
+          })
+        })
+
+        it('handles not found bundled Node version', (done) => {
+          state.getBinaryPkgAsync
+          .withArgs(binaryDir)
+          .resolves({
+            version: 'X.Y.Z',
+            electronVersion: '10.9.8',
+          })
+
+          this.exec(`${versionCommand} --component node`)
+          process.exit.callsFake(() => {
+            expect(logger.print()).to.equal('not found')
+            done()
+          })
+        })
+      })
+
+      it('reports package version', (done) => {
         sinon.stub(util, 'pkgVersion').returns('1.2.3')
         sinon
         .stub(state, 'getBinaryPkgAsync')
         .withArgs(binaryDir)
         .resolves({
           version: 'X.Y.Z',
-          electronVersion: '10.9.8',
-          electronNodeVersion: '7.7.7',
         })
-      })
 
-      it('reports just the package version', (done) => {
-        this.exec('version --component package')
+        this.exec(versionCommand)
         process.exit.callsFake(() => {
-          expect(logger.print()).to.equal('1.2.3')
+          snapshot('cli version and binary version 1', logger.print(), { allowSharedSnapshot: true })
           done()
         })
       })
 
-      it('reports just the binary version', (done) => {
-        this.exec('version --component binary')
+      it('reports package and binary message', (done) => {
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
+
+        this.exec(versionCommand)
         process.exit.callsFake(() => {
-          expect(logger.print()).to.equal('X.Y.Z')
+          snapshot('cli version and binary version 2', logger.print(), { allowSharedSnapshot: true })
           done()
         })
       })
 
-      it('reports just the electron version', (done) => {
-        this.exec('version --component electron')
-        process.exit.callsFake(() => {
-          expect(logger.print()).to.equal('10.9.8')
-          done()
-        })
-      })
-
-      it('reports just the bundled Node version', (done) => {
-        this.exec('version --component node')
-        process.exit.callsFake(() => {
-          expect(logger.print()).to.equal('7.7.7')
-          done()
-        })
-      })
-
-      it('handles not found bundled Node version', (done) => {
-        state.getBinaryPkgAsync
-        .withArgs(binaryDir)
-        .resolves({
+      it('reports electron and node message', (done) => {
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon.stub(state, 'getBinaryPkgAsync').resolves({
           version: 'X.Y.Z',
-          electronVersion: '10.9.8',
+          electronVersion: '10.10.88',
+          electronNodeVersion: '11.10.3',
         })
 
-        this.exec('version --component node')
+        this.exec(versionCommand)
         process.exit.callsFake(() => {
-          expect(logger.print()).to.equal('not found')
+          snapshot('cli version with electron and node 1', logger.print(), { allowSharedSnapshot: true })
           done()
         })
       })
-    })
 
-    it('reports package version', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon
-      .stub(state, 'getBinaryPkgAsync')
-      .withArgs(binaryDir)
-      .resolves({
-        version: 'X.Y.Z',
+      it('reports package and binary message with npm log silent', (done) => {
+        restoreEnv = mockedEnv({
+          npm_config_loglevel: 'silent',
+        })
+
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
+
+        this.exec(versionCommand)
+        process.exit.callsFake(() => {
+          // should not be empty!
+          snapshot('cli version and binary version with npm log silent', logger.print(), { allowSharedSnapshot: true })
+          done()
+        })
       })
 
-      this.exec('version')
-      process.exit.callsFake(() => {
-        snapshot('cli version and binary version 1', logger.print())
-        done()
-      })
-    })
+      it('reports package and binary message with npm log warn', (done) => {
+        restoreEnv = mockedEnv({
+          npm_config_loglevel: 'warn',
+        })
 
-    it('reports package and binary message', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon.stub(state, 'getBinaryPkgAsync').resolves({
+          version: 'X.Y.Z',
+        })
 
-      this.exec('version')
-      process.exit.callsFake(() => {
-        snapshot('cli version and binary version 2', logger.print())
-        done()
-      })
-    })
-
-    it('reports electron and node message', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves({
-        version: 'X.Y.Z',
-        electronVersion: '10.10.88',
-        electronNodeVersion: '11.10.3',
-      })
-
-      this.exec('version')
-      process.exit.callsFake(() => {
-        snapshot('cli version with electron and node 1', logger.print())
-        done()
-      })
-    })
-
-    it('reports package and binary message with npm log silent', (done) => {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'silent',
-      })
-
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
-
-      this.exec('version')
-      process.exit.callsFake(() => {
+        this.exec(versionCommand)
+        process.exit.callsFake(() => {
         // should not be empty!
-        snapshot('cli version and binary version with npm log silent', logger.print())
-        done()
-      })
-    })
-
-    it('reports package and binary message with npm log warn', (done) => {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'warn',
+          snapshot('cli version and binary version with npm log warn', logger.print(), { allowSharedSnapshot: true })
+          done()
+        })
       })
 
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves({
-        version: 'X.Y.Z',
-      })
+      it('handles non-existent binary', (done) => {
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
-      this.exec('version')
-      process.exit.callsFake(() => {
-        // should not be empty!
-        snapshot('cli version and binary version with npm log warn', logger.print())
-        done()
-      })
-    })
-
-    it('handles non-existent binary version', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
-
-      this.exec('version')
-      process.exit.callsFake(() => {
-        snapshot('cli version no binary version 1', logger.print())
-        done()
-      })
-    })
-
-    it('handles non-existent binary --version', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
-
-      this.exec('--version')
-      process.exit.callsFake(() => {
-        snapshot('cli --version no binary version 1', logger.print())
-        done()
-      })
-    })
-
-    it('handles non-existent binary -v', (done) => {
-      sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
-
-      this.exec('-v')
-      process.exit.callsFake(() => {
-        snapshot('cli -v no binary version 1', logger.print())
-        done()
+        this.exec(versionCommand)
+        process.exit.callsFake(() => {
+          snapshot('cli version no binary version 1', logger.print(), { allowSharedSnapshot: true })
+          done()
+        })
       })
     })
   })
@@ -493,6 +473,26 @@ describe('cli', () => {
       this.exec('run --ci-build-id "123" --group "staging"')
       expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
     })
+
+    it('calls run with --auto-cancel-after-failures', () => {
+      this.exec('run --auto-cancel-after-failures 4')
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: '4' })
+    })
+
+    it('calls run with --auto-cancel-after-failures with false', () => {
+      this.exec('run --auto-cancel-after-failures false')
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
+    })
+
+    it('calls run with --runner-ui', () => {
+      this.exec('run --runner-ui')
+      expect(run.start).to.be.calledWith({ runnerUi: true })
+    })
+
+    it('calls run with --no-runner-ui', () => {
+      this.exec('run --no-runner-ui')
+      expect(run.start).to.be.calledWith({ runnerUi: false })
+    })
   })
 
   context('cypress open', () => {
@@ -635,7 +635,7 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('spawns server with correct args for depricated component-testing command', () => {
+    it('spawns server with correct args for deprecated component-testing command', () => {
       this.exec('open-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
@@ -647,7 +647,7 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('runs server with correct args for depricated component-testing command', () => {
+    it('runs server with correct args for deprecated component-testing command', () => {
       this.exec('run-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')

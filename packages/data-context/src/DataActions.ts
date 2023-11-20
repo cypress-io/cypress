@@ -10,8 +10,14 @@ import {
   BrowserActions,
   DevActions,
   AuthActions,
+  ServersActions,
+  CohortsActions,
+  CodegenActions,
+  CloudProjectActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
+import { EventCollectorActions } from './actions/EventCollectorActions'
+import { NotificationActions } from './actions/NotificationActions'
 import { VersionsActions } from './actions/VersionsActions'
 import { cached } from './util'
 
@@ -74,7 +80,37 @@ export class DataActions {
   }
 
   @cached
+  get servers () {
+    return new ServersActions(this.ctx)
+  }
+
+  @cached
   get versions () {
     return new VersionsActions(this.ctx)
+  }
+
+  @cached
+  get eventCollector () {
+    return new EventCollectorActions(this.ctx)
+  }
+
+  @cached
+  get cohorts () {
+    return new CohortsActions(this.ctx)
+  }
+
+  @cached
+  get codegen () {
+    return new CodegenActions(this.ctx)
+  }
+
+  @cached
+  get notification () {
+    return new NotificationActions(this.ctx)
+  }
+
+  @cached
+  get cloudProject () {
+    return new CloudProjectActions(this.ctx)
   }
 }

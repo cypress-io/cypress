@@ -1,39 +1,35 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container"
+    class="pt-[8px] specs-list-container"
     data-cy="specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
-      class="children:h-30px"
+      class="children:h-[30px]"
     >
       <li
         v-for="row in list"
         :key="row.index"
-        class="
-        cursor-pointer
-        flex
-        group
-        relative"
+        class="relative flex cursor-pointer  group"
         data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
-        @click.self="submit(row.data, row.index)"
+        @click.self="submitOrToggle(row.data, row.index)"
       >
-        <RouterLink
+        <component
+          :is="row.data.isLeaf ? RouterLink : 'button'"
           :ref="el => setItemRef(el, row.index)"
           :key="row.data.data?.absolute"
-          :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-          class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
+          class="border-transparent outline-none border w-full group focus-visible:bg-gray-900 before:border-r-4 before:border-transparent before:h-[28px] before:rounded-r-[4px] before:absolute before:left-[-4px] before:w-[8px]"
           :class="{
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
-          :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :to="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
+          :aria-expanded="row.data.isLeaf ? null : row.data.expanded"
           @focus="resetFocusIfNecessary(row, row.index)"
-          @click.capture.prevent="submit(row.data, row.index)"
-          @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
+          @click.prevent="submitOrToggle(row.data, row.index)"
           @keydown.left.right.prevent.stop="toggle(row.data, row.index)"
         >
           <SpecFileItem
@@ -41,8 +37,8 @@
             :file-name="row.data.data?.fileName || row.data.name"
             :extension="row.data.data?.specFileExtension || ''"
             :selected="isCurrentSpec(row.data)"
-            :indexes="row.data?.data?.fileIndexes"
-            class="pl-22px"
+            :indexes="row.data.highlightIndexes"
+            class="pl-[22px]"
             data-cy="spec-file-item"
           />
           <DirectoryItem
@@ -50,27 +46,38 @@
             class="children:truncate"
             :name="row.data.name"
             :expanded="treeSpecList[row.index].expanded.value"
-            :indexes="getDirIndexes(row.data)"
+            :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
-          />
-        </RouterLink>
+          >
+            <template #run-all-specs>
+              <InlineRunAllSpecs
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+                :directory="row.data.name"
+                class="flex items-center justify-center h-full opacity-0 run-all"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+              />
+            </template>
+          </DirectoryItem>
+        </component>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree, getDirIndexes } from './spec-utils'
-import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
+import { UseCollapsibleTreeNode, useCollapsibleTree, SpecTreeNode, FuzzyFoundSpec, buildSpecTree } from './tree/useCollapsibleTree'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
-import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
-import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
+import { useVirtualList } from './tree/useVirtualList'
+import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
+import { useStudioStore } from '../store/studio-store'
+import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
+import { posixify } from '../paths'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -114,7 +121,12 @@ const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
   row.toggle()
 }
 
-const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+const submitOrToggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+  // If the user selects a new spec while in studio mode, turn studio mode off
+  const studioStore = useStudioStore()
+
+  studioStore.cancel()
+
   activeItem.value = idx
 
   if (row.isLeaf) {
@@ -122,7 +134,7 @@ const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
       return
     }
 
-    router.push({ path: '/specs/runner', query: { file: row.data.relative.replace(/\\/g, '/') } })
+    router.push({ path: '/specs/runner', query: { file: posixify(row.data.relative) } })
   } else {
     row.toggle()
   }
@@ -150,6 +162,12 @@ const resetFocusIfNecessary = (row, index) => {
   }
 }
 
+const runAllSpecsStore = useRunAllSpecsStore()
+
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
+
 </script>
 
 <style scoped>
@@ -161,6 +179,11 @@ a::before {
 /** Header is 64px, padding-top is 8px **/
 .specs-list-container {
   height: calc(100vh - 64px - 8px);
+}
+
+/** For run all specs group hover to work */
+[data-cy=spec-row-item]:hover .run-all, [data-cy=spec-row-item]:focus-within .run-all {
+  opacity: 1 !important;
 }
 
 </style>

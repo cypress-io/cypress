@@ -98,6 +98,27 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(checkbox).check()
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener = _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').check().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     // readonly should only be limited to inputs, not checkboxes
     it('can check readonly checkboxes', () => {
       cy.get('#readonly-checkbox').check().then(($checkbox) => {
@@ -272,8 +293,9 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    // TODO(webkit): fix+unskip
     // https://github.com/cypress-io/cypress/issues/4233
-    it('can check an element behind a sticky header', () => {
+    it('can check an element behind a sticky header', { browser: '!webkit' }, () => {
       cy.viewport(400, 400)
       cy.visit('./fixtures/sticky-header.html')
       cy.get(':checkbox:first').check()
@@ -301,24 +323,27 @@ describe('src/cy/commands/actions/check', () => {
     })
 
     it('can set options.waitForAnimations', () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+      let retries = 0
 
-      cy.get(':checkbox:first').check({ waitForAnimations: false }).then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      cy.on('command:retry', () => {
+        retries += 1
+      })
+
+      cy.get(':checkbox:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).check({ waitForAnimations: false }).then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
     it('can set options.animationDistanceThreshold', () => {
-      const $btn = cy.$$(':checkbox:first')
+      let retries = 0
 
-      cy.spy(cy, 'ensureElementIsNotAnimating')
-      cy.get(':checkbox:first').check({ animationDistanceThreshold: 1000 }).then(() => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
+      cy.on('command:retry', () => {
+        retries += 1
+      })
 
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(1000)
+      cy.get(':checkbox:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).check({ animationDistanceThreshold: 1000 }).then(() => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        expect(retries).to.eq(1)
       })
     })
 
@@ -359,7 +384,7 @@ describe('src/cy/commands/actions/check', () => {
         })
       })
 
-      it('eventually passes the assertion on multiple :checkboxs', () => {
+      it('eventually passes the assertion on multiple :checkboxes', () => {
         $(':checkbox').click(function () {
           _.delay(() => {
             $(this).addClass('checked')
@@ -436,7 +461,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(checked).to.eq(1)
-          expect(err.message).to.include('`cy.check()` failed because this element')
+          expect(err.message).to.include('`cy.check()` failed because the page updated')
 
           done()
         })
@@ -573,7 +598,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').check().should('have.class', 'checked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').check(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })
@@ -732,12 +757,13 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('check')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('check')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -749,11 +775,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -764,11 +793,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This radio was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This radio was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -781,11 +813,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -795,7 +830,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
@@ -902,16 +937,19 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
-    it('can forcibly click even when being covered by another element', (done) => {
+    it('can forcibly click even when being covered by another element', () => {
+      let clicked = false
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
 
       $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
 
       checkbox.on('click', () => {
-        done()
+        clicked = true
       })
 
-      cy.get('#checkbox-covered-in-span').uncheck({ force: true })
+      cy.get('#checkbox-covered-in-span').uncheck({ force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('passes timeout and interval down to click', (done) => {
@@ -1075,7 +1113,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(unchecked).to.eq(1)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element')
+          expect(err.message).to.include('`cy.uncheck()` failed because the page updated')
 
           done()
         })
@@ -1151,7 +1189,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').uncheck(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })
@@ -1268,12 +1306,13 @@ describe('src/cy/commands/actions/check', () => {
         cy.get('[name=colors][value=blue]').uncheck().then(function ($input) {
           const { lastLog } = this
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('uncheck')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('uncheck')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -1285,11 +1324,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            name: 'uncheck',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1301,11 +1343,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            name: 'uncheck',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1315,7 +1360,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })

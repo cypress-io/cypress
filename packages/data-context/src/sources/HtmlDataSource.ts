@@ -6,6 +6,7 @@
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
 import _ from 'lodash'
+import { telemetry } from '@packages/telemetry'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
@@ -42,7 +43,7 @@ export class HtmlDataSource {
     throw err
   }
 
-  getPropertiesFromLegacyConfig (cfg: any) {
+  getPropertiesFromServerConfig (cfg: any = {}) {
     const keys = [
       'baseUrl',
       'browserUrl',
@@ -53,18 +54,20 @@ export class HtmlDataSource {
       'testingType',
       'componentTesting',
       'reporterUrl',
-      'xhrUrl',
       'namespace',
       'socketIoRoute',
+      'protocolEnabled',
+      'hideCommandLog',
+      'hideRunnerUi',
     ]
 
     return _.pick(cfg, keys)
   }
 
   async makeServeConfig () {
-    const propertiesFromLegacyConfig = this.getPropertiesFromLegacyConfig(this.ctx._apis.projectApi.getConfig() ?? {})
+    const propertiesFromServerConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
 
-    let cfg = { ...propertiesFromLegacyConfig }
+    let cfg = { ...propertiesFromServerConfig }
 
     try {
       cfg = {
@@ -91,7 +94,8 @@ export class HtmlDataSource {
       projectName: this.ctx.lifecycleManager.projectTitle,
       namespace: cfg.namespace || '__cypress-string',
       base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
-      hideCommandLog: cfg.env?.NO_COMMAND_LOG === 1,
+      hideCommandLog: cfg.hideCommandLog,
+      hideRunnerUi: cfg.hideRunnerUi,
     }
   }
 
@@ -120,10 +124,8 @@ export class HtmlDataSource {
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
-          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-      ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';`
-      : ''
-          }
+          ${telemetry.isEnabled() ? `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}` : ''}
+          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
         </script>
     `)
   }

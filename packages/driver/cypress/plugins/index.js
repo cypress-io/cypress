@@ -7,37 +7,54 @@ const fs = require('fs-extra')
 const Promise = require('bluebird')
 const wp = require('@cypress/webpack-preprocessor')
 const Jimp = require('jimp')
+const webpackConfig = require('@packages/runner/webpack.config.ts')
 
-process.env.NO_LIVERELOAD = '1'
-const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
+async function getWebpackOptions () {
+  process.env.NO_LIVERELOAD = '1'
+  const opts = await webpackConfig.default()
 
-// set mode to development which overrides
-// the 'none' value of the base webpack config
-// https://webpack.js.org/configuration/mode/
-webpackOptions.mode = 'development'
+  const webpackOptions = opts[0]
 
-// remove the evalDevToolPlugin which comes from the base
-// webpack config - otherwise we won't get code frames
-webpackOptions.plugins = _.reject(webpackOptions.plugins, { evalDevToolPlugin: true })
+  // set mode to development which overrides
+  // the 'none' value of the base webpack config
+  // https://webpack.js.org/configuration/mode/
+  webpackOptions.mode = 'development'
 
-const babelLoader = _.find(webpackOptions.module.rules, (rule) => {
-  return _.includes(rule.use.loader, 'babel-loader')
-})
+  // remove the evalDevToolPlugin which comes from the base
+  // webpack config - otherwise we won't get code frames
+  webpackOptions.plugins = _.reject(webpackOptions.plugins, { evalDevToolPlugin: true })
 
-// get rid of prismjs plugin. the driver doesn't need it
-babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plugin) => {
-  return _.includes(plugin[0], 'babel-plugin-prismjs')
-})
+  const babelLoader = _.find(webpackOptions.module.rules, (rule) => {
+    return _.includes(rule.use.loader, 'babel-loader')
+  })
 
+  // get rid of prismjs plugin. the driver doesn't need it
+  babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plugin) => {
+    return _.includes(plugin[0], 'babel-plugin-prismjs')
+  })
+
+  return webpackOptions
+}
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on, config) => {
+module.exports = async (on, config) => {
+  const webpackOptions = await getWebpackOptions()
+
   on('file:preprocessor', wp({ webpackOptions }))
 
   on('task', {
     'return:arg' (arg) {
       return arg
+    },
+    'return:foo' () {
+      return 'foo'
+    },
+    'return:bar' () {
+      return 'bar'
+    },
+    'return:baz' () {
+      return 'baz'
     },
     'cypress:env' () {
       return process.env['CYPRESS']
@@ -52,13 +69,13 @@ module.exports = (on, config) => {
     'wait' () {
       return Promise.delay(2000)
     },
-    'create:long:file' () {
+    async 'create:long:file' () {
       const filePath = path.join(__dirname, '..', '_test-output', 'longtext.txt')
       const longText = _.times(2000).map(() => {
         return _.times(20).map(() => Math.random()).join(' ')
       }).join('\n\n')
 
-      fs.outputFileSync(filePath, longText)
+      await fs.outputFile(filePath, longText)
 
       return null
     },

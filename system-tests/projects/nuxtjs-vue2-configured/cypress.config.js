@@ -1,10 +1,11 @@
-const { defineConfig } = require("cypress")
-const { devServer } = require("@cypress/webpack-dev-server")
-const { getWebpackConfig } = require("nuxt")
+const { defineConfig } = require('cypress')
+const { devServer } = require('@cypress/webpack-dev-server')
+const { getWebpackConfig } = require('nuxt')
 
 module.exports = defineConfig({
   component: {
-    async devServer(cypressDevServerConfig, devServerConfig) {
+    experimentalSingleTabRunMode: true,
+    async devServer (cypressDevServerConfig, devServerConfig) {
       const webpackConfig = await getWebpackConfig()
 
       // Whenever we need to test Vue 2, make sure to add this to the
@@ -15,8 +16,8 @@ module.exports = defineConfig({
         ...webpackConfig.resolve,
         alias: {
           ...(webpackConfig.resolve?.alias ?? {}),
-          'vue': require.resolve('vue')
-        }
+          'vue': require.resolve('vue'),
+        },
       }
 
       return devServer({ ...cypressDevServerConfig, webpackConfig })

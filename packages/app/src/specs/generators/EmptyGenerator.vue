@@ -1,13 +1,13 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col grow justify-between">
     <template v-if="!result">
-      <div class="p-24px w-720px">
+      <div class="p-[24px] w-[720px]">
         <form @submit.prevent="createSpec">
           <Input
             v-model="specFile"
             :input-ref="inputRefFn"
-            :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-            :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :placeholder="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
+            :aria-label="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
             :has-error="hasError"
           >
             <template #prefix>
@@ -26,22 +26,22 @@
         >
           <div
             v-if="hasError"
-            class="rounded flex font-medium bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px items-center"
+            class="rounded flex font-medium bg-error-100 mt-[16px] p-[14px] ring-2 ring-error-100 text-error-600 gap-[8px] items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
             <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
           </div>
           <div
             v-else-if="showExtensionWarning && props.type === 'e2e'"
-            class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
+            class="rounded flex font-medium bg-warning-100 mt-[16px] p-[16px] text-warning-600 gap-[8px] items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-            {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
+            {{ t('createSpec.e2e.importTemplateSpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-[2px] px-[8px] text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div
             v-if="hasError"
-            class="mt-16px"
+            class="mt-[16px]"
           >
             <SpecPatterns
               :gql="props.gql"
@@ -52,7 +52,7 @@
       </div>
       <StandardModalFooter
         v-if="!result"
-        class="flex gap-16px"
+        class="flex gap-[16px]"
       >
         <Button
           size="lg"
@@ -87,18 +87,18 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex gap-16px items-center"
+        class="flex gap-[16px] items-center"
       >
         <router-link
           class="outline-none"
           :to="{
             name: 'SpecRunner',
             query: {
-              file: result.file.relative?.replace(/\\/g, '/')
+              file: posixify(result.file.relative)
             },
             params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
-                shouldShowTroubleRenderingAlert: true
+                shouldShowTroubleRenderingAlert: 'true'
               }
               : undefined
           }"
@@ -106,7 +106,7 @@
           <Button
             size="lg"
             :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-16px h-16px icon-dark-white"
+            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
@@ -115,7 +115,7 @@
         <Button
           size="lg"
           :prefix-icon="PlusButtonIcon"
-          prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+          prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
           variant="outline"
           @click="emits('restart')"
         >
@@ -140,13 +140,13 @@ import StandardModalFooter from '@packages/frontend-shared/src/components/Standa
 import GeneratorSuccess from './GeneratorSuccess.vue'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
+import { posixify } from '../../paths'
 
 const props = defineProps<{
   title: string
   gql: EmptyGeneratorFragment
   type: 'e2e' | 'component' | 'componentEmpty'
   specFileName: string
-  erroredCodegenCandidate?: string
   /** is there any other generator available when clicking "Back" */
   otherGenerators: boolean
 }>()
@@ -168,8 +168,8 @@ mutation EmptyGenerator_MatchSpecFile($specFile: String!) {
 `
 
 gql`
-mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $erroredCodegenCandidate: String) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, erroredCodegenCandidate: $erroredCodegenCandidate) {
+mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
   }
 }`
@@ -230,7 +230,7 @@ const createSpec = async () => {
     return
   }
 
-  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type, erroredCodegenCandidate: props.erroredCodegenCandidate ?? null })
+  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type })
 
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }
@@ -241,7 +241,7 @@ watch(specFile, async (value) => {
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 }, { immediate: true })
 
-title.value = t('createSpec.e2e.importEmptySpec.chooseFilenameHeader')
+title.value = t('createSpec.e2e.importTemplateSpec.chooseFilenameHeader')
 
 const showExtensionWarning = computed(() => isValidSpecFile.value && !specFile.value.includes('.cy'))
 const recommendedFileName = computed(() => {
@@ -250,6 +250,6 @@ const recommendedFileName = computed(() => {
   return `{filename}.cy.${split[split.length - 1]}`
 })
 
-const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importEmptySpec.invalidSpecWarning') : t('createSpec.component.importEmptySpec.invalidComponentWarning'))
+const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importTemplateSpec.invalidSpecWarning') : t('createSpec.component.importTemplateSpec.invalidComponentWarning'))
 
 </script>

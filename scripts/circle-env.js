@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const fs = require('fs').promises
 
 async function loadInternalTaskData () {
@@ -21,8 +20,16 @@ async function checkCanaries () {
 
   const circleEnv = await readCircleEnv()
 
-  if (Object.keys(circleEnv).length === 0) {
-    return console.warn('CircleCI env empty, assuming this is a contributor PR. Not checking for canary variables.')
+  // if the config contains only CIRCLE_PLUGIN_TEST, treat the config as if it were empty
+  const containsOnlyAllowedEnvs = () => {
+    const circleEnvKeys = Object.keys(circleEnv)
+
+    return circleEnvKeys.length === 0 || (circleEnvKeys.length === 1 &&
+      circleEnvKeys.includes('CIRCLE_PLUGIN_TEST'))
+  }
+
+  if (containsOnlyAllowedEnvs()) {
+    return console.warn('CircleCI env empty or contains only allowed envs, assuming this is a contributor PR. Not checking for canary variables.')
   }
 
   if (!circleEnv.MAIN_CANARY) throw new Error('Missing MAIN_CANARY.')
@@ -43,8 +50,8 @@ async function readCircleEnv () {
     if (!circleEnv) throw new Error('No Environment object was found.')
 
     // last-ditch effort to check that an empty circle env is accurately reflecting process.env (external PRs)
-    if (process.env.CACHE_VERSION && Object.keys(circleEnv).length === 0) {
-      throw new Error('CACHE_VERSION is set, but circleEnv is empty')
+    if (process.env.COPY_CIRCLE_ARTIFACTS && Object.keys(circleEnv).length === 0) {
+      throw new Error('COPY_CIRCLE_ARTIFACTS is set, but circleEnv is empty')
     }
 
     return circleEnv

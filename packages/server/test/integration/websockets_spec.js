@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const socketIo = require(`@packages/socket/lib/browser`)
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { Automation } = require(`../../lib/automation`)
 const Fixtures = require('@tooling/system-tests')
@@ -38,7 +38,7 @@ describe('Web Sockets', () => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
-      this.server = new ServerE2E()
+      this.server = new ServerBase()
 
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
@@ -285,22 +285,24 @@ describe('Web Sockets', () => {
           })
         })
 
-        it('fails to connect via polling', function (done) {
-          this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
-            path: this.cfg.socketIoRoute,
-            transports: ['polling'],
-            rejectUnauthorized: false,
-            reconnection: false,
-          })
+        // TODO: this test will currently fail because we allow polling in development mode
+        // for webkit support. Restore this test before WebKit is available in production.
+        // it('fails to connect via polling', function (done) {
+        //   this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
+        //     path: this.cfg.socketIoRoute,
+        //     transports: ['polling'],
+        //     rejectUnauthorized: false,
+        //     reconnection: false,
+        //   })
 
-          this.wsClient.on('connect', () => {
-            return done(new Error('should not have been able to connect'))
-          })
+        //   this.wsClient.on('connect', () => {
+        //     return done(new Error('should not have been able to connect'))
+        //   })
 
-          return this.wsClient.io.on('error', () => {
-            return done()
-          })
-        })
+        //   return this.wsClient.io.on('error', () => {
+        //     return done()
+        //   })
+        // })
       })
     }
 

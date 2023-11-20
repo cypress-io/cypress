@@ -123,17 +123,64 @@ export const create = (state: StateFunc) => ({
     const $focused = this.getFocused(el.ownerDocument)
 
     let hasFocused = false
+    let onFocusCapture
 
     // we need to bind to the focus event here
     // because some browsers will not ever fire
     // the focus event if the window itself is not
     // currently focused
     const cleanup = () => {
+      if (onFocusCapture) {
+        $elements.callNativeMethod(el, 'removeEventListener', 'focus', onFocusCapture, { capture: true })
+      }
+
       return $elements.callNativeMethod(el, 'removeEventListener', 'focus', onFocus)
     }
 
     const onFocus = () => {
       return hasFocused = true
+    }
+
+    if (Cypress.isBrowser('webkit')) {
+      // By default, WebKit will select the contents of an input element when the input is focused.
+      // This is problematic, as we use the existence of any selection to determine whether
+      // we adjust the input's cursor and prepare the input for receiving additional content.
+      // Without intervention, we will always interpret this default selection as a user-performed selection
+      // and persist it, leaving the selection contents to be overwritten rather than appended to
+      // on subsequent actions.
+      //
+      // In order to avoid this behavior, we use a focus event during the capture phase to set
+      // our own initial blank selection. This short-circuits WebKit's default behavior and ensures
+      // that any user-performed selections performed during the focus event's bubble phase are still applied.
+
+      onFocusCapture = (event: FocusEvent) => {
+        const eventTarget = event.currentTarget as HTMLInputElement
+
+        if (!eventTarget.setSelectionRange) {
+          return
+        }
+
+        try {
+          // Prior to being focused, the element's selectionStart/End will be at 0.
+          // Even so, we need to explicitly call setSelectionRange here to prevent WebKit
+          // from selecting the contents after being focused.
+          //
+          // By re-setting the selection at the current start/end values,
+          // we ensure that any selection values set by previous event handlers
+          // are persisted.
+          eventTarget.setSelectionRange(
+            eventTarget.selectionStart,
+            eventTarget.selectionEnd,
+          )
+        } catch (e) {
+          // Some input types do not support selections and will throw when
+          // setSelectionRange is called. We can ignore these errors,
+          // as these elements wouldn't have a selection to we need to
+          // prevent anyway.
+        }
+      }
+
+      $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocusCapture, { capture: true })
     }
 
     $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocus)
@@ -214,11 +261,11 @@ export const create = (state: StateFunc) => ({
       return true
     }
 
-    // if our focused element isnt the same as the previously
+    // if our focused element isn't the same as the previously
     // focused el then what probably happened is our mouse
-    // down event caused our element to receive focuse
+    // down event caused our element to receive focus
     // without the browser sending the focus event
-    // which happens when the window isnt in focus
+    // which happens when the window isn't in focus
     if ($previouslyFocusedEl.get(0) !== $focused.get(0)) {
       return true
     }
@@ -227,10 +274,12 @@ export const create = (state: StateFunc) => ({
   },
 
   getFocused (document = state('document')) {
-    const { activeElement } = document
+    if (document) {
+      const { activeElement } = document
 
-    if ($dom.isFocused(activeElement)) {
-      return $dom.wrap(activeElement)
+      if ($dom.isFocused(activeElement)) {
+        return $dom.wrap(activeElement)
+      }
     }
 
     return null

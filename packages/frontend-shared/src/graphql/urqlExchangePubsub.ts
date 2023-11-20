@@ -1,9 +1,9 @@
 import { pipe, tap } from 'wonka'
 import type { Exchange, Operation, OperationResult } from '@urql/core'
-import type { Socket } from '@packages/socket/lib/browser'
+import type { SocketShape } from '@packages/socket/lib/types'
 import type { DefinitionNode, DocumentNode, OperationDefinitionNode } from 'graphql'
 
-export const pubSubExchange = (io: Socket): Exchange => {
+export const pubSubExchange = (io: SocketShape): Exchange => {
   return ({ client, forward }) => {
     const watchedOperations = new Map<number, Operation>()
     const observedOperations = new Map<number, number>()

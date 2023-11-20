@@ -29,7 +29,7 @@ describe('user agent override', {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    cy.origin('http://foobar.com:3500', {
+    cy.origin('http://www.foobar.com:3500', {
       args: {
         userAgentBefore: window.navigator.userAgent,
       },

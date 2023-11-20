@@ -75,7 +75,7 @@ interface BackendError {
 
 export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({
-    // allow our signature to be similar to cy.route
+    // allow our signature to be similar to cy.intercept
     // METHOD / URL / BODY
     // or object literal with all expanded options
     request (...args) {
@@ -153,6 +153,13 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (originOrBase) {
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
+      }
+
+      // https://github.com/cypress-io/cypress/issues/19407
+      // Make generated querystring consistent with `URLSearchParams` class and cy.visit()
+      if (options.qs) {
+        options.url = $Location.mergeUrlWithParams(options.url, options.qs)
+        options.qs = null
       }
 
       // Make sure the url unicode characters are properly escaped

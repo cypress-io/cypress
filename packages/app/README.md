@@ -16,7 +16,7 @@ This is the front-end for the Cypress App.
 
 Cypress has two modes: `run` and `open`. We want run mode to be as light and fast as possible, since this is the mode used to run on CI machines, etc. Run mode has minimal UI showing only what is necessary. Open mode is the interactive experience.
 
-- **`open`** mode is driven using GraphQL and urql. It shows the full Cypress app, include the top nav, side nav, spec list, etc. You can change between testing types, check your latest runs on the Cypress dashboard, update settings, etc.
+- **`open`** mode is driven using GraphQL and urql. It shows the full Cypress app, include the top nav, side nav, spec list, etc. You can change between testing types, check your latest runs on Cypress Cloud, update settings, etc.
 - **`run`** mode is does not rely on GraphQL. This is so we can be as performant as possible. It only renders the "runner" part of the UI, which is comprised of the command log, Spec Runner header, and AUT iframe.
 
 The two modes are composed using the same logic, but have slightly different components. You can see where the differences are in `Runner.vue`(src/pages/Specs/Runner.vue). Notice that `<SpecRunnerOpenMode>` receives a `gql` prop, since it uses GraphQL, and `<SpecRunnerRunMode>` does not.
@@ -91,13 +91,13 @@ The terminology can get a bit confusing as Vue Router's `params` are not the que
 
 ## Using existing, Vite-incompatible modules
 
-Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily
+Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner` cannot be easily
 used with Vite due to circular dependencies and modules that do not have compatible ESM builds.
 
 To work around this, when consuming existing code, it is bundled with webpack and made available under the
 `window.UnifiedRunner` namespace. It is injected via [`injectBundle`](./src/runner/injectBundle.ts).
 
-To add more code to the bundle, add it in the bundle root, `@packages/runner-ct/src/main.tsx` and attach it to
+To add more code to the bundle, add it in the bundle root, `@packages/runner/src/main.tsx` and attach it to
 `window.UnifiedRunner`.
 
 As a rule of thumb, avoid importing from the older, webpack based modules into this package. Instead, if you want to consume code from those older, webpack bundled modules, you should add them to the webpack root and consume them via `window.UnifiedRunner`. Ideally, update [`index.d.ts`](./index.d.ts) to add the types, as well.

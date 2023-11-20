@@ -39,7 +39,7 @@ exports['e2e issue 149 failing 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_149.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -48,12 +48,6 @@ exports['e2e issue 149 failing 1'] = `
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/issue_149.cy.js/fails (failed).png                  (1280x720)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_149.cy.js.mp4                 (X second)
 
 
 ====================================================================================================

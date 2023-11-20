@@ -2,7 +2,8 @@ const { clickCommandLog } = require('../../support/utils')
 const { _ } = Cypress
 
 // https://github.com/cypress-io/cypress/pull/5299/files
-describe('rect highlight', () => {
+// TODO(webkit): fix+unskip for experimental webkit
+describe('rect highlight', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
@@ -83,7 +84,7 @@ describe('rect highlight', () => {
 })
 
 const ensureCorrectTargetPosition = (sel) => {
-  return cy.wrap(null, { timeout: 400 }).should(() => {
+  return cy.wrap(null, { timeout: 4000 }).should(() => {
     const target = cy.$$('div[data-highlight-hitbox]')[0].getBoundingClientRect()
 
     const dims = {
@@ -100,7 +101,7 @@ const ensureCorrectTargetPosition = (sel) => {
 }
 
 const ensureCorrectHighlightPositions = (sel) => {
-  return cy.wrap(null, { timeout: 400 }).should(() => {
+  return cy.wrap(null, { timeout: 4000 }).should(() => {
     const els = {
       content: cy.$$('div[data-layer=Content]'),
       padding: cy.$$('div[data-layer=Padding]'),

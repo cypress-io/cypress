@@ -6,14 +6,10 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*',
   },
   component: {
+    experimentalSingleTabRunMode: true,
     specPattern: 'cypress/component-tests/*.spec.js',
     devServer: {
       bundler: 'webpack',
-    },
-    setupNodeEvents (on, config) {
-      require('@cypress/code-coverage/task')(on, config)
-
-      return config
     },
   },
 })

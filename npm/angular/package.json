@@ -5,19 +5,18 @@
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
-    "check-ts": "tsc --noEmit"
+    "check-ts": "tsc --noEmit",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^14.0.6",
-    "@angular/core": "^14.0.6",
-    "@angular/platform-browser-dynamic": "^14.0.6",
-    "@rollup/plugin-node-resolve": "^11.1.1",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "~4.2.3",
+    "@angular/common": "^14.2.0",
+    "@angular/core": "^14.2.0",
+    "@angular/platform-browser-dynamic": "^14.2.0",
+    "@cypress/mount-utils": "0.0.0-development",
+    "typescript": "^4.7.4",
     "zone.js": "~0.11.4"
   },
   "peerDependencies": {
@@ -35,7 +34,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/angular/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular/#readme",
   "author": "Jordan Powell",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
   "keywords": [
@@ -58,6 +57,15 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{workspaceRoot}/cli/angular"
+        ]
+      }
+    }
   },
   "standard": {
     "globals": [

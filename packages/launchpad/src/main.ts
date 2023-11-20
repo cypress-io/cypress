@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { HeaderBar_HeaderBarQueryDocument } from './generated/graphql'
 import './main.scss'
-import 'virtual:windi.css'
+import 'tailwindcss/tailwind.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import Toast, { POSITION } from 'vue-toastification'
@@ -9,6 +9,7 @@ import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'
 import { initHighlighter } from '@packages/frontend-shared/src/components/highlight'
+import { createPinia } from '@packages/frontend-shared/src/store'
 
 const app = createApp(App)
 
@@ -19,6 +20,7 @@ app.use(Toast, {
 })
 
 app.use(createI18n())
+app.use(createPinia())
 
 Promise.all([
   makeUrqlClient({ target: 'launchpad' }).then((launchpadClient) => {

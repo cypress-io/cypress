@@ -1,28 +1,29 @@
 #!/usr/bin/env node
 
+/* eslint-disable no-console */
+
 const resolvePkg = require('resolve-pkg')
 const { join } = require('path')
 const fs = require('fs-extra')
 const path = require('path')
-const glob = require('glob')
-const util = require('util')
 const childProcess = require('child_process')
 
 const EXAMPLE_DIR = path.join(__dirname, '..')
-const globAsync = util.promisify(glob)
 
-async function build() {
+async function build () {
   await Promise.all([
     fs.remove(path.join(EXAMPLE_DIR, 'app')),
-    fs.remove(path.join(EXAMPLE_DIR, 'cypress'))
+    fs.remove(path.join(EXAMPLE_DIR, 'cypress')),
   ])
+
   await Promise.all([
     fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'app'), path.join(EXAMPLE_DIR, 'app')),
     fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'cypress'), path.join(EXAMPLE_DIR, 'cypress')),
   ])
+
   childProcess.execSync('node ./bin/convert.js', {
     cwd: EXAMPLE_DIR,
-    stdio: 'inherit'
+    stdio: 'inherit',
   })
 }
 

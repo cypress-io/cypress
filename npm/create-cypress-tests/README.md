@@ -44,7 +44,7 @@ Here is a list of available configuration options:
 
 `--use-npm` – use npm if yarn available
 `--ignore-typescript` – will not create typescript configuration if available 
-`--ignore-examples` – will create a 1 empty spec file (`cypress/integration/spec.js`) to start with
+`--ignore-examples` – will create a 1 template spec file (`cypress/integration/spec.js`) to start with
 `--component-tests` – will not ask should setup component testing or not
 
 ## License

@@ -1,15 +1,24 @@
 /* eslint-disable no-console */
 const Promise = require('bluebird')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = {
-  'fixturesFolder': false,
-  'e2e': {
-    'supportFile': false,
+  fixturesFolder: false,
+  experimentalInteractiveRunEvents: true,
+  e2e: {
+    supportFile: false,
     setupNodeEvents (on, config) {
       on('before:run', (runDetails) => {
         const { specs, browser } = runDetails
 
-        console.log('before:run:', specs[0].relative, browser.name)
+        if (config.isTextTerminal) {
+          console.log('before:run:', specs[0].relative, browser.name)
+        } else {
+          const outputPath = path.join(process.cwd(), 'beforeRun.json')
+
+          fs.writeFileSync(outputPath, JSON.stringify(runDetails))
+        }
 
         return Promise.delay(10).then(() => {
           return console.log('before:run is awaited')
@@ -27,7 +36,13 @@ module.exports = {
       })
 
       on('before:spec', (spec) => {
-        console.log('before:spec:', spec.relative)
+        if (config.isTextTerminal) {
+          console.log('before:spec:', spec.relative)
+        } else {
+          const outputPath = path.join(process.cwd(), 'beforeSpec.json')
+
+          fs.writeFileSync(outputPath, JSON.stringify(spec))
+        }
 
         return Promise.delay(10).then(() => {
           return console.log('before:spec is awaited')

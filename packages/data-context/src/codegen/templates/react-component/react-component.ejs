@@ -1,0 +1,13 @@
+---
+fileName: <%= fileName %>
+---
+
+import React from 'react'
+import <%= isDefault ? componentName : `{ ${componentName} }` %> from '<%- componentPath %>'
+
+describe('<<%- componentName %> />', () => {
+  it('renders', () => {
+    // see: https://on.cypress.io/mounting-react
+    cy.mount(<<%- componentName %> />)
+  })
+})

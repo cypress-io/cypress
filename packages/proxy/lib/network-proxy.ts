@@ -1,3 +1,4 @@
+import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 
@@ -12,8 +13,29 @@ export class NetworkProxy {
     this.http.addPendingBrowserPreRequest(preRequest)
   }
 
+  removePendingBrowserPreRequest (requestId: string) {
+    this.http.removePendingBrowserPreRequest(requestId)
+  }
+
+  addPendingUrlWithoutPreRequest (url: string) {
+    this.http.addPendingUrlWithoutPreRequest(url)
+  }
+
   handleHttpRequest (req, res) {
-    this.http.handle(req, res)
+    const span = telemetry.startSpan({
+      name: 'network:proxy:handleHttpRequest',
+      opts: {
+        attributes: {
+          'network:proxy:url': req.proxiedUrl,
+          'network:proxy:contentType': req.get('content-type'),
+        },
+      },
+      isVerbose: true,
+    })
+
+    this.http.handleHttpRequest(req, res, span).finally(() => {
+      span?.end()
+    })
   }
 
   handleSourceMapRequest (req, res) {
@@ -26,5 +48,13 @@ export class NetworkProxy {
 
   reset () {
     this.http.reset()
+  }
+
+  setProtocolManager (protocolManager) {
+    this.http.setProtocolManager(protocolManager)
+  }
+
+  setPreRequestTimeout (timeout) {
+    this.http.setPreRequestTimeout(timeout)
   }
 }

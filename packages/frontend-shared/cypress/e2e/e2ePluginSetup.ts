@@ -1,20 +1,38 @@
+import { hookRequire } from '@packages/server/hook-require'
+
+hookRequire({ forceTypeScript: false })
+
+// Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
+// from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
+// will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
+import {
+  getOperationName,
+  Response,
+  makeGraphQLServer,
+  clearCtx,
+  DataContext,
+  globalPubSub,
+  setCtx,
+  buildSchema,
+  execute,
+  ExecutionResult,
+  GraphQLError,
+  parse,
+} from './prod-dependencies'
+
 import path from 'path'
 import execa from 'execa'
+import _ from 'lodash'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
-// import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
-import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql'
-import { Response } from 'cross-fetch'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
-import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
@@ -43,6 +61,11 @@ chai.use(chaiSubset)
 chai.use(sinonChai)
 
 export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+  // @ts-ignore getSnapshotResult is injected by the snapshot script
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) && typeof global.getSnapshotResult === 'undefined') {
+    throw new Error('getSnapshotResult is undefined. v8 snapshots are not being used in Cypress in Cypress. This can happen if CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT is not set')
+  }
+
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
@@ -81,7 +104,7 @@ async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
-  const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+  const { makeDataContext } = require('./prod-dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
@@ -106,6 +129,8 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let remoteGraphQLOptions: Record<string, any> | undefined
+  let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
   const cachedCwd = process.cwd()
@@ -127,7 +152,7 @@ async function makeE2ETasks () {
     await scaffoldCommonNodeModules()
 
     try {
-      await scaffoldProjectNodeModules(projectName)
+      await scaffoldProjectNodeModules({ project: projectName })
     } catch (e) {
       if (isRetry) {
         throw e
@@ -174,8 +199,10 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
+      process.chdir(cachedCwd)
       testState = {}
-      await DataContext.waitForActiveRequestsToFlush()
+      remoteGraphQLOptions = {}
+
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
@@ -183,6 +210,7 @@ async function makeE2ETasks () {
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
+      remoteGraphQLInterceptBatched = undefined
 
       const fetchApi = ctx.util.fetch
 
@@ -214,7 +242,69 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          if (remoteGraphQLIntercept) {
+          if (operationName?.startsWith('batchTestRunnerExecutionQuery') && remoteGraphQLInterceptBatched) {
+            const fn = remoteGraphQLInterceptBatched
+            const keys: string[] = []
+            const values: Promise<any>[] = []
+            const finalVal: Record<string, any> = {}
+            const errors: GraphQLError[] = []
+
+            // The batch execution plugin (https://www.graphql-tools.com/docs/batch-execution) batches the
+            // query variables & payloads by rewriting both the fields & variables to ensure there
+            // are no collisions. It does so in a consistent manner, prefixing each field with an incrementing integer,
+            // and prefixing the variables within that selection set with the same id
+            //
+            // It ends up looking something like this:
+            //
+            // query ($_0_variableA: String, $_0_variableB: String, $_1_variableA: String, $_1_variableB: String) {
+            //   _0_someQueryField: someQueryField(argA: $_0_variableA) {
+            //     id
+            //     field(argB: $_0_variableB))
+            //   }
+            //   _1_someQueryField: someQueryField(argA: $_1_variableA) {
+            //     id
+            //     field(argB: $_1_variableB))
+            //   }
+            // }
+            //
+            // To make it simpler to test, we take this knowledge and use some regexes & rewriting it to parse out the index,
+            // and re-write the variables as though we were executing the query individually, the same way the plugin does when
+            // we return the resolved data. We then expect that you return the data for the individual row
+            //
+            for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
+              const re = /^_(\d+)_(.*?)$/.exec(key)
+
+              if (!re) {
+                finalVal[key] = val
+                continue
+              }
+
+              const [, capture1, capture2] = re
+              const subqueryVariables = _.transform(_.pickBy(variables, (val, key) => key.startsWith(`_${capture1}_`)), (acc, val, k) => {
+                acc[k.replace(`_${capture1}_`, '')] = val
+              }, {})
+
+              keys.push(key)
+              values.push(Promise.resolve().then(() => {
+                return fn({
+                  key,
+                  index: Number(capture1),
+                  field: capture2,
+                  variables: subqueryVariables,
+                  result: result[key],
+                }, testState)
+              }).catch((e) => {
+                errors.push(new GraphQLError(e.message, undefined, undefined, undefined, [key], e))
+
+                return null
+              }))
+            }
+            result = {
+              data: _.zipObject(keys, (await Promise.allSettled(values)).map((v) => v.status === 'fulfilled' ? v.value : v.reason)),
+              errors: errors.length ? [...(result.errors ?? []), ...errors] : result.errors,
+              extensions: result.extensions,
+            }
+          } else if (remoteGraphQLIntercept) {
             try {
               result = await Promise.resolve(remoteGraphQLIntercept({
                 operationName,
@@ -224,7 +314,7 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState))
+              }, testState, remoteGraphQLOptions ?? {}))
             } catch (e) {
               const err = e as Error
 
@@ -241,30 +331,18 @@ async function makeE2ETasks () {
           return new Response(JSON.stringify(result), { status: 200 })
         }
 
-        if (String(url) === 'https://download.cypress.io/desktop.json') {
+        if (String(url) === CYPRESS_REMOTE_MANIFEST_URL) {
           return new Response(JSON.stringify({
             name: 'Cypress',
             version: pkg.version,
           }), { status: 200 })
         }
 
-        if (String(url) === 'https://registry.npmjs.org/cypress') {
+        if (String(url) === NPM_CYPRESS_REGISTRY_URL) {
           return new Response(JSON.stringify({
             'time': {
               [pkg.version]: '2022-02-10T01:07:37.369Z',
             },
-          }), { status: 200 })
-        }
-
-        if (String(url).startsWith('https://on.cypress.io/v10-video-embed/')) {
-          return new Response(JSON.stringify({
-            videoHtml: `<iframe
-              src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-              class="rounded h-full bg-gray-1000 w-full"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-            />`,
           }), { status: 200 })
         }
 
@@ -274,8 +352,17 @@ async function makeE2ETasks () {
       return null
     },
 
-    __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
+    __internal_remoteGraphQLIntercept (args: {
+      fn: string
+      remoteGraphQLOptions?: Record<string, any>
+    }) {
+      remoteGraphQLOptions = args.remoteGraphQLOptions
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', 'remoteGraphQLOptions', `return (${args.fn})(obj, testState, remoteGraphQLOptions)`).bind(null, console) as RemoteGraphQLInterceptor
+
+      return null
+    },
+    __internal_remoteGraphQLInterceptBatched (fn: string) {
+      remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
 
       return null
     },
@@ -314,15 +401,31 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
-      if (!scaffoldedProjects.has(projectName)) {
+      let projectMatched = false
+
+      for (const scaffoldedProject of scaffoldedProjects.keys()) {
+        if (projectName.startsWith(scaffoldedProject)) {
+          projectMatched = true
+        }
+      }
+
+      if (!projectMatched) {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
+      let port = '4455'
+
+      // If we're component testing, we need to set the port to something other than 4455 so that
+      // the dev server can be running on something other than the special 4455 port
+      if (argv.includes('--component')) {
+        port = '4456'
+      }
+
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', port]
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
@@ -338,7 +441,7 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {

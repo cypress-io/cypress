@@ -45,6 +45,8 @@ const getMidPoint = (el) => {
 }
 
 const isFirefox = Cypress.isBrowser('firefox')
+const isWebKit = Cypress.isBrowser('webkit')
+const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -292,6 +294,14 @@ describe('src/cy/commands/actions/click', () => {
       cy.get(':text:first').click().should('have.focus')
 
       cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24900
+    it('retains focus after clicking', () => {
+      cy.$$('#button').on('blur', cy.stub().as('blur'))
+
+      cy.get('#button').click()
+      cy.get('@blur').should('not.be.called')
     })
 
     // https://github.com/cypress-io/cypress/issues/5430
@@ -737,6 +747,27 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener = _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').first().click().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     it('increases the timeout delta after each click', () => {
       const count = cy.$$('#three-buttons button').length
 
@@ -812,22 +843,20 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('places cursor at the end of [contenteditable]', () => {
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>').click()
-      .then(expectCaret(0))
+      cy.get('[contenteditable]:first').as('edit')
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', 'foo').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', '<div><br></div>')
+      cy.get('@edit').click().then(expectCaret(0))
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div>foo</div>').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', 'foo')
+      cy.get('@edit').click().then(expectCaret(3))
 
-      cy.get('[contenteditable]:first')
+      cy.get('@edit').invoke('html', '<div>foo</div>')
+      cy.get('@edit').click().then(expectCaret(3))
+
       // firefox headless: prevent contenteditable from disappearing (dont set to empty)
-      .invoke('html', '<br>').click()
-      .then(expectCaret(0))
+      cy.get('@edit').invoke('html', '<br>')
+      cy.get('@edit').click().then(expectCaret(0))
     })
 
     it('can click SVG elements', () => {
@@ -984,8 +1013,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#ptrNone').click({ timeout: 300, force: true })
       })
 
-      it('should error with message about pointer-events', function () {
-        const onError = cy.stub().callsFake((err) => {
+      it('should error with message about pointer-events', function (done) {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           expect(err.message).to.contain('has CSS `pointer-events: none`')
@@ -993,25 +1022,26 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Error',
+            'name',
+            'type',
+            'error',
+            'props',
           ])
 
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
-        })
+          expect(_.keys(consoleProps.props)).deep.eq([
+            'Tried to Click',
+            'But it has CSS',
+          ])
 
-        cy.once('fail', onError)
+          expect(consoleProps.props['But it has CSS']).to.eq('pointer-events: none')
+          done()
+        })
 
         cy.get('#ptrNone').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
       })
 
-      it('should error with message about pointer-events and include inheritance', function () {
-        const onError = cy.stub().callsFake((err) => {
+      it('should error with message about pointer-events and include inheritance', function (done) {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
@@ -1019,28 +1049,38 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
+            'name',
+            'type',
+            'error',
+            'props',
+          ])
+
+          expect(_.keys(consoleProps.props)).deep.eq([
             'Tried to Click',
             'But it has CSS',
             'Inherited From',
-            'Error',
           ])
 
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+          expect(consoleProps.props['But it has CSS']).to.eq('pointer-events: none')
 
-          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
+          expect(consoleProps.props['Inherited From']).to.eq(this.ptrNone.get(0))
+          done()
         })
-
-        cy.once('fail', onError)
 
         cy.get('#ptrNoneChild').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
       })
     })
 
     describe('actionability', () => {
+      let retries = 0
+
+      beforeEach(() => {
+        retries = 0
+        cy.on('command:retry', () => {
+          retries += 1
+        })
+      })
+
       it('can click on inline elements that wrap lines', () => {
         cy.get('#overflow-link').find('.wrapped').click()
       })
@@ -1327,15 +1367,10 @@ describe('src/cy/commands/actions/click', () => {
         $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
         let clicked = false
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
-        })
-
-        cy.on('command:retry', () => {
-          retried = true
         })
 
         $btn.on('click', () => {
@@ -1344,7 +1379,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('#button-covered-in-span').click({ force: true }).then(() => {
           expect(scrolled).to.be.empty
-          expect(retried).to.be.false
+          expect(retries).to.eq(0)
 
           expect(clicked).to.be.true
         })
@@ -1355,19 +1390,14 @@ describe('src/cy/commands/actions/click', () => {
 
         $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
 
-        let retried = false
         let clicked = false
-
-        cy.on('command:retry', () => {
-          retried = true
-        })
 
         $btn.on('click', () => {
           clicked = true
         })
 
         cy.get('#button-covered-in-span').click({ force: true }).then(() => {
-          expect(retried).to.be.false
+          expect(retries).to.be.eq(0)
           expect(clicked).to.be.true
         })
       })
@@ -1387,7 +1417,6 @@ describe('src/cy/commands/actions/click', () => {
         }).prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1395,11 +1424,10 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $span.hide()
-          retried = true
         }))
 
         cy.get('#button-covered-in-span').click().then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
 
           // - element scrollIntoView
           // - element scrollIntoView (retry animation coords)
@@ -1560,22 +1588,18 @@ describe('src/cy/commands/actions/click', () => {
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
-        let retried = false
-
         cy.on('command:retry', _.after(3, () => {
           $btn.show()
-          retried = true
         }))
 
         cy.get('#button').click().then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
         })
       })
 
       it('waits until element is no longer disabled', () => {
         const $btn = cy.$$('#button').prop('disabled', true)
 
-        let retried = false
         let clicks = 0
 
         $btn.on('click', () => {
@@ -1584,83 +1608,64 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $btn.prop('disabled', false)
-          retried = true
         }))
 
         cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
 
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
         })
       })
 
+      it('succeeds when DOM rerenders and returns new subject', () => {
+        const $btn = cy.$$('#button').prop('disabled', true)
+
+        cy.on('command:retry', _.after(3, () => {
+          $btn.replaceWith('<button id="button">New Button</button>')
+        }))
+
+        cy.get('#button').click().should('contain', 'New Button')
+      })
+
       it('waits until element stops animating', () => {
-        let retries = 0
-
-        cy.on('command:retry', () => {
-          retries += 1
-        })
-
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
-
-        cy.get('button:first').click().then(() => {
-          // - retry animation coords
-          // - retry animation
-          // - retry animation
-          expect(retries).to.eq(3)
-
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          expect(retries).to.gte(1)
         })
       })
 
       it('does not throw when waiting for animations is disabled', {
         waitForAnimations: false,
       }, () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').click().then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          expect(retries).to.eq(0)
         })
       })
 
       it('does not throw when turning off waitForAnimations in options', () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').click({ waitForAnimations: false }).then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click({ waitForAnimations: false }).then(() => {
+          expect(retries).to.eql(0)
         })
       })
 
-      it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const $btn = cy.$$('button:first')
-
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-        cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-          expect(args[2]).to.eq(1000)
+      it('passes options.animationDistanceThreshold to $actionability.ensureElIsNotAnimating', () => {
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click({ animationDistanceThreshold: 1000 }).then(() => {
+          // One retry, because $actionability waits for two sets of position coordinates.
+          expect(retries).to.eq(1)
         })
       })
 
-      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+      it('passes config.animationDistanceThreshold to $actionability.ensureElIsNotAnimating', () => {
+        let old = Cypress.config('animationDistanceThreshold')
 
-        const $btn = cy.$$('button:first')
+        Cypress.config('animationDistanceThreshold', 1000)
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-
-        cy.get('button:first').click().then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-          expect(args[2]).to.eq(animationDistanceThreshold)
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          try {
+            // One retry, because $actionability waits for two sets of position coordinates.
+            expect(retries).to.eq(1)
+          } finally {
+            Cypress.config('animationDistanceThreshold', old)
+          }
         })
       })
 
@@ -1673,12 +1678,25 @@ describe('src/cy/commands/actions/click', () => {
         it('can scroll to and click elements in html with scroll-behavior: smooth', () => {
           cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
+        })
+
+        // https://github.com/cypress-io/cypress/issues/28150
+        it('can scroll to and click elements in html with scroll-behavior: smooth and overflow-y: auto', () => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('body').invoke('css', 'overflow-y', 'auto')
+          cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
 
         // https://github.com/cypress-io/cypress/issues/3200
         it('can scroll to and click elements in ancestor element with scroll-behavior: smooth', () => {
           cy.get('#dom').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('#dom').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
       })
     })
@@ -2095,10 +2113,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          this.logs.push(log)
+          this.logs?.push(log)
         })
-
-        null
       })
 
       it('throws when not a dom subject', (done) => {
@@ -2119,41 +2135,21 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('.badge-multi').click()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let clicked = 0
+      // This is an instance of an unfixable detached DOM error: .then() is a command, so it sets the subject to a
+      // *specific element*, which then gets detached.
 
-        const $checkbox = cy.$$(':checkbox:first').click(() => {
-          clicked += 1
-          $checkbox.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(clicked).to.eq(1)
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').click().click()
-      })
-
+      // The error message tells the user exactly how to fix this case.
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because the page updated while this command was executing.')
+          expect(err.message).to.include('You can typically solve this by breaking up a chain.')
 
           done()
         })
 
         cy.get('input:first')
         .then(($el) => {
-          // This represents an asynchronous re-render
-          // since we fire the 'scrolled' event during actionability
-          // if we use el.on('scroll'), headless electron is flaky
-          cy.on('scrolled', () => {
-            $el.remove()
-          })
+          cy.on('scrolled', () => $el.remove())
         })
         .click()
       })
@@ -2238,7 +2234,7 @@ describe('src/cy/commands/actions/click', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
         const span = $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           // get + click logs
@@ -2261,8 +2257,8 @@ describe('src/cy/commands/actions/click', () => {
 
           const console = clickLog.invoke('consoleProps')
 
-          expect(console['Tried to Click']).to.eq($btn.get(0))
-          expect(console['But its Covered By']).to.eq(span.get(0))
+          expect(console.props['Tried to Click']).to.eq($btn.get(0))
+          expect(console.props['But its Covered By']).to.eq(span.get(0))
 
           done()
         })
@@ -2293,8 +2289,8 @@ describe('src/cy/commands/actions/click', () => {
 
           const console = lastLog.invoke('consoleProps')
 
-          expect(console['Tried to Click']).to.eq($btn.get(0))
-          expect(console['But its Covered By']).to.eq(span.get(0))
+          expect(console.props['Tried to Click']).to.eq($btn.get(0))
+          expect(console.props['But its Covered By']).to.eq(span.get(0))
 
           done()
         })
@@ -2548,7 +2544,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
 
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
       })
 
@@ -2563,11 +2559,10 @@ describe('src/cy/commands/actions/click', () => {
           // this button should be 60 pixels wide
           expect(rect.width).to.eq(60)
 
-          expect(consoleProps.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
-          expect(consoleProps.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
 
-          expect(consoleProps).to.containSubset({
-            'Command': 'click',
+          expect(consoleProps.props).to.containSubset({
             'Applied To': lastLog.get('$el').get(0),
             'Elements': 1,
           })
@@ -2585,7 +2580,7 @@ describe('src/cy/commands/actions/click', () => {
         .appendTo($btn)
 
         cy.get('#button-covered-in-span').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Actual Element Clicked']).to.eq($span.get(0))
+          expect(this.lastLog.invoke('consoleProps').props['Actual Element Clicked']).to.eq($span.get(0))
         })
       })
 
@@ -2775,9 +2770,9 @@ describe('src/cy/commands/actions/click', () => {
         cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
           const { logs } = this
-          const logsArr = logs.map((x) => x.invoke('consoleProps'))
+          const consolePropsArr = logs.map((x) => x.invoke('consoleProps'))
 
-          const lastClickProps = _.filter(logsArr, { Command: 'click' })[1]
+          const lastClickProps = _.filter(consolePropsArr, { name: 'click' })[1]
           const consoleProps = lastClickProps
 
           expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
@@ -3023,7 +3018,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
@@ -3268,26 +3263,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.dblclick()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let dblclicked = 0
-
-        const $button = cy.$$('button:first').dblclick(() => {
-          dblclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(dblclicked).to.eq(1)
-          expect(err.message).to.include('`cy.dblclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').dblclick().dblclick()
-      })
-
       it('logs once when not dom subject', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -3359,21 +3334,6 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      // TODO: remove this after 4.0 when {multiple:true} is no longer default
-      // https://github.com/cypress-io/cypress/issues/5406
-      it('does not log default option {multiple:true}', () => {
-        const logs = []
-
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
-        })
-
-        cy.get('button:first').dblclick().then(() => {
-          expect(logs[1].get('message')).to.eq('')
-          expect(logs[1].invoke('consoleProps').Options).not.ok
-        })
-      })
-
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
 
@@ -3423,10 +3383,14 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'dblclick',
+            name: 'dblclick',
+            type: 'command',
+            'table': {},
+          })
+
+          expect(consoleProps.props).to.containSubset({
             'Applied To': {},
             'Elements': 1,
-            'table': {},
           })
 
           const tables = _.map(consoleProps.table, ((x) => x()))
@@ -3595,7 +3559,8 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
 
-      cy.getAll('el', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('el', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('rightclick cancel contextmenu', () => {
@@ -3704,26 +3669,6 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.rightclick()
-      })
-
-      it('throws when subject is not in the document', (done) => {
-        let rightclicked = 0
-
-        const $button = cy.$$('button:first').on('contextmenu', () => {
-          rightclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('`cy.rightclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').rightclick().rightclick()
       })
 
       it('logs once when not dom subject', function (done) {
@@ -3845,11 +3790,15 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'rightclick',
+            name: 'rightclick',
+            type: 'command',
+            'table': {},
+          })
+
+          expect(consoleProps.props).to.containSubset({
             'Applied To': {},
             'Elements': 1,
             'Coords': midpoint,
-            'table': {},
           })
 
           const tables = _.map(consoleProps.table, ((x) => x()))
@@ -4061,11 +4010,27 @@ describe('mouse state', () => {
           y: 10,
         }
 
+        const coordsWebKit = {
+          clientX: 500,
+          clientY: 10,
+          layerX: 500,
+          layerY: 226,
+          pageX: 500,
+          pageY: 226,
+          screenX: 500,
+          screenY: 10,
+          x: 500,
+          y: 10,
+        }
+
         let coords
 
         switch (Cypress.browser.family) {
           case 'firefox':
             coords = coordsFirefox
+            break
+          case 'webkit':
+            coords = coordsWebKit
             break
           default:
             coords = coordsChrome
@@ -4184,6 +4149,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
+
         const pointerleave = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4221,6 +4187,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
+
         const mouseover = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4258,6 +4225,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
+
         const mouseenter = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4295,6 +4263,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
+
         const pointerover = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4332,6 +4301,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
+
         const pointerenter = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4492,12 +4462,12 @@ describe('mouse state', () => {
       btn.on('pointerover', onAction)
 
       cy.get('#btn').click()
-      // cy.wrap(onAction).should('calledOnce')
 
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
 
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox ? shouldBeCalled : shouldNotBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit || isChromium116OrLater ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
@@ -4521,7 +4491,9 @@ describe('mouse state', () => {
       cy.get('#btn').click()
 
       cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
-      cy.getAll('btn', 'pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
+
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
 
       cy.getAll('btn', 'mouseup click').each(shouldNotBeCalled)
     })
@@ -4596,8 +4568,8 @@ describe('mouse state', () => {
 
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
 
-      // on disabled inputs, pointer events are still fired in chrome, not in firefox
-      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+      // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('can target new element after mousedown sequence', () => {
@@ -4717,7 +4689,11 @@ describe('mouse state', () => {
 
   describe('user experience', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/dom.html')
+      cy.visit('/fixtures/dom.html').then(() => {
+        if (Cypress.config('hideRunnerUi')) {
+          throw new Error('hideRunnerUi is true, but should be false')
+        }
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/4347

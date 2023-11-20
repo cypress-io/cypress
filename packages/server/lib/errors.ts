@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import errors from '@packages/errors'
-import exception from './exception'
+import exception from './cloud/exception'
 
 const isProduction = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'production'
@@ -15,6 +15,8 @@ export const logException = Bluebird.method(function (this: any, err) {
     .create(err)
     .catch(() => {})
   }
+
+  return
 })
 
 export const get = errors.get

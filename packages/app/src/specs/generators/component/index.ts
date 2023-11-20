@@ -1,1 +1,3 @@
-export * from './ComponentGenerator'
+export * from './VueComponentGenerator'
+
+export * from './ReactComponentGenerator'

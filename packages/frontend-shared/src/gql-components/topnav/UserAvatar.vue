@@ -1,7 +1,7 @@
 <template>
   <div
     :style="`background-image: url(${gravatarUrl});`"
-    class="bg-cover border-1px border-gray-200 rounded-50px overflow-hidden"
+    class="bg-cover border-[1px] border-gray-200 rounded-[50px] overflow-hidden"
     data-cy="user-avatar"
   />
 </template>

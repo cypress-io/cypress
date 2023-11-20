@@ -1,11 +1,12 @@
 <template>
   <div
-    class="space-y-32px h-[calc(100vh-64px)] p-32px overflow-auto"
+    class="space-y-[32px] h-[calc(100vh-[64px])] p-[32px] overflow-auto"
     data-cy="settings"
   >
-    <div class="space-y-24px">
+    <div class="space-y-[24px]">
       <SettingsCard
         :title="t('settingsPage.project.title')"
+        name="project"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
         max-height="10000px"
@@ -18,24 +19,30 @@
       <SettingsCard
         :title="t('settingsPage.device.title')"
         :description="t('settingsPage.device.description')"
+        name="device"
         :icon="IconLaptop"
         max-height="800px"
       >
         <ExternalEditorSettings :gql="props.gql" />
         <ProxySettings :gql="props.gql" />
+        <NotificationSettings
+          v-if="showNotificationSettings"
+          :gql="props.gql"
+        />
         <TestingPreferences :gql="props.gql" />
       </SettingsCard>
       <SettingsCard
         :title="t('settingsPage.cloud.title')"
         :description="t('settingsPage.cloud.description')"
         :icon="IconOdometer"
+        name="cloud"
         max-height="10000px"
       >
         <CloudSettings :gql="props.gql" />
       </SettingsCard>
     </div>
     <hr class="border-gray-100">
-    <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-16px leading-24px">
+    <p class="mx-auto font-light text-center text-gray-500 max-w-[500px] text-[16px] leading-[24px]">
       {{ footerText }}
     </p>
     <Button
@@ -62,11 +69,13 @@ import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
+import NotificationSettings from './device/NotificationSettings.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
+import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
 
 const { t } = useI18n()
 
@@ -87,10 +96,15 @@ fragment SettingsContainer on Query {
   ...CloudSettings
   ...ExternalEditorSettings
   ...ProxySettings
+  ...NotificationSettings
 }`
 
 const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
+
+// Run notifications will initially be released without support for Windows
+// https://github.com/cypress-io/cypress/issues/26786
+const showNotificationSettings = !isWindows
 
 </script>

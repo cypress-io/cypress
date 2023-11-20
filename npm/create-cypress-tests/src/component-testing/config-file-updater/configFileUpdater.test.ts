@@ -1,11 +1,7 @@
 /// <reference path="../../../../../cli/types/mocha/index.d.ts" />
 
-import * as path from 'path'
 import { expect } from 'chai'
-
-import * as fs from 'fs-extra'
-import { insertValueInJSString, insertValuesInConfigFile } from './configFileUpdater'
-const projectRoot = process.cwd()
+import { insertValueInJSString } from './configFileUpdater'
 
 // Test util - if needed outside the tests we can move it to utils
 const stripIndent = (strings: any, ...args: any) => {
@@ -47,7 +43,7 @@ describe('lib/util/config-file-updater', () => {
   context('with js files', () => {
     describe('#insertValueInJSString', () => {
       describe('es6 vs es5', () => {
-        it('finds the object litteral and adds the values to it es6', async () => {
+        it('finds the object literal and adds the values to it es6', async () => {
           const src = stripIndent`\
               export default {
                 foo: 42,
@@ -67,7 +63,7 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
-        it('finds the object litteral and adds the values to it es5', async () => {
+        it('finds the object literal and adds the values to it es5', async () => {
           const src = stripIndent`\
               module.exports = {
                 foo: 42,
@@ -337,7 +333,7 @@ describe('lib/util/config-file-updater', () => {
       })
 
       describe('failures', () => {
-        it('fails if not an object litteral', () => {
+        it('fails if not an object literal', () => {
           const src = [
             'const foo = {}',
             'export default foo',

@@ -5,6 +5,7 @@
     :title="title"
     :model-value="show"
     :help-link="helpLink"
+    :no-help="!helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -14,7 +15,7 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <div class="flex flex-col min-h-280px sm:min-w-640px">
+    <div class="flex flex-col min-h-[280px] sm:min-w-[640px]">
       <component
         :is="generator.entry"
         v-if="generator"
@@ -29,7 +30,7 @@
       />
       <div
         v-else
-        class="flex-grow flex items-center self-center"
+        class="grow flex items-center self-center"
       >
         <CreateSpecCards
           :gql="props.gql"
@@ -41,7 +42,7 @@
   </StandardModal>
 </template>
 
-<script lang  ="ts" setup>
+<script lang="ts" setup>
 import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
@@ -71,13 +72,23 @@ const emits = defineEmits<{
 const iteration = ref(0)
 
 gql`
+fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
+  codeGenGlobs {
+    id
+    component
+  }
+  codeGenFramework
+}
+`
+
+gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
     id
     fileExtensionToUse
     defaultSpecFileName
-    isDefaultSpecPattern
     ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
@@ -107,7 +118,7 @@ const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject, props.gql.currentProject?.isDefaultSpecPattern)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 

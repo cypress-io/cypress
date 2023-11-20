@@ -67,7 +67,7 @@ describe('MigrationActions', () => {
       fs.writeJsonSync(path.join(mockCypressDir, 'package.json'), mockPkgJson)
     }
 
-    it('errors when local cypress version is <10', () => {
+    it('errors when local cypress version is <10', async () => {
       mockLocallyInstalledCypress(currentProject, '9.5.0')
       const ctx = createTestDataContext()
 
@@ -77,9 +77,11 @@ describe('MigrationActions', () => {
         coreData.app.isGlobalMode = true
       })
 
+      const currentVersion = (await ctx.versions.versionData()).current.version
+
       return (
         expect(ctx.actions.migration.initialize({})).to.eventually.be.rejectedWith(
-          'You are running Cypress version 10 in global mode, but you are attempting to migrate a project where Cypress version 9.5.0 is installed',
+          `You are running Cypress version ${currentVersion} in global mode, but you are attempting to migrate a project where Cypress version 9.5.0 is installed`,
         )
       )
     })

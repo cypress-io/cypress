@@ -12,7 +12,7 @@ describe('circle-env', () => {
   })
 
   beforeEach(() => {
-    delete process.env.CACHE_VERSION
+    delete process.env.COPY_CIRCLE_ARTIFACTS
     process.env.CI = 'true'
     process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
   })
@@ -44,14 +44,58 @@ describe('circle-env', () => {
         await _checkCanaries()
       })
 
-      it('fails if CACHE_VERSION does exist', async () => {
-        process.env.CACHE_VERSION = 'foo'
+      it('fails if COPY_CIRCLE_ARTIFACTS does exist', async () => {
+        process.env.COPY_CIRCLE_ARTIFACTS = 'foo'
 
         try {
           await _checkCanaries()
           throw new Error('should not reach')
         } catch (err) {
-          expect(err.message).to.include('CACHE_VERSION is set, but circleEnv is empty')
+          expect(err.message).to.include('COPY_CIRCLE_ARTIFACTS is set, but circleEnv is empty')
+        }
+      })
+    })
+
+    context('with circleEnv plus only omitted keys', () => {
+      it('passes', async () => {
+        sinon.stub(fs, 'readFile')
+        .withArgs('/foo.json').resolves(JSON.stringify({
+          Dispatched: { TaskInfo: { Environment: {
+            CIRCLE_PLUGIN_TEST: 'baz',
+          } } },
+        }))
+
+        sinon.spy(console, 'warn')
+        await _checkCanaries()
+        expect(console.warn).to.be.calledWith('CircleCI env empty or contains only allowed envs, assuming this is a contributor PR. Not checking for canary variables.')
+      })
+
+      it('also passes', async () => {
+        sinon.stub(fs, 'readFile')
+        .withArgs('/foo.json').resolves(JSON.stringify({
+          Dispatched: { TaskInfo: { Environment: {
+            CIRCLE_PLUGIN_TEST: 'baz',
+            MAIN_CANARY: 'qux',
+            CONTEXT_CANARY: 'quux',
+          } } },
+        }))
+
+        await _checkCanaries()
+      })
+
+      it('fails', async () => {
+        sinon.stub(fs, 'readFile')
+        .withArgs('/foo.json').resolves(JSON.stringify({
+          Dispatched: { TaskInfo: { Environment: {
+            CIRCLE_PLUGIN_TEST: 'baz',
+            SOME_OTHER_VAR: 'quux',
+          } } },
+        }))
+
+        try {
+          await _checkCanaries()
+        } catch (e) {
+          expect(e.message).to.equal('Missing MAIN_CANARY.')
         }
       })
     })

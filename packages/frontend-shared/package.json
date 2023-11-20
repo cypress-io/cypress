@@ -3,43 +3,48 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "build": "node ./script/build.js",
     "check-ts": "vue-tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
     "test": "yarn cypress:run && yarn types",
-    "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
     "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@antfu/utils": "^0.3.0",
-    "@cypress-design/css": "^0.5.2",
+    "@antfu/utils": "^0.7.0",
+    "@cypress-design/css": "^0.13.3",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
-    "@intlify/vite-plugin-vue-i18n": "2.4.0",
-    "@percy/cypress": "^3.1.0",
-    "@testing-library/cypress": "8.0.0",
+    "@intlify/unplugin-vue-i18n": "0.10.0",
+    "@percy/core": "^1.0.0-beta.48",
+    "@percy/cypress": "^3.1.2",
+    "@testing-library/cypress": "9.0.0",
     "@toycode/markdown-it-class": "1.2.3",
     "@types/faker": "5.5.8",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
     "@urql/vue": "0.6.2",
-    "@vitejs/plugin-vue": "2.2.4",
-    "@vitejs/plugin-vue-jsx": "1.3.8",
-    "@vue/compiler-core": "3.2.31",
-    "@vue/compiler-dom": "3.2.31",
-    "@vue/compiler-sfc": "3.2.31",
+    "@vitejs/plugin-vue": "4.2.0",
+    "@vitejs/plugin-vue-jsx": "3.0.1",
+    "@vue/compiler-core": "3.2.47",
+    "@vue/compiler-dom": "3.2.47",
+    "@vue/compiler-sfc": "3.2.47",
+    "@vue/test-utils": "2.3.2",
     "@vueuse/core": "7.2.2",
+    "autoprefixer": "^10.4.14",
     "axe-core": "4.4.1",
+    "browser-logos": "github:alrra/browser-logos",
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
     "cypress-axe": "0.14.0",
@@ -58,23 +63,23 @@
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
     "lodash": "4.17.21",
-    "markdown-it": "12.2.0",
+    "markdown-it": "13.0.1",
     "modern-normalize": "1.1.0",
     "patch-package": "6.4.7",
-    "rimraf": "3.0.2",
+    "postcss": "^8.4.22",
     "shiki": "^0.9.12",
+    "tailwindcss": "^3.3.1",
     "unplugin-icons": "0.13.2",
-    "unplugin-vue-components": "^0.15.4",
-    "vite": "3.0.3",
+    "unplugin-vue-components": "^0.24.1",
+    "vite": "4.3.2",
     "vite-plugin-components": "0.11.3",
-    "vite-svg-loader": "3.1.2",
-    "vue": "3.2.31",
+    "vite-svg-loader": "4.0.0",
+    "vue": "3.2.47",
     "vue-eslint-parser": "7.11.0",
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
     "vue-tsc": "^0.3.0",
-    "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
   },
   "module": "es2020",
@@ -84,32 +89,20 @@
       "patch-package"
     ]
   },
-  "vite": {
-    "optimizeDeps": {
-      "include": [
-        "@testing-library/cypress/add-commands",
-        "@urql/core",
-        "@urql/devtools",
-        "@urql/exchange-execute",
-        "@urql/exchange-graphcache",
-        "@urql/vue",
-        "@vue/test-utils",
-        "@vueuse/core",
-        "dedent",
-        "fake-uuid",
-        "floating-vue",
-        "graphql",
-        "graphql-relay",
-        "graphql/jsutils/Path",
-        "gravatar",
-        "human-interval",
-        "lodash",
-        "shiki",
-        "vue",
-        "vue-i18n",
-        "vue-toastification",
-        "wonka"
-      ]
-    }
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "generate-shiki-theme"
+        ],
+        "outputs": [
+          "{projectRoot}/src/generated/schema-for-tests.gen.json"
+        ]
+      }
+    },
+    "implicitDependencies": [
+      "@packages/data-context",
+      "@packages/graphql"
+    ]
   }
 }

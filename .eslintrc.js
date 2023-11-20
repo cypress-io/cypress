@@ -25,6 +25,7 @@ const validators = specifiedRules
 )
 
 module.exports = {
+  root: true,
   plugins: [
     '@cypress/dev',
     'graphql',
@@ -34,6 +35,14 @@ module.exports = {
     'plugin:@cypress/dev/tests',
   ],
   parser: '@typescript-eslint/parser',
+  ignorePatterns: [
+    // cli types are checked by dtslint
+    'cli/types/**',
+    // these fixtures are supposed to fail linting
+    'npm/eslint-plugin-dev/test/fixtures/**',
+    // Cloud generated
+    'system-tests/lib/validations/**',
+  ],
   overrides: [
     {
       files: [
@@ -41,6 +50,7 @@ module.exports = {
         '**/scripts/**',
         '**/test/**',
         '**/system-tests/**',
+        'tooling/**',
         'packages/{app,driver,frontend-shared,launchpad}/cypress/**',
         '*.test.ts',
         // ignore in packages that don't run in the Cypress process

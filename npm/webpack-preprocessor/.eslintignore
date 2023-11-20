@@ -1,0 +1,8 @@
+**/dist
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+**/cypress/fixtures
+**/test/fixtures
+**/_test-output
+/cypress/tests/e2e/compile-error.js

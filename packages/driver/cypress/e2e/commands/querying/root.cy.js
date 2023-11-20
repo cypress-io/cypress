@@ -17,7 +17,7 @@ describe('src/cy/commands/querying', () => {
     it('returns withinSubject if exists', () => {
       const form = cy.$$('form')
 
-      cy.get('form').within(() => {
+      cy.get('form').first().within(() => {
         cy
         .get('input')
         .root().then(($root) => {
@@ -100,7 +100,7 @@ describe('src/cy/commands/querying', () => {
       it('sets $el to withinSubject', () => {
         const form = cy.$$('form')
 
-        cy.get('form').within(() => {
+        cy.get('form').first().within(() => {
           cy
           .get('input')
           .root().then(function ($root) {
@@ -114,8 +114,11 @@ describe('src/cy/commands/querying', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'root',
-            Yielded: $root.get(0),
+            name: 'root',
+            type: 'command',
+            props: {
+              Yielded: $root.get(0),
+            },
           })
         })
       })

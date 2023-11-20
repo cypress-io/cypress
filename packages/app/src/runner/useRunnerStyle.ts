@@ -1,3 +1,4 @@
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { useWindowSize } from '@vueuse/core'
 import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
@@ -34,15 +35,18 @@ export const useRunnerStyle = () => {
     const miscBorders = 4
     const containerMinimum = 50
 
-    // start with just the margin since all other elements that take up width
-    // might not be there
-    let nonAutWidth = autMargin * 2
+    let nonAutWidth = 0
 
-    if (window.__CYPRESS_MODE__ === 'open') {
+    if (!isRunMode) {
       nonAutWidth += collapsedNavBarWidth
     }
 
     if (!window.__CYPRESS_CONFIG__.hideCommandLog) {
+      // if we are not hiding the entire runner, the margins need to be added in
+      if (!window.__CYPRESS_CONFIG__.hideRunnerUi) {
+        nonAutWidth += (autMargin * 2)
+      }
+
       nonAutWidth += reporterWidth.value + specListWidth.value + miscBorders
     }
 
@@ -54,7 +58,8 @@ export const useRunnerStyle = () => {
   })
 
   const containerHeight = computed(() => {
-    const nonAutHeight = autStore.specRunnerHeaderHeight + (autMargin * 2)
+    // if the entire runner is being hidden, there is not non-aut height, otherwise we need to account for the header and margins
+    const nonAutHeight = window.__CYPRESS_CONFIG__.hideRunnerUi ? 0 : autStore.specRunnerHeaderHeight + (autMargin * 2)
 
     return windowHeight.value - nonAutHeight
   })
@@ -97,7 +102,7 @@ export const useRunnerStyle = () => {
   return {
     viewportStyle,
     windowWidth: computed(() => {
-      if (window.__CYPRESS_MODE__ === 'run') {
+      if (isRunMode) {
         return windowWidth.value
       }
 

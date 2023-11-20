@@ -6,7 +6,7 @@ describe('<RenameSpecsManual/>', { viewportWidth: 1119 }, () => {
     cy.mountFragment(RenameSpecsManualFragmentDoc, {
       render (gql) {
         return (
-          <div class="p-16px">
+          <div class="p-[16px]">
             <RenameSpecsManual gql={gql} />
           </div>
         )

@@ -1,6 +1,6 @@
 # Frontend Shared
 
-This package contains components and other code (such as WindiCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to be the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher-level components that exist in both apps, like the header.
+This package contains components and other code (such as TailwindCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to be the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher-level components that exist in both apps, like the header.
 
 Conceivably, other packages may be created that also import from this shared component package.
 
@@ -21,16 +21,6 @@ For the best development experience, you will want to use VS Code with the [Vola
 ## from repo root
 yarn workspace @packages/frontend-shared cypress:run:ct
 ```
-
-## Utility class usage
-WindiCSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
-
-```bash
-## from this directory
-yarn windi
-```
-
-This will be useful from time to time so that we can audit our usage of these classes and extract repeated patterns into Windi shortcuts or otherwise consolidate them, when it makes sense to do so.
 
 ## Link Components
 There are two shared components involved with links - `BaseLink`, and `ExternalLink`. `BaseLink` is responsible for default colors and hover/focus styles. `ExternalLink` wraps `BaseLink` is responsible for managing the GraphQL mutation that triggers links to open the in the user's default browser.
@@ -79,17 +69,17 @@ We are using some components from Headless UI as the basis for UI patterns like 
 Only `@packages/app` has a router, so details are described in its [README](../app/README.md).
 
 ### Styles
-#### Tailwind and Windi
-We use [Tailwind](https://tailwindcss.com/) through [WindiCSS](https://windicss.org/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
+#### Tailwind
+We use [Tailwind](https://tailwindcss.com/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
 
 #### Explicit Pixel Values
-WindiCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
+TailwindCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
 
-`<p class="p-20px">`
+`<p class="p-[20px]">`
 
-This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase. 
+This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase.
 
-As an example: instead of using the class `m-2` which applies the rule `margin: 0.5rem` in Tailwind and usually creates a margin of `8px` (with 16px font size), we write the class as `m-8px`, from which Windi will generate a class with the rule `margin: 8px`.
+As an example: instead of using the class `m-2` which applies the rule `margin: 0.5rem` in Tailwind and usually creates a margin of `8px` (with 16px font size), we write the class as `m-[8px]`, from which Tailwind will generate a class with the rule `margin: 8px`.
 
 ### Icons
 #### Custom Icon Library
@@ -98,7 +88,7 @@ Cy has a very custom icon library, to meet the following needs:
 * Most of our icons are duo-tone
 * They must be styled with different colors in different contexts
 * Since they're duotone, you want to target the specific strokes and fills of the SVGs to color them
-* We should be able to apply color styles to icons with the same WindiCSS approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
+* We should be able to apply color styles to icons with the same TailwindCSS approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
 * We don't want to import icons in Vue SFCs for basic use in templates, they should 'just work'.
 
 #### Adding new icons
@@ -132,16 +122,11 @@ will be used to target paths and strokes inside the SVG that have the class `ico
 
 ```jsx
 
-<i-cy-book_x16 class="
-  icon-light-pink-100 
-  icon-dark-purple-500
-  hover:icon-light-purple-500
-  hover:icon-dark-pink-100
-" />
+<i-cy-book_x16 class=" icon-light-pink-100 icon-dark-purple-500 hover:icon-light-purple-500 hover:icon-dark-pink-100" />
 ```
 
-#### Implementation: Custom classes w/ a WindiCSS plugin
-To support selecting specific paths while keeping Tailwind's incredibly helpful interaction helpers (e.g. `group-hover` or `group-focus`), we use a WindiCSS plugin. Windi configuration lives in the [windi.config.ts](windi.config.ts) file in this package.
+#### Implementation: Custom classes w/ a TailwindCSS plugin
+To support selecting specific paths while keeping Tailwind's incredibly helpful interaction helpers (e.g. `group-hover` or `group-focus`), we use a TailwindCSS plugin. Tailwind configuration lives in the [tailwind.config.cjs](./tailwind.config.cjs) file in this package.
 
 ### Accessibility
 We consider accessibility a core part of front-end code quality. When possible, components should be built out using standard semantic HTML elements. If there are no plain HTML solutions for a particular interaction, we can reach for a library (like HeadlessUI above) that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).
@@ -157,7 +142,7 @@ Our GraphQL frontend client is [urql](https://formidable.com/open-source/urql/) 
 By convention, we use a prop named `gql` to represent the source of data, so it is common to see things like `props.gql.currentProject`.
 
 ### Use of GraphQL by shared components is limited to `src/gql-components`
-In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launchpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory, because only that directory is specified in [graphql-codegen.yml](graphql-codegen.yml). This is intended to maintain the separation between genuinely reusable components driven by props and events, and gql-driven components that are tightly bound to the implementation of App and Launchpad.
+In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launchpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory, because only that directory is specified in [graphql-codegen.yml](../graphql/graphql-codegen.yml). This is intended to maintain the separation between genuinely reusable components driven by props and events, and gql-driven components that are tightly bound to the implementation of App and Launchpad.
 
 ## Generating Fixtures
 

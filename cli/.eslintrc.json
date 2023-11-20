@@ -1,5 +1,4 @@
 {
-  "extends": "../.eslintrc.js",
   "rules": {
     "no-restricted-syntax": [
       "error",

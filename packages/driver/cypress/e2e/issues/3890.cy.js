@@ -1,7 +1,7 @@
 // @see https://github.com/cypress-io/cypress/issues/3890
 const { $ } = Cypress
 
-describe('issue 3890 overwriting cy.route command', () => {
+describe('issue 3890 overwriting cy.intercept command', () => {
   beforeEach(function () {
     cy
     .visit('/fixtures/jquery.html')
@@ -12,40 +12,38 @@ describe('issue 3890 overwriting cy.route command', () => {
     })
   })
 
-  it('stores route as an alias', () => {
-    // sanity test before overwriting cy.route in the next test
+  it('stores intercept as an alias', () => {
+    // sanity test before overwriting cy.intercept in the next test
     cy
-    .server()
-    .route(/foo/, 'my value').as('getFoo')
+    .intercept(/foo/, { body: 'my value' }).as('getFoo')
     .window().then((win) => {
       win.$.get('foo')
 
       return null
     })
-    .wait('@getFoo').its('responseBody').should('equal', 'my value')
+    .wait('@getFoo').its('response.body').should('equal', 'my value')
   })
 
-  it('stores route as an alias after overwrite', () => {
+  it('stores intercept as an alias after overwrite', () => {
     let routeCalled
 
-    Cypress.Commands.overwrite('route', (route, ...args) => {
+    Cypress.Commands.overwrite('intercept', (route, ...args) => {
       routeCalled = true
 
-      return cy.log(`cy.route ${args.join(' ')}`)
+      return cy.log(`cy.intercept ${args.join(' ')}`)
       .then(() => {
         return route(...args)
       })
     })
 
     cy
-    .server()
-    .route(/foo/, 'my value').as('getFoo')
+    .intercept(/foo/, { body: 'my value' }).as('getFoo')
     .window().then((win) => {
       win.$.get('foo')
 
       return null
     })
-    .wait('@getFoo').its('responseBody').should('equal', 'my value')
+    .wait('@getFoo').its('response.body').should('equal', 'my value')
     .then(() => {
       expect(routeCalled, 'route overwrite was called').to.be.true
     })

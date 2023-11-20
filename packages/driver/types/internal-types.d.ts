@@ -1,6 +1,7 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 /// <reference path="./internal-types-lite.d.ts" />
+
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
   error?: Error
@@ -29,6 +30,10 @@ declare namespace Cypress {
     configure: (config: Cypress.ObjectLike) => void
     isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
+    cy: $Cy
+    Location: {
+      create: (url: string) => ({ domain: string, superDomain: string })
+    }
   }
 
   interface CypressUtils {
@@ -45,6 +50,31 @@ declare namespace Cypress {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
     projectRoot?: string
+  }
+
+  interface Actions {
+    (action: 'set:cookie', fn: (cookie: SerializableAutomationCookie) => void)
+    (action: 'clear:cookie', fn: (name: string) => void)
+    (action: 'clear:cookies', fn: () => void)
+    (action: 'cross:origin:cookies', fn: (cookies: SerializableAutomationCookie[]) => void)
+    (action: 'before:stability:release', fn: () => void)
+    (action: 'paused', fn: (nextCommandName: string) => void)
+  }
+
+  interface Backend {
+    (task: 'cross:origin:cookies:received'): Promise<void>
+    (task: 'get:rendered:html:origins'): Promise<string[]>
+  }
+}
+
+declare namespace InternalCypress {
+  interface Cypress extends Cypress.Cypress, NodeEventEmitter {
+    backend: (eventName: string, ...args: any[]) => Promise<any>
+  }
+
+  interface LocalStorage extends Cypress.LocalStorage {
+    setStorages: (local, remote) => LocalStorage
+    unsetStorages: () => LocalStorage
   }
 }
 
@@ -63,6 +93,16 @@ interface SpecWindow extends Window {
 interface CypressRunnable extends Mocha.Runnable {
   type: null | 'hook' | 'suite' | 'test'
   hookId: any
+  hookName: string
   id: any
   err: any
+  // Added by Cypress to Tests in order to calculate continue conditions for retries
+  calculateTestStatus?: () => {
+    strategy: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
+    shouldAttemptsContinue: boolean
+    attempts: number
+    outerStatus: 'passed' | failed
+  }
+  // Added by Cypress to Tests in order to determine if the experimentalRetries test run passed so we can leverage in the retry logic.
+  hasAttemptPassed?: boolean
 }

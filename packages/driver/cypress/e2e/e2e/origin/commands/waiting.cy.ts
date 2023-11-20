@@ -3,41 +3,24 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 declare global {
   interface Window {
     xhrGet: any
-    abortRequests: any
   }
 }
-
-let reqQueue: XMLHttpRequest[] = []
 
 const xhrGet = (url) => {
   const xhr = new window.XMLHttpRequest()
 
   xhr.open('GET', url)
-  reqQueue.push(xhr)
   xhr.send()
 }
 
-const abortRequests = () => {
-  reqQueue.forEach((xhr) => xhr.abort())
-  reqQueue = []
-}
-
-context('cy.origin waiting', () => {
+context('cy.origin waiting', { browser: '!webkit' }, () => {
   before(() => {
-    cy.origin('http://foobar.com:3500', () => {
-      let reqQueue: XMLHttpRequest[] = []
-
+    cy.origin('http://www.foobar.com:3500', () => {
       window.xhrGet = (url) => {
         const xhr = new window.XMLHttpRequest()
 
         xhr.open('GET', url)
-        reqQueue.push(xhr)
         xhr.send()
-      }
-
-      window.abortRequests = () => {
-        reqQueue.forEach((xhr) => xhr.abort())
-        reqQueue = []
       }
     })
   })
@@ -45,12 +28,6 @@ context('cy.origin waiting', () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
-    cy.origin('http://foobar.com:3500', () => {
-      window.abortRequests()
-    })
-
-    abortRequests()
-
     logs = new Map()
 
     cy.on('log:changed', (attrs, log) => {
@@ -62,7 +39,7 @@ context('cy.origin waiting', () => {
 
   context('number', () => {
     it('waits for the specified value', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const delay = cy.spy(Cypress.Promise, 'delay')
 
         cy.wait(50).then(() => {
@@ -97,7 +74,7 @@ context('cy.origin waiting', () => {
       cy.intercept('/foo', (req) => {
         // delay the response to ensure the wait will wait for response
         req.reply({
-          delay: 100,
+          delay: 200,
           body: response,
         })
       }).as('foo')
@@ -332,15 +309,16 @@ context('cy.origin waiting', () => {
 
   context('#consoleProps', () => {
     it('number', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.wait(200)
       })
 
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('wait', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('wait')
-        expect(consoleProps['Waited For']).to.equal('200ms before continuing')
+        expect(consoleProps.name).to.equal('wait')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Waited For']).to.equal('200ms before continuing')
       })
     })
 
@@ -357,9 +335,10 @@ context('cy.origin waiting', () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
-          expect(consoleProps['Waited For']).to.equal('foo')
-          expect(consoleProps.Yielded).to.equal(Cypress.state('routes')[consoleProps.Yielded.routeId].requests[consoleProps.Yielded.id])
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Waited For']).to.equal('foo')
+          expect(consoleProps.props.Yielded).to.equal(Cypress.state('routes')[consoleProps.props.Yielded.routeId].requests[consoleProps.props.Yielded.id])
         })
       })
 
@@ -380,10 +359,11 @@ context('cy.origin waiting', () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
-          expect(consoleProps['Waited For']).to.equal('foo, bar')
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Waited For']).to.equal('foo, bar')
           const routes = Cypress.state('routes')
-          const yielded = consoleProps.Yielded
+          const yielded = consoleProps.props.Yielded
           const expectedRoutes = [routes[yielded[0].routeId].requests[yielded[0].id], routes[yielded[1].routeId].requests[yielded[1].id]]
 
           expect(yielded).to.deep.equal(expectedRoutes)

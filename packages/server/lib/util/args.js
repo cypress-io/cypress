@@ -4,9 +4,8 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
+const { getBreakingRootKeys, getPublicConfigKeys, coerce } = require('@packages/config')
 
-const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
 
@@ -15,6 +14,7 @@ const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
 const allowList = [
+  'autoCancelAfterFailures',
   'apiKey',
   'appPath',
   'browser',
@@ -45,6 +45,8 @@ const allowList = [
   'reporterOptions',
   'returnPkg',
   'runMode',
+  'runnerUi',
+  'noRunnerUi',
   'runProject',
   'smokeTest',
   'spec',
@@ -157,7 +159,7 @@ const JSONOrCoerce = (str) => {
   }
 
   // nupe :-(
-  return coerceUtil.coerce(str)
+  return coerce(str)
 }
 
 const sanitizeAndConvertNestedArgs = (str, argName) => {
@@ -349,6 +351,7 @@ module.exports = {
     const alias = {
       'api-key': 'apiKey',
       'app-path': 'appPath',
+      'auto-cancel-after-failures': 'autoCancelAfterFailures',
       'ci-build-id': 'ciBuildId',
       'config-file': 'configFile',
       'exec-path': 'execPath',
@@ -358,6 +361,7 @@ module.exports = {
       'proxy-source': 'proxySource',
       'reporter-options': 'reporterOptions',
       'return-pkg': 'returnPkg',
+      'runner-ui': 'runnerUi',
       'run-mode': 'isTextTerminal',
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
@@ -389,7 +393,7 @@ module.exports = {
       // bypassed the cli
       cwd: process.cwd(),
     })
-    .mapValues(coerceUtil.coerce)
+    .mapValues(coerce)
     .value()
 
     debug('argv parsed: %o', options)
@@ -408,7 +412,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag, testingType } = options
+    const { env, config, reporterOptions, outputPath, tag, testingType, autoCancelAfterFailures } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -447,6 +451,10 @@ module.exports = {
 
         return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
+    }
+
+    if (autoCancelAfterFailures && !((typeof autoCancelAfterFailures === 'number' && Number.isInteger(autoCancelAfterFailures)) || autoCancelAfterFailures === false)) {
+      return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'auto-cancel-after-failures', autoCancelAfterFailures, 'auto-cancel-after-failures must be an integer or false')
     }
 
     if (tag) {

@@ -14,7 +14,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void) {
     this.requests = {}
 
     // set the middleware
@@ -38,8 +38,8 @@ export class Automation {
     this.middleware = this.initializeMiddleware()
   }
 
-  automationValve (message, fn) {
-    return (msg, data) => {
+  automationValve (message: string, fn: (...args: any) => any) {
+    return (msg: string, data: any) => {
       // enable us to omit message
       // argument
       if (!data) {
@@ -60,7 +60,7 @@ export class Automation {
     }
   }
 
-  requestAutomationResponse (message, data, fn) {
+  requestAutomationResponse (message: string, data: any, fn: (...args: any) => any) {
     return new Bluebird((resolve, reject) => {
       const id = uuidv4()
 
@@ -97,7 +97,7 @@ export class Automation {
     })
   }
 
-  normalize (message, data, automate?) {
+  normalize (message: string, data: any, automate?) {
     return Bluebird.try(() => {
       switch (message) {
         case 'take:screenshot':
@@ -127,6 +127,7 @@ export class Automation {
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':
+        case 'canceled:download':
         case 'complete:download':
           return data
         default:
@@ -184,7 +185,7 @@ export class Automation {
     }
   }
 
-  get = (fn: keyof AutomationMiddleware) => {
+  get = <K extends keyof AutomationMiddleware>(fn: K): AutomationMiddleware[K] => {
     return this.middleware[fn]
   }
 }

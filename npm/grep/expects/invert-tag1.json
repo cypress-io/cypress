@@ -1,0 +1,7 @@
+{
+  "hello world": "passing",
+  "works": "passing",
+  "works 2 @tag1": "pending",
+  "works 2 @tag1 @tag2": "pending",
+  "works @tag2": "passing"
+}

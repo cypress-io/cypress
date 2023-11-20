@@ -26,6 +26,8 @@ const isObject = (event, handler) => {
 const eventValidators = {
   '_get:task:body': isFunction,
   '_get:task:keys': isFunction,
+  '_process:cross:origin:callback': isFunction,
+  'after:browser:launch': isFunction,
   'after:run': isFunction,
   'after:screenshot': isFunction,
   'after:spec': isFunction,
@@ -41,7 +43,11 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
   const validator = eventValidators[event]
 
   if (!validator) {
-    const userEvents = _.reject(_.keys(eventValidators), (event) => event.startsWith('_'))
+    const userEvents = _.reject(_.keys(eventValidators), (event) => {
+      // we're currently not documenting after:browser:launch, so it shouldn't
+      // appear in the list of valid events
+      return event.startsWith('_') || event === 'after:browser:launch'
+    })
 
     const error = new Error(`invalid event name registered: ${event}`)
 

@@ -1,7 +1,8 @@
-import type { FoundBrowser, BrowserStatus } from '@packages/types'
-import os from 'os'
 import execa from 'execa'
+import _ from 'lodash'
+import os from 'os'
 
+import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 let isPowerShellAvailable: undefined | boolean
@@ -22,6 +23,14 @@ if (os.platform() === 'win32') {
 
 const platform = os.platform()
 
+function getBrowserKey<T extends {name: string, version: string | number}> (browser: T) {
+  return `${browser.name}-${browser.version}`
+}
+
+export function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
+  return _.uniqBy(browsers, getBrowserKey)
+}
+
 export interface BrowserApiShape {
   close(): Promise<any>
   ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser>
@@ -34,28 +43,60 @@ export class BrowserDataSource {
   constructor (private ctx: DataContext) {}
 
   /**
+   * Gets the browsers from the machine and the project config
+   */
+  async allBrowsers () {
+    if (this.ctx.coreData.allBrowsers) {
+      return this.ctx.coreData.allBrowsers
+    }
+
+    const p = await this.ctx.project.getConfig()
+    const machineBrowsers = await this.machineBrowsers()
+
+    if (!p.browsers) {
+      this.ctx.coreData.allBrowsers = Promise.resolve(machineBrowsers)
+
+      return this.ctx.coreData.allBrowsers
+    }
+
+    const userBrowsers = p.browsers.reduce<FoundBrowser[]>((acc, b) => {
+      if (_.includes(_.map(machineBrowsers, getBrowserKey), getBrowserKey(b))) return acc
+
+      return [...acc, {
+        ...b,
+        majorVersion: String(b.majorVersion),
+        custom: true,
+      }]
+    }, [])
+
+    this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
+
+    return this.ctx.coreData.allBrowsers
+  }
+
+  /**
    * Gets the browsers from the machine, caching the Promise on the coreData
    * so we only look them up once
    */
   machineBrowsers () {
-    if (!this.ctx.coreData.machineBrowsers) {
-      const p = this.ctx._apis.browserApi.getBrowsers()
-
-      this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
-        if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
-
-        return browsers
-      }).catch((e) => {
-        this.ctx.update((coreData) => {
-          coreData.machineBrowsers = null
-          coreData.diagnostics.error = e
-        })
-
-        throw e
-      })
+    if (this.ctx.coreData.machineBrowsers) {
+      return this.ctx.coreData.machineBrowsers
     }
 
-    return this.ctx.coreData.machineBrowsers
+    const p = this.ctx._apis.browserApi.getBrowsers()
+
+    return this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
+      if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
+
+      return browsers
+    }).catch((e) => {
+      this.ctx.update((coreData) => {
+        coreData.machineBrowsers = null
+        coreData.diagnostics.error = e
+      })
+
+      throw e
+    })
   }
 
   idForBrowser (obj: FoundBrowser) {
@@ -89,13 +130,5 @@ export class BrowserDataSource {
 
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
-  }
-
-  setBrowserStatus (browserStatus: BrowserStatus) {
-    this.ctx.update((d) => {
-      d.app.browserStatus = browserStatus
-    })
-
-    this.ctx.emitter.browserStatusChange()
   }
 }

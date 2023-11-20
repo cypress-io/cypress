@@ -43,8 +43,7 @@
         "displayName": "Electron",
         "version": "94.0.4606.81",
         "path": "",
-        "majorVersion": 94,
-        "info": "Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
+        "majorVersion": 94
       }
     ],
     "from": "default",
@@ -86,6 +85,11 @@
   {
     "value": false,
     "from": "default",
+    "field": "experimentalCspAllowList"
+  },
+  {
+    "value": false,
+    "from": "default",
     "field": "experimentalFetchPolyfill"
   },
   {
@@ -101,7 +105,7 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalSessionAndOrigin"
+    "field": "experimentalWebKitSupport"
   },
   {
     "value": "",
@@ -154,7 +158,7 @@
     "field": "port"
   },
   {
-    "value": "sehy69",
+    "value": "ypt4pf",
     "from": "config",
     "field": "projectId"
   },
@@ -209,7 +213,7 @@
     "field": "scrollBehavior"
   },
   {
-    "value": "cypress/e2e/support/e2eSupport.ts",
+    "value": "cypress/support/e2e.ts",
     "from": "config",
     "field": "supportFile"
   },
@@ -229,12 +233,12 @@
     "field": "userAgent"
   },
   {
-    "value": true,
+    "value": false,
     "from": "default",
     "field": "video"
   },
   {
-    "value": 32,
+    "value": false,
     "from": "default",
     "field": "videoCompression"
   },
@@ -242,11 +246,6 @@
     "value": "cypress/videos",
     "from": "default",
     "field": "videosFolder"
-  },
-  {
-    "value": true,
-    "from": "default",
-    "field": "videoUploadOnPasses"
   },
   {
     "value": 850,
@@ -286,7 +285,7 @@
               "just-my-luck",
               "combine-properties",
               "faker",
-              "@packages/ui-components/cypress/support/customPercyCommand"
+              "cypress/support/customPercyCommand"
             ]
           }
         }

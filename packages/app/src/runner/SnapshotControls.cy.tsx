@@ -11,10 +11,6 @@ const snapshotControlsSelector = '[data-testid=snapshot-controls]'
 const unpinButtonSelector = '[data-testid=unpin]'
 
 describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => {
-  afterEach(() => {
-    cy.wait(100).percySnapshot()
-  })
-
   const mountSnapshotControls = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
@@ -86,8 +82,6 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     // simulate it by registering the same unpin:snapshot event it does.
     eventManager.on('unpin:snapshot', () => snapshotStore.$reset())
 
-    // debugger
-    // console.log('snapshotWithSnapshots', snapshotWithSnapshots)
     snapshotStore.pinSnapshot({ ...snapshotWithSnapshots, $el: document.body })
 
     mountSnapshotControls(eventManager, autIframe)
@@ -102,7 +96,7 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
 
     snapshotStore.setTestsRunningError()
     cy.get('body')
-    .findByText('Cannot show Snapshot while tests are running')
+    .findByText('Cannot show snapshot while tests are running')
     .should('be.visible')
   })
 

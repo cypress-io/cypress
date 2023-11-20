@@ -99,7 +99,7 @@ function getRelativePathToProjectDir (projectDir: string) {
 async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFilePath: string, relativePathToMonorepoRoot: string }) {
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
-  .replaceAll(opts.relativePathToMonorepoRoot, relativePathToProjectDir)
+  .replaceAll(opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'), relativePathToProjectDir.replace(/\\+/g, '/'))
 
   await fs.writeFile(opts.lockFilePath, lockFileContents)
 }
@@ -107,7 +107,7 @@ async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFil
 async function normalizeLockFileRelativePaths (opts: { project: string, projectDir: string, lockFilePath: string, lockFilename: string, relativePathToMonorepoRoot: string }) {
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
-  .replaceAll(relativePathToProjectDir, opts.relativePathToMonorepoRoot)
+  .replaceAll(relativePathToProjectDir.replace(/\\+/g, '/'), opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'))
 
   // write back to the original project dir, not the tmp copy
   await fs.writeFile(path.join(projects, opts.project, opts.lockFilename), lockFileContents)
@@ -148,7 +148,15 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  * Will use `yarn` or `npm` based on the lockfile present.
  */
-export async function scaffoldProjectNodeModules (project: string, updateLockFile: boolean = !!process.env.UPDATE_LOCK_FILE): Promise<void> {
+export async function scaffoldProjectNodeModules ({
+  project,
+  updateLockFile = !!process.env.UPDATE_LOCK_FILE,
+  forceCopyDependencies = false,
+}: {
+  project: string
+  updateLockFile?: boolean
+  forceCopyDependencies?: boolean
+}): Promise<void> {
   const projectDir = projectPath(project)
   const relativePathToMonorepoRoot = path.relative(
     path.join(projects, project),
@@ -195,7 +203,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     let persistCacheCb: () => Promise<void>
 
-    if (hasYarnLock) {
+    if (hasYarnLock && !forceCopyDependencies) {
       await symlinkNodeModulesFromCache(tmpNodeModulesDir, cacheNodeModulesDir)
     } else {
       // due to an issue in NPM, we cannot have `node_modules` be a symlink. fall back to copying.
@@ -252,6 +260,9 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
+    // if the symlink already exists, return as we do not need to relink the directory
+    if (err.code === 'EEXIST') return
+
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
     console.error(err)
     throw err
@@ -277,7 +288,6 @@ export async function scaffoldCommonNodeModules () {
     'babel-loader',
     // Used for import { defineConfig } from 'cypress'
     'cypress',
-    '@cypress/code-coverage',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
@@ -292,6 +302,7 @@ export async function scaffoldCommonNodeModules () {
     'jimp',
     'lazy-ass',
     'lodash',
+    'playwright-webkit',
     'proxyquire',
     'semver',
     'systeminformation',
@@ -300,7 +311,7 @@ export async function scaffoldCommonNodeModules () {
   ].map(symlinkNodeModule))
 }
 
-async function symlinkNodeModule (pkg) {
+export async function symlinkNodeModule (pkg) {
   const from = path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 

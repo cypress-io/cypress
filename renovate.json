@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "automerge": true,
+  "automerge": false,
   "major": {
     "automerge": false
   },
@@ -21,7 +21,16 @@
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "before 3am on the first day of the month"
+    "every weekend"
   ],
-  "dependencyDashboardApproval": true
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "^electron"
+      ],
+      "semanticCommitType": "dependency",
+      "groupName": "electron",
+      "dependencyDashboardApproval": false
+    }
+  ]
 }

@@ -32,7 +32,7 @@ exports['e2e screenshot viewport capture / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  27                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_viewport_capture.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -94,13 +94,6 @@ exports['e2e screenshot viewport capture / passes'] = `
      are (24).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/properly blac      (400x400)
      ks out absolute elements within a relative container.png                                       
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture.cy.     (X second)
-                          js.mp4                                                                    
 
 
 ====================================================================================================

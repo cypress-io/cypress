@@ -8,7 +8,7 @@ const minimist = require('minimist')
 const argsUtil = require(`../../../lib/util/args`)
 const getWindowsProxyUtil = require(`../../../lib/util/get-windows-proxy`)
 
-const cwd = process.cwd()
+const getCwd = () => process.cwd()
 
 describe('lib/util/args', () => {
   beforeEach(function () {
@@ -92,7 +92,7 @@ describe('lib/util/args', () => {
 
   context('--project', () => {
     it('sets projectRoot', function () {
-      const projectRoot = path.resolve(cwd, './foo/bar')
+      const projectRoot = path.resolve(getCwd(), './foo/bar')
       const options = this.setup('--project', './foo/bar')
 
       expect(options.projectRoot).to.eq(projectRoot)
@@ -113,7 +113,7 @@ describe('lib/util/args', () => {
 
   context('--run-project', () => {
     it('sets projectRoot', function () {
-      const projectRoot = path.resolve(cwd, '/baz')
+      const projectRoot = path.resolve(getCwd(), '/baz')
       const options = this.setup('--run-project', '/baz')
 
       expect(options.projectRoot).to.eq(projectRoot)
@@ -138,16 +138,16 @@ describe('lib/util/args', () => {
     it('converts to array', function () {
       const options = this.setup('--run-project', 'foo', '--spec', 'cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/a.js`)
-      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/b.js`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/a.js`)
+      expect(options.spec[1]).to.eq(`${getCwd()}/cypress/integration/b.js`)
 
-      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/c.js`)
+      expect(options.spec[2]).to.eq(`${getCwd()}/cypress/integration/c.js`)
     })
 
     it('discards wrapping single quotes', function () {
       const options = this.setup('--run-project', 'foo', '--spec', '\'cypress/integration/foo_spec.js\'')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/foo_spec.js`)
     })
 
     it('throws if argument cannot be parsed', function () {
@@ -165,56 +165,56 @@ describe('lib/util/args', () => {
     it('should be correctly parsing globs with lists & ranges', function () {
       const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
     })
 
     it('should be correctly parsing globs with a mix of lists, ranges & regular paths', function () {
       const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js,cypress/integration/foo.spec.js')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
-      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo.spec.js`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+      expect(options.spec[1]).to.eq(`${getCwd()}/cypress/integration/foo.spec.js`)
     })
 
     it('should be correctly parsing single glob with range', function () {
       const options = this.setup('--spec', 'cypress/integration/[a-c]*/**')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/[a-c]*/**`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/[a-c]*/**`)
     })
 
     it('should be correctly parsing single glob with list', function () {
       const options = this.setup('--spec', 'cypress/integration/{a,b,c}/*.js')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{a,b,c}/*.js`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/{a,b,c}/*.js`)
     })
 
     // https://github.com/cypress-io/cypress/issues/20794
     it('does not split at filename with glob pattern', function () {
       const options = this.setup('--spec', 'cypress/integration/foo/bar/[baz]/test.ts,cypress/integration/foo1/bar/[baz]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/[baz]/test.ts`)
-      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/[baz]/test.ts`)
-      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
-      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/foo/bar/[baz]/test.ts`)
+      expect(options.spec[1]).to.eq(`${getCwd()}/cypress/integration/foo1/bar/[baz]/test.ts`)
+      expect(options.spec[2]).to.eq(`${getCwd()}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${getCwd()}/cypress/integration/foo3/bar/baz/foo4.ts`)
     })
 
     // https://github.com/cypress-io/cypress/issues/20794
     it('correctly splits at comma with glob pattern', function () {
       const options = this.setup('--spec', 'cypress/integration/foo/bar/baz/test.ts,cypress/integration/foo1/bar/[baz]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/baz/test.ts`)
-      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/[baz]/test.ts`)
-      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
-      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/foo/bar/baz/test.ts`)
+      expect(options.spec[1]).to.eq(`${getCwd()}/cypress/integration/foo1/bar/[baz]/test.ts`)
+      expect(options.spec[2]).to.eq(`${getCwd()}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${getCwd()}/cypress/integration/foo3/bar/baz/foo4.ts`)
     })
 
     // https://github.com/cypress-io/cypress/issues/20794
     it('correctly splits at comma with escaped glob pattern', function () {
       const options = this.setup('--spec', 'cypress/integration/foo/bar/\[baz\]/test.ts,cypress/integration/foo1/bar/\[baz1\]/test.ts,cypress/integration/foo2/bar/baz/test.ts,cypress/integration/foo3/bar/baz/foo4.ts')
 
-      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo/bar/\[baz\]/test.ts`)
-      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo1/bar/\[baz1\]/test.ts`)
-      expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/foo2/bar/baz/test.ts`)
-      expect(options.spec[3]).to.eq(`${cwd}/cypress/integration/foo3/bar/baz/foo4.ts`)
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/foo/bar/\[baz\]/test.ts`)
+      expect(options.spec[1]).to.eq(`${getCwd()}/cypress/integration/foo1/bar/\[baz1\]/test.ts`)
+      expect(options.spec[2]).to.eq(`${getCwd()}/cypress/integration/foo2/bar/baz/test.ts`)
+      expect(options.spec[3]).to.eq(`${getCwd()}/cypress/integration/foo3/bar/baz/foo4.ts`)
     })
   })
 
@@ -226,6 +226,58 @@ describe('lib/util/args', () => {
       expect(options.tag[1]).to.eq('production')
 
       expect(options.tag[2]).to.eq('build')
+    })
+  })
+
+  context('--auto-cancel-after-failures', () => {
+    it('converts to integer', function () {
+      const options = this.setup('--auto-cancel-after-failures', '4')
+
+      expect(options.autoCancelAfterFailures).to.eq(4)
+    })
+
+    it('converts to false', function () {
+      const options = this.setup('--auto-cancel-after-failures', 'false')
+
+      expect(options.autoCancelAfterFailures).to.eq(false)
+    })
+
+    it('handles value 0', function () {
+      const options = this.setup('--auto-cancel-after-failures', '0')
+
+      expect(options.autoCancelAfterFailures).to.eq(0)
+    })
+
+    it('throws error when a string is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', 'foo')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when true is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', 'true')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (true) error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when a negative value is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', '-1')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (negative value) error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when a decimal value is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', '1.5')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (decimal value) error', stripAnsi(err.message))
+      }
     })
   })
 
@@ -335,6 +387,20 @@ describe('lib/util/args', () => {
       } catch (err) {
         return snapshot('invalid reporter options error', stripAnsi(err.message))
       }
+    })
+  })
+
+  context('--runner-ui', () => {
+    it('converts to boolean', function () {
+      const options = this.setup('--runner-ui', 'false')
+
+      expect(options.runnerUi).to.eq(false)
+    })
+
+    it('is undefined if not specified', function () {
+      const options = this.setup()
+
+      expect(options.runnerUi).to.eq(undefined)
     })
   })
 
@@ -534,9 +600,9 @@ describe('lib/util/args', () => {
       this.hosts = { a: 'b', b: 'c' }
       this.blockHosts = ['a.com', 'b.com']
       this.specs = [
-        path.join(cwd, 'foo'),
-        path.join(cwd, 'bar'),
-        path.join(cwd, 'baz'),
+        path.join(getCwd(), 'foo'),
+        path.join(getCwd(), 'bar'),
+        path.join(getCwd(), 'baz'),
       ]
 
       this.env = {
@@ -577,7 +643,7 @@ describe('lib/util/args', () => {
 
     it('backs up env, config, reporterOptions, spec', function () {
       expect(this.obj).to.deep.eq({
-        cwd,
+        cwd: getCwd(),
         _: [],
         config: this.config,
         invokedFromCli: false,
@@ -600,12 +666,12 @@ describe('lib/util/args', () => {
 
       expect(args).to.deep.eq([
         `--config=${mergedConfig}`,
-        `--cwd=${cwd}`,
+        `--cwd=${getCwd()}`,
         `--spec=${JSON.stringify(this.specs)}`,
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({
-        cwd,
+        cwd: getCwd(),
         _: [],
         invokedFromCli: true,
         config: this.config,
@@ -618,7 +684,7 @@ describe('lib/util/args', () => {
 
       expect(result).to.deep.equal({
         ciBuildId: '1e100',
-        cwd,
+        cwd: getCwd(),
         _: [],
         invokedFromCli: false,
         config: {},
@@ -629,7 +695,7 @@ describe('lib/util/args', () => {
       const result = argsUtil.toObject(['--config', '{"baseUrl": "http://foobar.com", "specPattern":"**/*.test.js"}'])
 
       expect(result).to.deep.equal({
-        cwd,
+        cwd: getCwd(),
         _: [],
         invokedFromCli: false,
         config: {
@@ -652,7 +718,7 @@ describe('lib/util/args', () => {
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
-        cwd,
+        cwd: getCwd(),
         _: [
           '/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress',
           '/Applications/Cypress.app',
@@ -677,7 +743,7 @@ describe('lib/util/args', () => {
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
-        cwd,
+        cwd: getCwd(),
         _: [
           '/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress',
           '/Applications/Cypress.app1',

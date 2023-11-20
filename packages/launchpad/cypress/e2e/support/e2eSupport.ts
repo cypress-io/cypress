@@ -1,5 +1,5 @@
-/// <reference path="../../../../frontend-shared/cypress/e2e/support/e2eSupport.ts" />
-require('../../../../frontend-shared/cypress/e2e/support/e2eSupport')
+/// <reference path="../../../../frontend-shared/cypress/support/e2e.ts" />
+require('../../../../frontend-shared/cypress/support/e2e')
 
 require('./dropFileWithPath')
 require('./containsPath')

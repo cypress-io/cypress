@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "types": ["cypress"]
+  },
+  "include": ["e2e/**/*.ts"]
+}

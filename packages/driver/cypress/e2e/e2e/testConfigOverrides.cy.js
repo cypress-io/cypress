@@ -6,48 +6,21 @@ describe('per-test config', () => {
     ranChrome: false,
     ranChromium: false,
     ranElectron: false,
+    ranWebKit: false,
   }
 
   after(function () {
     if (hasOnly(this.currentTest)) return
 
-    if (Cypress.browser.family === 'firefox') {
-      return expect(testState).deep.eq({
-        ranChrome: false,
-        ranChromium: false,
-        ranFirefox: true,
-        ranElectron: false,
-      })
-    }
+    const { name } = Cypress.browser
 
-    if (Cypress.browser.name === 'chrome') {
-      return expect(testState).deep.eq({
-        ranChrome: true,
-        ranChromium: false,
-        ranFirefox: false,
-        ranElectron: false,
-      })
-    }
-
-    if (Cypress.browser.name === 'chromium') {
-      return expect(testState).deep.eq({
-        ranChrome: false,
-        ranChromium: true,
-        ranFirefox: false,
-        ranElectron: false,
-      })
-    }
-
-    if (Cypress.browser.name === 'electron') {
-      return expect(testState).deep.eq({
-        ranChrome: false,
-        ranChromium: false,
-        ranFirefox: false,
-        ranElectron: true,
-      })
-    }
-
-    throw new Error('should have made assertion')
+    expect(testState).deep.eq({
+      ranChrome: name === 'chrome',
+      ranChromium: name === 'chromium',
+      ranFirefox: name === 'firefox',
+      ranElectron: name === 'electron',
+      ranWebKit: name === 'webkit',
+    })
   })
 
   it('set various config values', {
@@ -103,6 +76,13 @@ describe('per-test config', () => {
   }, () => {
     testState.ranElectron = true
     expect(Cypress.browser.name).eq('electron')
+  })
+
+  it('can specify only run in webkit', {
+    browser: 'webkit',
+  }, () => {
+    testState.ranWebKit = true
+    expect(Cypress.browser.name).eq('webkit')
   })
 
   describe('mutating global config via Cypress.config and Cypress.env', () => {
@@ -377,15 +357,15 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
-describe('cannot set read-only properties', () => {
+describe('cannot set override configuration options that', () => {
   afterEach(() => {
     window.top.__cySkipValidateConfig = true
   })
 
   it('throws if mutating read-only config with Cypress.config()', (done) => {
     window.top.__cySkipValidateConfig = false
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option')
       done()
     })
 

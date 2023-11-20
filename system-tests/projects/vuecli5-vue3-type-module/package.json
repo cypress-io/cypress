@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "vue": "^3.2.13"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~5.0.0"
+  },
+  "type": "module",
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.5"
+  },
+  "projectFixtureDirectory": "vue-cli"
+}

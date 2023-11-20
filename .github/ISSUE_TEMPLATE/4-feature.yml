@@ -1,0 +1,28 @@
+name: "✨ Feature"
+description: Suggest a feature or enhancement to improve Cypress.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
+
+        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/discord) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
+  - type: textarea
+    id: feature
+    attributes:
+      label: What would you like?
+      description: A clear description of the feature or enhancement wanted in Cypress.
+      placeholder: I'd like to be able to...
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why is this needed?
+      description: Remember, we're not familiar with the app you're testing, so please provide a clear description of why this would be useful to your project. 
+      placeholder: I want this because...
+  - type: textarea
+    id: other
+    attributes:
+      label: Other
+      placeholder: Any other details?

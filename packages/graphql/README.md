@@ -1,6 +1,6 @@
 # GraphQL
 
-The GraphQL layer that `@packages/launchpad` and `@packages/runner` use to interact with `@packages/server`. 
+The GraphQL layer that `@packages/launchpad` and `@packages/app` use to interact with `@packages/server`. 
 
 With the goal of type safety, several tools and abstractions are used. The technologies are:
 

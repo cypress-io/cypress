@@ -1,6 +1,8 @@
 import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
 import { useAutStore, useSpecStore } from '../store'
+import { useStudioStore } from '../store/studio-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
 
 export function useEventManager () {
@@ -8,14 +10,16 @@ export function useEventManager () {
 
   const autStore = useAutStore()
   const specStore = useSpecStore()
+  const studioStore = useStudioStore()
+  const router = useRouter()
 
-  function runSpec () {
+  function runSpec (isRerun: boolean = false) {
     if (!specStore.activeSpec) {
       throw Error(`Cannot run spec when specStore.active spec is null or undefined!`)
     }
 
     autStore.setScriptError(null)
-    UnifiedRunnerAPI.executeSpec(specStore.activeSpec)
+    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
   }
 
   function initializeRunnerLifecycleEvents () {
@@ -23,7 +27,9 @@ export function useEventManager () {
     eventManager.on('restart', () => {
       // If we get the event to restart but have already navigated away from the runner, don't execute the spec
       if (specStore.activeSpec) {
-        runSpec()
+        const isRerun = true
+
+        runSpec(isRerun)
       }
     })
 
@@ -35,11 +41,34 @@ export function useEventManager () {
       getAutIframeModel().showVisitFailure(payload)
     })
 
-    eventManager.on('visit:blank', ({ type }) => {
-      getAutIframeModel().visitBlank({ type })
+    eventManager.on('page:loading', (isLoading) => {
+      if (isLoading) {
+        return
+      }
+
+      getAutIframeModel().reattachStudio()
+    })
+
+    eventManager.on('visit:blank', ({ testIsolation }) => {
+      getAutIframeModel().visitBlankPage(testIsolation)
+    })
+
+    eventManager.on('run:end', () => {
+      if (studioStore.isLoading) {
+        getAutIframeModel().startStudio()
+      }
     })
 
     eventManager.on('expect:origin', addCrossOriginIframe)
+
+    eventManager.on('testFilter:cloudDebug:dismiss', () => {
+      const currentRoute = router.currentRoute.value
+
+      const { mode, ...query } = currentRoute.query
+
+      // Delete runId from query which will remove the test filter and trigger a rerun
+      router.replace({ ...currentRoute, query })
+    })
   }
 
   const startSpecWatcher = () => {

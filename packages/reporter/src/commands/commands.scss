@@ -21,6 +21,19 @@
     font-family: $monospace;
   }
 
+  .command-is-studio {
+    cursor: auto;
+    
+    &.command-type-parent .commands-controls .studio-command-remove {
+      display: block;
+      padding-left: 5px;
+
+      &:hover {
+        color: #565554;
+      }
+    }
+  }
+
   // System Command Styles
   .command-type-system {
     user-select: none;
@@ -118,19 +131,22 @@
 
     .command-group-block {
       @include nested-command-dashes($gray-600);
-      width: 11px;
+      width: 12px;
       min-height: 28px;
-      min-width: 11px;
+      min-width: 12px;
     }
   }
 
   .command-info {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    display: -webkit-box;
+    font-weight: 600;
     margin-left: 0;
     overflow: hidden;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
     width: 100%;
-    font-weight: 600;
 
     .command-aliases,
     .command-message {
@@ -236,13 +252,37 @@
     }
   }
 
+  .command-state-warned {
+    color: $warn-text;
+
+    &:not(.command-type-system) {
+      border-left: $warn-border;
+    }
+
+    .command-number-column,
+    .command-method,
+    .command-message {
+      color: $warn-text;
+    }
+
+    .command-group {
+      border-color: $warn-text;
+      @include nested-command-dashes($warn-text);
+
+      .command-group-block {
+        border-color: $warn-text;
+        @include nested-command-dashes($warn-text);
+      }
+    }
+  }
+
   .command-state-failed {
     color: $err-header-text;
 
     &:not(.command-type-system) {
-      border-left: 2px solid $fail;
+      border-left: $err-border;
       background-color: $err-header-background;
-          
+
       &.command-is-interactive:hover {
         background: rgba($red-400, 0.3);
       }
@@ -252,6 +292,10 @@
     .command-method,
     .command-message {
       color: $err-header-text;
+    }
+
+    .failed-indicator {
+      vertical-align: middle;
     }
 
     .command-group {
@@ -265,14 +309,8 @@
     }
   }
 
-  .command .runnable-err-wrapper {
-    padding: 0;
-    border: 0;
-    margin: 0;
-    margin-bottom: 5px;
-  }
-
   // Custom Styles for Specific Commands
+  // NOTE: assert does not support warned state
   .command-name-assert {
     .command-method {
       span {
@@ -365,8 +403,6 @@
     white-space: initial;
     word-wrap: inherit;
     width: 100%;
-    -webkit-line-clamp: 50;
-    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception

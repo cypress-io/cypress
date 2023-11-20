@@ -136,14 +136,14 @@ describe('lib/tasks/cache', () => {
     it('deletes cache binaries for all version but the current one', async () => {
       await cache.prune()
 
-      const currentVersion = util.pkgVersion()
+      const checkedInBinaryVersion = util.pkgVersion()
 
       const files = await fs.readdir('/.cache/Cypress')
 
       expect(files.length).to.eq(1)
 
       files.forEach((file) => {
-        expect(file).to.eq(currentVersion)
+        expect(file).to.eq(checkedInBinaryVersion)
       })
 
       defaultSnapshot()
@@ -155,14 +155,14 @@ describe('lib/tasks/cache', () => {
       await fs.removeAsync(dir)
       await cache.prune()
 
-      const currentVersion = util.pkgVersion()
+      const checkedInBinaryVersion = util.pkgVersion()
 
       const files = await fs.readdirAsync('/.cache/Cypress')
 
       expect(files.length).to.eq(1)
 
       files.forEach((file) => {
-        expect(file).to.eq(currentVersion)
+        expect(file).to.eq(checkedInBinaryVersion)
       })
 
       defaultSnapshot()

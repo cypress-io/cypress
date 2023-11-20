@@ -9,6 +9,7 @@ describe('cypress config with esm and cjs', function () {
     'config-cjs-and-esm/config-with-cjs',
     'config-cjs-and-esm/config-with-js-module',
     'config-cjs-and-esm/config-with-ts-module',
+    'config-cjs-and-esm/config-node-next',
 
     // This covers Vite and SvelteKit e2e projects
     'config-cjs-and-esm/config-with-ts-module-and-esbuild',
@@ -43,6 +44,7 @@ describe('compiles config files using the native node import', () => {
     'config-cjs-and-esm/config-with-js-tsconfig-es5',
     'config-cjs-and-esm/config-with-js-tsconfig-es3',
     'config-cjs-and-esm/config-with-js-tsconfig-es2015',
+    'config-cjs-and-esm/config-with-module-resolution-bundler',
   ].forEach((project) => {
     systemTests.it(`${project}`, {
       project,

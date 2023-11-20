@@ -2,10 +2,6 @@ import _ from 'lodash'
 import mockfs from 'mock-fs'
 import path from 'path'
 
-export const logFs = () => {
-  console.dir(getFs(), { depth: null })
-}
-
 export const getFsPath = (pathStr: string) => {
   return _.get(getFs(), _.compact(pathStr.split(path.sep)))
 }

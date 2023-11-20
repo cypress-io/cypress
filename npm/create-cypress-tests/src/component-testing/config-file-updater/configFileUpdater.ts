@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { parse } from '@babel/parser'
 import type { File } from '@babel/types'
 import type { NodePath } from 'ast-types/lib/node-path'
@@ -72,7 +71,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
   const splicers: Splicer[] = []
 
   if (!objectLiteralNode) {
-    // if the export is no object litteral
+    // if the export is no object literal
     throw new Error('Cypress was unable to add/update values in your configuration file.')
   }
 

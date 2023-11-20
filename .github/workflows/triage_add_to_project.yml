@@ -1,0 +1,68 @@
+name: 'Triage: add issue/PR to project'
+
+on:
+  # makes this workflow reusable
+  workflow_call:
+    secrets:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
+        required: true
+      TRIAGE_BOARD_TOKEN:
+        required: true
+      WORKFLOW_DEPLOY_KEY:
+        required: true
+  issues:
+    types:
+      - opened
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  add-to-triage-project:
+    name: Add to triage project
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      PROJECT_NUMBER: 9
+      GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+    steps:
+      - name: is-collaborator
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $repo: String!, $user: String!) {
+              repository(owner: $org, name: $repo) {
+                collaborators(query: $user, first: 1) {
+                  totalCount
+                }
+              }
+            } ' -f org=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f user=${{ github.event.pull_request.user.login || github.event.issue.user.login }} > collaborators.json
+
+          echo 'IS_COLLABORATOR='$(jq -r '.data.repository.collaborators.totalCount' collaborators.json) >> $GITHUB_ENV
+      - uses: actions/add-to-project@v0.4.1
+        # only add issues/prs from outside contributors to the project
+        if: ${{ env.IS_COLLABORATOR == 0 || github.event.repository.name == 'cypress-support-internal' || github.event.pull_request.user.login == 'github-actions[bot]' || github.event.issue.user.login == 'github-actions[bot]' }}
+        with:
+          project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
+          github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+  add-contributor-pr-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          repository: 'cypress-io/release-automations'
+          ref: 'master'
+          ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Run comment_workflow.js Script
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/triage/add_contributing_comment.js')
+            await script.addContributingComment(github, context);     
+

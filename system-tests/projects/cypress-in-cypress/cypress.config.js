@@ -2,6 +2,7 @@ module.exports = {
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
+    experimentalSingleTabRunMode: true,
     specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
     supportFile: false,
     devServer: {

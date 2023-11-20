@@ -97,11 +97,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalSessionAndOrigin',
-    defaultValue: false,
-    isExperimental: true,
-    canUpdateDuringTestTime: true,
-  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     isExperimental: true,
@@ -246,7 +241,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'video',
-    defaultValue: true,
+    defaultValue: false,
     canUpdateDuringTestTime: false,
   }, {
     name: 'videoCompression',

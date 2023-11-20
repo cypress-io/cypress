@@ -2,12 +2,18 @@ import _ from 'lodash'
 import Debug from 'debug'
 import extension from '@packages/extension'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
+import type { SerializableAutomationCookie } from '../util/cookies'
+
+type AutomationFn<V, T> = (data: V) => Bluebird.Promise<T>
+
+type AutomationMessageFn<V, T> = (message: string, data: V) => Bluebird.Promise<T>
 
 export interface AutomationCookie {
   domain: string
+  expirationDate?: number
   expiry: number | null
   httpOnly: boolean
-  maxAge: 'Infinity' | '-Infinity' | number | null
+  hostOnly?: boolean
   name: string
   path: string | null
   sameSite: string
@@ -18,38 +24,44 @@ export interface AutomationCookie {
 
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly sameSite'.split(' ')
+const COOKIE_PROPERTIES = 'domain expiry httpOnly hostOnly name path sameSite secure value'.split(' ')
 
 const debug = Debug('cypress:server:automation:cookies')
 
-const normalizeCookies = (cookies) => {
-  return _.map(cookies, normalizeCookieProps)
+const normalizeCookies = (cookies: (SerializableAutomationCookie | AutomationCookie)[]): AutomationCookie[] => {
+  return _.map(cookies, normalizeCookieProps) as AutomationCookie[]
 }
 
-const normalizeCookieProps = function (props) {
-  if (!props) {
-    return props
+const normalizeCookieProps = function (automationCookie: SerializableAutomationCookie | AutomationCookie | null) {
+  if (!automationCookie) {
+    return automationCookie
   }
 
-  const cookie = _.pick(props, COOKIE_PROPERTIES)
+  const cookie = _.pick(automationCookie, COOKIE_PROPERTIES)
 
-  if (props.expiry != null) {
+  if (automationCookie.expiry === '-Infinity') {
+    cookie.expiry = -Infinity
+    // set the cookie to expired so when set, the cookie is removed
+    cookie.expirationDate = 0
+  } else if (automationCookie.expiry === 'Infinity') {
+    cookie.expiry = null
+  } else if (automationCookie.expiry != null) {
     // when sending cookie props we need to convert
     // expiry to expirationDate
     delete cookie.expiry
-    cookie.expirationDate = props.expiry
-  } else if (props.expirationDate != null) {
+    cookie.expirationDate = automationCookie.expiry
+  } else if (automationCookie.expirationDate != null) {
     // and when receiving cookie props we need to convert
     // expirationDate to expiry and always remove url
     delete cookie.expirationDate
     delete cookie.url
-    cookie.expiry = props.expirationDate
+    cookie.expiry = automationCookie.expirationDate
   }
 
-  return cookie
+  return cookie as AutomationCookie
 }
 
-export const normalizeGetCookies = (cookies) => {
+export const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (AutomationCookie | null)[] => {
   return _.chain(cookies)
   .map(normalizeGetCookieProps)
   // sort in order of expiration date, ascending
@@ -57,7 +69,7 @@ export const normalizeGetCookies = (cookies) => {
   .value()
 }
 
-export const normalizeGetCookieProps = (props) => {
+export const normalizeGetCookieProps = (props: AutomationCookie | null) => {
   if (!props) {
     return props
   }
@@ -79,7 +91,7 @@ export class Cookies {
 
   constructor (private cyNamespace, private cookieNamespace) {}
 
-  isNamespaced = (cookie) => {
+  isNamespaced = (cookie: AutomationCookie | null) => {
     const name = cookie && cookie.name
 
     // if the cookie has no name, return false
@@ -96,13 +108,15 @@ export class Cookies {
     }
   }
 
-  getCookies (data, automate) {
+  getCookies (data: {
+    domain?: string
+  }, automate: AutomationMessageFn<any, (AutomationCookie | null)[]>) {
     debug('getting:cookies %o', data)
 
     return automate('get:cookies', data)
     .then((cookies) => {
       cookies = normalizeGetCookies(cookies)
-      cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie))
+      cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie)) as AutomationCookie[]
 
       debug('received get:cookies %o', cookies)
 
@@ -110,7 +124,13 @@ export class Cookies {
     })
   }
 
-  getCookie (data, automate) {
+  getCookie (data: {
+    domain: string
+    name: string
+  }, automate: AutomationFn<{
+    domain: string
+    name: string
+  }, AutomationCookie | null>) {
     debug('getting:cookie %o', data)
 
     return automate(data)
@@ -127,9 +147,9 @@ export class Cookies {
     })
   }
 
-  setCookie (data, automate) {
+  setCookie (data: SerializableAutomationCookie, automate: AutomationFn<AutomationCookie, AutomationCookie | null>) {
     this.throwIfNamespaced(data)
-    const cookie = normalizeCookieProps(data)
+    const cookie = normalizeCookieProps(data) as AutomationCookie
 
     // lets construct the url ourselves right now
     // unless we already have a URL
@@ -148,13 +168,13 @@ export class Cookies {
   }
 
   setCookies (
-    cookies: AutomationCookie[],
-    automate: (eventName: string, cookies: AutomationCookie[]) => Bluebird.Promise<AutomationCookie[]>,
+    cookies: SerializableAutomationCookie[] | AutomationCookie[],
+    automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>,
     eventName: 'set:cookies' | 'add:cookies' = 'set:cookies',
   ) {
     cookies = cookies.map((data) => {
       this.throwIfNamespaced(data)
-      const cookie = normalizeCookieProps(data)
+      const cookie = normalizeCookieProps(data) as AutomationCookie
 
       // lets construct the url ourselves right now
       // unless we already have a URL
@@ -165,7 +185,7 @@ export class Cookies {
 
     debug(`${eventName} %o`, cookies)
 
-    return automate(eventName, cookies)
+    return automate(eventName, cookies as AutomationCookie[])
     .return(cookies)
   }
 
@@ -173,13 +193,19 @@ export class Cookies {
   // same as set:cookies in Firefox, but will only add cookies and not clear
   // them in Chrome, etc.
   addCookies (
-    cookies: AutomationCookie[],
-    automate: (eventName: string, cookies: AutomationCookie[]) => Bluebird.Promise<AutomationCookie[]>,
+    cookies: SerializableAutomationCookie[],
+    automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>,
   ) {
     return this.setCookies(cookies, automate, 'add:cookies')
   }
 
-  clearCookie (data, automate) {
+  clearCookie (data: {
+    domain: string
+    name: string
+  }, automate: AutomationFn<{
+    domain: string
+    name: string
+  }, AutomationCookie | null>) {
     this.throwIfNamespaced(data)
     debug('clear:cookie %o', data)
 
@@ -193,7 +219,7 @@ export class Cookies {
     })
   }
 
-  async clearCookies (data, automate) {
+  async clearCookies (data: AutomationCookie[], automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>) {
     const cookiesToClear = data
 
     const cookies = _.reject(normalizeCookies(cookiesToClear), this.isNamespaced)
@@ -204,8 +230,12 @@ export class Cookies {
     .mapSeries(normalizeCookieProps)
   }
 
-  changeCookie (data) {
-    const c = normalizeCookieProps(data.cookie)
+  changeCookie (data: {
+    cause: string
+    cookie: SerializableAutomationCookie
+    removed: boolean
+  }) {
+    const c = normalizeCookieProps(data.cookie) as AutomationCookie
 
     if (this.isNamespaced(c)) {
       return

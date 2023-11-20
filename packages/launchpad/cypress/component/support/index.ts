@@ -15,8 +15,6 @@
 
 // Import commands.js using ES2015 syntax:
 
-import 'virtual:windi.css'
-import '../../../src/main.scss'
 import '@iconify/iconify'
 import '@purge-icons/generated'
 
@@ -24,7 +22,7 @@ import 'cypress-real-events/support'
 
 import './commands'
 import './attachFileWithPath'
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/customPercyCommand'
 
 installCustomPercyCommand({
   before: () => {},

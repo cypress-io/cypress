@@ -47,8 +47,8 @@ export default (Commands, Cypress, cy) => {
         const deltaOptions = $utils.filterOutOptions(options)
 
         options._log = Cypress.log({
-          message: deltaOptions,
           $el: options.$el,
+          message: deltaOptions,
           timeout: options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
@@ -104,13 +104,16 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.invalid_multiple')
       }
 
+      const subjectChain = cy.subjectChain()
+
       const getOptions = () => {
+        options.$el = cy.getSubjectFromChain(subjectChain)
         let notAllUniqueValues
 
         // throw if <select> is disabled
-        if (!options.force && options.$el.prop('disabled')) {
-          node = $dom.stringify(options.$el)
-          $errUtils.throwErrByPath('select.disabled', { args: { node } })
+        if (!options.force) {
+          Cypress.ensure.isElement(options.$el, 'select', options._log)
+          Cypress.ensure.isNotDisabled(options.$el, 'select', options._log)
         }
 
         const values: string[] = []
@@ -124,6 +127,11 @@ export default (Commands, Cypress, cy) => {
           if (valueOrTextOrIndex.includes(value) || valueOrTextOrIndex.includes(index)) {
             optionEls.push(optEl)
             values.push(value)
+
+            // https://github.com/cypress-io/cypress/issues/24739
+            if (options.$el.find(`option[value="${value}"]`).length > 1) {
+              notAllUniqueValues = true
+            }
           }
 
           // replace new line chars, then trim spaces
@@ -180,9 +188,7 @@ export default (Commands, Cypress, cy) => {
               args: { node },
             })
           }
-        })
 
-        _.each(optionEls, ($el) => {
           if ($el.closest('optgroup').prop('disabled')) {
             node = $dom.stringify($el)
 
@@ -235,12 +241,12 @@ export default (Commands, Cypress, cy) => {
           const activeElement = $elements.getActiveElByDocument(options.$el)
 
           if (!options.force && activeElement === null) {
-            const node = $dom.stringify(options.$el)
-            const onFail = options._log
-
-            $errUtils.throwErrByPath('select.disabled', {
-              onFail,
-              args: { node },
+            $errUtils.throwErrByPath('dom.disabled', {
+              onFail: options._log,
+              args: {
+                cmd: 'select',
+                node: $dom.stringify(options.$el),
+              },
             })
           }
 
@@ -268,7 +274,7 @@ export default (Commands, Cypress, cy) => {
 
             if (notAllUniqueValues) {
               // if all the values are the same and the user is trying to
-              // select based on the text, setting the val() will just
+              // select based on the text or index, setting the val() will just
               // select the first one
               let selectedIndex = 0
 

@@ -93,6 +93,7 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const descriptions = {
+  autoCancelAfterFailures: 'overrides the project-level Cloud configuration to set the failed test threshold for auto cancellation or to disable auto cancellation when recording to the Cloud',
   browser: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
   cachePrune: 'deletes all cached binaries except for the version currently in use',
@@ -110,7 +111,7 @@ const descriptions = {
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
-  group: 'a named group for recorded runs in the Cypress Dashboard',
+  group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
@@ -118,11 +119,13 @@ const descriptions = {
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
   quiet: 'run quietly, using only the configured reporter',
-  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
+  record: 'records the run. sends test results, screenshots and videos to Cypress Cloud.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
+  runnerUi: 'displays the Cypress Runner UI',
+  noRunnerUi: 'hides the Cypress Runner UI',
   spec: 'runs specific spec file(s). defaults to "all"',
-  tag: 'named tag(s) for recorded runs in the Cypress Dashboard',
+  tag: 'named tag(s) for recorded runs in Cypress Cloud',
   version: 'prints Cypress version',
 }
 
@@ -153,26 +156,16 @@ const text = (description) => {
 
 function includesVersion (args) {
   return (
-    _.includes(args, 'version') ||
     _.includes(args, '--version') ||
     _.includes(args, '-v')
   )
 }
 
-function showVersions (args) {
+function showVersions (opts) {
   debug('printing Cypress version')
-  debug('additional arguments %o', args)
+  debug('additional arguments %o', opts)
 
-  const versionParser = commander.option(
-    '--component <package|binary|electron|node>', 'component to report version for',
-  )
-  .allowUnknownOption(true)
-  const parsed = versionParser.parse(args)
-  const parsedOptions = {
-    component: parsed.component,
-  }
-
-  debug('parsed version arguments %o', parsedOptions)
+  debug('parsed version arguments %o', opts)
 
   const reportAllVersions = (versions) => {
     logger.always('Cypress package version:', versions.package)
@@ -214,8 +207,8 @@ function showVersions (args) {
   return require('./exec/versions')
   .getVersions()
   .then((versions = defaultVersions) => {
-    if (parsedOptions.component) {
-      reportComponentVersion(parsedOptions.component, versions)
+    if (opts?.component) {
+      reportComponentVersion(opts.component, versions)
     } else {
       reportAllVersions(versions)
     }
@@ -242,6 +235,7 @@ const addCypressRunCommand = (program) => {
   .command('run')
   .usage('[options]')
   .description('Runs Cypress tests from the CLI without the GUI')
+  .option('--auto-cancel-after-failures <test-failure-count || false>', text('autoCancelAfterFailures'))
   .option('-b, --browser <browser-name-or-path>', text('browser'))
   .option('--ci-build-id <id>', text('ciBuildId'))
   .option('--component', text('component'))
@@ -260,6 +254,8 @@ const addCypressRunCommand = (program) => {
   .option('-q, --quiet', text('quiet'))
   .option('--record [bool]', text('record'), coerceFalse)
   .option('-r, --reporter <reporter>', text('reporter'))
+  .option('--runner-ui', text('runnerUi'))
+  .option('--no-runner-ui', text('noRunnerUi'))
   .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
   .option('-s, --spec <spec>', text('spec'))
   .option('-t, --tag <tag>', text('tag'))
@@ -405,7 +401,21 @@ module.exports = {
       args = process.argv
     }
 
-    const { CYPRESS_INTERNAL_ENV } = process.env
+    const { CYPRESS_INTERNAL_ENV, CYPRESS_DOWNLOAD_USE_CA } = process.env
+
+    if (process.env.CYPRESS_DOWNLOAD_USE_CA) {
+      let msg = `
+        ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
+
+        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer required to be set.
+        
+        You can safely unset this environment variable.
+      `
+
+      logger.log()
+      logger.warn(stripIndent(msg))
+      logger.log()
+    }
 
     if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
@@ -440,13 +450,19 @@ module.exports = {
       program.help()
     })
 
-    program
+    const handleVersion = (cmd) => {
+      return cmd
+      .option('--component <package|binary|electron|node>', 'component to report version for')
+      .action((opts, ...other) => {
+        showVersions(util.parseOpts(opts))
+      })
+    }
+
+    handleVersion(program
+    .storeOptionsAsProperties()
     .option('-v, --version', text('version'))
     .command('version')
-    .description(text('version'))
-    .action(() => {
-      showVersions(args)
-    })
+    .description(text('version')))
 
     maybeAddInspectFlags(addCypressOpenCommand(program))
     .action((opts) => {
@@ -649,7 +665,7 @@ module.exports = {
       // and now does not understand top level options
       // .option('-v, --version').command('version')
       // so we have to manually catch '-v, --version'
-      return showVersions(args)
+      handleVersion(program)
     }
 
     debug('program parsing arguments')

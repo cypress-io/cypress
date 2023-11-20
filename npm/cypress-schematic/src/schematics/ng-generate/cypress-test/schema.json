@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "cypress-schematics-generate-spec",
+  "title": "Cypress Generate Spec Options Schema",
+  "type": "object",
+  "properties": {
+    "filename": {
+      "type": "string",
+      "description": "Allows users to specify a custom filename.",
+      "visible": false
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The path where the spec will be created.",
+      "visible": false
+    },
+    "project": {
+      "type": "string",
+      "description": "The name of the project to create the spec in.",
+      "alias": "p",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the spec.",
+      "alias": "n",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What should the spec be named?"
+    },
+    "component": {
+      "type": "boolean",
+      "alias": "c",
+      "default": false,
+      "description": "When true, the spec created will be a component spec."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

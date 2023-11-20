@@ -13,7 +13,7 @@ interface ServeOptions {
 const debug = Debug('cypress:server:runner-ct')
 
 export const handle = (req, res) => {
-  const pathToFile = getPathToDist('runner-ct', req.params[0])
+  const pathToFile = getPathToDist('runner', req.params[0])
 
   return send(req, pathToFile)
   .pipe(res)
@@ -47,7 +47,7 @@ export const makeServeConfig = (options) => {
 export const serve = (req, res, options: ServeOptions) => {
   const config = makeServeConfig(options)
 
-  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
+  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner')
 
   return res.render(runnerPath, config)
 }

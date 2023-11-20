@@ -1,13 +1,15 @@
 // @ts-ignore
 import pkg from '@packages/root'
 import debugLib from 'debug'
+import DataLoader from 'dataloader'
+import { createBatchingExecutor } from '@graphql-tools/batch-execute'
 import { cacheExchange, Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -31,9 +33,9 @@ const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
 const REMOTE_SCHEMA_URLS = {
-  staging: 'https://dashboard-staging.cypress.io',
+  staging: 'https://cloud-staging.cypress.io',
   development: 'http://localhost:3000',
-  production: 'https://dashboard.cypress.io',
+  production: 'https://cloud.cypress.io',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +43,6 @@ type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
 export interface CloudExecuteQuery {
-  operation: string
   operationHash?: string
   operationDoc: DocumentNode
   operationVariables: any
@@ -49,6 +50,7 @@ export interface CloudExecuteQuery {
 
 export interface CloudExecuteRemote extends CloudExecuteQuery {
   fieldName: string
+  shouldBatch?: boolean
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
@@ -71,6 +73,9 @@ export interface CloudDataSourceParams {
    * and we need to clear both the server & client side cache
    */
   invalidateClientUrqlCache(): void
+  headers?: {
+    getMachineId: Promise<string | null>
+  }
 }
 
 /**
@@ -81,25 +86,33 @@ export interface CloudDataSourceParams {
 export class CloudDataSource {
   #cloudUrqlClient: Client
   #lastCache?: string
+  #batchExecutor: ReturnType<typeof createBatchingExecutor>
+  #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
+    this.#batchExecutor = createBatchingExecutor((config) => {
+      return this.#executeQuery(namedExecutionDocument(config.document), config.variables)
+    }, { maxBatchSize: 20 })
+
+    this.#batchExecutorBatcher = this.#makeBatchExecutionBatcher()
   }
 
   get #user () {
     return this.params.getUser()
   }
 
-  get #additionalHeaders () {
+  async #additionalHeaders () {
     return {
       'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
       'x-cypress-version': pkg.version,
+      'x-machine-id': await this.params.headers?.getMachineId || '',
     }
   }
 
   reset () {
     return this.#cloudUrqlClient = createClient({
-      url: `${REMOTE_SCHEMA_URLS[cloudEnv]}/test-runner-graphql`,
+      url: `${this.getCloudUrl(cloudEnv)}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
         cacheExchange({
@@ -147,7 +160,7 @@ export class CloudDataSource {
           ...init,
           headers: {
             ...init?.headers,
-            ...this.#additionalHeaders,
+            ...await this.#additionalHeaders(),
           },
         })
       },
@@ -157,7 +170,7 @@ export class CloudDataSource {
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
     return delegateToSchema({
       operation: 'query',
-      schema: params.ctx.schemaCloud,
+      schema: params.ctx.config.schemaCloud,
       fieldName: params.field,
       fieldNodes: params.info.fieldNodes,
       info: params.info,
@@ -174,7 +187,9 @@ export class CloudDataSource {
   #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
-    return `${config.operationHash ?? this.#sha1(config.operation)}-${stringifyVariables(config.operationVariables)}`
+    const operation = print(config.operationDoc)
+
+    return `${config.operationHash ?? this.#sha1(operation)}-${stringifyVariables(config.operationVariables)}`
   }
 
   #sha1 (str: string) {
@@ -182,7 +197,7 @@ export class CloudDataSource {
   }
 
   #formatWithErrors = async (data: OperationResult<any, any>) => {
-    // If we receive a 401 from the dashboard, we need to logout the user
+    // If we receive a 401 from Cypress Cloud, we need to logout the user
     if (data.error?.response?.status === 401) {
       await this.params.logout()
     }
@@ -206,7 +221,11 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
+    const query = config.shouldBatch
+      ? this.#batchExecutorBatcher.load(config)
+      : this.#executeQuery(config.operationDoc, config.operationVariables)
+
+    loading = query.then(this.#formatWithErrors)
     .then(async (op) => {
       this.#pendingPromises.delete(stableKey)
 
@@ -218,6 +237,7 @@ export class CloudDataSource {
         const eagerResult = this.readFromCache(config)
 
         if (eagerResult?.stale) {
+          debug('Has initial result with stale eagerResult', op.data, eagerResult.data)
           await this.invalidate({ __typename: 'Query' })
           this.params.invalidateClientUrqlCache()
 
@@ -241,6 +261,12 @@ export class CloudDataSource {
     this.#pendingPromises.set(stableKey, loading)
 
     return loading
+  }
+
+  #executeQuery (operationDoc: DocumentNode, operationVariables: object = {}) {
+    debug(`Executing remote dashboard request %s, %j`, print(operationDoc), operationVariables)
+
+    return this.#cloudUrqlClient.query(operationDoc, operationVariables, { requestPolicy: 'network-only' }).toPromise()
   }
 
   isResolving (config: CloudExecuteQuery) {
@@ -280,7 +306,7 @@ export class CloudDataSource {
     // If we do have a synchronous result, return it, and determine if we want to check for
     // updates to this field
     if (eagerResult && config.requestPolicy !== 'network-only') {
-      debug(`eagerResult found stale? %s, %o`, eagerResult.stale, eagerResult.data)
+      debug(`eagerResult found stale? %s, %s, %o`, eagerResult.stale, config.requestPolicy, eagerResult.data)
 
       // If we have some of the fields, but not the full thing, return what we do have and follow up
       // with an update we send to the client.
@@ -332,4 +358,80 @@ export class CloudDataSource {
 
     return JSON.parse(this.#lastCache ?? '')
   }
+
+  getCloudUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
+    return REMOTE_SCHEMA_URLS[env]
+  }
+
+  /**
+   * Creates a non-caching batch-loader, used to aggregate multiple remote GraphQL
+   * requests and rewrite them into a single query issued against the remote server.
+   * https://www.graphql-tools.com/docs/batch-execution
+   */
+  #makeBatchExecutionBatcher () {
+    return new DataLoader<CloudExecuteRemote, any>(async (toBatch) => {
+      return Promise.allSettled(toBatch.map((b) => {
+        return this.#batchExecutor({
+          operationType: 'query',
+          document: b.operationDoc,
+          variables: b.operationVariables,
+        })
+      })).then((val) => val.map((v) => v.status === 'fulfilled' ? v.value : this.#ensureError(v.reason)))
+    }, {
+      cache: false,
+    })
+  }
+
+  #ensureError (val: any): Error {
+    return val instanceof Error ? val : new Error(val)
+  }
+}
+
+/**
+ * Adds "batchExecutionQuery" to the query that we generate from the batch loader,
+ * useful to key off of in the tests.
+ */
+function namedExecutionDocument (document: DocumentNode) {
+  let hasReplaced = false
+
+  return visit(document, {
+    enter () {
+      if (hasReplaced) {
+        return false
+      }
+
+      return
+    },
+    OperationDefinition (op) {
+      if (op.name) {
+        return op
+      }
+
+      hasReplaced = true
+
+      const selectionSet = new Set()
+
+      op.selectionSet.selections.forEach((s) => {
+        if (s.kind === 'Field') {
+          selectionSet.add(s.name.value)
+        }
+      })
+
+      let operationName = 'batchTestRunnerExecutionQuery'
+
+      if (selectionSet.size > 0) {
+        operationName = `${operationName}_${Array.from(selectionSet).sort().join('_')}`
+      }
+
+      const namedOperationNode: OperationDefinitionNode = {
+        ...op,
+        name: {
+          kind: 'Name',
+          value: operationName,
+        },
+      }
+
+      return namedOperationNode
+    },
+  })
 }

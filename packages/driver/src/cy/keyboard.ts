@@ -876,7 +876,7 @@ export class Keyboard {
     let charCode: number | undefined
     let keyCode: number | undefined
     let which: number | undefined
-    let data: Nullable<string> | undefined
+    let data: Cypress.Nullable<string> | undefined
     let location: number | undefined = keyDetails.location || 0
     let key: string | undefined
     let code: string | undefined = keyDetails.code
@@ -912,7 +912,18 @@ export class Keyboard {
         keyCode = 0
         which = 0
         location = undefined
-        data = text === '\r' ? '↵' : text
+
+        // WebKit will insert characters on a textInput event, resulting
+        // in double char entry when the default handler is executed. But values
+        // inserted by textInput aren't always correct/aren't filtered
+        // through our shouldUpdateValue logic, so we prevent textInput's
+        // default logic by removing the key data from the event.
+        if (Cypress.isBrowser('webkit')) {
+          data = ''
+        } else {
+          data = text === '\r' ? '↵' : text
+        }
+
         break
 
       case 'beforeinput':
@@ -1089,7 +1100,7 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // TODO: Re-think skipping text insert if non-shift modifers
+    // TODO: Re-think skipping text insert if non-shift modifiers
     // @see https://github.com/cypress-io/cypress/issues/5622
     // if (hasModifierBesidesShift(modifiers)) {
     //   details.text = ''
@@ -1162,6 +1173,13 @@ export class Keyboard {
 
       if ($elements.isContentEditable(elToType)) {
         key.events.input = false
+
+        if (Cypress.isBrowser('webkit')) {
+          // WebKit will emit beforeinput itself when the text is
+          // inserted into a contenteditable input using `execCommand('insertText')`.
+          // We prevent the simulated event from firing to avoid duplicative events.
+          key.events.beforeinput = false
+        }
       } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }
@@ -1176,7 +1194,7 @@ export class Keyboard {
         ) {
           if (
             shouldIgnoreEvent('textInput', key.events) ||
-          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+            this.fireSimulatedEvent(elToType, 'textInput', key, options)
           ) {
             return this.performSimulatedDefault(elToType, key, options)
           }

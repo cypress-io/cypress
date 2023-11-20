@@ -59,6 +59,85 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    context('setSystemTime', () => {
+      it('takes number now arg', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+        })
+      })
+
+      it('takes Date now arg', () => {
+        // April 15, 2017
+        const now = new Date(2017, 3, 15)
+        const nowTimestamp = now.getTime()
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(nowTimestamp)
+        })
+      })
+
+      it('defaults to 0 ms with no argument', () => {
+        const now = 1111111111111
+
+        cy.clock(now).then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.setSystemTime()
+          expect(new this.window.Date().getTime()).to.equal(0)
+        })
+      })
+
+      it('combines correctly with tick', () => {
+        const now = 1111111111111
+
+        cy.clock().then(function (clock) {
+          expect(new this.window.Date().getTime()).to.equal(0)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(4321)
+          clock.setSystemTime(now)
+          expect(new this.window.Date().getTime()).to.equal(now)
+          clock.tick(4321)
+          expect(new this.window.Date().getTime()).to.equal(now + 4321)
+        })
+      })
+
+      it('doesn\'t call timers on setSystemTime, but does on tick', function () {
+        cy.clock().then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          })
+
+          clock.setSystemTime(1111111)
+          expect(callCount).to.equal(0)
+          clock.tick()
+          expect(callCount).to.equal(1)
+        })
+      })
+
+      it('doesn\'t shift the time left for timers to trigger', function () {
+        cy.clock(0).then(function (clock) {
+          let callCount = 0
+
+          this.window.setTimeout(() => {
+            callCount++
+          }, 100)
+
+          clock.setSystemTime(1111111)
+          clock.tick(99)
+          expect(callCount).to.equal(0)
+          clock.tick(1)
+          expect(callCount).to.equal(1)
+        })
+      })
+    })
+
     it('restores window time methods when calling restore', (done) => {
       cy.clock().then(function (clock) {
         this.window.setTimeout(() => {
@@ -86,12 +165,12 @@ describe('src/cy/commands/clock', () => {
     })
 
     it('automatically restores clock on \'restore\' event', () => {
-      cy.clock().then((clock) => {
+      cy.clock().then(async (clock) => {
         const r = cy.spy(clock, 'restore')
 
-        Cypress.emit('test:before:run', {})
+        await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
 
-        expect(r).to.be.called
+        expect(r).to.be.calledOnce
       })
     })
 
@@ -350,23 +429,23 @@ describe('src/cy/commands/clock', () => {
         it('includes clock\'s now value', function () {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps['Now']).to.equal(100)
+          expect(consoleProps.props['Now']).to.equal(100)
         })
 
         it('includes methods replaced by clock', function () {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps.props['Methods replaced']).to.eql(['setTimeout'])
         })
 
         it('logs ticked amount on tick', function () {
           const createdConsoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(createdConsoleProps['Ticked']).to.be.undefined
+          expect(createdConsoleProps.props['Ticked']).to.be.undefined
 
           const tickedConsoleProps = this.logs[1].invoke('consoleProps')
 
-          expect(tickedConsoleProps['Ticked']).to.equal('100 milliseconds')
+          expect(tickedConsoleProps.props['Ticked']).to.equal('100 milliseconds')
         })
 
         it('properties are unaffected by future actions', function () {
@@ -374,8 +453,8 @@ describe('src/cy/commands/clock', () => {
           this.clock.restore()
           const consoleProps = this.logs[1].invoke('consoleProps')
 
-          expect(consoleProps['Now']).to.equal(200)
-          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps.props['Now']).to.equal(200)
+          expect(consoleProps.props['Methods replaced']).to.eql(['setTimeout'])
         })
       })
     })
@@ -417,7 +496,7 @@ describe('src/cy/commands/clock', () => {
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
-        expect(consoleProps['Ticked']).to.equal('0 milliseconds')
+        expect(consoleProps.props['Ticked']).to.equal('0 milliseconds')
       })
     })
 

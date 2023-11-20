@@ -87,14 +87,8 @@ export default function (Commands, Cypress, cy, state, config) {
         }
       }
 
-      // transform table object into object with zero based index as keys
       const getTableData = () => {
-        return _.reduce(_.values(table), (memo, value, index) => {
-          memo[index + 1] = value
-
-          return memo
-        }
-        , {})
+        return _.values(table)
       }
 
       options._log = Cypress.log({
@@ -192,7 +186,9 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const type = function () {
+      const isFirefoxBefore91 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 91
       const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
+      const isFirefox106OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 106
 
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
@@ -255,7 +251,10 @@ export default function (Commands, Cypress, cy, state, config) {
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        if (!isFirefoxBefore98) {
+        //
+        // WebKit will send the submit with an Enter keypress event,
+        // so we do need to click the default button in this case.
+        if (!isFirefoxBefore98 && !Cypress.isBrowser('webkit')) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
@@ -263,7 +262,7 @@ export default function (Commands, Cypress, cy, state, config) {
           // on the button will indeed trigger the form submit event
           // so we dont need to fire it manually anymore!
           if (!clickedDefaultButton(defaultButton)) {
-            // if we werent able to click the default button
+            // if we weren't able to click the default button
             // then synchronously fire the submit event
             // currently this is sync but if we use a waterfall
             // promise in the submit command it will break again
@@ -297,7 +296,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
-        const event = new ctor('click')
+        const event = new ctor('click', { composed: true })
 
         el.dispatchEvent(event)
       }
@@ -355,14 +354,16 @@ export default function (Commands, Cypress, cy, state, config) {
 
           if (
             (
-              // Before Firefox 98,
-              // Firefox sends a click event when the Space key is pressed.
-              // We don't want to send it twice.
+              // Before Firefox 91, it sends a click event automatically on the
+              // 'keyup' event for a Space key and we don't want to send it twice
               !Cypress.isBrowser('firefox') ||
-              // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>,
-              // but it does not if the element is an <input>.
-              // event.target is null when used with shadow DOM.
+              // Starting with Firefox 91, click events are no longer sent
+              // automatically for <button> elements
+              // event.target is null when the element is within the shadow DOM
+              (!isFirefoxBefore91 && event.target && $elements.isButton(event.target)) ||
+              // Starting with Firefox 98, click events are no longer sent
+              // automatically for <input> elements
+              // event.target is null when the element is within the shadow DOM
               (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
@@ -443,12 +444,17 @@ export default function (Commands, Cypress, cy, state, config) {
           // Send click event on type('{enter}')
           if (sendClickEvent) {
             if (
-              // Before Firefox 98, it sends a click event automatically.
+              // Before Firefox 98, it sends a click event automatically on
+              // simulated keypress events and we don't want to send it twice
               !Cypress.isBrowser('firefox') ||
-              // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>
-              // it does not if the element is an <input>
-              (!isFirefoxBefore98 && $elements.isInput(el))) {
+              // Starting with Firefox 98, click events are no longer sent
+              // automatically for <input> elements, but are still sent for
+              // other element types
+              (!isFirefoxBefore98 && $elements.isInput(el)) ||
+              // Starting with Firefox 106, click events are no longer sent
+              // automatically for <button> elements
+              (isFirefox106OrLater && $elements.isButton(el))
+            ) {
               fireClickEvent(el)
             }
           }
@@ -478,6 +484,8 @@ export default function (Commands, Cypress, cy, state, config) {
         },
       })
     }
+
+    const subjectChain = cy.subjectChain()
 
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
@@ -512,6 +520,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, config, options, {
+        subjectFn: () => cy.getSubjectFromChain(subjectChain),
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -530,7 +540,6 @@ export default function (Commands, Cypress, cy, state, config) {
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
           return cy.now('click', $elToClick, {
-            $el: $elToClick,
             log: false,
             verify: false,
             _log: options._log,
@@ -539,6 +548,7 @@ export default function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
             errorOnSelect: false,
             scrollBehavior: options.scrollBehavior,
+            subjectFn: () => $elToClick,
           })
           .then(() => {
             let activeElement = $elements.getActiveElByDocument($elToClick)

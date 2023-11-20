@@ -1,5 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+// import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 import { getPathForPlatform } from '../../src/paths'
 
 describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
@@ -28,7 +28,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .focus()
     .type('{esc}')
 
-    snapshotAUTPanel('browsers open')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('browsers open')
 
     cy.contains('Canary').should('be.hidden')
 
@@ -36,16 +37,18 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
     .should('be.visible')
 
-    snapshotAUTPanel('viewport info open')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('viewport info open')
 
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
     cy.findByTestId('playground-selector').clear().type('li')
 
-    snapshotAUTPanel('cy.get selector')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('cy.get selector')
 
-    cy.findByTestId('playground-num-elements').contains('3 Matches')
+    cy.findByTestId('playground-num-elements').contains('3 matches')
 
     // This validates that each matching element is covered by the playground highlighting
     cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
@@ -59,19 +62,22 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       })
     })
 
-    cy.findByLabelText('Selector Methods').click()
+    cy.findByLabelText('Selector methods').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
     cy.findByTestId('playground-selector').clear().type('Item 1')
 
-    snapshotAUTPanel('cy.contains selector')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('cy.contains selector')
 
-    cy.findByTestId('playground-num-elements').contains('1 Match')
+    cy.findByTestId('playground-num-elements').contains('1 match')
 
     cy.window().then((win) => cy.spy(win.console, 'log'))
     cy.findByTestId('playground-print').click().window().then((win) => {
       expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
     })
+
+    cy.get('.hook-open-in-ide').should('exist')
   })
 
   it('navigation between specs and other parts of the app works', () => {
@@ -110,7 +116,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
     // should clear after reload
     cy.reload()
@@ -148,7 +154,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
-    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
+    const expectedAutHeight = 456 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
 
@@ -172,7 +178,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // We could consider removing this after percy is
     // up and running for e2e tests.
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('should show visit failure blank page', () => {
@@ -181,7 +187,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .click()
 
     cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('set the correct viewport values from CLI', () => {
@@ -202,7 +208,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.get('body').type('f')
-    cy.contains('Search Specs')
+    cy.contains('Search specs')
     cy.contains('withWait.spec').click()
     cy.waitForSpecToFinish()
 
@@ -223,55 +229,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('new-file.spec').click()
     cy.waitForSpecToFinish()
     cy.get('[data-model-state="passed"]').should('contain', 'expected true to be true')
-  })
-
-  it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
-    cy.visitApp()
-    cy.contains('dom-content.spec').click()
-    cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-    cy.get('.passed > .num').should('contain', 1)
-    cy.get('.failed > .num').should('contain', '--')
-
-    cy.findByTestId('sidebar-link-runs-page').click()
-    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-
-    cy.findByTestId('sidebar-link-specs-page').click()
-    cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-
-    cy.contains('dom-content.spec').click()
-    cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-
-    cy.window().then((win) => {
-      const connected = () => win.ws?.connected
-
-      win.ws?.close()
-
-      cy.wrap({
-        connected,
-      }).invoke('connected').should('be.false')
-
-      win.ws?.connect()
-
-      cy.wrap({
-        connected,
-      }).invoke('connected').should('be.true')
-    })
-
-    cy.withCtx(async (ctx, o) => {
-      await ctx.actions.file.writeFileInProject(o.path, `
-describe('Dom Content', () => {
-  it('renders the new test content', () => {
-    cy.visit('cypress/e2e/dom-content.html')
-  })
-})
-`)
-    }, { path: getPathForPlatform('cypress/e2e/dom-content.spec.js') })
-
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the new test content')
-    cy.get('.passed > .num').should('contain', 1)
-    cy.get('.failed > .num').should('contain', '--')
   })
 
   describe('accessibility', () => {

@@ -13,47 +13,6 @@ describe('e2e system node', () => {
 
   systemTests.setup()
 
-  it('uses system node when launching plugins file', async function () {
-    const { stderr } = await systemTests.exec(this, {
-      project: 'system-node',
-      userNodePath: expectedNodePath,
-      userNodeVersion: expectedNodeVersion,
-      config: {
-        nodeVersion: 'system',
-        env: {
-          expectedNodeVersion,
-          expectedNodePath,
-        },
-      },
-      spec: 'system.spec.js',
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-    })
-
-    expect(stderr).to.contain(`Plugin Node version: ${expectedNodeVersion}`)
-
-    expect(stderr).to.contain('Plugin Electron version: undefined')
-  })
-
-  it('uses bundled node when launching plugins file', async function () {
-    const { stderr } = await systemTests.exec(this, {
-      project: 'system-node',
-      config: {
-        nodeVersion: 'bundled',
-        env: {
-          expectedNodeVersion,
-        },
-      },
-      spec: 'bundled.spec.js',
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-    })
-
-    expect(stderr).to.contain(`Plugin Node version: ${expectedNodeVersion}`)
-
-    expect(stderr).to.not.contain('Plugin Electron version: undefined')
-  })
-
   it('uses default node when launching plugins file', async function () {
     const { stderr } = await systemTests.exec(this, {
       project: 'system-node',

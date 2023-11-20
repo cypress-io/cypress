@@ -1,10 +1,10 @@
-import { parse } from 'graphql'
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape, AuthStateShape } from '../data'
+import { gql } from '@urql/core'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   resetAuthState(): void
 }
@@ -33,12 +33,19 @@ export class AuthActions {
   }
 
   async checkAuth () {
-    const operation = `query Cypress_CheckAuth { cloudViewer { id email fullName } }`
+    const operationDoc = gql`
+      query Cypress_CheckAuth { 
+        cloudViewer { 
+          id 
+          email 
+          fullName 
+        } 
+      }`
+
     const result = await this.ctx.cloud.executeRemoteGraphQL({
       fieldName: 'cloudViewer',
       operationType: 'query',
-      operation,
-      operationDoc: parse(operation),
+      operationDoc,
       operationVariables: {},
     })
 
@@ -48,7 +55,7 @@ export class AuthActions {
     }
   }
 
-  async login (utmSource: string, utmMedium: string) {
+  async login (utmSource: string, utmMedium: string, utmContent?: string | null) {
     const onMessage = (authState: AuthStateShape) => {
       this.ctx.update((coreData) => {
         coreData.authState = authState
@@ -66,7 +73,7 @@ export class AuthActions {
       this.#cancelActiveLogin = () => resolve(null)
 
       // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
-      this.authApi.logIn(onMessage, utmSource, utmMedium).then(resolve, reject)
+      this.authApi.logIn(onMessage, utmSource, utmMedium, utmContent || null).then(resolve, reject)
     })
 
     const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()
@@ -75,7 +82,9 @@ export class AuthActions {
       const isBrowserFocusSupported = this.ctx.coreData.activeBrowser
         && await this.ctx.browser.isFocusSupported(this.ctx.coreData.activeBrowser)
 
-      if (!isBrowserFocusSupported) {
+      const isBrowserOpen = this.ctx.coreData.app.browserStatus === 'open'
+
+      if (!isBrowserFocusSupported || !isBrowserOpen) {
         this.ctx._apis.electronApi.focusMainWindow()
       } else {
         await this.ctx.actions.browser.focusActiveBrowserWindow()

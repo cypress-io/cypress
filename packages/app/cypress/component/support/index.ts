@@ -1,3 +1,5 @@
+/// <reference path="../../../../frontend-shared/cypress/support/component.ts" />
+import '../../../../frontend-shared/cypress/support/component.ts'
 import { registerMountFn } from '@packages/frontend-shared/cypress/support/common'
 // ***********************************************************
 // This example support/index.ts is processed and
@@ -16,16 +18,16 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 
 // Import commands.js using ES2015 syntax:
 
-import 'virtual:windi.css'
-import '../../../src/main.scss'
 import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
 import type { Pinia } from 'pinia'
 import 'cypress-real-events/support'
+import 'cypress-plugin-tab'
 
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/customPercyCommand'
+import { tabUntil } from '@packages/frontend-shared/cypress/support/tab-until'
 
 let pinia: Pinia
 
@@ -48,3 +50,4 @@ registerMountFn({ plugins: [() => createRouter(), () => pinia] })
 installCustomPercyCommand()
 
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+Cypress.Commands.add('tabUntil', tabUntil)

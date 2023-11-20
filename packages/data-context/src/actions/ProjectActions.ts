@@ -1,19 +1,25 @@
-import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState } from '@packages/types'
+import type { MutationSetProjectPreferencesInGlobalCacheArgs } from '@packages/graphql/src/gen/nxs.gen'
+import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
 import type { ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
-import { codeGenerator, SpecOptions } from '../codegen'
+import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
-import { insertValuesInConfigFile } from '../util'
+import { insertValuesInConfigFile, toPosix } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
-import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
+import debugLib from 'debug'
+
+export class RunSpecError extends Error {
+  constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
+    super(msg)
+  }
+}
 
 export interface ProjectApiShape {
   /**
@@ -22,7 +28,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: Partial<OpenProjectLaunchOpts>): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
@@ -35,17 +41,21 @@ export interface ProjectApiShape {
   getConfig(): ReceivedCypressOptions | undefined
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
-  getCurrentProjectSavedState(): {} | undefined
+  getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
-    updateSpecs(specs: FoundSpec[]): void
+    updateSpecs(specs: SpecWithRelativeRoot[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
+  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetServer(): void
+  runSpec(spec: Cypress.Spec): Promise<void>
+  routeToDebug(runNumber: number): void
 }
 
 export interface FindSpecs<T> {
@@ -76,6 +86,8 @@ type SetForceReconfigureProjectByTestingType = {
   testingType?: TestingType
 }
 
+const debug = debugLib('cypress:data-context:ProjectActions')
+
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
 
@@ -84,6 +96,7 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    // Clear data associated with local project
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
@@ -96,19 +109,22 @@ export class ProjectActions {
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
+      d.app.browserUserAgent = null
     })
 
+    // Also clear any data associated with the linked cloud project
+    this.ctx.actions.cloudProject.clearCloudProject()
+
+    this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
     resetIssuedWarnings()
     await this.api.closeActiveProject()
   }
 
-  private get projects () {
-    return this.ctx.projectsList
-  }
-
   private set projects (projects: ProjectShape[]) {
-    this.ctx.coreData.app.projects = projects
+    this.ctx.update((d) => {
+      d.app.projects = projects
+    })
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -127,6 +143,10 @@ export class ProjectActions {
 
   setAndLoadCurrentTestingType (type: TestingType) {
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
+  }
+
+  async initializeProjectSetup (type: TestingType) {
+    await this.ctx.lifecycleManager.initializeProjectSetup(type)
   }
 
   async setCurrentProject (projectRoot: string) {
@@ -148,11 +168,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.ctx.update((d) => {
-      d.app.projects = [...projectRoots]
-    })
-
-    return this.projects
+    return this.projects = [...projectRoots]
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
@@ -175,7 +191,7 @@ export class ProjectActions {
         // When switching testing type, the project should be relaunched in the previously selected browser
         if (this.ctx.coreData.app.relaunchBrowser) {
           this.ctx.project.setRelaunchBrowser(false)
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
       })
     } catch (e) {
@@ -228,7 +244,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: Cypress.TestingType | null, options: LaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options?: Partial<OpenProjectLaunchOpts>, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -246,19 +262,25 @@ export class ProjectActions {
 
     if (!browser) throw new Error('Missing browser in launchProject')
 
-    let activeSpec: FoundSpec | undefined
+    let activeSpec: Cypress.Spec | undefined
 
     if (specPath) {
-      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = specPath === RUN_ALL_SPECS_KEY ? RUN_ALL_SPECS : this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // launchProject expects a spec when opening browser for url navigation.
-    // We give it an empty spec if none is passed so as to land on home page
+    // We give it an template spec if none is passed so as to land on home page
     const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+
+    // Used for run-all-specs feature
+    if (options?.shouldLaunchNewTab) {
+      await this.api.resetBrowserTabsForNextTest(true)
+      this.api.resetServer()
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
@@ -313,9 +335,18 @@ export class ProjectActions {
     this.api.setPromptShown(slug)
   }
 
-  setSpecs (specs: FoundSpec[]) {
+  setSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
+
+    // only check for non-example specs when the specs change
+    this.hasNonExampleSpec().then((result) => {
+      this.ctx.project.setHasNonExampleSpec(result)
+    })
+    .catch((e) => {
+      this.ctx.project.setHasNonExampleSpec(false)
+      this.ctx.logTraceError(e)
+    })
 
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
@@ -324,7 +355,7 @@ export class ProjectActions {
     this.ctx.emitter.specsChange()
   }
 
-  refreshSpecs (specs: FoundSpec[]) {
+  refreshSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
 
@@ -334,67 +365,6 @@ export class ProjectActions {
     }
 
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
-  }
-
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot create spec without currentProject.`)
-    }
-
-    const getCodeGenPath = () => {
-      return codeGenType === 'e2e' || erroredCodegenCandidate
-        ? this.ctx.path.join(
-          project,
-          codeGenCandidate,
-        )
-        : codeGenCandidate
-    }
-
-    const codeGenPath = getCodeGenPath()
-
-    const newSpecCodeGenOptions = new SpecOptions({
-      codeGenPath,
-      codeGenType,
-      erroredCodegenCandidate,
-      framework: this.getWizardFrameworkFromConfig(),
-      isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenOptions.templateKey], target: path.parse(codeGenPath).dir },
-      codeGenOptions,
-    )
-
-    if (!codeGenResults.files[0] || codeGenResults.failed[0]) {
-      throw (codeGenResults.failed[0] || 'Unable to generate spec')
-    }
-
-    const [newSpec] = codeGenResults.files
-
-    const cfg = await this.ctx.project.getConfig()
-
-    if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
-
-      await this.setSpecsFoundBySpecPattern({
-        projectRoot: this.ctx.currentProject,
-        testingType,
-        specPattern: cfg.specPattern ?? [],
-        configSpecPattern: cfg.specPattern ?? [],
-        excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: cfg.additionalIgnorePattern,
-      })
-    }
-
-    return {
-      status: 'valid',
-      file: { absolute: newSpec.file, contents: newSpec.content },
-      description: 'Generated spec',
-    }
   }
 
   async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {
@@ -456,35 +426,19 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
-  get defaultE2EPath () {
-    const projectRoot = this.ctx.currentProject
+  async hasNonExampleSpec () {
+    const specs = this.ctx.project.specs?.map((spec) => spec.relativeToCommonRoot)
 
-    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
-
-    return path.join(projectRoot, 'cypress', 'e2e')
-  }
-
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
-    const projectRoot = this.ctx.currentProject
-
-    assert(projectRoot, `Cannot create spec without currentProject.`)
-
-    const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
-      {},
-    )
-
-    if (results.failed.length) {
-      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    switch (this.ctx.coreData.currentTestingType) {
+      case 'e2e':
+        return hasNonExampleSpec(templates.e2eExamples, specs)
+      case 'component':
+        return specs.length > 0
+      case null:
+        return false
+      default:
+        throw new Error(`Unsupported testing type ${this.ctx.coreData.currentTestingType}`)
     }
-
-    return results.files.map(({ status, file, content }) => {
-      return {
-        status: (status === 'add' || status === 'overwrite') ? 'valid' : 'skipped',
-        file: { absolute: file, contents: content },
-        description: 'Generated spec',
-      }
-    })
   }
 
   async pingBaseUrl () {
@@ -495,7 +449,7 @@ export class ProjectActions {
       return
     }
 
-    const baseUrlWarning = this.ctx.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
+    const baseUrlWarning = this.ctx.coreData.diagnostics.warnings.find((e) => e.cypressError.type === 'CANNOT_CONNECT_BASE_URL_WARNING')
 
     if (baseUrlWarning) {
       this.ctx.actions.error.clearWarning(baseUrlWarning.id)
@@ -520,15 +474,175 @@ export class ProjectActions {
     }
   }
 
-  getWizardFrameworkFromConfig (): WizardFrontendFramework | undefined {
-    const config = this.ctx.lifecycleManager.loadedConfigFile
+  async runSpec ({ specPath }: { specPath: string}) {
+    const waitForBrowserToOpen = async () => {
+      const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
 
-    // If devServer is a function, they are using a custom dev server.
-    if (typeof config?.component?.devServer === 'function') {
-      return undefined
+      // Wait for browser to finish launching. Browser is either launched from scratch
+      // or relaunched when switching testing types - we need to wait in either case
+      // We wait a maximum of 3 seconds so we don't block indefinitely in case something
+      // goes sideways with the browser launch process. This is broken up into three
+      // separate 'waits' in case we have to watch a browser relaunch (close > opening > open)
+      debug('Waiting for browser to report `open`')
+      let maxIterations = 3
+
+      while (this.ctx.coreData.app.browserStatus !== 'open') {
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 1000)),
+          browserStatusSubscription.next(),
+        ])
+
+        if (--maxIterations === 0) {
+          break
+        }
+      }
+
+      await browserStatusSubscription.return(undefined as any)
     }
 
-    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+    try {
+      if (!this.ctx.currentProject) {
+        throw new RunSpecError('NO_PROJECT', 'A project must be open prior to attempting to run a spec')
+      }
+
+      if (!specPath) {
+        throw new RunSpecError('NO_SPEC_PATH', '`specPath` must be a non-empty string')
+      }
+
+      let targetTestingType: TestingType
+
+      // Get relative path from the specPath to determine which testing type from the specPattern
+      const relativeSpecPath = path.relative(this.ctx.currentProject, specPath)
+
+      // Check to see whether input specPath matches the specPattern for one or the other testing type
+      // If it matches neither then we can't run the spec and we should error
+      if (await this.ctx.project.matchesSpecPattern(relativeSpecPath, 'e2e')) {
+        targetTestingType = 'e2e'
+      } else if (await this.ctx.project.matchesSpecPattern(relativeSpecPath, 'component')) {
+        targetTestingType = 'component'
+      } else {
+        throw new RunSpecError('NO_SPEC_PATTERN_MATCH', 'Unable to determine testing type, spec does not match any configured specPattern')
+      }
+
+      debug(`Spec %s matches '${targetTestingType}' pattern`, specPath)
+
+      debug('Attempting to launch spec %s', specPath)
+
+      // Look to see if there's actually a file at the target location
+      // This helps us avoid switching testingType *then* finding out the spec doesn't exist
+      if (!this.ctx.fs.existsSync(specPath)) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${specPath}`)
+      }
+
+      // We now know what testingType we need to be in - if we're already there, great
+      // If not, verify that type is configured then switch (or throw an error if not configured)
+      if (this.ctx.coreData.currentTestingType !== targetTestingType) {
+        if (!this.ctx.lifecycleManager.isTestingTypeConfigured(targetTestingType)) {
+          throw new RunSpecError('TESTING_TYPE_NOT_CONFIGURED', `Input path matched specPattern for '${targetTestingType}' testing type, but it is not configured.`)
+        }
+
+        debug('Setting testing type to %s', targetTestingType)
+
+        const specChangeSubscription = this.ctx.emitter.subscribeTo('specsChange', { sendInitial: false })
+
+        const originalTestingType = this.ctx.coreData.currentTestingType
+
+        // Temporarily toggle testing type so the `activeBrowser` can be initialized
+        // for the targeted testing type. Browser has to be initialized prior to our "relaunch"
+        // call below - this can be an issue when Cypress is still on the launchpad and no
+        // browser has been launched yet
+        this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+        this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
+
+        // This is the magic sauce - we now have a browser selected, so this will toggle
+        // the testing type, trigger specs to update, and launch the browser
+        await this.switchTestingTypesAndRelaunch(targetTestingType)
+
+        await waitForBrowserToOpen()
+
+        // When testing type changes we need to wait for the specWatcher to trigger and load new specs
+        // otherwise our call to `getCurrentSpecByAbsolute` below will fail
+        // Wait a maximum of 2 seconds just in case something breaks with the event subscription
+        // so we don't block indefinitely
+        debug('Waiting for specs to finish loading')
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 2000)),
+          specChangeSubscription.next(),
+        ])
+
+        // Close out subscription
+        await specChangeSubscription.return(undefined)
+      } else {
+        debug('Already in %s testing mode', targetTestingType)
+      }
+
+      // This accounts for an edge case where a testing type has been previously opened, but
+      // the user then backs out to the testing type selector in launchpad. In that scenario,
+      // the testingType switch logic above does not trigger the browser to open, so we do it
+      // manually here
+      if (this.ctx.coreData.app.browserStatus === 'closed') {
+        debug('No browser instance, launching...')
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+
+        await this.api.launchProject(
+          this.ctx.coreData.activeBrowser!,
+          {
+            name: '',
+            absolute: '',
+            relative: '',
+            specType: targetTestingType === 'e2e' ? 'integration' : 'component',
+          },
+        )
+
+        debug('Browser launched')
+      } else {
+        debug(`Browser already running, status ${this.ctx.coreData.app.browserStatus}`)
+
+        if (this.ctx.coreData.app.browserStatus !== 'open') {
+          await waitForBrowserToOpen()
+        }
+      }
+
+      // Now that we're in the correct testingType, verify the requested spec actually exists
+      // We don't have specs available until a testingType is loaded, so even through we validated
+      // a matching file exists above it may not end up loading as a valid spec so we validate that here
+      //
+      // Have to use toPosix here to align windows absolute paths with how the absolute path is storied in the data context
+      const spec = this.ctx.project.getCurrentSpecByAbsolute(toPosix(specPath))
+
+      if (!spec) {
+        debug(`Spec not found with path: ${specPath}`)
+        throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${specPath}`)
+      }
+
+      const browser = this.ctx.coreData.activeBrowser!
+
+      // Hooray, everything looks good and we're all set up
+      // Try to launch the requested spec by navigating to it in the browser
+      await this.api.runSpec(spec)
+
+      return {
+        testingType: targetTestingType,
+        browser,
+        spec,
+      }
+    } catch (err) {
+      if (!(err instanceof RunSpecError)) {
+        debug('Unexpected error during `runSpec` %o', err)
+      }
+
+      return {
+        code: err instanceof RunSpecError ? err.code : 'GENERAL_ERROR',
+        detailMessage: err.message,
+      }
+    }
+  }
+
+  async debugCloudRun (runNumber: number) {
+    debug('attempting to switch to run #%s', runNumber)
+    await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
+    debug('navigating to Debug page')
+    this.api.routeToDebug(runNumber)
   }
 }

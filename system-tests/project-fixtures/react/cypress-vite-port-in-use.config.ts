@@ -11,12 +11,12 @@ export default defineConfig({
       bundler: 'vite',
       viteConfig: {
         server: {
-          port: 3000
-        }
+          port: 3000,
+        },
       },
     },
-    async setupNodeEvents() {
+    async setupNodeEvents () {
       await new Promise<void>((res) => http.createServer().listen(3000, '127.0.0.1', res))
-    }
-  }
+    },
+  },
 })

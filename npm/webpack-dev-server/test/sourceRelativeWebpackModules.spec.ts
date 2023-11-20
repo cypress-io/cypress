@@ -44,7 +44,7 @@ async function sourceModulesForProject (fixture: ProjectDirs[number]) {
   Fixtures.remove()
   const projectRoot = await Fixtures.scaffoldProject(fixture)
 
-  await FixturesScaffold.scaffoldProjectNodeModules(fixture)
+  await FixturesScaffold.scaffoldProjectNodeModules({ project: fixture })
 
   const result = sourceDefaultWebpackDependencies({
     cypressConfig: {

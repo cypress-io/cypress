@@ -45,6 +45,7 @@ module.exports = {
       PROJECTS: [],
       PROJECT_PREFERENCES: {},
       PROJECTS_CONFIG: {},
+      COHORTS: {},
     }
   },
 
@@ -182,6 +183,29 @@ module.exports = {
     }
 
     return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
+  },
+
+  getCohorts () {
+    return fileUtil.get('COHORTS', {}).then((cohorts) => {
+      Object.keys(cohorts).forEach((key) => {
+        cohorts[key].name = key
+      })
+
+      return cohorts
+    })
+  },
+
+  insertCohort (cohort) {
+    return fileUtil.transaction((tx) => {
+      return tx.get('COHORTS', {}).then((cohorts) => {
+        return tx.set('COHORTS', {
+          ...cohorts,
+          [cohort.name]: {
+            cohort: cohort.cohort,
+          },
+        })
+      })
+    })
   },
 
   remove () {

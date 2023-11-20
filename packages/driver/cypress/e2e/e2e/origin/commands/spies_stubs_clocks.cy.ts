@@ -1,23 +1,13 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin spies, stubs, and clock', () => {
+context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  afterEach(() => {
-    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-    // commands may have origin's unload event bleed into subsequent tests
-    // and prevent stability from being reached, causing those tests to hang.
-    // We enqueue another cy command after each test to ensure stability
-    // is reached for the next test. This additional command can be removed with the
-    // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
-  })
-
   it('spy()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.spy(foo, 'bar')
@@ -27,7 +17,7 @@ context('cy.origin spies, stubs, and clock', () => {
   })
 
   it('stub()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.stub(foo, 'bar')
@@ -38,7 +28,7 @@ context('cy.origin spies, stubs, and clock', () => {
 
   context('resets stubs', () => {
     it('creates the stub', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
 
         expect(Cypress.env('foo')).to.equal('bar')
@@ -49,7 +39,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('verifies the stub got restored', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         expect(Cypress.env('foo')).to.be.undefined
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
@@ -59,7 +49,7 @@ context('cy.origin spies, stubs, and clock', () => {
 
   context('resets spies', () => {
     it('creates the spy', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const stubEnv = cy.spy(Cypress, 'env')
 
         Cypress.env()
@@ -70,7 +60,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('verifies the spy got restored', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
       })
@@ -78,7 +68,7 @@ context('cy.origin spies, stubs, and clock', () => {
   })
 
   it('clock() and tick()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)
@@ -111,7 +101,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('spy()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const foo = { bar () { } }
 
         cy.spy(foo, 'bar')
@@ -122,14 +112,15 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
 
-        expect(spyLog.consoleProps.Command).to.equal('spy-1')
+        expect(spyLog.consoleProps.name).to.equal('spy-1')
+        expect(spyLog.consoleProps.type).to.equal('command')
         expect(spyLog.callCount).to.be.a('number')
         expect(spyLog.functionName).to.equal('bar')
       })
     })
 
     it('.stub()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const foo = { bar () { } }
 
         cy.stub(foo, 'bar')
@@ -140,14 +131,15 @@ context('cy.origin spies, stubs, and clock', () => {
       cy.shouldWithTimeout(() => {
         const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
 
-        expect(stubLog.consoleProps.Command).to.equal('stub-1')
+        expect(stubLog.consoleProps.name).to.equal('stub-1')
+        expect(stubLog.consoleProps.type).to.equal('command')
         expect(stubLog.callCount).to.be.a('number')
         expect(stubLog.functionName).to.equal('bar')
       })
     })
 
     it('.clock()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)
@@ -160,14 +152,15 @@ context('cy.origin spies, stubs, and clock', () => {
 
         const consoleProps = clockLog.consoleProps()
 
-        expect(consoleProps.Command).to.equal('clock')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.name).to.equal('clock')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
       })
     })
 
     it('.tick()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)
@@ -182,10 +175,11 @@ context('cy.origin spies, stubs, and clock', () => {
 
         const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
 
-        expect(consoleProps.Command).to.equal('tick')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
-        expect(consoleProps).to.have.property('Ticked').that.is.a('string')
+        expect(consoleProps.name).to.equal('tick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.props).to.have.property('Ticked').that.is.a('string')
       })
     })
   })

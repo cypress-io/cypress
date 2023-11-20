@@ -27,28 +27,10 @@
     },
     {
       "files": [
-        "lib/*"
-      ],
-      "rules": {
-        "no-console": 1
-      }
-    },
-    {
-      "files": [
-        "**/*.json"
-      ],
-      "rules": {
-        "quotes": "off",
-        "comma-dangle": "off"
-      }
-    },
-    {
-      "files": [
         "*.tsx",
         "*.jsx"
       ],
       "rules": {
-        "no-unused-vars": "off",
         "react/jsx-no-bind": "off",
         "react/react-in-jsx-scope": "off",
         "react/no-unknown-property": "off"

@@ -1,0 +1,6 @@
+{
+  "testFiles": [
+    "**/*.test.js",
+    "**/*.spec.js"
+  ]
+}

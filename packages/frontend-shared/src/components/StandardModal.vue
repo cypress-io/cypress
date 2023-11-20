@@ -17,6 +17,7 @@
         :class="props.class || ''"
       >
         <StandardModalHeader
+          :no-help="noHelp"
           :help-link="helpLink"
           :help-text="helpText"
           @close="closeModal"
@@ -28,7 +29,7 @@
 
         <DialogDescription
           v-if="$slots.description"
-          class="font-normal p-24px text-gray-700"
+          class="font-normal p-[24px] text-gray-700"
         >
           <slot name="description" />
         </DialogDescription>
@@ -72,11 +73,13 @@ const props = withDefaults(defineProps<{
   helpLink?: string
   helpText?: string
   variant?: 'bare'
+  noHelp?: boolean
   title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
   modelValue: false,
   helpText: `${defaultMessages.links.needHelp}`,
+  noHelp: false,
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,

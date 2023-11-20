@@ -20,10 +20,6 @@ export type { PlatformName } from './platform'
 
 export {
   BROWSER_FAMILY,
-  MIN_CHROME_VERSION,
-  MIN_FIREFOX_VERSION,
-  MIN_EDGE_VERSION,
-  browsers,
 } from './browser'
 
 export * from './config'
@@ -31,6 +27,8 @@ export * from './config'
 export {
   RESOLVED_FROM,
 } from './config'
+
+export * from './reporter'
 
 export * from './server'
 
@@ -41,3 +39,9 @@ export * from './warning'
 export * from './modeOptions'
 
 export * from './git'
+
+export * from './video'
+
+export * from './protocol'
+
+export * from './proxy'

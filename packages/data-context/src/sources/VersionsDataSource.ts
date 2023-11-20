@@ -1,12 +1,13 @@
 import os from 'os'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
+import { dependencyNamesToDetect } from '@packages/scaffold-config'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
-const nmi = require('node-machine-id')
 
 interface Version {
   id: string
@@ -18,9 +19,6 @@ interface VersionData {
   current: Version
   latest: Version
 }
-
-const REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
-const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 
 export class VersionsDataSource {
   private _initialLaunch: boolean
@@ -111,7 +109,7 @@ export class VersionsDataSource {
     let response
 
     try {
-      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY_URL)
       const responseJson = await response.json() as { time: Record<string, string>}
 
       debug('NPM release dates received %o', { modified: responseJson.time.modified })
@@ -120,7 +118,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
+      debug('Error fetching %o', NPM_CYPRESS_REGISTRY_URL, e)
 
       return DEFAULT_RESPONSE
     }
@@ -131,15 +129,31 @@ export class VersionsDataSource {
       return pkg.version
     }
 
-    const id = await VersionsDataSource.machineId()
+    debug('#getLatestVersion')
+
+    const preferences = await this.ctx.config.localSettingsApi.getPreferences()
+    const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = [
+      ...preferences.notifyWhenRunCompletes ?? [],
+    ]
+
+    if (preferences.notifyWhenRunStarts) {
+      notificationPreferences.push('started')
+    }
+
+    if (preferences.notifyWhenRunStartsFailing) {
+      notificationPreferences.push('failing')
+    }
+
+    const id = (await this.ctx.coreData.machineId) || undefined
 
     const manifestHeaders: HeadersInit = {
       'Content-Type': 'application/json',
       'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
       'x-arch': os.arch(),
+      'x-notifications': notificationPreferences.join(','),
       'x-initial-launch': String(this._initialLaunch),
-      'x-logged-in': String(!!this.ctx.user),
+      'x-logged-in': String(!!this.ctx.coreData.user),
     }
 
     if (this._currentTestingType) {
@@ -162,8 +176,47 @@ export class VersionsDataSource {
       }
     }
 
+    if (this._initialLaunch) {
+      try {
+        const projectPath = this.ctx.currentProject
+
+        if (projectPath) {
+          debug('Checking %d dependencies in project', dependencyNamesToDetect.length)
+          // Check all dependencies of interest in parallel
+          const dependencyResults = await Promise.allSettled(
+            dependencyNamesToDetect.map(async (dependency) => {
+              const result = await this.ctx.util.isDependencyInstalledByName(dependency, projectPath)
+
+              if (!result.detectedVersion) {
+                throw new Error(`Could not resolve dependency version for ${dependency}`)
+              }
+
+              // For any satisfied dependencies, build a `package@version` string
+              return `${result.dependency}@${result.detectedVersion}`
+            }),
+          )
+
+          // Take any dependencies that were found and combine into comma-separated string
+          const headerValue = dependencyResults
+          .filter(this.isFulfilled)
+          .map((result) => result.value)
+          .join(',')
+
+          if (headerValue) {
+            manifestHeaders['x-dependencies'] = headerValue
+          }
+        } else {
+          debug('No project path, skipping dependency check')
+        }
+      } catch (err) {
+        debug('Failed to detect project dependencies', err)
+      }
+    } else {
+      debug('Not initial launch of Cypress, skipping dependency check')
+    }
+
     try {
-      const manifestResponse = await this.ctx.util.fetch(REMOTE_MANIFEST_URL, {
+      const manifestResponse = await this.ctx.util.fetch(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
 
@@ -177,7 +230,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %s: %o', REMOTE_MANIFEST_URL, e)
+      debug('Error fetching %s: %o', CYPRESS_REMOTE_MANIFEST_URL, e)
 
       return pkg.version
     } finally {
@@ -185,11 +238,7 @@ export class VersionsDataSource {
     }
   }
 
-  private static async machineId (): Promise<string | undefined> {
-    try {
-      return await nmi.machineId()
-    } catch (error) {
-      return undefined
-    }
+  private isFulfilled<R> (item: PromiseSettledResult<R>): item is PromiseFulfilledResult<R> {
+    return item.status === 'fulfilled'
   }
 }

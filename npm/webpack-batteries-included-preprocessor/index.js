@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 const hasTsLoader = (rules) => {
@@ -13,21 +14,21 @@ const hasTsLoader = (rules) => {
 
 const addTypeScriptConfig = (file, options) => {
   // shortcut if we know we've already added typescript support
-  if (options.__typescriptSupportAdded) return
+  if (options.__typescriptSupportAdded) return options
 
   const webpackOptions = options.webpackOptions
   const rules = webpackOptions.module && webpackOptions.module.rules
 
   // if there are no rules defined or it's not an array, we can't add to them
-  if (!rules || !Array.isArray(rules)) return
+  if (!rules || !Array.isArray(rules)) return options
 
   // if we find ts-loader configured, don't add it again
-  if (hasTsLoader(rules)) return
+  if (hasTsLoader(rules)) return options
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-package'
-  const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
+  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
+  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
@@ -57,6 +58,8 @@ const addTypeScriptConfig = (file, options) => {
   })]
 
   options.__typescriptSupportAdded = true
+
+  return options
 }
 
 /**
@@ -105,8 +108,8 @@ const getDefaultWebpackOptions = () => {
             plugins: [
               ...[
                 'babel-plugin-add-module-exports',
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-proposal-object-rest-spread',
+                '@babel/plugin-transform-class-properties',
+                '@babel/plugin-transform-object-rest-spread',
               ].map(require.resolve),
               [require.resolve('@babel/plugin-transform-runtime'), {
                 absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
@@ -129,23 +132,59 @@ const getDefaultWebpackOptions = () => {
         loader: require.resolve('coffee-loader'),
       }],
     },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
+      }),
+    ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
-      alias: {
-        'child_process': require.resolve('./empty'),
-        'cluster': require.resolve('./empty'),
-        'console': require.resolve('./empty'),
-        'dgram': require.resolve('./empty'),
-        'dns': require.resolve('./empty'),
-        'fs': require.resolve('./empty'),
-        'http2': require.resolve('./empty'),
-        'inspector': require.resolve('./empty'),
-        'module': require.resolve('./empty'),
-        'net': require.resolve('./empty'),
-        'perf_hooks': require.resolve('./empty'),
-        'readline': require.resolve('./empty'),
-        'repl': require.resolve('./empty'),
-        'tls': require.resolve('./empty'),
+      fallback: {
+        assert: require.resolve('assert/'),
+        buffer: require.resolve('buffer/'),
+        child_process: false,
+        cluster: false,
+        console: false,
+        constants: require.resolve('constants-browserify'),
+        crypto: require.resolve('crypto-browserify'),
+        dgram: false,
+        dns: false,
+        domain: require.resolve('domain-browser'),
+        events: require.resolve('events/'),
+        fs: false,
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        http2: false,
+        inspector: false,
+        module: false,
+        net: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        perf_hooks: false,
+        punycode: require.resolve('punycode/'),
+        process: require.resolve('process/browser.js'),
+        querystring: require.resolve('querystring-es3'),
+        readline: false,
+        repl: false,
+        stream: require.resolve('stream-browserify'),
+        string_decoder: require.resolve('string_decoder/'),
+        sys: require.resolve('util/'),
+        timers: require.resolve('timers-browserify'),
+        tls: false,
+        tty: require.resolve('tty-browserify'),
+        url: require.resolve('url/'),
+        util: require.resolve('util/'),
+        vm: require.resolve('vm-browserify'),
+        zlib: require.resolve('browserify-zlib'),
       },
       plugins: [],
     },
@@ -163,7 +202,7 @@ const preprocessor = (options = {}) => {
     options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions()
 
     if (options.typescript) {
-      addTypeScriptConfig(file, options)
+      options = addTypeScriptConfig(file, options)
     }
 
     if (process.versions.pnp) {
@@ -178,6 +217,16 @@ const preprocessor = (options = {}) => {
 preprocessor.defaultOptions = {
   webpackOptions: getDefaultWebpackOptions(),
   watchOptions: {},
+}
+
+preprocessor.getFullWebpackOptions = (filePath, typescript) => {
+  const webpackOptions = getDefaultWebpackOptions()
+
+  if (typescript) {
+    return addTypeScriptConfig({ filePath }, { typescript, webpackOptions }).webpackOptions
+  }
+
+  return webpackOptions
 }
 
 // for testing purposes, but do not add this to the typescript interface

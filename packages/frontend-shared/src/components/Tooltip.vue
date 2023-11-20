@@ -8,15 +8,17 @@
     :distance="distance"
     :skidding="skidding"
     :auto-hide="false /* to prevent the popper from getting focus */"
-    :delay="{show: 0, hide: hideDelay }"
+    :delay="{show: showDelay, hide: hideDelay }"
     :show-group="showGroup"
   >
     <slot />
     <template
-      #popper
+      #popper="{ shown, hide }"
     >
       <slot
         name="popper"
+        :shown="shown"
+        :hide="hide"
       />
     </template>
   </component>
@@ -25,10 +27,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Tooltip, Menu } from 'floating-vue'
+import { Tooltip, Menu, options } from 'floating-vue'
+
+// Override default of 5000 so that DOM elements are disposed immediately when tooltip closes
+options.disposeTimeout = 0
 
 const props = withDefaults(defineProps<{
-  color?: string
+  color?: 'dark' | 'light'
   hideArrow?: boolean
   disabled?: boolean
   isInteractive?: boolean
@@ -36,11 +41,12 @@ const props = withDefaults(defineProps<{
   skidding?: number
   placement?: 'top' | 'right' | 'bottom' | 'left'
   popperClass?: string
+  showDelay?: number
   hideDelay?: number
   instantMove?: boolean
   showGroup?: string
 }>(), {
-  color: 'dark',
+  color: undefined,
   hideArrow: false,
   disabled: false,
   isInteractive: false,
@@ -48,6 +54,7 @@ const props = withDefaults(defineProps<{
   skidding: undefined,
   placement: undefined,
   popperClass: undefined,
+  showDelay: 0,
   hideDelay: 100,
   instantMove: undefined,
   showGroup: undefined,
@@ -64,6 +71,17 @@ const actualPopperClass = computed(() => {
     result.push('no-arrow')
   }
 
+  // color takes priority, else fallback to tooltip -> dark, menu -> light
+  if (props.color === 'dark') {
+    result.push('cypress-v-tooltip-dark')
+  } else if (props.color === 'light') {
+    result.push('cypress-v-tooltip-light')
+  } else if (!props.isInteractive) {
+    result.push('cypress-v-tooltip-dark')
+  } else {
+    result.push('cypress-v-tooltip-light')
+  }
+
   return result
 })
 
@@ -77,14 +95,17 @@ const actualPopperClass = computed(() => {
   }
 }
 
-.v-popper__popper.v-popper--theme-tooltip {
+.cypress-v-tooltip-dark {
   .v-popper__inner {
-    @apply bg-gray-900 py-2 px-4;
+    @apply bg-gray-900 border-0 text-white py-2 px-4;
   }
-  .v-popper__arrow-inner,
   .v-popper__arrow-outer {
     // NOTE: we can't use @apply to here because having !important breaks things
     border-color: #2e3247;
+  }
+
+  .v-popper__arrow-inner{
+    visibility: hidden;
   }
 
   &[data-popper-placement="top"] {
@@ -132,7 +153,7 @@ const actualPopperClass = computed(() => {
   }
 }
 
-.v-popper__popper.v-popper--theme-menu {
+.cypress-v-tooltip-light {
   .v-popper__inner {
     @apply bg-white text-black;
     border-color: transparent;

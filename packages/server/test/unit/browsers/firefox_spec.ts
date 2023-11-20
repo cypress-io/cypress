@@ -10,6 +10,9 @@ import stripAnsi from 'strip-ansi'
 import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
+import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CriClient } from '../../../lib/browsers/cri-client'
 
 const path = require('path')
 const _ = require('lodash')
@@ -115,7 +118,7 @@ describe('lib/browsers/firefox', () => {
     it('calls connectToNewSpec in firefoxUtil', function () {
       sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
 
-      firefox.connectToNewSpec(this.browser, 50505, this.options, this.automation)
+      firefox.connectToNewSpec(this.browser, this.options, this.automation)
 
       expect(firefoxUtil.connectToNewSpec).to.be.called
     })
@@ -123,7 +126,9 @@ describe('lib/browsers/firefox', () => {
 
   context('#open', () => {
     beforeEach(function () {
-      this.browser = { name: 'firefox', channel: 'stable' }
+      // majorVersion >= 86 indicates CDP support for Firefox, which provides
+      // the CDP debugger URL for the after:browser:launch tests
+      this.browser = { name: 'firefox', channel: 'stable', majorVersion: 100 }
       this.automation = {
         use: sinon.stub().returns({}),
       }
@@ -145,33 +150,42 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
-      sinon.stub(launch, 'launch').resolves(this.browserInstance)
+      sinon.stub(launch, 'launch').returns(this.browserInstance)
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
+      sinon.stub(utils, 'getPort').resolves(1234)
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
       sinon.spy(FirefoxProfile.prototype, 'updatePreferences')
+      sinon.spy(FirefoxProfile.prototype, 'path')
 
-      return sinon.spy(FirefoxProfile.prototype, 'path')
+      const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
+
+      browserCriClient.attachToTargetUrl = sinon.stub().resolves({})
+      browserCriClient.getWebSocketDebuggerUrl = sinon.stub().returns('ws://debugger')
+      browserCriClient.close = sinon.stub().resolves()
+
+      sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+      sinon.stub(CdpAutomation, 'create').resolves()
     })
 
     it('executes before:browser:launch if registered', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves(null)
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(plugins.execute).to.be.called
+        expect(plugins.execute).to.be.calledWith('before:browser:launch')
       })
     })
 
     it('does not execute before:browser:launch if not registered', function () {
-      plugins.has.returns(false)
+      plugins.has.withArgs('before:browser:launch').returns(false)
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(plugins.execute).not.to.be.called
+        expect(plugins.execute).not.to.be.calledWith('before:browser:launch')
       })
     })
 
     it('uses default preferences if before:browser:launch returns falsy value', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves(null)
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
@@ -180,7 +194,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('uses default preferences if before:browser:launch returns object with non-object preferences', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves({
         preferences: [],
       })
@@ -191,7 +205,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('sets preferences if returned by before:browser:launch', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves({
         preferences: { 'foo': 'bar' },
       })
@@ -202,7 +216,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('adds extensions returned by before:browser:launch, along with cypress extension', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves({
         extensions: ['/path/to/user/ext'],
       })
@@ -215,7 +229,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('adds only cypress extension if before:browser:launch returns object with non-array extensions', function () {
-      plugins.has.returns(true)
+      plugins.has.withArgs('before:browser:launch').returns(true)
       plugins.execute.resolves({
         extensions: 'not-an-array',
       })
@@ -248,7 +262,7 @@ describe('lib/browsers/firefox', () => {
       }
 
       mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
+        [path.resolve(`${__dirname }../../../../../extension/dist/v2`)]: {
           'background.js': mockfs.file({
             mode: 0o444,
           }),
@@ -303,6 +317,23 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/17896
+    it('escapes the downloadsFolders path correctly when running on Windows OS', function () {
+      this.options.proxyServer = 'http://proxy-server:1234'
+      this.options.downloadsFolder = 'C:/Users/test/Downloads/My_Test_Downloads_Folder'
+      sinon.stub(os, 'platform').returns('win32')
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            // NOTE: sinon.match treats the string itself as a regular expression. The backslashes need to be escaped.
+            'browser.download.dir': 'C:\\\\Users\\\\test\\\\Downloads\\\\My_Test_Downloads_Folder',
+          },
+        }), this.options)
+      })
+    })
+
     it('updates the preferences', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
@@ -311,12 +342,13 @@ describe('lib/browsers/firefox', () => {
 
     it('launches with the url and args', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', undefined, [
+        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', 1234, [
           '-marionette',
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
           '-no-remote',
+          '--remote-debugging-port=1234',
           '-profile',
           '/path/to/appData/firefox-stable/interactive',
         ])
@@ -390,6 +422,25 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    it('executes after:browser:launch if registered', function () {
+      plugins.has.withArgs('after:browser:launch').returns(true)
+      plugins.execute.resolves(null)
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', this.browser, {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('does not execute after:browser:launch if not registered', function () {
+      plugins.has.withArgs('after:browser:launch').returns(false)
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
+    })
+
     context('returns BrowserInstance', function () {
       it('from browsers.launch', async function () {
         const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
@@ -411,6 +462,12 @@ describe('lib/browsers/firefox', () => {
           instance.kill()
         })
       })
+    })
+  })
+
+  context('#connectProtocolToBrowser', () => {
+    it('throws error', () => {
+      expect(firefox.connectProtocolToBrowser).to.throw('Protocol is not yet supported in firefox.')
     })
   })
 
@@ -495,6 +552,46 @@ describe('lib/browsers/firefox', () => {
 
         expect(memory.forceCycleCollection).to.be.calledTwice
         expect(memory.forceGarbageCollection).to.be.calledTwice
+      })
+    })
+
+    context('#setupRemote', function () {
+      it('correctly sets up the remote agent', async function () {
+        const criClientStub: CriClient = {
+          targetId: '',
+          send: sinon.stub(),
+          on: sinon.stub(),
+          off: sinon.stub(),
+          close: sinon.stub(),
+          ws: sinon.stub() as any,
+          queue: {
+            enableCommands: [],
+            enqueuedCommands: [],
+            subscriptions: [],
+          },
+          closed: false,
+          connected: false,
+        }
+
+        const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
+
+        browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
+
+        sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+        sinon.stub(CdpAutomation, 'create').resolves()
+
+        const actual = await firefoxUtil.setupRemote(port, null, null)
+
+        expect(actual).to.equal(browserCriClient)
+        expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null })
+        expect(CdpAutomation.create).to.be.calledWith(
+          criClientStub.send,
+          criClientStub.on,
+          criClientStub.off,
+          browserCriClient.resetBrowserTargets,
+          null,
+        )
       })
     })
   })

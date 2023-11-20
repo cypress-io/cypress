@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded flex font-medium bg-gray-900 py-2px px-12px text-gray-200 text-14px leading-20px gap-8px items-center">
+  <div class="rounded flex font-medium bg-gray-900 py-[2px] px-[12px] text-gray-200 text-[14px] leading-[20px] gap-[8px] items-center">
     <Switch
       name="toggle-highlights"
       :value="props.value"

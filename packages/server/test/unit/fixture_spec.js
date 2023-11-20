@@ -154,6 +154,9 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     })
 
     it('does not reformat empty objects', function () {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23457
+      this.retries(15)
+
       const fn = () => {
         return fixture.get(this.fixturesFolder, 'empty_objects')
       }

@@ -1,8 +1,15 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
-import { InterceptRequest } from '@packages/net-stubbing'
+import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
+import { telemetry } from '@packages/telemetry'
+import { isVerboseTelemetry as isVerbose } from '.'
+import {
+  addCookieJarCookiesToRequest, getSameSiteContext, shouldAttachAndSetCookies,
+} from './util/cookies'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
+
 import type { HttpMiddleware } from './'
-import { getSameSiteContext } from './util/cookies'
+import type { CypressIncomingRequest } from '../types'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -21,45 +28,92 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
+const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
 
+  span?.setAttributes({
+    isAUTFrame: this.req.isAUTFrame,
+    isFromExtraTarget: this.req.isFromExtraTarget,
+  })
+
+  // we only want to intercept requests from the main target and not ones from
+  // extra tabs or windows, so run the bare minimum request/response middleware
+  // to send the request/response directly through
+  if (this.req.isFromExtraTarget) {
+    this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
+
+    delete this.req.headers['x-cypress-is-from-extra-target']
+
+    this.onlyRunMiddleware([
+      'SendRequestOutgoing',
+    ])
+  }
+
+  span?.end()
   this.next()
 }
 
-const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  const currentAUTUrl = this.getAUTUrl()
+const MaybeSimulateSecHeaders: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:simulate:sec:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
-    return this.next()
+  span?.setAttributes({
+    experimentalModifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode,
+  })
+
+  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+    span?.end()
+    this.next()
+
+    return
   }
 
-  const sameSiteContext = getSameSiteContext(
-    currentAUTUrl,
-    this.req.proxiedUrl,
-    this.req.isAUTFrame,
-  )
+  // Do NOT disclose destination to an iframe and simulate if iframe was top
+  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
+    const secFetchDestModifiedTo = 'document'
 
-  const cookies = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
-  const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+    span?.setAttributes({
+      secFetchDestModifiedFrom: this.req.headers['sec-fetch-dest'],
+      secFetchDestModifiedTo,
+    })
 
-  this.debug('existing cookies on request: %s', existingCookies.join('; '))
-  this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
+    this.req.headers['sec-fetch-dest'] = secFetchDestModifiedTo
+  }
 
-  // if two or more cookies have the same key, the first one found is preferred,
-  // so we prepend the added cookies so they take preference
-  this.req.headers['cookie'] = cookiesToAdd.concat(existingCookies).join('; ')
-
+  span?.end()
   this.next()
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'correlate:prerequest', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const shouldCorrelatePreRequests = this.shouldCorrelatePreRequests()
+
+  span?.setAttributes({
+    shouldCorrelatePreRequest: shouldCorrelatePreRequests,
+  })
+
   if (!this.shouldCorrelatePreRequests()) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const copyResourceTypeAndNext = () => {
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    span?.setAttributes({
+      resourceType: this.req.resourceType,
+    })
+
+    span?.end()
+
     return this.next()
   }
 
@@ -86,62 +140,220 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       })
     })
 
-    return this.next()
+    return copyResourceTypeAndNext()
   }
 
   this.debug('waiting for prerequest')
-  this.getPreRequest(((browserPreRequest) => {
+  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
     this.req.browserPreRequest = browserPreRequest
-    this.next()
+    this.req.noPreRequestExpected = noPreRequestExpected
+    copyResourceTypeAndNext()
   }))
 }
 
-const SendToDriver: RequestMiddleware = function () {
-  const { browserPreRequest } = this.req
+const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
+  if (!doesTopNeedToBeSimulated(this) ||
+    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+    this.next()
 
-  if (browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', browserPreRequest)
+    return
   }
 
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+
+  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+
+  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
+  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  this.req.credentialsLevel = credentialStatus
+  this.next()
+}
+
+const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const doesTopNeedSimulation = doesTopNeedToBeSimulated(this)
+
+  span?.setAttributes({
+    doesTopNeedToBeSimulated: doesTopNeedSimulation,
+    resourceType: this.req.resourceType,
+  })
+
+  if (!doesTopNeedSimulation) {
+    span?.end()
+
+    return this.next()
+  }
+
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
+  const currentAUTUrl = this.getAUTUrl()
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
+
+  span?.setAttributes({
+    currentAUTUrl,
+    shouldCookiesBeAttachedToRequest,
+  })
+
+  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
+  if (!shouldCookiesBeAttachedToRequest) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const sameSiteContext = getSameSiteContext(
+    currentAUTUrl,
+    this.req.proxiedUrl,
+    this.req.isAUTFrame,
+  )
+
+  span?.setAttributes({
+    sameSiteContext,
+    currentAUTUrl,
+    isAUTFrame: this.req.isAUTFrame,
+  })
+
+  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
+  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
+
+  const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')
+  const addedCookiesFromHeader = cookiesOnRequest.join('; ')
+
+  this.debug('existing cookies on request from cookie jar: %s', existingCookiesInJar)
+  this.debug('add cookies to request from header: %s', addedCookiesFromHeader)
+
+  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
+
+  span?.setAttributes({
+    existingCookiesInJar,
+    addedCookiesFromHeader,
+    cookieHeader: this.req.headers['cookie'],
+  })
+
+  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
+
+  span?.end()
+  this.next()
+}
+
+function shouldLog (req: CypressIncomingRequest) {
+  // 1. Any matching `cy.intercept()` should cause `req` to be logged by default, unless `log: false` is passed explicitly.
+  if (req.matchingRoutes?.length) {
+    const lastMatchingRoute = req.matchingRoutes[0]
+
+    if (!lastMatchingRoute.staticResponse) {
+      // No StaticResponse is set, therefore the request must be logged.
+      return true
+    }
+
+    if (lastMatchingRoute.staticResponse.log !== undefined) {
+      return Boolean(lastMatchingRoute.staticResponse.log)
+    }
+  }
+
+  // 2. Otherwise, only log if it is an XHR or fetch.
+  return req.resourceType === 'fetch' || req.resourceType === 'xhr'
+}
+
+const SendToDriver: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'send:to:driver', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const shouldLogReq = shouldLog(this.req)
+
+  if (shouldLogReq && this.req.browserPreRequest) {
+    this.socket.toDriver('request:event', 'incoming:request', this.req.browserPreRequest)
+  }
+
+  span?.setAttributes({
+    shouldLogReq,
+    hasBrowserPreRequest: !!this.req.browserPreRequest,
+  })
+
+  span?.end()
   this.next()
 }
 
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:end:with:buffered:response', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
   const buffer = this.buffers.take(this.req.proxiedUrl)
+
+  span?.setAttributes({
+    hasBuffer: !!buffer,
+  })
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
+
+    // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
+    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
+
+    span?.setAttributes({
+      wantsInjection: this.res.wantsInjection,
+    })
+
+    span?.end()
+    this.reqMiddlewareSpan?.end()
 
     return this.onResponse(buffer.response, buffer.stream)
   }
 
+  span?.end()
   this.next()
 }
 
 const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'redirect:to:client:route:if:unloaded', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const hasAppUnloaded = this.req.cookies['__cypress.unload']
+
+  span?.setAttributes({
+    hasAppUnloaded,
+  })
+
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
-  if (this.req.cookies['__cypress.unload']) {
+  if (hasAppUnloaded) {
+    span?.setAttributes({
+      redirectedTo: this.config.clientRoute,
+    })
+
     this.res.redirect(this.config.clientRoute)
+
+    span?.end()
 
     return this.end()
   }
 
+  span?.end()
   this.next()
 }
 
 const EndRequestsToBlockedHosts: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'end:requests:to:block:hosts', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
   const { blockHosts } = this.config
+
+  span?.setAttributes({
+    areBlockHostsConfigured: !!blockHosts,
+  })
 
   if (blockHosts) {
     const matches = blocked.matches(this.req.proxiedUrl, blockHosts)
+
+    span?.setAttributes({
+      didUrlMatchBlockedHosts: !!matches,
+    })
 
     if (matches) {
       this.res.set('x-cypress-matched-blocked-host', matches)
       this.debug('blocking request %o', { matches })
 
       this.res.status(503).end()
+
+      span?.end()
 
       return this.end()
     }
@@ -151,17 +363,34 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 }
 
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
+  const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
 
+  span?.setAttributes({
+    acceptEncodingHeaderPresent: !!acceptEncoding,
+  })
+
   if (acceptEncoding) {
-    if (acceptEncoding.includes('gzip')) {
+    const doesAcceptHeadingIncludeGzip = acceptEncoding.includes('gzip')
+
+    span?.setAttributes({
+      doesAcceptHeadingIncludeGzip,
+    })
+
+    if (doesAcceptHeadingIncludeGzip) {
       this.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      this.req.headers['accept-encoding'] = 'identity'
     }
+  } else {
+    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
+    // In that case, we want to explicitly filter that down to `gzip` and identity
+    this.req.headers['accept-encoding'] = 'gzip,identity'
   }
 
+  span?.end()
   this.next()
 }
 
@@ -171,31 +400,59 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
 }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:set:basic:auth:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
   // get the remote state for the proxied url
   const remoteState = this.remoteStates.get(this.req.proxiedUrl)
 
-  if (remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  const doesReqNeedBasicAuthHeaders = remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)
+
+  span?.setAttributes({
+    doesReqNeedBasicAuthHeaders,
+  })
+
+  if (remoteState?.auth && doesReqNeedBasicAuthHeaders) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
     this.req.headers['authorization'] = `Basic ${base64}`
   }
 
+  span?.end()
   this.next()
 }
 
 const SendRequestOutgoing: RequestMiddleware = function () {
+  // end the request middleware span here before we make
+  // our outbound request so we can see that outside
+  // of the internal cypress middleware handlers
+  this.reqMiddlewareSpan?.end()
+
+  // the actual req/resp time outbound from the proxy server
+  const span = telemetry.startSpan({
+    name: 'outgoing:request:ttfb',
+    parentSpan: this.handleHttpRequestSpan,
+    isVerbose,
+  })
+
   const requestOptions = {
+    browserPreRequest: this.req.browserPreRequest,
     timeout: this.req.responseTimeout,
     strictSSL: false,
     followRedirect: this.req.followRedirect || false,
     retryIntervals: [],
     url: this.req.proxiedUrl,
+    time: !!span, // include timingPhases
   }
 
   const requestBodyBuffered = !!this.req.body
 
   const { strategy, origin, fileServer } = this.remoteStates.current()
+
+  span?.setAttributes({
+    requestBodyBuffered,
+    strategy,
+  })
 
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
@@ -212,12 +469,62 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const onSocketClose = () => {
     this.debug('request aborted')
+    // if the request is aborted, close out the middleware span and http span. the response middleware did not run
+
+    const pendingRequest = this.pendingRequest
+
+    if (pendingRequest) {
+      delete this.pendingRequest
+      this.removePendingRequest(pendingRequest)
+    }
+
+    this.reqMiddlewareSpan?.setAttributes({
+      requestAborted: true,
+    })
+
+    this.reqMiddlewareSpan?.end()
+    this.handleHttpRequestSpan?.end()
+
     req.abort()
   }
 
   req.on('error', this.onError)
-  req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
+  req.on('response', (incomingRes) => {
+    if (span) {
+      const { timings } = incomingRes.request
 
+      if (!timings.socket) {
+        timings.socket = 0
+      }
+
+      if (!timings.lookup) {
+        timings.lookup = timings.socket
+      }
+
+      if (!timings.connect) {
+        timings.connect = timings.lookup
+      }
+
+      if (!timings.response) {
+        timings.response = timings.connect
+      }
+
+      span.setAttributes({
+        'request.timing.socket': timings.socket,
+        'request.timing.dns': timings.lookup - timings.socket,
+        'request.timing.tcp': timings.connect - timings.lookup,
+        'request.timing.firstByte': timings.response - timings.connect,
+        'request.timing.totalUntilFirstByte': timings.response,
+      // download and total are not available yet
+      })
+
+      span.end()
+    }
+
+    this.onResponse(incomingRes, req)
+  })
+
+  // NOTE: this is an odd place to remove this listener
   this.req.res?.on('finish', () => {
     socket.removeListener('close', onSocketClose)
   })
@@ -234,10 +541,13 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
-  ExtractIsAUTFrameHeader,
+  ExtractCypressMetadataHeaders,
+  MaybeSimulateSecHeaders,
+  CorrelateBrowserPreRequest,
+  CalculateCredentialLevelIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  CorrelateBrowserPreRequest,
+  SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,

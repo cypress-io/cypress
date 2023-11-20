@@ -2,6 +2,7 @@
   <StandardModal
     :model-value="true"
     :title="t('migration.renameAuto.modal.title')"
+    :no-help="true"
     @update:modelValue="emit('cancel')"
   >
     <Alert
@@ -12,7 +13,7 @@
     />
     <MigrationTitle
       :title="t('migration.renameAuto.title')"
-      class="mt-24px"
+      class="mt-[24px]"
     />
     <MigrationList>
       <MigrationListItem>
@@ -92,7 +93,7 @@
       </template>
     </Radio>
     <template #footer>
-      <div class="flex gap-16px">
+      <div class="flex gap-[16px]">
         <Button
           @click="emit('save', selectedValue)"
         >

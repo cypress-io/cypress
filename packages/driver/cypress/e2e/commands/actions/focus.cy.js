@@ -295,8 +295,11 @@ describe('src/cy/commands/actions/focus', () => {
       it('#consoleProps', () => {
         cy.get('input:first').focus().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focus',
-            'Applied To': $input.get(0),
+            name: 'focus',
+            type: 'command',
+            props: {
+              'Applied To': $input.get(0),
+            },
           })
         })
       })
@@ -336,7 +339,7 @@ describe('src/cy/commands/actions/focus', () => {
 
         cy.on('fail', (err) => {
           expect(focused).to.eq(1)
-          expect(err.message).to.include('`cy.focus()` failed because this element')
+          expect(err.message).to.include('`cy.focus()` failed because the page updated')
 
           done()
         })
@@ -744,8 +747,11 @@ describe('src/cy/commands/actions/focus', () => {
       it('#consoleProps', () => {
         cy.get('input:first').focus().blur().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'blur',
-            'Applied To': $input.get(0),
+            name: 'blur',
+            type: 'command',
+            props: {
+              'Applied To': $input.get(0),
+            },
           })
         })
       })
@@ -791,7 +797,7 @@ describe('src/cy/commands/actions/focus', () => {
 
         cy.on('fail', (err) => {
           expect(blurred).to.eq(1)
-          expect(err.message).to.include('`cy.blur()` failed because this element')
+          expect(err.message).to.include('`cy.blur()` failed because the page')
           expect(err.docsUrl).to.include('https://on.cypress.io/element-has-detached-from-dom')
 
           done()

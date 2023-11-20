@@ -18,6 +18,31 @@ export const LocalSettingsPreferences = objectType({
     t.string('proxyBypass', {
       resolve: (source, args, ctx) => ctx.env.NO_PROXY ?? null,
     })
+
+    t.json('majorVersionWelcomeDismissed', {
+      resolve: async (source, args, ctx) => {
+        const preferences = await ctx._apis.localSettingsApi.getPreferences()
+
+        return preferences.majorVersionWelcomeDismissed || {}
+      },
+    })
+
+    t.boolean('wasBrowserSetInCLI', {
+      resolve: (source, args, ctx) => {
+        return Boolean(ctx.coreData.cliBrowser)
+      },
+    })
+
+    t.boolean('debugSlideshowComplete')
+    t.boolean('desktopNotificationsEnabled')
+    t.dateTime('dismissNotificationBannerUntil')
+    t.boolean('notifyWhenRunStarts')
+    t.boolean('notifyWhenRunStartsFailing')
+    t.json('notifyWhenRunCompletes', {
+      resolve: async (source, args, ctx) => {
+        return ctx.coreData.localSettings.preferences.notifyWhenRunCompletes || []
+      },
+    })
   },
 })
 

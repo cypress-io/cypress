@@ -36,20 +36,6 @@ type CurrentViewport = Pick<Cypress.Config, 'viewportWidth' | 'viewportHeight'>
 // refresh would cause viewport to hang
 let currentViewport: CurrentViewport | null = null
 
-interface InternalTitleOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: Log
-}
-
-interface InternalWindowOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: Log
-  error?: any
-}
-
-interface InternalDocumentOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: Log
-  error?: any
-}
-
 interface InternalViewportOptions extends Partial<Cypress.Loggable> {
   _log?: Log
 }
@@ -102,108 +88,50 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
+  Commands.addQuery('title', function title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    this.set('timeout', options.timeout)
+    if (options.log !== false) {
+      Cypress.log({ timeout: options.timeout })
+    }
+
+    return () => (state('document')?.title || '')
+  })
+
+  Commands.addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    this.set('timeout', options.timeout)
+    if (options.log !== false) {
+      Cypress.log({ timeout: options.timeout })
+    }
+
+    return () => {
+      const win = state('window')
+
+      if (!win) {
+        $errUtils.throwErrByPath('window.iframe_undefined')
+      }
+
+      return win
+    }
+  })
+
+  Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    this.set('timeout', options.timeout)
+    if (options.log !== false) {
+      Cypress.log({ timeout: options.timeout })
+    }
+
+    return () => {
+      const win = state('window')
+
+      if (!win?.document) {
+        $errUtils.throwErrByPath('window.iframe_doc_undefined')
+      }
+
+      return win.document
+    }
+  })
+
   Commands.addAll({
-    title (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalTitleOptions = _.defaults({}, userOptions, { log: true })
-
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
-      }
-
-      const resolveTitle = () => {
-        const doc = state('document')
-
-        const title = (doc && doc.title) || ''
-
-        return cy.verifyUpcomingAssertions(title, options, {
-          onRetry: resolveTitle,
-        })
-      }
-
-      return resolveTitle()
-    },
-
-    window (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalWindowOptions = _.defaults({}, userOptions, { log: true })
-
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
-      }
-
-      const getWindow = () => {
-        const window = state('window')
-
-        if (!window) {
-          $errUtils.throwErrByPath('window.iframe_undefined', { onFail: options._log })
-        }
-
-        return window
-      }
-
-      // wrap retrying into its own
-      // separate function
-      const retryWindow = () => {
-        return Promise
-        .try(getWindow)
-        .catch((err) => {
-          options.error = err
-
-          return cy.retry(retryWindow, options)
-        })
-      }
-
-      const verifyAssertions = () => {
-        return Promise.try(retryWindow).then((win) => {
-          return cy.verifyUpcomingAssertions(win, options, {
-            onRetry: verifyAssertions,
-          })
-        })
-      }
-
-      return verifyAssertions()
-    },
-
-    document (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalDocumentOptions = _.defaults({}, userOptions, { log: true })
-
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
-      }
-
-      const getDocument = () => {
-        const win = state('window')
-
-        // TODO: add failing test around logging twice
-        if (!win?.document) {
-          $errUtils.throwErrByPath('window.iframe_doc_undefined')
-        }
-
-        return win.document
-      }
-
-      // wrap retrying into its own
-      // separate function
-      const retryDocument = () => {
-        return Promise
-        .try(getDocument)
-        .catch((err) => {
-          options.error = err
-
-          return cy.retry(retryDocument, options)
-        })
-      }
-
-      const verifyAssertions = () => {
-        return Promise.try(retryDocument).then((doc) => {
-          return cy.verifyUpcomingAssertions(doc, options, {
-            onRetry: verifyAssertions,
-          })
-        })
-      }
-
-      return verifyAssertions()
-    },
-
     viewport (presetOrWidth, heightOrOrientation, userOptions: Partial<Cypress.Loggable> = {}) {
       if (_.isObject(heightOrOrientation)) {
         userOptions = heightOrOrientation

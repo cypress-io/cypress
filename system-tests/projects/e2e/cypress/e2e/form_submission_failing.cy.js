@@ -5,8 +5,7 @@ describe('form submission fails', () => {
   })
 
   it('fails without an explicit wait when an element is immediately found', () => {
-    cy.server()
-    cy.route('POST', '/users', {})
+    cy.intercept('POST', '/users', {})
     cy.get('input[name=name]').type('brian')
     cy.get('#submit').click()
     cy.get('form').then(($form) => {

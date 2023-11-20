@@ -25,6 +25,8 @@
       :aria-hidden="!isOpen"
       :class="{
         'overflow-auto': isOpen && overflow,
+        'border rounded rounded-t-none bg-light-50 border-gray-100 mb-4 w-full block': isOpen && fileRow,
+        'overflow-hidden': !isOpen && fileRow
       }"
     >
       <slot
@@ -38,6 +40,7 @@
 
 <script setup lang="ts">
 import { useToggle } from '@vueuse/core'
+import { watch } from 'vue'
 
 const props = withDefaults(defineProps<{
   maxHeight?: string
@@ -45,14 +48,23 @@ const props = withDefaults(defineProps<{
   lazy?: boolean
   disable?: boolean
   overflow?: boolean
+  fileRow?: boolean
 }>(), {
   initiallyOpen: false,
   maxHeight: '500px',
   lazy: false,
   disable: false,
   overflow: true,
+  fileRow: false,
 })
 
 const [isOpen, toggle] = useToggle(props.initiallyOpen)
 
+watch(() => props.initiallyOpen, (val, oldVal) => {
+  // It was toggled from false to true by the parent to
+  // force the collapsible to open.
+  if (oldVal === false && val === true) {
+    isOpen.value = true
+  }
+})
 </script>

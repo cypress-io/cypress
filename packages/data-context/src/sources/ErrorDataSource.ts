@@ -38,7 +38,7 @@ export class ErrorDataSource {
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:internal') && !stackLine.includes('source-map-support'))
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support'))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {

@@ -12,15 +12,18 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
-import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
+import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
+import type { BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  projectBase: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
+  private projectBase: ProjectBase | null = null
+  relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
+    throw new Error('bad relaunch')
+  }
 
   constructor () {
     return autoBindDebug(this)
@@ -29,10 +32,14 @@ export class OpenProject {
   resetOpenProject () {
     this.projectBase?.__reset()
     this.projectBase = null
-    this.relaunchBrowser = null
+    this.relaunchBrowser = () => {
+      throw new Error('bad relaunch after reset')
+    }
   }
 
   reset () {
+    cookieJar.removeAllCookies()
+    session.clearSessions(true)
     this.resetOpenProject()
   }
 
@@ -48,15 +55,13 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
-    onError: () => undefined,
-  }) {
+  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
     this._ctx = getCtx()
 
     assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
-      browser.name, spec, options)
+      browser.name, spec, prevOptions)
 
     la(_.isPlainObject(browser), 'expected browser object:', browser)
 
@@ -64,7 +69,7 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.projectBase!.reset()
 
-    let url = getSpecUrl({
+    const url = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? undefined : getSpecUrl({
       spec,
       browserUrl: this.projectBase.cfg.browserUrl,
       projectRoot: this.projectBase.projectRoot,
@@ -74,18 +79,24 @@ export class OpenProject {
 
     const cfg = this.projectBase.getConfig()
 
-    _.defaults(options, {
-      browsers: cfg.browsers,
+    if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
+
+    const options: BrowserLaunchOpts = {
+      browser,
+      url,
+      // TODO: fix majorVersion discrepancy that causes this to be necessary
+      browsers: cfg.browsers as FoundBrowser[],
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       proxyServer: cfg.proxyServer,
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
-      isTextTerminal: cfg.isTextTerminal,
+      isTextTerminal: !!cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
-      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
-    })
+      experimentalWebKitSupport: cfg.experimentalWebKitSupport,
+      ...prevOptions || {},
+    }
 
     // if we don't have the isHeaded property
     // then we're in interactive mode and we
@@ -96,21 +107,13 @@ export class OpenProject {
       browser.isHeadless = false
     }
 
-    // set the current browser object on options
-    // so we can pass it down
-    options.browser = browser
-
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      options.url = url
-    }
-
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
     const automation = this.projectBase.getAutomation()
 
     // use automation middleware if its
     // been defined here
-    let am = options.automationMiddleware
+    const am = options.automationMiddleware
 
     if (am) {
       automation.use(am)
@@ -133,7 +136,7 @@ export class OpenProject {
         return Bluebird.resolve()
       }
 
-      return runEvents.execute('after:spec', cfg, spec)
+      return runEvents.execute('after:spec', spec)
     }
 
     const { onBrowserClose } = options
@@ -155,41 +158,38 @@ export class OpenProject {
 
     options.onError = this.projectBase.options.onError
 
-    this.relaunchBrowser = () => {
+    this.relaunchBrowser = async () => {
       debug(
         'launching browser: %o, spec: %s',
         browser,
         spec.relative,
       )
 
-      return Bluebird.try(() => {
-        if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-          return runEvents.execute('before:spec', cfg, spec)
+      // clear cookies and all session data before each spec
+      cookieJar.removeAllCookies()
+      session.clearSessions()
+
+      // TODO: Stub this so we can detect it being called
+      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        return await browsers.connectToExisting(browser, options, automation, this._ctx?.coreData.servers.cdpSocketServer)
+      }
+
+      // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
+      // then we can connect to the new spec
+      if (options.shouldLaunchNewTab && browser.name !== 'electron') {
+        const onInitializeNewBrowserTab = async () => {
+          await this.resetBrowserState()
         }
 
-        // clear cookies and all session data before each spec
-        cookieJar.removeAllCookies()
-        session.clearSessions()
-      })
-      .then(() => {
-        // TODO: Stub this so we can detect it being called
-        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return browsers.connectToExisting(browser, options, automation)
-        }
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
+      }
 
-        if (options.shouldLaunchNewTab) {
-          const onInitializeNewBrowserTab = async () => {
-            await this.resetBrowserState()
-          }
+      options.relaunchBrowser = this.relaunchBrowser
 
-          // If we do not launch the browser,
-          // we tell it that we are ready
-          // to receive the next spec
-          return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
-        }
-
-        return browsers.open(browser, options, automation, this._ctx)
-      })
+      return await browsers.open(browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()
@@ -200,7 +200,13 @@ export class OpenProject {
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    try {
+      await this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    } catch (e) {
+      // If the CRI client disconnected or crashed, we want to no-op here so that anything
+      // depending on resetting the browser tabs can continue with further operations
+      return
+    }
   }
 
   async resetBrowserState () {
@@ -220,7 +226,53 @@ export class OpenProject {
   close () {
     debug('closing opened project')
 
-    this.closeOpenProjectAndBrowsers()
+    return this.closeOpenProjectAndBrowsers()
+  }
+
+  async connectProtocolToBrowser (options) {
+    await browsers.connectProtocolToBrowser(options)
+  }
+
+  changeUrlToSpec (spec: Cypress.Spec) {
+    if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
+      return
+    }
+
+    const newSpecUrl = getSpecUrl({
+      projectRoot: this.projectBase.projectRoot,
+      spec,
+    })
+
+    debug(`New url is ${newSpecUrl}`)
+
+    this.projectBase.server.socket.changeToUrl(newSpecUrl)
+  }
+
+  changeUrlToDebug (runNumber: number) {
+    if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
+      return
+    }
+
+    const params = JSON.stringify({ from: 'notification', runNumber })
+
+    const newUrl = `#/redirect?name=Debug&params=${params}`
+
+    debug(`New url is ${newUrl}`)
+
+    this.projectBase.server.socket.changeToUrl(newUrl)
+  }
+
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.projectBase?.server.socket.updateTelemetryContext(context)
   }
 
   // close existing open project if it exists, for example
@@ -233,6 +285,8 @@ export class OpenProject {
   _ctx?: DataContext
 
   async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
+    // ensure switching to a new project in cy-in-cy tests and from the launchpad starts with a clean slate
+    this.reset()
     this._ctx = getCtx()
     debug('open_project create %s', path)
 

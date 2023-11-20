@@ -15,7 +15,7 @@ describe('<OpenBrowserList />', () => {
   it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) =>
-        (<div class="border-current border-1 resize overflow-auto">
+        (<div class="border-current border resize overflow-auto">
           <OpenBrowserList gql={gqlVal}/>
         </div>),
     })
@@ -39,7 +39,7 @@ describe('<OpenBrowserList />', () => {
   it('displays a tooltip for an unsupported browser', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) =>
-        (<div class="border-current border-1 resize overflow-auto">
+        (<div class="border-current border resize overflow-auto">
           <div class="h-40" />
           <OpenBrowserList gql={gqlVal}/>
         </div>),
@@ -51,13 +51,16 @@ describe('<OpenBrowserList />', () => {
     cy.get('.v-popper__popper--shown')
     .contains('Cypress does not support running Firefox Developer Edition version 69.')
 
-    cy.percySnapshot()
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot()
+    */
   })
 
   it('emits navigates back', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
             onNavigatedBack={cy.stub().as('navigatedBack')}/>
@@ -74,7 +77,7 @@ describe('<OpenBrowserList />', () => {
         res.browserStatus = 'opening'
       },
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal} />
         </div>),
@@ -83,8 +86,6 @@ describe('<OpenBrowserList />', () => {
     cy.get('[data-cy-browser]').each((browser) => cy.wrap(browser).should('have.attr', 'aria-disabled', 'true'))
     cy.get('[data-cy="launch-button"]').should('not.exist')
     cy.contains('button', defaultMessages.openBrowser.openingE2E.replace('{browser}', 'Electron')).should('be.disabled')
-
-    cy.percySnapshot()
   })
 
   it('shows browser is open', () => {
@@ -93,7 +94,7 @@ describe('<OpenBrowserList />', () => {
         res.browserStatus = 'open'
       },
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
             onCloseBrowser={cy.stub().as('closeBrowser')}/>
@@ -117,7 +118,7 @@ describe('<OpenBrowserList />', () => {
       },
       render: (gqlVal) => {
         return (
-          <div class="border-current border-1 resize overflow-auto">
+          <div class="border-current border resize overflow-auto">
             <OpenBrowserList
               gql={gqlVal}
               onCloseBrowser={cy.stub().as('closeBrowser')}/>
@@ -127,28 +128,24 @@ describe('<OpenBrowserList />', () => {
 
     cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
-
-    cy.percySnapshot()
+    cy.get('[aria-checked="true"]').contains('Electron')
   })
 
-  it('throws when activeBrowser is null', (done) => {
-    cy.once('uncaught:exception', (err) => {
-      expect(err.message).to.include('Missing activeBrowser in selectedBrowserId')
-      done()
-    })
-
+  it('throws when activeBrowser is null', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.activeBrowser = null
       },
       render: (gqlVal) => {
         return (
-          <div class="border-current border-1 resize overflow-auto">
+          <div class="border-current border resize overflow-auto">
             <OpenBrowserList
               gql={gqlVal}
               onCloseBrowser={cy.stub().as('closeBrowser')}/>
           </div>)
       },
     })
+
+    cy.get('[aria-checked="true"]').should('not.exist')
   })
 })

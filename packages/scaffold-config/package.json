@@ -10,19 +10,22 @@
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register 'test/unit/**' --config ./test/.mocharc.js --exit"
+    "test-unit": "mocha -r @packages/ts/register 'test/unit/**' --config ./test/.mocharc.js --exit --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "compare-versions": "4.1.3",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
+    "find-up": "^5.0.0",
     "fs-extra": "^9.1.0",
-    "globby": "^11.0.1"
+    "globby": "^11.0.1",
+    "resolve-package-path": "^4.0.3",
+    "zod": "^3.20.3"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "chai": "4.2.0",
-    "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "mocha": "7.0.1"
   },
   "files": [
     "src"

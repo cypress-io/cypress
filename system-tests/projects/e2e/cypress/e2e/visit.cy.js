@@ -53,23 +53,21 @@ describe('visits', () => {
         count += 1
       })
 
-      // about:blank yes (1)
-      cy.visit('/hash.html?foo#bar') // yes (2)
-      cy.visit('/hash.html?foo#foo') // no (2)
+      cy.visit('/hash.html?foo#bar') // yes (1)
+      cy.visit('/hash.html?foo#foo') // no (1)
       cy.window().its('scrollY').should('eq', 1000)
-      cy.visit('/hash.html?bar#bar') // yes (3)
+      cy.visit('/hash.html?bar#bar') // yes (2)
       cy.window().its('scrollY').should('eq', 0)
-      cy.visit('/index.html?bar#bar') // yes (4)
-      cy.visit('/index.html?baz#bar') // yes (5)
-      cy.visit('/index.html#bar') // yes (6)
-      cy.visit('/index.html') // yes (7)
-      cy.visit('/index.html#baz') // no (7)
-      cy.visit('/index.html#') // no (7)
+      cy.visit('/index.html?bar#bar') // yes (3)
+      cy.visit('/index.html?baz#bar') // yes (4)
+      cy.visit('/index.html#bar') // yes (5)
+      cy.visit('/index.html') // yes (6)
+      cy.visit('/index.html#baz') // no (6)
+      cy.visit('/index.html#') // no (6)
       .then(() => {
-        expect(count).to.eq(7)
+        expect(count).to.eq(6)
 
         expect(urls).to.deep.eq([
-          'about:blank',
           `${origin}/hash.html?foo#bar`,
           `${origin}/hash.html?bar#bar`,
           `${origin}/index.html?bar#bar`,

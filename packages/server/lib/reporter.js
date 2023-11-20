@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const { stackUtils } = require('@packages/errors')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
-// and prevents accidently upgrading this one
+// and prevents accidentally upgrading this one
 // TODO: look into upgrading this to version in driver
 const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
@@ -17,6 +17,41 @@ const { overrideRequire } = require('./override_require')
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
+
+const buildAttemptMessage = (currentRetry, totalRetries) => {
+  return `(Attempt ${currentRetry} of ${totalRetries})`
+}
+
+// Used for experimentalRetries, where we want to display the passed/failed
+// status of an attempt in the console
+const getIconStatus = (status) => {
+  let overallStatusSymbol
+  let overallStatusSymbolColor
+  let overallStatusColor
+
+  switch (status) {
+    case 'passed':
+      overallStatusSymbol = mochaSymbols.ok
+      overallStatusSymbolColor = 'checkmark'
+      overallStatusColor = 'checkmark'
+      break
+    case 'failed':
+      overallStatusSymbol = mochaSymbols.err
+      overallStatusSymbolColor = 'bright fail'
+      overallStatusColor = 'error message'
+      break
+    default:
+      overallStatusSymbol = undefined
+      overallStatusSymbolColor = undefined
+      overallStatusColor = 'medium'
+  }
+
+  return {
+    overallStatusSymbol,
+    overallStatusSymbolColor,
+    overallStatusColor,
+  }
+}
 
 overrideRequire((depPath, _load) => {
   if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
@@ -41,31 +76,23 @@ overrideRequire((depPath, _load) => {
 // Mocha.Runnable.prototype.titlePath = ->
 //   @parent.titlePath().concat([@title])
 
-const getParentTitle = function (runnable, titles) {
-  // if the browser/reporter changed the runnable title (for display purposes)
-  // it will have .originalTitle which is the name of the test before title change
-  let p
-
+const getTitlePath = function (runnable, titles = []) {
+  // `originalTitle` is a Mocha Hook concept used to associated the
+  // hook to the test that executed it
   if (runnable.originalTitle) {
     runnable.title = runnable.originalTitle
   }
 
-  if (!titles) {
-    titles = [runnable.title]
+  if (runnable.title) {
+    // sanitize the title which may have been altered by a suite-/
+    // test-level browser skip to ensure the original title is used
+    const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
   }
 
-  p = runnable.parent
-
-  if (p) {
-    let t
-
-    t = p.title
-
-    if (t) {
-      titles.unshift(t)
-    }
-
-    return getParentTitle(p, titles)
+  if (runnable.parent) {
+    return getTitlePath(runnable.parent, titles)
   }
 
   return titles
@@ -164,7 +191,7 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return _.extend(runnable, testProps)
+    return [_.extend(runnable, testProps)]
   })
 }
 
@@ -181,7 +208,7 @@ const safelyMergeRunnable = function (hookProps, runnables) {
     }
   }
 
-  return _.extend({}, runnables[hookProps.id], hookProps)
+  return [_.extend({}, runnables[hookProps.id], hookProps)]
 }
 
 const mergeErr = function (runnable, runnables, stats) {
@@ -199,7 +226,10 @@ const mergeErr = function (runnable, runnables, stats) {
   // dont mutate the test, and merge in the runnable title
   // in the case its a hook so that we emit the right 'fail'
   // event for reporters
-  test = _.extend({}, test, { title: runnable.title })
+
+  // However, we need to propagate the cypressTestStatusInfo to the reporter in order to print the test information correctly
+  // in the terminal, as well as updating the test state as it may have changed in the client-side runner.
+  test = _.extend({}, test, { title: runnable.title, _cypressTestStatusInfo: runnable._cypressTestStatusInfo, state: runnable.state })
 
   return [test, test.err]
 }
@@ -219,7 +249,7 @@ const setDate = function (obj, runnables, stats) {
     stats.wallClockEndedAt = new Date(e)
   }
 
-  return null
+  return []
 }
 
 const orNull = function (prop) {
@@ -245,11 +275,6 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
-const reporters = {
-  teamcity: 'mocha-teamcity-reporter',
-  junit: 'mocha-junit-reporter',
-}
-
 class Reporter {
   constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
@@ -262,13 +287,14 @@ class Reporter {
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
-  setRunnables (rootRunnable) {
+  setRunnables (rootRunnable, cypressConfig) {
     if (!rootRunnable) {
       rootRunnable = { title: '' }
     }
 
     // manage stats ourselves
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
+    this.retriesConfig = cypressConfig ? cypressConfig.retries : {}
     this.runnables = {}
     rootRunnable = this._createRunnable(rootRunnable, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
@@ -277,18 +303,6 @@ class Reporter {
     this.mocha.suite = rootRunnable
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
-
-    if (this.reporterName === 'spec') {
-      this.runner.on('retry', (test) => {
-        const runnable = this.runnables[test.id]
-        const padding = '  '.repeat(runnable.titlePath().length)
-        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
-
-        // Log: `(Attempt 1 of 2) test title` when a test retries
-        // eslint-disable-next-line no-console
-        return console.log(`${padding}${retryMessage} ${test.title}`)
-      })
-    }
 
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
@@ -306,23 +320,102 @@ class Reporter {
         --indents
       })
 
+      const retriesConfig = this.retriesConfig
+
       // Override the default reporter to always show test timing even for fast tests
       // and display slow ones in yellow rather than red
       this.runner._events.pass[2] = function (test) {
+        // can possibly be undefined if the test fails before being run, such as in before/beforeEach hooks
+        const cypressTestMetaData = test._cypressTestStatusInfo
+
         const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
-        const fmt =
+
+        let fmt
+
+        // Print the default if the experiment is not configured
+        if (!retriesConfig?.experimentalStrategy) {
+          fmt =
+            Array(indents).join('  ') +
+            mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
+            mochaColor('pass', ' %s') +
+            mochaColor(durationColor, ' (%dms)')
+
+          // Log: `✓ test title (300ms)` when a test passes
+          // eslint-disable-next-line no-console
+          console.log(fmt, test.title, test.duration)
+        } else {
+          // If there have been no retries and experimental retries is configured,
+          // DON'T decorate the last test in the console as an attempt.
+          if (cypressTestMetaData?.attempts > 1) {
+            const lastTestStatus = getIconStatus(test.state)
+
+            fmt =
+              Array(indents).join('  ') +
+              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+
+            // or Log: `✓(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
+            // eslint-disable-next-line no-console
+            console.log(fmt, test.title)
+          }
+
+          const finalTestStatus = getIconStatus(cypressTestMetaData.outerStatus || test.state)
+
+          const finalMessaging =
+            Array(indents).join('  ') +
+            mochaColor(finalTestStatus.overallStatusSymbolColor, `  ${ finalTestStatus.overallStatusSymbol ? finalTestStatus.overallStatusSymbol : ''}`) +
+            mochaColor(finalTestStatus.overallStatusColor, ' %s') +
+            mochaColor(durationColor, ' (%dms)')
+
+          // Log: ✓`test title` when the overall outerStatus of a test has passed
+          // OR
+          // Log: ✖`test title` when the overall outerStatus of a test has failed
+          // eslint-disable-next-line no-console
+          console.log(finalMessaging, test.title, test.duration)
+        }
+      }
+
+      const originalFailPrint = this.runner._events.fail[2]
+
+      this.runner._events.fail[2] = function (test) {
+        // can possibly be undefined if the test fails before being run, such as in before/beforeEach hooks
+        const cypressTestMetaData = test._cypressTestStatusInfo
+
+        // print the default if the experiment is not configured
+        if (!retriesConfig?.experimentalStrategy) {
+          return originalFailPrint.call(this, test)
+        }
+
+        const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
+
+        // If there have been no retries and experimental retries is configured,
+        // DON'T decorate the last test in the console as an attempt.
+        if (cypressTestMetaData?.attempts > 1) {
+          const lastTestStatus = getIconStatus(test.state)
+
+          const fmt =
+            Array(indents).join('  ') +
+            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+
+          // Log: `✖(Attempt 3 of 3) test title (300ms)` when a test fails and none of the retries have passed
+          // eslint-disable-next-line no-console
+          console.log(fmt, test.title)
+        }
+
+        const finalTestStatus = getIconStatus(cypressTestMetaData?.outerStatus || test.state)
+
+        const finalMessaging =
           Array(indents).join('  ') +
-          mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
-          mochaColor('pass', ' %s') +
+          mochaColor(finalTestStatus.overallStatusSymbolColor, `  ${ finalTestStatus.overallStatusSymbol ? finalTestStatus.overallStatusSymbol : ''}`) +
+          mochaColor(finalTestStatus.overallStatusColor, ' %s') +
           mochaColor(durationColor, ' (%dms)')
 
-        // Log: `✓ test title (300ms)` when a test passes
+        // Log: ✖`test title` when the overall outerStatus of a test has failed
         // eslint-disable-next-line no-console
-        console.log(fmt, test.title, test.duration)
+        console.log(finalMessaging, test.title, test.duration)
       }
-    }
 
-    this.runner.ignoreLeaks = true
+      this.runner.ignoreLeaks = true
+    }
   }
 
   _createRunnable (runnableProps, type, parent) {
@@ -355,49 +448,115 @@ class Reporter {
     return runnable
   }
 
-  emit (event, ...args) {
-    args = this.parseArgs(event, args)
-
-    if (args) {
-      return this.runner && this.runner.emit.apply(this.runner, args)
+  emit (event, arg) {
+    // iI using GA retries, log the retry attempt as the status of the attempt is not used
+    if (event === 'retry' && this.reporterName === 'spec' && !this.retriesConfig?.experimentalStrategy) {
+      this._logRetry(arg)
     }
+
+    // If using experimental retries, log the attempt after the test attempt runs to accurately represent the attempt pass/fail status
+    // We don't log the last attempt as this is handled by the main pass/fail handler defined above, and would ultimately log AFTER the test complete test status is reported
+    // from the mocha:pass/mocha:fail event
+    if (event === 'test:after:run' && this.reporterName === 'spec' && this.retriesConfig?.experimentalStrategy && !arg.final) {
+      this._logRetry(arg)
+    }
+
+    // ignore the event if we haven't accounted for it
+    if (!events[event]) return
+
+    const args = this.parseArgs(event, arg)
+
+    return this.runner && this.runner.emit.apply(this.runner, args)
   }
 
-  parseArgs (event, args) {
-    // make sure this event is in our events hash
-    let e
+  parseArgs (event, arg) {
+    const normalizeArgs = events[event]
 
-    e = events[event]
+    const args = _.isFunction(normalizeArgs)
+      ? normalizeArgs.call(this, arg, this.runnables, this.stats)
+      : [arg]
 
-    if (e) {
-      if (_.isFunction(e)) {
-        debug('got mocha event \'%s\' with args: %o', event, args)
-        // transform the arguments if
-        // there is an event.fn callback
-        args = e.apply(this, args.concat(this.runnables, this.stats))
+    // the normalizeArgs function needs the id property, but we want to remove
+    // and other private props before logging/emitting to mocha
+    args[0] = _.isPlainObject(args[0]) ? _.omit(args[0], ['id', 'hookId']) : args[0]
+
+    debug('got mocha event \'%s\' with args: %o', event, args)
+
+    return [event].concat(args)
+  }
+
+  _logRetry (test) {
+    const runnable = this.runnables[test.id]
+
+    // Merge the runnable with the updated test props to gain most recent status from the app runnable (in the case a passed test is retried).
+    _.extend(runnable, test)
+    const padding = '  '.repeat(runnable.titlePath().length)
+
+    // Don't display a pass/fail symbol if we don't know the status.
+    let mochaSymbolToDisplay = ''
+    let mochaColorScheme = 'medium'
+
+    // If experimental retries are configured, we need to print the pass/fail status of each attempt as it is no longer implied.
+    if (this.retriesConfig?.experimentalStrategy) {
+      switch (runnable.state) {
+        case 'passed':
+          mochaSymbolToDisplay = mochaColor('checkmark', mochaSymbols.ok)
+          mochaColorScheme = 'green'
+          break
+        case 'failed':
+          mochaSymbolToDisplay = mochaColor('bright fail', mochaSymbols.err)
+          mochaColorScheme = 'error message'
+          break
+        default:
       }
-
-      return [event].concat(args)
     }
+
+    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.retries + 1))
+
+    // Log: `(Attempt 1 of 2) test title` when a test attempts without experimentalRetries configured.
+    // OR
+    // Log: `✓(Attempt 1 of 2) test title` when a test attempt passes with experimentalRetries configured.
+    // OR
+    // Log: `✖(Attempt 1 of 2) test title` when a test attempt fails with experimentalRetries configured.
+    // eslint-disable-next-line no-console
+    return console.log(`${padding}${mochaSymbolToDisplay}${attemptMessage} ${test.title}`)
   }
 
   normalizeHook (hook = {}) {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
-      title: getParentTitle(hook),
+      title: getTitlePath(hook),
       body: hook.body,
     }
   }
 
   normalizeTest (test = {}) {
+    let outerTest = _.clone(test)
+
+    // In the case tests were skipped or another case where they haven't run,
+    // test._cypressTestStatusInfo.outerStatus will be undefined. In this case,
+    // the test state reflects the outer state.
+    outerTest.state = test._cypressTestStatusInfo?.outerStatus || test.state
+
+    // If the outerStatus is failed, but the last test passed, look up the first error that occurred
+    // and use this as the test overall error. This same logic is applied in the mocha patch to report
+    // the error correctly to the Cypress browser reporter (see ./driver/patches/mocha+7.0.1.dev.patch)
+    if (test.state === 'passed' && outerTest.state === 'failed') {
+      outerTest.err = (test.prevAttempts || []).find((t) => t.state === 'failed')?.err
+      // Otherwise, if the test failed, set the error on the outer test similar to the state
+      // as we can assume that if the last test failed, the state could NEVER be passing.
+    } else if (test.state === 'failed') {
+      outerTest.err = test.err
+    }
+
     const normalizedTest = {
-      testId: orNull(test.id),
-      title: getParentTitle(test),
-      state: orNull(test.state),
-      body: orNull(test.body),
-      displayError: orNull(test.err && test.err.stack),
-      attempts: _.map((test.prevAttempts || []).concat([test]), (attempt) => {
+      testId: orNull(outerTest.id),
+      title: getTitlePath(outerTest),
+      state: orNull(outerTest.state),
+      body: orNull(outerTest.body),
+      displayError: orNull(outerTest.err && outerTest.err.stack),
+      attempts: _.map((outerTest.prevAttempts || []).concat([test]), (attempt) => {
         const err = attempt.err && {
           name: attempt.err.name,
           message: attempt.err.message,
@@ -506,16 +665,22 @@ class Reporter {
   }
 
   static loadReporter (reporterName, projectRoot) {
-    let p; let r
+    let p
 
     debug('trying to load reporter:', reporterName)
 
-    r = reporters[reporterName]
-
-    if (r) {
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
-      return require(r)
+      return require('mocha-teamcity-reporter')
+    }
+
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'junit') {
+      debug(`${reporterName} is built-in reporter`)
+
+      return require('mocha-junit-reporter')
     }
 
     if (mochaReporters[reporterName]) {

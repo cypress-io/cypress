@@ -4,13 +4,11 @@ import { SpecPatternsFragmentDoc } from '../generated/graphql-test'
 describe('<SpecPatterns />', () => {
   it('renders spec patterns', () => {
     cy.mountFragment(SpecPatternsFragmentDoc, {
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} /></div>,
+      render: (gql) => <div class="p-[16px]"><SpecPatterns gql={gql} /></div>,
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
-    cy.get('[data-cy="file-match-indicator"]').contains('50 Matches')
-
-    cy.percySnapshot()
+    cy.get('[data-cy="file-match-indicator"]').contains('50 matches')
   })
 
   it('renders component spec pattern', () => {
@@ -23,11 +21,11 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = res.specs.slice(0, 50) || []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} /></div>,
+      render: (gql) => <div class="p-[16px]"><SpecPatterns gql={gql} /></div>,
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
-    cy.get('[data-cy="file-match-indicator"]').contains('50 Matches')
+    cy.get('[data-cy="file-match-indicator"]').contains('50 matches')
   })
 
   it('renders component spec pattern should not show matches verbiage', () => {
@@ -40,14 +38,14 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = res.specs.slice(0, 50) || []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} variant='info' /></div>,
+      render: (gql) => <div class="p-[16px]"><SpecPatterns gql={gql} variant='info' /></div>,
     })
 
     cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
     cy.get('[data-cy="file-match-indicator"]').should('contain', 'specPattern')
   })
 
-  it('displays `No Matches` when specs are empty', () => {
+  it('displays `No matches` when specs are empty', () => {
     cy.mountFragment(SpecPatternsFragmentDoc, {
       onResult: (res) => {
         if (!res) {
@@ -57,10 +55,10 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql}/></div>,
+      render: (gql) => <div class="p-[16px]"><SpecPatterns gql={gql}/></div>,
     })
 
-    cy.get('[data-cy="file-match-indicator"]').contains('No Matches')
+    cy.get('[data-cy="file-match-indicator"]').contains('No matches')
   })
 
   it('displays `1 Match` when specs has 1 element', () => {
@@ -73,9 +71,9 @@ describe('<SpecPatterns />', () => {
         res.currentTestingType = 'component'
         res.specs = res.specs.slice(0, 1) || []
       },
-      render: (gql) => <div class="p-16px"><SpecPatterns gql={gql}/></div>,
+      render: (gql) => <div class="p-[16px]"><SpecPatterns gql={gql}/></div>,
     })
 
-    cy.get('[data-cy="file-match-indicator"]').contains('1 Match')
+    cy.get('[data-cy="file-match-indicator"]').contains('1 match')
   })
 })

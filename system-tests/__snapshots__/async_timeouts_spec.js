@@ -47,7 +47,7 @@ exports['e2e async timeouts / failing1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     async_timeouts.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -59,12 +59,6 @@ exports['e2e async timeouts / failing1'] = `
      ).png                                                                                          
   -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts.cy.js/async -- fails async after     (1280x720)
       cypress command (failed).png                                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/async_timeouts.cy.js.mp4            (X second)
 
 
 ====================================================================================================

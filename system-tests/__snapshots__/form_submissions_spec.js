@@ -40,17 +40,10 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_multipart.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart.cy.js     (X second)
-                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -109,17 +102,10 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_multipart.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart.cy.js     (X second)
-                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -179,7 +165,7 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_failing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -190,13 +176,6 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing.cy.js/form submission f     (1280x720)
      ails -- fails without an explicit wait when an element is immediately found (fai               
      led).png                                                                                       
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing.cy.js.m     (X second)
-                          p4                                                                        
 
 
 ====================================================================================================
@@ -247,17 +226,10 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_passing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing.cy.js.m     (X second)
-                          p4                                                                        
 
 
 ====================================================================================================

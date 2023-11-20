@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin actions', () => {
+context('cy.origin actions', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
   })
@@ -8,7 +8,7 @@ context('cy.origin actions', () => {
   it('.type()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').type('foo')
       .should('have.value', 'foo')
     })
@@ -17,7 +17,7 @@ context('cy.origin actions', () => {
   it('.focus()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').focus()
       .should('be.focused')
     })
@@ -26,7 +26,7 @@ context('cy.origin actions', () => {
   it('.blur()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').type('foo').blur()
       .should('not.be.focused')
     })
@@ -35,7 +35,7 @@ context('cy.origin actions', () => {
   it('.clear()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input')
       .type('foo').should('have.value', 'foo')
       .clear().should('have.value', '')
@@ -45,7 +45,7 @@ context('cy.origin actions', () => {
   it('.submit()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterFormSubmitted = new Promise<void>((resolve) => {
         cy.once('form:submitted', resolve)
       })
@@ -58,7 +58,7 @@ context('cy.origin actions', () => {
   it('.click()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const onClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -73,7 +73,7 @@ context('cy.origin actions', () => {
   it('.dblclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterDblClick = new Promise<void>((resolve) => {
           $btn.on('dblclick', () => resolve())
@@ -88,7 +88,7 @@ context('cy.origin actions', () => {
   it('.rightclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterContextmenu = new Promise<void>((resolve) => {
           $btn.on('contextmenu', () => resolve())
@@ -103,7 +103,7 @@ context('cy.origin actions', () => {
   it('.check()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
     })
@@ -112,7 +112,7 @@ context('cy.origin actions', () => {
   it('.uncheck()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
       .uncheck().should('not.be.checked')
@@ -122,7 +122,7 @@ context('cy.origin actions', () => {
   it('.select()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('select[name="foods"]')
       .select('Japanese').should('have.value', 'Japanese')
     })
@@ -131,7 +131,7 @@ context('cy.origin actions', () => {
   it('.scrollIntoView()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5')
       .should('not.be.visible')
       .scrollIntoView().should('be.visible')
@@ -141,7 +141,7 @@ context('cy.origin actions', () => {
   it('.scrollTo()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
       cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       cy.get('#scroll-into-view-vertical h5').should('be.visible')
@@ -151,7 +151,7 @@ context('cy.origin actions', () => {
   it('.trigger()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -166,7 +166,7 @@ context('cy.origin actions', () => {
   it('.selectFile()', () => {
     cy.get('a[data-cy="files-form-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap(Cypress.Buffer.from('foo')).as('foo')
 
       cy.get('#basic')
@@ -188,6 +188,27 @@ context('cy.origin actions', () => {
     })
   })
 
+  context('cross-origin AUT errors', () => {
+    // We only need to check .get here because the other commands are chained off of it.
+    it('.get()', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after 50ms:`)
+        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
+        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+        expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
+
+        //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.get('#button')
+    })
+  })
+
   context('#consoleProps', () => {
     const { _ } = Cypress
     let logs: Map<string, any>
@@ -202,7 +223,7 @@ context('cy.origin actions', () => {
 
     it('.get()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button')
       })
 
@@ -212,19 +233,20 @@ context('cy.origin actions', () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('get')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Selector).to.equal('#button')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Selector).to.equal('#button')
 
         // The Yielded value here SHOULD be correct as it will be reified from its props as it should not be found in the current DOM state
-        expect(consoleProps.Yielded.tagName).to.equal('BUTTON')
-        expect(consoleProps.Yielded.getAttribute('id')).to.equal('button')
+        expect(consoleProps.props.Yielded.tagName).to.equal('BUTTON')
+        expect(consoleProps.props.Yielded.getAttribute('id')).to.equal('button')
       })
     })
 
-    it('.alias()', () => {
+    it('.as()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').as('buttonAlias')
       })
 
@@ -234,21 +256,22 @@ context('cy.origin actions', () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(alias).to.equal('buttonAlias')
+        expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
-        expect(consoleProps.Command).to.equal('get')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Selector).to.equal('#button')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Selector).to.equal('#button')
 
         // The Yielded value here SHOULD be correct as it will be reified from its props as it should not be found in the current DOM state
-        expect(consoleProps.Yielded.tagName).to.equal('BUTTON')
-        expect(consoleProps.Yielded.getAttribute('id')).to.equal('button')
+        expect(consoleProps.props.Yielded.tagName).to.equal('BUTTON')
+        expect(consoleProps.props.Yielded.getAttribute('id')).to.equal('button')
       })
     })
 
     it('.click()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button-inside-a').click()
       })
 
@@ -266,20 +289,21 @@ context('cy.origin actions', () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('click')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('click')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         // TODO: test class list serialization
-        // expect(consoleProps['Applied To']).to.have.property('classList').that.contains(['my-custom-button-css', 'class2', '@class3'])
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button-inside-a')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('<span>click button</span>')
+        // expect(consoleProps.props['Applied To']).to.have.property('classList').that.contains(['my-custom-button-css', 'class2', '@class3'])
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button-inside-a')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('<span>click button</span>')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -294,14 +318,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.dblclick()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').dblclick()
       })
 
@@ -316,18 +340,19 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('dblclick')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('dblclick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('button')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('button')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -342,14 +367,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.rightclick()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').rightclick()
       })
 
@@ -364,18 +389,19 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('rightclick')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('rightclick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('button')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('button')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -390,14 +416,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.type()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('input#input').type('foo')
       })
 
@@ -415,18 +441,19 @@ context('cy.origin actions', () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('type')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('type')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Typed).to.equal('foo')
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Typed).to.equal('foo')
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
-        expect(consoleProps['Applied To'].innerHTML).to.equals('')
-        expect(consoleProps['Applied To'].type).to.equal('text')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.props['Applied To'].innerHTML).to.equals('')
+        expect(consoleProps.props['Applied To'].type).to.equal('text')
 
         expect(consoleProps.table[1]).to.be.a('function')
         expect(consoleProps.table[2]).to.be.a('function')
@@ -445,30 +472,31 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
 
         _.forEach(KeyboardEventsTable.data, (datum) => {
           expect(datum).to.have.property('Active Modifiers').that.equals(null)
           expect(datum).to.have.property('Events Fired').that.equals('keydown, keypress, beforeinput, textInput, input, keyup')
           expect(datum).to.have.property('Prevented Default').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
 
-        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
-        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('f')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Typed').that.equals('f')
+
+        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
+        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('o')
 
         expect(KeyboardEventsTable.data[2]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
         expect(KeyboardEventsTable.data[2]).to.have.property('Typed').that.equals('o')
-
-        expect(KeyboardEventsTable.data[3]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
-        expect(KeyboardEventsTable.data[3]).to.have.property('Typed').that.equals('o')
       })
     })
 
-    it('.submit()', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23480
+    it('.submit()', { retries: 15 }, () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')
         cy.get('form#multiple-inputs-and-input-submit input[name="lname"]').type('bar')
         cy.get('form#multiple-inputs-and-input-submit').submit()
@@ -485,25 +513,26 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('submit')
-        expect(consoleProps.Elements).to.equal(1)
+        expect(consoleProps.name).to.equal('submit')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('multiple-inputs-and-input-submit')
-        expect(consoleProps['Applied To'].querySelector('input[name="fname"]')).to.be.ok
-        expect(consoleProps['Applied To'].querySelector('input[name="lname"]')).to.be.ok
-        expect(consoleProps['Applied To'].querySelector('input[type="submit"]')).to.be.ok
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('multiple-inputs-and-input-submit')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="fname"]')).to.be.ok
+        expect(consoleProps.props['Applied To'].querySelector('input[name="lname"]')).to.be.ok
+        expect(consoleProps.props['Applied To'].querySelector('input[type="submit"]')).to.be.ok
 
         // make sure input values are passed along into the serialized snapshot/element
-        expect(consoleProps['Applied To'].querySelector('input[name="fname"]').value).to.equal('foo')
-        expect(consoleProps['Applied To'].querySelector('input[name="lname"]').value).to.equal('bar')
-        expect(consoleProps['Applied To'].querySelector('input[type="submit"]').value).to.equal('submit me')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="fname"]').value).to.equal('foo')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="lname"]').value).to.equal('bar')
+        expect(consoleProps.props['Applied To'].querySelector('input[type="submit"]').value).to.equal('submit me')
       })
     })
 
     it('.focus()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#input').focus()
       })
 
@@ -518,15 +547,16 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('focus')
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('focus')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
     it('.blur()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot shows the primary domain (before type). Should be secondary
         cy.get('#input').type('foo').blur()
       })
@@ -542,15 +572,16 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('blur')
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('blur')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
     it('.clear()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot shows the primary domain. Should be secondary
         cy.get('#input').type('foo').clear()
       })
@@ -566,17 +597,18 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('clear')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Options).to.be.undefined
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('clear')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Options).to.be.undefined
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
     it('.check()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]').check()
       })
 
@@ -591,14 +623,15 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('check')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('check')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -613,14 +646,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.uncheck()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]')
         .check().uncheck()
       })
@@ -636,14 +669,15 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('uncheck')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('uncheck')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -658,14 +692,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.select()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // TODO: wrong selected value is displayed in the snapshot after
         cy.get('select[name="foods"]').select('Japanese')
       })
@@ -681,15 +715,16 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('select')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('select')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
-        expect(consoleProps.Selected[0]).to.equal('Japanese')
+        expect(consoleProps.props.Options).to.be.undefined
+        expect(consoleProps.props.Selected[0]).to.equal('Japanese')
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('SELECT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('SELECT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -704,14 +739,14 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
 
     it('.scrollIntoView()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot of primary is showing for scrollIntoView
         cy.get('#scroll-into-view-vertical h5')
         .should('not.be.visible')
@@ -729,17 +764,18 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollIntoView')
+        expect(consoleProps.name).to.equal('scrollIntoView')
+        expect(consoleProps.type).to.equal('command')
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('H5')
-        expect(consoleProps['Scrolled Element']).to.have.property('tagName').that.equals('H5')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('H5')
+        expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('H5')
       })
     })
 
     it('.scrollTo()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
         cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       })
@@ -749,17 +785,18 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollTo')
-        expect(consoleProps.X).to.equal(0)
-        expect(consoleProps.Y).to.equal(300)
-        expect(consoleProps['Scrolled Element']).to.have.property('tagName').that.equals('DIV')
+        expect(consoleProps.name).to.equal('scrollTo')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.X).to.equal(0)
+        expect(consoleProps.props.Y).to.equal(300)
+        expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('DIV')
       })
     })
 
     it('.trigger()', () => {
       cy.get('a[data-cy="dom-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').trigger('click')
       })
 
@@ -768,23 +805,24 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('trigger')
-        expect(consoleProps['Event options']).to.have.property('bubbles').that.is.a('boolean')
-        expect(consoleProps['Event options']).to.have.property('cancelable').that.is.a('boolean')
-        expect(consoleProps['Event options']).to.have.property('clientX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('clientY').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('pageX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('pageY').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('screenX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('screenY').that.is.a('number')
-        expect(consoleProps.Yielded[0]).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.name).to.equal('trigger')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Event options']).to.have.property('bubbles').that.is.a('boolean')
+        expect(consoleProps.props['Event options']).to.have.property('cancelable').that.is.a('boolean')
+        expect(consoleProps.props['Event options']).to.have.property('clientX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('clientY').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('pageX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('pageY').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('screenX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('screenY').that.is.a('number')
+        expect(consoleProps.props.Yielded[0]).to.have.property('tagName').that.equals('BUTTON')
       })
     })
 
     it('.selectFile()', () => {
       cy.get('a[data-cy="files-form-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#basic').selectFile({ contents: Cypress.Buffer.from('foo'), fileName: 'foo.txt' })
       })
 
@@ -799,10 +837,11 @@ context('cy.origin actions', () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('selectFile')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Target).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps.Target).to.have.property('id').that.equals('basic')
+        expect(consoleProps.name).to.equal('selectFile')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Target).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props.Target).to.have.property('id').that.equals('basic')
       })
     })
   })

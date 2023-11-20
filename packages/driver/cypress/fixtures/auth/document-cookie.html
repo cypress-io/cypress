@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <p>
+    <strong>document.cookie</strong>:
+    <span data-cy="doc-cookie">should be replaced</span>
+  </p>
+  <script>
+    document.cookie = 'name=value'
+
+    document.querySelector('[data-cy="doc-cookie"]').innerText = document.cookie
+  </script>
+</body>
+</html>

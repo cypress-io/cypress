@@ -1,0 +1,7 @@
+**/dist
+**/dist-*
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+**/cypress/fixtures
+/src/store/mobx-runner-store.ts

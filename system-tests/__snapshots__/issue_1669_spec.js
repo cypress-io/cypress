@@ -43,7 +43,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_1669.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -54,12 +54,6 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   -  /XXX/XXX/XXX/cypress/screenshots/issue_1669.cy.js/issue-1669 undefined err.stack     (1280x720)
       in beforeEach hook -- cy.setCookie should fail with correct error -- before eac               
      h hook (failed).png                                                                            
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1669.cy.js.mp4                (X second)
 
 
 ====================================================================================================

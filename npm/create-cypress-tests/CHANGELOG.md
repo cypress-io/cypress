@@ -1,3 +1,16 @@
+# [create-cypress-tests-v2.0.4](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.3...create-cypress-tests-v2.0.4) (2023-10-16)
+
+# [create-cypress-tests-v2.0.3](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.2...create-cypress-tests-v2.0.3) (2023-09-07)
+
+# [create-cypress-tests-v2.0.2](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.1...create-cypress-tests-v2.0.2) (2023-04-07)
+
+# [create-cypress-tests-v2.0.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.0...create-cypress-tests-v2.0.1) (2023-01-03)
+
+
+### Bug Fixes
+
+* change wording for spec creation ([#25271](https://github.com/cypress-io/cypress/issues/25271)) ([c12a7e3](https://github.com/cypress-io/cypress/commit/c12a7e37c73d972eb0514e4b602940df210d86c7))
+
 # [create-cypress-tests-v2.0.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.3.0...create-cypress-tests-v2.0.0) (2022-06-13)
 
 

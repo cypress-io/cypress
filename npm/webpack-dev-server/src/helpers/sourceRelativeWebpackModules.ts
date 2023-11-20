@@ -1,6 +1,6 @@
 import Module from 'module'
 import path from 'path'
-import type { WebpackDevServerConfig, ALL_FRAMEWORKS } from '../devServer'
+import type { Frameworks, WebpackDevServerConfig } from '../devServer'
 import debugFn from 'debug'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
@@ -56,7 +56,7 @@ export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
   })
 }
 
-type FrameworkWebpackMapper = { [Property in typeof ALL_FRAMEWORKS[number]]: string | undefined }
+type FrameworkWebpackMapper = { [Property in Frameworks]: string | undefined }
 
 const frameworkWebpackMapper: FrameworkWebpackMapper = {
   'create-react-app': 'react-scripts',
@@ -66,6 +66,7 @@ const frameworkWebpackMapper: FrameworkWebpackMapper = {
   vue: undefined,
   next: 'next',
   'angular': '@angular-devkit/build-angular',
+  'svelte': undefined,
 }
 
 // Source the users framework from the provided projectRoot. The framework, if available, will serve

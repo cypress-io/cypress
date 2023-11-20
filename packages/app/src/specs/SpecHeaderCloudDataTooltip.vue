@@ -3,10 +3,11 @@
     placement="top"
     :is-interactive="true"
     :show-group="VALUES[mode].header"
+    :show-delay="250"
   >
     <button
       type="button"
-      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline decoration-gray-300 underline-offset-4"
     >
       <span
         class="hidden lg:flex"
@@ -26,8 +27,8 @@
         data-cy="cloud-data-tooltip-content"
       >
         <div
-          :class="{'my-2': projectConnectionStatus!== 'CONNECTED'}"
-          class="max-w-300px"
+          :class="{'my-2': !project.isProjectConnected}"
+          class="max-w-[300px]"
         >
           <i18n-t
             scope="global"
@@ -43,34 +44,34 @@
         </div>
         <div>
           <Button
-            v-if="projectConnectionStatus === 'LOGGED_OUT'"
+            v-if="cloudStatusMatches('isLoggedOut')"
             :prefix-icon="UserOutlineIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="login-button"
-            @click="emits('showLogin')"
+            @click="emits('showLoginConnect')"
           >
-            {{ t('specPage.dashboardLoginButton') }}
+            {{ t('specPage.cloudLoginButton') }}
           </Button>
           <Button
-            v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
+            v-else-if="cloudStatusMatches('needsProjectConnect')"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="connect-button"
-            @click="emits('showConnectToProject')"
+            @click="emits('showLoginConnect')"
           >
             {{ t("specPage.connectProjectButton") }}
           </Button>
           <Button
-            v-else-if="projectConnectionStatus === 'NOT_FOUND'"
+            v-else-if="project.isNotFound"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="reconnect-button"
-            @click="emits('showConnectToProject')"
+            @click="emits('showLoginConnect')"
           >
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
           <RequestAccessButton
-            v-else-if="projectConnectionStatus === 'UNAUTHORIZED'"
+            v-else-if="project.isNotAuthorized"
             :gql="props.gql"
           />
         </div>
@@ -91,6 +92,10 @@ import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+
+const { cloudStatusMatches, project } = useUserProjectStatusStore()
+
 const { t } = useI18n()
 
 type CloudDataTooltipMode = 'LATEST_RUNS' | 'AVG_DURATION'
@@ -139,8 +144,7 @@ const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
 }
 
 const emits = defineEmits<{
-  (eventName: 'showLogin'): void
-  (eventName: 'showConnectToProject'): void
+  (eventName: 'showLoginConnect'): void
 }>()
 
 const props = defineProps<{
@@ -159,32 +163,16 @@ fragment SpecHeaderCloudDataTooltip on Query {
       }
     }
   }
-  ...Auth
-  ...CloudConnectModals
   ...RequestAccessButton
 }
 `
 
-const projectConnectionStatus = computed(() => {
-  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
-
-  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    return 'UNAUTHORIZED'
-  }
-
-  return 'CONNECTED'
-})
-
 const tooltipTextKey = computed(() => {
-  if (projectConnectionStatus.value === 'CONNECTED') {
+  if (project.isProjectConnected) {
     return VALUES[props.mode].connected
   }
 
-  if (projectConnectionStatus.value === 'UNAUTHORIZED') {
+  if (project.isNotAuthorized) {
     return VALUES[props.mode].noAccess
   }
 

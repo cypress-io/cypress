@@ -5,46 +5,38 @@
   "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "build:test": "tsc -p tsconfig.spec.json",
-    "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "clean12": "git checkout HEAD -- sandbox12 && git clean -f -d sandbox12",
-    "launch12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic && cd ..",
-    "launch:test12": "yarn link:sandbox12 && cd sandbox12 && ng add @cypress/schematic --e2eUpdate && cd ..",
-    "link:sandbox12": "yarn link && cd sandbox12 && yarn link @cypress/schematic",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
-    "test:e2e:sandbox12": "cd sandbox12 && ng run sandbox:cypress-run",
-    "unlink:sandbox12": "cd sandbox12 && yarn unlink @cypress/schematic && cd .. && yarn unlink"
+    "lint": "eslint --ext .ts,.json, ."
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1202.10",
-    "@angular-devkit/core": "^12.2.17",
-    "@angular-devkit/schematics": "^12.2.17",
-    "@schematics/angular": "^12.2.17",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^12.2.17",
-    "@angular/cli": "^12.2.17",
+    "@angular-devkit/architect": "^0.1402.1",
+    "@angular-devkit/core": "^14.2.1",
+    "@angular-devkit/schematics": "^14.2.1",
+    "@angular-devkit/schematics-cli": "^14.2.1",
+    "@angular/cli": "^14.2.1",
+    "@schematics/angular": "^14.2.1",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
-    "@types/node": "^12.11.1",
+    "@types/node": "^18.17.5",
     "chai": "4.2.0",
-    "cypress": "0.0.0-development",
     "mocha": "3.5.3",
-    "typescript": "~4.2.4"
+    "typescript": "^4.7.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=12",
-    "@angular/core": ">=12"
+    "@angular/cli": ">=14",
+    "@angular/core": ">=14"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/cypress-schematic#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
   "author": "Cypress DX Team",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
   "keywords": [
@@ -61,6 +53,17 @@
   "builders": "./src/builders/builders.json",
   "ng-add": {
     "save": "devDependencies"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/src/**/*.js",
+          "{projectRoot}/src/**/*.d.ts",
+          "{projectRoot}/src/**/*.js.map"
+        ]
+      }
+    }
   },
   "schematics": "./src/schematics/collection.json"
 }

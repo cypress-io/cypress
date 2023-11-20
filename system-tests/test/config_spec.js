@@ -180,18 +180,6 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws an error if experimentalSessionAndOrigin is set on the component level', async function () {
-    await Fixtures.scaffoldProject('invalid-root-level-config')
-
-    return systemTests.exec(this, {
-      project: 'invalid-root-level-config',
-      configFile: 'invalid-component-experimentalSessionAndOrigin-config.js',
-      testingType: 'component',
-      expectedExitCode: 1,
-      snapshot: true,
-    })
-  })
-
   it('throws an error if indexHtml is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
 

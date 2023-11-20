@@ -1,0 +1,261 @@
+{
+  "data": {
+    "currentProject": {
+      "id": "Q3VycmVudFByb2plY3Q6L1VzZXJzL2xhY2hsYW5taWxsZXIvY29kZS9kdW1wL2VsZXV0aGVyaWEvcGFja2FnZXMvZnJvbnRlbmQ=",
+      "cloudProject": {
+        "__typename": "CloudProject",
+        "id": "Q2xvdWRQcm9qZWN0OjdwNXVjZQ==",
+        "cloudProjectUrl": "https://cloud.cypress.io/projects/7p5uce",
+        "runByNumber": {
+          "id": "Q2xvdWRSdW46bkdudmx5d3BHWg==",
+          "runNumber": 2,
+          "createdAt": "2023-01-30T08:10:59.720Z",
+          "status": "PASSED",
+          "totalDuration": 7210000,
+          "commitInfo": {
+            "sha": "e9d176f0c00c0428c9945577aec37cb6d48c5a26",
+            "authorName": "Lachlan Miller",
+            "authorEmail": "asdf",
+            "summary": "update projectId",
+            "branch": "main",
+            "__typename": "CloudRunCommitInfo"
+          },
+          "url": "https://cloud.cypress.io/projects/7p5uce/runs/2",
+          "totalPassed": 2,
+          "totalFailed": 0,
+          "totalPending": 2,
+          "totalSkipped": 0,
+          "totalFlakyTests": null,
+          "cancelledBy": null,
+          "cancelledAt": null,
+          "scheduledToCompleteAt": null,
+          "errors": [],
+          "overLimitActionType": "UPGRADE",
+          "overLimitActionUrl": "https://cloud.cypress.io/organizations/021fea67-d608-4ab2-af17-3f8a2a23d019/pricing",
+          "isHidden": false,
+          "reasonsRunIsHidden": [],
+          "totalTests": 21,
+          "ci": {
+            "id": "Q2xvdWRDaUJ1aWxkSW5mbzowYzhjNjcyZS00ODIyLTRiMmEtOTI1YS03NTA4ZTJjNDJkYmY=",
+            "ciBuildNumberFormatted": "4041791434",
+            "formattedProvider": "GitHub Actions",
+            "url": "https://github.com/lmiller1990/eleutheria/actions/runs/4041791434",
+            "__typename": "CloudCiBuildInfo"
+          },
+          "testsForReview": [],
+          "specs": [
+            {
+              "id": "Q2xvdWRTcGVjUnVuOjBjOGM2NzJlLTQ4MjItNGIyYS05MjVhLTc1MDhlMmM0MmRiZjpNekExTlRVNE1UWXRNalZqTmkxak0yWmlMVEU0WWpFdFkyWTVaV1JrWkRFM05qTmk=",
+              "path": "src/components/InfoPanel/InfoPanel.cy.ts",
+              "basename": "InfoPanel.cy.ts",
+              "extension": ".cy.ts",
+              "shortPath": "src/components/InfoPanel/InfoPanel.cy.ts",
+              "groupIds": [
+                "Q2xvdWRSdW5Hcm91cDo2Njg4MzkyNjpsaW51eC1FbGVjdHJvbi0xMDYtZjlkOGIzNjdiNQ=="
+              ],
+              "specDuration": {
+                "min": 56,
+                "max": 56,
+                "__typename": "SpecDataAggregate"
+              },
+              "status": "PASSED",
+              "testsPassed": {
+                "min": 1,
+                "max": 1,
+                "__typename": "SpecDataAggregate"
+              },
+              "testsFailed": {
+                "min": 0,
+                "max": 0,
+                "__typename": "SpecDataAggregate"
+              },
+              "testsPending": {
+                "min": 0,
+                "max": 0,
+                "__typename": "SpecDataAggregate"
+              },
+              "__typename": "CloudSpecRun"
+            },
+            {
+              "id": "Q2xvdWRTcGVjUnVuOjBjOGM2NzJlLTQ4MjItNGIyYS05MjVhLTc1MDhlMmM0MmRiZjpaalU0TnpJeFltSXROek13T1Mxa05XWXlMV05pT1dNdE5UVTRZemRsTVdKak9HUTE=",
+              "path": "src/components/DifficultyItem.cy.ts",
+              "basename": "DifficultyItem.cy.ts",
+              "extension": ".cy.ts",
+              "shortPath": "src/components/DifficultyItem.cy.ts",
+              "groupIds": [
+                "Q2xvdWRSdW5Hcm91cDo2Njg4MzkyNjpsaW51eC1FbGVjdHJvbi0xMDYtZjlkOGIzNjdiNQ=="
+              ],
+              "specDuration": {
+                "min": 163,
+                "max": 163,
+                "__typename": "SpecDataAggregate"
+              },
+              "status": "PASSED",
+              "testsPassed": {
+                "min": 1,
+                "max": 1,
+                "__typename": "SpecDataAggregate"
+              },
+              "testsFailed": {
+                "min": 0,
+                "max": 0,
+                "__typename": "SpecDataAggregate"
+              },
+              "testsPending": {
+                "min": 0,
+                "max": 0,
+                "__typename": "SpecDataAggregate"
+              },
+              "__typename": "CloudSpecRun"
+            }
+          ],
+          "groups": [
+            {
+              "id": "Q2xvdWRSdW5Hcm91cDo2Njg4MzkyNjpsaW51eC1FbGVjdHJvbi0xMDYtZjlkOGIzNjdiNQ==",
+              "testingType": "component",
+              "groupName": null,
+              "os": {
+                "id": "Q2xvdWRPcGVyYXRpbmdTeXN0ZW06NjY4ODM5MjY6bGludXgtRWxlY3Ryb24tMTA2LWY5ZDhiMzY3YjU=",
+                "name": "Linux",
+                "nameWithVersion": "Linux Ubuntu - ",
+                "__typename": "CloudOperatingSystem"
+              },
+              "browser": {
+                "id": "Q2xvdWRCcm93c2VySW5mbzo2Njg4MzkyNjpsaW51eC1FbGVjdHJvbi0xMDYtZjlkOGIzNjdiNQ==",
+                "formattedName": "Electron",
+                "formattedNameWithVersion": "Electron 106",
+                "__typename": "CloudBrowserInfo"
+              },
+              "__typename": "CloudRunGroup"
+            }
+          ],
+          "__typename": "CloudRun"
+        }
+      },
+      "specs": [
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9EaWZmaWN1bHR5SXRlbS5jeS50cw==",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/DifficultyItem.cy.ts",
+          "relative": "src/components/DifficultyItem.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9EaWZmaWN1bHR5TGFiZWwuY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/DifficultyLabel.cy.ts",
+          "relative": "src/components/DifficultyLabel.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9EaWZmaWN1bHR5UGFuZWwuY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/DifficultyPanel.cy.ts",
+          "relative": "src/components/DifficultyPanel.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9QbGF5U3ltYm9sLmN5LnRz",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/PlaySymbol.cy.ts",
+          "relative": "src/components/PlaySymbol.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9Tb25nSW5mby5jeS50c3g=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/SongInfo.cy.tsx",
+          "relative": "src/components/SongInfo.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9Tb25nVGlsZS5jeS50c3g=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/SongTile.cy.tsx",
+          "relative": "src/components/SongTile.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9Nb2RpZmllclBhbmVsL01vZGlmaWVyUGFuZWwuY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/ModifierPanel/ModifierPanel.cy.ts",
+          "relative": "src/components/ModifierPanel/ModifierPanel.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9JbnB1dC9JbnB1dC5jeS50cw==",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/Input/Input.cy.ts",
+          "relative": "src/components/Input/Input.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9JbmZvUGFuZWwvSW5mb1BhbmVsLmN5LnRz",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/InfoPanel/InfoPanel.cy.ts",
+          "relative": "src/components/InfoPanel/InfoPanel.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9Ob25HYW1lcGxheVNjcmVlbi9Ob25HYW1lcGxheVNjcmVlbi5jeS50cw==",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/NonGameplayScreen/NonGameplayScreen.cy.ts",
+          "relative": "src/components/NonGameplayScreen/NonGameplayScreen.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9QbGFpblBhbmVsL1BsYWluUGFuZWwuY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/PlainPanel/PlainPanel.cy.ts",
+          "relative": "src/components/PlainPanel/PlainPanel.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9TY29yZUJhZGdlL1Njb3JlQmFkZ2UuY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/ScoreBadge/ScoreBadge.cy.ts",
+          "relative": "src/components/ScoreBadge/ScoreBadge.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9TaWduSW5Gb3JtL1NpZ25JbkZvcm0uY3kudHN4",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/SignInForm/SignInForm.cy.tsx",
+          "relative": "src/components/SignInForm/SignInForm.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9TaWduVXBGb3JtL1NpZ25VcEZvcm0uY3kudHM=",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/SignUpForm/SignUpForm.cy.ts",
+          "relative": "src/components/SignUpForm/SignUpForm.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9Tb25nU2VsZWN0U2NyZWVuL0xvYWRpbmdTY3JlZW4uY3kudHN4",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/SongSelectScreen/LoadingScreen.cy.tsx",
+          "relative": "src/screens/SongSelectScreen/LoadingScreen.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9Tb25nU2VsZWN0U2NyZWVuL09wdGlvbnNQYW5lLmN5LnRzeA==",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/SongSelectScreen/OptionsPane.cy.tsx",
+          "relative": "src/screens/SongSelectScreen/OptionsPane.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9zdW1tYXJ5L1N1bW1hcnlTY3JlZW4uY3kudHN4",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/summary/SummaryScreen.cy.tsx",
+          "relative": "src/screens/summary/SummaryScreen.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9nYW1lcGxheS9HYW1lcGxheUxvYWRpbmcuY3kudHN4",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/gameplay/GameplayLoading.cy.tsx",
+          "relative": "src/screens/gameplay/GameplayLoading.cy.tsx",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9nYW1lcGxheS9jb21wb25lbnRzL0dhbWVwbGF5L0dhbWVwbGF5LmN5LnRz",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/gameplay/components/Gameplay/Gameplay.cy.ts",
+          "relative": "src/screens/gameplay/components/Gameplay/Gameplay.cy.ts",
+          "__typename": "Spec"
+        },
+        {
+          "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvc2NyZWVucy9nYW1lcGxheS9jb21wb25lbnRzL0dhbWVwbGF5L0dhbWVwbGF5U2NvcmUuY3kudHN4",
+          "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/screens/gameplay/components/Gameplay/GameplayScore.cy.tsx",
+          "relative": "src/screens/gameplay/components/Gameplay/GameplayScore.cy.tsx",
+          "__typename": "Spec"
+        }
+      ],
+      "currentTestingType": "component",
+      "__typename": "CurrentProject"
+    }
+  }
+}

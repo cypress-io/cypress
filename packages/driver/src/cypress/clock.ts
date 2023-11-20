@@ -46,10 +46,16 @@ export const create = (win, now, methods) => {
     return _.pick(clock, 'now', 'methods')
   }
 
+  const setSystemTime = (now) => {
+    clock.setSystemTime(now)
+  }
+
   return {
     tick,
 
     restore,
+
+    setSystemTime,
 
     bind,
 

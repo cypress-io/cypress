@@ -27,6 +27,7 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
     numElements: 1,
     testCurrentRetry: 0,
     testId: 'r3',
+    state: 'active',
     timeout: 4000,
     wallClockStartedAt: new Date().toString(),
   } as CommandProps
@@ -100,30 +101,8 @@ describe('Test model', () => {
 
       command.isLongRunning = true
 
-      test.finish({} as UpdatableTestProps)
+      test.finish({} as UpdatableTestProps, false)
       expect(test.isLongRunning).to.be.false
-    })
-  })
-
-  context('#studioIsNotEmpty', () => {
-    it('is empty when there are no studio commands', () => {
-      const test = createTest()
-
-      expect(test.studioIsNotEmpty).to.be.false
-
-      test.addLog(createCommand())
-
-      expect(test.studioIsNotEmpty).to.be.false
-    })
-
-    it('is is not empty when there are studio commands', () => {
-      const test = createTest()
-
-      expect(test.studioIsNotEmpty).to.be.false
-
-      test.addLog(createCommand({ hookId: 'r3-studio' }))
-
-      expect(test.studioIsNotEmpty).to.be.true
     })
   })
 
@@ -303,21 +282,21 @@ describe('Test model', () => {
     it('sets the test as inactive', () => {
       const test = createTest()
 
-      test.finish({} as UpdatableTestProps)
+      test.finish({} as UpdatableTestProps, false)
       expect(test.isActive).to.be.false
     })
 
     it('updates the state of the test', () => {
       const test = createTest()
 
-      test.finish({ state: 'failed' } as UpdatableTestProps)
+      test.finish({ state: 'failed' } as UpdatableTestProps, false)
       expect(test.state).to.equal('failed')
     })
 
     it('updates the test err', () => {
       const test = createTest()
 
-      test.finish({ err: { name: 'SomeError' } as Err } as UpdatableTestProps)
+      test.finish({ err: { name: 'SomeError' } as Err } as UpdatableTestProps, false)
       expect(test.err.name).to.equal('SomeError')
     })
 
@@ -325,7 +304,7 @@ describe('Test model', () => {
       const test = createTest({ hooks: [{ hookId: 'h1', hookName: 'before each' }] })
 
       test.addLog(createCommand({ instrument: 'command' }))
-      test.finish({ failedFromHookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps)
+      test.finish({ state: 'failed', failedFromHookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps, false)
       expect(test.lastAttempt.hooks[1].failed).to.be.true
     })
 
@@ -333,7 +312,7 @@ describe('Test model', () => {
       const test = createTest()
 
       expect(() => {
-        test.finish({ hookId: 'h1' } as UpdatableTestProps)
+        test.finish({ hookId: 'h1' } as UpdatableTestProps, false)
       }).not.to.throw()
     })
   })

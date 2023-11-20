@@ -7,6 +7,7 @@ const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
+const { telemetry } = require('@packages/telemetry')
 
 const errorMessage = function (err = {}) {
   return err.stack || err.annotated || err.message || err.toString()
@@ -66,11 +67,10 @@ const API = {
       // we should be watching the file if we are NOT
       // in a text terminal aka cypress run
       // TODO: rename this to config.isRunMode
-      // vs config.isInterativeMode
+      // vs config.isInteractiveMode
       const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
-      const baseFilePath = filePath
-      .replace(config.projectRoot, '')
+      const baseFilePath = filePath.replace(config.projectRoot, '')
 
       fileObject = (fileObjects[filePath] = _.extend(new EE(), {
         filePath,
@@ -98,7 +98,14 @@ const API = {
     }
 
     const preprocessor = (fileProcessors[filePath] = Promise.try(() => {
-      return plugins.execute('file:preprocessor', fileObject)
+      const span = telemetry.startSpan({ name: 'file:preprocessor' })
+
+      return plugins.execute('file:preprocessor', fileObject).then((arg) => {
+        span?.setAttribute('file', arg)
+        span?.end()
+
+        return arg
+      })
     }))
 
     return preprocessor

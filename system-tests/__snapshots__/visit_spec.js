@@ -55,16 +55,10 @@ exports['e2e visit / low response timeout / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit.cy.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -77,102 +71,6 @@ exports['e2e visit / low response timeout / passes'] = `
   │ ✔  visit.cy.js                              XX:XX       18       18        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       18       18        -        -        -  
-
-
-`
-
-exports['e2e visit / low response timeout / fails when network connection immediately fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_network_error_failing.cy.js)                                   │
-  │ Searched:   cypress/e2e/visit_http_network_error_failing.cy.js                                 │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  visit_http_network_error_failing.cy.js                                          (1 of 1)
-
-
-  when network connection cannot be established
-    1) fails
-
-
-  0 passing
-  1 failing
-
-  1) when network connection cannot be established
-       fails:
-     CypressError: \`cy.visit()\` failed trying to load:
-
-http://localhost:16795/
-
-We attempted to make an http request to this URL but the request failed without a response.
-
-We received this error at the network level:
-
-  > Error: connect ECONNREFUSED 127.0.0.1:16795
-
-Common situations why this would fail:
-  - you don't have internet access
-  - you forgot to run / boot your web server
-  - your web server isn't accessible
-  - you have weird network configuration settings on your computer
-      [stack trace lines]
-  
-  From Node.js Internals:
-    Error: connect ECONNREFUSED 127.0.0.1:16795
-      [stack trace lines]
-    
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     visit_http_network_error_failing.cy.js                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_network_error_failing.cy.js/when net     (1280x720)
-     work connection cannot be established -- fails (failed).png                                    
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X second)
-                          g.cy.js.mp4                                                               
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  visit_http_network_error_failing.cy      XX:XX        1        -        1        -        - │
-  │    .js                                                                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -230,7 +128,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_http_500_response_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -242,13 +140,6 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
      er response is 500 -- fails (failed).png                                                       
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
-                          .cy.js.mp4                                                                
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -257,93 +148,6 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  visit_http_500_response_failing.cy.      XX:XX        1        -        1        -        - │
-  │    js                                                                                          │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e visit / low response timeout / fails when file server responds with 404'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_file_404_response_failing.cy.js)                                    │
-  │ Searched:   cypress/e2e/visit_file_404_response_failing.cy.js                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  visit_file_404_response_failing.cy.js                                           (1 of 1)
-
-
-  when file server response is 404
-    1) fails
-
-
-  0 passing
-  1 failing
-
-  1) when file server response is 404
-       fails:
-     CypressError: \`cy.visit()\` failed trying to load:
-
-/static/does-not-exist.html
-
-We failed looking for this file at the path:
-
-/foo/bar/.projects/e2e/static/does-not-exist.html
-
-The internal Cypress web server responded with:
-
-  > 404: Not Found
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     visit_file_404_response_failing.cy.js                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing.cy.js/when file     (1280x720)
-      server response is 404 -- fails (failed).png                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
-                          .cy.js.mp4                                                                
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  visit_file_404_response_failing.cy.      XX:XX        1        -        1        -        - │
   │    js                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
@@ -406,7 +210,7 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_non_html_content_type_failing.cy.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -416,13 +220,6 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
   -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing.cy.js/when      (1280x720)
      content type is plaintext -- fails (failed).png                                                
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X second)
-                          ling.cy.js.mp4                                                            
 
 
 ====================================================================================================
@@ -505,7 +302,7 @@ When this \`load\` event occurs, Cypress will continue running commands.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_http_timeout_failing.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -517,13 +314,6 @@ When this \`load\` event occurs, Cypress will continue running commands.
      es out -- fails timeout exceeds pageLoadTimeout (failed).png                                   
   -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing.cy.js/when visit tim     (1280x720)
      es out -- fails timeout exceeds timeout option (failed).png                                    
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -590,7 +380,6 @@ Common situations why this would fail:
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
   2) response timeouts result in an error
        handles no response errors when not initially visiting:
@@ -614,7 +403,6 @@ Common situations why this would fail:
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
   3) response timeouts result in an error
        fails after reducing the responseTimeout option:
@@ -638,7 +426,6 @@ Common situations why this would fail:
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
       [stack trace lines]
-    
 
 
 
@@ -652,7 +439,7 @@ Common situations why this would fail:
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_response_never_ends_failing.cy.js                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -669,13 +456,6 @@ Common situations why this would fail:
   -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing.cy.js/respons     (1280x720)
      e timeouts result in an error -- fails after reducing the responseTimeout option               
       (failed).png                                                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X second)
-                          ng.cy.js.mp4                                                              
 
 
 ====================================================================================================
@@ -728,16 +508,10 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_2196.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_2196.cy.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -817,16 +591,10 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   │ Pending:      6                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     source_rewriting.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/source_rewriting.cy.js.mp4          (X second)
 
 
 ====================================================================================================

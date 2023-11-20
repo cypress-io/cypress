@@ -1,13 +1,13 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin shadow dom', () => {
+context('cy.origin shadow dom', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="shadow-dom-link"]').click()
   })
 
   it('.shadow()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#shadow-element-1').shadow().find('p.shadow-1')
       .should('have.text', 'Shadow Content 1')
     })
@@ -25,7 +25,7 @@ context('cy.origin shadow dom', () => {
     })
 
     it('.shadow()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#shadow-element-1').shadow()
       })
 
@@ -38,13 +38,14 @@ context('cy.origin shadow dom', () => {
 
         const { consoleProps } = findCrossOriginLogs('shadow', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('shadow')
-        expect(consoleProps.Elements).to.equal(1)
+        expect(consoleProps.name).to.equal('shadow')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
-        expect(consoleProps['Applied To']).to.have.property('id').that.equals('shadow-element-1')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')
+        expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('shadow-element-1')
 
-        expect(consoleProps.Yielded).to.be.null
+        expect(consoleProps.props.Yielded).to.be.null
       })
     })
   })

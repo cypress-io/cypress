@@ -12,6 +12,8 @@ let server
 // this is a transparent TCP proxy for Chrome's debugging port
 // it can kill all existing connections or shut the port down independently of Chrome or Cypress
 const startTcpProxy = () => {
+  console.error('starting tcp proxy ', { realPort, fakePort })
+
   return new Promise((resolve, reject) => {
     server = net.createServer((socket) => {
       const { remotePort } = socket
@@ -76,12 +78,6 @@ module.exports = (on, config) => {
     },
     'kill:active:connections' () {
       server.emit('kill-active-connections')
-
-      return null
-    },
-    'destroy:server' () {
-      console.error('closing server')
-      server.close()
 
       return null
     },

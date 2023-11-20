@@ -3,6 +3,10 @@
     margin-right: 8px;
     transform: rotate(-90deg);
     transition: transform 150ms ease-out;
+
+    .icon-dark {
+      stroke: $gray-800;
+    }
   }
 
   .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {

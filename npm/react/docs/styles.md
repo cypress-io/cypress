@@ -1,6 +1,6 @@
 # styles
 
-If you component imports its own style, the style should be applied during the Cypress test.
+If your component imports its own style, the style should be applied during the Cypress test.
 
 ```js
 // Footer.jsx
@@ -20,7 +20,7 @@ it('is stylish', () => {
 })
 ```
 
-## Import from spec
+## Import in the spec file
 
 Sometimes the root component imports the style, or it is included from `src/public/index.html` file. We can usually import the style directly from the spec file:
 
@@ -41,6 +41,25 @@ it('is stylish', () => {
 })
 ```
 
+## Import in the component support file
+
+If you have stylesheets that should apply to all of your components, you can import those in your component support file.
+
+```js
+// cypress/support/component.js
+import './main.css'
+...
+
+// Footer.spec.js
+import React from 'react'
+import { mount } from '@cypress/react'
+import Footer from './Footer.jsx'
+
+it('is stylish', () => {
+  mount(<Footer />)
+  // styles are there because the component support file imported the CSS file
+})
+```
 ### Additional markup
 
 The global style might assume a certain DOM structure. You can "mimic" this structure by surrounding the component with additional elements with necessary styles. For example, this is the Footer component from [bahmutov/todomvc-react](https://github.com/bahmutov/todomvc-react) repository:
@@ -85,66 +104,6 @@ describe('footer component', () => {
 })
 ```
 
-The component looks nice:
+The component is rendered with the correct styles:
 
 ![Footer component](../images/footer.png)
-
-## Extra styles
-
-But sometimes you need more power.
-
-You can use one or all 3 options to load additional styles:
-
-```js
-mount(<Component />, {
-  style: string, // load inline style CSS
-  cssFiles: string | string[], // load a single or a list of local CSS files
-  stylesheets: string | string[] // load external stylesheets
-})
-```
-
-### Inline styles
-
-You can add individual style to the mounted component by passing its text as an option
-
-```js
-it('can be passed as an option', () => {
-  const style = `
-    .component-button {
-      display: inline-flex;
-      width: 25%;
-      flex: 1 0 auto;
-    }
-
-    .component-button.orange button {
-      background-color: #F5923E;
-      color: white;
-    }
-  `
-  cy.mount(<Button name="Orange" orange />, { style })
-  cy.get('.orange button').should(
-    'have.css',
-    'background-color',
-    'rgb(245, 146, 62)',
-  )
-})
-```
-
-### Load local CSS file
-
-```js
-const cssFiles = 'cypress/integration/Button.css'
-cy.mount(<Button name="Orange" orange />, { cssFiles })
-```
-
-See [cypress/integration/inject-style-spec.js](cypress/integration/inject-style-spec.js) for more examples.
-
-### Load external stylesheets
-
-```js
-mount(<Todo todo={todo} />, {
-  stylesheets: [
-    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
-  ],
-})
-```

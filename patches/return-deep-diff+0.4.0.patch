@@ -1,0 +1,7 @@
+diff --git a/node_modules/return-deep-diff/index.d.ts b/node_modules/return-deep-diff/index.d.ts
+new file mode 100644
+index 0000000..53711dd
+--- /dev/null
++++ b/node_modules/return-deep-diff/index.d.ts
+@@ -0,0 +1 @@
++export default function deepDiff(obj1: Record<string, any>, obj2: Record<string, any>, keepNewKeys?: boolean): Record<string, any>

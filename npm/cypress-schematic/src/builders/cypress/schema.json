@@ -11,16 +11,16 @@
       "type": [
         "string"
       ],
-      "description": "Specify a path to a JSON file where configuration values are set or pass false to disable the use of a configuration file entirely."
+      "description": "Specify a path to a JSON file where configuration values are set or pass false to disable the use of a configuration file entirely"
     },
     "quiet": {
       "type": "boolean",
-      "description": "If passed, Cypress output will not be printed to stdout. Only output from the configured Mocha reporter will print.",
+      "description": "If passed, Cypress output will not be printed to stdout. Only output from the configured Mocha reporter will print",
       "default": false
     },
     "browser": {
       "type": "string",
-      "description": "The browser to run tests in.",
+      "description": "The browser to run tests in",
       "enum": [
         "electron",
         "chrome",
@@ -32,7 +32,17 @@
     },
     "devServerTarget": {
       "type": "string",
-      "description": "Dev server target to run tests against."
+      "description": "Dev server target to run tests against"
+    },
+    "e2e": {
+      "type": "boolean",
+      "description": "Run end to end tests",
+      "default": true
+    },
+    "component": {
+      "type": "boolean",
+      "description": "Run component tests",
+      "default": false
     },
     "env": {
       "type": "object",
@@ -82,6 +92,13 @@
       "type": "boolean",
       "description": "Recompile and run tests when files change.",
       "default": false
+    },
+    "testingType": {
+      "enum": [
+        "e2e",
+        "component"
+      ],
+      "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e."
     }
   },
   "additionalProperties": true

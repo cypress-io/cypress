@@ -50,9 +50,10 @@ type AllowedChalkColors = 'red' | 'blue' | 'green' | 'magenta' | 'yellow'
  *
  * @param err
  * @param color
+ * @param causeDepth If error has a `cause` limits the maximum depth of causes to log. Set to `0` to not log any `cause`
  * @returns
  */
-export const logError = function (err: CypressError | ErrorLike, color: AllowedChalkColors = 'red') {
+export const logError = function (err: CypressError | ErrorLike, color: AllowedChalkColors = 'red', causeDepth: number = 3) {
   console.log(chalk[color](err.message))
 
   if (err.details) {
@@ -66,6 +67,12 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
   }
 
   console.log(chalk[color](err.stack ?? ''))
+
+  if (causeDepth > 0 && err['cause']) {
+    // Limit the recursions on `cause` in case there is a loop
+    console.log(chalk[color]('Caused by:'))
+    logError(err['cause'], color, causeDepth - 1)
+  }
 
   return err
 }

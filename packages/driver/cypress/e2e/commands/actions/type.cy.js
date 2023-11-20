@@ -22,6 +22,8 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
+const isWebKit = Cypress.isBrowser('webkit')
+
 describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -89,6 +91,10 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     cy.get('input:text:first').type('bar')
+  })
+
+  it('can type into an input when given a wrapper element', () => {
+    cy.get('#focus div span').type('foo')
   })
 
   it('lists the input as the focused element', () => {
@@ -198,6 +204,15 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('actionability', () => {
+    let retries = 0
+
+    beforeEach(() => {
+      retries = 0
+      cy.on('command:retry', () => {
+        retries += 1
+      })
+    })
+
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()
 
@@ -259,35 +274,32 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
-      const retried = cy.stub()
-
       cy.on('command:retry', _.after(3, () => {
-        $txt.show()
-        retried()
+        // Replace the element with a copy of itself, to ensure that .type() requeries the DOM
+        // while retrying actionability
+        $txt.replaceWith($txt[0].innerHTML)
+        cy.$$(':text:first').show()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
     it('waits until element is no longer disabled', () => {
       const $txt = cy.$$(':text:first').prop('disabled', true)
 
-      const retried = cy.stub()
       const clicked = cy.stub()
 
       $txt.on('click', clicked)
 
       cy.on('command:retry', _.after(3, () => {
         $txt.prop('disabled', false)
-        retried()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
         expect(clicked).to.be.calledOnce
-
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
@@ -312,67 +324,44 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('waits until element stops animating', () => {
-      const retried = cy.stub()
-
-      cy.on('command:retry', retried)
-
-      cy.stub(cy, 'ensureElementIsNotAnimating')
-      .throws(new Error('animating!'))
-      .onThirdCall().returns()
-
-      cy.get(':text:first').type('foo').then(() => {
-        // - retry animation coords
-        // - retry animation
-        // - retry animation
-        expect(retried).to.be.calledThrice
-
-        expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+      cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.be.gte(1)
       })
     })
 
-    it('does not throw when waiting for animations is disabled', {
+    it('does not wait when waiting for animations is disabled', {
       waitForAnimations: false,
     }, () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo').then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('does not throw when turning off waitForAnimations in options', () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo', { waitForAnimations: false }).then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+    it('does not wait when turning off waitForAnimations in options', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { waitForAnimations: false }).then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      cy.spy(cy, 'ensureElementIsNotAnimating')
-
-      cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(1000)
+    it('passes options.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        expect(retries).to.eq(1)
       })
     })
 
-    it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+    it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      let old = Cypress.config('animationDistanceThreshold')
 
-      cy.spy(cy, 'ensureElementIsNotAnimating')
+      Cypress.config('animationDistanceThreshold', 1000)
 
-      cy.get(':text:first').type('foo').then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(animationDistanceThreshold)
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        try {
+          expect(retries).to.eq(1)
+        } finally {
+          Cypress.config('animationDistanceThreshold', old)
+        }
       })
     })
 
@@ -922,7 +911,8 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('inserts text after existing text input by invoking val', () => {
-      cy.get('#input-without-value').invoke('val', 'foo').type(' bar').then(($text) => {
+      cy.get('#input-without-value').invoke('val', 'foo')
+      cy.get('#input-without-value').type(' bar').then(($text) => {
         expect($text).to.have.value('foo bar')
       })
     })
@@ -951,6 +941,25 @@ describe('src/cy/commands/actions/type - #type', () => {
         .on('focus', function (e) {
           e.currentTarget.setSelectionRange(0, 1)
         })
+      })
+      .type('bar')
+      .should('have.value', 'baroo')
+    })
+
+    // WebKit will select all input content on focus. This causes our
+    // cursor placement logic to be ignored, as we interpret the default
+    // selection as a user-provided selection that we do not want to override.
+    // We work around this by preventing the default selection on focus using
+    // our own capture-phase 'focus' event handler; this test ensures that user-set
+    // capture-phase events continue to function as expected for the purpose
+    // of selection updates.
+    it('respects changed selection in focus handler during capture phase', () => {
+      cy.get('#input-without-value')
+      .then(($el) => {
+        $el.val('foo')
+        $el.get(0).addEventListener('focus', (e) => {
+          e.currentTarget.setSelectionRange(0, 1)
+        }, { capture: true })
       })
       .type('bar')
       .should('have.value', 'baroo')
@@ -1196,14 +1205,15 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('inserts text after existing text ', () => {
+      it('inserts text after existing text', () => {
         cy.get('#number-with-value').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#number-without-value').invoke('val', '12').type('34').then(($text) => {
+        cy.get('#number-without-value').invoke('val', '12')
+        cy.get('#number-without-value').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
       })
@@ -1323,7 +1333,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#email-without-value').invoke('val', 'brian@foo.c').type('om').then(($text) => {
+        cy.get('#email-without-value').invoke('val', 'brian@foo.c')
+        cy.get('#email-without-value').type('om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
       })
@@ -1363,7 +1374,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#password-without-value').invoke('val', 'secr').type('et').then(($text) => {
+        cy.get('#password-without-value').invoke('val', 'secr')
+        cy.get('#password-without-value').type('et').then(($text) => {
           expect($text).to.have.value('secret')
         })
       })
@@ -1420,7 +1432,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#date-without-value').invoke('val', '2016-01-01').type('1959-09-13').then(($text) => {
+        cy.get('#date-without-value').invoke('val', '2016-01-01')
+        cy.get('#date-without-value').type('1959-09-13').then(($text) => {
           expect($text).to.have.value('1959-09-13')
         })
       })
@@ -1510,7 +1523,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05')
+        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('errors when invalid datetime', (done) => {
@@ -1538,7 +1552,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#month-without-value').invoke('val', '2016-01').type('1959-09').then(($text) => {
+        cy.get('#month-without-value').invoke('val', '2016-01')
+        cy.get('#month-without-value').type('1959-09').then(($text) => {
           expect($text).to.have.value('1959-09')
         })
       })
@@ -1558,7 +1573,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#week-without-value').invoke('val', '2016-W01').type('1959-W09').then(($text) => {
+        cy.get('#week-without-value').invoke('val', '2016-W01')
+        cy.get('#week-without-value').type('1959-W09').then(($text) => {
           expect($text).to.have.value('1959-W09')
         })
       })
@@ -1578,7 +1594,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#time-without-value').invoke('val', '01:23:45').type('12:34:56').then(($text) => {
+        cy.get('#time-without-value').invoke('val', '01:23:45')
+        cy.get('#time-without-value').type('12:34:56').then(($text) => {
           expect($text).to.have.value('12:34:56')
         })
       })
@@ -1622,7 +1639,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text', () => {
-        cy.get('#input-types [contenteditable]').invoke('text', 'foo').type(' bar').then(($text) => {
+        cy.get('#input-types [contenteditable]').invoke('text', 'foo')
+        cy.get('#input-types [contenteditable]').type(' bar').then(($text) => {
           expect($text).to.have.text('foo bar')
         })
       })
@@ -1647,9 +1665,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         attachKeyListeners({ ce })
 
-        cy.get('#input-types [contenteditable]')
-        .invoke('text', 'foo')
-        .type('{enter}')
+        cy.get('#input-types [contenteditable]').invoke('text', 'foo')
+        cy.get('#input-types [contenteditable]').type('{enter}')
         .should(($text) => {
           expect(trimInnerText($text)).eq('foo')
         })
@@ -1793,33 +1810,36 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/7088
+    // In WebKit, setting the inputType is not supported by the InputEvent constructor.
+    // This results in the inputType being unset in any of the simulated beforeinput events.
+    // https://bugs.webkit.org/show_bug.cgi?id=170416
     describe('beforeInput event', () => {
       it('sends beforeinput in text input', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('insertLineBreak')
+          !isWebKit && expect(e.inputType).eq('insertLineBreak')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('deleteContentBackward')
+          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('deleteContentForward')
+          !isWebKit && expect(e.inputType).eq('deleteContentForward')
         }
 
         const stub = cy.stub()
@@ -1842,28 +1862,28 @@ describe('src/cy/commands/actions/type - #type', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(' ')
-          expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call2)
         }
         const call2 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq('f')
-          expect(e.inputType).eq('insertText')
+          !isWebKit && expect(e.inputType).eq('insertText')
           stub.callsFake(call3)
         }
         const call3 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('insertLineBreak')
+          !isWebKit && expect(e.inputType).eq('insertLineBreak')
           stub.callsFake(call4)
         }
         const call4 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('deleteContentBackward')
+          !isWebKit && expect(e.inputType).eq('deleteContentBackward')
           stub.callsFake(call5)
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('deleteContentForward')
+          !isWebKit && expect(e.inputType).eq('deleteContentForward')
         }
 
         const stub = cy.stub()
@@ -1882,6 +1902,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      // In WebKit, simulated `beforeinput` events are not emitted for
+      // contenteditable inputs. The stubs are receiving the
+      // browser-emitted events, which is why the inputType values
+      // of these events are populated.
       it('sends beforeinput in [contenteditable]', () => {
         const call1 = (e) => {
           expect(e.code).not.exist
@@ -1907,7 +1931,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         }
         const call5 = (e) => {
           expect(e.data).eq(null)
-          expect(e.inputType).eq('deleteContentForward')
+
+          if (isWebKit) {
+            // WebKit does not distinguish between forward/backward
+            // deletion within a contenteditable field
+            expect(e.inputType).eq('deleteContentBackward')
+          } else {
+            expect(e.inputType).eq('deleteContentForward')
+          }
         }
 
         const stub = cy.stub()
@@ -1926,7 +1957,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('beforeinput special inputTypes', () => {
+      it('beforeinput special inputTypes in [contenteditable] (not WebKit)', { browser: '!webkit' }, () => {
         const call1 = (e) => {
           expect(e.code).not.exist
           expect(e.data).eq(null)
@@ -1963,6 +1994,50 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('{ctrl}{shift}{backspace}')
         .then(($el) => {
           expect(stub).callCount(4)
+        })
+      })
+
+      // We do not emit simulated `beforeinput` events for the WebKit browser's
+      // contenteditable fields, as `execCommand('insertText')` will emit `beforeinput`
+      // when called. As a result, we do not emit as many events as other browsers in
+      // this test case, which includes no-op deletions due to a terminal cursor position.
+      it('beforeinput special inputTypes in [contenteditable] (WebKit)', { browser: 'webkit' }, () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+
+          // WebKit does not distinguish between forward/backward
+          // deletion within a contenteditable field using `execCommand('delete')`
+          expect(e.inputType).eq('deleteContentBackward')
+
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+
+          // WebKit does not distinguish between forward/backward
+          // deletion within a contenteditable field using `execCommand('delete')`
+          expect(e.inputType).eq('deleteContentBackward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('#input-types [contenteditable]')
+        .then(($el) => {
+          $el.text('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        // This command does not result in a change, as the cursor is in the right-most position
+        // and there is nothing to delete. This causes WebKit to not emit a beforeinput event.
+        .type('{ctrl}{del}')
+        // This command also does not result in a change, for the same reason.
+        .type('{ctrl}{shift}{del}')
+        .type('{ctrl}{backspace}')
+        .type('{ctrl}{shift}{backspace}')
+        .then(($el) => {
+          expect(stub).callCount(2)
         })
       })
 
@@ -2350,24 +2425,21 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('releases modfier keys at the end of the shortcut sequence', () => {
+    it('releases modifier keys at the end of the shortcut sequence', () => {
       cy.get(':text:first').type('h{ctrl+alt++}i')
       .then(function ($input) {
         const table = this.lastLog.invoke('consoleProps').table[2]()
 
-        // eslint-disable-next-line
-          console.table(table.data, table.columns)
-
         expect(table.name).to.eq('Keyboard Events')
-        const expectedTable = {
-          1: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
-          2: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
-          3: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
-          4: { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
-          5: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
-          6: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
-          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
-        }
+        const expectedTable = [
+          { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+        ]
 
         // uncomment for debugging
         // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
@@ -2412,7 +2484,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
   describe('case-insensitivity', () => {
     it('special chars are case-insensitive', () => {
-      cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
+      cy.get(':text:first').invoke('val', 'bar')
+      cy.get(':text:first').type('{leftarrow}{DeL}').then(($input) => {
         expect($input).to.have.value('ba')
       })
     })
@@ -2711,9 +2784,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       //  even if actual and expected appear the same.
       const expected = '{\n  foo:   1\n  bar:   2\n  baz:   3\n}'
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>')
-      .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
+      cy.get('[contenteditable]:first').invoke('html', '<div><br></div>')
+      cy.get('[contenteditable]:first').type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
       .should(($el) => {
         expectMatchInnerText($el, expected)
       })
@@ -2907,7 +2979,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
       })
     })
 
@@ -2915,14 +2987,14 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('has all of the regular options', () => {
         cy.get('input:first').type('foobar').then(function ($input) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('type')
-          expect(console.Typed).to.eq('foobar')
-          expect(console['Applied To']).to.eq($input.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
-
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+          expect(consoleProps.name).to.eq('type')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Typed).to.eq('foobar')
+          expect(consoleProps.props['Applied To']).to.eq($input.get(0))
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
         })
       })
 
@@ -2933,27 +3005,23 @@ describe('src/cy/commands/actions/type - #type', () => {
         .then(function ($input) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
-          // eslint-disable-next-line
-            console.table(table.data, table.columns)
-
           expect(table.name).to.eq('Keyboard Events')
-          const expectedTable = {
-            1: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, beforeinput, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            8: { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftarrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': `keydown, beforeinput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, beforeinput, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            11: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
-            12: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
-          }
+          const expectedTable = [
+            { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, beforeinput, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftarrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': `keydown, beforeinput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, beforeinput, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
+            { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          ]
 
           // uncomment for debugging
-          // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
           expect(table.data).to.deep.eq(expectedTable)
           expect($input.val()).eq('foo')
         })
@@ -2963,9 +3031,9 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
-          expect(table.data).to.deep.eq({
-            1: { Typed: 'f', 'Events Fired': `keydown, keypress, beforeinput, textInput, input, keyup`, 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
-          })
+          expect(table.data).to.deep.eq([
+            { Typed: 'f', 'Events Fired': 'keydown, keypress, beforeinput, textInput, input, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
+          ])
         })
       })
 
@@ -2977,12 +3045,9 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
-          // eslint-disable-next-line
-            console.table(table.data, table.columns)
-
-          expect(table.data).to.deep.eq({
-            1: { Typed: 'f', 'Events Fired': 'keydown, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': true, 'Target Element': $el[0] },
-          })
+          expect(table.data).to.deep.eq([
+            { Typed: 'f', 'Events Fired': 'keydown, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': true, 'Target Element': $el[0] },
+          ])
         })
       })
     })
@@ -3026,6 +3091,18 @@ describe('src/cy/commands/actions/type - #type', () => {
       .find('input').type('asdf')
 
       cy.get('#result').should('have.text', 'typed')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/26198
+    it('type calls on elements in shadow dom do not fire click if the element already has focus', () => {
+      cy.visit('fixtures/shadow-dom-type.html')
+
+      cy.get('test-element').shadow().find('input').as('input')
+
+      cy.get('@input').invoke('on', 'click', cy.spy().as('clickSpy'))
+      cy.get('@input').focus().type('asdf')
+
+      cy.get('@clickSpy').should('not.have.been.called')
     })
   })
 })

@@ -1,6 +1,7 @@
 import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
+import { $Location } from '../cypress/location'
 import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
@@ -9,6 +10,7 @@ interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
+  file?: string
   fn: string
   skipConfigValidation: boolean
   state: {}
@@ -23,6 +25,11 @@ interface serializedRunnable {
   ctx: {}
   _timeout: number
   titlePath: string
+}
+
+interface GetFileResult {
+  contents?: string
+  error?: string
 }
 
 const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
@@ -54,12 +61,61 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   return runnable
 }
 
+// Callback function handling / preprocessing for dependencies
+// ---
+// 1. If experimentalOriginDependencies is disabled or the string "Cypress.require"
+//    does not exist in the callback, just eval the callback as-is
+// 2. Otherwise, we send it to the server
+// 3. The server webpacks the callback to bundle in all the deps, then returns
+//    that bundle
+// 4. Eval the callback like normal
+const getCallbackFn = async (fn: string, file?: string) => {
+  if (
+    // @ts-expect-error
+    !Cypress.config('experimentalOriginDependencies')
+    || !fn.includes('Cypress.require')
+  ) {
+    return fn
+  }
+
+  // Since webpack will wrap everything up in a closure, we create a variable
+  // in the outer scope (see the return value below), assign the function to it
+  // in the inner scope, then call the function with the args
+  const callbackName = '__cypressCallback'
+
+  const response = await fetch('/__cypress/process-origin-callback', {
+    body: JSON.stringify({
+      file,
+      fn: `${callbackName} = ${fn};`,
+      projectRoot: Cypress.config('projectRoot'),
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+  })
+  const result = await response.json() as GetFileResult
+
+  if (result.error) {
+    $errUtils.throwErrByPath('origin.failed_to_get_callback', {
+      args: { error: result.error },
+    })
+  }
+
+  return `(args) => {
+    let ${callbackName};
+    ${result.contents};
+    return ${callbackName}(args);
+  }`
+}
+
 export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   const reset = (state) => {
     cy.reset({})
 
     const stateUpdates = {
       ...state,
+      autLocation: $Location.create(state.autLocation),
       redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each cy.origin command.
     }
 
@@ -85,7 +141,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
-    const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
+    const { config, args, env, file, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
@@ -105,7 +161,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       queueFinished = true
       setRunnableStateToPassed()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
-        subject: cy.currentSubject(),
+        subject: cy.subject(),
       }, {
         syncGlobals: true,
       })
@@ -125,8 +181,16 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
+    // the name of this function is used to verify if privileged commands are
+    // properly called. it shouldn't be removed and if the name is changed, it
+    // needs to also be changed in server/lib/browsers/privileged-channel.js
+    function invokeOriginFn (callback) {
+      return window.eval(`(${callback})`)(args)
+    }
+
     try {
-      const value = window.eval(`(${fn})`)(args)
+      const callback = await getCallbackFn(fn, file)
+      const value = invokeOriginFn(callback)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {

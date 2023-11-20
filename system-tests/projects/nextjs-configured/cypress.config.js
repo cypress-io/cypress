@@ -3,7 +3,7 @@
 
 module.exports = {
   component: {
-    devServer: {}
-  }
+    experimentalSingleTabRunMode: true,
+    devServer: {},
+  },
 }
-

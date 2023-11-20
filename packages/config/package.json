@@ -13,31 +13,33 @@
     "test": "yarn test-unit",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000"
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "@babel/core": "^7",
-    "@babel/parser": "^7",
-    "@babel/plugin-syntax-typescript": "^7",
-    "@babel/plugin-transform-typescript": "^7",
-    "@babel/traverse": "^7",
-    "@babel/types": "^7",
+    "@babel/core": "^7.22.9",
+    "@babel/parser": "^7.22.7",
+    "@babel/plugin-syntax-typescript": "^7.22.5",
+    "@babel/plugin-transform-typescript": "^7.22.9",
+    "@babel/traverse": "^7.22.8",
+    "@babel/types": "^7.22.5",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
-    "recast": "0.20.4"
+    "recast": "0.20.4",
+    "return-deep-diff": "0.4.0"
   },
   "devDependencies": {
+    "@packages/errors": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/mocha": "9.1.0",
     "babel-plugin-tester": "^10.1.0",
     "chai": "4.2.0",
-    "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "mocha": "7.0.1"
   },
   "files": [
     "src"

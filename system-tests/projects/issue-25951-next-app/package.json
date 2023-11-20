@@ -1,0 +1,14 @@
+{
+  "name": "issue-25951-next-app",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@types/node": "18.17.5",
+    "@types/react": "18.0.32",
+    "@types/react-dom": "18.0.11",
+    "next": "13.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.0.3"
+  }
+}

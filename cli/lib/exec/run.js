@@ -45,6 +45,10 @@ const processRunOptions = (options = {}) => {
 
   const args = ['--run-project', options.project]
 
+  if (options.autoCancelAfterFailures || options.autoCancelAfterFailures === 0 || options.autoCancelAfterFailures === false) {
+    args.push('--auto-cancel-after-failures', options.autoCancelAfterFailures)
+  }
+
   if (options.browser) {
     args.push('--browser', options.browser)
   }
@@ -127,6 +131,10 @@ const processRunOptions = (options = {}) => {
   // if we have a specific reporter push that into the args
   if (options.reporterOptions) {
     args.push('--reporter-options', options.reporterOptions)
+  }
+
+  if (options.runnerUi != null) {
+    args.push('--runner-ui', options.runnerUi)
   }
 
   // if we have specific spec(s) push that into the args

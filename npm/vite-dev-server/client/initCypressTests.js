@@ -24,12 +24,28 @@ if (supportFile) {
 
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
-  importsToLoad.push(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`))
+  importsToLoad.push({
+    load: () => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`),
+    absolute: supportFile,
+    relative: supportRelativeToProjectRoot,
+    relativeUrl: `${devServerPublicPathRoute}${supportRelativeToProjectRoot}`,
+  })
 }
+
+// Using relative path wouldn't allow to load tests outside Vite project root folder
+// So we use the "@fs" bit to load the test file using its absolute path
+// Normalize path to not include a leading slash (different on Win32 vs Unix)
+const normalizedAbsolutePath = CypressInstance.spec.absolute.replace(/^\//, '')
+const testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${normalizedAbsolutePath}`
 
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
-importsToLoad.push(() => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`))
+importsToLoad.push({
+  load: () => import(testFileAbsolutePathRoute),
+  absolute: CypressInstance.spec.absolute,
+  relative: CypressInstance.spec.relative,
+  relativeUrl: testFileAbsolutePathRoute,
+})
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')

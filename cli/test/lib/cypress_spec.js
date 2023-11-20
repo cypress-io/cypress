@@ -100,10 +100,28 @@ describe('cypress', function () {
     }
 
     it('calls run#start, passing in options', () => {
-      return cypress.run({ spec: 'foo' })
+      return cypress.run({ spec: 'foo', autoCancelAfterFailures: 4 })
       .then(getStartArgs)
       .then((args) => {
         expect(args.spec).to.equal('foo')
+        expect(args.autoCancelAfterFailures).to.equal(4)
+        expect(args.runnerUi).to.be.undefined
+      })
+    })
+
+    it('calls run#start, passing in autoCancelAfterFailures false', () => {
+      return cypress.run({ autoCancelAfterFailures: false })
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args.autoCancelAfterFailures).to.equal(false)
+      })
+    })
+
+    it('calls run#start, passing in autoCancelAfterFailures 0', () => {
+      return cypress.run({ autoCancelAfterFailures: 0 })
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args.autoCancelAfterFailures).to.equal(0)
       })
     })
 

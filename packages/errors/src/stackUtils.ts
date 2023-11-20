@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import type { ErrorLike } from './errorTypes'
 
-const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
+export const stackLineRegex = /^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+|<unknown>|\[native code\])+\)?)$/
 
 type MessageLines = [string[], string[]] & {messageEnded?: boolean}
 

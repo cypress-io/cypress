@@ -1,5 +1,8 @@
 <template>
-  <div v-if="query.data.value">
+  <div
+    v-if="query.data.value"
+    class="h-full"
+  >
     <CreateSpecModal
       v-if="query.data.value.currentProject?.currentTestingType"
       :key="generator"
@@ -21,17 +24,27 @@
       :is-default-spec-pattern="isDefaultSpecPattern"
       @showCreateSpecModal="showCreateSpecModal"
     />
+    <SpecsListRunWatcher
+      v-for="run in latestRuns"
+      :key="run.runId"
+      :run="run"
+      @run-update="runUpdate()"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { gql, SubscriptionHandlerArg, useQuery, useSubscription } from '@urql/vue'
+import { computed, ref, watch } from 'vue'
+import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
-import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
+import SpecsListRunWatcher from '../../specs/SpecsListRunWatcher.vue'
+import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
+import { useSubscription } from '../../graphql'
+import { useRelevantRun } from '../../composables/useRelevantRun'
+import { isEmpty } from 'lodash'
 
 const { t } = useI18n()
 
@@ -46,7 +59,7 @@ query SpecsPageContainer_BranchInfo {
 `
 
 gql`
-query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
+query SpecsPageContainer($runIds: [ID!]!, $hasRunIds: Boolean!) {
   ...Specs_SpecsList
   ...NoSpecsPage
   ...CreateSpecModal
@@ -58,37 +71,24 @@ query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
 `
 
 gql`
-subscription SpecsPageContainer_specsChange($fromBranch: String!, $hasBranch: Boolean!) {
+subscription SpecsPageContainer_specsChange($runIds: [ID!]!, $hasRunIds: Boolean!) {
   specsChange {
     id
     specs {
       id
-      ...SpecsList
+      ...SpecsList 
     }
   }
 }
 `
 
-gql`
-subscription SpecsPageContainer_specListPolling($fromBranch: String, $projectId: String) {
-  startPollingForSpecs(branchName: $fromBranch, projectId: $projectId)
-}
-`
-
-const branchInfo = useQuery({ query: SpecsPageContainer_BranchInfoDocument })
+const relevantRuns = useRelevantRun('SPECS')
 
 const variables = computed(() => {
-  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? ''
-  const hasBranch = Boolean(fromBranch)
+  const runIds = relevantRuns.value.latest?.map((run) => run.runId) || []
+  const hasRunIds = !isEmpty(runIds)
 
-  return { fromBranch, hasBranch }
-})
-
-const pollingVariables = computed(() => {
-  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? null
-  const projectId = branchInfo.data.value?.currentProject?.projectId ?? null
-
-  return { fromBranch, projectId }
+  return { runIds, hasRunIds }
 })
 
 useSubscription({
@@ -96,16 +96,28 @@ useSubscription({
   variables,
 })
 
-const mostRecentUpdate = ref<string|null>(null)
+/**
+ * Used to trigger Spec updates via the useCloudSpec composable.
+ */
+const mostRecentUpdate = ref<string | undefined>()
 
-const updateMostRecentUpdate: SubscriptionHandlerArg<any, any> = (_, reportedUpdate) => {
-  mostRecentUpdate.value = reportedUpdate?.startPollingForSpecs ?? null
+/**
+ * At this time, the CloudRun is not passing the `updatedAt` field.  To mimic
+ * that, we are setting the current date/time here each time any of the runs change.
+ */
+watch(() => relevantRuns.value, (value, oldValue) => {
+  if (value && oldValue && value.all !== oldValue.all) {
+    runUpdate()
+  }
+})
+
+const latestRuns = computed(() => {
+  return relevantRuns.value.latest
+})
+
+const runUpdate = () => {
+  mostRecentUpdate.value = new Date().toISOString()
 }
-
-useSubscription({
-  query: SpecsPageContainer_SpecListPollingDocument,
-  variables: pollingVariables,
-}, updateMostRecentUpdate)
 
 const query = useQuery({
   query: SpecsPageContainerDocument,

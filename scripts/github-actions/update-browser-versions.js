@@ -1,11 +1,12 @@
 const https = require('https')
 const fs = require('fs')
 
-const getLatestVersionData = () => {
+// https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
+const getLatestVersionData = ({ channel, currentVersion }) => {
   const options = {
-    hostname: 'omahaproxy.appspot.com',
+    hostname: 'versionhistory.googleapis.com',
     port: 443,
-    path: '/all.json',
+    path: `/v1/chrome/platforms/linux/channels/${channel}/versions?filter=version>${currentVersion}&order_by=version%20desc`,
     method: 'GET',
   }
 
@@ -34,16 +35,14 @@ const getVersions = async ({ core }) => {
   try {
     // file path is relative to repo root
     const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
-    const data = JSON.parse(await getLatestVersionData())
-    const linuxData = data.find((item) => item.os === 'linux')
-    const stableData = linuxData.versions.find((version) => version.channel === 'stable')
-    const betaData = linuxData.versions.find((version) => version.channel === 'beta')
-    const hasStableUpdate = currentBrowserVersions['chrome:stable'] !== stableData.version
-    const hasBetaUpdate = currentBrowserVersions['chrome:beta'] !== betaData.version
+    const stableData = JSON.parse(await getLatestVersionData({ channel: 'stable', currentVersion: currentBrowserVersions['chrome:stable'] }))
+    const betaData = JSON.parse(await getLatestVersionData({ channel: 'beta', currentVersion: currentBrowserVersions['chrome:beta'] }))
+    const hasStableUpdate = stableData.versions.length > 0
+    const hasBetaUpdate = betaData.versions.length > 0
     let description = 'Update '
 
     if (hasStableUpdate) {
-      description += `Chrome (stable) to ${stableData.version}`
+      description += `Chrome (stable) to ${stableData.versions[0].version}`
 
       if (hasBetaUpdate) {
         description += ' and '
@@ -51,17 +50,16 @@ const getVersions = async ({ core }) => {
     }
 
     if (hasBetaUpdate) {
-      description += `Chrome (beta) to ${betaData.version}`
+      description += `Chrome (beta) to ${betaData.versions[0].version}`
     }
 
     core.setOutput('has_update', (hasStableUpdate || hasBetaUpdate) ? 'true' : 'false')
     core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
-    core.setOutput('latest_stable_version', stableData.version)
+    core.setOutput('latest_stable_version', hasStableUpdate ? stableData.versions[0].version : currentBrowserVersions['chrome:stable'])
     core.setOutput('current_beta_version', currentBrowserVersions['chrome:beta'])
-    core.setOutput('latest_beta_version', betaData.version)
+    core.setOutput('latest_beta_version', hasBetaUpdate ? betaData.versions[0].version : currentBrowserVersions['chrome:beta'])
     core.setOutput('description', description)
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.log('Errored checking for new Chrome versions:', err.stack)
     core.setOutput('has_update', 'false')
   }
@@ -77,17 +75,18 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
 }
 
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
-  const versions = {
+  const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
+  const newVersions = Object.assign(currentBrowserVersions, {
     'chrome:beta': latestBetaVersion,
     'chrome:stable': latestStableVersion,
-  }
+  })
 
   // file path is relative to repo root
-  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(versions, null, 2) }\n`)
+  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(newVersions, null, 2) }\n`)
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
-  const { data } = await github.pulls.list({
+  const { data } = await github.rest.pulls.list({
     owner: context.repo.owner,
     repo: context.repo.repo,
     base: baseBranch,
@@ -95,29 +94,16 @@ const updatePRTitle = async ({ context, github, baseBranch, branchName, descript
   })
 
   if (!data.length) {
-    // eslint-disable-next-line no-console
     console.log('Could not find PR for branch:', branchName)
 
     return
   }
 
-  await github.pulls.update({
+  await github.rest.pulls.update({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: data[0].number,
     title: `chore: ${description}`,
-  })
-}
-
-const createPullRequest = async ({ context, github, baseBranch, branchName, description }) => {
-  await github.pulls.create({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    base: baseBranch,
-    head: branchName,
-    title: `chore: ${description}`,
-    body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
-    maintainer_can_modify: true,
   })
 }
 
@@ -126,5 +112,4 @@ module.exports = {
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
-  createPullRequest,
 }

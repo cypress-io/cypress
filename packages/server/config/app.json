@@ -1,0 +1,14 @@
+{
+  "development": {
+    "api_url": "http://localhost:1234/"
+  },
+  "test": {
+    "api_url": "http://localhost:1234/"
+  },
+  "staging": {
+    "api_url": "https://api-staging.cypress.io/"
+  },
+  "production": {
+    "api_url": "https://api.cypress.io/"
+  }
+}

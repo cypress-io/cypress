@@ -9,21 +9,25 @@ const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
 
-const api = require('../api')
-const exception = require('../exception')
+const { hideKeys } = require('@packages/config')
+
+const api = require('../cloud/api')
+const exception = require('../cloud/exception')
+const upload = require('../cloud/upload')
+
 const errors = require('../errors')
 const capture = require('../capture')
-const upload = require('../upload')
 const Config = require('../config')
 const env = require('../util/env')
-const keys = require('../util/keys')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
+const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } = require('../util/print-run')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
+const { fs } = require('../util/fs')
+const { performance } = require('perf_hooks')
 
 // dont yell about any errors either
-
 const runningInternalTests = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
@@ -46,8 +50,8 @@ const warnIfProjectIdButNoRecordOption = (projectId, options) => {
   }
 }
 
-const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
-  const errMsg = parallel ? 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL' : 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL'
+const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
+  const errMsg = parallel ? 'CLOUD_CANNOT_PROCEED_IN_PARALLEL' : 'CLOUD_CANNOT_PROCEED_IN_SERIAL'
 
   const errToThrow = errors.get(errMsg, {
     response: err,
@@ -76,13 +80,14 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   }
 }
 
-const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) => {
-  if (!record && _.some([ciBuildId, parallel, group, tag])) {
+const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
+  if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
     errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
       group,
       parallel,
+      autoCancelAfterFailures,
     })
   }
 }
@@ -105,69 +110,363 @@ const getSpecRelativePath = (spec) => {
   return _.get(spec, 'relative', null)
 }
 
-const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
+/*
+artifacts : [
+  {
+    reportKey: 'protocol' | 'screenshots' | 'video',
+    uploadUrl: string,
+    filePath?: string,
+    url: string,
+    fileSize?: number | bigint,
+    payload?: Buffer,
+    message?: string,
+  }
+]
 
-  const uploads = []
-  let count = 0
+returns:
+[
+  {
+    success: boolean,
+    error?: string,
+    url: artifact.uploadUrl,
+    pathToFile: artifact.filePath,
+    fileSize: artifact.fileSize,
+    key: artifact.reportKey,
+  },
+  ...
+]
+*/
 
-  const nums = () => {
-    count += 1
-
-    return chalk.gray(`(${count}/${uploads.length})`)
+const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
+  const priority = {
+    'video': 0,
+    'screenshots': 1,
+    'protocol': 2,
+  }
+  const labels = {
+    'video': 'Video',
+    'screenshots': 'Screenshot',
+    'protocol': 'Test Replay',
   }
 
-  const send = (pathToFile, url) => {
-    const success = () => {
-      if (!quiet) {
-        // eslint-disable-next-line no-console
-        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+  artifacts.sort((a, b) => {
+    return priority[a.reportKey] - priority[b.reportKey]
+  })
+
+  const preparedArtifacts = await Promise.all(artifacts.map(async (artifact) => {
+    if (artifact.skip) {
+      return artifact
+    }
+
+    if (artifact.reportKey === 'protocol') {
+      try {
+        if (protocolManager.hasFatalError()) {
+          const error = protocolManager.getFatalError().error
+
+          debug('protocol fatal error encountered', {
+            message: error.message,
+            stack: error.stack,
+          })
+
+          return {
+            ...artifact,
+            skip: true,
+            error: error.message || error.stack || 'Unknown Error',
+          }
+        }
+
+        const archiveInfo = await protocolManager.getArchiveInfo()
+
+        if (archiveInfo === undefined) {
+          return {
+            ...artifact,
+            skip: true,
+            error: 'No test data recorded',
+          }
+        }
+
+        return {
+          ...artifact,
+          fileSize: archiveInfo.fileSize,
+          payload: archiveInfo.stream,
+        }
+      } catch (err) {
+        debug('failed to prepare protocol artifact', {
+          error: err.message,
+          stack: err.stack,
+        })
       }
     }
 
-    const fail = (err) => {
-      debug('failed to upload artifact %o', {
-        file: pathToFile,
-        stack: err.stack,
+    if (artifact.filePath) {
+      try {
+        const { size } = await fs.statAsync(artifact.filePath)
+
+        return {
+          ...artifact,
+          fileSize: size,
+        }
+      } catch (err) {
+        debug('failed to get stats for upload artifact %o', {
+          file: artifact.filePath,
+          stack: err.stack,
+        })
+      }
+    }
+
+    return artifact
+  }))
+
+  if (!quiet) {
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    terminal.header('Uploading Cloud Artifacts', {
+      color: ['blue'],
+    })
+
+    // eslint-disable-next-line no-console
+    console.log('')
+  }
+
+  preparedArtifacts.forEach((artifact) => {
+    debug('preparing to upload artifact %O', {
+      ...artifact,
+      payload: typeof artifact.payload,
+    })
+
+    if (!quiet) {
+      printPendingArtifactUpload(artifact, labels)
+    }
+  })
+
+  let stopUploadActivityOutput
+
+  if (!quiet && preparedArtifacts.filter(({ skip }) => !skip).length) {
+    stopUploadActivityOutput = beginUploadActivityOutput()
+  }
+
+  const uploadResults = await Promise.all(
+    preparedArtifacts.map(async (artifact) => {
+      if (artifact.skip) {
+        debug('nothing to upload for artifact %O', artifact)
+
+        return {
+          key: artifact.reportKey,
+          skipped: true,
+          url: artifact.uploadUrl,
+          ...(artifact.error && { error: artifact.error, success: false }),
+        }
+      }
+
+      const startTime = performance.now()
+
+      debug('uploading artifact %O', {
+        ...artifact,
+        payload: typeof artifact.payload,
       })
 
-      if (!quiet) {
-        // eslint-disable-next-line no-console
-        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      try {
+        if (artifact.reportKey === 'protocol') {
+          const res = await protocolManager.uploadCaptureArtifact(artifact)
+
+          return {
+            ...res,
+            pathToFile: 'Test Replay',
+            url: artifact.uploadUrl,
+            fileSize: artifact.fileSize,
+            key: artifact.reportKey,
+            duration: performance.now() - startTime,
+          }
+        }
+
+        const res = await upload.send(artifact.filePath, artifact.uploadUrl)
+
+        return {
+          ...res,
+          success: true,
+          url: artifact.uploadUrl,
+          pathToFile: artifact.filePath,
+          fileSize: artifact.fileSize,
+          key: artifact.reportKey,
+          duration: performance.now() - startTime,
+        }
+      } catch (err) {
+        debug('failed to upload artifact %o', {
+          file: artifact.filePath,
+          url: artifact.uploadUrl,
+          stack: err.stack,
+        })
+
+        if (err.errors) {
+          const lastError = _.last(err.errors)
+
+          return {
+            key: artifact.reportKey,
+            success: false,
+            error: lastError.message,
+            allErrors: err.errors,
+            url: artifact.uploadUrl,
+            pathToFile: artifact.filePath,
+            duration: performance.now() - startTime,
+          }
+        }
+
+        return {
+          key: artifact.reportKey,
+          success: false,
+          error: err.message,
+          url: artifact.uploadUrl,
+          pathToFile: artifact.filePath,
+          duration: performance.now() - startTime,
+        }
       }
+    }),
+  ).finally(() => {
+    if (stopUploadActivityOutput) {
+      stopUploadActivityOutput()
     }
+  })
 
-    return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
-    )
-  }
+  const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
+    return !skipped
+  })
 
-  if (videoUploadUrl && shouldUploadVideo) {
-    send(video, videoUploadUrl)
-  }
+  if (!quiet && attemptedUploadResults.length) {
+    // eslint-disable-next-line no-console
+    console.log('')
 
-  if (screenshotUploadUrls) {
-    screenshotUploadUrls.forEach((obj) => {
-      const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
+    terminal.header('Uploaded Cloud Artifacts', {
+      color: ['blue'],
+    })
 
-      return send(screenshot.path, obj.uploadUrl)
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    attemptedUploadResults.forEach(({ key, skipped, ...report }, i, { length }) => {
+      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
     })
   }
 
-  if (!uploads.length && !quiet) {
-    // eslint-disable-next-line no-console
-    console.log('  - Nothing to Upload')
+  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
+    if (key === 'protocol') {
+      const error = report.allErrors ? `Failed to upload after ${report.allErrors.length} attempts. Errors: ${report.allErrors.map((error) => error.message).join(', ')}` : report.error
+
+      return skipped && !report.error ? acc : {
+        ...acc,
+        [key]: {
+          // TODO: once cloud supports reporting duration, no longer omit this
+          ..._.omit(report, 'duration'),
+          error,
+        },
+      }
+    }
+
+    return skipped ? acc : {
+      ...acc,
+      [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
+    }
+  }, {
+    video: undefined,
+    screenshots: [],
+    protocol: undefined,
+  })
+}
+
+const uploadArtifacts = async (options = {}) => {
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
+
+  const artifacts = []
+
+  if (videoUploadUrl) {
+    artifacts.push({
+      reportKey: 'video',
+      uploadUrl: videoUploadUrl,
+      filePath: video,
+    })
+  } else {
+    artifacts.push({
+      reportKey: 'video',
+      skip: true,
+    })
   }
 
-  return Promise
-  .all(uploads)
-  .catch((err) => {
-    errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
+  if (screenshotUploadUrls.length) {
+    screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
+      const screenshot = _.find(screenshots, { screenshotId })
+
+      debug('screenshot: %o', screenshot)
+
+      return {
+        reportKey: 'screenshots',
+        uploadUrl,
+        filePath: screenshot.path,
+      }
+    }).forEach((screenshotArtifact) => {
+      artifacts.push(screenshotArtifact)
+    })
+  } else {
+    artifacts.push({
+      reportKey: 'screenshots',
+      skip: true,
+    })
+  }
+
+  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
+  if (protocolManager && (captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url))) {
+    artifacts.push({
+      reportKey: 'protocol',
+      uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
+    })
+  } else if (protocolCaptureMeta && protocolCaptureMeta.disabledMessage) {
+    artifacts.push({
+      reportKey: 'protocol',
+      message: protocolCaptureMeta.disabledMessage,
+      skip: true,
+    })
+  }
+
+  let uploadReport
+
+  try {
+    uploadReport = await uploadArtifactBatch(artifacts, protocolManager, quiet)
+  } catch (err) {
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     return exception.create(err)
-  })
+  }
+
+  debug('checking for protocol errors', protocolManager?.hasErrors())
+  if (protocolManager) {
+    try {
+      await protocolManager.reportNonFatalErrors({
+        specName: spec.name,
+        osName: platform.osName,
+        projectSlug: projectId,
+      })
+    } catch (err) {
+      debug('Failed to send protocol errors %O', err)
+    }
+  }
+
+  try {
+    debug('upload reprt: %O', uploadReport)
+    const res = await api.updateInstanceArtifacts({
+      runId, instanceId, ...uploadReport,
+    })
+
+    return res
+  } catch (err) {
+    debug('failed updating artifact status %o', {
+      stack: err.stack,
+    })
+
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
+
+    if (err.statusCode !== 503) {
+      return exception.create(err)
+    }
+  }
 }
 
 const updateInstanceStdout = (options = {}) => {
@@ -184,7 +483,7 @@ const updateInstanceStdout = (options = {}) => {
       stack: err.stack,
     })
 
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+    errors.warning('CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
@@ -227,7 +526,7 @@ const postInstanceResults = (options = {}) => {
       stack: err.stack,
     })
 
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -265,7 +564,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -308,6 +607,7 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('CI provider information %o', ci)
 
   return api.createRun({
+    projectRoot,
     specs,
     group,
     tags,
@@ -320,6 +620,8 @@ const createRun = Promise.method((options = {}) => {
     testingType,
     ci,
     commit,
+    autoCancelAfterFailures,
+    project,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -374,20 +676,19 @@ const createRun = Promise.method((options = {}) => {
             link: billingLink(warning.orgId),
           })
         default:
-          return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
+          return errors.warning('CLOUD_UNKNOWN_CREATE_RUN_WARNING', {
             message: warning.message,
             props: _.omit(warning, 'message'),
           })
       }
     })
   }).catch((err) => {
-    debug('failed creating run with status %d %o', err.statusCode, {
-      stack: err.stack,
-    })
+    debug('failed creating run with status %o',
+      _.pick(err, ['name', 'message', 'statusCode', 'stack']))
 
     switch (err.statusCode) {
       case 401:
-        recordKey = keys.hide(recordKey)
+        recordKey = hideKeys(recordKey)
         if (!recordKey) {
           // make sure the key is defined, otherwise the error
           // printing logic substitutes the default value {}
@@ -395,7 +696,7 @@ const createRun = Promise.method((options = {}) => {
           recordKey = 'undefined'
         }
 
-        return errors.throwErr('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        return errors.throwErr('CLOUD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
         const { code, payload } = err.error
 
@@ -423,8 +724,12 @@ const createRun = Promise.method((options = {}) => {
             return errors.throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
+          case 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN', {
+              link: billingLink(orgId),
+            })
           default:
-            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,
@@ -436,9 +741,9 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throwErr('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
+        return errors.throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
-        return errors.throwErr('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+        return errors.throwErr('CLOUD_INVALID_RUN_REQUEST', err.error)
       case 422: {
         const { code, payload } = err.error
 
@@ -446,7 +751,7 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throwErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+            return errors.throwErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
               ciBuildId,
@@ -454,7 +759,7 @@ const createRun = Promise.method((options = {}) => {
           case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
             const { browserName, browserVersion, osName, osVersion } = platform
 
-            return errors.throwErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+            return errors.throwErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH', {
               group,
               runUrl,
               ciBuildId,
@@ -465,24 +770,25 @@ const createRun = Promise.method((options = {}) => {
                 browserVersion,
                 specs,
               },
+              payload,
             })
           }
           case 'PARALLEL_DISALLOWED':
-            return errors.throwErr('DASHBOARD_PARALLEL_DISALLOWED', {
+            return errors.throwErr('CLOUD_PARALLEL_DISALLOWED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
-            return errors.throwErr('DASHBOARD_PARALLEL_REQUIRED', {
+            return errors.throwErr('CLOUD_PARALLEL_REQUIRED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'ALREADY_COMPLETE':
-            return errors.throwErr('DASHBOARD_ALREADY_COMPLETE', {
+            return errors.throwErr('CLOUD_ALREADY_COMPLETE', {
               runUrl,
               tags,
               group,
@@ -490,15 +796,24 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'STALE_RUN':
-            return errors.throwErr('DASHBOARD_STALE_RUN', {
+            return errors.throwErr('CLOUD_STALE_RUN', {
               runUrl,
               tags,
               group,
               parallel,
               ciBuildId,
             })
+          case 'AUTO_CANCEL_MISMATCH':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
+              runUrl,
+              tags,
+              group,
+              parallel,
+              ciBuildId,
+              autoCancelAfterFailures,
+            })
           default:
-            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 tags,
@@ -510,7 +825,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       default:
-        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+        throwCloudCannotProceed({ parallel, ciBuildId, group, err })
     }
   })
 })
@@ -527,13 +842,12 @@ const createInstance = (options = {}) => {
     platform,
     machineId,
   })
-
   .catch((err) => {
     debug('failed creating instance %o', {
       stack: err.stack,
     })
 
-    throwDashboardCannotProceed({
+    throwCloudCannotProceed({
       err,
       group,
       ciBuildId,
@@ -560,7 +874,7 @@ const _postInstanceTests = ({
     hooks,
   })
   .catch((err) => {
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -580,6 +894,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     onError,
     testingType,
     quiet,
+    autoCancelAfterFailures,
   } = options
   const recordKey = options.key
 
@@ -601,6 +916,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     }
 
     return createRun({
+      projectRoot,
       git,
       specs,
       group,
@@ -613,6 +929,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       specPattern,
       testingType,
       configFile: config ? config.configFile : null,
+      autoCancelAfterFailures,
+      project,
     })
     .then((resp) => {
       if (!resp) {
@@ -624,6 +942,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const { runUrl, runId, machineId, groupId } = resp
+      const protocolCaptureMeta = resp.capture || {}
 
       let captured = null
       let instanceId = null
@@ -653,31 +972,20 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            instanceId,
           })
           .value()
         })
       }
 
       const afterSpecRun = (spec, results, config) => {
-        // dont do anything if we failed to
+        // don't do anything if we failed to
         // create the instance
         if (!instanceId || results.skippedSpec) {
           return
         }
 
         debug('after spec run %o', { spec })
-
-        if (!quiet) {
-          // eslint-disable-next-line no-console
-          console.log('')
-
-          terminal.header('Uploading Results', {
-            color: ['blue'],
-          })
-
-          // eslint-disable-next-line no-console
-          console.log('')
-        }
 
         return specWriter.countStudioUsage(spec.absolute)
         .then((metadata) => {
@@ -696,14 +1004,22 @@ const createRunAndRecordSpecs = (options = {}) => {
             return
           }
 
-          const { video, shouldUploadVideo, screenshots } = results
-          const { videoUploadUrl, screenshotUploadUrls } = resp
+          debug('postInstanceResults resp %O', resp)
+          const { video, screenshots } = results
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            runId,
+            instanceId,
             video,
             screenshots,
             videoUploadUrl,
-            shouldUploadVideo,
+            captureUploadUrl,
+            platform,
+            projectId,
+            spec,
+            protocolCaptureMeta,
+            protocolManager: project.protocolManager,
             screenshotUploadUrls,
             quiet,
           })
@@ -735,15 +1051,18 @@ const createRunAndRecordSpecs = (options = {}) => {
         const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
-          if (v.originalTitle) {
-            v._titlePath.splice(-1, 1, v.originalTitle)
-          }
-
           return _.pick({
             ...v,
             clientId: v.id,
             config: v._testConfig?.unverifiedTestConfig || null,
-            title: v._titlePath,
+            title: v._titlePath.map((title) => {
+              // sanitize the title which may have been altered by a suite-/test-level
+              // browser skip to ensure the original title is used so the test recorded
+              // to the cloud is correct registered as a pending test
+              const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+              return title.replace(BROWSER_SKIP_TITLE, '')
+            }),
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
           'clientId', 'body', 'title', 'config', 'hookIds')
@@ -791,7 +1110,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          errors.warning('DASHBOARD_CANCEL_SKIPPED_SPEC')
+          errors.warning('CLOUD_CANCEL_SKIPPED_SPEC')
 
           // set a property on the response so the browser runner
           // knows not to start executing tests

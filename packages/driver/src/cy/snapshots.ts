@@ -1,9 +1,13 @@
 import $ from 'jquery'
 import _ from 'lodash'
+import uniqueSelector from '@cypress/unique-selector'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
+import { debug as Debug } from 'debug'
+
+const debug = Debug('cypress:driver:snapshots')
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -153,10 +157,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
     // jQuery v3 runs in strict mode and throws an error if you attempt to set a property
 
-    // TODO: in firefox sometimes this throws a cross-origin access error
-    const isJqueryElement = $dom.isElement($elToHighlight) && $dom.isJquery($elToHighlight)
+    const shouldHighlightElement = isJqueryElement($elToHighlight)
 
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).attr(HIGHLIGHT_ATTR, 'true')
     }
 
@@ -200,7 +203,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // which would reduce memory, and some CPU operations
 
     // now remove it after we clone
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).removeAttr(HIGHLIGHT_ATTR)
     }
 
@@ -227,8 +230,70 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
   }
 
+  const isJqueryElement = ($el) => {
+    // TODO: in firefox sometimes this throws a cross-origin access error
+    return $dom.isElement($el) && $dom.isJquery($el)
+  }
+
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
+    // when using cy.origin() and in a transitionary state, state('document')
+    // can be undefined, resulting in a bizarre snapshot of the entire Cypress
+    // UI. better not to take the snapshot in that case.
+    // https://github.com/cypress-io/cypress/issues/24506
+    // also, do not take the snapshot here if it has already been taken and
+    // preprocessed in a spec bridge.
+    if (!preprocessedSnapshot && !state('document')) {
+      return null
+    }
+
+    const timestamp = performance.now() + performance.timeOrigin
+
+    // if the protocol has been enabled, our snapshot is just the name, timestamp, and highlighted elements,
+    // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
+    // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
+    if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
+      const snapshot: {
+        name: string
+        timestamp: number
+        elementsToHighlight?: {
+          selector: string
+          frameId: string
+        }[]
+      } = { name, timestamp }
+
+      if (isJqueryElement($elToHighlight)) {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+          try {
+            const ownerDoc = el.ownerDocument
+            const elWindow = ownerDoc.defaultView
+
+            if (elWindow === null) {
+              return []
+            }
+
+            const selector = uniqueSelector(el)
+
+            if (!selector) {
+              debug('could not find a unique selector for element %o', el)
+
+              return []
+            }
+
+            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+
+            return [{ selector, frameId }]
+          } catch {
+            // the element may not always be found since it's possible for the element to be removed from the DOM
+            return []
+          }
+        })
+      }
+
+      Cypress.action('cy:protocol-snapshot')
+
+      return snapshot
+    }
 
     try {
       const {
@@ -241,7 +306,19 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const body = {
         get: () => {
           if (!attachedBody) {
-            attachedBody = $$(state('document').adoptNode($body[0]))
+            // logs streaming in from the secondary need to be cloned off a document,
+            // which means state("document") will be undefined in the primary
+            // if a cy.origin block is active
+
+            // this could also be possible, but unlikely, if the spec bridge is taking
+            // snapshots before the document has loaded into state, as could be the case with logs
+            // generated from before:load event handlers in a spec bridge
+
+            // in any of these cases, fall back to the root document as we only
+            // need the document to clone the node.
+            const doc = state('document') || window.document
+
+            attachedBody = $$(doc.adoptNode($body[0]))
           }
 
           return attachedBody
@@ -250,6 +327,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
       const snapshot = {
         name,
+        timestamp,
         htmlAttrs: $htmlAttrs,
         body,
       }

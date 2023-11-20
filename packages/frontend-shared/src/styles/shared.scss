@@ -10,8 +10,18 @@
     local("Roboto-Light"), local("DroidSans"), local("Tahoma");
 }
 
+@supports (font-variation-settings: normal) {
+  @font-face {
+    font-family: 'Fira Code';
+    src: url('/fonts/FiraCode-VF.woff2') format('woff2 supports variations'),
+         url('/fonts/FiraCode-VF.woff2') format('woff2-variations');
+    font-weight: 100 1000;
+    font-stretch: 25% 151%;
+  }
+}
+
 html, body {
-  @apply bg-white font-sans antialiased;
+  @apply bg-white font-sans antialiased #{!important};
 }
 
 body {
@@ -60,7 +70,7 @@ body {
 
 // Input Resets
 // Taken from Tailwind CSS Forms -- a plugin for tailwind.
-// We could probably add these into WindiCSS directly
+// We could probably add these into TailwindCSS directly
 // https://github.com/tailwindlabs/tailwindcss-forms
 // [type="search"]::-webkit-search-cancel-button,
 // [type="search"]::-webkit-search-decoration {
@@ -281,7 +291,7 @@ input[type="search"].light {
   color: #222;
 }
 input[type="search"].suffix::-webkit-search-cancel-button {
-  @apply pr-3.25em;
+  @apply pr-[3.25em];
 }
 
 input[type="search"]::-webkit-search-cancel-button {

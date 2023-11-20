@@ -1,9 +1,9 @@
-import { WizardBundler, WizardFrontendFramework, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardBundler, WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
-function findFramework (type: WizardFrontendFramework['type']) {
-  return WIZARD_FRAMEWORKS.find((x) => x.type === type)!
+function findFramework (type: Cypress.ResolvedComponentFrameworkDefinition['type']) {
+  return resolveComponentFrameworkDefinition(CT_FRAMEWORKS.find((x) => x.type === type)!)
 }
 
 function findBundler (type: WizardBundler['type']) {
@@ -27,7 +27,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D react-scripts webpack react-dom react`)
+    expect(actual).to.eq(`npm install -D react-scripts react-dom react`)
   })
 
   it('vueclivue2-unconfigured', async () => {
@@ -43,7 +43,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue@2`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue@2`)
   })
 
   it('vueclivue3-unconfigured', async () => {
@@ -59,7 +59,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
   })
 
   it('vuecli5vue3-unconfigured', async () => {
@@ -75,7 +75,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
   })
 
   it('regular react project with vite', async () => {

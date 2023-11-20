@@ -53,16 +53,10 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     https_passthru.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -114,17 +108,10 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -176,17 +163,10 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -238,17 +218,10 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -325,7 +298,6 @@ Common situations why this would fail:
   From Node.js Internals:
     Error: socket hang up
       [stack trace lines]
-    
 
   2) network error handling
        cy.request() retries
@@ -361,7 +333,6 @@ https://on.cypress.io/request
   From Node.js Internals:
     RequestError: Error: socket hang up
       [stack trace lines]
-    
 
 
 
@@ -375,7 +346,7 @@ https://on.cypress.io/request
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_handling.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -387,13 +358,6 @@ https://on.cypress.io/request
      ling -- cy.visit() retries -- fails after retrying 5x (failed).png                             
   -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling.cy.js/network error hand     (1280x720)
      ling -- cy.request() retries -- fails after retrying 5x (failed).png                           
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling.cy.js.mp     (X second)
-                          4                                                                         
 
 
 ====================================================================================================

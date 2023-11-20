@@ -1,6 +1,5 @@
 import {
   WIZARD_DEPENDENCY_TYPESCRIPT,
-  DependencyToInstall,
   isDependencyInstalled,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
@@ -8,12 +7,12 @@ import type { DataContext } from '..'
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  async packagesToInstall (): Promise<DependencyToInstall[]> {
+  async packagesToInstall (): Promise<Cypress.DependencyToInstall[]> {
     if (!this.ctx.coreData.wizard.chosenFramework || !this.ctx.coreData.wizard.chosenBundler || !this.ctx.currentProject) {
       return []
     }
 
-    const packages: DependencyToInstall[] = [
+    const packages: Cypress.DependencyToInstall[] = [
       ...(await this.ctx.coreData.wizard.chosenFramework.dependencies(
         this.ctx.coreData.wizard.chosenBundler.type, this.ctx.currentProject,
       )),

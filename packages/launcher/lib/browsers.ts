@@ -1,20 +1,20 @@
 import Debug from 'debug'
-import * as cp from 'child_process'
+import type * as cp from 'child_process'
+import { utils } from './utils'
 import type { FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
 
 export const debug = Debug('cypress:launcher:browsers')
 
 /** starts a found browser and opens URL if given one */
-
 export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
 
 export function launch (
   browser: FoundBrowser,
   url: string,
   args: string[] = [],
-  defaultBrowserEnv = {},
-): LaunchedBrowser {
+  browserEnv = {},
+) {
   debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
@@ -25,13 +25,16 @@ export function launch (
     args = [url].concat(args)
   }
 
-  debug('spawning browser with args %o', { args })
+  const spawnOpts: cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe> = {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    // allow setting default env vars such as MOZ_HEADLESS_WIDTH
+    // but only if it's not already set by the environment
+    env: { ...browserEnv, ...process.env },
+  }
 
-  // allow setting default env vars such as MOZ_HEADLESS_WIDTH
-  // but only if it's not already set by the environment
-  const env = Object.assign({}, defaultBrowserEnv, process.env)
+  debug('spawning browser with opts %o', { browser, url, spawnOpts })
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
+  const proc = utils.spawnWithArch(browser.path, args, spawnOpts)
 
   proc.stdout.on('data', (buf) => {
     debug('%s stdout: %s', browser.name, String(buf).trim())

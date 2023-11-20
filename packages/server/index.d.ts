@@ -19,9 +19,11 @@ export namespace CyServer {
   export interface Config {
     blockHosts: string | string[]
     clientRoute: string
+    experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
     experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean
+    experimentalSkipDomainInjection: string[] | null
     /**
      * URL to Cypress's runner.
      */

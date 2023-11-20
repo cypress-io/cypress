@@ -1,46 +1,33 @@
-// if running in production mode (CYPRESS_INTERNAL_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
-
-const { patchFs } = require('./lib/util/patch-fs')
-const fs = require('fs')
-
-// prevent EMFILE errors
-patchFs(fs)
-
-// override tty if we're being forced to
-require('./lib/util/tty').override()
-
-const electronApp = require('./lib/util/electron-app')
-
-// are we in the main node process or the electron process?
-const isRunningElectron = electronApp.isRunning()
-
-if (process.env.CY_NET_PROFILE && isRunningElectron) {
-  const netProfiler = require('./lib/util/net_profiler')()
-
-  process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
+const runChildProcess = async (entryPoint) => {
+  require('./lib/plugins/child/register_ts_node')
+  require(entryPoint)
 }
 
-require('./lib/unhandled_exceptions')
+const startCypress = async () => {
+  try {
+    const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
-process.env.UV_THREADPOOL_SIZE = 128
+    initializeStartTime()
 
-if (isRunningElectron) {
-  require('./lib/util/process_profiler').start()
+    // No typescript requires before this point please
+    // typescript isn't interpreted until the start cypress file
+    // Avoid putting much code here all together since this is prior to v8 snapshots.
+    const { hookRequire } = require('./hook-require')
+
+    hookRequire({ forceTypeScript: false })
+
+    await require('./start-cypress')
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    process.exit(1)
+  }
 }
 
-// warn when deprecated callback apis are used in electron
-// https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
-process.enablePromiseAPIs = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+const { entryPoint } = require('minimist')(process.argv.slice(1))
 
-// don't show any electron deprecation warnings in prod
-process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
-
-// always show stack traces for Electron deprecation warnings
-process.traceDeprecation = true
-
-require('./lib/util/suppress_warnings').suppress()
-
-module.exports = require('./lib/cypress').start(process.argv)
+if (entryPoint) {
+  module.exports = runChildProcess(entryPoint)
+} else {
+  module.exports = startCypress()
+}

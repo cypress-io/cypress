@@ -1,21 +1,34 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import { browsers as supportedBrowsers, DEFAULT_ELECTRON_BROWSER } from '@packages/types'
-import type { FoundBrowser } from '@packages/types'
-
+import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
+import * as errors from '../errors'
+import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
+import * as launcher from '@packages/launcher'
+import type { Automation } from '../automation'
+import type { Browser } from './types'
+import type { CriClient } from './cri-client'
+
+declare global {
+  interface Window {
+    navigation?: {
+      addEventListener: (event: string, listener: (event: any) => void) => void
+    }
+    cypressDownloadLinkClicked: (url: string) => void
+  }
+}
+
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
-const launcher = require('@packages/launcher') //her
+const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 
-import * as errors from '../errors'
-import * as plugins from '../plugins'
 const { fs } = require('../util/fs')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
+const { telemetry } = require('@packages/telemetry')
 
 const pathToBrowsers = appData.path('browsers')
 const legacyProfilesWildcard = path.join(pathToBrowsers, '*')
@@ -48,10 +61,12 @@ const defaultLaunchOptions: {
   preferences: {[key: string]: any}
   extensions: string[]
   args: string[]
+  env: {[key: string]: any}
 } = {
   preferences: {},
   extensions: [],
   args: [],
+  env: {},
 }
 
 const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)
@@ -124,7 +139,18 @@ const pathToExtension = extension.getPathToExtension()
 
 async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
   if (plugins.has('before:browser:launch')) {
+    const span = telemetry.startSpan({ name: 'lifecycle:before:browser:launch' })
+
+    span?.setAttribute({
+      name: browser.name,
+      channel: browser.channel,
+      version: browser.version,
+      isHeadless: browser.isHeadless,
+    })
+
     const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+
+    span?.end()
 
     if (pluginConfigResult) {
       extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
@@ -134,13 +160,35 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+interface AfterBrowserLaunchDetails {
+  webSocketDebuggerUrl: string | never
+}
+
+async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowserLaunchDetails) {
+  if (plugins.has('after:browser:launch')) {
+    const span = telemetry.startSpan({ name: 'lifecycle:after:browser:launch' })
+
+    span?.setAttribute({
+      name: browser.name,
+      channel: browser.channel,
+      version: browser.version,
+      isHeadless: browser.isHeadless,
+    })
+
+    await plugins.execute('after:browser:launch', browser, options)
+
+    span?.end()
+  }
+}
+
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(getError(
+    // eslint-disable-next-line no-console
+    (options.onWarning || console.warn)(getError(
       'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
@@ -184,40 +232,90 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const getBrowsers = () => {
+const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
+
+const getWebKitBrowserVersion = async () => {
+  try {
+    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
+    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
+    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
+    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
+    const wkBrowserContents = await fs.readFile(wkBrowserPath)
+    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+
+    if (!result || !result.groups!.version) return '0'
+
+    return result.groups!.version
+  } catch (err) {
+    debug('Error detecting WebKit browser version %o', err)
+
+    return '0'
+  }
+}
+
+async function getWebKitBrowser () {
+  try {
+    const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
+    const mod = await import(modulePath) as typeof import('playwright-webkit')
+    const version = await getWebKitBrowserVersion()
+
+    const browser: FoundBrowser = {
+      name: 'webkit',
+      channel: 'stable',
+      family: 'webkit',
+      displayName: 'WebKit',
+      version,
+      path: mod.webkit.executablePath(),
+      majorVersion: version.split('.')[0],
+      warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
+    }
+
+    return browser
+  } catch (err) {
+    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+
+    return
+  }
+}
+
+const getBrowsers = async () => {
   debug('getBrowsers')
 
-  return launcher.detect()
-  .then((browsers: FoundBrowser[] = []) => {
-    let majorVersion
+  const [browsers, wkBrowser] = await Promise.all([
+    launcher.detect(),
+    getWebKitBrowser(),
+  ])
 
-    debug('found browsers %o', { browsers })
+  if (wkBrowser) browsers.push(wkBrowser)
 
-    if (!process.versions.electron) {
-      debug('not in electron, skipping adding electron browser')
+  debug('found browsers %o', { browsers })
 
-      return browsers
-    }
+  if (!process.versions.electron) {
+    debug('not in electron, skipping adding electron browser')
 
-    // @ts-ignore
-    const version = process.versions.electron || ''
+    return browsers
+  }
 
-    if (version) {
-      majorVersion = getMajorVersion(version)
-    }
+  const version = process.versions.chrome || ''
+  let majorVersion
 
-    const electronBrowser = {
-      ...DEFAULT_ELECTRON_BROWSER,
-      version,
-      path: '',
-      majorVersion,
-    } as FoundBrowser
+  if (version) {
+    majorVersion = getMajorVersion(version)
+  }
 
-    // the internal version of Electron, which won't be detected by `launcher`
-    debug('adding Electron browser %o', electronBrowser)
+  const electronBrowser: FoundBrowser = {
+    name: 'electron',
+    channel: 'stable',
+    family: 'chromium',
+    displayName: 'Electron',
+    version,
+    path: '',
+    majorVersion,
+  }
 
-    return browsers.concat(electronBrowser)
-  })
+  browsers.push(electronBrowser)
+
+  return browsers
 }
 
 const isValidPathToBrowser = (str) => {
@@ -242,50 +340,47 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers: FoundBrowser[]): Bluebird<FoundBrowser>
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers: FoundBrowser[]): Bluebird<FoundBrowser[]>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []) {
-  const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
+async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
+  const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
-  return findBrowsers
-  .then((browsers: FoundBrowser[] = []) => {
-    const filter = parseBrowserOption(nameOrPath)
+  const filter = parseBrowserOption(nameOrPath)
 
-    debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
+  debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
 
-    // try to find the browser by name with the highest version property
-    const sortedBrowsers = _.sortBy(browsers, ['version'])
+  // try to find the browser by name with the highest version property
+  const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-    const browser = _.findLast(sortedBrowsers, filter)
+  const browser = _.findLast(sortedBrowsers, filter)
 
-    if (browser) {
-      // short circuit if found
+  if (browser) {
+    // short circuit if found
+    if (returnAll) {
+      return browsers
+    }
+
+    return browser
+  }
+
+  // did the user give a bad name, or is this actually a path?
+  if (isValidPathToBrowser(nameOrPath)) {
+    // looks like a path - try to resolve it to a FoundBrowser
+    return launcher.detectByPath(nameOrPath)
+    .then((browser) => {
       if (returnAll) {
-        return browsers
+        return [browser].concat(browsers)
       }
 
       return browser
-    }
+    }).catch((err) => {
+      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+    })
+  }
 
-    // did the user give a bad name, or is this actually a path?
-    if (isValidPathToBrowser(nameOrPath)) {
-      // looks like a path - try to resolve it to a FoundBrowser
-      return launcher.detectByPath(nameOrPath)
-      .then((browser) => {
-        if (returnAll) {
-          return [browser].concat(browsers)
-        }
-
-        return browser
-      }).catch((err) => {
-        errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-      })
-    }
-
-    // not a path, not found by name
-    throwBrowserNotFound(nameOrPath, browsers)
-  })
+  // not a path, not found by name
+  throwBrowserNotFound(nameOrPath, browsers)
 }
 
 const formatBrowsersToOptions = (browsers) => {
@@ -302,9 +397,57 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers), formatBrowsersToOptions(supportedBrowsers))
 }
 
+// Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
+// We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
+// correlated in the proxy.
+const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Automation) => {
+  await criClient.send('Runtime.enable')
+  await criClient.send('Runtime.addBinding', {
+    name: 'cypressDownloadLinkClicked',
+  })
+
+  await criClient.on('Runtime.bindingCalled', async (data) => {
+    if (data.name === 'cypressDownloadLinkClicked') {
+      const url = data.payload
+
+      await automation.onDownloadLinkClicked?.(url)
+    }
+  })
+
+  await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(${listenForDownload.toString()})()`,
+  })
+}
+
+// The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
+// For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
+const listenForDownload = () => {
+  if (window.navigation) {
+    window.navigation.addEventListener('navigate', (event) => {
+      if (typeof event.downloadRequest === 'string') {
+        window.cypressDownloadLinkClicked(event.destination.url)
+      }
+    })
+  } else {
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
+        window.cypressDownloadLinkClicked(event.target.href)
+      }
+    })
+  }
+}
+
 export = {
 
   extendLaunchOptionsFromPlugins,
+
+  executeAfterBrowserLaunch,
 
   executeBeforeBrowserLaunch,
 
@@ -335,6 +478,10 @@ export = {
   formatBrowsersToOptions,
 
   throwBrowserNotFound,
+
+  handleDownloadLinksViaCDP,
+
+  listenForDownload,
 
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')

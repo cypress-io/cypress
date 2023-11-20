@@ -3,6 +3,7 @@
 
 export * from './commandFile'
 export * from './component-index-template'
+export * from './ct-detect-third-party'
 export * from './dependencies'
 export * from './detect'
 export * from './frameworks'

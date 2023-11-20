@@ -1,7 +1,8 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'next',
       bundler: 'webpack',
@@ -10,12 +11,12 @@ module.exports = {
         resolve: {
           alias: {
             'react': path.resolve(__dirname, './node_modules/react'),
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   },
   // These tests should run quickly / fail quickly,
   // since we intentionally causing error states for testing
-  defaultCommandTimeout: 1000
+  defaultCommandTimeout: 1000,
 }

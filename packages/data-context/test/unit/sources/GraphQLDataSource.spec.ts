@@ -25,7 +25,7 @@ describe('GraphQLDataSource', () => {
     ctx.project.projectId = async () => 'abc123'
 
     pushFragmentIterator = await Promise.resolve(subscribe({
-      schema: ctx.schema,
+      schema: ctx.config.schema,
       contextValue: ctx,
       document: parse(`subscription {
         pushFragment {
@@ -47,7 +47,7 @@ describe('GraphQLDataSource', () => {
   function executeQuery (query: string) {
     return Promise.resolve(execute({
       document: parse(query),
-      schema: ctx.schema,
+      schema: ctx.config.schema,
       contextValue: ctx,
     }))
   }
@@ -92,7 +92,7 @@ describe('GraphQLDataSource', () => {
         __typename: 'CurrentProject',
         cloudProject: {
           __typename: 'CloudProject',
-          id: 'Q2xvdWRQcm9qZWN0OjU=',
+          id: 'Q2xvdWRQcm9qZWN0OjY=',
           name: 'cloud-project-abc123',
         },
         id: Buffer.from(`CurrentProject:${projectPath}`, 'utf8').toString('base64'),

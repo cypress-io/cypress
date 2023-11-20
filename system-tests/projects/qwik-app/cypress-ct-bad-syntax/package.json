@@ -1,0 +1,7 @@
+{
+  "name": "cypress-ct-bad-missing-value",
+  "exports": {
+    "node": "./definition.js",
+    "default": "./index.js"
+  }
+}

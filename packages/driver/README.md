@@ -82,7 +82,6 @@ TODO: this data is accurate but also somewhat out of date.
 | mocha:fail            | Mocha   | Cypress | when mocha runner fires its 'fail' event                                                                                                                      |
 | test:end              | Mocha   | Cypress | when mocha runner fires its 'test end' event                                                                                                                  |
 | test:results:ready    | Runner  | Anyone  | when we receive the 'test:end' event                                                                                                                          |
-| test:after:hooks      | Cypress | Cypress | after all hooks have run for a test                                                                                                                           |
 | test:after:run        | Cypress | Anyone  | after any code has run for a test                                                                                                                             |
 | mocha:end             | Mocha   | Cypress | when mocha runner fires its 'end' event                                                                                                                       |
 | after:run             | Runner  | Anyone  | after run has finished                                                                                                                                        |

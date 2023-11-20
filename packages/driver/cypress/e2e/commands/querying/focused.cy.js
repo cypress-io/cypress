@@ -95,7 +95,7 @@ describe('src/cy/commands/querying', () => {
         cy.get('body').focused().then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('type')).to.eq('parent')
+          expect(lastLog.get('type')).not.to.eq('child')
         })
       })
 
@@ -123,16 +123,19 @@ describe('src/cy/commands/querying', () => {
         cy.get('input:first').focused().then(function ($input) {
           const { lastLog } = this
 
-          expect(lastLog.get('$el')).to.eq($input)
+          expect(lastLog.get('$el')).to.eql($input)
         })
       })
 
       it('#consoleProps', () => {
         cy.get('input:first').focused().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focused',
-            Yielded: $input.get(0),
-            Elements: 1,
+            name: 'focused',
+            type: 'command',
+            props: {
+              Yielded: $input.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -145,9 +148,12 @@ describe('src/cy/commands/querying', () => {
 
         cy.focused().should('not.exist').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focused',
-            Yielded: '--nothing--',
-            Elements: 0,
+            name: 'focused',
+            type: 'command',
+            props: {
+              Yielded: '--nothing--',
+              Elements: 0,
+            },
           })
         })
       })

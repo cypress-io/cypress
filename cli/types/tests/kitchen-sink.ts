@@ -18,27 +18,12 @@ result // $ExpectType boolean
 
 Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
 
-// check if cy.server() yields default server options
-cy.server().should((server) => {
-  server // $ExpectType ServerOptions
-  expect(server.delay).to.eq(0)
-  expect(server.method).to.eq('GET')
-  expect(server.status).to.eq(200)
-})
-
 cy.visit('https://www.acme.com/', {
   auth: {
     username: 'wile',
     password: 'coyote'
   }
 })
-
-const serverOptions: Partial<Cypress.ServerOptions> = {
-  delay: 100,
-  ignore: () => true
-}
-
-cy.server(serverOptions)
 
 Cypress.spec.name // $ExpectType string
 Cypress.spec.relative // $ExpectType string

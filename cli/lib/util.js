@@ -21,7 +21,6 @@ const isInstalledGlobally = require('is-installed-globally')
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 const fs = require('./fs')
-const semver = require('semver')
 
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 
@@ -134,7 +133,7 @@ function isValidCypressInternalEnvValue (value) {
     return true
   }
 
-  // names of config environments, see "packages/server/config/app.yml"
+  // names of config environments, see "packages/server/config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
@@ -192,6 +191,7 @@ const dequote = (str) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
+    'autoCancelAfterFailures',
     'browser',
     'cachePath',
     'cacheList',
@@ -225,6 +225,7 @@ const parseOpts = (opts) => {
     'reporter',
     'reporterOptions',
     'record',
+    'runnerUi',
     'runProject',
     'spec',
     'tag')
@@ -257,7 +258,7 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
@@ -304,21 +305,6 @@ const util = {
       opts.ORIGINAL_NODE_OPTIONS = process.env.NODE_OPTIONS
     }
 
-    // https://github.com/cypress-io/cypress/issues/18914
-    // Node 17+ ships with OpenSSL 3 by default, so we may need the option
-    // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
-    // function. This option doesn't exist on Node <17 or when it is built
-    // against OpenSSL 1, so we have to detect Node's major version and check
-    // which version of OpenSSL it was built against before spawning the plugins
-    // process.
-
-    // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
-    // version that has been updated to webpack >= 5.61, which no longer relies on
-    // Node's builtin crypto.hash function.
-    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && semver.satisfies(process.versions.openssl, '>=3', { includePrerelease: true })) {
-      opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
-    }
-
     return opts
   },
 
@@ -345,7 +331,7 @@ const util = {
   },
 
   supportsColor () {
-    // if we've been explictly told not to support
+    // if we've been explicitly told not to support
     // color then turn this off
     if (process.env.NO_COLOR) {
       return false
@@ -533,6 +519,7 @@ const util = {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
+    const configVarNameLower = configVarName.toLowerCase()
     const packageConfigVarName = `npm_package_config_${varName}`
 
     let result
@@ -545,6 +532,10 @@ const util = {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
+    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+      debug(`Using ${varName.toLowerCase()} from npm config`)
+
+      result = process.env[configVarNameLower]
     } else if (process.env.hasOwnProperty(packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 

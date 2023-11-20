@@ -1,46 +1,58 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin misc', () => {
+context('cy.origin misc', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
   })
 
   it('.end()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').end().should('be.null')
     })
   })
 
   it('.exec()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
   })
 
   it('.focused()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
     })
   })
 
   it('.wrap()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })
     })
   })
 
   it('.debug()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').debug().should('have.id', 'button')
     })
   })
 
   it('.pause()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    // ensures the 'paused' event makes it to the event-manager in the primary.
+    // if we get cross-origin cy-in-cy test working, we could potentially make
+    // this even more end-to-end: test out the reporter UI and click the
+    // resume buttons instead of sending the resume:all event
+    Cypress.primaryOriginCommunicator.once('paused', ({ nextCommandName, origin }) => {
+      expect(nextCommandName).to.equal('wrap')
+      expect(origin).to.equal('http://www.foobar.com:3500')
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'resume:all')
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
-        cy.once('paused', () => {
-          Cypress.emit('resume:all')
+        // event is sent from the event listener in the primary above,
+        // ensuring that the pause sequence has come full circle
+        cy.once('resume:all', () => {
           resolve()
         })
       })
@@ -54,7 +66,7 @@ context('cy.origin misc', () => {
   })
 
   it('.task()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
   })
@@ -71,23 +83,24 @@ context('cy.origin misc', () => {
     })
 
     it('.exec()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.exec('echo foobar')
       })
 
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('exec', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('exec')
-        expect(consoleProps['Shell Used']).to.be.undefined
-        expect(consoleProps.Yielded).to.have.property('code').that.equals(0)
-        expect(consoleProps.Yielded).to.have.property('stderr').that.equals('')
-        expect(consoleProps.Yielded).to.have.property('stdout').that.equals('foobar')
+        expect(consoleProps.name).to.equal('exec')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Shell Used']).to.be.undefined
+        expect(consoleProps.props.Yielded).to.have.property('code').that.equals(0)
+        expect(consoleProps.props.Yielded).to.have.property('stderr').that.equals('')
+        expect(consoleProps.props.Yielded).to.have.property('stdout').that.equals('foobar')
       })
     })
 
     it('.focused()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').click().focused()
       })
 
@@ -100,15 +113,16 @@ context('cy.origin misc', () => {
 
         const { consoleProps } = findCrossOriginLogs('focused', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('focused')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
+        expect(consoleProps.name).to.equal('focused')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props.Yielded).to.have.property('id').that.equals('button')
       })
     })
 
     it('.wrap()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const arr = ['foo', 'bar', 'baz']
 
         cy.wrap(arr).spread((foo, bar, baz) => {
@@ -121,15 +135,16 @@ context('cy.origin misc', () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('wrap', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('wrap')
-        expect(consoleProps.Yielded[0]).to.equal('foo')
-        expect(consoleProps.Yielded[1]).to.equal('bar')
-        expect(consoleProps.Yielded[2]).to.equal('baz')
+        expect(consoleProps.name).to.equal('wrap')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded[0]).to.equal('foo')
+        expect(consoleProps.props.Yielded[1]).to.equal('bar')
+        expect(consoleProps.props.Yielded[2]).to.equal('baz')
       })
     })
 
     it('.debug()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').debug()
       })
 
@@ -142,14 +157,15 @@ context('cy.origin misc', () => {
 
         const { consoleProps } = findCrossOriginLogs('debug', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('debug')
-        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps.Yielded).to.have.property('id').that.equals('button')
+        expect(consoleProps.name).to.equal('debug')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props.Yielded).to.have.property('id').that.equals('button')
       })
     })
 
     it('.pause()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterPaused = new Promise<void>((resolve) => {
           cy.once('paused', () => {
             Cypress.emit('resume:all')
@@ -172,41 +188,45 @@ context('cy.origin misc', () => {
 
         const { consoleProps } = findCrossOriginLogs('pause', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('pause')
-        expect(consoleProps.Yielded).to.be.undefined
+        expect(consoleProps.name).to.equal('pause')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded).to.be.undefined
       })
     })
 
     it('.task()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.task('return:arg', 'works')
       })
 
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('task', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('task')
-        expect(consoleProps.Yielded).to.equal('works')
-        expect(consoleProps.arg).to.equal('works')
-        expect(consoleProps.task).to.equal('return:arg')
+        expect(consoleProps.name).to.equal('task')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded).to.equal('works')
+        expect(consoleProps.props.arg).to.equal('works')
+        expect(consoleProps.props.task).to.equal('return:arg')
       })
     })
   })
 })
 
 it('verifies number of cy commands', () => {
+  // remove custom commands we added for our own testing
+  const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils', 'runSupportFileCustomPrivilegedCommands']
   // @ts-ignore
-  // remove 'getAll' and 'shouldWithTimeout' commands since they are custom commands we added for our own testing and are not actual cy commands
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll' || command === 'shouldWithTimeout')
+  const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
-    'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+    'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-    'focused', 'get', 'contains', 'root', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+    'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
     'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
-    'mount',
+    'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',
+    'getAllCookies', 'clearAllCookies',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
   const removedCommands = Cypress._.difference(expectedCommands, actualCommands)

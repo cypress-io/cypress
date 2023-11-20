@@ -7,8 +7,7 @@ You can install and bring [Testing library/Cypress](https://testing-library.com/
 
 ```js
 it('loads and displays greeting (testing-lib)', () => {
-  cy.server()
-  cy.route('/greeting', { greeting: 'Hello there' }).as('greet')
+  cy.intercept('/greeting', { greeting: 'Hello there' }).as('greet')
 
   const url = '/greeting'
   mount(<Fetch url={url} />)
@@ -19,7 +18,7 @@ it('loads and displays greeting (testing-lib)', () => {
   cy.findByRole('heading').should('have.text', 'Hello there')
   cy.findByRole('button').should('be.disabled')
   cy.get('@greet')
-    .its('url')
+    .its('response.url')
     .should('match', /\/greeting$/)
 })
 ```

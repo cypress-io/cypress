@@ -14,19 +14,19 @@
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "pretest-unit": "yarn clean",
     "test-unit": "mocha",
-    "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha"
+    "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "ansi_up": "5.0.0",
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
-    "@packages/config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "8.2.2",
-    "@types/node": "14.14.31",
+    "@types/node": "18.17.5",
     "@types/pngjs": "^6.0.1",
     "@types/strip-ansi": "^5.2.1",
     "ansi-styles": "^5",

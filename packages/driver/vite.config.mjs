@@ -17,7 +17,4 @@ export default defineConfig({
       mocha: require.resolve('mocha/mocha.js'),
     },
   },
-  optimizeDeps: {
-    // include: ['mocha/lib/pending.js'],
-  },
 })

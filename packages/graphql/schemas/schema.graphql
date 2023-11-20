@@ -23,7 +23,7 @@ enum AuthStateNameEnum {
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
-  disabled: Boolean!
+  disabled: Boolean
   displayName: String!
   family: BrowserFamily!
 
@@ -42,6 +42,7 @@ type Browser implements Node {
 enum BrowserFamily {
   chromium
   firefox
+  webkit
 }
 
 enum BrowserStatus {
@@ -65,6 +66,56 @@ type CachedUser implements Node {
   id: ID!
 }
 
+"""Information about the browser the tests were run on"""
+type CloudBrowserInfo implements Node {
+  """The formatted name of the browser, e.g. `Electron`"""
+  formattedName: String
+
+  """
+  The formatted name of the browser with the current version i.e `Electron 59.0.278`
+  """
+  formattedNameWithVersion: String
+
+  """The version of the browser, i.e. `59`"""
+  formattedVersion: String
+  id: ID!
+
+  """The ID of the browser, e.g. `electron`"""
+  unformattedName: String
+
+  """The unformatted version of the browser, i.e. `59.0.278`"""
+  unformattedVersion: String
+}
+
+"""Information about the CI provider that performed a run"""
+type CloudCiBuildInfo implements Node {
+  """CI build ID as extracted from the CI worker environment (if available)"""
+  ciBuildNumber: String
+
+  """
+  Formatted CI build ID as extracted from the CI worker environment (if available)
+  """
+  ciBuildNumberFormatted: String
+
+  """
+  The formatted name of the provider that performed the associated run, e.g. `CircleCI`
+  """
+  formattedProvider: String
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """
+  The ID of the provider that performed the associated run, e.g. `circleci`
+  """
+  provider: String
+
+  """
+  A link to the build details for the associated run within the CI provider (if available)
+  """
+  url: String
+}
+
 """Feature not available for subscription"""
 type CloudFeatureNotEnabled {
   """an error message"""
@@ -80,6 +131,26 @@ type CloudLatestRunUpdateSpecData {
 
   """Recommended seconds to wait before next poll."""
   pollingInterval: Int
+}
+
+"""The operating system the tests were run on"""
+type CloudOperatingSystem implements Node {
+  id: ID!
+
+  """The formatted name of the operating system, e.g. `linux`"""
+  name: String
+
+  """
+  The formatted name of the operating system with the version, e.g. `linux 14.04`
+  """
+  nameWithVersion: String
+
+  """The platform of the OS, e.g. `linux`"""
+  platform: OperatingSystemsEnum
+  unformattedName: String
+
+  """The version of the operating system, e.g. `14.04`"""
+  version: String
 }
 
 """
@@ -131,6 +202,18 @@ type CloudOrganizationEdge {
   node: CloudOrganization!
 }
 
+type CloudPollingIntervals {
+  """
+  The frequency with which the CloudProject.runByNumber field should be polled, in seconds.
+  """
+  runByNumber: Int
+
+  """
+  The frequency with which the CloudProject.runsByCommitShas field should be polled, in seconds.
+  """
+  runsByCommitShas: Int
+}
+
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
   """A link to the settings page of the project in the dashboard"""
@@ -154,6 +237,9 @@ type CloudProject implements Node {
   """Record keys for the service"""
   recordKeys: [CloudRecordKey!]
 
+  """Gets a single CloudRun by runNumber"""
+  runByNumber(runNumber: Int!): CloudRun
+
   """A connection field type"""
   runs(
     """Returns the elements in the list that come after the specified cursor"""
@@ -170,6 +256,17 @@ type CloudProject implements Node {
     last: Int
     status: CloudRunStatus
   ): CloudRunConnection
+
+  """
+  Returns runs associated to the given git commit SHAs hashes. The returned runs are ordered in the same way as the provided hashes.
+  """
+  runsByCommitShas(
+    """An ordered list of git commit sha1 hashes."""
+    commitShas: [String!]!
+
+    """A limit to apply to the sorted list of found runs."""
+    runLimit: Int! = 100
+  ): [CloudRun]
 
   """Unique identifier for a Project"""
   slug: String!
@@ -214,6 +311,16 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+
+  """
+  Average duration the spec takes to run within the context of the provided CloudRun ids.
+  """
+  averageDurationForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the average duration. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
+  ): Float
   flakyStatus(
     """The number of runs to consider when counting flaky runs."""
     flakyRunsWindow: Int!
@@ -224,11 +331,31 @@ type CloudProjectSpec implements Node {
     fromBranch: String!
   ): CloudProjectSpecFlakyResult
 
+  """
+  The flaky metadata for the spec within the context of the provided CloudRun ids.
+  """
+  flakyStatusForRunIds(
+    """
+    The ids for the CloudRuns, ordered from most to least relevant, to use to derive the flaky status.
+    """
+    cloudRunIds: [ID!]!
+  ): CloudProjectSpecFlakyResult
+
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   isConsideredFlaky(
     """The branch to measure flakiness against"""
     fromBranch: String!
+  ): Boolean
+
+  """
+  Indicator that a spec is considered flaky within the context of the provided CloudRun ids.
+  """
+  isConsideredFlakyForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the flake indicator. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
   ): Boolean
 
   """
@@ -257,7 +384,16 @@ type CloudProjectSpec implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
-  ): CloudSpecRunConnection
+  ): CloudSpecRunConnection @deprecated(reason: "Cypress app should utilize specRunsForRunIds to retrieve more relevant data based on local state")
+
+  """
+  Runs this spec has been involved with, limited to the provided list of CloudRun ids.
+  Runs will be returned in the same order as the runs provided, where matches are found.
+  """
+  specRunsForRunIds(
+    """A list of IDs for a CloudRun Node, conforming to the Relay spec"""
+    cloudRunIds: [ID!]!
+  ): [CloudSpecRun]
 }
 
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
@@ -271,9 +407,19 @@ type CloudProjectSpecFlakyStatus {
   flakyRunsWindow: Int
 
   """
-  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago. Will be null if field is a child of flayStatusForRunIds
   """
   lastFlaky: Int
+
+  """
+  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
+  """
+  lastFlakyRunCommitSha: String
+
+  """
+  The run number of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
+  """
+  lastFlakyRunNumber: Int
   severity: String
 }
 
@@ -308,15 +454,68 @@ type CloudRecordKey implements Node {
 
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
+  """Whether or not the run was canceled due to a failure"""
+  cancelOnFailure: Boolean
+
+  """When the run was cancelled, null if not cancelled"""
+  cancelledAt: DateTime
+
+  """
+  The user who manually cancelled the run, null if not cancelled manually
+  """
+  cancelledBy: CloudUser
+
+  """Information about the CI provider that performed the run"""
+  ci: CloudCiBuildInfo!
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
-  createdAt: DateTime
+
+  """Number of specs instances that have been completed within a run"""
+  completedInstanceCount: Int
+
+  """When the run was created"""
+  createdAt: DateTime!
+
+  """
+  Errors recorded against tests within this run, as reported by the Cypress App during recording
+  """
+  errors: [String!]!
+
+  """All groups within this run"""
+  groups: [CloudRunGroup!]!
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+
+  """
+  Whether this run is hidden to the user due to data limits. Specific reasons are provided in the reasonsRunIsHidden field.
+  """
+  isHidden: Boolean!
+
+  """Action user can perform when the run is over a usage limit"""
+  overLimitActionType: OverLimitActionTypeEnum!
+
+  """A link a user can navigate to when the run is over a usage limit"""
+  overLimitActionUrl: String!
+
+  """
+  Reasons why this run is hidden. List will be empty if the run is not hidden.
+  """
+  reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
+
+  """
+  The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
+  """
+  scheduledToCompleteAt: DateTime
+
+  """All specs within this run"""
+  specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]
+
+  """Tests within this run that failed and need to be reviewed"""
+  testsForReview(limit: Int! = 100): [CloudTestResult!]!
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -328,6 +527,9 @@ type CloudRun implements Node {
 
   """Number of flaky tests, null if flake detection is not enabled"""
   totalFlakyTests: Int
+
+  """Number of instances within a run"""
+  totalInstanceCount: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -386,6 +588,108 @@ type CloudRunEdge {
   node: CloudRun!
 }
 
+"""A group of tests that are executed together within a run"""
+type CloudRunGroup implements Node {
+  """The browser the tests were run on"""
+  browser: CloudBrowserInfo!
+
+  """The date and time the group was completed"""
+  completedAt: DateTime
+
+  """The date and time the group was created"""
+  createdAt: DateTime!
+
+  """The overall duration of the tests in the group in milliseconds"""
+  duration: Int!
+
+  """The name of the group"""
+  groupName: String
+  id: ID!
+
+  """The operating system the tests were run on"""
+  os: CloudOperatingSystem!
+  status: CloudRunGroupStatusEnum!
+
+  """The type of the test"""
+  testingType: String!
+
+  """The total number of tests that failed within the group"""
+  totalFailures: Int!
+
+  """The total number of tests that passed within the group"""
+  totalPasses: Int!
+
+  """The total number of tests that are pending within the group"""
+  totalPending: Int!
+
+  """The total number of tests that are skipped within the group"""
+  totalSkipped: Int!
+}
+
+"""Possible check status of a run group"""
+enum CloudRunGroupStatusEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  NOTESTS
+  PASSED
+  RUNNING
+  TIMEDOUT
+  UNCLAIMED
+}
+
+"""The reason a run was hidden, along with any details"""
+union CloudRunHidingReason = DataRetentionLimitExceeded | UsageLimitExceeded
+
+"""An instance of executing a single test within a run"""
+type CloudRunInstance implements Node {
+  """The ID of the group that this instance belongs to"""
+  groupId: String!
+
+  """Used to determine if the instance has test replay"""
+  hasReplay: Boolean
+
+  """Used to determine if the instance has screenshots"""
+  hasScreenshots: Boolean!
+
+  """Used to determine if the instance has stdout"""
+  hasStdout: Boolean!
+
+  """Used to determine if the instance has screenshots"""
+  hasVideo: Boolean!
+  id: ID!
+
+  """Link to Cypress Cloud to view test replay, if available"""
+  replayUrl: String
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  screenshotsUrl: String
+
+  """The status of the instance"""
+  status: RunInstanceStatusEnum!
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  stdoutUrl: String
+
+  """This is the number of failed tests for the instance"""
+  totalFailed: Int
+
+  """This is the number of passed tests for the instance"""
+  totalPassed: Int
+
+  """This is the number of pending tests for the instance"""
+  totalPending: Int
+
+  """This is the number of running tests for the instance"""
+  totalRunning: Int
+
+  """This is the number of skipped tests for the instance"""
+  totalSkipped: Int
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  videoUrl: String
+}
+
 """Possible check status of the test run"""
 enum CloudRunStatus {
   CANCELLED
@@ -405,23 +709,36 @@ type CloudRunTag implements Node {
 }
 
 """
-A Recorded run of a given spec from the Test Runner, typically to the cloud
+Details of test recording in Cypress Cloud for a spec file within a run
 """
 type CloudSpecRun implements Node {
-  """When the run was completed"""
+  """Basename of the spec file"""
+  basename: String!
+
+  """When the spec was completed"""
   completedAt: DateTime
 
-  """When the run was created"""
+  """When the spec was registered to run"""
   createdAt: DateTime
+
+  """Extension of the spec file"""
+  extension: String!
 
   """Amount of groups this spec was run in"""
   groupCount: Int
 
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  """Unique identifiers for each group this spec was run in"""
+  groupIds: [String]
   id: ID!
+
+  """Full path to the spec file"""
+  path: String!
 
   """Incremental run number assigned"""
   runNumber: Int
+
+  """Short path to the spec file without leading Cypress directories"""
+  shortPath: String
 
   """
   Aggregate information about how long the spec took to run in the groups
@@ -443,7 +760,7 @@ type CloudSpecRun implements Node {
   """Aggregate information about how many tests were skipped in the groups"""
   testsSkipped: SpecDataAggregate
 
-  """A link to the run overview page filtered by spec"""
+  """A link to the run overview page in Cypress Cloud filtered by spec"""
   url: String
 }
 
@@ -480,6 +797,61 @@ enum CloudSpecStatus {
   RUNNING
   TIMEDOUT
   UNCLAIMED
+}
+
+"""Details of a recording in Cypress Cloud for a single test within a run"""
+type CloudTestResult implements Node {
+  """This is the duration of the test result in milliseconds"""
+  duration: Int
+  id: ID!
+
+  """The instance of running the test result within the corresponding run"""
+  instance: CloudRunInstance
+
+  """If the test result was flaky in the current run"""
+  isFlaky: Boolean!
+
+  """The spec ID of the test result"""
+  specId: String!
+
+  """The state of the test result"""
+  state: CloudTestResultStateEnum!
+
+  """The URL to the test result in Cypress Cloud"""
+  testUrl: String!
+
+  """
+  The thumbprint of the test result, allows for deduping tests sharing the same title in the same spec
+  """
+  thumbprint: String!
+
+  """The title of the test result: describe/context > it/test"""
+  title(
+    """This will trim the test title to the provided depth"""
+    depth: Int!
+  ): String!
+
+  """The title of the test result split into parts"""
+  titleParts: [String!]!
+}
+
+"""State of the test result"""
+enum CloudTestResultStateEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  PASSED
+  PENDING
+  RUNNING
+  SKIPPED
+  TIMEDOUT
+  UNKNOWN
+}
+
+"""Type of tests"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -546,12 +918,43 @@ enum CodeGenType {
   component
   componentEmpty
   e2e
-  scaffoldIntegration
+  e2eExamples
 }
 
 enum CodeLanguageEnum {
   js
   ts
+}
+
+"""used to distinguish one group of users from another"""
+type Cohort {
+  """value used to indicate the cohort (e.g. "A" or "B")"""
+  cohort: String!
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
+}
+
+""""""
+type CommitInfo {
+  """Commit message"""
+  message: String!
+
+  """Commit hash"""
+  sha: String!
 }
 
 """
@@ -570,7 +973,7 @@ type CurrentProject implements Node & ProjectLike {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
-  """The remote associated project from Cypress Dashboard"""
+  """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProjectResult
 
   """
@@ -584,6 +987,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenFramework: String
   codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
@@ -605,6 +1009,11 @@ type CurrentProject implements Node & ProjectLike {
 
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
+
+  """
+  Whether the project has any specs found that do not match an example spec
+  """
+  hasNonExampleSpec: Boolean
 
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
@@ -640,7 +1049,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -655,6 +1064,12 @@ type CurrentProject implements Node & ProjectLike {
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
+}
+
+"""A run was hidden because it was over the data retention limit"""
+type DataRetentionLimitExceeded {
+  """The number of days of data retention"""
+  dataRetentionDays: Int
 }
 
 """
@@ -697,8 +1112,12 @@ enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BAD_POLICY_WARNING_TOOLTIP
+  BROWSER_CRASHED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
+  BROWSER_PAGE_CLOSED_UNEXPECTEDLY
+  BROWSER_PROCESS_CLOSED_UNEXPECTEDLY
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION
   BUNDLE_ERROR
   CANNOT_CONNECT_BASE_URL
   CANNOT_CONNECT_BASE_URL_RETRYING
@@ -713,6 +1132,27 @@ enum ErrorTypeEnum {
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
+  CLOUD_ALREADY_COMPLETE
+  CLOUD_API_RESPONSE_FAILED_RETRYING
+  CLOUD_AUTO_CANCEL_MISMATCH
+  CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN
+  CLOUD_CANCEL_SKIPPED_SPEC
+  CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE
+  CLOUD_CANNOT_PROCEED_IN_PARALLEL
+  CLOUD_CANNOT_PROCEED_IN_SERIAL
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL
+  CLOUD_GRAPHQL_ERROR
+  CLOUD_INVALID_RUN_REQUEST
+  CLOUD_PARALLEL_DISALLOWED
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH
+  CLOUD_PARALLEL_REQUIRED
+  CLOUD_PROJECT_NOT_FOUND
+  CLOUD_RECORD_KEY_NOT_VALID
+  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE
+  CLOUD_STALE_RUN
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING
+  CLOUD_UNKNOWN_INVALID_REQUEST
   COMPONENT_FOLDER_REMOVED
   COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
   CONFIG_FILES_LANGUAGE_CONFLICT
@@ -731,26 +1171,7 @@ enum ErrorTypeEnum {
   CONFIG_FILE_UNEXPECTED_ERROR
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
-  COULD_NOT_FIND_SYSTEM_NODE
   COULD_NOT_PARSE_ARGUMENTS
-  DASHBOARD_ALREADY_COMPLETE
-  DASHBOARD_API_RESPONSE_FAILED_RETRYING
-  DASHBOARD_CANCEL_SKIPPED_SPEC
-  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE
-  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL
-  DASHBOARD_CANNOT_PROCEED_IN_SERIAL
-  DASHBOARD_CANNOT_UPLOAD_RESULTS
-  DASHBOARD_GRAPHQL_ERROR
-  DASHBOARD_INVALID_RUN_REQUEST
-  DASHBOARD_PARALLEL_DISALLOWED
-  DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH
-  DASHBOARD_PARALLEL_REQUIRED
-  DASHBOARD_PROJECT_NOT_FOUND
-  DASHBOARD_RECORD_KEY_NOT_VALID
-  DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE
-  DASHBOARD_STALE_RUN
-  DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
-  DASHBOARD_UNKNOWN_INVALID_REQUEST
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
   DEV_SERVER_CONFIG_FILE_NOT_FOUND
@@ -759,11 +1180,17 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
+  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE
+  EXPERIMENTAL_STUDIO_E2E_ONLY
   EXPERIMENTAL_STUDIO_REMOVED
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
   FIREFOX_GC_INTERVAL_REMOVED
@@ -789,8 +1216,6 @@ enum ErrorTypeEnum {
   MIGRATION_CYPRESS_NOT_FOUND
   MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
-  NODE_VERSION_DEPRECATION_BUNDLED
-  NODE_VERSION_DEPRECATION_SYSTEM
   NOT_LOGGED_IN
   NO_DEFAULT_CONFIG_FILE_FOUND
   NO_PROJECT_FOUND_AT_PROJECT_ROOT
@@ -823,8 +1248,10 @@ enum ErrorTypeEnum {
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
   UNSUPPORTED_BROWSER_VERSION
-  VIDEO_POST_PROCESSING_FAILED
+  VIDEO_CAPTURE_FAILED
+  VIDEO_COMPRESSION_FAILED
   VIDEO_RECORDING_FAILED
+  VIDEO_UPLOAD_ON_PASSES_REMOVED
 }
 
 """Base error"""
@@ -870,7 +1297,9 @@ input FileDetailsInput {
 
 enum FileExtensionEnum {
   js
+  jsx
   ts
+  tsx
 }
 
 """Represents a file on the file system"""
@@ -910,18 +1339,6 @@ type FileParts implements Node {
 
   """Relative path to file (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
-}
-
-enum FrontendFrameworkEnum {
-  angular
-  nextjs
-  nuxtjs
-  react
-  reactscripts
-  vue2
-  vue3
-  vueclivue2
-  vueclivue3
 }
 
 """Error from generated spec"""
@@ -983,7 +1400,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1005,13 +1422,47 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
+  majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
+  wasBrowserSetInCLI: Boolean
+}
+
+"""Counts for specs and tests from a local project at a point in time"""
+input LocalTestCountsInput {
+  """Current Git branch name for local project"""
+  branch: String
+
+  """Total number of example specs found in project"""
+  exampleSpecs: Int!
+
+  """Total number of tests found in example specs. This can be an estimate"""
+  exampleTests: Int!
+
+  """Project slug for project"""
+  projectSlug: String
+
+  """Testing type"""
+  testingType: CloudTestingTypeEnum!
+
+  """Total number of specs found in project"""
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
 }
 
 type ManualMigration implements Node {
@@ -1088,9 +1539,6 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
-
-  """Markup for the migration landing page video embed"""
-  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -1185,14 +1633,22 @@ type Mutation {
   closeBrowser: Boolean
 
   """Create a project in the dashboard and return its object"""
-  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
+  cloudProjectCreate(campaign: String, ciProviders: [String!], cohort: String, medium: String, name: String!, orgId: ID!, public: Boolean!, source: String): CloudProject
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """Record event"""
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
   completeSetup: Query
 
   """add the passed text to the local clipboard"""
   copyTextToClipboard(text: String!): Boolean
+
+  """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -1201,6 +1657,7 @@ type Mutation {
 
   """Dismisses a warning displayed by the frontend"""
   dismissWarning(id: ID!): Query
+  e2eExamples: [ScaffoldedFile!]!
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -1209,13 +1666,23 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, componentName: String, isDefault: Boolean, type: CodeGenType!): GenerateSpecResponse
+
+  """
+  Parse a JS or TS file to see any exported React components that are defined in the file
+  """
+  getReactComponentsFromFile(filePath: String!): ReactComponentResponse
+
+  """
+  Scan dependencies to determine what, if any, CT frameworks are installed
+  """
+  initializeCtFrameworks: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject(specPath: String): CurrentProject
+  launchOpenProject(shouldLaunchNewTab: Boolean, specPath: String): CurrentProject
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -1229,10 +1696,10 @@ type Mutation {
     ids: [ID!]!
   ): [RemoteFetchable]!
 
-  """Auth with Cypress Dashboard"""
-  login(utmMedium: String!, utmSource: String!): Query
+  """Auth with Cypress Cloud"""
+  login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
-  """Log out of Cypress Dashboard"""
+  """Log out of Cypress Cloud"""
   logout: Query
 
   """Check if a give spec file will match the project spec pattern"""
@@ -1266,6 +1733,11 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
+  """
+  Allow the relevant run for debugging marked as next to be considered the current relevant run
+  """
+  moveToRelevantRun(runNumber: Int!): Boolean
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1283,12 +1755,26 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
+  Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.
+  """
+  recordEvent(
+    campaign: String!
+    cohort: String
+    includeMachineId: Boolean
+    medium: String!
+    messageId: String!
+
+    """(optional) stringified JSON object with supplemental data"""
+    payload: String
+  ): Boolean
+
+  """
   Signal that we are explicitly refetching remote data and should not use the server cache
   """
   refetchRemote: Query
 
-  """Clears the cloudViewer cache to refresh the organizations"""
-  refreshOrganizations: Query
+  """Clears the cloudViewer cache to refresh the organizations and projects"""
+  refreshCloudViewer: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1306,7 +1792,16 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
-  scaffoldIntegration: [ScaffoldedFile!]!
+
+  """
+  Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
+  """
+  runSpec(
+    """
+    Absolute path of the spec to run - must match e2e or component specPattern
+    """
+    specPath: String!
+  ): RunSpecResult
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -1329,8 +1824,26 @@ type Mutation {
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
+  """List of specs to run for the "Run All Specs" Feature"""
+  setRunAllSpecs(runAllSpecs: [String!]!): Boolean
+
+  """Set failed tests for the current run to be used by the runner"""
+  setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
+  """Set the route to debug and show the specified CloudRun"""
+  showDebugForCloudRun(runNumber: Int!): Boolean
+
+  """Show system notification via Electron"""
+  showSystemNotification(body: String!, title: String!): Boolean
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
+
+  """Return the set of test titles for the given spec path"""
+  testsForRun(
+    """Spec path relative to the project in posix format"""
+    spec: String!
+  ): [String!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -1340,6 +1853,20 @@ type Mutation {
 interface Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+}
+
+"""Possible operating systems for a build"""
+enum OperatingSystemsEnum {
+  LINUX
+  MAC
+  UNKNOWN
+  WINDOWS
+}
+
+"""What to do when the run is over the limit"""
+enum OverLimitActionTypeEnum {
+  CONTACT_ADMIN
+  UPGRADE
 }
 
 enum PackageManagerEnum {
@@ -1396,7 +1923,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1445,7 +1972,7 @@ type Query {
     """A list of Project slugs"""
     projectSlug: String!
 
-    """Datetime since the fetched data"""
+    """DateTime since the fetched data"""
     sinceDateTime: DateTime
   ): CloudLatestRunUpdateSpecData
 
@@ -1482,6 +2009,12 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
+  """Return the cohort for the given name"""
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
+
   """The currently opened project"""
   currentProject: CurrentProject
 
@@ -1501,9 +2034,17 @@ type Query {
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
+  """
+  Unique node machine identifier for this instance - may be nil if unable to resolve
+  """
+  machineId: String
+
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
+
+  """Defines the suggested polling intervals for various schema resources"""
+  pollingIntervals: CloudPollingIntervals
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
@@ -1514,11 +2055,85 @@ type Query {
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
+
   """A list of warnings"""
   warnings: [ErrorWrapper!]!
 
   """Metadata about the wizard"""
   wizard: Wizard!
+}
+
+"""Properties describing a React component"""
+type ReactComponentDescriptor {
+  """
+  The name of the component export e.g. "export const Foo"
+  """
+  exportName: String!
+
+  """
+  Whether the component is a default export e.g. "export default Foo"
+  """
+  isDefault: Boolean!
+}
+
+"""Response from getReactComponentsFromFile"""
+type ReactComponentResponse {
+  """Components that are exported from the parsed file"""
+  components: [ReactComponentDescriptor!]!
+
+  """Whether or not there was there an error when parsing the file"""
+  errored: Boolean
+}
+
+"""
+Indicates builds from the Cypress Cloud that most closely align with the current local Git commit
+"""
+type RelevantRun {
+  """
+  All relevant runs to fetch for the debug page prior to the latest completed run
+  """
+  all: [RelevantRunInfo!]!
+
+  """
+  How many commits ahead the current local commit is from the commit of the current run
+  """
+  commitsAhead: Int!
+
+  """Information about the current commit for the local project"""
+  currentCommitInfo: CommitInfo
+
+  """Latest relevant runs to fetch for the specs and runs page"""
+  latest: [RelevantRunInfo!]!
+
+  """Run number of the selected run in use on the Debug page"""
+  selectedRunNumber: Int
+}
+
+"""runNumber and commitSha for a given run"""
+type RelevantRunInfo {
+  """The run id"""
+  runId: ID!
+
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """sha associated with the run"""
+  sha: String!
+
+  """Status for run"""
+  status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
+}
+
+enum RelevantRunLocationEnum {
+  DEBUG
+  RUNS
+  SIDEBAR
+  SPECS
 }
 
 """
@@ -1625,6 +2240,51 @@ enum RemoteFetchableStatus {
   NOT_FETCHED
 }
 
+"""Possible check status of the instances run"""
+enum RunInstanceStatusEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  NOTESTS
+  PASSED
+  RUNNING
+  TIMEDOUT
+  UNCLAIMED
+}
+
+"""Error encountered during a runSpec mutation"""
+type RunSpecError {
+  code: RunSpecErrorCode!
+
+  """
+  Contextual information for the error (typically an expanded error message)
+  """
+  detailMessage: String
+}
+
+enum RunSpecErrorCode {
+  GENERAL_ERROR
+  NO_PROJECT
+  NO_SPEC_PATH
+  NO_SPEC_PATTERN_MATCH
+  SPEC_NOT_FOUND
+  TESTING_TYPE_NOT_CONFIGURED
+}
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser!
+
+  """Matched spec that was launched"""
+  spec: Spec!
+
+  """Testing Type that spec was launched in"""
+  testingType: String!
+}
+
+union RunSpecResult = RunSpecError | RunSpecResponse
+
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
   """Info about the file we just scaffolded"""
@@ -1719,6 +2379,11 @@ type Subscription {
   errorWarningChange: Query
 
   """
+  Triggered when there is a change to the automatically-detected framework/bundler for a CT project
+  """
+  frameworkDetectionChange: Wizard
+
+  """
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
@@ -1728,18 +2393,24 @@ type Subscription {
   """
   pushFragment: [PushFragmentPayload!]!
 
-  """Issued when the watched specs for the project changes"""
-  specsChange: CurrentProject
+  """
+  Subscription that watches the given CloudRun id for changes and emits if changes are detected on the fields provided
+  """
+  relevantRunSpecChange(runId: ID!): CloudRun
 
   """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
+  Subscription that polls the cloud for new relevant runs that match local git commit hashes
   """
-  startPollingForSpecs(branchName: String, projectId: String): String
+  relevantRuns(location: RelevantRunLocationEnum!): RelevantRun
+
+  """Issued when the watched specs for the project changes"""
+  specsChange: CurrentProject
 }
 
 enum SupportStatusEnum {
   alpha
   beta
+  community
   full
 }
 
@@ -1761,6 +2432,23 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""
+Represents the input for setting a mapping of test titles by the spec path
+"""
+input TestsBySpecInput {
+  """Path to the spec relative to the project"""
+  specPath: String!
+
+  """Full test title which should be all parts joined by a space"""
+  tests: [String!]!
+}
+
+"""A run was hidden because it was over the usage limit"""
+type UsageLimitExceeded {
+  """The number of tests allowed per month"""
+  monthlyTests: Int
 }
 
 """Version of Cypress and release date"""
@@ -1791,6 +2479,11 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
+
+  """
+  Framework definitions that had a package.json detected but could not be loaded due to an error
+  """
+  erroredFrameworks: [WizardErroredFramework!]!
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
@@ -1827,10 +2520,22 @@ enum WizardConfigFileStatusEnum {
   valid
 }
 
+"""Represents a Framework Definition that failed to load when detected"""
+type WizardErroredFramework implements Node {
+  """Relay style Node ID field for the WizardErroredFramework field"""
+  id: ID!
+
+  """The location of the framework's package.json file"""
+  path: String
+}
+
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
   """The category (framework, like react-scripts, or library, like react"""
   category: String!
+
+  """Raw SVG icon of framework"""
+  icon: String
 
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
@@ -1851,7 +2556,7 @@ type WizardFrontendFramework implements Node {
   supportedBundlers: [WizardBundler!]!
 
   """The unique identifier for a framework or library"""
-  type: FrontendFrameworkEnum!
+  type: String!
 }
 
 """Details about an NPM Package listed during the wizard install"""
@@ -1882,5 +2587,5 @@ type WizardNpmPackage implements Node {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  framework: FrontendFrameworkEnum
+  framework: String
 }

@@ -11,16 +11,7 @@ Learn more at https://on.cypress.io/reporters
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
-- lib/project-base.ts
-- lib/open_project.ts
-- lib/makeDataContext.ts
-- lib/modes/index.ts
-- lib/cypress.js
-- index.js
-- 
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
@@ -32,14 +23,14 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing.cy.js)                                                     │
-  │ Searched:   cypress/e2e/simple_passing.cy.js                                                   │
+  │ Specs:      2 found (simple_passing.cy.js, simple_failing.cy.js)                               │
+  │ Searched:   cypress/e2e/simple_passing.cy.js, cypress/e2e/simple_failing.cy.js                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_passing.cy.js                                                            (1 of 1)
+  Running:  simple_passing.cy.js                                                            (1 of 2)
 
   (Results)
 
@@ -50,16 +41,37 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_failing.cy.js                                                            (2 of 2)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_failing.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
+     ls1 (failed).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
+     ls2 (failed).png                                                                               
 
 
 ====================================================================================================
@@ -70,8 +82,10 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  simple_failing.cy.js                     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        3        1        2        -        -  
 
 
 `
@@ -105,16 +119,10 @@ finished!
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -172,16 +180,10 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -275,7 +277,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -289,12 +291,6 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
 
 
 ====================================================================================================
@@ -350,16 +346,10 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -451,7 +441,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -465,12 +455,6 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
 
 
 ====================================================================================================
@@ -526,16 +510,10 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -627,7 +605,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -641,12 +619,6 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
 
 
 ====================================================================================================
@@ -675,8 +647,6 @@ Learn more at https://on.cypress.io/reporters
 
 Error: this reporter threw an error
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
@@ -712,16 +682,10 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -734,6 +698,188 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-1.5.2 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+[mochawesome] Generating report files...
+
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+
+[mochawesome] Report saved to mochawesome-reports/mochawesome.html
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-2.3.1 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-3.0.1 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
 
 
 `

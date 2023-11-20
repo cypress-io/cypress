@@ -64,11 +64,6 @@
       background-color: $gray-900;
     }
 
-    .open-studio,
-    .open-studio-desc {
-      display: none;
-    }
-
     svg {
       margin-right: 5px;
       vertical-align: text-top;
@@ -83,8 +78,8 @@
     }
   }
 
-  &.experimental-studio-enabled .no-tests .open-studio,
-  &.experimental-studio-enabled .no-tests .open-studio-desc {
+  .open-studio,
+  .open-studio-desc {
     display: inline;
   }
 
@@ -184,7 +179,7 @@
 
     &.runnable-studio.runnable-passed > div > .runnable-wrapper,
     &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      border-left: 4px solid $indigo-700;
+      border-left: 4px solid $purple-400;
     }
 
     &.runnable-skipped > .runnable-wrapper {
@@ -248,7 +243,8 @@
 
       &.wand-icon {
         .icon-light {
-          fill: $indigo-700;
+          fill: $purple-300;
+          stroke: $purple-300;
         }
       }
     }
@@ -305,22 +301,13 @@
     }
 
     .runnable-controls-studio {
-      color: $indigo-300;
+      color: $purple-300;
       opacity: 0;
-      display: none;
     }
   }
 
   .test.runnable-failed .runnable-controls .runnable-controls-status {
     visibility: visible;
-  }
-
-  &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
-    display: inline;
-  }
-
-  &.studio-active .runnable-controls .runnable-controls-studio {
-    display: none;
   }
 
   .test .collapsible {
@@ -393,11 +380,12 @@
     }
 
     .studio-cancel {
-      background-color: $gray-900;
-      color: $gray-400;
+      color: rgba($white, 0.75);
+      cursor: pointer;
+      margin: 7px 0 0 5px;
 
       &:hover {
-        background-color: $gray-800;
+        text-decoration: underline;
       }
     }
 

@@ -1,7 +1,8 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
-import { CurrentProject, DevState, Query } from '.'
+import { enumType, idArg, list, nonNull, objectType, subscriptionType } from 'nexus'
+import { CurrentProject, DevState, Query, Wizard } from '.'
 import { Spec } from './gql-Spec'
+import { RelevantRun } from './gql-RelevantRun'
 
 export const Subscription = subscriptionType({
   definition (t) {
@@ -113,16 +114,42 @@ export const Subscription = subscriptionType({
       resolve: (source: PushFragmentData[], args, ctx) => source,
     })
 
-    t.string('startPollingForSpecs', {
+    t.field('relevantRuns', {
+      type: RelevantRun,
+      description: 'Subscription that polls the cloud for new relevant runs that match local git commit hashes',
       args: {
-        projectId: stringArg(),
-        branchName: stringArg(),
+        location: nonNull(enumType({
+          name: 'RelevantRunLocationEnum',
+          members: ['DEBUG', 'SIDEBAR', 'RUNS', 'SPECS'],
+        })),
       },
-      description: 'Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates',
       subscribe: (source, args, ctx) => {
-        return ctx.remotePolling.subscribeAndPoll(args.branchName, args.projectId)
+        return ctx.relevantRuns.pollForRuns(args.location)
       },
-      resolve: (o: string | null) => o,
+      resolve: async (root, args, ctx) => {
+        return root
+      },
+    })
+
+    t.field('relevantRunSpecChange', {
+      type: 'CloudRun',
+      description: 'Subscription that watches the given CloudRun id for changes and emits if changes are detected on the fields provided',
+      args: {
+        runId: nonNull(idArg()),
+      },
+      subscribe: (source, args, ctx, info) => {
+        return ctx.relevantRunSpecs.pollForSpecs(args.runId, info)
+      },
+      resolve: async (root, args, ctx) => {
+        return root
+      },
+    })
+
+    t.field('frameworkDetectionChange', {
+      type: Wizard,
+      description: 'Triggered when there is a change to the automatically-detected framework/bundler for a CT project',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('frameworkDetectionChange', { sendInitial: false }),
+      resolve: (source, args, ctx) => ctx.coreData.wizard,
     })
   },
 })

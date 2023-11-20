@@ -47,7 +47,7 @@ exports['e2e issue 674 / fails'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_674.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -59,12 +59,6 @@ exports['e2e issue 674 / fails'] = `
       both beforeEach and afterEach fail -- before each hook (failed).png                           
   -  /XXX/XXX/XXX/cypress/screenshots/issue_674.cy.js/issue 674 -- does not hang when     (1280x720)
       both beforeEach and afterEach fail -- after each hook (failed).png                            
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674.cy.js.mp4                 (X second)
 
 
 ====================================================================================================

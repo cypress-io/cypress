@@ -9,7 +9,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.configFile // $ExpectType string
   config.fixturesFolder // $ExpectType string | false
   config.screenshotsFolder // $ExpectType string | false
-  config.videoCompression // $ExpectType number | false
+  config.videoCompression // $ExpectType number | boolean
   config.projectRoot // $ExpectType string
   config.version // $ExpectType string
   config.testingType // $ExpectType TestingType
@@ -19,6 +19,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
     browser.displayName // $ExpectType string
     options.extensions // $ExpectType string[]
     options.args // $ExpectType string[]
+    options.env // $ExpectType { [key: string]: any; }
 
     console.log('launching browser', browser.displayName)
     return options

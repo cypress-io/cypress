@@ -1,12 +1,17 @@
 <template>
-  <div class="pb-8px">
-    <h1 class="font-medium text-center pt-20px text-32px text-body-gray-900">
-      {{ t('migration.wizard.title') }}
+  <div class="pb-[8px]">
+    <h1 class="font-medium text-center text-[32px] leading-snug text-body-gray-900">
+      {{ t('migration.wizard.title', { version: cypressMajorVersion }) }}
     </h1>
     <p
-      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
+      class="mt-2 text-center text-body-gray-600 text-lg"
     >
       {{ t('migration.wizard.description') }}
+    </p>
+    <p class="flex mb-[24px] text-sm text-gray-700 justify-center items-center">
+      <i-cy-clock_x16 class="mr-[8px] icon-dark-gray-700" />
+      <span>{{ t('migration.wizard.typicalMigrationLabel') }}</span>
+      <strong>&nbsp; {{ t('migration.wizard.typicalMigrationTime') }}</strong>
     </p>
     <template v-if="migration">
       <!-- used to ensure the wizard is actually rendered before running assertions-->
@@ -24,7 +29,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="renameSpecs"
           >
             {{ buttonTitle }}
@@ -39,12 +44,12 @@
       >
         <RenameSpecsManual :gql="migration" />
         <template #footer>
-          <div class="flex gap-16px">
+          <div class="flex gap-[16px]">
             <Button
               v-if="migration.manualFiles?.completed"
               size="lg"
               :suffix-icon="ArrowRightIcon"
-              suffix-icon-class="w-16px h-16px icon-dark-white"
+              suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
               @click="finishedRenamingComponentSpecs"
             >
               {{ t('migration.wizard.step2.buttonDone') }}
@@ -87,7 +92,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="renameSupportButton"
             @click="launchRenameSupportFile"
           >
@@ -106,7 +111,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="convertConfigButton"
             @click="convertConfig"
           >
@@ -125,7 +130,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="launchReconfigureButton"
             @click="launchReconfigureComponentTesting"
           >
@@ -136,7 +141,7 @@
     </template>
     <Spinner
       v-else
-      class="mx-auto mt-100px"
+      class="mx-auto mt-[100px]"
     />
   </div>
 </template>
@@ -178,6 +183,12 @@ fragment MigrationBaseError on Query {
 
 gql`
 fragment MigrationWizardData on Query {
+  versions {
+    current {
+      id
+      version
+    }
+  }
   migration {
     filteredSteps {
       id
@@ -399,4 +410,6 @@ const buttonTitle = computed(() => {
 
   return t('migration.wizard.step1.button')
 })
+
+const cypressMajorVersion = computed(() => query.data.value?.versions?.current.version.split('.')[0] ?? '')
 </script>

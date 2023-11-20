@@ -1,8 +1,0 @@
-@use '../baseColors' as *;
-
-// Exposes $color, stripped of hyphens, as a JS variable when directly imported
-:export {
-  @each $name, $color in $colors {
-    #{str-replace("" + $name, '-', '')}: #{$color};
-  }
-}

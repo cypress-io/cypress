@@ -1,9 +1,5 @@
 const { _ } = Cypress
 
-const getFirstSubjectByName = (name) => {
-  return cy.queue.find({ name }).get('subject')
-}
-
 const getQueueNames = () => {
   return _.map(cy.queue, 'name')
 }
@@ -28,6 +24,5 @@ function allowTsModuleStubbing () {
 
 module.exports = {
   getQueueNames,
-  getFirstSubjectByName,
   allowTsModuleStubbing,
 }

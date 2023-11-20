@@ -1,0 +1,7 @@
+{
+  "name": "cypress-ct-public-api-solid-js",
+  "dependencies": {
+    "solid-js": "1.6.11",
+    "vite": "^4.0.0"
+  }
+}

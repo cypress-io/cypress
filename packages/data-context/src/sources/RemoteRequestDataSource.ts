@@ -3,7 +3,6 @@ import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableSt
 import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
 import _ from 'lodash'
-
 import type { DataContext } from '../DataContext'
 import { pathToArray } from 'graphql/jsutils/Path'
 import type { RemoteFieldDefinitionConfig, RemoteQueryArgsResolver } from '@packages/graphql/src/plugins'
@@ -16,10 +15,12 @@ interface MaybeLoadRemoteFetchable extends CloudExecuteQuery {
   __typename: NexusGenAbstractTypeMembers['RemoteFetchable']
   id: string
   operationHash: string
+  operation: string
   ctx: DataContext
   shouldFetch?: boolean
   remoteQueryField: string
   isMutation: boolean
+  shouldBatch?: boolean
 }
 
 interface OperationDefinition {
@@ -66,6 +67,7 @@ export class RemoteRequestDataSource {
       remoteQueryField,
       shouldFetch: true,
       isMutation: true,
+      shouldBatch: true,
     })
   }
 
@@ -150,15 +152,15 @@ export class RemoteRequestDataSource {
   }
 
   #executeRemote (params: MaybeLoadRemoteFetchable) {
-    const { ctx, operation, operationDoc, operationHash, operationVariables, remoteQueryField } = params
+    const { ctx, operationDoc, operationHash, operationVariables, remoteQueryField } = params
 
     Promise.resolve(ctx.cloud.executeRemoteGraphQL({
       fieldName: remoteQueryField,
-      operation,
       operationDoc,
       operationHash,
       operationVariables,
       requestPolicy: 'network-only',
+      shouldBatch: params.shouldBatch,
     }))
     .then((result) => {
       const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)
@@ -295,6 +297,7 @@ export class RemoteRequestDataSource {
         shouldFetch: shouldEagerFetch,
         remoteQueryField: fieldConfig.remoteQueryField,
         isMutation: false,
+        shouldBatch: true,
       })
     })
   }
@@ -303,7 +306,7 @@ export class RemoteRequestDataSource {
     const fieldNodes = this.#getDataFieldNodes(info)
     const referencedVariableValues = this.#getReferencedVariables(fieldNodes, info.operation.variableDefinitions ?? [])
 
-    const queryFieldDef = ctx.schemaCloud.getQueryType()?.getFields()[fieldConfig.remoteQueryField]
+    const queryFieldDef = ctx.config.schemaCloud.getQueryType()?.getFields()[fieldConfig.remoteQueryField]
 
     assert(queryFieldDef, `Unknown remote query field ${fieldConfig.remoteQueryField}`)
 

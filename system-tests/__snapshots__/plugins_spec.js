@@ -1,146 +1,3 @@
-exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app.cy.js)                                                                │
-  │ Searched:   cypress/e2e/app.cy.js                                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app.cy.js                                                                       (1 of 1)
-
-
-  ✓ is another spec
-  ✓ is another spec
-
-  2 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app.cy.js                                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                                XX:XX        2        2        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
-
-
-`
-
-exports['e2e plugins can modify config from plugins 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app.cy.js)                                                                │
-  │ Searched:   cypress/e2e/app.cy.js                                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app.cy.js                                                                       (1 of 1)
-
-
-  ✓ overrides config
-  ✓ overrides env
-
-  2 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app.cy.js                                                                        │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 20 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                                XX:XX        2        2        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
-
-
-`
-
-exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-Your configFile as cypress.config.js set an invalid value:
-
-Expected at least one browser
-
-`
-
-exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-Your configFile at cypress.config.js set an invalid value:
-
-The error occurred while validating the browsers list.
-
-Expected displayName to be a non-empty string.
-
-Instead the value was: 
-
-{
-  "name": "browser name",
-  "family": "chromium"
-}
-
-`
-
 exports['e2e plugins can filter browsers from config 1'] = `
 Can't run because you've entered an invalid browser name.
 
@@ -194,16 +51,10 @@ exports['e2e plugins / works with user extensions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
 
 
 ====================================================================================================
@@ -217,91 +68,6 @@ exports['e2e plugins / works with user extensions'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
-
-`
-
-exports['e2e plugins calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot.cy.js)                                                   │
-  │ Searched:   cypress/e2e/after_screenshot.cy.js                                                 │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  after_screenshot.cy.js                                                          (1 of 1)
-
-
-  ✓ cy.screenshot() - replacement
-  ✓ cy.screenshot() - ignored values
-  ✓ cy.screenshot() - invalid return
-  1) failure screenshot - rename
-
-  3 passing
-  1 failing
-
-  1) failure screenshot - rename:
-     Error: test error
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      3                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     after_screenshot.cy.js                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/ignored-values.png                (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/invalid-return.png                (YxX)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot.cy.js.mp4          (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  after_screenshot.cy.js                   XX:XX        4        3        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
-
-
-`
-
-exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-Your configFile at cypress.config.js set an invalid value:
-
-Expected viewportWidth to be a number.
-
-Instead the value was: "foo"
 
 `
 
@@ -359,29 +125,168 @@ Error: Async error from plugins file
 
 `
 
-exports['e2e plugins fails when invalid event is registered 1'] = `
-Your configFile threw a validation error from: /foo/bar/.projects/plugin-validation-error/cypress.config.js
+exports['e2e plugins can modify config from plugins 1'] = `
 
-You must pass a valid event name when registering a plugin.
+====================================================================================================
 
-You passed: invalid:event
+  (Run Starting)
 
-The following are valid events:
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/app.cy.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
- - after:run
- - after:screenshot
- - after:spec
- - before:browser:launch
- - before:run
- - before:spec
- - dev-server:start
- - file:preprocessor
- - task
 
-Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app.cy.js                                                                       (1 of 1)
 
-InvalidEventNameError: invalid event name registered: invalid:event
+
+  ✓ overrides config
+  ✓ overrides env
+
+  2 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app.cy.js                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started compressing: Compressing to 20 CRF                                                     
+  -  Finished compressing: X second(s)                                               
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  app.cy.js                                XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
+`
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+Your configFile at cypress.config.js set an invalid value:
+
+Expected viewportWidth to be a number.
+
+Instead the value was: "foo"
+
+`
+
+exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
+Your configFile as cypress.config.js set an invalid value:
+
+Expected at least one browser
+
+`
+
+exports['e2e plugins catches invalid browser returned from plugins 1'] = `
+Your configFile at cypress.config.js set an invalid value:
+
+The error occurred while validating the browsers list.
+
+Expected displayName to be a non-empty string.
+
+Instead the value was: 
+
+{
+  "name": "browser name",
+  "family": "chromium"
+}
+
+`
+
+exports['e2e plugins calls after:screenshot for cy.screenshot() and failure screenshots 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (after_screenshot.cy.js)                                                   │
+  │ Searched:   cypress/e2e/after_screenshot.cy.js                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  after_screenshot.cy.js                                                          (1 of 1)
+
+
+  ✓ cy.screenshot() - replacement
+  ✓ cy.screenshot() - ignored values
+  ✓ cy.screenshot() - invalid return
+  1) failure screenshot - rename
+
+  3 passing
+  1 failing
+
+  1) failure screenshot - rename:
+     Error: test error
       [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     after_screenshot.cy.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/ignored-values.png                (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/invalid-return.png                (YxX)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  after_screenshot.cy.js                   XX:XX        4        3        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
+
+
 `
 
 exports['e2e plugins does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot 1'] = `
@@ -419,7 +324,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot_overwrite.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -428,13 +333,6 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   (Screenshots)
 
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================
@@ -451,21 +349,28 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
 `
 
-exports['e2e plugins fails when require throws synchronously 1'] = `
-Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
+exports['e2e plugins fails when invalid event is registered 1'] = `
+Your configFile threw a validation error from: /foo/bar/.projects/plugin-validation-error/cypress.config.js
 
-It threw an error when required, check the stack trace below:
+You must pass a valid event name when registering a plugin.
 
-RootSyncError: Root sync error from plugins file
-      [stack trace lines]
-`
+You passed: invalid:event
 
-exports['e2e plugins fails when function throws synchronously 1'] = `
-Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
+The following are valid events:
 
-The error was thrown while executing your e2e.setupNodeEvents() function:
+ - after:run
+ - after:screenshot
+ - after:spec
+ - before:browser:launch
+ - before:run
+ - before:spec
+ - dev-server:start
+ - file:preprocessor
+ - task
 
-FunctionSyncError: Function sync error from plugins file
+Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+
+InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]
 `
 
@@ -525,6 +430,15 @@ https://on.cypress.io/plugins-api
 
 `
 
+exports['e2e plugins fails when require throws synchronously 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
+
+It threw an error when required, check the stack trace below:
+
+RootSyncError: Root sync error from plugins file
+      [stack trace lines]
+`
+
 exports['e2e plugins fails when require has a syntax error 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugins-root-syntax-error/cypress.config.js
 
@@ -536,4 +450,67 @@ It threw an error when required, check the stack trace below:
 
 SyntaxError: Unexpected token '}'
       [stack trace lines]
+`
+
+exports['e2e plugins fails when function throws synchronously 1'] = `
+Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents() function:
+
+FunctionSyncError: Function sync error from plugins file
+      [stack trace lines]
+`
+
+exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/app.cy.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app.cy.js                                                                       (1 of 1)
+
+
+  ✓ is another spec
+  ✓ is another spec
+
+  2 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app.cy.js                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  app.cy.js                                XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
 `

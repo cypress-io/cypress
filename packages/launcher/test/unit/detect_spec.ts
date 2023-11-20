@@ -1,18 +1,29 @@
 require('../spec_helper')
 import _ from 'lodash'
-import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
+import { detect, detectByPath, getMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import os from 'os'
 import { log } from '../log'
+import * as linuxHelper from '../../lib/linux'
+import * as darwinHelper from '../../lib/darwin'
+import * as windowsHelper from '../../lib/windows'
+import type { Browser } from '@packages/types'
+import * as knownBrowsers from '../../lib/known-browsers'
 
 const isWindows = () => {
   return os.platform() === 'win32'
 }
 
-describe('browser detection', () => {
+const stubHelpers = (detect) => {
+  sinon.stub(linuxHelper, 'detect').callsFake(detect)
+  sinon.stub(darwinHelper, 'detect').callsFake(detect)
+  sinon.stub(windowsHelper, 'detect').callsFake(detect)
+}
+
+describe('detect', () => {
   // making simple to debug tests
   // using DEBUG=... flag
   const checkBrowsers = (browsers) => {
@@ -38,48 +49,80 @@ describe('browser detection', () => {
     return detect().then(checkBrowsers)
   })
 
-  context('#setMajorVersion', () => {
-    it('major version is converted to number when string of numbers', () => {
-      const foundBrowser = {
-        name: 'test browser',
-        version: '11.22.33',
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.majorVersion).to.equal(11)
-    })
-
-    it('falls back to version when unconventional browser version', () => {
-      const foundBrowser = {
-        name: 'test browser',
-        version: 'VMware Fusion 12.1.0',
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.majorVersion).to.equal(foundBrowser.version)
-    })
-
-    it('creates warning when version is unsupported', () => {
-      const foundBrowser = {
-        displayName: 'TestBro',
-        name: 'test browser',
-        version: '9000.1',
-        minSupportedVersion: 9001,
-      }
-
-      const res = setMajorVersion(foundBrowser)
-
-      // @ts-ignore
-      expect(res.warning).to.contain('does not support running TestBro version 9000')
-      .and.contain('TestBro newer than or equal to 9001')
+  describe('#getMajorVersion', () => {
+    it('parses major version from provided string', () => {
+      expect(getMajorVersion('123.45.67')).to.eq('123')
+      expect(getMajorVersion('Browser 77.1.0')).to.eq('Browser 77')
+      expect(getMajorVersion('999')).to.eq('999')
     })
   })
 
-  context('#detectByPath', () => {
+  describe('#detect', () => {
+    const testBrowser = {
+      name: 'test-browser',
+      family: 'chromium',
+      channel: 'test-channel',
+      displayName: 'Test Browser',
+      minSupportedVersion: 1,
+      versionRegex: /Test Browser (\S+)/m,
+      binary: 'test-browser-beta',
+    }
+
+    it('validates browser with own validator property', async () => {
+      stubHelpers((browser) => {
+        return Promise.resolve({
+          name: browser.name,
+          path: '/path/to/test-browser',
+          version: `${browser.minSupportedVersion}`,
+        })
+      })
+
+      const mockValidator = sinon.stub().returns({ isSupported: true })
+
+      const foundBrowsers = await detect([{ ...testBrowser as Browser, validator: mockValidator }])
+
+      expect(foundBrowsers).to.have.length(1)
+
+      const foundTestBrowser = foundBrowsers[0]
+
+      expect(foundTestBrowser.name).to.eq('test-browser')
+      expect(foundTestBrowser.displayName).to.eq('Test Browser')
+      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
+      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.undefined
+      expect(foundTestBrowser.warning, 'warning').to.be.undefined
+      expect(mockValidator).to.have.been.called
+    })
+
+    it('validates browser with default minVersionValidator', async () => {
+      stubHelpers((browser) => {
+        return Promise.resolve({
+          name: browser.name,
+          path: '/path/to/test-browser',
+          version: `${browser.minSupportedVersion}`,
+        })
+      })
+
+      const mockValidator = sinon.stub(knownBrowsers, 'validateMinVersion').returns({
+        isSupported: false,
+        warningMessage: 'This is a bad version',
+      })
+
+      const foundBrowsers = await detect([{ ...testBrowser as Browser }])
+
+      expect(foundBrowsers).to.have.length(1)
+
+      const foundTestBrowser = foundBrowsers[0]
+
+      expect(foundTestBrowser.name).to.eq('test-browser')
+      expect(foundTestBrowser.displayName).to.eq('Test Browser')
+      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
+      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.true
+      expect(foundTestBrowser.warning, 'warning').to.eq('This is a bad version')
+      expect(mockValidator).to.have.been.called
+    })
+  })
+
+  describe('#detectByPath', () => {
     let execa: SinonStub
 
     beforeEach(() => {
@@ -110,7 +153,7 @@ describe('browser detection', () => {
             info: 'Loaded from /foo/bar/browser',
             custom: true,
             version: '9001.1.2.3',
-            majorVersion: 9001,
+            majorVersion: '9001',
             path: '/foo/bar/browser',
           }),
         )
@@ -151,7 +194,7 @@ describe('browser detection', () => {
             info: 'Loaded from /Applications/My Shiny New Browser.app',
             custom: true,
             version: '100.1.2.3',
-            majorVersion: 100,
+            majorVersion: '100',
             path: '/Applications/My Shiny New Browser.app',
           }),
         )
@@ -164,6 +207,7 @@ describe('browser detection', () => {
 
       const foundBrowser = await detectByPath('/good-firefox')
 
+      expect(foundBrowser.unsupportedVersion).to.be.true
       expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
       .and.contain('Firefox newer than or equal to 86')
     })

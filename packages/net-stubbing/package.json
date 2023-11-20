@@ -4,9 +4,11 @@
   "private": true,
   "main": "./lib/server",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "clean-deps": "rimraf node_modules",
-    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
+    "test": "CYPRESS_INTERNAL_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*",
+    "lint": "eslint --ext .ts,.json, ."
   },
   "dependencies": {
     "@types/mime-types": "2.1.0",
@@ -19,8 +21,7 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "mocha": "7.1.2",
-    "rimraf": "3.0.2"
+    "mocha": "7.1.2"
   },
   "files": [
     "lib"

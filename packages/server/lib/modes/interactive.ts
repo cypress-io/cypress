@@ -8,12 +8,14 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
-import type { LaunchArgs } from '@packages/types'
+import type { LaunchArgs, Preferences } from '@packages/types'
 
 import debugLib from 'debug'
+import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = debugLib('cypress:server:interactive')
 
@@ -26,7 +28,7 @@ export = {
     return os.platform() === 'darwin'
   },
 
-  getWindowArgs (state) {
+  getWindowArgs (url: string, state: Preferences) {
     // Electron Window's arguments
     // These options are passed to Electron's BrowserWindow
     const minWidth = Math.round(/* 13" MacBook Air */ 1792 / 3) // Thirds
@@ -46,6 +48,7 @@ export = {
     }
 
     const common = {
+      url,
       // The backgroundColor should match the value we will show in the
       // launchpad frontend.
 
@@ -129,38 +132,40 @@ export = {
     return args[os.platform()]
   },
 
-  /**
-   * @param {import('@packages/types').LaunchArgs} options
-   * @returns
-   */
-  ready (options: {projectRoot?: string} = {}, port: number) {
+  async ready (options: LaunchArgs, launchpadPort: number) {
     const { projectRoot } = options
     const ctx = getCtx()
 
-    // TODO: potentially just pass an event emitter
-    // instance here instead of callback functions
     menu.set({
       withInternalDevTools: isDev(),
       onLogOutClicked () {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },
       getGraphQLPort: () => {
-        return ctx?.gqlServerPort
+        return ctx?.coreData.servers.gqlServerPort
       },
     })
 
-    return savedState.create(projectRoot, false).then((state) => state.get())
-    .then((state) => {
-      return Windows.open(projectRoot, port, this.getWindowArgs(state))
-      .then((win) => {
-        ctx?.actions.electron.setBrowserWindow(win)
+    const State = await savedState.create(projectRoot, false)
+    const state = await State.get()
+    const url = getPathToDesktopIndex(launchpadPort)
+    const win = await Windows.open(projectRoot, this.getWindowArgs(url, state))
 
-        return win
-      })
-    })
+    ctx?.actions.electron.setBrowserWindow(win)
+
+    return win
   },
 
   async run (options: LaunchArgs, _loading: Promise<void>) {
+    // Need to set this for system notifications to appear as "Cypress" on Windows
+    if (app.setAppUserModelId) {
+      app.setAppUserModelId('Cypress')
+    }
+
+    // Note: We do not await the `_loading` promise here since initializing
+    // the data context can significantly delay initial render of the UI
+    // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
+
     const [, port] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
@@ -173,7 +178,7 @@ export = {
     // the electron process to throw.
     // https://github.com/cypress-io/cypress/issues/22026
 
-    app.once('will-quit', (event: Event) => {
+    app.once('will-quit', (event: Electron.Event) => {
       // We must call synchronously call preventDefault on the will-quit event
       // to halt the current quit lifecycle
       event.preventDefault()
@@ -193,9 +198,15 @@ export = {
 
         debug('DataContext cleared, quitting app')
 
+        telemetry.getSpan('cypress')?.end()
+
+        await telemetry.shutdown()
+
         app.quit()
       })
     })
+
+    telemetry.getSpan('startup:time')?.end()
 
     return this.ready(options, port)
   },

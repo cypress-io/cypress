@@ -3,10 +3,11 @@
     placement="top"
     :is-interactive="true"
     show-group="last-updated-header"
+    :show-delay="250"
   >
     <button
       type="button"
-      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline decoration-gray-300 underline-offset-4"
       data-cy="last-updated-header"
     >
       {{ t('specPage.lastUpdated.header') }}
@@ -16,7 +17,7 @@
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center max-w-300px p-4 items-center"
+        class="flex flex-col text-sm text-center max-w-[300px] p-4 items-center"
       >
         <i18n-t
           v-if="props.isGitAvailable"

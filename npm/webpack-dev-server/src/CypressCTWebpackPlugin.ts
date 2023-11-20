@@ -13,6 +13,7 @@ export interface CypressCTWebpackPluginOptions {
   supportFile: string | false
   devServerEvents: EventEmitter
   webpack: Function
+  indexHtmlFile: string
 }
 
 export type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack'>
@@ -47,6 +48,7 @@ export class CypressCTWebpackPlugin {
   private supportFile: string | false
   private compilation: Webpack45Compilation | null = null
   private webpack: Function
+  private indexHtmlFile: string
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
@@ -57,6 +59,7 @@ export class CypressCTWebpackPlugin {
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
     this.webpack = options.webpack
+    this.indexHtmlFile = options.indexHtmlFile
   }
 
   private addLoaderContext = (loaderContext: object, module: any) => {
@@ -64,6 +67,7 @@ export class CypressCTWebpackPlugin {
       files: this.files,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
+      indexHtmlFile: this.indexHtmlFile,
     }
   };
 
@@ -93,11 +97,16 @@ export class CypressCTWebpackPlugin {
   }
 
   /*
-   * `webpack --watch` watches the existing specs and their dependencies for changes,
-   * but we also need to add additional dependencies to our dynamic "browser.js" (generated
-   * using loader.ts) when new specs are created. This hook informs webpack that browser.js
-   * has been "updated on disk", causing a recompliation (and pulling the new specs in as
-   * dependencies).
+   * `webpack --watch` watches the existing specs and their dependencies for changes.
+   * When new specs are created, we need to trigger a recompilation to add the new specs
+   * as dependencies. This hook informs webpack that `component-index.html` has been "updated on disk",
+   * causing a recompilation (and pulling the new specs in as dependencies). We use the component
+   * index file because we know that it will be there since the project is using Component Testing.
+   *
+   * We were using `browser.js` before to cause a recompilation but we ran into an
+   * issue with MacOS Ventura that will not allow us to write to files inside of our application bundle.
+   *
+   * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async (specs: Cypress.Cypress['spec'][]) => {
     if (!this.compilation || _.isEqual(specs, this.files)) {
@@ -110,7 +119,7 @@ export class CypressCTWebpackPlugin {
     // eslint-disable-next-line no-restricted-syntax
     const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
 
-    utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
+    utimesSync(path.join(this.projectRoot, this.indexHtmlFile), new Date(), new Date())
   }
 
   /**

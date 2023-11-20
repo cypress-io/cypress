@@ -255,7 +255,7 @@ describe('src/cy/commands/actions/submit', () => {
 
         cy.on('fail', (err) => {
           expect(submitted).to.eq(1)
-          expect(err.message).to.include('`cy.submit()` failed because this element')
+          expect(err.message).to.include('`cy.submit()` failed because the page')
 
           done()
         })
@@ -409,9 +409,12 @@ describe('src/cy/commands/actions/submit', () => {
           const { lastLog } = this
 
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'submit',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
+            name: 'submit',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+            },
           })
         })
       })

@@ -1,0 +1,18 @@
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  <% if (e2e) { %>
+  e2e: {
+    'baseUrl': '<%= baseUrl%>'
+  },
+  <% } %>
+  <% if (component) { %>
+  component: {
+    devServer: {
+      framework: 'angular',
+      bundler: 'webpack',
+    },
+    specPattern: '**/*.cy.ts'
+  }
+  <% } %>
+})

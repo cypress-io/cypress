@@ -68,7 +68,7 @@ describe('linux browser detection', () => {
         name: 'chromium',
         family: 'chromium',
         displayName: 'Chromium',
-        majorVersion: 64,
+        majorVersion: '64',
         minSupportedVersion: 64,
         path: 'chromium',
         profilePath: '/home/foo/snap/chromium/current',
@@ -86,7 +86,7 @@ describe('linux browser detection', () => {
       name: 'firefox',
       family: 'firefox',
       displayName: 'Firefox',
-      majorVersion: 99,
+      majorVersion: '99',
       minSupportedVersion: 86,
       path: 'firefox',
       profilePath: '/home/foo/snap/firefox/current',
@@ -169,14 +169,14 @@ describe('linux browser detection', () => {
         name: 'test-browser-name',
         version: '100.1.2.3',
         path: 'test-browser',
-        majorVersion: 100,
+        majorVersion: '100',
       },
       {
         displayName: 'Foo Browser',
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: 100,
+        majorVersion: '100',
       },
     ]
 
@@ -202,7 +202,7 @@ describe('linux browser detection', () => {
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: 100,
+        majorVersion: '100',
       },
     ]
 

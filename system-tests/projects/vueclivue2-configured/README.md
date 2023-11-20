@@ -1,4 +1,4 @@
-# vueclivue2-unconfigured
+# vueclivue2-configured
 
 ## Project setup
 ```

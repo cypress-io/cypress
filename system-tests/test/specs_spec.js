@@ -61,4 +61,13 @@ describe('e2e specs', () => {
       expectedExitCode: 0,
     })
   })
+
+  it('handles glob characters in the working directory and spec pattern provided from CLI', function () {
+    return systemTests.exec(this, {
+      project: 'project-with-(glob)-[chars]',
+      spec: '**/*.cy.js',
+      snapshot: true,
+      expectedExitCode: 0,
+    })
+  })
 })

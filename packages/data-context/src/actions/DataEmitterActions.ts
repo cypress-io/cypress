@@ -1,6 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
+import type { CloudRun, RelevantRun } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any
@@ -90,6 +91,29 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when then relevant run numbers changed after querying for matching
+   * runs based on local commit shas
+  */
+  relevantRunChange (runs: RelevantRun) {
+    this._emit('relevantRunChange', runs)
+  }
+
+  /**
+   *
+   */
+  relevantRunSpecChange (run: Partial<CloudRun>) {
+    this._emit('relevantRunSpecChange', run)
+  }
+
+  /**
+   * Emitted when there is a change to the auto-detected framework/bundler
+   * for a CT project
+   */
+  frameworkDetectionChange () {
+    this._emit('frameworkDetectionChange')
+  }
+
+  /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update
    */
@@ -130,6 +154,9 @@ abstract class DataEmitterEvents {
     this.pub.emit(evt, ...args)
   }
 }
+
+export type EventType = keyof DataEmitterEvents
+
 export class DataEmitterActions extends DataEmitterEvents {
   constructor (private ctx: DataContext) {
     super()
@@ -141,6 +168,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    */
   toApp () {
     this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch')
+    this.ctx.coreData.servers.cdpSocketNamespace?.emit('graphql-refetch')
   }
 
   /**
@@ -156,13 +184,25 @@ export class DataEmitterActions extends DataEmitterEvents {
    * source, and respond with the data before the initial hit was able to resolve
    */
   notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
-    const server = target === 'app' ? this.ctx.coreData.servers.appSocketNamespace : this.ctx.coreData.servers.gqlSocketServer
+    if (target === 'app') {
+      this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
 
-    server?.emit('graphql-refetch', {
-      field,
-      operation,
-      variables,
-    })
+      this.ctx.coreData.servers.cdpSocketNamespace?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
+    } else {
+      this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
+    }
   }
 
   /**
@@ -176,8 +216,17 @@ export class DataEmitterActions extends DataEmitterEvents {
    * requires that we use the raw protocol, which we have below. We assume that
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
+   *
+   * @param {keyof DataEmitterEvents} evt  name of the event to subscribe to
+   * @param {Object} [opts] options for the subscription
+   * @param {boolean} [opts.sendInitial=false] if true, an `undefined` value will be emitted immediately before one polling cycle
+   * @param {T} [opts.initialValue] this value will be emitted as the first value on the subscription immediately before one polling cycle
+   * @param {(val: any) => boolean} [opts.filter] a predicate that will filter any values being passed through the subscription
+   * @param {(listenerCount: number) => void} [opts.onUnsubscribe] a callback that is called each time a subscription is unsubscribed from
+   *                                                               the particular event. When the `listenerCount` is zero, then there are no
+   *                                                               longer any subscribers for that event
    */
-  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, onUnsubscribe?: () => void }): AsyncGenerator<any> {
+  subscribeTo <T> (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: T, filter?: (val: any) => boolean, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<T> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
@@ -185,6 +234,11 @@ export class DataEmitterActions extends DataEmitterEvents {
     let done = false
 
     function subscribed (value: any) {
+      //optional filter for stream of data
+      if (opts?.filter && !opts.filter(value)) {
+        return
+      }
+
       // We can get events here before next() is called setting up the deferred promise
       // If that happens, we will queue them up to be handled once next eventually is called
       if (dfd) {
@@ -193,6 +247,11 @@ export class DataEmitterActions extends DataEmitterEvents {
       } else {
         pending.push({ done: false, value })
       }
+    }
+
+    // will send an initial value if supplied instead of waiting for first event
+    if (opts?.initialValue) {
+      pending.push({ done: false, value: opts?.initialValue })
     }
 
     this.pub.on(evt, subscribed)
@@ -220,11 +279,14 @@ export class DataEmitterActions extends DataEmitterEvents {
       throw: async (error: Error) => {
         throw error
       },
-      return: async () => {
+      return: async (): Promise<{ done: true, value: T | undefined}> => {
         this.pub.off(evt, subscribed)
 
         if (opts?.onUnsubscribe) {
-          opts.onUnsubscribe()
+          // the unsubscribe method can use the listener count to make
+          // decisions like if a poller should be stopped if there are no
+          // longer any listeners left
+          opts.onUnsubscribe(this.pub.listenerCount(evt))
         }
 
         // If we are currently waiting on a deferred promise, we need to resolve it and signify we're done to ensure that the async loop terminates
@@ -244,5 +306,13 @@ export class DataEmitterActions extends DataEmitterEvents {
     }
 
     return iterator
+  }
+
+  subscribeToRawEvent (evt: keyof DataEmitterEvents, listener: Parameters<EventEmitter['on']>[1]) {
+    this.pub.on(evt, listener)
+  }
+
+  unsubscribeToRawEvent (evt: keyof DataEmitterEvents, listener: Parameters<EventEmitter['on']>[1]) {
+    this.pub.off(evt, listener)
   }
 }

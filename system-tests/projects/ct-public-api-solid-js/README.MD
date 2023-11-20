@@ -1,0 +1,1 @@
+Example using a Framework Definition created using our template: https://github.com/cypress-io/cypress-ct-definition-template

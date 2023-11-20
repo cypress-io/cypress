@@ -172,7 +172,7 @@ export async function startCypressWatch () {
   }
 
   const watcher = chokidar.watch([
-    'packages/{graphql,data-context}/src/**/*.{js,ts}',
+    'packages/{graphql,data-context,scaffold-config}/src/**/*.{js,ts}',
     'packages/server/lib/**/*.{js,ts}',
   ], {
     cwd: monorepoPaths.root,

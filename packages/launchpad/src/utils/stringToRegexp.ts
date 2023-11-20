@@ -14,15 +14,15 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
     throw Error(`Expected groups in ${file} using ${regexp}`)
   }
 
-  const higlights = Object.values(match.groups)
-  const delimiters = higlights.join('|')
+  const highlights = Object.values(match.groups)
+  const delimiters = highlights.join('|')
   const re = new RegExp(`(${delimiters})`)
   const split = file.split(re)
 
   return split.map<FilePart>((text) => {
     return {
       text,
-      highlight: higlights.includes(text),
+      highlight: highlights.includes(text),
     }
   })
 }

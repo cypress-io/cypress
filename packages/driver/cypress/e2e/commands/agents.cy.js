@@ -243,39 +243,40 @@ describe('src/cy/commands/agents', () => {
             })
 
             it('includes the event', function () {
-              expect(this.consoleProps['Event']).to.eq('stub-1 called')
+              expect(this.consoleProps.type).to.eq('event')
+              expect(this.consoleProps.name).to.eq('stub-1 called')
             })
 
             it('includes reference to stub', function () {
-              expect(this.consoleProps['stub']).to.be.a('function')
+              expect(this.consoleProps.props['stub']).to.be.a('function')
             })
 
             it('includes call number', function () {
-              expect(this.consoleProps['Call #']).to.eq(2)
+              expect(this.consoleProps.props['Call #']).to.eq(2)
             })
 
             it('includes alias', function () {
-              expect(this.consoleProps['Alias']).to.eq('objFoo')
+              expect(this.consoleProps.props['Alias']).to.eq('objFoo')
             })
 
             it('includes references to withArgs stubs', function () {
-              expect(this.consoleProps['  1.1 stub']).to.be.a('function')
-              expect(this.consoleProps['  1.2 stub']).to.be.a('function')
+              expect(this.consoleProps.props['  1.1 stub']).to.be.a('function')
+              expect(this.consoleProps.props['  1.2 stub']).to.be.a('function')
             })
 
             it('includes withArgs call numbers', function () {
-              expect(this.consoleProps['  1.1 call #']).to.eq(2)
-              expect(this.consoleProps['  1.2 call #']).to.eq(1)
+              expect(this.consoleProps.props['  1.1 call #']).to.eq(2)
+              expect(this.consoleProps.props['  1.2 call #']).to.eq(1)
             })
 
             it('includes withArgs aliases', function () {
-              expect(this.consoleProps['  1.1 alias']).to.eq('withFoo')
-              expect(this.consoleProps['  1.2 alias']).to.eq('withFooBaz')
+              expect(this.consoleProps.props['  1.1 alias']).to.eq('withFoo')
+              expect(this.consoleProps.props['  1.2 alias']).to.eq('withFooBaz')
             })
 
             it('includes withArgs matching arguments', function () {
-              expect(this.consoleProps['  1.1 matching arguments']).to.eql(['foo'])
-              expect(this.consoleProps['  1.2 matching arguments']).to.eql(['foo', 'baz'])
+              expect(this.consoleProps.props['  1.1 matching arguments']).to.eql(['foo'])
+              expect(this.consoleProps.props['  1.2 matching arguments']).to.eql(['foo', 'baz'])
             })
           })
         })
@@ -312,7 +313,7 @@ describe('src/cy/commands/agents', () => {
           this.stub()
           const consoleProps = this.logs[1].get('consoleProps')()
 
-          expect(consoleProps['Alias']).to.eql('myStub')
+          expect(consoleProps.props['Alias']).to.eql('myStub')
         })
 
         it('updates the displayName of the agent', function () {
@@ -321,10 +322,6 @@ describe('src/cy/commands/agents', () => {
 
         it('stores the lookup as an alias', () => {
           expect(cy.state('aliases').myStub).to.exist
-        })
-
-        it('stores the agent as the subject', function () {
-          expect(cy.state('aliases').myStub.subject).to.eq(this.stub)
         })
 
         it('assigns subject to runnable ctx', function () {
@@ -393,7 +390,7 @@ describe('src/cy/commands/agents', () => {
           this.stub()
           const consoleProps = this.logs[1].get('consoleProps')()
 
-          expect(consoleProps['Alias']).to.eql('my.stub')
+          expect(consoleProps.props['Alias']).to.eql('my.stub')
         })
 
         it('updates the displayName of the agent', function () {
@@ -402,10 +399,6 @@ describe('src/cy/commands/agents', () => {
 
         it('stores the lookup as an alias', () => {
           expect(cy.state('aliases')['my.stub']).to.exist
-        })
-
-        it('stores the agent as the subject', function () {
-          expect(cy.state('aliases')['my.stub'].subject).to.eq(this.stub)
         })
 
         it('assigns subject to runnable ctx', function () {
@@ -580,41 +573,41 @@ describe('src/cy/commands/agents', () => {
           this.consoleProps = this.logs[1].get('consoleProps')()
         })
 
-        it('does not include \'command\' or \'error\' properties', function () {
-          expect(this.consoleProps['Command']).to.be.null
-          expect(this.consoleProps['Error']).to.be.null
+        it('does not include \'error\' property', function () {
+          expect(this.consoleProps.error).to.be.null
         })
 
         it('includes the event', function () {
-          expect(this.consoleProps['Event']).to.eq('stub-1 called')
+          expect(this.consoleProps.name).to.eq('stub-1 called')
+          expect(this.consoleProps.type).to.eq('event')
         })
 
         it('includes reference to stub', function () {
-          expect(this.consoleProps['stub']).to.be.a('function')
+          expect(this.consoleProps.props['stub']).to.be.a('function')
         })
 
         it('includes call number', function () {
-          expect(this.consoleProps['Call #']).to.eq(2)
+          expect(this.consoleProps.props['Call #']).to.eq(2)
         })
 
         it('includes alias', function () {
-          expect(this.consoleProps['Alias']).to.eq('objFoo')
+          expect(this.consoleProps.props['Alias']).to.eq('objFoo')
         })
 
         it('includes references to stubbed object', function () {
-          expect(this.consoleProps['Stubbed Obj']).to.be.eq(this.obj)
+          expect(this.consoleProps.props['Stubbed Obj']).to.be.eq(this.obj)
         })
 
         it('includes arguments', function () {
-          expect(this.consoleProps['Arguments']).to.eql(['foo', 'baz'])
+          expect(this.consoleProps.props['Arguments']).to.eql(['foo', 'baz'])
         })
 
         it('includes context', function () {
-          expect(this.consoleProps['Context']).to.eq(this.context)
+          expect(this.consoleProps.props['Context']).to.eq(this.context)
         })
 
         it('includes return value', function () {
-          expect(this.consoleProps['Returned']).to.eq('return value')
+          expect(this.consoleProps.props['Returned']).to.eq('return value')
         })
       })
     })
@@ -696,11 +689,11 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('includes reference to spy', function () {
-          expect(this.consoleProps['spy']).to.be.a('function')
+          expect(this.consoleProps.props['spy']).to.be.a('function')
         })
 
         it('includes references to spied object', function () {
-          expect(this.consoleProps['Spied Obj']).to.be.eq(this.obj)
+          expect(this.consoleProps.props['Spied Obj']).to.be.eq(this.obj)
         })
       })
     })

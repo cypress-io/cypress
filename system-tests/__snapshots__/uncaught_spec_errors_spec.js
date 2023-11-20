@@ -46,7 +46,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_synchronous_before_tests_parsed.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -56,13 +56,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_before_tests_parsed.js/An      (1280x720)
      uncaught error was detected outside of a test (failed).png                                     
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes     (X second)
-                          ts_parsed.js.mp4                                                          
 
 
 ====================================================================================================
@@ -128,7 +121,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_synchronous_during_hook.cy.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -138,13 +131,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook.cy.js/An uncau     (1280x720)
      ght error was detected outside of a test (failed).png                                          
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo     (X second)
-                          k.cy.js.mp4                                                               
 
 
 ====================================================================================================
@@ -237,7 +223,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_during_test.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -251,12 +237,6 @@ https://on.cypress.io/uncaught-exception-from-application
      tTimeout and done (failed).png                                                                 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test.cy.js/foo -- fails with as     (1280x720)
      ync app code error (failed).png                                                                
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test.cy.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -325,7 +305,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_during_hook.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -335,12 +315,6 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook.cy.js/foo -- does not run      (1280x720)
      -- before all hook (failed).png                                                                
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook.cy.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -422,7 +396,7 @@ exports['e2e uncaught errors / failing5'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     caught_async_sync_test.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -438,13 +412,6 @@ exports['e2e uncaught errors / failing5'] = `
      (failed).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- quux2 fails     (1280x720)
       (failed).png                                                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test.cy.js.mp     (X second)
-                          4                                                                         
 
 
 ====================================================================================================

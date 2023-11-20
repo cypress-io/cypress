@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 import $networkUtils from './network_utils'
@@ -14,18 +13,26 @@ const fetchScript = (scriptWindow, script) => {
 const extractSourceMap = ([script, contents]) => {
   script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
-  const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
+  const sourceMap = $sourceMapUtils.extractSourceMap(contents)
 
   return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
-  .return([script, contents])
+  .catch((_err) => {
+    // if WebAssembly is missing, we can't consume source maps, but it shouldn't block Cy
+    // like in WebKit on Windows: https://github.com/microsoft/playwright/issues/2876
+  })
+  .then(() => [script, contents])
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {
-  _.each(scripts, ([script, contents]) => {
-    specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
-  })
+  return Bluebird.each(scripts, (_script: any) => {
+    const [script, contents] = _script
 
-  return null
+    if (script.load) {
+      return script.load()
+    }
+
+    return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
+  })
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {
@@ -35,9 +42,38 @@ const runScriptsFromUrls = (specWindow, scripts) => {
   .then((scripts) => evalScripts(specWindow, scripts))
 }
 
+const appendScripts = (specWindow, scripts) => {
+  return Bluebird.each(scripts, (script: any) => {
+    const firstScript = specWindow.document.querySelector('script')
+    const specScript = specWindow.document.createElement('script')
+
+    return new Promise<void>((resolve) => {
+      specScript.addEventListener('load', () => {
+        resolve()
+      })
+
+      specScript.src = script.relativeUrl
+      firstScript.after(specScript)
+    })
+  })
+}
+
+interface Script {
+  absolute: string
+  relative: string
+  relativeUrl: string
+}
+
+interface RunScriptsOptions {
+  browser: Cypress.Browser
+  scripts: Script[]
+  specWindow: Window
+  testingType: Cypress.TestingType
+}
+
 // Supports either scripts as objects or as async import functions
 export default {
-  runScripts: (specWindow, scripts) => {
+  runScripts: ({ browser, scripts, specWindow, testingType }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {
       // chain the loading promises
@@ -47,6 +83,15 @@ export default {
       return Bluebird.each(scripts, (script: any) => script())
     }
 
+    // in webkit, stack traces for e2e are made pretty much useless if these
+    // scripts are eval'd, so we append them as script tags instead
+    if (browser.family === 'webkit' && testingType === 'e2e') {
+      return appendScripts(specWindow, scripts)
+    }
+
+    // for other browsers, we get the contents of the scripts so that we can
+    // extract and utilize the source maps for better errors and code frames.
+    // we then eval the script contents to run them
     return runScriptsFromUrls(specWindow, scripts)
   },
 }

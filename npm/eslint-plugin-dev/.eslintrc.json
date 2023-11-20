@@ -6,6 +6,5 @@
   "extends": [
     "plugin:promise/recommended",
     "plugin:@cypress/dev/general"
-  ],
-  "rules": {}
+  ]
 }

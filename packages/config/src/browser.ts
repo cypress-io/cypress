@@ -1,19 +1,30 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { defaultSpecPattern, options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions, additionalOptionsToResolveConfig } from './options'
-import type { BreakingOption, BreakingOptionErrorKey } from './options'
-import type { TestingType } from '@packages/types'
+import {
+  defaultSpecPattern,
+  defaultExcludeSpecPattern,
+  options,
+  breakingOptions,
+  breakingRootOptions,
+  testingTypeBreakingOptions,
+} from './options'
+
+import type { BreakingErrResult, TestingType } from '@packages/types'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
+import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
 
 export {
   defaultSpecPattern,
-  validation,
+  defaultExcludeSpecPattern,
   options,
   breakingOptions,
   BreakingOption,
   BreakingOptionErrorKey,
+  ErrResult,
+  validation,
 }
 
 const debug = Debug('cypress:config:browser')
@@ -21,10 +32,12 @@ const debug = Debug('cypress:config:browser')
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
-function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T) {
+function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
-      memo[item[keyKey] as string] = item[valueKey]
+      memo[item[keyKey]] = item[valueKey]
+    } else {
+      memo[item[keyKey]] = defaultValueFallback
     }
 
     return memo
@@ -33,19 +46,18 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
 
 const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _([...options, ...additionalOptionsToResolveConfig]).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
+
+export const testOverrideLevels = createIndex(options, 'name', 'overrideLevel', 'never')
+
 const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
 
 const issuedWarnings = new Set()
 
-export type BreakingErrResult = {
-  name: string
-  newName?: string
-  value?: any
-  configFile: string
-  testingType?: TestingType
+export type InvalidTestOverrideResult = {
+  invalidConfigKey: string
+  supportedOverrideLevel: string
 }
 
 type ErrorHandler = (
@@ -57,7 +69,7 @@ export function resetIssuedWarnings () {
   issuedWarnings.clear()
 }
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -137,15 +149,19 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: string) => void) => {
-  debug('validating configuration')
+export const validate = (cfg: any, onErr: (property: ErrResult | string) => void, testingType: TestingType | null) => {
+  debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
 
     // key has a validation rule & value different from the default
     if (validationFn && value !== defaultValues[key]) {
-      const result = validationFn(key, value)
+      const result = validationFn(key, value, {
+        // if we are validating the e2e or component-specific configuration values, pass
+        // the key testing type as the testing type to ensure correct validation
+        testingType: (key === 'e2e' || key === 'component') ? key : testingType,
+      })
 
       if (result !== true) {
         return onErr(result)
@@ -172,16 +188,45 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
-  let errProperty
+export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: boolean, onErr: (result: InvalidTestOverrideResult) => void) => {
+  Object.keys(config).some((configKey) => {
+    const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
-  Object.keys(config).some((option) => {
-    return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
+    if (!overrideLevel) {
+      // non-cypress configuration option. skip validation
+      return
+    }
+
+    // this is unique validation, not applied to the general cy config.
+    // it will be removed when we support defining experimental retries
+    // in test config overrides
+
+    // TODO: remove when experimental retry overriding is supported
+
+    if (configKey === 'retries') {
+      const experimentalRetryCfgKeys = [
+        'experimentalStrategy', 'experimentalOptions',
+      ]
+
+      Object.keys(config.retries || {})
+      .filter((v) => experimentalRetryCfgKeys.includes(v))
+      .forEach((invalidExperimentalCfgOverride) => {
+        onErr({
+          invalidConfigKey: `retries.${invalidExperimentalCfgOverride}`,
+          supportedOverrideLevel: 'global_only',
+        })
+      })
+    }
+    // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
+    // https://github.com/cypress-io/cypress/issues/24365
+
+    if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
+      onErr({
+        invalidConfigKey: configKey,
+        supportedOverrideLevel: overrideLevel,
+      })
+    }
   })
-
-  if (errProperty) {
-    return onErr(errProperty)
-  }
 }
 
 export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: any) => {

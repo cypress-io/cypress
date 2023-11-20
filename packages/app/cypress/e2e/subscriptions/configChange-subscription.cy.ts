@@ -16,7 +16,7 @@ function updateViewportHeightInCypressConfig (value: number) {
   }, { value })
 }
 
-describe('specChange subscription', () => {
+describe('configChange subscription', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
@@ -27,10 +27,22 @@ describe('specChange subscription', () => {
   describe('on config page', () => {
     it('responds to configChange event when viewport is changed', () => {
       cy.contains('a', 'Settings').click()
-      cy.get('[data-cy="collapsible-header"]').contains('Project Settings').click()
+      cy.get('[data-cy="collapsible-header"]').contains('Project settings').click()
       cy.contains(`projectId: 'abc123'`)
       updateProjectIdInCypressConfig('foo456')
       cy.contains(`projectId: 'foo456'`)
+    })
+  })
+
+  describe('on specs list page', () => {
+    it('responds to configChange event when viewport is changed', () => {
+      cy.contains('a', 'Specs').click()
+      updateViewportHeightInCypressConfig(888)
+
+      // validate the spinner appears and then goes away
+      cy.contains('[role="alert"]', 'Loading')
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
     })
   })
 
@@ -46,6 +58,11 @@ describe('specChange subscription', () => {
 
       // update the config - the spec should re-execute with the new viewportHeight
       updateViewportHeightInCypressConfig(777)
+
+      // validate the spinner appears and then goes away
+      cy.contains('[role="alert"]', 'Loading')
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')

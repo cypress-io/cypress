@@ -3,12 +3,12 @@ const snapshot = require('snap-shot-it')
 import type { SpawnOptions, ChildProcess } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
+import stripAnsi from 'strip-ansi'
 import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
 import {
-  e2ePath,
   DEFAULT_BROWSERS,
   replaceStackTraceLines,
   pathUpToProjectName,
@@ -40,8 +40,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-export type BrowserName = 'electron' | 'firefox' | 'chrome'
-| '!electron' | '!chrome' | '!firefox'
+export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'webkit'
+| '!electron' | '!chrome' | '!firefox' | '!webkit'
 
 type ExecResult = {
   code: number
@@ -56,6 +56,7 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
+    this: Mocha.Context,
     execFn: ExecFn,
     browser: BrowserName
   ) => Promise<any> | any
@@ -142,6 +143,10 @@ type ExecOptions = {
    */
   snapshot?: boolean
   /**
+   * By default strip ansi codes from stdout. Pass false to turn off.
+   */
+  stripAnsi?: boolean
+  /**
    * Pass a function to assert on and/or modify the stdout before snapshotting.
    */
   onStdout?: (stdout: string) => string | void
@@ -180,7 +185,7 @@ type ExecOptions = {
    */
   ciBuildId?: string
   /**
-   * Run Cypress with a record key.
+   * Run Cypress with a Record Key.
    */
   key?: string
   /**
@@ -280,6 +285,7 @@ export type SpawnerResult = {
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
   kill: ChildProcess['kill']
+  pid: number
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
@@ -305,15 +311,16 @@ Bluebird.config({
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
+const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
 const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed processing this video.',
-  'This error will not alter the exit code.',
+  'Warning: We failed capturing this video.',
+  'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
 const expectedDeletedVideoSnapshotLines = [
   '(Video)',
-  '-  Started processing:  Compressing to 32 CRF',
+  '-  Started compressing: Compressing to 32 CRF',
 ]
 const sometimesAddedSpacingLine = ''
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
@@ -331,7 +338,7 @@ const isVideoSnapshotError = (err: Error) => {
 
   for (const line of lines) {
     // past this point, the content is variable - mp4 path length
-    if (line.includes('Finished processing:')) break
+    if (line.includes('Finished compressing:')) break
 
     if (line.charAt(0) === '+') added.push(line.slice(1).trim())
 
@@ -341,7 +348,15 @@ const isVideoSnapshotError = (err: Error) => {
   _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+  // If a video line exists after removing other static matches, remove it
+  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
+
+  // If we did indeed remove a video line, also remove the (Video) text that preceded it
+  if (deletedVideoLine) {
+    _.pull(deleted, '(Video)')
+  }
+
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
 
 /**
@@ -401,14 +416,14 @@ const startServer = function (obj) {
 
 const stopServer = (srv) => srv.destroyAsync()
 
-const copy = function () {
+const copy = function (projectPath: string) {
   const ca = process.env.CIRCLE_ARTIFACTS
 
   debug('Should copy Circle Artifacts?', Boolean(ca))
 
   if (ca) {
-    const videosFolder = path.join(e2ePath, 'cypress/videos')
-    const screenshotsFolder = path.join(e2ePath, 'cypress/screenshots')
+    const videosFolder = path.join(projectPath, 'cypress/videos')
+    const screenshotsFolder = path.join(projectPath, 'cypress/screenshots')
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
@@ -486,7 +501,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()
@@ -528,7 +542,8 @@ const localItFn = function (title: string, opts: ItOptions) {
         return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
-      return options.onRun(execFn, browser, ctx)
+      // pass Mocha's this context to onRun
+      return options.onRun.call(this, execFn, browser, ctx)
     })
   }
 
@@ -619,12 +634,13 @@ const systemTests = {
     }
 
     _.defaults(options, {
-      browser: 'electron',
+      browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
-      timeout: 120000,
+      timeout: Number(process.env.SYSTEM_TEST_TIMEOUT || 120000),
       originalTitle: null,
       expectedExitCode: 0,
+      stripAnsi: true,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
@@ -792,20 +808,30 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
+    const projectPath = Fixtures.projectPath(options.project)
+
+    if (process.env.SNAPSHOT_BROWSER) {
+      debug('setting browser to ', process.env.SNAPSHOT_BROWSER)
+      options.browser = options.browser || process.env.SNAPSHOT_BROWSER as BrowserName
+      debug(options.browser)
+    }
 
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
     }
 
+    debug(process.env.SNAPSHOT_BROWSER, options.browser)
+
     if (!options.skipScaffold) {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      await DepInstaller.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules({ project: options.project })
     }
 
     if (process.env.NO_EXIT) {
@@ -813,7 +839,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.writeForTesting(e2ePath, ctx.settings)
+      await settings.writeForTesting(projectPath, ctx.settings)
     }
 
     let stdout = ''
@@ -829,6 +855,12 @@ const systemTests = {
           expect(code).to.to.eq(expectedExitCode, `expected exit code ${expectedExitCode} but got ${code}`)
         }
       })
+
+      if (options.stripAnsi) {
+        // always strip ansi from stdout before yielding
+        // it to any callback functions
+        stdout = stripAnsi(stdout)
+      }
 
       // snapshot the stdout!
       if (options.snapshot) {
@@ -854,7 +886,7 @@ const systemTests = {
           const { browser } = options
 
           if (browser && !customBrowserPath) {
-            expect(_.capitalize(browser)).to.eq(browserName)
+            expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase())
           }
 
           expect(parseFloat(version)).to.be.a.number
@@ -883,7 +915,7 @@ const systemTests = {
             throw err
           }
 
-          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video capturing in Firefox.')
         }
       }
 
@@ -926,6 +958,13 @@ const systemTests = {
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+
+      // opt in to WebKit experimental support if we are running w WebKit
+      ...(specifiedBrowser === 'webkit' ? {
+        CYPRESS_experimentalWebKitSupport: 'true',
+        // prevent snapshots from failing due to "Experiments:  experimentalWebKitSupport=true" difference
+        CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS: '1',
+      } : {}),
     })
     .extend(options.processEnv)
     .value()
@@ -962,7 +1001,7 @@ const systemTests = {
       sp.on('exit', resolve)
     })
 
-    await copy()
+    await copy(projectPath)
 
     return exit(exitCode)
   },
@@ -986,8 +1025,8 @@ const systemTests = {
     return stdout
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
-    .replace(/Project is running at http:\/\/localhost:\d+/g, 'Project is running at http://localhost:xxxx')
     .replace(/webpack.*compiled with.*in \d+ ms/g, 'webpack x.x.x compiled with x errors in xxx ms')
+    .replace(/webpack.*compiled successfully in \d+ ms/g, 'webpack x.x.x compiled successfully in xxx ms')
   },
 
   normalizeRuns (runs) {

@@ -90,6 +90,10 @@ export default (Commands, Cypress, cy, state) => {
       const req = waitForRoute(alias, state, type)
 
       if (req) {
+        // Attach alias to request to ensure driver access to
+        // dynamic aliases. See #24653
+        req.request.alias = alias
+
         return req
       }
 
@@ -193,23 +197,8 @@ export default (Commands, Cypress, cy, state) => {
 
       const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
 
-      const isRouteAlias = (alias) => {
-        // has all aliases saved using cy.as() command
-        const aliases = cy.state('aliases') || {}
-
-        const aliasObject = aliases[alias]
-
-        if (!aliasObject) {
-          return false
-        }
-
-        // cy.route aliases have subject that has all XHR properties
-        // let's check one of them
-        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
-      }
-
       if (command && !isNetworkInterceptCommand(command)) {
-        if (!isInterceptAlias(alias) && !isRouteAlias(alias)) {
+        if (!isInterceptAlias(alias)) {
           $errUtils.throwErrByPath('wait.invalid_alias', {
             onFail: options._log,
             args: { alias },
@@ -265,7 +254,24 @@ export default (Commands, Cypress, cy, state) => {
     .then((responses) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses
+      const ret = responses.length === 1 ? responses[0] : ((resp) => {
+        const respMap = new Map()
+        const respSeq = resp.map((r) => r.routeId)
+
+        // responses are sorted in the order the user specified them. if there are multiples of the same
+        // alias awaited, they're sorted in execution order
+        resp.sort((a, b) => {
+          // sort responses based on browser request ID
+          const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
+          const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
+
+          return parseInt(requestIdSuffixA) < parseInt(requestIdSuffixB) ? -1 : 1
+        }).forEach((r) => {
+          respMap.get(r.routeId)?.push(r) ?? respMap.set(r.routeId, [r])
+        })
+
+        return respSeq.map((routeId) => respMap.get(routeId)?.shift())
+      })(responses)
 
       if (log) {
         log.set('consoleProps', () => {
@@ -282,14 +288,14 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
-  Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, originPolicy) => {
+  Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, { origin }) => {
     options.isCrossOriginSpecBridge = true
     waitString(null, str, options).then((responses) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', responses)
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'wait:for:xhr:end', responses)
     }).catch((err) => {
       options._log?.error(err)
       err.hasSpecBridgeError = true
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'wait:for:xhr:end', err)
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'wait:for:xhr:end', err)
     })
   })
 
@@ -300,8 +306,8 @@ export default (Commands, Cypress, cy, state) => {
         if (responsesOrErr.hasSpecBridgeError) {
           delete responsesOrErr.hasSpecBridgeError
           if (options.log) {
+            // skip this 'wait' log since it was already added through the primary
             Cypress.state('onBeforeLog', (log) => {
-              // skip this 'wait' log since it was already added through the primary
               if (log.get('name') === 'wait') {
                 // unbind this function so we don't impact any other logs
                 cy.state('onBeforeLog', null)
@@ -309,7 +315,7 @@ export default (Commands, Cypress, cy, state) => {
                 return false
               }
 
-              return
+              return true
             })
           }
 

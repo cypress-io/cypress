@@ -31,7 +31,7 @@ exports['e2e screenshot fullPage capture / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  11                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_fullpage_capture.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -61,13 +61,6 @@ exports['e2e screenshot fullPage capture / passes'] = `
      are (8).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-comp      (600x500)
      are (9).png                                                                                    
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_fullpage_capture.cy.     (X second)
-                          js.mp4                                                                    
 
 
 ====================================================================================================

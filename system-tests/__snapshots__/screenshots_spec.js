@@ -110,7 +110,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  34                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshots.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -131,13 +131,13 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/element.png                        (400x300)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/taking screenshots -- retries     (200x1300)
       each screenshot for up to  XX:XX.png                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test.png                (1000x1316)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test.png                 (1000x660)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/taking screenshots -- screens     (1280x720)
      hots in a retried test (failed).png                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test (attempt 2).png    (1000x1316)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test (attempt 2).png     (1000x660)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/taking screenshots -- screens     (1280x720)
      hots in a retried test (failed) (attempt 2).png                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test (attempt 3).png    (1000x1316)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/retrying-test (attempt 3).png     (1000x660)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/taking screenshots -- screens     (1280x720)
      hots in a retried test (failed) (attempt 3).png                                                
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots.cy.js/taking screenshots -- ensures     (1280x720)
@@ -168,12 +168,6 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
      long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                          
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshots.cy.js.mp4               (X second)
 
 
 ====================================================================================================

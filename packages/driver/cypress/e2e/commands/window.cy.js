@@ -145,7 +145,7 @@ describe('src/cy/commands/window', () => {
 
           expect(win).to.eq(this.win)
 
-          expect(this.logs[0].get('alias')).to.eq('win')
+          expect(this.logs[0].get('alias')).to.eq('@win')
           expect(this.logs[0].get('aliasType')).to.eq('primitive')
 
           expect(this.logs[2].get('aliasType')).to.eq('primitive')
@@ -171,8 +171,11 @@ describe('src/cy/commands/window', () => {
       it('#consoleProps', () => {
         cy.window().then(function (win) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'window',
-            Yielded: win,
+            name: 'window',
+            type: 'command',
+            props: {
+              Yielded: win,
+            },
           })
         })
       })
@@ -329,7 +332,7 @@ describe('src/cy/commands/window', () => {
 
           expect(doc).to.eq(this.doc)
 
-          expect(logs[0].get('alias')).to.eq('doc')
+          expect(logs[0].get('alias')).to.eq('@doc')
           expect(logs[0].get('aliasType')).to.eq('primitive')
 
           expect(logs[2].get('aliasType')).to.eq('primitive')
@@ -355,8 +358,11 @@ describe('src/cy/commands/window', () => {
       it('#consoleProps', () => {
         cy.document().then(function (win) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'document',
-            Yielded: win,
+            name: 'document',
+            type: 'command',
+            props: {
+              Yielded: win,
+            },
           })
         })
       })
@@ -532,8 +538,11 @@ describe('src/cy/commands/window', () => {
       it('#consoleProps', () => {
         cy.title().then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'title',
-            Yielded: 'Generic HTML Fixture',
+            name: 'title',
+            type: 'command',
+            props: {
+              Yielded: 'Generic HTML Fixture',
+            },
           })
         })
       })
@@ -659,8 +668,11 @@ describe('src/cy/commands/window', () => {
       it('changes viewport and then resets back to the original', () => {
         const { viewportHeight, viewportWidth } = Cypress.config()
 
-        cy.viewport(500, 400).then(() => {
-          Cypress.action('runner:test:before:run:async', {})
+        cy.viewport(500, 400).then(async () => {
+          await Cypress.action('runner:test:before:run:async', {
+            id: 'r1',
+            currentRetry: 0,
+          }, Cypress.state('runnable'))
           .then(() => {
             expect(Cypress.config('viewportWidth')).to.eq(viewportWidth)
             expect(Cypress.config('viewportHeight')).to.eq(viewportHeight)
@@ -1001,10 +1013,13 @@ describe('src/cy/commands/window', () => {
       it('.consoleProps with preset', () => {
         cy.viewport('ipad-mini').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'viewport',
-            Preset: 'ipad-mini',
-            Width: 768,
-            Height: 1024,
+            name: 'viewport',
+            type: 'command',
+            props: {
+              Preset: 'ipad-mini',
+              Width: 768,
+              Height: 1024,
+            },
           })
         })
       })
@@ -1012,9 +1027,12 @@ describe('src/cy/commands/window', () => {
       it('.consoleProps without preset', () => {
         cy.viewport(1024, 768).then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'viewport',
-            Width: 1024,
-            Height: 768,
+            name: 'viewport',
+            type: 'command',
+            props: {
+              Width: 1024,
+              Height: 768,
+            },
           })
         })
       })

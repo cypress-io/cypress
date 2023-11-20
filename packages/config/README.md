@@ -1,6 +1,6 @@
 # Config
 
-The `config` package contains the configuration types and validation used in both the `server` and the `driver` for setting the Cypress configuration values.
+The `config` package contains the configuration types and validation used in both the `server`, the `data-context` and the `driver` for setting the Cypress configuration values.
 
 ## Testing
 

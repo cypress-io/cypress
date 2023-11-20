@@ -102,7 +102,9 @@ export class MigrationDataSource {
     }
 
     const versionData = await this.ctx.versions.versionData()
-    const embedOnLink = `https://on.cypress.io/v10-video-embed/${versionData.current.version}`
+    const embedOnLink = `https://on.cypress.io/v13-video-embed/${versionData.current.version}`
+
+    debug(`Getting videoEmbedHtml at link: ${embedOnLink}`)
 
     // Time out request if it takes longer than 3 seconds
     const controller = new AbortController()

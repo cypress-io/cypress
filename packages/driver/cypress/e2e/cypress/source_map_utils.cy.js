@@ -46,19 +46,19 @@ const file2 = createFile('file2')
 describe('driver/src/cypress/source_map_utils', () => {
   context('.extractSourceMap', () => {
     it('returns null if there is no source map embedded', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(file2, testContent)
+      const sourceMap = $sourceMapUtils.extractSourceMap(testContent)
 
       expect(sourceMap).to.be.null
     })
 
     it('returns null if it is not an inline map', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(file2, `${testContent}\n\/\/# sourceMappingURL=foo.map`)
+      const sourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=foo.map`)
 
       expect(sourceMap).to.be.null
     })
 
     it('returns source map when content has an inline map', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(file1, fileContents)
+      const sourceMap = $sourceMapUtils.extractSourceMap(fileContents)
 
       expect(sourceMap).to.be.eql(sourceMap)
     })
@@ -71,7 +71,7 @@ describe('driver/src/cypress/source_map_utils', () => {
         const timeLimit = 10
         const startTime = Date.now()
 
-        $sourceMapUtils.extractSourceMap(file1, fileContents)
+        $sourceMapUtils.extractSourceMap(fileContents)
 
         const endTime = Date.now()
 
@@ -81,7 +81,7 @@ describe('driver/src/cypress/source_map_utils', () => {
 
     // https://github.com/cypress-io/cypress/issues/7481
     it('does not garble utf-8 characters', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(file1, fileContents)
+      const sourceMap = $sourceMapUtils.extractSourceMap(fileContents)
 
       expect(sourceMap.sourcesContent[1]).to.include('サイプリスは一番')
     })

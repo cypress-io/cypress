@@ -1,9 +1,8 @@
-import _ from 'lodash'
+import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
-import { extend as extendEvents } from './events'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -15,7 +14,8 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -77,6 +77,10 @@ export const LogUtils = {
       hasSnapshot: !!attrs.snapshots,
       hasConsoleProps: !!attrs.consoleProps,
     }
+  },
+
+  getProtocolProps: (attrs) => {
+    return _.pick(attrs, PROTOCOL_PROPS)
   },
 
   getConsoleProps: (attrs) => {
@@ -149,10 +153,8 @@ const defaults = function (state: StateFunc, config, obj) {
           return {}
         }
 
-        const ret = $dom.isElement(current.get('subject')) ?
-          $dom.getElements(current.get('subject'))
-          :
-          current.get('subject')
+        const subject = current.get('subject')
+        const ret = $dom.isElement(subject) ? $dom.getElements(subject) : subject
 
         return { Yielded: ret }
       },
@@ -168,7 +170,7 @@ const defaults = function (state: StateFunc, config, obj) {
     if (_.isFunction(obj.type)) {
       const chainerId = current && current.get('chainerId')
 
-      obj.type = obj.type(current, (state('subjects') || {})[chainerId])
+      obj.type = obj.type(current, cy.subjectChain(chainerId))
     }
   }
 
@@ -203,6 +205,8 @@ const defaults = function (state: StateFunc, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
+    createdAtTimestamp: performance.now() + performance.timeOrigin,
+    updatedAtTimestamp: performance.now() + performance.timeOrigin,
     renderProps () {
       return {}
     },
@@ -230,23 +234,27 @@ const defaults = function (state: StateFunc, config, obj) {
 }
 
 export class Log {
-  cy: any
+  createSnapshot: Function
   state: StateFunc
   config: any
-  fireChangeEvent: ((log) => (void | undefined))
+  fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
   obj: any
 
   private attributes: Record<string, any> = {}
 
-  constructor (cy, state, config, fireChangeEvent, obj) {
-    this.cy = cy
+  constructor (createSnapshot, state, config, fireChangeEvent, obj) {
+    this.createSnapshot = createSnapshot
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
 
-    extendEvents(this)
+    if (config('protocolEnabled')) {
+      Cypress.on('test:after:run', () => {
+        this.fireChangeEvent.flush()
+      })
+    }
   }
 
   get (attr) {
@@ -320,6 +328,8 @@ export class Log {
       delete this.obj.id
     }
 
+    this.obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
+
     _.extend(this.attributes, this.obj)
 
     // if we have an consoleProps function
@@ -341,20 +351,7 @@ export class Log {
     return _.pick(this.attributes, args)
   }
 
-  snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests
-    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
-      return this
-    }
-
-    _.defaults(options, {
-      at: null,
-      next: null,
-    })
-
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
-
+  private addSnapshot (snapshot, options, shouldRebindSnapshotFn = true) {
     const snapshots = this.get('snapshots') || []
 
     // don't add snapshot if we couldn't create one, which can happen
@@ -367,17 +364,46 @@ export class Log {
 
     this.set('snapshots', snapshots)
 
-    if (options.next) {
-      const fn = this.snapshot
+    if (options.next && shouldRebindSnapshotFn) {
+      this.set('next', options.next)
+    }
 
-      this.snapshot = function () {
-        // restore the fn
-        this.snapshot = fn
+    return this
+  }
 
-        // call orig fn with next as name
-        return fn.call(this, options.next)
+  snapshot (name?, options: any = {}) {
+    // bail early and don't snapshot if we're in headless mode
+    // or we're not storing tests and the protocol is not enabled
+    if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
+      return this
+    }
+
+    if (this.get('next')) {
+      name = this.get('next')
+      this.set('next', null)
+    }
+
+    if (!Cypress.isCrossOriginSpecBridge) {
+      const activeSpecBridgeOriginIfApplicable = this.state('currentActiveOrigin') || undefined
+      // @ts-ignore
+      const { origin: originThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('url'))
+
+      if (activeSpecBridgeOriginIfApplicable && activeSpecBridgeOriginIfApplicable === originThatIsSoonToBeOrIsActive) {
+        Cypress.emit('request:snapshot:from:spec:bridge', {
+          log: this,
+          name,
+          options,
+          specBridge: activeSpecBridgeOriginIfApplicable,
+          addSnapshot: this.addSnapshot,
+        })
+
+        return this
       }
     }
+
+    const snapshot = this.createSnapshot(name, this.get('$el'))
+
+    this.addSnapshot(snapshot, options)
 
     return this
   }
@@ -385,7 +411,7 @@ export class Log {
   error (err) {
     const logGroupIds = this.state('logGroupIds') || []
 
-    // current log was responsible to creating the current log group so end the current group
+    // current log was responsible for creating the current log group so end the current group
     if (_.last(logGroupIds) === this.attributes.id) {
       this.endGroup()
     }
@@ -393,6 +419,7 @@ export class Log {
     this.set({
       ended: true,
       error: err,
+      _error: undefined,
       state: 'failed',
     })
 
@@ -504,18 +531,11 @@ export class Log {
 
     const { consoleProps } = this.attributes
 
-    this.attributes.consoleProps = function (...args) {
-      const key = _this.get('event') ? 'Event' : 'Command'
-
-      const consoleObj: Record<string, any> = {}
-
-      consoleObj[key] = _this.get('name')
-
-      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
-      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
-
-      // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleObjDefaults)
+    this.attributes.consoleProps = function (...invokedArgs) {
+      const consoleObj: Record<string, any> = {
+        name: _this.get('name'),
+        type: _this.get('event') ? 'event' : 'command',
+      }
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -523,24 +543,38 @@ export class Log {
       // and finally add error if one exists
       if (_this.get('error')) {
         _.defaults(consoleObj, {
-          Error: _this.getError(_this.get('error')),
+          error: _this.getError(_this.get('error')),
         })
       }
 
       // add note if no snapshot exists on command instruments
-      if ((_this.get('instrument') === 'command') && !_this.get('snapshots')) {
-        consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
+      if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
+        consoleObj.snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
-        delete consoleObj.Snapshot
+        delete consoleObj.snapshot
       }
 
-      return consoleObj
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjResult = _.isFunction(consoleProps) ? consoleProps.apply(this, invokedArgs) : consoleProps
+
+      // these are the expected properties on the consoleProps object
+      const expectedProperties = ['name', 'type', 'error', 'snapshot', 'args', 'groups', 'table', 'props']
+      const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
+        // don't include properties with undefined values
+        return value === undefined ? memo : _.extend(memo, { [key]: value })
+      }, consoleObj)
+      // any other key/value pairs need to be added to the `props` property
+      const rest = _.omit(consoleObjResult, expectedProperties)
+
+      return _.extend(expectedPropertiesObj, {
+        props: _.extend(rest, expectedPropertiesObj.props || {}),
+      })
     }
   }
 }
 
 class LogManager {
-  logs: Record<string, any> = {}
+  logs: Record<string, boolean> = {}
 
   constructor () {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
@@ -559,12 +593,19 @@ class LogManager {
 
     const attrs = log.toJSON()
 
+    const logAttrsEqual = _.isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
+      // if the key is 'updatedAtTimestamp' then we want to ignore it since it will always be different
+      if (key === 'updatedAtTimestamp') {
+        return true
+      }
+
+      return undefined
+    })
+
     // only trigger this event if our last stored
     // emitted attrs do not match the current toJSON
-    if (!_.isEqual(log._emittedAttrs, attrs)) {
+    if (!logAttrsEqual) {
       log._emittedAttrs = attrs
-
-      log.emit(event, attrs)
 
       return Cypress.action(event, attrs, log)
     }
@@ -592,27 +633,9 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      const log = new Log(cy, state, config, this.fireChangeEvent, options)
+      const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent, options)
 
       log.set(options)
-
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
-      // if end was passed in
-      // go ahead and end
-      if (log.get('end')) {
-        log.end()
-      }
-
-      if (log.get('error')) {
-        log.error(log.get('error'))
-      }
-
-      log.wrapConsoleProps()
 
       const onBeforeLog = state('onBeforeLog')
 
@@ -624,28 +647,33 @@ class LogManager {
         }
       }
 
-      // set the log on the command
-      const current = state('current')
+      const command = state('current')
 
-      if (current) {
-        current.log(log)
+      if (command) {
+        command.log(log)
       }
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'))
+      }
+
+      log.wrapConsoleProps()
 
       this.addToLogs(log)
-
-      if (options.sessionInfo) {
-        Cypress.emit('session:add', log.toJSON())
-      }
-
       if (options.emitOnly) {
         return
       }
 
       this.triggerLog(log)
 
-      // if not current state then the log is being run
-      // with no command reference, so just end the log
-      if (!current) {
+      // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
+      if (!command || log.get('end')) {
         log.end()
       }
 

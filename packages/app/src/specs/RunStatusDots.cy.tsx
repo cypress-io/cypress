@@ -11,11 +11,9 @@ function mountWithRuns (runs: Required<CloudSpecRun>[]) {
       __typename: 'CloudProjectSpec',
       retrievedAt: new Date().toISOString(),
       id: 'id',
-      specRuns: {
-        nodes: [
-          ...runs as any, // suppress TS compiler
-        ],
-      },
+      specRunsForRunIds: [
+        ...runs as any, // suppress TS compiler
+      ],
     },
   }
 
@@ -23,6 +21,16 @@ function mountWithRuns (runs: Required<CloudSpecRun>[]) {
     return (
       <div class="flex justify-center">
         <RunStatusDots gql={gql} specFileExtension=".cy.ts" specFileName="spec"/>
+      </div>
+    )
+  })
+}
+
+function mountWithNoData () {
+  cy.mount(() => {
+    return (
+      <div class="flex justify-center">
+        <RunStatusDots gql={null} specFileExtension=".cy.ts" specFileName="spec"/>
       </div>
     )
   })
@@ -106,6 +114,20 @@ describe('<RunStatusDots />', () => {
       cy.findByTestId('external').should('not.exist')
       cy.findByTestId('run-status-dots').trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('not.exist')
+    })
+  })
+
+  context('runs not loaded', () => {
+    beforeEach(() => {
+      mountWithNoData()
+    })
+
+    it('renders placeholder without tooltip or link', () => {
+      cy.findByTestId('external').should('not.exist')
+      cy.findByTestId('run-status-empty').contains('--')
+      cy.findByTestId('run-status-empty').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').should('not.exist')
+      cy.findByTestId('run-status-dots').should('not.exist')
     })
   })
 

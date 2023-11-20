@@ -5,7 +5,7 @@
   >
     <RadioGroup
       v-model="selectedBrowserId"
-      class="flex flex-wrap py-40px gap-24px justify-center"
+      class="flex flex-wrap py-[40px] gap-[24px] justify-center"
       data-cy="open-browser-list"
     >
       <RadioGroupOption
@@ -18,26 +18,29 @@
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
+          class="rounded border text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label"
           :class="{
-            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
+            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border focus:outline-none': checked,
             'border-gray-100 bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
             'border-gray-100 filter grayscale': browserStatus.chosen && !checked,
             'border-gray-100 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen
           }"
         >
           <Tooltip
-            v-if="!browser.isVersionSupported"
+            v-if="browser.warning"
             popper-class="max-w-lg"
           >
             <i-cy-circle-bg-question-mark_x16
               data-cy="unsupported-browser-tooltip-trigger"
-              class="mt-8px mr-8px top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
+              class="mt-[8px] mr-[8px] top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
               alt="unsupported browser"
             />
             <template #popper>
-              <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
-                <div class="font-medium text-white mb-2">
+              <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
+                <div
+                  v-if="!browser.isVersionSupported"
+                  class="font-medium text-white mb-2"
+                >
                   Unsupported browser
                 </div>
                 {{ browser.warning }}
@@ -48,17 +51,17 @@
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
-              class="h-40px w-40px inline"
+              class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
             >
           </div>
           <div
-            class="font-medium pt-2 text-18px leading-28px"
+            class="font-medium pt-2 px-2 text-[18px] leading-[28px] truncate"
             :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}
           </div>
-          <div class="text-gray-500 text-14px leading-20px">
+          <div class="text-gray-500 text-[14px] leading-[20px]">
             v{{ browser.majorVersion }}
           </div>
         </RadioGroupLabel>
@@ -68,7 +71,7 @@
       v-if="props.gql.currentTestingType"
       class="mb-14"
     >
-      <div class="flex mb-4 gap-16px items-center justify-center">
+      <div class="flex mb-4 gap-[16px] items-center justify-center">
         <template v-if="selectedBrowserId">
           <template v-if="browserStatus.closed || browserStatus.opening">
             <Button
@@ -139,7 +142,7 @@
         size="sm"
         variant="text"
         :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:-translate-x-2px"
+        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
@@ -163,7 +166,6 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument, OpenBrowserList_BrowserStatusChangeDocument } from '../generated/graphql'
@@ -225,11 +227,8 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const browsers = computed(() => {
-  if (!props.gql.browsers) {
-    return undefined
-  }
-
-  return sortBrowsers([...props.gql.browsers])
+  // Need to slice(). `sort()` mutates, and props are supposed to be `readonly`.
+  return (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
@@ -237,9 +236,7 @@ const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 const selectedBrowserId = computed({
   get: () => {
     // NOTE: The activeBrowser is set during project initialization. It should always be defined.
-    if (!props.gql.activeBrowser) throw new Error('Missing activeBrowser in selectedBrowserId')
-
-    return props.gql.activeBrowser.id
+    return props.gql.activeBrowser?.id
   },
   set (browserId) {
     if (browserId) {

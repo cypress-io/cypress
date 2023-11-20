@@ -1,7 +1,7 @@
 <template>
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900"
+    class="flex"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -36,13 +36,14 @@
       <template #panel3>
         <HideDuringScreenshot>
           <SpecRunnerHeaderRunMode
+            v-if="!hideRunnerUi"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             class="bg-white"
           />
         </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
-          class="h-0 p-16px"
+          :class="(hideRunnerUi) ? '' : 'h-0 p-[16px]'"
         >
           <ScriptError
             v-if="autStore.scriptError"
@@ -108,6 +109,7 @@ const {
 } = useEventManager()
 
 const hideCommandLog = runnerUiStore.hideCommandLog
+const hideRunnerUi = runnerUiStore.hideRunnerUi
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()

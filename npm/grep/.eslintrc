@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    "cypress"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/tests"
+  ],
+  "env": {
+    "cypress/globals": true
+  },
+  "rules": {
+    "mocha/no-global-tests": "off",
+    "no-console": "off",
+    "no-restricted-syntax": "off"
+  }
+}

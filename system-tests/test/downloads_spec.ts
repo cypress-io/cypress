@@ -12,9 +12,6 @@ describe('e2e downloads', () => {
   systemTests.it('handles various file downloads', {
     project: 'downloads',
     spec: 'downloads.cy.ts',
-    config: {
-      video: false,
-    },
   })
 
   const fileExists = (fileName) => {
@@ -22,11 +19,11 @@ describe('e2e downloads', () => {
   }
 
   systemTests.it('allows changing the downloads folder', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (implement downloads support)
     project: 'downloads',
     spec: 'downloads.cy.ts',
     config: {
       downloadsFolder: 'cypress/dls',
-      video: false,
     },
     onRun: async (exec) => {
       await exec()

@@ -17,14 +17,13 @@ export type {
 
 export * from './util/pluginHandlers'
 
-import { globalPubSub } from './globalPubSub'
-
-export { globalPubSub }
+export { globalPubSub } from './globalPubSub'
 
 let ctx: DataContext | null = null
 
 export async function clearCtx () {
   if (ctx) {
+    await ctx.lifecycleManager.mainProcessWillDisconnect()
     await ctx.destroy()
     ctx = null
   }
@@ -36,14 +35,14 @@ export function hasCtx () {
 
 /**
  * Gets the current DataContext, used in situations where it's too much work
- * to inject it deeply through the class hierearchy in legacy server code, but we
+ * to inject it deeply through the class hierarchy in legacy server code, but we
  * need to reference it anyway, and for the time being we can assume
  * there's only one for the lifecycle of the Electron app.
  */
 export function getCtx () {
   if (!ctx) {
     throw new Error(`
-      Expected DataContext to already have been set via setCtx. If this is a 
+      Expected DataContext to already have been set via setCtx. If this is a
       testing context, make sure you are calling "setCtx" in a before hook,
       otherwise check the application flow.
     `)
@@ -59,8 +58,8 @@ export function getCtx () {
 export function setCtx (_ctx: DataContext) {
   if (ctx) {
     throw new Error(`
-      The context has already been set. If this is occurring in a testing context, 
-      make sure you are clearing the context. Otherwise 
+      The context has already been set. If this is occurring in a testing context,
+      make sure you are clearing the context. Otherwise
     `)
   }
 

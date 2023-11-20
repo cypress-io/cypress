@@ -34,7 +34,6 @@ If you don't require screenshots or videos to be stored you can safely ignore th
   1) fails:
      Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-root/cypress/screenshots'
   
-  
 
 
 

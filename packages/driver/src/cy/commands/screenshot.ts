@@ -182,6 +182,10 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
   const win = state('window')
   const doc = state('document')
 
+  if (!doc) {
+    return
+  }
+
   const resetScrollOverrides = scrollOverrides(win, doc)
 
   const docHeight = $(doc).height() as number
@@ -239,6 +243,10 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
 const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, automationOptions: AutomationOptions) => {
   const win = state('window')
   const doc = state('document')
+
+  if (!doc) {
+    return
+  }
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
@@ -439,12 +447,14 @@ const takeScreenshot = (
     blackout: getBlackout(screenshotConfig),
     overwrite,
     startTime: startTime.toISOString(),
+    appOnly: isAppOnly(screenshotConfig),
+    hideRunnerUi: Cypress.config('hideRunnerUi'),
   })
 
   // use the subject as $el or yield the wrapped documentElement
   const $el: JQuery<HTMLElement> = $dom.isElement(subject)
     ? subject
-    : $dom.wrap(state('document').documentElement)
+    : $dom.wrap(state('document')?.documentElement)
 
   // get the current body of the AUT to accurately calculate screenshot blackouts
   // as well as properly enable/disable CSS animations while screenshotting is happening
@@ -496,14 +506,17 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     // if a screenshot has not been taken (by cy.screenshot()) in the test
-    // that failed, we can bypass UI-changing and pixel-checking (simple: true)
+    // that failed and the runner is not hidden, we can bypass
+    // UI-changing and pixel-checking (simple: true)
     // otherwise, we need to do all the standard checks
     // to make sure the UI is in the right place (simple: false)
+    const simple = !state('screenshotTaken') && !config('hideRunnerUi')
+
     screenshotConfig.capture = 'runner'
 
     return takeScreenshot(Cypress, state, screenshotConfig, {
       runnable,
-      simple: !state('screenshotTaken'),
+      simple,
       testFailure: true,
       timeout: config('responseTimeout'),
     })
@@ -520,9 +533,9 @@ export default function (Commands, Cypress, cy, state, config) {
       // we are not limited to "within" subject
       // https://github.com/cypress-io/cypress/issues/14253
       if (userOptions.capture !== 'runner') {
-        const withinSubject = state('withinSubject')
+        const withinSubject = cy.getSubjectFromChain(cy.state('withinSubjectChain'))
 
-        if (withinSubject && $dom.isElement(withinSubject)) {
+        if ($dom.isElement(withinSubject)) {
           subject = withinSubject
         }
       }
@@ -560,7 +573,7 @@ export default function (Commands, Cypress, cy, state, config) {
           message: name,
           timeout: options.timeout,
           consoleProps () {
-            return consoleProps
+            return { props: consoleProps }
           },
         })
       }

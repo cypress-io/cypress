@@ -1,5 +1,12 @@
 <template>
-  <ProjectId :gql="props.gql" />
+  <ProjectId
+    v-if="props.gql.currentProject?.projectId"
+    :gql="props.gql"
+  />
+  <section v-else>
+    <CloudConnectButton utm-medium="Settings Tab" />
+  </section>
+
   <template
     v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
       && props.gql.currentProject.cloudProject.recordKeys?.length"
@@ -18,6 +25,7 @@ import { gql } from '@urql/vue'
 import RecordKey from './RecordKey.vue'
 import ProjectId from './ProjectId.vue'
 import type { CloudSettingsFragment } from '../../generated/graphql'
+import CloudConnectButton from '../../runs/CloudConnectButton.vue'
 
 gql`
 fragment CloudSettings on Query {

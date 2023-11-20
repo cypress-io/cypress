@@ -11,15 +11,15 @@
     "allowJs": true,
     "declaration": true,
     "outDir": "dist",
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
     "baseUrl": "./",
     "types": [
       "cypress"
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noPropertyAccessFromIndexSignature": true,
   },
   "include": ["src/**/*.*"],
   "exclude": ["src/**/*-spec.*"]

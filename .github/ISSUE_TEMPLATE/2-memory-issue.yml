@@ -1,0 +1,81 @@
+name: "💾 Memory issue report"
+description: Report a memory issue found while using Cypress.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? 👉 [Ask in chat](https://on.cypress.io/discord) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
+
+        Prior to logging a memory issue, please make sure you are running the latest version of Cypress and have enabled [`experimentalMemoryManagement`](https://on.cypress.io/experiments) for Chromium-based browsers (introduced in Cypress 12.4.0). 
+
+        If you are running in `cypress open` mode, you can also try lowering [`numTestsKeptInMemory`](https://docs.cypress.io/guides/references/configuration#Options) in your config file.
+
+        If you are still experiencing the issue, please fill out the following information.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Test code to reproduce
+      description: Please provide a failing test or repo we can run. You can fork [this repo](https://github.com/cypress-io/cypress-test-tiny), set up a failing test, then link to your fork. If you have never done this before, watch [this video](https://youtu.be/NnriKHmj5T8) for example.
+      placeholder: Here is my failing test code and the app code to run the tests on...
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Cypress Mode
+      description: What mode of Cypress are you running?
+      options:
+        - cypress run
+        - cypress open
+        - both modes
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Cypress Version
+      description: What version of Cypress are you running? Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
+      placeholder: ex. 10.3.1
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser Version
+      description: What browser(s) is Cypress running against when you are encountering your problem? The more specific the better. ie Chrome 109.0.5414.87 or Firefox 107.0
+      placeholder: ex. Chrome 109.0.5414.87
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      description: What version of node.js are you using to run Cypress?
+      placeholder: ex. v18.15.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system is Cypress running on when you are encountering your problem? The more specific the better. ie macOS 12.4 or Windows 10.0.19044.1889
+      placeholder: ex. macOS 12.4
+    validations:
+      required: true
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Memory Debug Logs
+      description: |
+        If running a Chromium-based browser, please set the `CYPRESS_INTERNAL_MEMORY_SAVE_STATS` environment variable to `1` or `true` and include the `cypress\logs\memory\<spec name>.json` file here.
+        
+        Alternatively, you can run Cypress in [debug mode](https://docs.cypress.io/guides/references/troubleshooting#Print-DEBUG-logs) setting `DEBUG=cypress*memory` and include the entire set of logs here.
+      placeholder: Debug logging output
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: other
+    attributes:
+      label: Other
+      placeholder: Any other details?

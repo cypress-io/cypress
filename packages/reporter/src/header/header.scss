@@ -93,7 +93,7 @@ $color-transition: color 150ms ease-out;
     height: 24px;
     justify-content: space-between;
     padding: 0 4px;
-    width: 124px;
+    min-width: 124px;
 
     li {
       display: flex;
@@ -110,7 +110,7 @@ $color-transition: color 150ms ease-out;
         color: $white;
         line-height: 12px;
         vertical-align: text-top;
-        width: 16px;
+        min-width: 16px;
         display: inline-block;
         text-align: center;
 

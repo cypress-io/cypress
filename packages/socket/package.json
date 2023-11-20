@@ -12,21 +12,24 @@
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch"
+    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "circular-json": "0.5.9",
-    "engine.io": "5.2.1",
+    "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
     "socket.io": "4.0.1",
-    "socket.io-client": "4.0.1"
+    "socket.io-client": "4.0.1",
+    "uuid": "8.3.2"
   },
   "devDependencies": {
+    "@packages/types": "0.0.0-development",
+    "@types/uuid": "8.3.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
-    "resolve-pkg": "2.0.0",
-    "rimraf": "3.0.2"
+    "resolve-pkg": "2.0.0"
   },
   "files": [
     "index.js",

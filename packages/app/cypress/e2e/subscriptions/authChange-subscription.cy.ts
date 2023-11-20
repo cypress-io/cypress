@@ -1,12 +1,5 @@
 describe('authChange subscription', () => {
   beforeEach(() => {
-    cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
-
-      o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
-    }, { AUTHED_USER })
   })
 
   const AUTHED_USER = {
@@ -25,12 +18,20 @@ describe('authChange subscription', () => {
 
   describe('in app', () => {
     beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
+
       cy.startAppServer()
       cy.visitApp()
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -48,18 +49,26 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 
   describe('in app (component testing)', () => {
     beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
+
       cy.startAppServer('component')
       cy.visitApp()
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -77,17 +86,22 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 
   describe('in launchpad', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -105,7 +119,7 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 })

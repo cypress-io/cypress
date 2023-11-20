@@ -31,7 +31,7 @@ exports['e2e screenshot element capture / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  11                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_element_capture.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -61,13 +61,6 @@ exports['e2e screenshot element capture / passes'] = `
      e (8).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
      e (9).png                                                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture.cy.j     (X second)
-                          s.mp4                                                                     
 
 
 ====================================================================================================

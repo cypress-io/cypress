@@ -12,7 +12,7 @@ const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype
   const desc = Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
 
   if (desc === undefined) {
-    throw new Error(`Error, could not get property descriptor for ${klass}  ${prop}. This should never happen`)
+    throw new Error(`Error, could not get property descriptor for ${klass}  ${String(prop)}. This should never happen`)
   }
 
   return desc
@@ -207,6 +207,7 @@ const nativeGetters = {
   body: descriptor('Document', 'body').get,
   frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement')!.get,
   maxLength: _getMaxLength,
+  style: descriptor('HTMLElement', 'style').get,
 }
 
 const nativeSetters = {
@@ -224,12 +225,16 @@ const nativeMethods = {
   execCommand: window.document.execCommand,
   getAttribute: window.Element.prototype.getAttribute,
   setAttribute: window.Element.prototype.setAttribute,
+  removeAttribute: window.Element.prototype.removeAttribute,
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
   hasFocus: window.document.hasFocus,
   blur: _nativeBlur,
   select: _nativeSelect,
+  getStyleProperty: window.CSSStyleDeclaration.prototype.getPropertyValue,
+  setStyleProperty: window.CSSStyleDeclaration.prototype.setProperty,
+  removeStyleProperty: window.CSSStyleDeclaration.prototype.removeProperty,
 }
 
 export const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {
@@ -238,7 +243,7 @@ export const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T
   if (!nativeProp) {
     const props = _.keys(nativeGetters).join(', ')
 
-    throw new Error(`attempted to use a native getter prop called: ${prop}. Available props are: ${props}`)
+    throw new Error(`attempted to use a native getter prop called: ${String(prop)}. Available props are: ${props}`)
   }
 
   let retProp = nativeProp.call(obj, prop)
@@ -258,7 +263,7 @@ export const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, va
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${String(prop)}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)

@@ -5,16 +5,21 @@
     <title>{{title}}</title>
   </head>
   <body>
-    <script type="text/javascript">
-      document.domain = '{{domain}}';
-      
+    <script>
+      {{if(options.superDomain)}}
+        document.domain = '{{superDomain}}';
+      {{/if}}
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window, {{scripts | safe}});
       })(window.opener || window.parent);
+    </script>
+    <script>{{privilegedChannel | safe}}</script>
+    <script>
+      window.Cypress.onSpecWindow(window, {{scripts | safe}});
     </script>
   </body>
 </html>

@@ -91,9 +91,6 @@ exports.runTest = async (options = {}) => {
     spec: opts.spec,
     browser: opts.browser,
     exit: opts.exit,
-    config: {
-      video: false,
-    },
     dev: true,
   })
   .finally(() => {
@@ -111,7 +108,6 @@ exports.runTest = async (options = {}) => {
       })
     }
 
-    // console.log(stdout)
     console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
   })
 }

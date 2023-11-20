@@ -13,9 +13,13 @@ program
   await fs.remove(destinationPath)
   await fs.copy(exampleFolder, destinationPath, { recursive: true })
 
-  console.log(`✅ Example was successfully created at ${chalk.cyan(destination)}`)
+  console.log(`✅ E2E Examples were successfully created at ${chalk.cyan(destination)}`)
 
-  await fs.copy(path.join(__dirname, 'example-tsconfig.json'), path.join(destination, 'tsconfig.json'))
+  await fs.copy(path.join(__dirname, 'examples', 'cypress'), path.join(destination))
+
+  console.log(`✅ Cypress Setup was successfully created at ${chalk.cyan(destination)}`)
+
+  await fs.copy(path.join(__dirname, 'examples', 'tsconfig.json'), path.join(destination, 'tsconfig.json'))
 
   console.log(`✅ tsconfig.json was created for ${chalk.cyan(destination)}`)
 })

@@ -5,6 +5,8 @@ export interface CypressBuilderOptions extends JsonObject {
   configFile: string
   browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
   devServerTarget: string
+  e2e: boolean
+  component: boolean
   env: Record<string, string>
   quiet: boolean
   exit: boolean
@@ -19,4 +21,5 @@ export interface CypressBuilderOptions extends JsonObject {
   spec: string
   tsConfig: string
   watch: boolean
+  testingType: 'e2e' | 'component'
 }

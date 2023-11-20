@@ -9,7 +9,7 @@
       :spec-file-name="props.specFileNoExtension"
       :spec-file-extension="props.specFileExtension"
     />
-    <div class="flex flex-row text-gray-700 text-size-14px gap-2 items-center">
+    <div class="flex flex-row text-gray-700 text-[14px] gap-2 items-center">
       <div
         v-if="statusText"
         :class="'text-'+statusTextColor"

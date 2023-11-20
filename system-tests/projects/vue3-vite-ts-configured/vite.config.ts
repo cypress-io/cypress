@@ -12,6 +12,6 @@ export default defineConfig({
       // not seem to like.
       // https://vitejs.dev/config/#server-fs-allow
       allow: ['/root/cypress/', '/root/.cache/', '/tmp/', '/Users/', '/private/'],
-    }
-  }
+    },
+  },
 })

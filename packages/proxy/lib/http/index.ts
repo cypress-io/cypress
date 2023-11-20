@@ -1,4 +1,16 @@
+import Bluebird from 'bluebird'
+import chalk from 'chalk'
+import Debug from 'debug'
 import _ from 'lodash'
+import { errorUtils } from '@packages/errors'
+import { DeferredSourceMapCache } from '@packages/rewriter'
+import { telemetry, Span } from '@packages/telemetry'
+import ErrorMiddleware from './error-middleware'
+import RequestMiddleware from './request-middleware'
+import ResponseMiddleware from './response-middleware'
+import { HttpBuffers } from './util/buffers'
+import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
 import type {
@@ -6,28 +18,24 @@ import type {
   CypressOutgoingResponse,
   BrowserPreRequest,
 } from '@packages/proxy'
-import Debug from 'debug'
-import chalk from 'chalk'
-import ErrorMiddleware from './error-middleware'
-import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PreRequests } from './util/prerequests'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import Bluebird from 'bluebird'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
-import RequestMiddleware from './request-middleware'
-import ResponseMiddleware from './response-middleware'
-import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
-import type { CookieJar } from '@packages/server/lib/util/cookies'
-import type { Automation } from '@packages/server/lib/automation/automation'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
+import type { ProtocolManagerShape } from '@packages/types'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
     Math.floor(Math.random() * 0xFFFFFF),
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
+
+export const isVerboseTelemetry = true
+
+const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
@@ -48,16 +56,23 @@ export type HttpMiddlewareStacks = {
 type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
+  handleHttpRequestSpan?: Span
+  reqMiddlewareSpan?: Span
+  resMiddlewareSpan?: Span
   shouldCorrelatePreRequests: () => boolean
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
+  pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getAutomation: () => Automation
-  getPreRequest: (cb: GetPreRequestCb) => void
+  getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
+  addPendingUrlWithoutPreRequest: (url: string) => void
+  removePendingRequest: (pendingRequest: PendingRequest) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
+  simulatedCookies: SerializableAutomationCookie[]
+  protocolManager?: ProtocolManagerShape
 } & T
 
 export const defaultMiddleware = {
@@ -69,10 +84,10 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getAutomation: () => Automation
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -91,6 +106,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'onResponse',
   'onError',
   'skipMiddleware',
+  'onlyRunMiddleware',
 ]
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
@@ -104,12 +120,13 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
+  onlyRunMiddleware: (names: string[]) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError) {
+export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
-  const runMiddlewareStack = () => {
+  const runMiddlewareStack = (): Promise<void> => {
     const middlewares = ctx.middleware[type]
 
     // pop the first pair off the middleware
@@ -137,7 +154,33 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
         .value()
       }
 
+      function _onError (error: Error) {
+        ctx.debug('Error in middleware %o', { middlewareName, error })
+
+        if (type === HttpStages.Error) {
+          return
+        }
+
+        ctx.res.off('close', onClose)
+        _end(onError(error))
+      }
+
+      function onClose () {
+        if (!ctx.res.writableFinished) {
+          _onError(new Error('Socket closed before finished writing response.'))
+        }
+      }
+
+      // If we are in the middle of the response phase we want to listen for the on close message and abort responding and instead send an error.
+      // If the response is closed before the middleware completes, it implies the that request was canceled by the browser.
+      // The request phase is handled elsewhere because we always want the request phase to complete before erroring on canceled.
+      if (type === HttpStages.IncomingResponse) {
+        ctx.res.on('close', onClose)
+      }
+
       function _end (retval?) {
+        ctx.res.off('close', onClose)
+
         if (ended) {
           return
         }
@@ -156,33 +199,34 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
       const fullCtx = {
         next: () => {
           fullCtx.next = () => {
-            throw new Error('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+
+            if (ctx.error) {
+              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+              error['cause'] = ctx.error
+            }
+
+            throw error
           }
 
           copyChangedCtx()
 
+          ctx.res.off('close', onClose)
           _end(runMiddlewareStack())
         },
-        end: () => _end(),
+        end: _end,
         onResponse: (incomingRes: Response, resStream: Readable) => {
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 
           _end()
         },
-        onError: (error: Error) => {
-          ctx.debug('Error in middleware %o', { middlewareName, error })
-
-          if (type === HttpStages.Error) {
-            return
-          }
-
-          ctx.error = error
-          onError(error)
-          _end(_runStage(HttpStages.Error, ctx, onError))
-        },
-        skipMiddleware: (name) => {
+        onError: _onError,
+        skipMiddleware: (name: string) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
+        },
+        onlyRunMiddleware: (names: string[]) => {
+          ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
         ...ctx,
       }
@@ -190,6 +234,9 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
       try {
         middleware.call(fullCtx)
       } catch (err) {
+        err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
+        errorUtils.logError(err)
         fullCtx.onError(err)
       }
     })
@@ -213,8 +260,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getAutomation: () => Automation
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
@@ -222,17 +268,17 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
+  protocolManager?: ProtocolManagerShape
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
-
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
-    this.getAutomation = opts.getAutomation
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -240,6 +286,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -247,7 +294,7 @@ export class Http {
     }
   }
 
-  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse) {
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
@@ -256,10 +303,10 @@ export class Http {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
+      handleHttpRequestSpan,
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getAutomation: this.getAutomation,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
@@ -267,7 +314,9 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
+      simulatedCookies: [],
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return
 
@@ -283,28 +332,71 @@ export class Http {
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
-        this.preRequests.get(ctx.req, ctx.debug, cb)
+        return this.preRequests.get(ctx.req, ctx.debug, cb)
       },
+      addPendingUrlWithoutPreRequest: (url) => {
+        this.preRequests.addPendingUrlWithoutPreRequest(url)
+      },
+      removePendingRequest: (pendingRequest: PendingRequest) => {
+        this.preRequests.removePendingRequest(pendingRequest)
+      },
+      protocolManager: this.protocolManager,
     }
 
-    const onError = () => {
-      if (ctx.req.browserPreRequest) {
+    const onError = (error: Error): Promise<void> => {
+      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
+
+      if (pendingRequest) {
+        delete ctx.pendingRequest
+        ctx.removePendingRequest(pendingRequest)
+      }
+
+      ctx.error = error
+      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled) {
+        ctx.req.browserPreRequest.errorHandled = true
         // browsers will retry requests in the event of network errors, but they will not send pre-requests,
         // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
         const preRequest = {
           ...ctx.req.browserPreRequest,
           requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+          errorHandled: false,
         }
 
         ctx.debug('Re-using pre-request data %o', preRequest)
         this.addPendingBrowserPreRequest(preRequest)
       }
+
+      return _runStage(HttpStages.Error, ctx, onError)
     }
+
+    // start the span that is responsible for recording the start time of the entire middleware run on the stack
+    // make this span a part of the middleware ctx so we can keep names simple when correlating
+    ctx.reqMiddlewareSpan = telemetry.startSpan({
+      name: 'request:middleware',
+      parentSpan: handleHttpRequestSpan,
+      isVerbose,
+    })
 
     return _runStage(HttpStages.IncomingRequest, ctx, onError)
     .then(() => {
+      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+      // In this case we don't want to run the response middleware and should just exit.
+      if (res.destroyed) {
+        return onError(new Error('Socket closed before finished writing response'))
+      }
+
       if (ctx.incomingRes) {
+        // start the span that is responsible for recording the start time of the entire middleware run on the stack
+        ctx.resMiddlewareSpan = telemetry.startSpan({
+          name: 'response:middleware',
+          parentSpan: handleHttpRequestSpan,
+          isVerbose,
+        })
+
         return _runStage(HttpStages.IncomingResponse, ctx, onError)
+        .finally(() => {
+          ctx.resMiddlewareSpan?.end()
+        })
       }
 
       return ctx.debug('Warning: Request was not fulfilled with a response.')
@@ -340,6 +432,7 @@ export class Http {
   reset () {
     this.buffers.reset()
     this.setAUTUrl(undefined)
+    this.preRequests.reset()
   }
 
   setBuffer (buffer) {
@@ -348,5 +441,22 @@ export class Http {
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.preRequests.addPending(browserPreRequest)
+  }
+
+  removePendingBrowserPreRequest (requestId: string) {
+    this.preRequests.removePendingPreRequest(requestId)
+  }
+
+  addPendingUrlWithoutPreRequest (url: string) {
+    this.preRequests.addPendingUrlWithoutPreRequest(url)
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this.protocolManager = protocolManager
+    this.preRequests.setProtocolManager(protocolManager)
+  }
+
+  setPreRequestTimeout (timeout: number) {
+    this.preRequests.setPreRequestTimeout(timeout)
   }
 }

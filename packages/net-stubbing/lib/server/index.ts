@@ -2,11 +2,11 @@ export { onNetStubbingEvent } from './driver-events'
 
 export { InterceptError } from './middleware/error'
 
-export { InterceptRequest } from './middleware/request'
+export { SetMatchingRoutes, InterceptRequest } from './middleware/request'
 
 export { InterceptResponse } from './middleware/response'
 
-export { NetStubbingState } from './types'
+export { NetStubbingState, ResourceType } from './types'
 
 export { getRoutesForRequest } from './route-matching'
 

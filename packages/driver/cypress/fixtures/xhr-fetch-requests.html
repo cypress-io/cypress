@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1 data-cy="assertion-header">Making XHR and Fetch Requests behind the scenes if fireOnload is true!</h1>
+    <button data-cy="trigger-fetch" onclick="triggerFetch('/test-request')"> trigger fetch </button>
+    <button data-cy="trigger-fetch-with-request-object" onclick="triggerFetchWithRequestObject('/test-request')"> trigger fetch with Request Object</button>
+    <button data-cy="trigger-fetch-with-url-object" onclick="triggerFetchWithUrlObject('/test-request')" > trigger fetch with URL Object</button>
+    <button data-cy="trigger-fetch-omit" onclick="triggerFetch('/test-request', 'omit')"> trigger fetch w/ omit credentials </button>
+    <button data-cy="trigger-fetch-with-request-object-omit" onclick="triggerFetchWithRequestObject('/test-request', 'omit')"> trigger fetch with Request Object w/ omit credentials</button>
+    <button data-cy="trigger-fetch-with-url-object-omit" onclick="triggerFetchWithUrlObject('/test-request', 'omit')" > trigger fetch with URL Object w/ omit credentials</button>
+    <button data-cy="trigger-fetch-include" onclick="triggerFetch('/test-request', 'include')"> trigger fetch w/ include credentials </button>
+    <button data-cy="trigger-fetch-with-request-object-include" onclick="triggerFetchWithRequestObject('/test-request', 'include')"> trigger fetch with Request Object w/ include credentials</button>
+    <button data-cy="trigger-fetch-with-url-object-include" onclick="triggerFetchWithUrlObject('/test-request', 'include')" > trigger fetch with URL Object w/ include credentials</button>
+    <button data-cy="trigger-fetch-with-bad-options" onclick="triggerFetch(null)">trigger fetch with bad option</button>
+    <button data-cy="trigger-fetch-with-preflight" onclick="triggerFailingFetchPreflight('/test-request')">trigger fetch w/ preflight</button>
+    <button data-cy="trigger-xml-http-request" onclick="triggerXmlHttpRequest('/test-request')">trigger xmlHttpRequest</button>
+    <button data-cy="trigger-xml-http-request-with-credentials" onclick="triggerXmlHttpRequest('/test-request', true)">trigger xmlHttpRequest w/ credentials</button>
+    <button data-cy="trigger-xml-http-request-with-bad-options" onclick="triggerXmlHttpRequest(null)">trigger xmlHttpRequest w/ bad options</button>
+    <button data-cy="trigger-xml-http-request-with-preflight" onclick="triggerFailingXmlHttpRequestPreflight('/test-request')">trigger xmlHttpRequest w/ preflight</button>
+    <script>
+      function triggerFetch(requestOrUrlObjOrString, credentials){
+        let fetchReq
+        if(credentials){
+          fetchReq = fetch(requestOrUrlObjOrString, {
+            credentials
+          })
+        } else {
+          fetchReq = fetch(requestOrUrlObjOrString)
+        }
+        return fetchReq.then(function(response) {
+          // throw errors in our application to test when fetch fails
+            if (!response.ok) {
+              throw Error(response.status);
+            }
+            return response;
+        })
+      }
+
+      function triggerFetchWithRequestObject(urlString, credentials){
+        let req = new Request(urlString)
+        if(credentials){
+          // credentials must either match options passed into fetch or must exist on the Request object itself
+          req = new Request(urlString, {
+            credentials
+          })
+        }
+        return triggerFetch(req)
+      }
+
+      function triggerFetchWithUrlObject(urlString, credentials){
+        return triggerFetch(new URL(urlString, window.location.origin), credentials)
+      }
+
+      function triggerFailingFetchPreflight(relativeUrl){
+        let url = new URL(relativeUrl, 'http://app.foobar.com:3500').toString()
+        return fetch(url, {
+          headers: {
+            'foo': 'bar'
+          },
+          credentials: 'include'
+        }).catch(() => {
+          throw new Error('CORS ERROR');
+        }).then(() => {
+          throw new Error('request succeeded when it shouldn\'t have')
+        })
+      }
+
+      function triggerXmlHttpRequest(relativeUrl, withCredentials = false){
+        const url = new URL(relativeUrl, window.location.origin)
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+        xhr.withCredentials = withCredentials
+        xhr.send();
+      }
+
+      function triggerFailingXmlHttpRequestPreflight(relativeUrl){
+        // might need a cross origin req here
+        let url = new URL(relativeUrl, 'http://app.foobar.com:3500').toString()
+
+        let xhr = new XMLHttpRequest()
+
+        xhr.open('GET', url)
+        // adding headers to trigger a preflight request. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests
+        xhr.setRequestHeader('foo', 'bar')
+        // since the plugin server sets the Access-Control-Allow-Origin to * (wildcard), this request will fail as a CORS errors. The
+        xhr.withCredentials = true
+    
+        xhr.onerror = function () {
+          throw new Error('CORS ERROR')
+        }
+
+        xhr.send()
+      }
+
+      function fireXHRAndFetchRequests() {
+        if(window.location.search.includes('fireOnload=true')){
+          xhr = new XMLHttpRequest();
+          xhr.open("GET", "http://localhost:3500/foo.bar.baz.json");
+          xhr.responseType = "json";
+          xhr.send();
+  
+          fetch("http://localhost:3500/foo.bar.baz.json")
+        }
+      }
+      
+      fireXHRAndFetchRequests()
+    </script>
+  </body>
+</html>

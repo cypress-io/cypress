@@ -1,0 +1,97 @@
+name: 'Set Issue Status'
+on:
+  # makes this workflow reusable
+  workflow_call:
+    inputs:
+      status:
+        description: 'Which status column?'
+        default: 'New Issue'
+        required: false
+        type: string
+    secrets:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
+        required: true
+
+jobs:
+  move-to-requested-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project data
+        env:
+          STATUS: ${{ inputs.status || 'New Issue' }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          ORGANIZATION: 'cypress-io'
+          REPOSITORY: ${{ github.event.repository.name }}
+          PROJECT_NUMBER: 9
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
+              organization(login: $org) {
+                repository(name: $repo) {
+                  issue(number: $issue) {
+                    projectItems(first: 10, includeArchived: false) {
+                      nodes {
+                        id
+                        fieldValueByName(name: "Status") {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            name
+                            field {
+                              ... on ProjectV2SingleSelectField {
+                                project {
+                                  ... on ProjectV2 {
+                                    id
+                                    number
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                projectV2(number: $project) {
+                  field(name: "Status") {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      options {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -f repo=$REPOSITORY -F issue=$ISSUE_NUMBER -F project=$PROJECT_NUMBER > project_data.json
+
+          echo 'PROJECT_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[].fieldValueByName.field.project | select(.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
+          echo 'PROJECT_ITEM_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[] | select(.fieldValueByName.field.project.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
+          echo 'STATUS_FIELD_ID='$(jq -r '.data.organization.projectV2.field | .id' project_data.json) >> $GITHUB_ENV
+          echo 'STATUS_OPTION_ID='$(jq -r '.data.organization.projectV2.field.options[] | select(.name== "${{ env.STATUS }}") | .id' project_data.json) >> $GITHUB_ENV
+      - name: Move issue to new status
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+        run: |
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $status_field: ID!
+              $status_value: String!
+            ) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $status_field
+                value: { 
+                  singleSelectOptionId: $status_value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$PROJECT_ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$STATUS_OPTION_ID

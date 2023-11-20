@@ -1,0 +1,8 @@
+**/dist
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+**/cypress/fixtures
+/test/__fixtures__/**/*
+/test/__babel_fixtures__/**/*
+**/__snapshots__

@@ -5,6 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "nexus-build": "ts-node ./scripts/nexus-build.ts",
+    "build": "graphql-codegen --config graphql-codegen.yml",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -12,16 +14,16 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
-    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
+    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/wrap": "8.1.1",
     "@urql/core": "2.4.4",
     "dedent": "^0.7.0",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "express-graphql": "^0.12.0",
-    "getenv": "1.0.0",
     "graphql": "^15.5.1",
     "graphql-resolve-batch": "1.0.3",
     "graphql-scalars": "^1.10.0",
@@ -40,7 +42,6 @@
     "@types/server-destroy": "^1.0.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
-    "rimraf": "3.0.2",
     "snap-shot-it": "7.9.3",
     "tslint": "^6.1.3"
   },
@@ -48,5 +49,32 @@
     "src",
     "schemas"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {
+    "targets": {
+      "nexus-build": {
+        "outputs": [
+          "{projectRoot}/src/gen/nxs.gen.ts",
+          "{projectRoot}/schemas/schema.graphql"
+        ]
+      },
+      "build": {
+        "dependsOn": [
+          "nexus-build"
+        ],
+        "outputs": [
+          "{workspaceRoot}/packages/frontend-shared/cypress/support/generated/test-graphql-types.gen.ts",
+          "{projectRoot}/src/gen/test-cloud-graphql-types.gen.ts",
+          "{projectRoot}/src/gen/cloud-source-types.gen.ts",
+          "{workspaceRoot}/packages/data-context/src/gen/graphcache-config.gen.ts",
+          "{workspaceRoot}/packages/launchpad/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/app/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/frontend-shared/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/launchpad/src/generated/graphql-test.ts",
+          "{workspaceRoot}/packages/app/src/generated/graphql-test.ts",
+          "{workspaceRoot}/packages/frontend-shared/src/generated/graphql-test.ts"
+        ]
+      }
+    }
+  }
 }

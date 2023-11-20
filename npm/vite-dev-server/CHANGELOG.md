@@ -1,3 +1,136 @@
+# [@cypress/vite-dev-server-v5.0.6](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.5...@cypress/vite-dev-server-v5.0.6) (2023-08-29)
+
+
+### Bug Fixes
+
+* allow cypress config.port to override devServer.port for proxying assets ([f82fdf0](https://github.com/cypress-io/cypress/commit/f82fdf026eeab125a2b974e4257a7ac5e33640eb))
+
+# [@cypress/vite-dev-server-v5.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.4...@cypress/vite-dev-server-v5.0.5) (2023-03-20)
+
+
+### Bug Fixes
+
+* Vite dev server add searchForWorkspaceRoot ([#26036](https://github.com/cypress-io/cypress/issues/26036)) ([6397ac6](https://github.com/cypress-io/cypress/commit/6397ac60da1bfa7149212aeab5f0ae4c5d6372d7))
+* **vite-dev-server:** do not use incremental esbuild option with Vite v4.2.0+ ([#26139](https://github.com/cypress-io/cypress/issues/26139)) ([3a2b2d3](https://github.com/cypress-io/cypress/commit/3a2b2d3323310c68f72f6e42203f5e93afc1cde5))
+
+# [@cypress/vite-dev-server-v5.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.3...@cypress/vite-dev-server-v5.0.4) (2023-02-24)
+
+
+### Bug Fixes
+
+* vite-dev-server windows ([#25889](https://github.com/cypress-io/cypress/issues/25889)) ([0981fcf](https://github.com/cypress-io/cypress/commit/0981fcf6ac3cd955dc45a554df350af5fc538b3c))
+
+# [@cypress/vite-dev-server-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.2...@cypress/vite-dev-server-v5.0.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* allow running tests outside Vite project root folder ([#25801](https://github.com/cypress-io/cypress/issues/25801)) ([d54fa65](https://github.com/cypress-io/cypress/commit/d54fa65f587da2b86c8d3140f44c653888fb62ee))
+
+# [@cypress/vite-dev-server-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.1...@cypress/vite-dev-server-v5.0.2) (2022-12-09)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** ensure assets are correctly reloaded ([#24965](https://github.com/cypress-io/cypress/issues/24965)) ([89c013f](https://github.com/cypress-io/cypress/commit/89c013fcedc2509850ec820f938d33f08f9cbb42))
+
+# [@cypress/vite-dev-server-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.0...@cypress/vite-dev-server-v5.0.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* add v8 snapshot usage to cypress in cypress testing ([#24860](https://github.com/cypress-io/cypress/issues/24860)) ([c540284](https://github.com/cypress-io/cypress/commit/c540284f5080d46a8597e53dd2213cb6fb133078))
+
+# [@cypress/vite-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.1...@cypress/vite-dev-server-v5.0.0) (2022-12-02)
+
+
+### chore
+
+* remove experimentalSessionAndOrigin flag ([#24340](https://github.com/cypress-io/cypress/issues/24340)) ([69873ae](https://github.com/cypress-io/cypress/commit/69873ae9884228f15310fd151e42cbc0cb712817))
+
+
+### BREAKING CHANGES
+
+* removed experimentalSessionAndOrigin flag. testIsolation defaults to strict
+
+# [@cypress/vite-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.0...@cypress/vite-dev-server-v4.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* vite-dev-server hoisting issue in binary ([#24599](https://github.com/cypress-io/cypress/issues/24599)) ([2513bea](https://github.com/cypress-io/cypress/commit/2513beac307e95267ab736a93a39cd1cd1280506))
+
+# [@cypress/vite-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.4.0...@cypress/vite-dev-server-v4.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* normalize vite config resolution ([#24369](https://github.com/cypress-io/cypress/issues/24369)) ([feba489](https://github.com/cypress-io/cypress/commit/feba489a9aeaddad3197764fe7e7405cfb4e7a56))
+
+
+### BREAKING CHANGES
+
+* vite.config.js is no longer merged when devServer.viteConfig is provided
+
+# [@cypress/vite-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.1...@cypress/vite-dev-server-v3.4.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
+# [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
+
+
+### Bug Fixes
+
+* CSS import in CT Support file is not working ([#24117](https://github.com/cypress-io/cypress/issues/24117)) ([5af6b27](https://github.com/cypress-io/cypress/commit/5af6b27ed972ba9bc03d4a7fa4eaaeb2c7848fc3))
+
+# [@cypress/vite-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.2.0...@cypress/vite-dev-server-v3.3.0) (2022-10-06)
+
+
+### Bug Fixes
+
+* Address Vite sourcemap edge cases ([#24063](https://github.com/cypress-io/cypress/issues/24063)) ([e918fc1](https://github.com/cypress-io/cypress/commit/e918fc1a8c1b26b25207e42a6b8a879b0a3e9a2b))
+
+
+### Features
+
+* Disable file watching in component tests in run mode ([#24097](https://github.com/cypress-io/cypress/issues/24097)) ([3e01474](https://github.com/cypress-io/cypress/commit/3e014743909b35f54b697d2a759e4a2c5b67b5b7))
+
+# [@cypress/vite-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.1...@cypress/vite-dev-server-v3.2.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* support type: module in Node.js 16.17.0+ and 18.6.0+ ([#23637](https://github.com/cypress-io/cypress/issues/23637)) ([b6dad0a](https://github.com/cypress-io/cypress/commit/b6dad0a674279936a9816939963bbf129647cee7))
+
+
+### Features
+
+* allow vite/webpack config to be an async function ([#23605](https://github.com/cypress-io/cypress/issues/23605)) ([4c647f6](https://github.com/cypress-io/cypress/commit/4c647f6d5b0f58a797b50436e63c645418bc07ac))
+* CT stack traces ([#23916](https://github.com/cypress-io/cypress/issues/23916)) ([bf590eb](https://github.com/cypress-io/cypress/commit/bf590eba3f1cf46b04f6a1252e51da5c5a3dc7c2))
+
+# [@cypress/vite-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.0...@cypress/vite-dev-server-v3.1.1) (2022-08-15)
+
+
+### Bug Fixes
+
+* vite v3 not working with node >=17 ([#23048](https://github.com/cypress-io/cypress/issues/23048)) ([2226b28](https://github.com/cypress-io/cypress/commit/2226b2834aabc90eab532bd7cf86407e8c7248df))
+
+# [@cypress/vite-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.0.0...@cypress/vite-dev-server-v3.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+
+
+### Features
+
+* support vite.config.mts and vite.config.cts ([#22782](https://github.com/cypress-io/cypress/issues/22782)) ([8678053](https://github.com/cypress-io/cypress/commit/8678053f7d822cda90fe653fd1aa87efd09cf769))
+* update to Vite 3 ([#22915](https://github.com/cypress-io/cypress/issues/22915)) ([6adba46](https://github.com/cypress-io/cypress/commit/6adba462ea6b76dbb96f99aa3837492ca1f17ed3))
+
 # [@cypress/vite-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.3...@cypress/vite-dev-server-v3.0.0) (2022-06-13)
 
 

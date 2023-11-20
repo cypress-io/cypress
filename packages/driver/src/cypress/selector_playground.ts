@@ -4,7 +4,7 @@ import uniqueSelector from '@cypress/unique-selector'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
-const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
+const SELECTOR_PRIORITIES = 'data-cy data-test data-testid data-qa id class tag attributes nth-child'.split(' ')
 
 type Defaults = {
   onElement: Cypress.SelectorPlaygroundDefaultsOptions['onElement'] | null

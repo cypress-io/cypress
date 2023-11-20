@@ -68,7 +68,7 @@ const onInvoke = function (Cypress, obj, args) {
   const logProps: Record<string, any> = {
     name: agentName,
     message: obj.message,
-    error: obj.error,
+    state: obj.error ? 'failed' : 'passed',
     type: 'parent',
     end: true,
     snapshot: !agent._noSnapshot,
@@ -76,9 +76,8 @@ const onInvoke = function (Cypress, obj, args) {
     consoleProps () {
       const consoleObj: Record<string, any> = {}
 
-      consoleObj.Command = null
-      consoleObj.Error = null
-      consoleObj.Event = `${agentName} called`
+      consoleObj.name = `${agentName} called`
+      consoleObj.error = null
 
       consoleObj[agent._cyType] = agent
       consoleObj['Call #'] = agent.callCount
@@ -235,7 +234,7 @@ export default function (Commands, Cypress, cy, state) {
     agent.as = (alias) => {
       cy.validateAlias(alias)
       cy.addAlias(ctx, {
-        subject: agent,
+        subjectChain: [agent],
         command: log,
         alias,
       })

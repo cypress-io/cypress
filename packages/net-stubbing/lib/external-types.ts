@@ -68,6 +68,9 @@ type Method =
     | 'unlink'
     | 'unlock'
     | 'unsubscribe'
+
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+
 export namespace CyHttpMessages {
   export interface BaseMessage {
     /**
@@ -139,6 +142,10 @@ export namespace CyHttpMessages {
      * The HTTP version used in the request. Read only.
      */
     httpVersion: string
+    /**
+     * The resource type that is being requested, according to the browser.
+     */
+    resourceType: ResourceType
     /**
      * If provided, the number of milliseconds before an upstream response to this request
      * will time out and cause an error. By default, `responseTimeout` from config is used.
@@ -371,6 +378,10 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   query?: DictMatcher<S>
   /**
+   * Match on the request's resource type, according to the browser.
+   */
+  resourceType?: ResourceType | S
+  /**
    * If set, this `RouteMatcher` will only match the first `times` requests.
    */
   times?: number
@@ -384,7 +395,17 @@ export interface RouteMatcherOptionsGeneric<S> {
 
 export type RouteHandlerController = HttpRequestInterceptor
 
-export type RouteHandler = string | StaticResponse | RouteHandlerController | object
+export type RouteHandler = string | StaticResponseWithOptions | RouteHandlerController | object
+
+export type InterceptOptions = {
+  /**
+   * If set to `false`, matching requests will not be shown in the Command Log.
+   * @default true
+   */
+  log?: boolean
+}
+
+export type StaticResponseWithOptions = StaticResponse & InterceptOptions
 
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.

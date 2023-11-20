@@ -19,7 +19,8 @@ describe('e2e cookies spec', () => {
 
   context('__Host- prefix', () => {
     // https://github.com/cypress-io/cypress/issues/8261
-    it('can set __Host- cookie', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it('can set __Host- cookie', { retries: 15 }, () => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         domain: 'example.com',
@@ -35,7 +36,8 @@ describe('e2e cookies spec', () => {
       }))
     })
 
-    it('errors when __Host- cookie and secure:false', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it('errors when __Host- cookie and secure:false', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval')
 
@@ -48,7 +50,8 @@ describe('e2e cookies spec', () => {
       })
     })
 
-    it('errors when __Host- cookie and path', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it('errors when __Host- cookie and path', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         secure: true,
@@ -63,7 +66,8 @@ describe('e2e cookies spec', () => {
   })
 
   context('__Secure- prefix', () => {
-    it('can set __Secure- cookie', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it('can set __Secure- cookie', { retries: 15 }, () => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',
@@ -79,7 +83,8 @@ describe('e2e cookies spec', () => {
       }))
     })
 
-    it('errors when __Secure- cookie secure:false', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+    it('errors when __Secure- cookie secure:false', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',

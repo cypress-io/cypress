@@ -15,3 +15,7 @@ export interface FoundSpec extends SpecFile {
   fileExtension: string
   specType: Cypress.CypressSpecType
 }
+
+export interface SpecWithRelativeRoot extends FoundSpec {
+  relativeToCommonRoot: string
+}

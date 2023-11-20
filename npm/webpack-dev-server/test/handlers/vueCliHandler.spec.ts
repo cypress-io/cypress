@@ -13,7 +13,7 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = vueCliHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await vueCliHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
       framework: 'vue-cli',
     } as WebpackDevServerConfig)
@@ -30,7 +30,7 @@ describe('vueCliHandler', function () {
 
     process.chdir(projectRoot)
 
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = vueCliHandler({
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await vueCliHandler({
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
       framework: 'vue-cli',
     } as WebpackDevServerConfig)

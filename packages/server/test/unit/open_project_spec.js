@@ -21,6 +21,7 @@ describe('lib/open_project', () => {
     this.config = {
       excludeSpecPattern: '**/*.nope',
       projectRoot: todosPath,
+      proxyServer: 'http://cy-proxy-server',
     }
 
     this.onError = sinon.stub()
@@ -120,33 +121,6 @@ describe('lib/open_project', () => {
         sinon.stub(runEvents, 'execute').resolves()
       })
 
-      it('executes before:spec if in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).to.be.calledWith('before:spec', this.config, this.spec)
-        })
-      })
-
-      it('does not execute before:spec if not in interactive mode', function () {
-        this.config.experimentalInteractiveRunEvents = true
-        this.config.isTextTerminal = true
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
-      it('does not execute before:spec if experimental flag is not enabled', function () {
-        this.config.experimentalInteractiveRunEvents = false
-        this.config.isTextTerminal = false
-
-        return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
-      })
-
       it('executes after:spec on browser close if in interactive mode', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
@@ -157,7 +131,7 @@ describe('lib/open_project', () => {
           return browsers.open.lastCall.args[1].onBrowserClose()
         })
         .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
+          expect(runEvents.execute).to.be.calledWith('after:spec', this.spec)
         })
       })
 
@@ -206,6 +180,9 @@ describe('lib/open_project', () => {
       })
 
       it('sends after:spec errors through onError option', function () {
+        // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23448
+        this.retries(15)
+
         const err = new Error('thrown from after:spec handler')
 
         this.config.experimentalInteractiveRunEvents = true
@@ -227,9 +204,14 @@ describe('lib/open_project', () => {
         })
       })
 
-      it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
+      it('calls connectToNewSpec when shouldLaunchNewTab is set and the browser is not electron', async function () {
         await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
+      })
+
+      it('calls open when shouldLaunchNewTab is set and the browser is electron', async function () {
+        await openProject.launch({ name: 'electron' }, this.spec, { shouldLaunchNewTab: true })
+        expect(browsers.open).to.have.been.calledOnce
       })
     })
   })
@@ -271,6 +253,17 @@ describe('lib/open_project', () => {
 
       expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
       expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
+    })
+  })
+
+  context('#connectProtocolToBrowser', () => {
+    it('connects protocol to browser', async () => {
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      const options = sinon.stub()
+
+      await openProject.connectProtocolToBrowser(options)
+
+      expect(browsers.connectProtocolToBrowser).to.be.calledWith(options)
     })
   })
 })

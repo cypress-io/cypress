@@ -1,7 +1,7 @@
 import type { CloudSpecRun } from '../../../../graphql/src/gen/cloud-source-types.gen'
-import type { CloudSpecStatus } from '@packages/app/src/generated/graphql'
+import type { CloudRunGroupStatusEnum } from '@packages/app/src/generated/graphql'
 
-export const randomRunStatus = (): CloudSpecStatus => {
+export const randomRunStatus = (): CloudRunGroupStatusEnum => {
   const r = Math.floor(Math.random() * 5)
 
   switch (r) {
@@ -13,12 +13,17 @@ export const randomRunStatus = (): CloudSpecStatus => {
   }
 }
 
-export const fakeRuns = (statuses: CloudSpecStatus[]): Required<CloudSpecRun>[] => {
+export const fakeRuns = (statuses: CloudRunGroupStatusEnum[]): Required<CloudSpecRun>[] => {
   return statuses.map((s, idx) => {
     return {
       __typename: 'CloudSpecRun',
       id: `SpecRun_${idx}`,
       status: s,
+      basename: '',
+      extension: '',
+      groupIds: null,
+      path: '',
+      shortPath: '',
       createdAt: new Date('2022-05-08T03:17:00').toISOString(),
       completedAt: new Date('2022-05-08T05:17:00').toISOString(),
       runNumber: 432,

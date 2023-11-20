@@ -1,7 +1,3 @@
-Cypress.Cookies.defaults({
-  preserve: 'foo1',
-})
-
 describe('Cookies', () => {
   beforeEach(() => {
     cy.wrap({ foo: 'bar' })
@@ -61,24 +57,6 @@ describe('Cookies', () => {
     cy.document()
     .its('cookie')
     .should('be.empty')
-  })
-
-  it('resets cookies between tests correctly', () => {
-    beforeEach(() => {
-      Cypress.Cookies.preserveOnce('foo2')
-    })
-
-    for (let i = 1; i <= 100; i++) {
-      (((i) => {
-        cy.setCookie(`foo${i}`, `${i}`)
-      }))(i)
-    }
-
-    cy.getCookies().should('have.length', 100)
-  })
-
-  it('should be zero now', () => {
-    cy.getCookies().should('have.length', 2)
   })
 
   it('sends cookies to localhost:2121', () => {
