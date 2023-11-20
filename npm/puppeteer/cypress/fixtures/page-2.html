@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page 2</title>
+    <link rel="stylesheet" href="/cypress/fixtures/styles.css"></link>
+  </head>
+  <body>
+    <main>
+      <h1>Page 2</h1>
+      <p>You said: <span id="content"></span></p>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(location.search)
+      const content = document.querySelector('#content')
+
+      content.textContent = params.get('text')
+    </script>
+  </body>
+</html>
