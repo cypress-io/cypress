@@ -7,6 +7,10 @@ _Released 11/21/2023 (PENDING)_
 
 - When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the console. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
 
+**Bugfixes:**
+
+- Fixed issue where some URLs would timeout in pre-request correlation. Addressed in [#28354](https://github.com/cypress-io/cypress/pull/28354).
+
 ## 13.5.1
 
 _Released 11/14/2023_
