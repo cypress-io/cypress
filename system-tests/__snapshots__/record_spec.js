@@ -3796,6 +3796,7 @@ We will retry 1 more time in X second(s)...
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error downloading capture code: 500 - "500 - Internal Server Error"
 
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3878,6 +3879,7 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
+  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
