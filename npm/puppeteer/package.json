@@ -23,7 +23,7 @@
   "devDependencies": {
     "chai-as-promised": "^7.1.1",
     "chokidar": "^3.5.3",
-    "http-server": "^14.1.1",
+    "express": "4.17.3",
     "mocha": "^10.2.0",
     "rimraf": "^5.0.1",
     "semantic-release": "19.0.3",

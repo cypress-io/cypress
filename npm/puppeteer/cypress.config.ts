@@ -1,12 +1,15 @@
-import cp from 'child_process'
 import { defineConfig } from 'cypress'
 import type { Browser as PuppeteerBrowser, Page } from 'puppeteer-core'
+import path from 'path'
+import express from 'express'
 
 import { setup, retry } from './src/plugin'
 
+const serverPort = 8000
+
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:8000',
+    baseUrl: `http://localhost:${serverPort}`,
     setupNodeEvents (on) {
       setup({
         on,
@@ -43,7 +46,7 @@ export default defineConfig({
             const page = await browser.newPage()
 
             // Text comes from the test invocation of `cy.puppeteer()`
-            await page.goto(`http://localhost:8000/cypress/fixtures/page-4.html?text=${text}`)
+            await page.goto(`http://localhost:${serverPort}/cypress/fixtures/page-4.html?text=${text}`)
 
             const paragraph = (await page.waitForSelector('p'))!
             const paragraphText = await page.evaluate((el) => el.textContent, paragraph)
@@ -60,9 +63,18 @@ export default defineConfig({
       })
 
       return new Promise<void>((resolve) => {
-        const serverProcess = cp.spawn('http-server', ['-p', '8000'], { stdio: 'inherit' })
+        const app = express()
 
-        serverProcess.on('spawn', () => resolve())
+        app.set('port', serverPort)
+        app.set('view engine', 'html')
+        app.use(express.static(path.join(__dirname)))
+
+        app.listen(serverPort, () => {
+          // eslint-disable-next-line no-console
+          console.log(`Express server listening on http://localhost:${serverPort}`)
+
+          resolve()
+        })
       })
     },
   },
