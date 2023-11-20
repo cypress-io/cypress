@@ -643,6 +643,7 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
 const UPLOAD_ACTIVITY_INTERVAL = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') === 'undefined' ? 15000 : env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL')
 
 export const beginUploadActivityOutput = () => {
+  console.log('')
   process.stdout.write(chalk.bold.blue('  Uploading Cloud Artifacts: '))
   process.stdout.write(chalk.bold.blue('. '))
   const uploadActivityInterval = setInterval(() => {
