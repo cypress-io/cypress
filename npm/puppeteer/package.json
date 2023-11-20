@@ -9,7 +9,7 @@
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "cypress:open": "node ../../scripts/cypress.js open",
-    "cypress:run": "node ../../scripts/cypress.js run",
+    "cypress:run": "node ../../scripts/cypress.js run --browser chrome",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "semantic-release": "semantic-release",
     "test": "mocha test/unit/*.spec.ts",
