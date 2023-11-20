@@ -154,3 +154,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   return new WkInstance()
 }
+
+export async function closeExtraTargets () {
+  // we're currently holding off on implementing Webkit support in order
+  // to release Chromium support as soon as possible and may add Webkit
+  // support in the future
+  debug('Closing extra targets is not currently supported in Webkit')
+}

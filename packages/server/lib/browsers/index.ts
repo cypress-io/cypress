@@ -273,4 +273,15 @@ export = {
 
     return instance
   },
+
+  /**
+   * Closes extra targets that are not the Cypress tab
+   */
+  async closeExtraTargets () {
+    if (!instance?.browser) return
+
+    const browserLauncher = await getBrowserLauncher(instance.browser, [])
+
+    await browserLauncher.closeExtraTargets()
+  },
 } as const

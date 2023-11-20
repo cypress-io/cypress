@@ -25,6 +25,7 @@ const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadAct
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 const { fs } = require('../util/fs')
+const { performance } = require('perf_hooks')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -258,6 +259,8 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         }
       }
 
+      const startTime = performance.now()
+
       debug('uploading artifact %O', {
         ...artifact,
         payload: typeof artifact.payload,
@@ -273,6 +276,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             url: artifact.uploadUrl,
             fileSize: artifact.fileSize,
             key: artifact.reportKey,
+            duration: performance.now() - startTime,
           }
         }
 
@@ -285,6 +289,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           pathToFile: artifact.filePath,
           fileSize: artifact.fileSize,
           key: artifact.reportKey,
+          duration: performance.now() - startTime,
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -303,6 +308,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
+            duration: performance.now() - startTime,
           }
         }
 
@@ -312,6 +318,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
+          duration: performance.now() - startTime,
         }
       }
     }),
@@ -348,7 +355,8 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       return skipped && !report.error ? acc : {
         ...acc,
         [key]: {
-          ...report,
+          // TODO: once cloud supports reporting duration, no longer omit this
+          ..._.omit(report, 'duration'),
           error,
         },
       }
