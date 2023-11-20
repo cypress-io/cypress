@@ -87,7 +87,9 @@ export function addDefaultPort (urlToCheck: any) {
 }
 
 export function getPath (urlToCheck: string) {
-  return url.parse(urlToCheck).path
+  const url = new URL(urlToCheck)
+
+  return `${url.pathname}${url.search}`
 }
 
 const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
