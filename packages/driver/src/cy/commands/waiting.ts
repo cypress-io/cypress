@@ -90,6 +90,10 @@ export default (Commands, Cypress, cy, state) => {
       const req = waitForRoute(alias, state, type)
 
       if (req) {
+        // Attach alias to request to ensure driver access to
+        // dynamic aliases. See #24653
+        req.request.alias = alias
+
         return req
       }
 
