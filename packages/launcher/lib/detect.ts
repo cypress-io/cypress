@@ -1,14 +1,13 @@
 import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
-import Debug from 'debug'
 
-import * as windowsHelper from './windows'
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
 import { knownBrowsers, validateMinVersion } from './known-browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
+import Debug from 'debug'
 import type {
   Browser,
   BrowserValidator,
@@ -19,6 +18,7 @@ import type {
   NotDetectedAtPathError,
   NotInstalledError, PathData,
 } from './types'
+import * as windowsHelper from './windows'
 
 const debug = Debug('cypress:launcher:detect')
 const debugVerbose = Debug('cypress-verbose:launcher:detect')
