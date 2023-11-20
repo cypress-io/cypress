@@ -18,7 +18,7 @@ export default defineConfig({
               const page = pages.find((page) => page.url().includes('page-2.html'))
 
               // If we haven't found the page, throw an error to signal that it should retry
-              if (!page) throw new Error('Could not find page')
+              if (!page) throw new Error('Could not find page matching `page-2.html`')
 
               // Otherwise, return the page instance and it will be returned by the `retry` function itself
               return page

@@ -168,7 +168,7 @@ setup({
 
 ## Examples
 
-These examples can be found and run in the [Cypress tests of this package](./cypress).
+These examples can be found and run in the [Cypress tests of this package](./cypress) with this project's [cypress.config.ts](./cypress.config.ts).
 
 While these example use tabs, they could just as easily apply to windows. Tabs and windows are essentially the same things as far as Puppeteer is concerned and encapsuled by instances of the [Page class](https://pptr.dev/api/puppeteer.page/).
 
@@ -339,7 +339,7 @@ Run all unit tests once:
 yarn test
 ```
 
-Run tests in watch mode:
+Run unit tests in watch mode:
 
 ```shell
 yarn test-watch
