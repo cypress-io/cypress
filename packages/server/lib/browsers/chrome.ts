@@ -651,4 +651,8 @@ export = {
     // with additional method to close the remote connection
     return launchedBrowser
   },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
+  },
 }
