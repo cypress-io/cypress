@@ -735,13 +735,6 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - when:
-          condition:
-            equal: [ chrome, << parameters.browser >> ]
-          steps:
-            - install-chrome:
-                channel: stable
-                version: $(node ./scripts/get-browser-version.js chrome:stable)
       - run:
           name: Run system tests
           environment:

@@ -4,8 +4,7 @@ import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create } from './cri-client'
-import type { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
