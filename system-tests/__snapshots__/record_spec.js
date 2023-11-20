@@ -69,7 +69,7 @@ Fix the error in your code and re-run your tests.
 
   (Uploaded Cloud Artifacts)
 
-  - Video - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
+  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -132,8 +132,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Uploaded Cloud Artifacts)
 
-  - Video - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
-  - Screenshot - Done Uploading 1 kB 2/2 /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
+  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2 /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -180,7 +180,7 @@ plugin stdout
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -246,8 +246,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploaded Cloud Artifacts)
 
-  - Video - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
-  - Screenshot - Done Uploading 1 kB 2/2 /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
+  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2 /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
 
 ====================================================================================================
 
@@ -1062,7 +1062,7 @@ plugin stdout
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1578,7 +1578,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 Warning: We encountered an error communicating with our servers.
 
 This run will proceed, but will not be recorded.
@@ -1671,8 +1671,8 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Uploaded Cloud Artifacts)
 
-  - Video - Failed Uploading 1/2 /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4 - 500 - "Internal Server Error"
-  - Screenshot - Failed Uploading 2/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png - 500 - "Internal Server Error"
+  - Video - Failed Uploading after Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4 - 500 - "Internal Server Error"
+  - Screenshot - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png - 500 - "Internal Server Error"
 
 ====================================================================================================
 
@@ -1777,7 +1777,7 @@ We will retry 3 more times in X second(s)...
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2020,7 +2020,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2105,7 +2105,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2192,7 +2192,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2277,7 +2277,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2362,7 +2362,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2447,7 +2447,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2532,7 +2532,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2617,7 +2617,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2708,7 +2708,7 @@ Details:
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2789,7 +2789,7 @@ exports['e2e record capture-protocol disabled messaging displays disabled messag
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2870,8 +2870,8 @@ exports['e2e record capture-protocol enabled passing retrieves the capture proto
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB 2/2
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 
@@ -2956,7 +2956,7 @@ https://on.cypress.io/renderer-process-crashed
 
   (Uploaded Cloud Artifacts)
 
-  - Test Replay - Done Uploading 1 kB 1/1
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -3002,8 +3002,8 @@ https://on.cypress.io/renderer-process-crashed
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB 2/2
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 
@@ -3082,7 +3082,7 @@ Error: Async error from plugins file
 
   (Uploaded Cloud Artifacts)
 
-  - Test Replay - Done Uploading 1 kB 1/1
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1
 
 ====================================================================================================
 
@@ -3163,8 +3163,8 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Uploading 2/2 - Spec recording too large: db is 1024 bytes, limit is 200 bytes
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Spec recording too large: db is 1024 bytes, limit is 200 bytes
 
 ====================================================================================================
 
@@ -3245,7 +3245,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -3326,7 +3326,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -3407,7 +3407,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -3488,8 +3488,8 @@ exports['e2e record capture-protocol enabled protocol runtime errors non-fatal e
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB 2/2
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 
@@ -3570,8 +3570,8 @@ exports['capture-protocol api errors upload 500 - retries 8 times and fails cont
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Uploading 2/2 - Internal Server Error
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Internal Server Error
 
 ====================================================================================================
 
@@ -3652,8 +3652,8 @@ exports['capture-protocol api errors upload 500 - retries 7 times and succeeds o
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB 2/2
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 
@@ -3740,7 +3740,7 @@ We will retry 1 more time in X second(s)...
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -3821,8 +3821,8 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB 2/2
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
 
 ====================================================================================================
 

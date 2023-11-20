@@ -1678,12 +1678,25 @@ describe('src/cy/commands/actions/click', () => {
         it('can scroll to and click elements in html with scroll-behavior: smooth', () => {
           cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
+        })
+
+        // https://github.com/cypress-io/cypress/issues/28150
+        it('can scroll to and click elements in html with scroll-behavior: smooth and overflow-y: auto', () => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('body').invoke('css', 'overflow-y', 'auto')
+          cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
 
         // https://github.com/cypress-io/cypress/issues/3200
         it('can scroll to and click elements in ancestor element with scroll-behavior: smooth', () => {
           cy.get('#dom').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('#dom').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
       })
     })

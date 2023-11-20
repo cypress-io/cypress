@@ -361,7 +361,7 @@ describe('lib/browsers/cri-client', function () {
         BrowserCriClient._onTargetDestroyed(options as any)
 
         expect(options.browserCriClient.removeExtraTargetClient).to.be.calledWith('target-id')
-      // error is caught or else the test would fail
+        // error is caught or else the test would fail
       })
 
       it('removes the extra target client from the tracker', () => {
@@ -543,6 +543,38 @@ describe('lib/browsers/cri-client', function () {
       const browserClient = await getClient() as any
 
       await expect(browserClient.resetBrowserTargets()).to.be.rejected
+    })
+  })
+
+  context('#closeExtraTargets', () => {
+    it('closes any extra tracked targets', async () => {
+      const browserClient = await getClient() as any
+
+      browserClient.browserClient.send = sinon.stub().resolves()
+
+      browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
+      browserClient.addExtraTargetClient({ targetId: 'target-id-2' }, {})
+
+      await browserClient.closeExtraTargets()
+
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
+    })
+
+    it('ignores errors', async () => {
+      const browserClient = await getClient() as any
+
+      browserClient.browserClient.send = sinon.stub().resolves()
+      browserClient.browserClient.send.onFirstCall().rejects(new Error('failed to close target'))
+
+      browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
+      browserClient.addExtraTargetClient({ targetId: 'target-id-2' }, {})
+
+      await browserClient.closeExtraTargets()
+
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
+      // error is caught or else the test would fail
     })
   })
 
