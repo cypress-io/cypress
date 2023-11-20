@@ -10,9 +10,23 @@ interface SetupOptions {
   puppeteer?: PuppeteerNode
 }
 
-function callbackError (err: any) {
+function messageHandlerError (err: any) {
+  const errObject = {} as any
+
+  if (typeof err === 'string') {
+    errObject.message = err
+  } else if (typeof err === 'object') {
+    Object.assign(errObject, {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    })
+  } else {
+    errObject.message = err
+  }
+
   return {
-    __error__: err,
+    __error__: errObject,
   }
 }
 
@@ -43,10 +57,12 @@ export function setup (options: SetupOptions) {
 
   const puppeteer = options.puppeteer || defaultPuppeteer
 
+  let cypressBrowser: Cypress.Browser
   let debuggerUrl: string
 
   try {
-    options.on('after:browser:launch', async (_, options) => {
+    options.on('after:browser:launch', async (browser, options) => {
+      cypressBrowser = browser
       debuggerUrl = options.webSocketDebuggerUrl
     })
   } catch (err: any) {
@@ -55,29 +71,42 @@ export function setup (options: SetupOptions) {
 
   options.on('task', {
     async __cypressPuppeteer__ ({ name, args }: { name: string, args: any[] }) {
-      const callback = options.onMessage[name]
-
-      if (!callback) {
-        return callbackError(pluginError(`Could not find callback with the name \`${name}\`. Registered callback names are: ${Object.keys(options.onMessage).join(', ')}.`))
+      if (!cypressBrowser) {
+        return messageHandlerError(pluginError(`Lost the reference to the browser. This usually occurs because the Cypress config was reloaded without the browser re-launching. Close and re-open the browser.`))
       }
 
-      const callbackType = typeof callback
-
-      if (callbackType !== 'function') {
-        return callbackError(pluginError(`Callbacks must be a function, but the callback for the name \`${name}\` was type \`${callbackType}\`.`))
+      if (cypressBrowser.family !== 'chromium') {
+        return messageHandlerError(pluginError(`Only browsers in the "Chromium" family are supported. You are currently running a browser with the family: ${cypressBrowser.family}`))
       }
 
-      // TODO: wrap error message?
-      const browser = await puppeteer.connect({
-        browserWSEndpoint: debuggerUrl,
-        defaultViewport: null,
-      })
+      const messageHandler = options.onMessage[name]
+
+      if (!messageHandler) {
+        return messageHandlerError(pluginError(`Could not find message handler with the name \`${name}\`. Registered message handler names are: ${Object.keys(options.onMessage).join(', ')}.`))
+      }
+
+      const handlerType = typeof messageHandler
+
+      if (handlerType !== 'function') {
+        return messageHandlerError(pluginError(`Message handlers must be functions, but the message handler for the name \`${name}\` was type \`${handlerType}\`.`))
+      }
+
+      let browser: Browser
+
+      try {
+        browser = await puppeteer.connect({
+          browserWSEndpoint: debuggerUrl,
+          defaultViewport: null,
+        })
+      } catch (err: any) {
+        return messageHandlerError(err)
+      }
 
       let result: any
       let error: any
 
       try {
-        result = await callback(browser, ...args)
+        result = await messageHandler(browser, ...args)
       } catch (err: any) {
         error = err
       } finally {
@@ -85,7 +114,7 @@ export function setup (options: SetupOptions) {
       }
 
       if (error) {
-        return callbackError(error)
+        return messageHandlerError(error)
       }
 
       // cy.task() errors if `undefined` is returned, so return null in that case

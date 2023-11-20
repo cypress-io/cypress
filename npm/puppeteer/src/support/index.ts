@@ -17,9 +17,7 @@ Cypress.Commands.add('puppeteer', (name, ...args) => {
 
   cy.task('__cypressPuppeteer__', { name, args }, { log: false }).then((result: any) => {
     if (result && result.__error__) {
-      // TODO: wrap and re-throw error
-
-      throw new Error(result.__error__.message)
+      throw new Error(`cy.puppeteer() failed with the following error:\n> ${result.__error__.message || result.__error__}`)
     }
 
     return result

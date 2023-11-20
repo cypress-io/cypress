@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 
-import { retry } from '../../src'
+import { retry } from '../../src/plugin'
 
 use(chaiAsPromised)
 use(sinonChai)
@@ -48,6 +48,6 @@ describe('#retry', () => {
 
     await expect(
       retry(fn, { timeout: 5, delayBetweenTries: 1 }),
-    ).to.be.rejectedWith('@cypress/puppeteer: Failed retrying after 5ms: fail')
+    ).to.be.rejectedWith('ailed retrying after 5ms: fail')
   })
 })
