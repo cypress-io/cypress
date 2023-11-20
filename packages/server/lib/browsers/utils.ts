@@ -230,61 +230,10 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
-
-const getWebKitBrowserVersion = async () => {
-  try {
-    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
-    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
-    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath)
-    const result = wkBrowserVersionRe.exec(wkBrowserContents)
-
-    if (!result || !result.groups!.version) return '0'
-
-    return result.groups!.version
-  } catch (err) {
-    debug('Error detecting WebKit browser version %o', err)
-
-    return '0'
-  }
-}
-
-async function getWebKitBrowser () {
-  try {
-    const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
-    const mod = await import(modulePath) as typeof import('playwright-webkit')
-    const version = await getWebKitBrowserVersion()
-
-    const browser: FoundBrowser = {
-      name: 'webkit',
-      channel: 'stable',
-      family: 'webkit',
-      displayName: 'WebKit',
-      version,
-      path: mod.webkit.executablePath(),
-      majorVersion: version.split('.')[0],
-      warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
-    }
-
-    return browser
-  } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
-
-    return
-  }
-}
-
 const getBrowsers = async () => {
   debug('getBrowsers')
 
-  const [browsers, wkBrowser] = await Promise.all([
-    launcher.detect(),
-    getWebKitBrowser(),
-  ])
-
-  if (wkBrowser) browsers.push(wkBrowser)
+  const browsers = await launcher.detect()
 
   debug('found browsers %o', { browsers })
 

@@ -148,4 +148,13 @@ export const knownBrowsers: Browser[] = [
     binary: ['edge-dev', 'microsoft-edge-dev'],
     minSupportedVersion: MIN_EDGE_VERSION,
   },
+  {
+    name: 'webkit',
+    family: 'webkit',
+    channel: 'stable',
+    displayName: 'WebKit',
+    versionRegex: /BROWSER_VERSION = \'(?<version>[^']+)\'/gm,
+    binary: ['playwright-webkit'],
+    warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
+  },
 ]
