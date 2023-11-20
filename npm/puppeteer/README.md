@@ -26,6 +26,18 @@ npm install --save-dev @cypress/puppeteer
 yarn add @cypress/puppeteer
 ```
 
+## With TypeScript
+
+Add the following in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["cypress", "@cypress/puppeteer"]
+  }
+}
+```
+
 ## Compatibility
 
 `@cypress/puppeteer` requires Cypress version 13.6.0 or greater.

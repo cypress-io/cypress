@@ -14,7 +14,8 @@ describe('multi-tab testing', () => {
     // We get a dynamic value from the page and pass it through to the puppeteer
     // message handler
     cy.get('#message').invoke('text').then((message) => {
-      cy.puppeteer('createTabAndGetContent', message)
+      cy
+      .puppeteer('createTabAndGetContent', message)
       .should('equal', 'I approve this message: Cypress and Puppeteer make a great combo')
     })
   })

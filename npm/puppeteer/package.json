@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "description": "Plugin for enhancing Cypress tests with Puppeteer",
   "private": false,
-  "main": "./dist/plugin/index.js",
+  "main": "dist/plugin/index.js",
   "scripts": {
     "build-prod": "yarn build",
     "build": "rimraf dist && tsc || echo 'built, with errors'",
@@ -32,5 +32,9 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
-  "types": "./src/plugin/index.d.ts"
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "types": "index.d.ts"
 }

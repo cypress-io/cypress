@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
-    "types": ["cypress"]
+    "types": [
+      "cypress"
+    ]
   },
-  "include": ["e2e/**/*.ts", "globals.d.ts"]
+  "include": [
+    "../index.d.ts",
+    "e2e/**/*.ts"
+  ]
 }

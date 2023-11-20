@@ -1,14 +1,3 @@
-// necessary to make this a module so `declare global` works
-export {}
-
-declare global {
-  namespace Cypress {
-    interface Chainable {
-      puppeteer(messageName: string, ...args: any[]): Chainable
-    }
-  }
-}
-
 Cypress.Commands.add('puppeteer', (name, ...args) => {
   Cypress.log({
     name: 'puppeteer',

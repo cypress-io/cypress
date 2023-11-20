@@ -17,5 +17,8 @@
       "cypress"
     ]
   },
-  "include": ["src/"]
+  "include": [
+    "index.d.ts",
+    "src/"
+  ]
 }
