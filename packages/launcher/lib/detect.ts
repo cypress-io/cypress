@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
+
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
 import { knownBrowsers, validateMinVersion } from './known-browsers'
 import * as darwinHelper from './darwin'

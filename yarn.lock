@@ -6210,10 +6210,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chrome-remote-interface@0.31.4":
-  version "0.31.4"
-  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.31.4.tgz#d07b34f4af0c7294c5b0164780b3d7bfce078155"
-  integrity sha512-DJHDwimNqCgAyG5gFmr6Y265pe967u3mnkeMVc0iHuf04PHzTgFypA2AjxSvtkM/pogqWxvfRYXy9Wa5Dj0U1g==
+"@types/chrome-remote-interface@0.31.11":
+  version "0.31.11"
+  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.31.11.tgz#bd8e3317eac339d1f831659dbb8f07a7ad785f2e"
+  integrity sha512-9NzphRNJaDSfI6BKQx/i6F3xQghU9PN39bssoPckYPAsOABNy2I1tCH2JUdubuAsED3zszTwivWS+K0X024pJg==
   dependencies:
     devtools-protocol "0.0.927104"
 
@@ -10669,10 +10669,10 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
-chrome-remote-interface@0.31.3:
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.31.3.tgz#bd01b89f5f0e968f7eeb37b8b7c5ac20e6e1f4d0"
-  integrity sha512-NTwb1YNPHXLTus1RjqsLxJmdViKwKJg/lrFEcM6pbyQy04Ow2QKWHXyPpxzwE+dFsJghWuvSAdTy4W0trluz1g==
+chrome-remote-interface@0.33.0:
+  version "0.33.0"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.33.0.tgz#9140b5612ee5cdc39212cd0296d3b61ea881c47a"
+  integrity sha512-tv/SgeBfShXk43fwFpQ9wnS7mOCPzETnzDXTNxCb6TqKOiOeIfbrJz+2NAp8GmzwizpKa058wnU1Te7apONaYg==
   dependencies:
     commander "2.11.x"
     ws "^7.2.0"

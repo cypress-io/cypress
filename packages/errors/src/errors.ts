@@ -102,7 +102,7 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(options)}`
   },
-  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
+  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[], supportedBrowsers: string[]) => {
     let canarySuffix: PartialErr | null = null
 
     if (browser === 'canary') {
@@ -119,7 +119,7 @@ export const AllCypressErrors = {
         Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
-        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox'])}
+        ${fmt.listItems(supportedBrowsers)}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 

@@ -350,6 +350,8 @@ describe('visual error templates', () => {
       }
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
+      const mockedFoundBrowsers = [{ name: 'chrome' }, { name: 'firefox' }]
+
       return {
         default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
         canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],

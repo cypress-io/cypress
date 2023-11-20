@@ -243,7 +243,7 @@ const getBrowsers = async () => {
     return browsers
   }
 
-  const version = process.versions.chrome || ''
+  const version = process.versions.electron || ''
   let majorVersion
 
   if (version) {
@@ -251,14 +251,11 @@ const getBrowsers = async () => {
   }
 
   const electronBrowser: FoundBrowser = {
-    name: 'electron',
-    channel: 'stable',
-    family: 'chromium',
-    displayName: 'Electron',
+    ...launcher.DEFAULT_ELECTRON_BROWSER,
     version,
     path: '',
     majorVersion,
-  }
+  } as FoundBrowser
 
   browsers.push(electronBrowser)
 
@@ -327,7 +324,7 @@ const formatBrowsersToOptions = (browsers) => {
 }
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
-  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers), formatBrowsersToOptions(launcher.knownBrowsers))
 }
 
 // Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
