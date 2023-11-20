@@ -24,8 +24,6 @@ const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
 const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
-
-const { fs } = require('../util/fs')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
 const { telemetry } = require('@packages/telemetry')
