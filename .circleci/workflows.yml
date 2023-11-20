@@ -2864,7 +2864,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
           - npm-puppeteer-unit-tests
-          - npm-puppeteer-integration-tests
+          - npm-puppeteer-cypress-tests
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
@@ -2913,7 +2913,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
           - npm-puppeteer-unit-tests
-          - npm-puppeteer-integration-tests
+          - npm-puppeteer-cypress-tests
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
