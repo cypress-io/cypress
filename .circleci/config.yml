@@ -56,7 +56,7 @@ jobs:
           name: Download .circleci/workflows.yaml
           command: |
             if [[ "$CIRCLE_BRANCH" == "pull/"* ]]; then
-              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/contributor-prs/.circleci/workflows.yml
+              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/develop/.circleci/workflows.yml
             else 
               curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
             fi
