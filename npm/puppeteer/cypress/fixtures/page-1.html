@@ -13,35 +13,11 @@
       <button>Open new tab</button>
     </main>
 
-    <!-- <h3>Messages</h3>
-    <ul></ul>
-
-    <h3>Data on Close</h3>
-    <pre><code></code></pre> -->
-
     <script>
       document.querySelector('button').addEventListener('click', () => {
         const text = document.querySelector('input').value
 
-        console.log('text:', text)
-
-        const win = window.open(`/cypress/fixtures/page-2.html?text=${encodeURIComponent(text)}`)
-
-        window.addEventListener('message', (event) => {
-          if (event.data.close === true) {
-            win.close()
-
-            document.querySelector('code').innerText = JSON.stringify(event.data.payload)
-
-            return
-          }
-
-          const li = document.createElement('li')
-
-          li.textContent = event.data.message
-
-          document.querySelector('ul').appendChild(li)
-        })
+        window.open(`/cypress/fixtures/page-2.html?text=${encodeURIComponent(text)}`)
       })
     </script>
   </body>
