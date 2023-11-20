@@ -338,12 +338,7 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
-
-async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
-  const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
-
+async function ensureAndGetByNameOrPath (nameOrPath: string, browsers: FoundBrowser[]): Promise<FoundBrowser> {
   const filter = parseBrowserOption(nameOrPath)
 
   debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
@@ -351,34 +346,25 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   // try to find the browser by name with the highest version property
   const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-  const browser = _.findLast(sortedBrowsers, filter)
+  const browser = _.findLast(sortedBrowsers, filter) as FoundBrowser
 
   if (browser) {
-    // short circuit if found
-    if (returnAll) {
-      return browsers
-    }
-
     return browser
   }
 
   // did the user give a bad name, or is this actually a path?
-  if (isValidPathToBrowser(nameOrPath)) {
-    // looks like a path - try to resolve it to a FoundBrowser
-    return launcher.detectByPath(nameOrPath)
-    .then((browser) => {
-      if (returnAll) {
-        return [browser].concat(browsers)
-      }
-
-      return browser
-    }).catch((err) => {
-      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-    })
+  if (!isValidPathToBrowser(nameOrPath)) {
+    // not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
   }
 
-  // not a path, not found by name
-  throwBrowserNotFound(nameOrPath, browsers)
+  // looks like a path - try to resolve it to a FoundBrowser
+  return launcher.detectByPath(nameOrPath)
+  .then((browser: FoundBrowser) => {
+    return browser
+  }).catch((err) => {
+    errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+  })
 }
 
 const formatBrowsersToOptions = (browsers) => {

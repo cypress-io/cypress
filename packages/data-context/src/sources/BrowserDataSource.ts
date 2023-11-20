@@ -33,7 +33,7 @@ export function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
 
 export interface BrowserApiShape {
   close(): Promise<any>
-  ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser>
+  ensureAndGetByNameOrPath(nameOrPath: string, browsers: FoundBrowser[]): Promise<FoundBrowser>
   getBrowsers(): Promise<FoundBrowser[]>
   focusActiveBrowserWindow(): Promise<any>
   relaunchBrowser(): Promise<void> | null
@@ -43,7 +43,8 @@ export class BrowserDataSource {
   constructor (private ctx: DataContext) {}
 
   /**
-   * Gets the browsers from the machine and the project config
+   * Gets the browsers from the machine and the project config.
+   * Caches the Promise on the coreData so we only look them up once.
    */
   async allBrowsers () {
     if (this.ctx.coreData.allBrowsers) {
@@ -75,8 +76,8 @@ export class BrowserDataSource {
   }
 
   /**
-   * Gets the browsers from the machine, caching the Promise on the coreData
-   * so we only look them up once
+   * Gets the browsers from the machine.
+   * Caches the Promise on the coreData so we only look them up once.
    */
   machineBrowsers () {
     if (this.ctx.coreData.machineBrowsers) {
@@ -97,6 +98,12 @@ export class BrowserDataSource {
 
       throw e
     })
+  }
+
+  async getBrowser (nameOrPath: string): Promise<FoundBrowser> {
+    const knownBrowsers = await this.allBrowsers()
+
+    return this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath, knownBrowsers)
   }
 
   idForBrowser (obj: FoundBrowser) {

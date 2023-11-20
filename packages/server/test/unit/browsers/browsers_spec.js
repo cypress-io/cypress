@@ -83,7 +83,7 @@ describe('lib/browsers/index', () => {
         { name: 'bar', channel: 'stable' },
       ]
 
-      return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers)
+      return browsers.ensureAndGetByNameOrPath('foo', foundBrowsers)
       .then((browser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
@@ -96,7 +96,7 @@ describe('lib/browsers/index', () => {
         { name: 'electron', channel: 'stable' },
       ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
+      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
@@ -110,7 +110,7 @@ describe('lib/browsers/index', () => {
         { name: 'firefox', channel: 'stable' },
       ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
+      return expect(browsers.ensureAndGetByNameOrPath('canary', foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return normalizeSnapshot(err.message)

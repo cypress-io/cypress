@@ -342,7 +342,7 @@ export class ProjectLifecycleManager {
 
   private async setActiveBrowserByNameOrPath (nameOrPath: string) {
     try {
-      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(nameOrPath)
+      const browser = await this.ctx.browser.getBrowser(nameOrPath)
 
       this.ctx.debug('browser found to set', browser.name)
 

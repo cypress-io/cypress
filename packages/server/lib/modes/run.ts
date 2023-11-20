@@ -150,9 +150,6 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     morgan: false,
     report: true,
     isTextTerminal: args.isTextTerminal,
-    // pass the list of browsers we have detected when opening a project
-    // to give user's plugins file a chance to change it
-    browsers: args.browsers,
     onWarning,
     spec: args.spec,
     onError: args.onError,
@@ -995,14 +992,7 @@ async function ready (options: ReadyOptions) {
   // alias and coerce to null
   let specPatternFromCli = options.spec || null
 
-  // ensure the project exists
-  // and open up the project
-  const browsers = await browserUtils.get()
-
-  debug('found all system browsers %o', browsers.map(createPublicBrowser))
-  // TODO: refactor this so we don't need to extend options
-  options.browsers = browsers
-
+  // ensure the project exists and open up the project
   const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
   debug('project created and opened with config %o', createPublicConfig(config))
@@ -1017,10 +1007,6 @@ async function ready (options: ReadyOptions) {
     recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
   }
 
-  // user code might have modified list of allowed browsers
-  // but be defensive about it
-  const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
-
   let specPattern = specPatternFromCli || config.specPattern
 
   specPattern = relativeSpecPattern(projectRoot, specPattern)
@@ -1028,7 +1014,8 @@ async function ready (options: ReadyOptions) {
   const [sys, browser] = await Promise.all([
     system.info(),
     (async () => {
-      const browser = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
+      // @ts-expect-error ctx is protected
+      const browser = await project.ctx.browser.getBrowser(browserName)
 
       await removeOldProfiles(browser)
 
@@ -1049,6 +1036,7 @@ async function ready (options: ReadyOptions) {
   }
 
   if (browser.family === 'chromium') {
+    // TODO: FIX ME. this is currently _.noop
     chromePolicyCheck.run(onWarning)
   }
 

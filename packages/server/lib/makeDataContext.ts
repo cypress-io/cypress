@@ -46,11 +46,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     browserApi: {
       close: browsers.close,
       getBrowsers,
-      async ensureAndGetByNameOrPath (nameOrPath: string) {
-        const browsers = await ctx.browser.allBrowsers()
-
-        return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
-      },
+      ensureAndGetByNameOrPath,
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
