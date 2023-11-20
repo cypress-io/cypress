@@ -16,6 +16,10 @@ describe('lib/uri', () => {
     it('does not encode the "|" character', () => {
       expect(uri.getPath('http://localhost:9999?foo=bar|baz')).to.eq('/?foo=bar|baz')
     })
+
+    it('works with relative urls', () => {
+      expect(uri.getPath('/foo/bar?foo=bar|baz')).to.eq('/foo/bar?foo=bar|baz')
+    })
   })
 
   context('.isLocalhost', () => {

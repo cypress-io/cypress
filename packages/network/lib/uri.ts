@@ -87,7 +87,9 @@ export function addDefaultPort (urlToCheck: any) {
 }
 
 export function getPath (urlToCheck: string) {
-  const url = new URL(urlToCheck)
+  // since we are only concerned with the pathname and search properties,
+  // we can set the base to localhost to handle relative urls
+  const url = new URL(urlToCheck, 'http://localhost')
 
   return `${url.pathname}${url.search}`
 }
