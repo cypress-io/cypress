@@ -2783,6 +2783,12 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-vue:
         requires:
           - build
+    - npm-puppeteer-unit-tests:
+        requires:
+          - build
+    - npm-puppeteer-cypress-tests:
+        requires:
+          - build
     - npm-react:
         requires:
           - build
