@@ -251,7 +251,6 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
   })
 
   // test each error visually
-  // @ts-expect-error
   _.forEach(errorsToTest, testVisualError)
 
   // if we are testing all the errors then make sure we
@@ -350,11 +349,11 @@ describe('visual error templates', () => {
       }
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
-      const mockedFoundBrowsers = [{ name: 'chrome' }, { name: 'firefox' }]
+      const mockedFoundBrowsers = [{ name: 'chrome', channel: 'stable' }, { name: 'firefox', channel: 'stable' }]
 
       return {
-        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
+        default: ['invalid-browser', browsers.formatBrowsersToOptions(mockedFoundBrowsers), browsers.formatBrowsersToOptions(knownBrowsers)],
+        canary: ['canary', browsers.formatBrowsersToOptions(mockedFoundBrowsers), browsers.formatBrowsersToOptions(knownBrowsers)],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
