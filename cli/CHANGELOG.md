@@ -5,7 +5,7 @@ _Released 12/05/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Cypress will now correctly log errors and debug logs on Linux machines. Fixes [#5051](https://github.com/cypress-io/cypress/issue/5051) and [#24713](https://github.com/cypress-io/cypress/issue/24713).
+- Cypress will now correctly log errors and debug logs on Linux machines. Fixes [#5051](https://github.com/cypress-io/cypress/issues/5051) and [#24713](https://github.com/cypress-io/cypress/issues/24713).
 
 ## 13.6.0
 
