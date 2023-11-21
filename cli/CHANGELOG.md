@@ -1,4 +1,30 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.0
+
+_Released 11/21/2023_
+
+**Features:**
+
+- Added an activity indicator to CLI output when artifacts (screenshots, videos, or Test Replay) are being uploaded to the cloud. Addresses [#28239](https://github.com/cypress-io/cypress/issues/28239). Addressed in [#28277](https://github.com/cypress-io/cypress/pull/28277).
+- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the terminal. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
+
+**Bugfixes:**
+
+- We now allow absolute paths when setting `component.indexHtmlFile` in the Cypress config. Fixes [#27750](https://github.com/cypress-io/cypress/issues/27750).
+- Fixed an issue where dynamic intercept aliases now show with alias name instead of "no alias" in driver. Addresses [#24653](https://github.com/cypress-io/cypress/issues/24653)
+- Fixed an issue where [aliasing individual requests](https://docs.cypress.io/api/commands/intercept#Aliasing-individual-requests) with `cy.intercept()` led to an error when retrieving all of the aliases with `cy.get(@alias.all)` . Addresses [#25448](https://github.com/cypress-io/cypress/issues/25448)
+- The URL of the application under test and command error "Learn more" links now open externally instead of in the Cypress-launched browser. Fixes [#24572](https://github.com/cypress-io/cypress/issues/24572).
+- Fixed issue where some URLs would timeout in pre-request correlation. Addressed in [#28354](https://github.com/cypress-io/cypress/pull/28354).
+
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+- Cypress now ensures the main browser tab is active before running each command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
+
+**Dependency Updates:**
+
+- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
+
 ## 13.5.1
 
 _Released 11/14/2023_
