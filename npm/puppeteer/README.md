@@ -1,6 +1,6 @@
 # @cypress/puppeteer
 
-Utilize Puppeteer's browser API within Cypress with a single command.
+Utilize [Puppeteer's browser API](https://pptr.dev/api) within Cypress with a single command.
 
 # Table of Contents
 
@@ -182,7 +182,7 @@ setup({
 
 These examples can be found and run in the [Cypress tests of this package](./cypress) with this project's [cypress.config.ts](./cypress.config.ts).
 
-While these example use tabs, they could just as easily apply to windows. Tabs and windows are essentially the same things as far as Puppeteer is concerned and encapsuled by instances of the [Page class](https://pptr.dev/api/puppeteer.page/).
+While these examples use tabs, they could just as easily apply to windows. Tabs and windows are essentially the same things as far as Puppeteer is concerned and encapsulated by instances of the [Page class](https://pptr.dev/api/puppeteer.page/).
 
 ### Switching to a new tab
 
@@ -222,12 +222,17 @@ export default defineConfig({
         on,
         onMessage: {
           async switchToTabAndGetContent (browser: PuppeteerBrowser) {
+            // In this message handler, we utilize the Puppeteer API to interact with the browser and the new tab that our Cypress tests has opened
+
             // Utilize the retry since the page may not have opened and loaded by the time this runs
             const page = await retry<Promise<Page>>(async () => {
+              // The browser will (eventually) have 2 tabs open: the Cypress tab and the newly opened tab
+              // In Puppeteer, tabs and windows are called pages
               const pages = await browser.pages()
+              // Try to find the page we want to interact with
               const page = pages.find((page) => page.url().includes('page-2.html'))
 
-              // If we haven't found the page, throw an error to signal that it should retry
+              // If we can't find the page, it probably hasn't loaded yet, so throw an error to signal that this function should retry
               if (!page) throw new Error('Could not find page')
 
               // Otherwise, return the page instance and it will be returned by the `retry` function itself
@@ -296,6 +301,9 @@ export default defineConfig({
         puppeteer,
         onMessage: {
           async createTabAndGetContent (browser: PuppeteerBrowser, text: string) {
+            // In this message handler, we utilize the Puppeteer API to interact with the browser, creating a new tab and getting its content
+
+            // This will create a new tab within the Cypress-launched browser
             const page = await browser.newPage()
 
             // Text comes from the test invocation of `cy.puppeteer()`

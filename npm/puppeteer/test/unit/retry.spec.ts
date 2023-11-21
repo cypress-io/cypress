@@ -48,6 +48,6 @@ describe('#retry', () => {
 
     await expect(
       retry(fn, { timeout: 5, delayBetweenTries: 1 }),
-    ).to.be.rejectedWith('ailed retrying after 5ms: fail')
+    ).to.be.rejectedWith('Failed retrying after 5ms: fail')
   })
 })
