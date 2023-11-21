@@ -4,7 +4,6 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
-const debugElectron = require('debug')('cypress:electron')
 
 const util = require('../util')
 const state = require('../tasks/state')
@@ -122,10 +121,9 @@ module.exports = {
       return new Promise((resolve, reject) => {
         _.defaults(overrides, {
           onStderrData: false,
-          electronLogging: false,
         })
 
-        const { onStderrData, electronLogging } = overrides
+        const { onStderrData } = overrides
         const envOverrides = util.getEnvOverrides(options)
         const electronArgs = []
         const node11WindowsFix = isPlatform('win32')
@@ -158,10 +156,6 @@ module.exports = {
 
         if (node11WindowsFix) {
           stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
-        }
-
-        if (electronLogging) {
-          stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
         }
 
         if (util.isPossibleLinuxWithIncorrectDisplay()) {
@@ -241,7 +235,7 @@ module.exports = {
 
             // if we have a callback and this explicitly returns
             // false then bail
-            if (onStderrData && onStderrData(str) === false) {
+            if (onStderrData && onStderrData(str)) {
               return
             }
 
@@ -293,13 +287,6 @@ module.exports = {
             // then we know that's why cypress exited early
             if (util.isBrokenGtkDisplay(str)) {
               brokenGtkDisplay = true
-            }
-
-            // we should attempt to always slurp up
-            // the stderr logs unless we've explicitly
-            // enabled the electron debug logging
-            if (!debugElectron.enabled) {
-              return false
             }
           },
         })
