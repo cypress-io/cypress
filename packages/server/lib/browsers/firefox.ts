@@ -347,7 +347,7 @@ toolbar {
 
 `
 
-let browserCriClient
+let browserCriClient: BrowserCriClient | undefined
 
 export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
@@ -382,7 +382,7 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient!)
 }
 
 export function connectToExisting () {
@@ -573,9 +573,20 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       return originalBrowserKill.apply(browserInstance, args)
     }
+
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    })
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
   return browserInstance
+}
+
+export async function closeExtraTargets () {
+  // we're currently holding off on implementing Firefox support in order
+  // to release Chromium support as soon as possible and may add Firefox
+  // support in the future
+  debug('Closing extra targets is not currently supported in Firefox')
 }

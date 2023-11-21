@@ -337,7 +337,7 @@ export = {
   },
 
   _handleDownloads (win, dir, automation) {
-    const onWillDownload = (event, downloadItem) => {
+    const onWillDownload = (_event, downloadItem) => {
       const savePath = path.join(dir, downloadItem.getFilename())
 
       automation.push('create:download', {
@@ -347,8 +347,14 @@ export = {
         url: downloadItem.getURL(),
       })
 
-      downloadItem.once('done', () => {
-        automation.push('complete:download', {
+      downloadItem.once('done', (_event, state) => {
+        if (state === 'completed') {
+          return automation.push('complete:download', {
+            id: downloadItem.getETag(),
+          })
+        }
+
+        automation.push('canceled:download', {
           id: downloadItem.getETag(),
         })
       })
@@ -533,6 +539,14 @@ export = {
       },
     }) as BrowserInstance
 
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient!.getWebSocketDebuggerUrl(),
+    })
+
     return instance
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

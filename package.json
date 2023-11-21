@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.4.0",
+  "version": "13.6.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -70,7 +70,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@aws-sdk/credential-providers": "3.53.0",
+    "@aws-sdk/client-s3": "3.450.0",
+    "@aws-sdk/credential-providers": "3.450.0",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "^3.0.0",
     "@cypress/request-promise": "^5.0.0",
@@ -126,7 +127,6 @@
     "@urql/introspection": "^0.3.0",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
-    "aws-sdk": "2.814.0",
     "babel-eslint": "10.1.0",
     "bluebird": "3.5.3",
     "bluebird-retry": "0.11.0",

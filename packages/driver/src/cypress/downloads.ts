@@ -25,11 +25,17 @@ export default {
       return log.snapshot()
     }
 
-    const end = ({ id }) => {
+    const end = ({ id }, isCanceled = false) => {
+      Cypress.action('app:download:received')
+
       const log = logs[id]
 
       if (log) {
-        log.snapshot().end()
+        if (isCanceled) {
+          log.snapshot().error(new Error('Download was canceled.'))
+        } else {
+          log.snapshot().end()
+        }
 
         // don't need this anymore since the download has ended
         // and won't change anymore
