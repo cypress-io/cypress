@@ -403,6 +403,10 @@ function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetrie
   }
 
   if (typeof retriesConfig === 'number') {
+    if (retriesConfig === 0) {
+      return {}
+    }
+
     return {
       strategy: 'detect-flake-and-pass-on-threshold',
       maxRetries: retriesConfig,
@@ -424,6 +428,10 @@ function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetrie
   }
 
   if (typeof enablementValue === 'number') {
+    if (enablementValue === 0) {
+      return {}
+    }
+
     return {
       strategy: 'detect-flake-and-pass-on-threshold',
       maxRetries: enablementValue,

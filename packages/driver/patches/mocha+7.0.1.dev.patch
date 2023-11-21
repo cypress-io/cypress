@@ -12,7 +12,7 @@ index 0b43004..588e195 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index ceb1a24..113ac40 100644
+index ceb1a24..66c1ba7 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
 @@ -677,9 +677,45 @@ Runner.prototype.runTests = function(suite, fn) {
@@ -59,7 +59,7 @@ index ceb1a24..113ac40 100644
 -          if (retry < test.retries()) {
 +
 +          // requeue the test if we have retries and haven't satisfied our retry configuration.
-+          if (retry < test.retries() && testStatusInfo.shouldAttemptsContinue) {
++          if (testStatusInfo.shouldAttemptsContinue) {
              var clonedTest = test.clone();
              clonedTest.currentRetry(retry + 1);
              tests.unshift(clonedTest);
