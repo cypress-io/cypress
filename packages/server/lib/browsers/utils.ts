@@ -230,61 +230,10 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
-
-const getWebKitBrowserVersion = async () => {
-  try {
-    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
-    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
-    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath)
-    const result = wkBrowserVersionRe.exec(wkBrowserContents)
-
-    if (!result || !result.groups!.version) return '0'
-
-    return result.groups!.version
-  } catch (err) {
-    debug('Error detecting WebKit browser version %o', err)
-
-    return '0'
-  }
-}
-
-async function getWebKitBrowser () {
-  try {
-    const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
-    const mod = await import(modulePath) as typeof import('playwright-webkit')
-    const version = await getWebKitBrowserVersion()
-
-    const browser: FoundBrowser = {
-      name: 'webkit',
-      channel: 'stable',
-      family: 'webkit',
-      displayName: 'WebKit',
-      version,
-      path: mod.webkit.executablePath(),
-      majorVersion: version.split('.')[0],
-      warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
-    }
-
-    return browser
-  } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
-
-    return
-  }
-}
-
 const getBrowsers = async () => {
   debug('getBrowsers')
 
-  const [browsers, wkBrowser] = await Promise.all([
-    launcher.detect(),
-    getWebKitBrowser(),
-  ])
-
-  if (wkBrowser) browsers.push(wkBrowser)
+  const browsers = await launcher.detect()
 
   debug('found browsers %o', { browsers })
 
@@ -306,7 +255,7 @@ const getBrowsers = async () => {
     version,
     path: '',
     majorVersion,
-  } as FoundBrowser
+  }
 
   browsers.push(electronBrowser)
 
@@ -335,12 +284,7 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
-
-async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
-  const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
-
+async function ensureAndGetByNameOrPath (nameOrPath: string, browsers: FoundBrowser[]): Promise<FoundBrowser> {
   const filter = parseBrowserOption(nameOrPath)
 
   debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
@@ -348,34 +292,25 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   // try to find the browser by name with the highest version property
   const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-  const browser = _.findLast(sortedBrowsers, filter)
+  const browser = _.findLast(sortedBrowsers, filter) as FoundBrowser
 
   if (browser) {
-    // short circuit if found
-    if (returnAll) {
-      return browsers
-    }
-
     return browser
   }
 
   // did the user give a bad name, or is this actually a path?
-  if (isValidPathToBrowser(nameOrPath)) {
-    // looks like a path - try to resolve it to a FoundBrowser
-    return launcher.detectByPath(nameOrPath)
-    .then((browser) => {
-      if (returnAll) {
-        return [browser].concat(browsers)
-      }
-
-      return browser
-    }).catch((err) => {
-      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-    })
+  if (!isValidPathToBrowser(nameOrPath)) {
+    // not a path, not found by name
+    throwBrowserNotFound(nameOrPath, browsers)
   }
 
-  // not a path, not found by name
-  throwBrowserNotFound(nameOrPath, browsers)
+  // looks like a path - try to resolve it to a FoundBrowser
+  return launcher.detectByPath(nameOrPath)
+  .then((browser: FoundBrowser) => {
+    return browser
+  }).catch((err) => {
+    errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+  })
 }
 
 const formatBrowsersToOptions = (browsers) => {
@@ -388,8 +323,8 @@ const formatBrowsersToOptions = (browsers) => {
   })
 }
 
-const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
-  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers), formatBrowsersToOptions(launcher.knownBrowsers))
+const throwBrowserNotFound = function (browserName, machineBrowsers: FoundBrowser[] = []) {
+  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(machineBrowsers), formatBrowsersToOptions(launcher.knownBrowsers))
 }
 
 // Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.

@@ -7,6 +7,7 @@ import { knownBrowsers, validateMinVersion } from './known-browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
+import { detectWebkit } from './webkit'
 import Debug from 'debug'
 import type {
   Browser,
@@ -79,6 +80,10 @@ function lookup (
   platform: NodeJS.Platform,
   browser: Browser,
 ): Promise<DetectedBrowser> {
+  if (browser.name === 'webkit') {
+    return detectWebkit(browser)
+  }
+
   const helper = getHelper(platform)
 
   if (!helper) {

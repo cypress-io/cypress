@@ -9,7 +9,6 @@ const debug = Debug('cypress:data-context:actions:LocalSettingsActions')
 
 export interface LocalSettingsApiShape {
   getAvailableEditors(): Promise<Editor[]>
-
   getPreferences (): Promise<AllowedState>
   setPreferences (object: AllowedState): Promise<void>
 }
