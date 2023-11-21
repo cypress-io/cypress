@@ -216,7 +216,6 @@
   "workspaces": {
     "nohoist": [
       "@benmalka/foxdriver",
-      "devtools-protocol",
       "tsconfig-paths"
     ]
   },
