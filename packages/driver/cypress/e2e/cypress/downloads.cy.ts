@@ -1,4 +1,5 @@
 import $Downloads from '../../../src/cypress/downloads'
+import { authCreds } from '../../fixtures/auth_creds'
 
 describe('src/cypress/downloads', () => {
   let log
@@ -115,10 +116,7 @@ describe('download behavior', () => {
 describe('basic auth download behavior', () => {
   beforeEach(() => {
     cy.visit('/fixtures/downloads.html', {
-      auth: {
-        username: 'cypress',
-        password: 'password123',
-      },
+      auth: authCreds,
     })
   })
 

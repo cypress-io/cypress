@@ -9,6 +9,7 @@ const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 const { cors } = require('@packages/network')
+const { authCreds } = require('../fixtures/auth_creds')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
@@ -128,7 +129,7 @@ const createApp = (port) => {
   app.get('/basic_auth', (req, res) => {
     const user = auth(req)
 
-    if (user && ((user.name === 'cypress') && (user.pass === 'password123'))) {
+    if (user?.name === authCreds.username && user?.pass === authCreds.password) {
       return res.send('<html><body>basic auth worked</body></html>')
     }
 
@@ -345,7 +346,7 @@ const createApp = (port) => {
   app.get('/download-basic-auth.csv', (req, res) => {
     const user = auth(req)
 
-    if (user && ((user.name === 'cypress') && (user.pass === 'password123'))) {
+    if (user?.name === authCreds.username && user?.pass === authCreds.password) {
       return res.sendFile(path.join(__dirname, '..', 'fixtures', 'downloads_records.csv'))
     }
 
