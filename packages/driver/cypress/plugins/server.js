@@ -342,6 +342,19 @@ const createApp = (port) => {
     res.send(_var)
   })
 
+  app.get('/download-basic-auth.csv', (req, res) => {
+    const user = auth(req)
+
+    if (user && ((user.name === 'cypress') && (user.pass === 'password123'))) {
+      return res.sendFile(path.join(__dirname, '..', 'fixtures', 'downloads_records.csv'))
+    }
+
+    return res
+    .set('WWW-Authenticate', 'Basic')
+    .type('html')
+    .sendStatus(401)
+  })
+
   app.post('/upload', (req, res) => {
     res.sendStatus(200)
   })
