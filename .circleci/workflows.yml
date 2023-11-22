@@ -147,6 +147,15 @@ executors:
       DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
+  shallow_checkout:
+    description: Checkout the current branch with a shallow clone
+    steps:
+      - run:
+          name: Checkout current branch with a shallow clone
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" . --depth 1
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
   # Run this command in a job before you want to use the SHOULD_PERSIST_ARTIFACTS variable.
   setup_should_persist_artifacts:
@@ -1343,7 +1352,7 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - update_known_hosts
-      - checkout
+      - shallow_checkout
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
