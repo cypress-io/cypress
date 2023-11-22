@@ -28,6 +28,7 @@
     "@types/uuid": "8.3.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
+    "devtools-protocol": "0.0.927104",
     "mocha": "3.5.3",
     "resolve-pkg": "2.0.0"
   },
@@ -39,6 +40,7 @@
   "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
+      "devtools-protocol",
       "engine.io",
       "engine.io-parser",
       "socket.io",
