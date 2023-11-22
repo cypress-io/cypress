@@ -463,7 +463,8 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
 
     const action = actions?.find((a) => a.clientId === this.id && a.action === 'BURN_IN') ?? {}
 
-    const latestScore = action?.payload?.startingScore ?? -2
+    const latestScore = action?.payload?.startingScore === undefined ?
+      -2 : action?.payload?.startingScore
 
     // console.log('latestScore', latestScore)
 
