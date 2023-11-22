@@ -23,7 +23,7 @@ npm install --save-dev @cypress/puppeteer
 ## yarn
 
 ```sh
-yarn add @cypress/puppeteer
+yarn add --dev @cypress/puppeteer
 ```
 
 ## With TypeScript
@@ -61,8 +61,8 @@ export default defineConfig({
       setup({
         on,
         onMessage: {
-          async switchToTabAndGetContent (browser) {
-            // ...
+          async myMessageHander (browser) {
+            // Utilize the Puppeteer browser instance and the Puppeteer API to interact with and automate the browser
           },
         },
       })
@@ -85,7 +85,7 @@ In your spec (e.g. `spec.cy.ts`):
     cy.get('button').click() // opens a new tab
 
     cy
-    .puppeteer('switchToTabAndGetContent')
+    .puppeteer('myMessageHander')
     .should('equal', 'You said: Hello from Page 1')
   })
 ```
@@ -106,17 +106,21 @@ setup(options)
 - `onMessage` _required_: An object with string keys and function values (see more details [below](#onmessage))
 - `puppeteer` _optional_: The `puppeteer` library imported from `puppeteer-core`, overriding the default version of `puppeteer-core` used by this plugin
 
-#### onMessage
+##### onMessage
 
-Functions provided in the `onMessage` option receive the following arguments:
+The keys provided in this are used to invoke their corresponding functions by calling `cy.puppeteer(key)` in your Cypress test.
 
-##### browser
+The functions should contain Puppeteer code for automating the browser. The code is executed within Node.js and not within the browser, so Cypress commands and DOM APIs cannot be utilized.
+
+The functions receive the following arguments:
+
+###### browser
 
 A [puppeteer browser instance](https://pptr.dev/api/puppeteer.browser) connected to the Cypress-launched browser.
 
-##### ...args
+###### ...args
 
-The rest of the arguments are de-serialized arguments as passed to the `cy.puppeteer()` command from your Cypress test.
+The rest of the arguments are any de-serialized arguments passed to the `cy.puppeteer()` command from your Cypress test.
 
 ### Cypress Config - retry
 
