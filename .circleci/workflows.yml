@@ -2355,7 +2355,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      image: cypress/base-internal:18.15.0
+      - image: cypress/base-internal:18.15.0
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
