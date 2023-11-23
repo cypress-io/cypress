@@ -91,6 +91,12 @@ windowsWorkflowFilters: &windows-workflow-filters
         value: << pipeline.git.branch >>
 
 executors:
+  # a bare-bones image built by CircleCI with node, npm, and yarn preinstalled
+  # using 18.17.0 because that's the first time they started publishing arm images
+  basic-node:
+    docker:
+      - image: cimg/node:18.17.0
+
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
@@ -2349,7 +2355,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base-internal:18.15.0
+      image: cypress/base-internal:18.15.0
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -2634,16 +2640,20 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install:
+        executor: basic-node
         build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
+        executor: basic-node
         requires:
           - node_modules_install
     - check-ts:
+        executor: basic-node
         requires:
           - build
     - lint:
         name: linux-lint
+        executor: basic-node
         requires:
           - build
     - percy-finalize:
@@ -2652,6 +2662,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - lint-types:
+        executor: basic-node
         requires:
           - build
     # unit, integration and e2e tests
@@ -3410,7 +3421,7 @@ linux-arm64-workflow: &linux-arm64-workflow
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
-        executor: linux-arm64
+        executor: basic-node
         resource_class: arm.medium
         only-cache-for-root-user: true
 
