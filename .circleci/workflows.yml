@@ -2640,20 +2640,16 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install:
-        executor: basic-node
         build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
-        executor: basic-node
         requires:
           - node_modules_install
     - check-ts:
-        executor: basic-node
         requires:
           - build
     - lint:
         name: linux-lint
-        executor: basic-node
         requires:
           - build
     - percy-finalize:
@@ -2662,7 +2658,6 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - lint-types:
-        executor: basic-node
         requires:
           - build
     # unit, integration and e2e tests
@@ -3421,7 +3416,7 @@ linux-arm64-workflow: &linux-arm64-workflow
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
-        executor: basic-node
+        executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
 
