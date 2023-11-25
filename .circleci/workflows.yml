@@ -1346,6 +1346,8 @@ jobs:
       build-better-sqlite3:
         type: boolean
         default: false
+    docker:
+      - cimg/node:18.17.0
     resource_class: << parameters.resource_class >>
     steps:
       - update_known_hosts
