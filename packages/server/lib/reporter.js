@@ -13,6 +13,9 @@ const mochaSymbols = mochaReporters.Base.symbols
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
 const { overrideRequire } = require('./override_require')
+const { tryToFindPnpFile } = require('./util/search-utils')
+
+const yarnPnpRegistrationPath = new Map()
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
@@ -668,6 +671,21 @@ class Reporter {
     let p
 
     debug('trying to load reporter:', reporterName)
+
+    // we only need to register this once, when the project check dependencies for the first time.
+    if (!yarnPnpRegistrationPath.get(projectRoot)) {
+      const pnpFile = tryToFindPnpFile(projectRoot)
+
+      if (pnpFile) {
+        const pnpapi = require(pnpFile)
+
+        pnpapi.setup()
+        yarnPnpRegistrationPath.set(projectRoot, true)
+      } else {
+        // not using Yarn PnP
+        yarnPnpRegistrationPath.set(projectRoot, false)
+      }
+    }
 
     // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
     if (reporterName === 'teamcity') {
