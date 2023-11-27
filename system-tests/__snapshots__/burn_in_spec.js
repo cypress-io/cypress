@@ -1,57 +1,3 @@
-exports['burn-in override default burn-in config PASSED_BURN_IN 1'] = [
-  {
-    'state': 'passed',
-    'error': null,
-    'timings': {
-      'lifecycle': 'Any.Number',
-      'test': {
-        'fnDuration': 'Any.Number',
-        'afterFnDuration': 'Any.Number',
-      },
-    },
-    'failedFromHookId': null,
-    'wallClockStartedAt': 'Any.ISODate',
-    'wallClockDuration': 'Any.Number',
-    'videoTimestamp': null,
-    'reasonToStop': null,
-    'initialStrategy': 'NONE',
-  },
-  {
-    'state': 'passed',
-    'error': null,
-    'timings': {
-      'lifecycle': 'Any.Number',
-      'test': {
-        'fnDuration': 'Any.Number',
-        'afterFnDuration': 'Any.Number',
-      },
-    },
-    'failedFromHookId': null,
-    'wallClockStartedAt': 'Any.ISODate',
-    'wallClockDuration': 'Any.Number',
-    'videoTimestamp': null,
-    'reasonToStop': null,
-    'initialStrategy': 'BURN_IN',
-  },
-  {
-    'state': 'passed',
-    'error': null,
-    'timings': {
-      'lifecycle': 'Any.Number',
-      'test': {
-        'fnDuration': 'Any.Number',
-        'afterFnDuration': 'Any.Number',
-      },
-    },
-    'failedFromHookId': null,
-    'wallClockStartedAt': 'Any.ISODate',
-    'wallClockDuration': 'Any.Number',
-    'videoTimestamp': null,
-    'reasonToStop': 'PASSED_BURN_IN',
-    'initialStrategy': 'BURN_IN',
-  },
-]
-
 exports['burn-in modified/new test PASSED_BURN_IN 1'] = [
   {
     'state': 'passed',
@@ -2696,6 +2642,60 @@ exports['burn-in test is already burned-in FAILED_STOPPED_ON_FLAKE 1'] = [
     'videoTimestamp': null,
     'reasonToStop': 'FAILED_STOPPED_ON_FLAKE',
     'initialStrategy': 'RETRY',
+  },
+]
+
+exports['burn-in override default burn-in config PASSED_BURN_IN 1'] = [
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'NONE',
+  },
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'BURN_IN',
+  },
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': 'PASSED_BURN_IN',
+    'initialStrategy': 'BURN_IN',
   },
 ]
 
