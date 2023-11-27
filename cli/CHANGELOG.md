@@ -4,7 +4,7 @@
 _Release (Pending)_
 
 **Bugfixes:**
-- Fixed an issue where request logging would default the `message` to the `args` of the currently running command even though those `args` would not apply to the request log and are not displayed. If the `args` are sufficiently large (e.g. when running the `cy.task` from the [code-coverage](https://github.com/cypress-io/code-coverage/) plugin) there could be performance/memory implications.
+- Fixed an issue where request logging would default the `message` to the `args` of the currently running command even though those `args` would not apply to the request log and are not displayed. If the `args` are sufficiently large (e.g. when running the `cy.task` from the [code-coverage](https://github.com/cypress-io/code-coverage/) plugin) there could be performance/memory implications. Addressed in [#28411](https://github.com/cypress-io/cypress/pull/28411).
 
 ## 13.6.0
 
