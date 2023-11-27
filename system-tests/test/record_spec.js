@@ -2298,7 +2298,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
-        it('retrieves the capture protocol and uploads the db', function () {
+        it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2307,8 +2307,13 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+            expect(artifactReport?.protocol).to.exist()
+            expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+            expect(artifactReport?.protocol?.uploadDuration).to.exist()
           })
         })
       })

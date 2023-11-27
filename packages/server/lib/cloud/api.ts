@@ -274,28 +274,31 @@ type CreateRunResponse = {
   } | undefined
 }
 
+type ArtifactMetadata = {
+  url: string
+  fileSize?: number
+  uploadDuration?: number
+  success: boolean
+  error?: string
+}
+
+type ProtocolMetadata = ArtifactMetadata & {
+  specAccess?: {
+    size: bigint
+    offset: bigint
+  }
+}
+
+type UpdateInstanceArtifactsPayload = {
+  screenshots: ArtifactMetadata[]
+  video?: ArtifactMetadata
+  protocol?: ProtocolMetadata
+}
+
 type UpdateInstanceArtifactsOptions = {
   runId: string
   instanceId: string
   timeout: number | undefined
-  protocol: {
-    url: string
-    success: boolean
-    fileSize?: number | undefined
-    error?: string | undefined
-  } | undefined
-  screenshots: {
-    url: string
-    success: boolean
-    fileSize?: number | undefined
-    error?: string | undefined
-  }[] | undefined
-  video: {
-    url: string
-    success: boolean
-    fileSize?: number | undefined
-    error?: string | undefined
-  } | undefined
 }
 
 let preflightResult = {
@@ -497,17 +500,13 @@ module.exports = {
     })
   },
 
-  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions) {
+  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions, body: UpdateInstanceArtifactsPayload) {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
         json: true,
         timeout: options.timeout ?? SIXTY_SECONDS,
-        body: {
-          protocol: options.protocol,
-          screenshots: options.screenshots,
-          video: options.video,
-        },
+        body,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': options.runId,
