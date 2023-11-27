@@ -7,8 +7,8 @@ import $stackUtils from './stack_utils'
 // in the browser mocha is coming back
 // as window
 import * as mocha from 'mocha'
-import type { AttemptStrategy, CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, ReasonToStop } from '../burnIn'
-import { evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burnIn'
+import type { AttemptStrategy, CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, ReasonToStop } from '../burn-in'
+import { evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burn-in'
 
 const { getTestFromRunnable } = $utils
 
@@ -465,19 +465,11 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
 
     const latestScore = action?.payload?.startingScore === undefined ? -2 : action?.payload?.startingScore
 
-    // console.log('latestScore', latestScore)
-
     const userFacingBurnInConfig = Cypress.config('experimentalBurnIn')
-
-    // console.log('userFacingBurnInConfig', userFacingBurnInConfig)
 
     const localBurnInConfig = getBurnInConfig(userFacingBurnInConfig)
 
-    // console.log('localBurnInConfig', localBurnInConfig)
-
     const completeBurnInConfig = mergeBurnInConfig(action?.payload?.config ?? {}, { values: localBurnInConfig })
-
-    // console.log('completeBurnInConfig', completeBurnInConfig)
 
     return calculateTestStatus(this, retriesConfig, completeBurnInConfig, latestScore)
   }

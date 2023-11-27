@@ -12,10 +12,10 @@ index 0b43004..588e195 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index ceb1a24..1f295a8 100644
+index ceb1a24..66c1ba7 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
-@@ -677,9 +677,48 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -677,9 +677,45 @@ Runner.prototype.runTests = function(suite, fn) {
            }
            self.emit(constants.EVENT_TEST_END, test);
            return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
@@ -41,9 +41,6 @@ index ceb1a24..1f295a8 100644
 +            // If the test has met the exit condition, we need to grab the metadata from
 +            // 'calculateTestStatus' in order to display and interpret the test outerStatus correctly.
 +            test._cypressTestStatusInfo = testStatusInfo
-+            if(test.type === 'hook' && test.state === STATE_FAILED){
-+              test._cypressTestStatusInfo.reasonToStop= 'FAILED_HOOK_FAILED'
-+            }
 +      
 +            if(testStatusInfo.attempts > 1) {
 +              // If the test has been run AT LEAST twice (i.e. we are retrying), and the exit condition is met,
@@ -66,7 +63,7 @@ index ceb1a24..1f295a8 100644
              var clonedTest = test.clone();
              clonedTest.currentRetry(retry + 1);
              tests.unshift(clonedTest);
-@@ -689,8 +728,25 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -689,8 +725,25 @@ Runner.prototype.runTests = function(suite, fn) {
              // Early return + hook trigger so that it doesn't
              // increment the count wrong
              return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
@@ -94,7 +91,7 @@ index ceb1a24..1f295a8 100644
            }
            self.emit(constants.EVENT_TEST_END, test);
            return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
-@@ -1029,3 +1085,4 @@ Runner.constants = constants;
+@@ -1029,3 +1082,4 @@ Runner.constants = constants;
   * @external EventEmitter
   * @see {@link https://nodejs.org/api/events.html#events_class_eventemitter}
   */

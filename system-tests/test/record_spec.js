@@ -765,8 +765,6 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes({
       postInstanceTests: {
         res: (req, res) => {
-          // console.log(mockServerState.specs)
-          // if (mockServerState.specs.length > 0) {
           return res.json({
             ...postInstanceTestsResponse,
             actions: [{
@@ -785,12 +783,6 @@ describe('e2e record', () => {
               action: 'BURN_IN',
             }],
           })
-          // }
-
-          // return res.json({
-          //   ...postInstanceTestsResponse,
-          //   actions: [],
-          // })
         },
       },
 
