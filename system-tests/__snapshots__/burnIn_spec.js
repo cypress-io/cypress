@@ -1,4 +1,58 @@
-exports['api burn-in actions modified/new test PASSED_BURN_IN 1'] = [
+exports['burn-in override default burn-in config PASSED_BURN_IN 1'] = [
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'NONE',
+  },
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'BURN_IN',
+  },
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': 'PASSED_BURN_IN',
+    'initialStrategy': 'BURN_IN',
+  },
+]
+
+exports['burn-in modified/new test PASSED_BURN_IN 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -35,7 +89,7 @@ exports['api burn-in actions modified/new test PASSED_BURN_IN 1'] = [
   },
 ]
 
-exports['api burn-in actions modified/new test PASSED_MET_THRESHOLD 1'] = [
+exports['burn-in modified/new test PASSED_MET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -149,7 +203,7 @@ exports['api burn-in actions modified/new test PASSED_MET_THRESHOLD 1'] = [
   },
 ]
 
-exports['api burn-in actions modified/new test FAILED_REACHED_MAX_RETRIES 1'] = [
+exports['burn-in modified/new test FAILED_REACHED_MAX_RETRIES 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -323,7 +377,7 @@ exports['api burn-in actions modified/new test FAILED_REACHED_MAX_RETRIES 1'] = 
   },
 ]
 
-exports['api burn-in actions modified/new test FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
+exports['burn-in modified/new test FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -467,7 +521,7 @@ exports['api burn-in actions modified/new test FAILED_DID_NOT_MEET_THRESHOLD 1']
   },
 ]
 
-exports['api burn-in actions modified/new test FAILED_STOPPED_ON_FLAKE 1'] = [
+exports['burn-in modified/new test FAILED_STOPPED_ON_FLAKE 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -517,7 +571,7 @@ exports['api burn-in actions modified/new test FAILED_STOPPED_ON_FLAKE 1'] = [
   },
 ]
 
-exports['api burn-in actions failing without flake PASSED_BURN_IN 1'] = [
+exports['burn-in failing without flake PASSED_BURN_IN 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -554,7 +608,7 @@ exports['api burn-in actions failing without flake PASSED_BURN_IN 1'] = [
   },
 ]
 
-exports['api burn-in actions failing without flake PASSED_MET_THRESHOLD 1'] = [
+exports['burn-in failing without flake PASSED_MET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -668,7 +722,7 @@ exports['api burn-in actions failing without flake PASSED_MET_THRESHOLD 1'] = [
   },
 ]
 
-exports['api burn-in actions failing without flake FAILED_REACHED_MAX_RETRIES 1'] = [
+exports['burn-in failing without flake FAILED_REACHED_MAX_RETRIES 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -842,7 +896,7 @@ exports['api burn-in actions failing without flake FAILED_REACHED_MAX_RETRIES 1'
   },
 ]
 
-exports['api burn-in actions failing without flake FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
+exports['burn-in failing without flake FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -986,7 +1040,7 @@ exports['api burn-in actions failing without flake FAILED_DID_NOT_MEET_THRESHOLD
   },
 ]
 
-exports['api burn-in actions failing without flake FAILED_STOPPED_ON_FLAKE 1'] = [
+exports['burn-in failing without flake FAILED_STOPPED_ON_FLAKE 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1036,7 +1090,7 @@ exports['api burn-in actions failing without flake FAILED_STOPPED_ON_FLAKE 1'] =
   },
 ]
 
-exports['api burn-in actions flaky test PASSED_BURN_IN 1'] = [
+exports['burn-in flaky test PASSED_BURN_IN 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1107,7 +1161,7 @@ exports['api burn-in actions flaky test PASSED_BURN_IN 1'] = [
   },
 ]
 
-exports['api burn-in actions flaky test PASSED_MET_THRESHOLD 1'] = [
+exports['burn-in flaky test PASSED_MET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1221,7 +1275,7 @@ exports['api burn-in actions flaky test PASSED_MET_THRESHOLD 1'] = [
   },
 ]
 
-exports['api burn-in actions flaky test FAILED_REACHED_MAX_RETRIES 1'] = [
+exports['burn-in flaky test FAILED_REACHED_MAX_RETRIES 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1395,7 +1449,7 @@ exports['api burn-in actions flaky test FAILED_REACHED_MAX_RETRIES 1'] = [
   },
 ]
 
-exports['api burn-in actions flaky test FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
+exports['burn-in flaky test FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1539,7 +1593,7 @@ exports['api burn-in actions flaky test FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   },
 ]
 
-exports['api burn-in actions flaky test FAILED_STOPPED_ON_FLAKE 1'] = [
+exports['burn-in flaky test FAILED_STOPPED_ON_FLAKE 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1589,7 +1643,7 @@ exports['api burn-in actions flaky test FAILED_STOPPED_ON_FLAKE 1'] = [
   },
 ]
 
-exports['api burn-in actions cloud could not determine score PASSED_FIRST_ATTEMPT 1'] = [
+exports['burn-in cloud could not determine score PASSED_FIRST_ATTEMPT 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -1609,7 +1663,7 @@ exports['api burn-in actions cloud could not determine score PASSED_FIRST_ATTEMP
   },
 ]
 
-exports['api burn-in actions cloud could not determine score PASSED_MET_THRESHOLD 1'] = [
+exports['burn-in cloud could not determine score PASSED_MET_THRESHOLD 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -1753,7 +1807,7 @@ exports['api burn-in actions cloud could not determine score PASSED_MET_THRESHOL
   },
 ]
 
-exports['api burn-in actions cloud could not determine score FAILED_REACHED_MAX_RETRIES 1'] = [
+exports['burn-in cloud could not determine score FAILED_REACHED_MAX_RETRIES 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -1927,7 +1981,7 @@ exports['api burn-in actions cloud could not determine score FAILED_REACHED_MAX_
   },
 ]
 
-exports['api burn-in actions cloud could not determine score FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
+exports['burn-in cloud could not determine score FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2054,7 +2108,7 @@ exports['api burn-in actions cloud could not determine score FAILED_DID_NOT_MEET
   },
 ]
 
-exports['api burn-in actions cloud could not determine score FAILED_STOPPED_ON_FLAKE 1'] = [
+exports['burn-in cloud could not determine score FAILED_STOPPED_ON_FLAKE 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2117,7 +2171,7 @@ exports['api burn-in actions cloud could not determine score FAILED_STOPPED_ON_F
   },
 ]
 
-exports['api burn-in actions test is already burned-in PASSED_FIRST_ATTEMPT 1'] = [
+exports['burn-in test is already burned-in PASSED_FIRST_ATTEMPT 1'] = [
   {
     'state': 'passed',
     'error': null,
@@ -2137,7 +2191,7 @@ exports['api burn-in actions test is already burned-in PASSED_FIRST_ATTEMPT 1'] 
   },
 ]
 
-exports['api burn-in actions test is already burned-in PASSED_MET_THRESHOLD 1'] = [
+exports['burn-in test is already burned-in PASSED_MET_THRESHOLD 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2281,7 +2335,7 @@ exports['api burn-in actions test is already burned-in PASSED_MET_THRESHOLD 1'] 
   },
 ]
 
-exports['api burn-in actions test is already burned-in FAILED_REACHED_MAX_RETRIES 1'] = [
+exports['burn-in test is already burned-in FAILED_REACHED_MAX_RETRIES 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2455,7 +2509,7 @@ exports['api burn-in actions test is already burned-in FAILED_REACHED_MAX_RETRIE
   },
 ]
 
-exports['api burn-in actions test is already burned-in FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
+exports['burn-in test is already burned-in FAILED_DID_NOT_MEET_THRESHOLD 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2582,7 +2636,7 @@ exports['api burn-in actions test is already burned-in FAILED_DID_NOT_MEET_THRES
   },
 ]
 
-exports['api burn-in actions test is already burned-in FAILED_STOPPED_ON_FLAKE 1'] = [
+exports['burn-in test is already burned-in FAILED_STOPPED_ON_FLAKE 1'] = [
   {
     'state': 'failed',
     'error': {
@@ -2642,5 +2696,25 @@ exports['api burn-in actions test is already burned-in FAILED_STOPPED_ON_FLAKE 1
     'videoTimestamp': null,
     'reasonToStop': 'FAILED_STOPPED_ON_FLAKE',
     'initialStrategy': 'RETRY',
+  },
+]
+
+exports['burn-in override burn-in not allowed PASSED_FIRST_ATTEMPT 1'] = [
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': 'PASSED_FIRST_ATTEMPT',
+    'initialStrategy': 'NONE',
   },
 ]

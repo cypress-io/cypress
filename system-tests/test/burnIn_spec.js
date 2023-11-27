@@ -40,133 +40,32 @@ const assertRunnerCapabilities = (requests) => {
   })
 }
 
-const assertPassedBurnIn = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(2)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq('PASSED_BURN_IN')
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
+const assertAttempts = (postInstanceTestAttempts, expectedAttemptLength, expectedReasonStop, expectedFinalInitialStrategy, testIsBeingBurnedIn = true, isSuccessfulBurnIn = false) => {
+  expect(postInstanceTestAttempts.length).to.eq(expectedAttemptLength)
+  for (let i = 0; i < expectedAttemptLength; i++) {
+    const { reasonToStop, initialStrategy } = postInstanceTestAttempts[i]
+
+    // last attempt should have the expected initial strategy and reason to stop
+    if (i === expectedAttemptLength - 1) {
+      expect(reasonToStop).to.eq(expectedReasonStop)
+      expect(initialStrategy).to.eq(expectedFinalInitialStrategy)
+    } else if (i === 0) { // first attempt always has NONE strategy
+      expect(reasonToStop).to.eq(null)
+      expect(initialStrategy).to.eq('NONE')
+    } else if ((i === 1 || isSuccessfulBurnIn) && testIsBeingBurnedIn) {
+      // if test is being burned-in, the second attempt will always have BURN_IN strategy
+      // or if it's being burned-in and all of its attempts are passing
+      expect(reasonToStop).to.eq(null)
+      expect(initialStrategy).to.eq('BURN_IN')
+    } else {
+    // if previous attempt failed, the current and following attempts will use retry strategy
+      expect(reasonToStop).to.eq(null)
+      expect(initialStrategy).to.eq('RETRY')
+    }
+  }
 }
 
-const assertPassedMetThreshold = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(5)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq('PASSED_MET_THRESHOLD')
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedReachedMaxRetries = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(7)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[5].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[6].reasonToStop).to.eq('FAILED_REACHED_MAX_RETRIES')
-  expect(postInstanceTestAttempts[6].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedDidNotMeetThreshold = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(6)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[5].reasonToStop).to.eq('FAILED_DID_NOT_MEET_THRESHOLD')
-  expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
-}
-
-const assertStoppedOnFlake = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(2)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq('FAILED_STOPPED_ON_FLAKE')
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
-}
-
-const assertPassedFirstAttempt = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(1)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq('PASSED_FIRST_ATTEMPT')
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-}
-
-const assertPassedMetThresholdWithoutBurnIn = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(6)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[5].reasonToStop).to.eq('PASSED_MET_THRESHOLD')
-  expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedReachedMaxRetriesWithoutBurnIn = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(7)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[5].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[6].reasonToStop).to.eq('FAILED_REACHED_MAX_RETRIES')
-  expect(postInstanceTestAttempts[6].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedDidNotMeetThresholdWithoutBurnIn = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(5)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[4].reasonToStop).to.eq('FAILED_DID_NOT_MEET_THRESHOLD')
-  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedStoppedOnFlake = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(2)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq('FAILED_STOPPED_ON_FLAKE')
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
-}
-
-context('api burn-in actions', () => {
+context('burn-in', () => {
   context('modified/new test', () => {
     setupStubbedServer(createRoutes({
       postInstanceTests: {
@@ -216,7 +115,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'PASSED_BURN_IN', 'BURN_IN')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -248,7 +147,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedMetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 5, 'PASSED_MET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -280,7 +179,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedReachedMaxRetries(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 7, 'FAILED_REACHED_MAX_RETRIES', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -312,7 +211,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 6, 'FAILED_DID_NOT_MEET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -344,7 +243,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertStoppedOnFlake(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'FAILED_STOPPED_ON_FLAKE', 'BURN_IN')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -400,7 +299,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'PASSED_BURN_IN', 'BURN_IN')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -432,7 +331,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedMetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 5, 'PASSED_MET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -464,7 +363,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedReachedMaxRetries(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 7, 'FAILED_REACHED_MAX_RETRIES', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -496,7 +395,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 6, 'FAILED_DID_NOT_MEET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -528,7 +427,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertStoppedOnFlake(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'FAILED_STOPPED_ON_FLAKE', 'BURN_IN')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -584,15 +483,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      expect(postInstanceTestAttempts.length).to.eq(4)
-      expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-      expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-      expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-      expect(postInstanceTestAttempts[1].initialStrategy).to.eq('BURN_IN')
-      expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-      expect(postInstanceTestAttempts[2].initialStrategy).to.eq('BURN_IN')
-      expect(postInstanceTestAttempts[3].reasonToStop).to.eq('PASSED_BURN_IN')
-      expect(postInstanceTestAttempts[3].initialStrategy).to.eq('BURN_IN')
+      assertAttempts(postInstanceTestAttempts, 4, 'PASSED_BURN_IN', 'BURN_IN', true, true)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -624,7 +515,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedMetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 5, 'PASSED_MET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -656,7 +547,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedReachedMaxRetries(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 7, 'FAILED_REACHED_MAX_RETRIES', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -688,7 +579,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 6, 'FAILED_DID_NOT_MEET_THRESHOLD', 'RETRY')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -720,7 +611,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertStoppedOnFlake(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'FAILED_STOPPED_ON_FLAKE', 'BURN_IN')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -776,7 +667,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedFirstAttempt(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 1, 'PASSED_FIRST_ATTEMPT', 'NONE')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -808,7 +699,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 6, 'PASSED_MET_THRESHOLD', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -840,7 +731,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedReachedMaxRetriesWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 7, 'FAILED_REACHED_MAX_RETRIES', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -872,7 +763,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedDidNotMeetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 5, 'FAILED_DID_NOT_MEET_THRESHOLD', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -904,7 +795,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedStoppedOnFlake(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'FAILED_STOPPED_ON_FLAKE', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -961,7 +852,7 @@ context('api burn-in actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       // since the test passed in the first attempt and the test was already burned-in, we don't try to burn-in again
-      assertPassedFirstAttempt(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 1, 'PASSED_FIRST_ATTEMPT', 'NONE')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -993,7 +884,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 6, 'PASSED_MET_THRESHOLD', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -1023,7 +914,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedReachedMaxRetriesWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 7, 'FAILED_REACHED_MAX_RETRIES', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -1055,7 +946,7 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedDidNotMeetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 5, 'FAILED_DID_NOT_MEET_THRESHOLD', 'RETRY', false)
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
@@ -1087,7 +978,118 @@ context('api burn-in actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assertFailedStoppedOnFlake(postInstanceTestAttempts)
+      assertAttempts(postInstanceTestAttempts, 2, 'FAILED_STOPPED_ON_FLAKE', 'RETRY', false)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
+    })
+  })
+
+  context('override default burn-in config', () => {
+    setupStubbedServer(createRoutes({
+      postInstanceTests: {
+        res: (req, res) => {
+          return res.json({
+            ...postInstanceTestsResponse,
+            actions: [{
+              type: 'TEST',
+              clientId: 'r3',
+              payload: {
+                config: {
+                  overrides: {
+                    default: 3,
+                    flaky: 5,
+                  },
+                },
+                startingScore: null,
+                planType: 'team',
+              },
+              action: 'BURN_IN',
+            }],
+          })
+        },
+      },
+    }))
+
+    it('PASSED_BURN_IN', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
+        record: true,
+        snapshot: false,
+        expectedExitCode: 0,
+      })
+
+      const requests = getRequests()
+
+      assertRequestUrls()
+      assertRunnerCapabilities(requests)
+
+      const postInstanceTests = requests[3].body.tests
+
+      expect(postInstanceTests.length).to.eq(1)
+
+      const postInstanceTestAttempts = postInstanceTests[0].attempts
+
+      assertAttempts(postInstanceTestAttempts, 3, 'PASSED_BURN_IN', 'BURN_IN')
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
+    })
+  })
+
+  context('override burn-in not allowed', () => {
+    setupStubbedServer(createRoutes({
+      postInstanceTests: {
+        res: (req, res) => {
+          return res.json({
+            ...postInstanceTestsResponse,
+            actions: [{
+              type: 'TEST',
+              clientId: 'r3',
+              payload: {
+                config: {
+                  overrides: {
+                    enabled: false,
+                  },
+                },
+                startingScore: null,
+                planType: 'free',
+              },
+              action: 'BURN_IN',
+            }],
+          })
+        },
+      },
+    }))
+
+    it('PASSED_FIRST_ATTEMPT', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
+        record: true,
+        snapshot: false,
+        expectedExitCode: 0,
+      })
+
+      const requests = getRequests()
+
+      assertRequestUrls()
+      assertRunnerCapabilities(requests)
+
+      const postInstanceTests = requests[3].body.tests
+
+      expect(postInstanceTests.length).to.eq(1)
+
+      const postInstanceTestAttempts = postInstanceTests[0].attempts
+
+      assertAttempts(postInstanceTestAttempts, 1, 'PASSED_FIRST_ATTEMPT', 'NONE')
 
       const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
 
