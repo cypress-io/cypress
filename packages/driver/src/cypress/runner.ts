@@ -940,6 +940,7 @@ const setHookFailureProps = (test, hook, err) => {
   test.duration = hook.duration // TODO: nope (?)
   test.hookName = hookName // TODO: why are we doing this?
   test.failedFromHookId = hook.hookId
+  test._cypressTestStatusInfo.reasonToStop = 'FAILED_HOOK_FAILED'
   // There should never be a case where the outerStatus of a test is set AND the last test attempt failed on a hook and the state is passed.
   // Therefore, if the last test attempt fails on a hook, the outerStatus should also indicate a failure.
   if (test?._cypressTestStatusInfo?.outerStatus) {

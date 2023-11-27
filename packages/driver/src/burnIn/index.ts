@@ -27,7 +27,7 @@ export type ReasonToStop =
 | 'FAILED_REACHED_MAX_RETRIES' // failed after reaching max retries
 | 'FAILED_DID_NOT_MEET_THRESHOLD' // failed since it's impossible to meet threshold for strategy 'detect-flake-and-pass-on-threshold'
 | 'FAILED_STOPPED_ON_FLAKE' // failed with one attempt passing and using strategy 'detect-flake-but-always-fail' with `stopIfAnyPassed` set to true
-// NOTE: can we detect this? how? the goal is to avoid retrying a test that failed because of a hook failure
+// NOTE: this is used in runner.ts > hookFailed
 | 'FAILED_HOOK_FAILED' // failed because a hook failed
 
 export type EvaluateAttemptInput = {
