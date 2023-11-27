@@ -7,8 +7,8 @@ import $stackUtils from './stack_utils'
 // in the browser mocha is coming back
 // as window
 import * as mocha from 'mocha'
-import type { AttemptStrategy, CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, ReasonToStop } from '../burnIn'
-import { evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burnIn'
+import { CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burnIn'
+import type { AttemptStrategy, ReasonToStop } from '@packages/types'
 
 const { getTestFromRunnable } = $utils
 
