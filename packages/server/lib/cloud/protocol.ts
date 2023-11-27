@@ -9,6 +9,7 @@ import os from 'os'
 import path from 'path'
 
 import { agent } from '@packages/network'
+import { telemetry } from '@packages/telemetry'
 import pkg from '@packages/root'
 
 import env from '../util/env'
@@ -81,6 +82,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async setupProtocol (script: string, options: ProtocolManagerOptions) {
+    telemetry.startSpan({ name: 'protocol:setup' })
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 
     debug('setting up protocol via script')
@@ -107,6 +109,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       } else {
         throw error
       }
+    } finally {
+      telemetry.getSpan('protocol:setup')?.end()
     }
   }
 
@@ -142,6 +146,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    telemetry.startSpan({ name: 'protocol:beforeSpec' })
+
     // Reset the errors here so that we are tracking on them per-spec
     this._errors = []
 
@@ -156,6 +162,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       } else {
         throw error
       }
+    } finally {
+      telemetry.getSpan('protocol:beforeSpec')?.end()
     }
   }
 
@@ -178,7 +186,9 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async afterSpec () {
+    telemetry.startSpan({ name: 'protocol:afterSpec' })
     await this.invokeAsync('afterSpec', { isEssential: true })
+    telemetry.getSpan('protocol:afterSpec')?.end()
   }
 
   async beforeTest (test: { id: string } & Record<string, any>) {
@@ -288,6 +298,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    telemetry.startSpan({ name: 'protocol:uploadCaptureArtifact' })
+
     debug(`uploading %s to %s with a file size of %s`, archivePath, uploadUrl, fileSize)
 
     const retryRequest = async (retryCount: number, errors: Error[]) => {
@@ -367,6 +379,8 @@ export class ProtocolManager implements ProtocolManagerShape {
           debug(`Error unlinking db %o`, e)
         }) : Promise.resolve()
       )
+
+      telemetry.getSpan('protocol:uploadCaptureArtifact')?.end()
     }
   }
 
