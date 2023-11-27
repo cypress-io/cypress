@@ -1010,7 +1010,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,

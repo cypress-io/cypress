@@ -27,7 +27,7 @@ export type ReasonToStop =
 | 'FAILED_REACHED_MAX_RETRIES' // failed after reaching max retries
 | 'FAILED_DID_NOT_MEET_THRESHOLD' // failed since it's impossible to meet threshold for strategy 'detect-flake-and-pass-on-threshold'
 | 'FAILED_STOPPED_ON_FLAKE' // failed with one attempt passing and using strategy 'detect-flake-but-always-fail' with `stopIfAnyPassed` set to true
-// NOTE: this is used in runner.ts > hookFailed
+// NOTE: this is used in the mocha patch
 | 'FAILED_HOOK_FAILED' // failed because a hook failed
 
 export type EvaluateAttemptInput = {
