@@ -7,6 +7,18 @@ const {
   postInstanceTestsResponse,
 } = require('../lib/serverStub')
 
+const numberRegex = /"(wallClockDuration|fnDuration|afterFnDuration|lifecycle)":\"?(0|[1-9]\d*)(\.\d+)?\"?/g
+const isoDateRegex = /"([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?"/g
+
+const normalizeAttempts = (attemptsJson) => {
+  const stringifiedAttempts = JSON.stringify(attemptsJson)
+  const normalizedAttempts = stringifiedAttempts
+  .replace(isoDateRegex, '"Any.ISODate"')
+  .replace(numberRegex, '"$1": "Any.Number"')
+
+  return JSON.parse(normalizedAttempts)
+}
+
 const assertRequestUrls = () => {
   expect(getRequestUrls()).deep.eq([
     'POST /runs',
@@ -98,19 +110,7 @@ const assertPassedFirstAttempt = (postInstanceTestAttempts) => {
   expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
 }
 
-const assetPassedMetThresholdWithoutBurnIn = (postInstanceTestAttempts) => {
-  expect(postInstanceTestAttempts.length).to.eq(4)
-  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
-  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
-  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[3].reasonToStop).to.eq('PASSED_MET_THRESHOLD')
-  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
-}
-
-const assertFailedReachedMaxRetriesWithoutBurnIn = (postInstanceTestAttempts) => {
+const assertPassedMetThresholdWithoutBurnIn = (postInstanceTestAttempts) => {
   expect(postInstanceTestAttempts.length).to.eq(6)
   expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
   expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
@@ -122,8 +122,26 @@ const assertFailedReachedMaxRetriesWithoutBurnIn = (postInstanceTestAttempts) =>
   expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
   expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
   expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
-  expect(postInstanceTestAttempts[5].reasonToStop).to.eq('FAILED_REACHED_MAX_RETRIES')
+  expect(postInstanceTestAttempts[5].reasonToStop).to.eq('PASSED_MET_THRESHOLD')
   expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
+}
+
+const assertFailedReachedMaxRetriesWithoutBurnIn = (postInstanceTestAttempts) => {
+  expect(postInstanceTestAttempts.length).to.eq(7)
+  expect(postInstanceTestAttempts[0].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+  expect(postInstanceTestAttempts[1].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
+  expect(postInstanceTestAttempts[2].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[2].initialStrategy).to.eq('RETRY')
+  expect(postInstanceTestAttempts[3].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[3].initialStrategy).to.eq('RETRY')
+  expect(postInstanceTestAttempts[4].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[4].initialStrategy).to.eq('RETRY')
+  expect(postInstanceTestAttempts[5].reasonToStop).to.eq(null)
+  expect(postInstanceTestAttempts[5].initialStrategy).to.eq('RETRY')
+  expect(postInstanceTestAttempts[6].reasonToStop).to.eq('FAILED_REACHED_MAX_RETRIES')
+  expect(postInstanceTestAttempts[6].initialStrategy).to.eq('RETRY')
 }
 
 const assertFailedDidNotMeetThresholdWithoutBurnIn = (postInstanceTestAttempts) => {
@@ -148,7 +166,7 @@ const assertFailedStoppedOnFlake = (postInstanceTestAttempts) => {
   expect(postInstanceTestAttempts[1].initialStrategy).to.eq('RETRY')
 }
 
-context('api burnin actions', () => {
+context('api burn-in actions', () => {
   context('modified/new test', () => {
     setupStubbedServer(createRoutes({
       postInstanceTests: {
@@ -179,17 +197,12 @@ context('api burnin actions', () => {
     it('PASSED_BURN_IN', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'b_record.cy.js',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
-        config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-        },
       })
 
       const requests = getRequests()
@@ -204,6 +217,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('PASSED_MET_THRESHOLD', async function () {
@@ -211,24 +228,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 6,
-              passesRequired: 3,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -245,6 +249,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedMetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_REACHED_MAX_RETRIES', async function () {
@@ -252,24 +260,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: false,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -286,6 +281,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedReachedMaxRetries(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_DID_NOT_MEET_THRESHOLD', async function () {
@@ -293,24 +292,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 4,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -327,6 +313,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_STOPPED_ON_FLAKE', async function () {
@@ -334,24 +324,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: true,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -368,6 +345,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertStoppedOnFlake(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
   })
 
@@ -400,17 +381,12 @@ context('api burnin actions', () => {
     it('PASSED_BURN_IN', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'b_record.cy.js',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
-        config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-        },
       })
 
       const requests = getRequests()
@@ -425,6 +401,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('PASSED_MET_THRESHOLD', async function () {
@@ -432,24 +412,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 6,
-              passesRequired: 3,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -466,6 +433,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedMetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_REACHED_MAX_RETRIES', async function () {
@@ -473,24 +444,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: false,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -507,6 +465,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedReachedMaxRetries(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_DID_NOT_MEET_THRESHOLD', async function () {
@@ -514,24 +476,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 4,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -548,6 +497,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_STOPPED_ON_FLAKE', async function () {
@@ -555,24 +508,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: true,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -589,6 +529,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertStoppedOnFlake(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
   })
 
@@ -621,17 +565,12 @@ context('api burnin actions', () => {
     it('PASSED_BURN_IN', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'b_record.cy.js',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
-        config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-        },
       })
 
       const requests = getRequests()
@@ -654,6 +593,10 @@ context('api burnin actions', () => {
       expect(postInstanceTestAttempts[2].initialStrategy).to.eq('BURN_IN')
       expect(postInstanceTestAttempts[3].reasonToStop).to.eq('PASSED_BURN_IN')
       expect(postInstanceTestAttempts[3].initialStrategy).to.eq('BURN_IN')
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('PASSED_MET_THRESHOLD', async function () {
@@ -661,24 +604,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 6,
-              passesRequired: 3,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -695,6 +625,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedMetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_REACHED_MAX_RETRIES', async function () {
@@ -702,24 +636,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: false,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -736,6 +657,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedReachedMaxRetries(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_DID_NOT_MEET_THRESHOLD', async function () {
@@ -743,24 +668,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 4,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -777,6 +689,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedDidNotMeetThreshold(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_STOPPED_ON_FLAKE', async function () {
@@ -784,24 +700,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'passes-first-attempt-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: true,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -818,6 +721,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertStoppedOnFlake(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
   })
 
@@ -850,17 +757,12 @@ context('api burnin actions', () => {
     it('PASSED_FIRST_ATTEMPT', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'b_record.cy.js',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
-        config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-        },
       })
 
       const requests = getRequests()
@@ -875,6 +777,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertPassedFirstAttempt(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('PASSED_MET_THRESHOLD', async function () {
@@ -882,24 +788,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 2,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -915,7 +808,11 @@ context('api burnin actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assetPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_REACHED_MAX_RETRIES', async function () {
@@ -923,24 +820,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 5,
-              stopIfAnyPassed: false,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -957,6 +841,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedReachedMaxRetriesWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_DID_NOT_MEET_THRESHOLD', async function () {
@@ -964,24 +852,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 4,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -998,6 +873,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedDidNotMeetThresholdWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_STOPPED_ON_FLAKE', async function () {
@@ -1005,24 +884,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: true,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -1039,6 +905,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedStoppedOnFlake(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
   })
 
@@ -1071,17 +941,12 @@ context('api burnin actions', () => {
     it('PASSED_FIRST_ATTEMPT', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'b_record.cy.js',
+        project: 'experimental-retries',
+        spec: 'always-passes.cy.js',
+        configFile: 'burn-in-no-retries.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
-        config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-        },
       })
 
       const requests = getRequests()
@@ -1097,6 +962,10 @@ context('api burnin actions', () => {
 
       // since the test passed in the first attempt and the test was already burned-in, we don't try to burn-in again
       assertPassedFirstAttempt(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('PASSED_MET_THRESHOLD', async function () {
@@ -1104,24 +973,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 0,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 2,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -1137,7 +993,11 @@ context('api burnin actions', () => {
 
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
-      assetPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+      assertPassedMetThresholdWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_REACHED_MAX_RETRIES', async function () {
@@ -1145,24 +1005,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 5,
-              stopIfAnyPassed: false,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -1174,11 +1021,13 @@ context('api burnin actions', () => {
 
       const postInstanceTests = requests[3].body.tests
 
-      expect(postInstanceTests.length).to.eq(1)
-
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedReachedMaxRetriesWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_DID_NOT_MEET_THRESHOLD', async function () {
@@ -1186,24 +1035,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
-            experimentalOptions: {
-              maxRetries: 5,
-              passesRequired: 4,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -1220,6 +1056,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedDidNotMeetThresholdWithoutBurnIn(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
 
     it('FAILED_STOPPED_ON_FLAKE', async function () {
@@ -1227,24 +1067,11 @@ context('api burnin actions', () => {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'experimental-retries',
         spec: 'deterministic-flaky.cy.js',
-        configFile: 'cypress.config.js',
+        configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
         snapshot: false,
         expectedExitCode: 1,
         config: {
-          experimentalBurnIn: {
-            default: 2,
-            flaky: 4,
-          },
-          retries: {
-            openMode: false,
-            runMode: true,
-            experimentalStrategy: 'detect-flake-but-always-fail',
-            experimentalOptions: {
-              maxRetries: 6,
-              stopIfAnyPassed: true,
-            },
-          },
           screenshotOnRunFailure: false,
         },
       })
@@ -1261,6 +1088,10 @@ context('api burnin actions', () => {
       const postInstanceTestAttempts = postInstanceTests[0].attempts
 
       assertFailedStoppedOnFlake(postInstanceTestAttempts)
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
     })
   })
 })
