@@ -13671,7 +13671,8 @@
           "attempts": 1,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -38561,7 +38562,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -51373,7 +51375,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
