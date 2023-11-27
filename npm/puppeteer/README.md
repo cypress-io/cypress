@@ -1,6 +1,8 @@
-# @cypress/puppeteer
+# @cypress/puppeteer [beta]
 
 Utilize [Puppeteer's browser API](https://pptr.dev/api) within Cypress with a single command.
+
+> This plugin is in public beta, so we'd love to get your feedback to improve it. Please leave any feedback you have in [this discussion](https://github.com/cypress-io/cypress/discussions/28410).
 
 # Table of Contents
 
