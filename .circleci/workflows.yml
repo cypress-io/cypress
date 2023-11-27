@@ -515,13 +515,13 @@ commands:
             which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
-  
+
   # This code builds better-sqlite3 on CentOS 7. This is necessary because CentOS 7 has the oldest glibc version
   # that we support. The script checks for the existence of the Centos7-builder image tar file, and skips if it already
   # exists. If you want to rebuild the image, set the REBUILD_CENTOS_BUILDER_IMAGE environment variable to any value.
   # Since this is running Docker remote, we need to copy the project into the container, and copy the built plugin out
   # of the container because the host running docker does not have access to the project directory so volume mounts are
-  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.  
+  # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
     description: Build better-sqlite3 for CentOS 7
     steps:
@@ -2045,6 +2045,38 @@ jobs:
           command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
+  npm-puppeteer-unit-tests:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn lerna run build --scope @cypress/puppeteer
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/puppeteer
+      - store_test_results:
+          path: npm/puppeteer/test_results
+      - store_artifacts:
+          path: npm/puppeteer/test_results
+      - store-npm-logs
+
+  npm-puppeteer-cypress-tests:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: yarn cypress:run
+          working_directory: npm/puppeteer
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   npm-react:
     <<: *defaults
     steps:
@@ -2751,6 +2783,12 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-vue:
         requires:
           - build
+    - npm-puppeteer-unit-tests:
+        requires:
+          - build
+    - npm-puppeteer-cypress-tests:
+        requires:
+          - build
     - npm-react:
         requires:
           - build
@@ -2825,6 +2863,8 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - npm-puppeteer-unit-tests
+          - npm-puppeteer-cypress-tests
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
@@ -2872,6 +2912,8 @@ linux-x64-workflow: &linux-x64-workflow
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - npm-puppeteer-unit-tests
+          - npm-puppeteer-cypress-tests
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
@@ -3137,6 +3179,12 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-vue:
         requires:
           - build
+    - npm-puppeteer-unit-tests:
+        requires:
+          - build
+    - npm-puppeteer-cypress-tests:
+        requires:
+          - build
     - npm-react:
         requires:
           - build
@@ -3169,6 +3217,8 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - npm-angular
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
+          - npm-puppeteer-unit-tests
+          - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
           - npm-vue
