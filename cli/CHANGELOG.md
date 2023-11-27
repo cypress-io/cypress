@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.1
+
+_Release (Pending)_
+
+**Bugfixes:**
+- Fixed an issue where request logging would default the `message` to the `message` of the currently running command even though that `message` would not apply to the request log and is not displayed. If the `message` was sufficiently large (e.g. when running the `cy.task` from the [code-coverage](https://github.com/cypress-io/code-coverage/) plugin) there could be performance/memory implications.
+
 ## 13.6.0
 
 _Released 11/21/2023_
