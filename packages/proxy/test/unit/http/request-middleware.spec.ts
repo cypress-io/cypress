@@ -83,7 +83,7 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).not.to.exist
         expect(ctx.req.isFromExtraTarget).to.be.true
-        expect(ctx.onlyRunMiddleware).to.be.calledWith(['SendRequestOutgoing'])
+        expect(ctx.onlyRunMiddleware).to.be.calledWith(['MaybeSetBasicAuthHeaders', 'SendRequestOutgoing'])
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
