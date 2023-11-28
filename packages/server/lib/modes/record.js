@@ -279,7 +279,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             // performance.now() gives milliseconds with many decimals - this is
             // higher resolution than we need, and the cy cloud column is int, not
             // a floating point
-            uploadDuration: Math.round(performance.now() - startTime),
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -292,7 +292,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           pathToFile: artifact.filePath,
           fileSize: artifact.fileSize,
           key: artifact.reportKey,
-          uploadDuration: Math.round(performance.now() - startTime),
+          uploadDuration: performance.now() - startTime,
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -311,7 +311,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
-            uploadDuration: Math.round(performance.now() - startTime),
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -321,7 +321,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
-          uploadDuration: Math.round(performance.now() - startTime),
+          uploadDuration: performance.now() - startTime,
         }
       }
     }),
