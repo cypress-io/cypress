@@ -22,9 +22,27 @@ const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
 
+export const parseUrl = (url: string) => {
+  try {
+    return new URL(url)
+  } catch (e) {
+    // TODO: remove this hack after https://github.com/whatwg/url/issues/531 is resolved
+    const u = new URL(url, 'http://cy-fake-host')
+
+    return {
+      ...u,
+      hostname: u.hostname.replace('http://cy-fake-host', ''),
+      host: u.host.replace('http://cy-fake-host', ''),
+      href: u.href.replace('http://cy-fake-host', ''),
+      origin: u.origin.replace('http://cy-fake-host', ''),
+      protocol: '',
+    }
+  }
+}
+
 export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   // grab host which is 'hostname:port' only
-  const { host, hostname, port } = new URL(urlToCheck)
+  const { host, hostname, port } = parseUrl(urlToCheck)
 
   // if we have a default port for 80 or 443
   // then just return the hostname
@@ -37,7 +55,7 @@ export function stripProtocolAndDefaultPorts (urlToCheck: string) {
 }
 
 export function removeDefaultPort (urlToCheck: any) {
-  let parsed = new URL(urlToCheck)
+  const parsed = parseUrl(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
     parsed.port = ''
@@ -47,7 +65,7 @@ export function removeDefaultPort (urlToCheck: any) {
 }
 
 export function addDefaultPort (urlToCheck: any) {
-  const parsed = new URL(urlToCheck)
+  const parsed = parseUrl(urlToCheck)
 
   if (!parsed.port) {
     if (parsed.protocol) {
@@ -61,7 +79,7 @@ export function addDefaultPort (urlToCheck: any) {
 }
 
 export function getPath (urlToCheck: string) {
-  const url = new URL(urlToCheck)
+  const url = parseUrl(urlToCheck)
 
   return `${url.pathname}${url.search}`
 }
@@ -83,5 +101,5 @@ export function isLocalhost (url: URL) {
 }
 
 export function origin (urlStr: string) {
-  return new URL(urlStr).origin
+  return parseUrl(urlStr).origin
 }

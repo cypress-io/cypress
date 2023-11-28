@@ -30,13 +30,9 @@ export function parseDomain (domain: string, options = {}) {
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str) {
-  let { hostname, port, protocol } = new URL(str)
+  let { hostname, port, protocol } = uri.parseUrl(str)
 
-  if (!hostname) {
-    hostname = ''
-  }
-
-  if (!port) {
+  if (port.length === 0) {
     port = protocol === 'https:' ? '443' : '80'
   }
 
@@ -167,7 +163,7 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
  * @returns {boolean} - whether or not a match was found
  */
 const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns: string[]): boolean => {
-  let { hostname } = new URL(url)
+  let { hostname } = uri.parseUrl(url)
 
   return !!arrayOfStringOrGlobPatterns.find((globPattern) => {
     return minimatch(hostname || '', globPattern)
@@ -269,7 +265,6 @@ export function urlMatchesOriginProtectionSpace (urlStr, origin) {
 }
 
 export function getOrigin (url: string) {
-  // @ts-ignore
   const { origin } = new URL(url)
 
   // origin is comprised of:
@@ -288,7 +283,6 @@ export function getOrigin (url: string) {
  * ex: http://www.example.com:8081/my/path -> http://example.com:8081
  */
 export function getSuperDomainOrigin (url: string) {
-  // @ts-ignore
   const { port, protocol } = new URL(url)
 
   // super domain origin is comprised of:
