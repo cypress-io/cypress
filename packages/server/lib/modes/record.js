@@ -278,7 +278,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             key: artifact.reportKey,
             // performance.now() gives milliseconds with many decimals - this is
             // higher resolution than we need, and the cy cloud column is int, not
-            // a floating poina
+            // a floating point
             uploadDuration: Math.round(performance.now() - startTime),
           }
         }

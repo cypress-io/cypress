@@ -3,10 +3,6 @@
 
 _Released 12/5/2023 (PENDING)_
 
-**Features:**
-
-- Artifact upload duration is now reported to Cypress Cloud. Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418)
-
 **Bugfixes:**
 
 - Fixed an issue where pages or downloads opened in a new tab were missing basic auth headers. Fixes [#28350](https://github.com/cypress-io/cypress/issues/28350).
