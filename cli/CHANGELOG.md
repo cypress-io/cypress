@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.0
+
+_Released 12/5/2023 (PENDING)_
+
+**Features:**
+
+- Artifact upload duration is now reported to Cypress Cloud. Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418)
+
 ## 13.6.0
 
 _Released 11/21/2023_
