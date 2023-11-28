@@ -91,7 +91,6 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: output.outerTestStatus,
-    reasonToStop: output.reasonToStop,
   }
 }
 
