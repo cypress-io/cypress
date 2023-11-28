@@ -795,7 +795,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -828,7 +829,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -876,7 +878,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -910,7 +913,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -2542,7 +2546,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -2596,7 +2601,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -2665,7 +2671,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -2720,7 +2727,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -4373,7 +4381,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -4427,7 +4436,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -4496,7 +4506,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -4551,7 +4562,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -6802,7 +6814,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -6866,7 +6879,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -6945,7 +6959,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -7010,7 +7025,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -9578,7 +9594,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -9635,7 +9652,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -9692,7 +9710,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -9752,7 +9771,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -9810,7 +9830,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r3",
         "order": 1,
@@ -10073,7 +10094,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -10131,7 +10153,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -10189,7 +10212,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -10250,7 +10274,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -10309,7 +10334,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -10610,7 +10636,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -10675,7 +10702,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -10740,7 +10768,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -10808,7 +10837,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -10874,7 +10904,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -12986,7 +13017,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r7",
         "order": 4,
@@ -13031,7 +13063,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r7",
         "order": 4,
@@ -13076,7 +13109,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r7",
         "order": 4,
@@ -13124,7 +13158,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r7",
         "order": 4,
@@ -13170,7 +13205,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r7",
         "order": 4,
@@ -13337,7 +13373,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -13378,7 +13415,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -13434,7 +13472,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -13476,7 +13515,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -13631,7 +13671,8 @@
           "attempts": 1,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -14114,7 +14155,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -14169,7 +14211,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -14224,7 +14267,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -14282,7 +14326,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -14338,7 +14383,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -16373,7 +16419,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r4",
         "order": 2,
@@ -16420,7 +16467,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r4",
         "order": 2,
@@ -16467,7 +16515,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r4",
         "order": 2,
@@ -16517,7 +16566,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r4",
         "order": 2,
@@ -16565,7 +16615,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 7,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_MET_THRESHOLD"
         },
         "id": "r4",
         "order": 2,
@@ -16779,7 +16830,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -16834,7 +16886,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -16904,7 +16957,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -16960,7 +17014,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -17831,7 +17886,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
         },
         "id": "r2",
         "order": 1,
@@ -17876,7 +17932,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
         },
         "id": "r2",
         "order": 1,
@@ -17915,7 +17972,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
         },
         "id": "r2",
         "order": 1,
@@ -17955,7 +18013,8 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 6,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
         },
         "id": "r2",
         "order": 1,
@@ -19357,7 +19416,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -19402,7 +19462,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -19456,7 +19517,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -19496,7 +19558,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -22158,7 +22221,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -22224,7 +22288,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -22299,7 +22364,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -22360,7 +22426,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -25043,7 +25110,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -25109,7 +25177,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -25184,7 +25253,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -25245,7 +25315,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -28950,7 +29021,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -29026,7 +29098,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -29111,7 +29184,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -29182,7 +29256,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33444,7 +33519,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33513,7 +33589,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33576,7 +33653,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33642,7 +33720,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33706,7 +33785,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r3",
         "order": 1,
@@ -33975,7 +34055,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -34033,7 +34114,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -34091,7 +34173,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -34152,7 +34235,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -34211,7 +34295,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -34512,7 +34597,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -34577,7 +34663,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -34642,7 +34729,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -34710,7 +34798,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -34776,7 +34865,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -37782,7 +37872,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r7",
         "order": 4,
@@ -37839,7 +37930,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r7",
         "order": 4,
@@ -37890,7 +37982,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r7",
         "order": 4,
@@ -37944,7 +38037,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r7",
         "order": 4,
@@ -37996,7 +38090,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r7",
         "order": 4,
@@ -38169,7 +38264,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -38210,7 +38306,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -38266,7 +38363,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -38308,7 +38406,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -38463,7 +38562,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -38946,7 +39046,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -39001,7 +39102,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -39056,7 +39158,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -39114,7 +39217,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -39170,7 +39274,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -42123,7 +42228,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r4",
         "order": 2,
@@ -42182,7 +42288,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r4",
         "order": 2,
@@ -42235,7 +42342,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r4",
         "order": 2,
@@ -42291,7 +42399,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r4",
         "order": 2,
@@ -42345,7 +42454,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r4",
         "order": 2,
@@ -42565,7 +42675,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -42620,7 +42731,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -42690,7 +42802,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -42746,7 +42859,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -44189,7 +44303,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -44234,7 +44349,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -44273,7 +44389,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -44313,7 +44430,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -44611,7 +44729,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -44656,7 +44775,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -44710,7 +44830,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -44750,7 +44871,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -45364,7 +45486,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -45430,7 +45553,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -45505,7 +45629,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -45566,7 +45691,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -46201,7 +46327,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -46267,7 +46394,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -46342,7 +46470,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -46403,7 +46532,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -47212,7 +47342,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -47288,7 +47419,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -47373,7 +47505,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -47444,7 +47577,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48330,7 +48464,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48399,7 +48534,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48462,7 +48598,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48528,7 +48665,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48592,7 +48730,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r3",
         "order": 1,
@@ -48861,7 +49000,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -48919,7 +49059,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -48977,7 +49118,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -49038,7 +49180,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -49097,7 +49240,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r4",
         "order": 2,
@@ -49398,7 +49542,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -49463,7 +49608,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -49528,7 +49674,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -49596,7 +49743,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -49662,7 +49810,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -50536,7 +50685,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r7",
         "order": 4,
@@ -50593,7 +50743,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r7",
         "order": 4,
@@ -50644,7 +50795,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r7",
         "order": 4,
@@ -50698,7 +50850,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r7",
         "order": 4,
@@ -50750,7 +50903,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r7",
         "order": 4,
@@ -50923,7 +51077,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -50964,7 +51119,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -51020,7 +51176,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -51062,7 +51219,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r9",
         "order": 5,
@@ -51217,7 +51375,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -51700,7 +51859,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -51755,7 +51915,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -51810,7 +51971,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -51868,7 +52030,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -51924,7 +52087,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r3",
         "order": 1,
@@ -52735,7 +52899,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r4",
         "order": 2,
@@ -52794,7 +52959,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r4",
         "order": 2,
@@ -52847,7 +53013,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r4",
         "order": 2,
@@ -52903,7 +53070,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r4",
         "order": 2,
@@ -52957,7 +53125,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
         },
         "id": "r4",
         "order": 2,
@@ -53177,7 +53346,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -53232,7 +53402,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -53302,7 +53473,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -53358,7 +53530,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed"
+          "outerStatus": "passed",
+          "reasonToStop": "PASSED_FIRST_ATTEMPT"
         },
         "id": "r5",
         "order": 3,
@@ -54801,7 +54974,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -54846,7 +55020,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -54885,7 +55060,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,
@@ -54925,7 +55101,8 @@
           "strategy": "detect-flake-but-always-fail",
           "shouldAttemptsContinue": false,
           "attempts": 10,
-          "outerStatus": "failed"
+          "outerStatus": "failed",
+          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
         },
         "id": "r2",
         "order": 1,

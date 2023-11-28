@@ -761,6 +761,66 @@ describe('e2e record', () => {
     })
   })
 
+  describe('api burnin actions', () => {
+    setupStubbedServer(createRoutes({
+      postInstanceTests: {
+        res: (req, res) => {
+          return res.json({
+            ...postInstanceTestsResponse,
+            actions: [{
+              type: 'TEST',
+              clientId: 'r1',
+              payload: {
+                config: {
+                  overrides: {
+                    default: 3,
+                    flaky: 5,
+                  },
+                },
+                startingScore: -1,
+                planType: 'team',
+              },
+              action: 'BURN_IN',
+            }],
+          })
+        },
+      },
+
+    }))
+
+    it('sample test for burn-in', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id-without-video.config.js',
+        spec: 'b_record.cy.js',
+        record: true,
+        snapshot: false,
+        expectedExitCode: 0,
+      })
+
+      const requests = getRequests()
+
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      ])
+
+      expect(requests[0].body).property('runnerCapabilities').deep.eq({
+        'dynamicSpecsInSerialMode': true,
+        'protocolMountVersion': 2,
+        'skipSpecAction': true,
+        'burnInTestAction': true,
+      })
+      // TODO: check attempt data is correct once CYCLOUD-1141 is implemented
+      // console.log(JSON.stringify(requests))
+    })
+  })
+
   context('video recording', () => {
     describe('when video=false', () => {
       setupStubbedServer(createRoutes())
