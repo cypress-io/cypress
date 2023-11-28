@@ -90,9 +90,6 @@ export class RemoteStates {
     let state
 
     if (_.isString(urlOrState)) {
-      const remoteOrigin = uri.origin(urlOrState)
-      const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
-
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
         state = {
           auth: options.auth,
@@ -103,6 +100,9 @@ export class RemoteStates {
           props: null,
         }
       } else {
+        const remoteOrigin = uri.origin(urlOrState)
+        const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
+
         state = {
           auth: options.auth,
           origin: remoteOrigin,

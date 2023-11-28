@@ -30,7 +30,7 @@ export function parseDomain (domain: string, options = {}) {
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str) {
-  let { hostname, port, protocol } = uri.parse(str)
+  let { hostname, port, protocol } = new URL(str)
 
   if (!hostname) {
     hostname = ''
@@ -167,7 +167,7 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
  * @returns {boolean} - whether or not a match was found
  */
 const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns: string[]): boolean => {
-  let { hostname } = uri.parse(url)
+  let { hostname } = new URL(url)
 
   return !!arrayOfStringOrGlobPatterns.find((globPattern) => {
     return minimatch(hostname || '', globPattern)
@@ -262,8 +262,8 @@ declare module 'url' {
 }
 
 export function urlMatchesOriginProtectionSpace (urlStr, origin) {
-  const normalizedUrl = uri.addDefaultPort(urlStr).format()
-  const normalizedOrigin = uri.addDefaultPort(origin).format()
+  const normalizedUrl = uri.addDefaultPort(urlStr).href
+  const normalizedOrigin = uri.addDefaultPort(origin).href
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }

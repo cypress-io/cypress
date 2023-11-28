@@ -17,7 +17,7 @@ export type HttpBuffer = {
 
 const stripPort = (url) => {
   try {
-    return uri.removeDefaultPort(url).format()
+    return uri.removeDefaultPort(url).href
   } catch (e) {
     return url
   }

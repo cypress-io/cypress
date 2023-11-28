@@ -6,7 +6,6 @@
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
 import _ from 'lodash'
-import url, { URL } from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -23,15 +22,9 @@ const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
 
-const parseClone = (urlObject: any) => {
-  return url.parse(_.clone(urlObject))
-}
-
-export const parse = url.parse
-
 export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   // grab host which is 'hostname:port' only
-  const { host, hostname, port } = url.parse(urlToCheck)
+  const { host, hostname, port } = new URL(urlToCheck)
 
   // if we have a default port for 80 or 443
   // then just return the hostname
@@ -43,43 +36,24 @@ export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   return host
 }
 
-export function removePort (urlObject: any) {
-  const parsed = parseClone(urlObject)
-
-  // set host to undefined else url.format(...) will ignore the port property
-  // https://nodejs.org/api/url.html#url_url_format_urlobject
-  // Additionally, the types are incorrect (don't include undefined), so we add TS exceptions
-  /* @ts-ignore */
-  delete parsed.host
-  /* @ts-ignore */
-  delete parsed.port
-
-  return parsed
-}
-
 export function removeDefaultPort (urlToCheck: any) {
-  let parsed = parseClone(urlToCheck)
+  let parsed = new URL(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
-    parsed = removePort(parsed)
+    parsed.port = ''
   }
 
   return parsed
 }
 
 export function addDefaultPort (urlToCheck: any) {
-  const parsed = parseClone(urlToCheck)
+  const parsed = new URL(urlToCheck)
 
   if (!parsed.port) {
-    // unset host...
-    // see above for reasoning
-    /* @ts-ignore */
-    delete parsed.host
     if (parsed.protocol) {
       parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
     } else {
-      /* @ts-ignore */
-      delete parsed.port
+      parsed.port = ''
     }
   }
 
@@ -87,9 +61,7 @@ export function addDefaultPort (urlToCheck: any) {
 }
 
 export function getPath (urlToCheck: string) {
-  // since we are only concerned with the pathname and search properties,
-  // we can set the base to a fake base to handle relative urls
-  const url = new URL(urlToCheck, 'http://fake-base.com')
+  const url = new URL(urlToCheck)
 
   return `${url.pathname}${url.search}`
 }
@@ -111,13 +83,5 @@ export function isLocalhost (url: URL) {
 }
 
 export function origin (urlStr: string) {
-  const parsed = url.parse(urlStr)
-
-  parsed.hash = null
-  parsed.search = null
-  parsed.query = null
-  parsed.path = null
-  parsed.pathname = null
-
-  return url.format(parsed)
+  return new URL(urlStr).origin
 }
