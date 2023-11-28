@@ -1,7 +1,7 @@
 /* eslint-disable @cypress/dev/arrow-body-multiline-braces */
 
 import _ from 'lodash'
-import type { FoundBrowser, SpecWithRelativeRoot, AttemptStrategy, ReasonToStop } from '@packages/types'
+import type { FoundBrowser, SpecWithRelativeRoot } from '@packages/types'
 import path from 'path'
 
 import type { Cfg } from '../project-base'
@@ -30,8 +30,6 @@ interface AttemptResult {
   videoTimestamp: ms | null
   wallClockStartedAt: dateTimeISO | null
   wallClockDuration: ms | null
-  initialStrategy: AttemptStrategy
-  reasonToStop: ReasonToStop
 }
 
 interface TestResult {
