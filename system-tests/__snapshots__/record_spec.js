@@ -323,7 +323,7 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-            'reasonToStop': 'FAILED_NO_RETRIES',
+            'reasonToStop': 'FAILED_HOOK_FAILED',
             'initialStrategy': 'NONE',
           },
         ],
