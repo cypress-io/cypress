@@ -127,7 +127,7 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
   const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE' }
 
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
-  // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
+  // Otherwise, the test might be burning in OR the test passed on the first attempt,
   // meaning retry logic does NOT need to be applied.
   if (failedAttemptsCount > 0) {
     result.nextInitialStrategy = 'RETRY'
@@ -183,7 +183,6 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
         break
       default:
         result.outerTestStatus = 'failed'
-        result.forceState = currentAttemptResult === 'passed' ? currentAttemptResult : undefined
         result.reasonToStop = 'FAILED_NO_RETRIES'
     }
   } else {
