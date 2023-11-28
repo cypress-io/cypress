@@ -39,5 +39,16 @@
     "dist",
     "index.d.ts"
   ],
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/puppeteer/#readme",
+  "author": "Cypress App Team",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fpuppeteer&template=1-bug-report.md&title=",
+  "publishConfig": {
+    "access": "public"
+  }
 }
