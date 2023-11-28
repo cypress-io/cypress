@@ -249,6 +249,83 @@ context('burn-in', () => {
 
       systemTests.snapshot(normalizedAttempts)
     })
+
+    it('FAILED_HOOK_FAILED with all failing hooks', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'burn-in',
+        spec: 'runner/failing-all-hooks.runner.cy.js',
+        configFile: 'cypress.config.js',
+        record: true,
+        snapshot: false,
+        expectedExitCode: 4,
+        config: {
+          screenshotOnRunFailure: false,
+        },
+      })
+
+      const requests = getRequests()
+
+      assertRequestUrls()
+      assertRunnerCapabilities(requests)
+
+      const postInstanceTests = requests[3].body.tests
+
+      expect(postInstanceTests.length).to.eq(6)
+
+      // before failed
+      const firstPostInstanceTestAttempts = postInstanceTests[0].attempts
+
+      expect(firstPostInstanceTestAttempts.length).to.eq(1)
+      expect(firstPostInstanceTestAttempts[0].reasonToStop).to.eq('FAILED_HOOK_FAILED')
+      expect(firstPostInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+
+      // beforeEach failed
+      const secondPostInstanceTestAttempts = postInstanceTests[1].attempts
+
+      expect(secondPostInstanceTestAttempts.length).to.eq(1)
+      expect(secondPostInstanceTestAttempts[0].reasonToStop).to.eq('FAILED_HOOK_FAILED')
+      expect(secondPostInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+
+      // afterEach failed
+      const thirdPostInstanceTestAttempts = postInstanceTests[2].attempts
+
+      expect(thirdPostInstanceTestAttempts.length).to.eq(1)
+      expect(thirdPostInstanceTestAttempts[0].reasonToStop).to.eq('FAILED_HOOK_FAILED')
+      expect(thirdPostInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+
+      // skipped because of above afterEach failure
+      const fourthPostInstanceTestAttempts = postInstanceTests[3].attempts
+
+      expect(fourthPostInstanceTestAttempts.length).to.eq(1)
+      expect(fourthPostInstanceTestAttempts[0].reasonToStop).to.eq(null)
+      expect(fourthPostInstanceTestAttempts[0].initialStrategy).to.eq(null)
+
+      // passes so that the after hook fails below
+      const fifthPostInstanceTestAttempts = postInstanceTests[4].attempts
+
+      expect(fifthPostInstanceTestAttempts.length).to.eq(1)
+      expect(fifthPostInstanceTestAttempts[0].reasonToStop).to.eq('PASSED_FIRST_ATTEMPT')
+      expect(fifthPostInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+
+      //after failed
+      const sixthPostInstanceTestAttempts = postInstanceTests[5].attempts
+
+      expect(sixthPostInstanceTestAttempts.length).to.eq(1)
+      expect(sixthPostInstanceTestAttempts[0].reasonToStop).to.eq('FAILED_HOOK_FAILED')
+      expect(sixthPostInstanceTestAttempts[0].initialStrategy).to.eq('NONE')
+
+      const normalizedAttempts = normalizeAttempts([
+        firstPostInstanceTestAttempts,
+        secondPostInstanceTestAttempts,
+        thirdPostInstanceTestAttempts,
+        fourthPostInstanceTestAttempts,
+        fifthPostInstanceTestAttempts,
+        sixthPostInstanceTestAttempts,
+      ])
+
+      systemTests.snapshot(normalizedAttempts)
+    })
   })
 
   context('failing without flake', () => {

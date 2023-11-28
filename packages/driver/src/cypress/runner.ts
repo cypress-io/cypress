@@ -941,11 +941,11 @@ const setHookFailureProps = (test, hook, err) => {
   test.duration = hook.duration // TODO: nope (?)
   test.hookName = hookName // TODO: why are we doing this?
   test.failedFromHookId = hook.hookId
+  test.reasonToStop = 'FAILED_HOOK_FAILED'
   // There should never be a case where the outerStatus of a test is set AND the last test attempt failed on a hook and the state is passed.
   // Therefore, if the last test attempt fails on a hook, the outerStatus should also indicate a failure.
   if (test?._cypressTestStatusInfo?.outerStatus) {
     test._cypressTestStatusInfo.outerStatus = test.state
-    test._cypressTestStatusInfo.reasonToStop = 'FAILED_HOOK_FAILED'
   }
 }
 
@@ -1172,13 +1172,14 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       // as well as maybe incorrect (test passed on first attempt, but after hooks failed)
       const testStatus = test.calculateTestStatus()
 
+      runnable.reasonToStop = 'FAILED_HOOK_FAILED'
+
       runnable._cypressTestStatusInfo = {
         attempts: testStatus.attempts,
         strategy: testStatus.strategy,
         // regardless of the test state, we should ultimately fail the test here.
         outerStatus: runnable.state,
         shouldAttemptsContinue: false,
-        reasonToStop: 'FAILED_HOOK_FAILED',
       }
     }
 
