@@ -97,7 +97,8 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -399,7 +400,8 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before each\" hook for \"test 1\"",
@@ -971,7 +973,8 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "title": "\"after all\" hook for \"test 2\"",
@@ -1010,7 +1013,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -1074,7 +1077,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -1124,7 +1127,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -1303,7 +1306,8 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"after each\" hook for \"test 1\"",
@@ -1342,7 +1346,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -1391,7 +1395,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -1443,7 +1447,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -1493,7 +1497,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,

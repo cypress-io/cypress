@@ -98,7 +98,8 @@
           "attempts": 1,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -1670,7 +1671,8 @@
           "attempts": 6,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before each\" hook for \"test 1\"",
@@ -2244,7 +2246,8 @@
           "attempts": 1,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "title": "\"after all\" hook for \"test 2\"",
@@ -2284,7 +2287,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -2349,7 +2352,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -2400,7 +2403,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -4114,7 +4117,8 @@
           "attempts": 6,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"after each\" hook for \"test 1\"",
@@ -8496,7 +8500,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -11080,7 +11085,8 @@
           "attempts": 10,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before each\" hook for \"test 1\"",
@@ -11654,7 +11660,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "title": "\"after all\" hook for \"test 2\"",
@@ -11694,7 +11701,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -11759,7 +11766,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -11810,7 +11817,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -14707,7 +14714,8 @@
           "attempts": 10,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"after each\" hook for \"test 1\"",
@@ -14747,7 +14755,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -14796,7 +14804,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -14848,7 +14856,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -14898,7 +14906,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_REACHED_MAX_RETRIES"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -20161,7 +20169,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -22745,7 +22754,8 @@
           "attempts": 10,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"before each\" hook for \"test 1\"",
@@ -23319,7 +23329,8 @@
           "attempts": 1,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "title": "\"after all\" hook for \"test 2\"",
@@ -23359,7 +23370,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -23424,7 +23435,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -23475,7 +23486,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 1,
           "outerStatus": "failed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r4",
         "order": 2,
@@ -26044,7 +26055,8 @@
           "attempts": 10,
           "strategy": "detect-flake-but-always-fail",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false
+          "shouldAttemptsContinue": false,
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "title": "\"after each\" hook for \"test 1\"",
@@ -26084,7 +26096,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -26133,7 +26145,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -26185,7 +26197,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,
@@ -26235,7 +26247,7 @@
           "shouldAttemptsContinue": false,
           "attempts": 10,
           "outerStatus": "failed",
-          "reasonToStop": "FAILED_STOPPED_ON_FLAKE"
+          "reasonToStop": "FAILED_HOOK_FAILED"
         },
         "id": "r3",
         "order": 1,

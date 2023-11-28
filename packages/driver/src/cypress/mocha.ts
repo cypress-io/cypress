@@ -463,22 +463,13 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
 
     const action = actions?.find((a) => a.clientId === this.id && a.action === 'BURN_IN') ?? {}
 
-    const latestScore = action?.payload?.startingScore === undefined ?
-      -2 : action?.payload?.startingScore
-
-    // console.log('latestScore', latestScore)
+    const latestScore = action?.payload?.startingScore === undefined ? -2 : action?.payload?.startingScore
 
     const userFacingBurnInConfig = Cypress.config('experimentalBurnIn')
 
-    // console.log('userFacingBurnInConfig', userFacingBurnInConfig)
-
     const localBurnInConfig = getBurnInConfig(userFacingBurnInConfig)
 
-    // console.log('localBurnInConfig', localBurnInConfig)
-
     const completeBurnInConfig = mergeBurnInConfig(action?.payload?.config ?? {}, { values: localBurnInConfig })
-
-    // console.log('completeBurnInConfig', completeBurnInConfig)
 
     return calculateTestStatus(this, retriesConfig, completeBurnInConfig, latestScore)
   }
