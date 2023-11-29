@@ -131,6 +131,7 @@ executors:
     resource_class: windows.large
     environment:
       PLATFORM: windows
+      CYPRESS_INTERNAL_DISABLE_PROTOCOL: true
 
   darwin-arm64: &darwin-arm64-executor
     machine: true
