@@ -48,6 +48,20 @@ describe('e2e baseUrl', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/28336
+  context('basic auth + privileged commands', () => {
+    systemTests.setup({
+      servers: {
+        port: 9999,
+        onServer,
+      },
+    })
+
+    systemTests.it('passes', {
+      project: 'privileged-commands',
+    })
+  })
+
   context('http', () => {
     systemTests.setup({
       servers: {

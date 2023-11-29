@@ -199,7 +199,11 @@
     // send it to the server, where it's stored in state. when the command is
     // run and it sends its message to the server via websocket, we check
     // that verified status before allowing the command to continue running
-    const promise = fetch(`/${namespace}/add-verified-command`, {
+    //
+    // needs to use the fully-qualified url or else when the baseUrl includes
+    // basic auth, the fetch fails with a security error
+    // see https://github.com/cypress-io/cypress/issues/28336
+    const promise = fetch(`${window.location.origin}/${namespace}/add-verified-command`, {
       body: stringify({
         args,
         name: command.name,
