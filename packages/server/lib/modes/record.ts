@@ -410,7 +410,7 @@ type UploadArtifactsOptions = {
   quiet: boolean
 }
 
-export const uploadArtifacts = async (options: UploadArtifactsOptions) => {
+export const uploadArtifacts = async (options: UploadArtifactsOptions): Promise<void> => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
 
   const artifacts: Artifact[] = []
@@ -472,7 +472,7 @@ export const uploadArtifacts = async (options: UploadArtifactsOptions) => {
   } catch (err) {
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
-    return exception.create(err)
+    await exception.create(err)
   }
 
   debug('checking for protocol errors', protocolManager?.hasErrors())
@@ -489,12 +489,10 @@ export const uploadArtifacts = async (options: UploadArtifactsOptions) => {
   }
 
   try {
-    debug('upload reprt: %O', uploadReport)
-    const res = await api.updateInstanceArtifacts({
+    debug('upload report: %O', uploadReport)
+    await api.updateInstanceArtifacts({
       runId, instanceId, ...uploadReport,
     })
-
-    return res
   } catch (err) {
     debug('failed updating artifact status %o', {
       stack: err.stack,
@@ -503,7 +501,7 @@ export const uploadArtifacts = async (options: UploadArtifactsOptions) => {
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
 
     if (err.statusCode !== 503) {
-      return exception.create(err)
+      await exception.create(err)
     }
   }
 }
@@ -1080,7 +1078,7 @@ export const createRunAndRecordSpecs = (options: CreateRunAndRecordSpecsOptions)
             metadata,
           })
         })
-        .then((resp) => {
+        .then(async (resp) => {
           if (!resp) {
             return
           }
@@ -1089,32 +1087,31 @@ export const createRunAndRecordSpecs = (options: CreateRunAndRecordSpecsOptions)
           const { video, screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
-          return uploadArtifacts({
-            runId,
-            instanceId,
-            video,
-            screenshots,
-            videoUploadUrl,
-            captureUploadUrl,
-            platform,
-            projectId,
-            spec,
-            protocolCaptureMeta,
-            protocolManager: project.protocolManager,
-            screenshotUploadUrls,
-            quiet,
-          })
-          .finally(() => {
-            // always attempt to upload stdout
-            // even if uploading failed
+          try {
+            await uploadArtifacts({
+              runId,
+              instanceId,
+              video,
+              screenshots,
+              videoUploadUrl,
+              captureUploadUrl,
+              platform,
+              projectId,
+              spec,
+              protocolCaptureMeta,
+              protocolManager: project.protocolManager,
+              screenshotUploadUrls,
+              quiet,
+            })
+          } finally {
             if (instanceId) {
-              return updateInstanceStdout({
+              await updateInstanceStdout({
                 captured,
                 instanceId,
                 runId,
               })
             }
-          })
+          }
         })
       }
 
