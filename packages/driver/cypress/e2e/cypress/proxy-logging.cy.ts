@@ -126,6 +126,27 @@ describe('Proxy Logging', () => {
       img.src = `/fixtures/media/cypress.png?${Date.now()}`
     })
 
+    it('does not inherit the message of the currently running command', () => {
+      const logs: any[] = []
+
+      cy.on('log:added', (log) => {
+        if (log.name !== 'request') return
+
+        logs.push(log)
+      })
+
+      // delay the fetch call by 100ms to ensure it gets
+      // triggered during the cy.wait() below
+      setTimeout(() => {
+        fetch('/some-url')
+      }, 100)
+
+      cy.wait(200).then(() => {
+        expect(logs).to.have.length(1)
+        expect(logs[0].message).to.eq('')
+      })
+    })
+
     context('with cy.intercept()', () => {
       it('shows non-xhr/fetch log if intercepted', (done) => {
         const src = `/fixtures/media/cypress.png?${Date.now()}`
