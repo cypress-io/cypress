@@ -397,7 +397,7 @@ module.exports = {
       let script
 
       try {
-        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+        if (process.env.CYPRESS_INTERNAL_DISABLE_PROTOCOL !== 'true' && captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
           script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
         }
       } catch (e) {
