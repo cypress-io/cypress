@@ -29,15 +29,15 @@ class RelativeUrl {
   public readonly pathname: string
   public readonly search: string
 
-  constructor (private url: URL) {
-    this.hostname = url.hostname.replace(FAKE_HOST, '')
-    this.host = url.host.replace(FAKE_HOST, '')
+  constructor (url: URL) {
     this.href = url.href.replace(FAKE_HOST, '')
-    this.origin = url.origin.replace(FAKE_HOST, '')
-    this.protocol = ''
-    this.port = ''
     this.pathname = url.pathname
     this.search = url.search
+    this.hostname = ''
+    this.host = ''
+    this.origin = ''
+    this.protocol = ''
+    this.port = ''
   }
 
   set port (port) {
