@@ -18,6 +18,46 @@ type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
 const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
+class RelativeUrl {
+  constructor (private url: URL) {}
+
+  get hostname () {
+    return this.url.hostname.replace('http://cy-fake-host', '')
+  }
+
+  get host () {
+    return this.url.host.replace('http://cy-fake-host', '')
+  }
+
+  get href () {
+    return this.url.href.replace('http://cy-fake-host', '')
+  }
+
+  get origin () {
+    return this.url.origin.replace('http://cy-fake-host', '')
+  }
+
+  get protocol () {
+    return ''
+  }
+
+  get port () {
+    return ''
+  }
+
+  get pathname () {
+    return this.url.pathname
+  }
+
+  get search () {
+    return this.url.search
+  }
+
+  set port (port) {
+    this.url.port = port
+  }
+}
+
 const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
@@ -29,14 +69,7 @@ export const parseUrl = (url: string) => {
     // TODO: remove this hack after https://github.com/whatwg/url/issues/531 is resolved
     const u = new URL(url, 'http://cy-fake-host')
 
-    return {
-      ...u,
-      hostname: u.hostname.replace('http://cy-fake-host', ''),
-      host: u.host.replace('http://cy-fake-host', ''),
-      href: u.href.replace('http://cy-fake-host', ''),
-      origin: u.origin.replace('http://cy-fake-host', ''),
-      protocol: '',
-    }
+    return new RelativeUrl(u)
   }
 }
 

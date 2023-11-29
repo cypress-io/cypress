@@ -37,7 +37,7 @@ describe('lib/blocked', () => {
     matchesArray('http://mail.yahoo.com:443/asdf', true)
 
     matchesArray('https://buy.adwords.com:443/', false)
-    matchesArray('http://localhost:66667', false)
+    matchesArray('http://localhost:6667', false)
     matchesArray('http://mac.apple.com/', false)
 
     matchesStr('https://localhost:6666/foo', 'localhost:6666', true)
