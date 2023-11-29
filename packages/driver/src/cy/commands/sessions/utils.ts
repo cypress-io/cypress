@@ -196,6 +196,8 @@ function navigateAboutBlank ({ inBetweenTestsAndNextTestHasTestIsolationOn }: { 
   // When test isolation is off we typically don't navigate to about blank; however if we are in between tests and the next
   // test has test isolation on, we need to navigate to about blank to ensure the next test is not affected by the previous test
   if (Cypress.testingType === 'component' || (!Cypress.config('testIsolation') && !inBetweenTestsAndNextTestHasTestIsolationOn)) {
+    console.log('skip about blank.')
+
     return Promise.resolve()
   }
 

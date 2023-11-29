@@ -430,6 +430,7 @@ export class Http {
   }
 
   reset () {
+    // console.log('EMILY>____PROXY____RESETTING!')
     this.buffers.reset()
     this.setAUTUrl(undefined)
     this.preRequests.reset()
@@ -458,5 +459,9 @@ export class Http {
 
   setPreRequestTimeout (timeout: number) {
     this.preRequests.setPreRequestTimeout(timeout)
+  }
+
+  getPreRequestTimeout () {
+    return this.preRequests.requestTimeout
   }
 }

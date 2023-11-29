@@ -33,6 +33,7 @@ export class NetworkProxy {
       isVerbose: true,
     })
 
+    // HERE TO PROXY FOR PREQUEST
     this.http.handleHttpRequest(req, res, span).finally(() => {
       span?.end()
     })
@@ -56,5 +57,9 @@ export class NetworkProxy {
 
   setPreRequestTimeout (timeout) {
     this.http.setPreRequestTimeout(timeout)
+  }
+
+  getPreRequestTimeout () {
+    return this.http.getPreRequestTimeout()
   }
 }

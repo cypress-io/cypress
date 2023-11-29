@@ -59,6 +59,7 @@ export type BrowserPreRequest = {
   requestId: string
   method: string
   url: string
+  proxiedUrl: string
   headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined

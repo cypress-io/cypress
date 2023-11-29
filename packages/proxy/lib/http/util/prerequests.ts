@@ -127,6 +127,9 @@ export class PreRequests {
     // if a large number of pre-requests don't match up
     // fixes: https://github.com/cypress-io/cypress/issues/17853
     this.sweepIntervalTimer = setInterval(() => {
+      // console.log('SWEEP! Discarding prerequests')
+      // console.log('SWEEPing... pendingPreRequests', this.pendingPreRequests.length)
+      // console.log('SWEEPing... pendingUrlsWithoutPreRequests', this.pendingUrlsWithoutPreRequests.length)
       const now = Date.now()
 
       this.pendingPreRequests.removeMatching(({ cdpRequestWillBeSentReceivedTimestamp, browserPreRequest }) => {
@@ -148,7 +151,11 @@ export class PreRequests {
 
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${browserPreRequest.url}`
+    // if (browserPreRequest.url.includes('css?family=Roboto+Mono')) {
+    //   console.log(browserPreRequest)
+    // }
+
+    const key = `${browserPreRequest.method}-${browserPreRequest.proxiedUrl}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -160,7 +167,7 @@ export class PreRequests {
         proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
       }
 
-      debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
+      debug('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback?.({
@@ -176,6 +183,12 @@ export class PreRequests {
         return
       }
 
+      // console.log('Incoming pre-request %s matches pending request.... & that pending request has timed out.')
+      // console.log(key)
+      // console.log(browserPreRequest)
+
+      // console.log('hand off to this.protocolManager?.responseStreamTimedOut')
+      // console.log(timings)
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
         timings,
@@ -193,6 +206,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
+    debugVerbose('addPendingUrlWithoutPreRequest', url)
     const key = `GET-${url}`
     const pendingRequest = this.pendingRequests.shift(key)
 
@@ -215,11 +229,18 @@ export class PreRequests {
 
   removePendingPreRequest (requestId: string) {
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
-      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
+      return (
+        browserPreRequest.requestId.includes('-retry-')
+        && !browserPreRequest.requestId.startsWith(`${requestId}-`)
+      ) || (
+        !browserPreRequest.requestId.includes('-retry-')
+        && browserPreRequest.requestId !== requestId
+      )
     })
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
+    // HERE
     // The initial request that loads the service worker does not get sent to CDP and it happens prior
     // to the service worker target being added. Thus, we need to explicitly ignore it. We determine
     // it's the service worker request via the `sec-fetch-dest` header
@@ -234,6 +255,11 @@ export class PreRequests {
     }
 
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
+
+    // if (req.proxiedUrl.includes('css?family=Roboto+Mono')) {
+    //   console.log(req.proxiedUrl)
+    //   console.log(req.originalUrl)
+    // }
 
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
@@ -261,7 +287,7 @@ export class PreRequests {
 
     if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pending url without pre request', key)
+      // console.log('Incoming request %s matches known pending url without pre request', key)
       callback({
         noPreRequestExpected: true,
       })
@@ -275,7 +301,7 @@ export class PreRequests {
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
-        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        debugVerbose('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -306,6 +332,7 @@ export class PreRequests {
   }
 
   reset () {
+    // console.log('Emily___RESETTING PREQUESTS!!!___')
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue

@@ -718,17 +718,17 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     if (this.protocolManager && this.req.browserPreRequest?.requestId) {
       const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
 
-      this.protocolManager.responseEndedWithEmptyBody({
-        requestId,
-        isCached: this.incomingRes.statusCode === 304,
-        timings: {
-          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
-          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
-        },
-      })
+      // this.protocolManager.responseEndedWithEmptyBody({
+      //   requestId,
+      //   isCached: this.incomingRes.statusCode === 304,
+      //   timings: {
+      //     cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
+      //     cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+      //     proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
+      //     cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
+      //     proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
+      //   },
+      // })
     }
 
     this.res.end()
@@ -839,28 +839,28 @@ const GzipBody: ResponseMiddleware = async function () {
 
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-    const resultingStream = this.protocolManager.responseStreamReceived({
-      requestId,
-      responseHeaders: this.incomingRes.headers,
-      isAlreadyGunzipped: this.isGunzipped,
-      responseStream: this.incomingResStream,
-      res: this.res,
-      timings: {
-        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: preRequest.cdpLagDuration,
-        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-      },
-    })
+    // const resultingStream = this.protocolManager.responseStreamReceived({
+    //   requestId,
+    //   responseHeaders: this.incomingRes.headers,
+    //   isAlreadyGunzipped: this.isGunzipped,
+    //   responseStream: this.incomingResStream,
+    //   res: this.res,
+    //   timings: {
+    //     cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+    //     cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+    //     proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+    //     cdpLagDuration: preRequest.cdpLagDuration,
+    //     proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+    //   },
+    // })
 
-    if (resultingStream) {
-      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
-        span?.end()
-      })
-    } else {
-      span?.end()
-    }
+    // if (resultingStream) {
+    //   this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
+    //     span?.end()
+    //   })
+    // } else {
+    span?.end()
+    // }
   }
 
   if (this.isGunzipped) {

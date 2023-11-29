@@ -6,7 +6,7 @@ import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
 import { cookieJar } from '../util/cookies'
 
-export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
+export type AddBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
 export class Automation {
   private requests: Record<number, (any) => void>
@@ -14,7 +14,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public addBrowserPreRequest?: AddBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void) {
     this.requests = {}
 
     // set the middleware

@@ -1,11 +1,13 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
-import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp_automation'
 import os from 'os'
+import { uri } from '@packages/network'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
+
+import type { Automation } from '../automation'
+import { normalizeResourceType } from './cdp_automation'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
 
@@ -214,9 +216,11 @@ export class WebKitAutomation {
   private handleRequestEvents () {
     // emit preRequest to proxy
     this.page.on('request', (request) => {
+      const url = request.url()
+
       // ignore socket.io events
       // TODO: use config.socketIoRoute here instead
-      if (request.url().includes('/__socket') || request.url().includes('/__cypress')) return
+      if (url.includes('/__socket') || url.includes('/__cypress')) return
 
       // pw does not expose an ID on requests, so create one
       const requestId = String(requestIdCounter++)
@@ -226,7 +230,8 @@ export class WebKitAutomation {
       const browserPreRequest = {
         requestId,
         method: request.method(),
-        url: request.url(),
+        url: uri.getPath(url),
+        proxiedUrl: url,
         // TODO: await request.allHeaders() causes this to not resolve in time
         headers: request.headers(),
         resourceType: normalizeResourceType(request.resourceType()),
@@ -236,7 +241,7 @@ export class WebKitAutomation {
       }
 
       debug('received request %o', { browserPreRequest })
-      this.automation.onBrowserPreRequest?.(browserPreRequest)
+      this.automation.addBrowserPreRequest?.(browserPreRequest)
     })
 
     this.page.on('requestfinished', async (request) => {

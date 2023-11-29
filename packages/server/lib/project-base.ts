@@ -91,6 +91,7 @@ export class ProjectBase extends EE {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
+    this.runningSpec = false
     this.testingType = testingType
     this.projectRoot = path.resolve(projectRoot)
     this.spec = null
@@ -389,12 +390,16 @@ export class ProjectBase extends EE {
 
         reporterInstance.emit(event, runnable)
 
-        if (event === 'test:before:run') {
+        if (event === 'start') {
+          console.log('mocha started!')
+          this.runningSpec = true
+        } else if (event === 'test:before:run') {
           this.emit('test:before:run', {
             runnable,
             previousResults: reporterInstance?.results() || {},
           })
         } else if (event === 'end') {
+          this.server.runningSpec = false
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
@@ -435,7 +440,21 @@ export class ProjectBase extends EE {
   }
 
   shouldCorrelatePreRequests = () => {
+    // if (this.runningSpec) {
+    //   if (this.browser.family !== 'chromium') {
+    //     // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
+    //     // in order to not hang for 2 seconds, we override the prerequest timeout to be 500 ms (which is what it has been historically)
+    //     this._server?.setPreRequestTimeout(500)
+    //   } else {
+    //     this._server?.setPreRequestTimeout(2000)
+    //   }
+    // }
+
+    // this._server?.setPreRequestTimeout(2000)
+
     return !!this.browser
+
+    // return !this.runningSpec
   }
 
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
@@ -446,6 +465,8 @@ export class ProjectBase extends EE {
       // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
       // in order to not hang for 2 seconds, we override the prerequest timeout to be 500 ms (which is what it has been historically)
       this._server?.setPreRequestTimeout(500)
+    } else {
+      // this._server?.setPreRequestTimeout(2000)
     }
   }
 

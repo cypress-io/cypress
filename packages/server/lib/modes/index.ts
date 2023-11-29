@@ -16,7 +16,7 @@ export = (mode, options) => {
       isTextTerminal: true,
       browser: 'electron',
       quiet: false,
-      morgan: false,
+      // morgan: false,
       report: true,
     })
   }

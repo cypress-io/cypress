@@ -33,7 +33,10 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }: {nextTestHasTestIsolationOn?: boolean} = {}) => {
+      console.log('test:before:after:run:async', nextTestHasTestIsolationOn)
       if (nextTestHasTestIsolationOn || nextTestHasTestIsolationOn === undefined) {
+        console.log('navigateAboutBlank')
+
         return navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
       }
 
@@ -41,6 +44,7 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:run:async', async () => {
+      console.log('test:before:run:async', Cypress.state('runnable').id)
       if (!Cypress.config('testIsolation')) {
         return
       }

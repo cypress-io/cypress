@@ -396,14 +396,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // we have not yet started our websocket server
     app.use((req, res, next) => {
       setProxiedUrl(req)
-
+      // console.log(' URL', req.url)
+      // console.log('PROXIED URL', req.proxiedUrl)
       // useful for tests
       if (this._middleware) {
         this._middleware(req, res)
       }
 
       // always continue on
-
       return next()
     })
 
@@ -425,7 +425,21 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev')
+    return require('morgan')((tokens, req, res) => {
+      const responseTime = tokens['response-time'](req, res)
+
+      if (!responseTime || responseTime < this._networkProxy?.getPreRequestTimeout()) return
+
+      // copy dev format of :method :url :status :response-time ms - :res[content-length]
+      return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        responseTime, 'ms -',
+        tokens.res(req, res, 'content-length'),
+      ].join(' ')
+    })
+    // return require('morgan')('dev')
   }
 
   getHttpServer () {

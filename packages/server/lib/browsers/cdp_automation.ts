@@ -224,7 +224,8 @@ export class CdpAutomation implements CDPClient {
     const browserPreRequest: BrowserPreRequest = {
       requestId: params.requestId,
       method: params.request.method,
-      url,
+      url: uri.getPath(url),
+      proxiedUrl: url,
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
@@ -234,7 +235,7 @@ export class CdpAutomation implements CDPClient {
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
-    this.automation.onBrowserPreRequest?.(browserPreRequest)
+    this.automation.addBrowserPreRequest?.(browserPreRequest)
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {

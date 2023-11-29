@@ -41,7 +41,8 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
-const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const CAPTURE_ERRORS = true
+// const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 class DecryptionError extends Error {
   isDecryptionError = true

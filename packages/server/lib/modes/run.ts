@@ -147,7 +147,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   // - YES display reporter results (via mocha reporter)
   const options = {
     socketId,
-    morgan: false,
+    // morgan: false,
     report: true,
     isTextTerminal: args.isTextTerminal,
     // pass the list of browsers we have detected when opening a project
@@ -624,7 +624,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
 
-  await protocolManager?.afterSpec()
+  await protocolManager?.afterSpec(telemetry)
 
   const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)

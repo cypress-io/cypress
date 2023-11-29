@@ -125,8 +125,8 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     this.req.browserPreRequest = {
       requestId,
       method: this.req.method,
-      url: this.req.proxiedUrl,
-      // @ts-ignore
+      url: this.req.url,
+      proxiedUrl: this.req.proxiedUrl,
       headers: this.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',
@@ -144,11 +144,11 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   }
 
   this.debug('waiting for prerequest')
-  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
+  this.pendingRequest = this.getPreRequest(({ browserPreRequest, noPreRequestExpected }) => {
     this.req.browserPreRequest = browserPreRequest
     this.req.noPreRequestExpected = noPreRequestExpected
     copyResourceTypeAndNext()
-  }))
+  })
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
