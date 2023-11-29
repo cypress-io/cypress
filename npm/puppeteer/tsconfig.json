@@ -14,11 +14,11 @@
     "strictNullChecks": true,
     "target": "ES2020",
     "types": [
-      "cypress"
+      "cypress",
+      "./support"
     ]
   },
   "include": [
-    "index.d.ts",
     "src/"
   ]
 }

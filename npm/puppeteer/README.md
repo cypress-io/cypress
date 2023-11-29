@@ -35,7 +35,7 @@ Add the following in `tsconfig.json`:
 ```json
 {
   "compilerOptions": {
-    "types": ["cypress", "@cypress/puppeteer"]
+    "types": ["cypress", "@cypress/puppeteer/support"]
   }
 }
 ```
@@ -55,7 +55,7 @@ While the `cy.puppeteer()` command is executed in the browser, the majority of t
 In your Cypress config (e.g. `cypress.config.ts`):
 
 ```typescript
-import { setup } from '@cypress/puppeteer/plugin'
+import { setup } from '@cypress/puppeteer'
 
 export default defineConfig({
   e2e: {
@@ -76,7 +76,7 @@ export default defineConfig({
 In your support file (e.g. `cypress/support/e2e.ts`):
 
 ```typescript
-import { setup } from '@cypress/puppeteer/support'
+import '@cypress/puppeteer/support'
 ```
 
 In your spec (e.g. `spec.cy.ts`):
