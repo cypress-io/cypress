@@ -58,6 +58,7 @@ describe('e2e baseUrl', () => {
     })
 
     systemTests.it('passes', {
+      browser: 'chrome',
       project: 'privileged-commands',
     })
   })
