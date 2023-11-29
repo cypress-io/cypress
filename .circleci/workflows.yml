@@ -86,6 +86,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/investigate-windows-pass-rate', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
