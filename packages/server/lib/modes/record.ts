@@ -1,31 +1,36 @@
-const _ = require('lodash')
-const path = require('path')
-const la = require('lazy-ass')
-const chalk = require('chalk')
-const check = require('check-more-types')
-const debug = require('debug')('cypress:server:record')
-const debugCiInfo = require('debug')('cypress:server:record:ci-info')
-const Promise = require('bluebird')
-const isForkPr = require('is-fork-pr')
-const commitInfo = require('@cypress/commit-info')
+import _ from 'lodash'
+import path from 'path'
+import la from 'lazy-ass'
+import chalk from 'chalk'
+import check from 'check-more-types'
+import Debug from 'debug'
+import Bluebird from 'bluebird'
+import isForkPr from 'is-fork-pr'
+import commitInfo from '@cypress/commit-info'
+import { hideKeys } from '@packages/config'
+import api from '../cloud/api'
+import exception from '../cloud/exception'
+import upload from '../cloud/upload'
+import type ProtocolManager from '../cloud/protocol'
+import * as errors from '../errors'
+import capture from '../capture'
+import * as Config from '../config'
+import env from '../util/env'
+import terminal from '../util/terminal'
+import ciProvider from '../util/ci_provider'
+import { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } from '../util/print-run'
+import * as specWriter from '../util/spec_writer'
+import { flattenSuiteIntoRunnables } from '../util/tests_utils'
+import { fs } from '../util/fs'
+import { performance } from 'perf_hooks'
+import type { Artifact, ArtifactUploadResult } from '../types/artifact'
+import type { CaptureArtifact, SpecWithRelativeRoot, TestingType, FoundBrowser, SpecFile } from '@packages/types'
+import type { Cfg, ProjectBase } from '../project-base'
+import type { SystemInfo } from '../util/system'
+import type { Platform } from '../cloud/api'
 
-const { hideKeys } = require('@packages/config')
-
-const api = require('../cloud/api')
-const exception = require('../cloud/exception')
-const upload = require('../cloud/upload')
-
-const errors = require('../errors')
-const capture = require('../capture')
-const Config = require('../config')
-const env = require('../util/env')
-const terminal = require('../util/terminal')
-const ciProvider = require('../util/ci_provider')
-const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } = require('../util/print-run')
-const testsUtils = require('../util/tests_utils')
-const specWriter = require('../util/spec_writer')
-const { fs } = require('../util/fs')
-const { performance } = require('perf_hooks')
+const debug = Debug('cypress:server:record')
+const debugCiInfo = Debug('cypress:server:record:ci-info')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -40,7 +45,7 @@ const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
   )
 }
 
-const warnIfProjectIdButNoRecordOption = (projectId, options) => {
+export const warnIfProjectIdButNoRecordOption = (projectId, options) => {
   if (haveProjectIdAndKeyButNoRecordOption(projectId, options)) {
     // log a warning telling the user
     // that they either need to provide us
@@ -67,7 +72,7 @@ const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
   throw errToThrow
 }
 
-const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
+export const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
     errors.throwErr(
       'INDETERMINATE_CI_BUILD_ID',
@@ -80,7 +85,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   }
 }
 
-const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
+export const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
   if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
     errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
@@ -92,7 +97,7 @@ const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group,
   }
 }
 
-const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
+export const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
   if (ciBuildId && (!parallel && !group)) {
@@ -100,7 +105,7 @@ const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   }
 }
 
-const throwIfNoProjectId = (projectId, configFile) => {
+export const throwIfNoProjectId = (projectId, configFile) => {
   if (!projectId) {
     errors.throwErr('CANNOT_RECORD_NO_PROJECT_ID', configFile)
   }
@@ -137,7 +142,7 @@ returns:
 ]
 */
 
-const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
+const uploadArtifactBatch = async (artifacts: Artifact[], protocolManager: ProtocolManager | undefined, quiet: boolean): Promise<ArtifactUploadResult[]> => {
   const priority = {
     'video': 0,
     'screenshots': 1,
@@ -160,22 +165,22 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.reportKey === 'protocol') {
       try {
-        if (protocolManager.hasFatalError()) {
-          const error = protocolManager.getFatalError().error
+        const fatalError = protocolManager?.getFatalError()?.error
 
+        if (fatalError) {
           debug('protocol fatal error encountered', {
-            message: error.message,
-            stack: error.stack,
+            message: fatalError.message,
+            stack: fatalError.stack,
           })
 
           return {
             ...artifact,
             skip: true,
-            error: error.message || error.stack || 'Unknown Error',
+            error: fatalError.message || fatalError.stack || 'Unknown Error',
           }
         }
 
-        const archiveInfo = await protocolManager.getArchiveInfo()
+        const archiveInfo = await protocolManager?.getArchiveInfo()
 
         if (archiveInfo === undefined) {
           return {
@@ -200,11 +205,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.filePath) {
       try {
-        const { size } = await fs.statAsync(artifact.filePath)
+        const stats = await fs.statAsync(artifact.filePath)
 
         return {
           ...artifact,
-          fileSize: size,
+          fileSize: stats?.size,
         }
       } catch (err) {
         debug('failed to get stats for upload artifact %o', {
@@ -268,7 +273,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
       try {
         if (artifact.reportKey === 'protocol') {
-          const res = await protocolManager.uploadCaptureArtifact(artifact)
+          const res = await protocolManager?.uploadCaptureArtifact(artifact as CaptureArtifact)
 
           return {
             ...res,
@@ -280,16 +285,18 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           }
         }
 
-        const res = await upload.send(artifact.filePath, artifact.uploadUrl)
+        if (artifact.filePath && artifact.uploadUrl) {
+          const res = await upload.send(artifact.filePath, artifact.uploadUrl)
 
-        return {
-          ...res,
-          success: true,
-          url: artifact.uploadUrl,
-          pathToFile: artifact.filePath,
-          fileSize: artifact.fileSize,
-          key: artifact.reportKey,
-          duration: performance.now() - startTime,
+          return {
+            ...res,
+            success: true,
+            url: artifact.uploadUrl,
+            pathToFile: artifact.filePath,
+            fileSize: artifact.fileSize,
+            key: artifact.reportKey,
+            duration: performance.now() - startTime,
+          }
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -299,12 +306,13 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         })
 
         if (err.errors) {
-          const lastError = _.last(err.errors)
+          const errors = err.errors as Error[]
+          const lastError = _.last(errors)
 
           return {
             key: artifact.reportKey,
             success: false,
-            error: lastError.message,
+            error: lastError?.message,
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
@@ -373,12 +381,39 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   })
 }
 
-const uploadArtifacts = async (options = {}) => {
+type UploadArtifactsOptions = {
+  protocolManager?: ProtocolManager
+  video?: string
+  videoUploadUrl?: string
+  screenshotUploadUrls?: Array<{
+    screenshotId: string
+    uploadUrl: string
+  }>
+  screenshots: Array<{
+    path: string
+    screenshotId: string
+  }>
+  captureUploadUrl
+  runId: string
+  instanceId: string | null
+  platform: Platform
+  projectId: string
+  spec: SpecFile
+  protocolCaptureMeta: {
+    url?: string
+    tags: string[] | null
+    mountVersion?: number
+    disabledMessage?: string
+  } | undefined
+  quiet: boolean
+}
+
+export const uploadArtifacts = async (options: UploadArtifactsOptions) => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
 
-  const artifacts = []
+  const artifacts: Artifact[] = []
 
-  if (videoUploadUrl) {
+  if (videoUploadUrl && video) {
     artifacts.push({
       reportKey: 'video',
       uploadUrl: videoUploadUrl,
@@ -391,7 +426,7 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
-  if (screenshotUploadUrls.length) {
+  if (screenshotUploadUrls && screenshotUploadUrls.length) {
     screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
       const screenshot = _.find(screenshots, { screenshotId })
 
@@ -400,10 +435,12 @@ const uploadArtifacts = async (options = {}) => {
       return {
         reportKey: 'screenshots',
         uploadUrl,
-        filePath: screenshot.path,
+        filePath: screenshot?.path,
       }
-    }).forEach((screenshotArtifact) => {
-      artifacts.push(screenshotArtifact)
+    })
+    .filter(({ filePath }) => !!filePath)
+    .forEach((screenshotArtifact) => {
+      artifacts.push(screenshotArtifact as Artifact)
     })
   } else {
     artifacts.push({
@@ -416,7 +453,7 @@ const uploadArtifacts = async (options = {}) => {
   if (protocolManager && (captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url))) {
     artifacts.push({
       reportKey: 'protocol',
-      uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
+      uploadUrl: captureUploadUrl || protocolCaptureMeta?.url,
     })
   } else if (protocolCaptureMeta && protocolCaptureMeta.disabledMessage) {
     artifacts.push({
@@ -469,10 +506,16 @@ const uploadArtifacts = async (options = {}) => {
   }
 }
 
-const updateInstanceStdout = (options = {}) => {
+type UpdateInstanceStdoutOptions = {
+  runId: string
+  instanceId: string
+  captured: { toString: () => string } | null
+}
+
+export const updateInstanceStdout = (options: UpdateInstanceStdoutOptions): Promise<void> => {
   const { runId, instanceId, captured } = options
 
-  const stdout = captured.toString()
+  const stdout: string = captured?.toString() || ''
 
   return api.updateInstanceStdout({
     runId,
@@ -492,7 +535,18 @@ const updateInstanceStdout = (options = {}) => {
   }).finally(capture.restore)
 }
 
-const postInstanceResults = (options = {}) => {
+type PostInstanceResultsOptions = {
+  runId: string
+  instanceId: string
+  results: Record<string, any>
+  group: string
+  parallel: boolean
+  ciBuildId: string
+  metadata: Record<string, any>
+  config: any
+}
+
+export const postInstanceResults = (options: PostInstanceResultsOptions) => {
   const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
@@ -530,7 +584,7 @@ const postInstanceResults = (options = {}) => {
   })
 }
 
-const getCommitFromGitOrCi = (git) => {
+export const getCommitFromGitOrCi = (git) => {
   la(check.object(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
@@ -556,7 +610,25 @@ const gracePeriodMessage = (gracePeriodEnds) => {
   return gracePeriodEnds || 'the grace period ends'
 }
 
-const createRun = Promise.method((options = {}) => {
+type CreateRunOptions = {
+  projectRoot: string
+  git: any // returned from `commitInfo.commitInfo(projectRoot)`
+  specs: SpecWithRelativeRoot[]
+  group: string
+  tags: string[]
+  parallel: boolean
+  platform: Platform
+  recordKey: string
+  ciBuildId: string
+  projectId: any
+  specPattern: string | RegExp | string[]
+  testingType: TestingType
+  configFile: string | null
+  autoCancelAfterFailures: number | false
+  project: ProjectBase
+}
+
+export const createRun = Bluebird.method((options: CreateRunOptions) => {
   _.defaults(options, {
     group: null,
     tags: null,
@@ -688,13 +760,7 @@ const createRun = Promise.method((options = {}) => {
 
     switch (err.statusCode) {
       case 401:
-        recordKey = hideKeys(recordKey)
-        if (!recordKey) {
-          // make sure the key is defined, otherwise the error
-          // printing logic substitutes the default value {}
-          // leading to "[object Object]" :)
-          recordKey = 'undefined'
-        }
+        recordKey = hideKeys(recordKey) || 'undefined'
 
         return errors.throwErr('CLOUD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
@@ -741,7 +807,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
+        return errors.throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, options.configFile ? path.basename(options.configFile) : '[no config file specified]')
       case 412:
         return errors.throwErr('CLOUD_INVALID_RUN_REQUEST', err.error)
       case 422: {
@@ -775,14 +841,13 @@ const createRun = Promise.method((options = {}) => {
           }
           case 'PARALLEL_DISALLOWED':
             return errors.throwErr('CLOUD_PARALLEL_DISALLOWED', {
-              tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
             return errors.throwErr('CLOUD_PARALLEL_REQUIRED', {
-              tags,
+              tags: tags.join(', '),
               group,
               runUrl,
               ciBuildId,
@@ -790,9 +855,9 @@ const createRun = Promise.method((options = {}) => {
           case 'ALREADY_COMPLETE':
             return errors.throwErr('CLOUD_ALREADY_COMPLETE', {
               runUrl,
-              tags,
+              tags: tags.join(','),
               group,
-              parallel,
+              parallel: parallel.toString(),
               ciBuildId,
             })
           case 'STALE_RUN':
@@ -806,11 +871,11 @@ const createRun = Promise.method((options = {}) => {
           case 'AUTO_CANCEL_MISMATCH':
             return errors.throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
               runUrl,
-              tags,
+              tags: tags.join(','),
               group,
-              parallel,
+              parallel: parallel.toString(),
               ciBuildId,
-              autoCancelAfterFailures,
+              autoCancelAfterFailures: autoCancelAfterFailures.toString(),
             })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
@@ -830,33 +895,7 @@ const createRun = Promise.method((options = {}) => {
   })
 })
 
-const createInstance = (options = {}) => {
-  let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
-
-  spec = getSpecRelativePath(spec)
-
-  return api.createInstance({
-    spec,
-    runId,
-    groupId,
-    platform,
-    machineId,
-  })
-  .catch((err) => {
-    debug('failed creating instance %o', {
-      stack: err.stack,
-    })
-
-    throwCloudCannotProceed({
-      err,
-      group,
-      ciBuildId,
-      parallel,
-    })
-  })
-}
-
-const _postInstanceTests = ({
+export const _postInstanceTests = ({
   runId,
   instanceId,
   config,
@@ -878,7 +917,38 @@ const _postInstanceTests = ({
   })
 }
 
-const createRunAndRecordSpecs = (options = {}) => {
+type RunAllSpecs = ({ beforeSpecRun, afterSpecRun, onTestsReceived, runUrl, parallel }: { beforeSpecRun?: any, afterSpecRun?: any, onTestsReceived?: any, runUrl?: string, parallel?: boolean}) => Promise<any>
+type CreateRunAndRecordSpecsOptions = {
+  autoCancelAfterFailures: number | false
+  tag: string
+  key: string
+  sys: SystemInfo
+  specs: SpecWithRelativeRoot[]
+  group: string
+  config: Cfg
+  browser: FoundBrowser
+  parallel: boolean
+  ciBuildId: string
+  testingType: TestingType
+  project: ProjectBase
+  projectId: any
+  projectRoot: string
+  projectName?: string
+  specPattern: string | RegExp | string[]
+  runAllSpecs: RunAllSpecs
+  onError: (err: Error) => void
+  quiet: boolean
+}
+
+type BeforeSpecRunReturn = {
+  spec: string | null
+  claimedInstances: number
+  totalInstances: number
+  estimated: number | null
+  instanceId: string | null
+}
+
+export const createRunAndRecordSpecs = (options: CreateRunAndRecordSpecsOptions) => {
   const { specPattern,
     specs,
     sys,
@@ -942,43 +1012,45 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const { runUrl, runId, machineId, groupId } = resp
-      const protocolCaptureMeta = resp.capture || {}
+      const protocolCaptureMeta = resp.capture
 
-      let captured = null
-      let instanceId = null
+      let captured: { toString: () => string } | null = null
+      let instanceId: string | null = null
 
-      const beforeSpecRun = (spec) => {
+      const beforeSpecRun = async (spec: string): Promise<BeforeSpecRunReturn | undefined> => {
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
         captured = capture.stdout()
 
-        return createInstance({
-          spec,
-          runId,
-          group,
-          groupId,
-          platform,
-          parallel,
-          ciBuildId,
-          machineId,
-        })
-        .then((resp = {}) => {
-          instanceId = resp.instanceId
-
-          // pull off only what we need
-          return _
-          .chain(resp)
-          .pick('spec', 'claimedInstances', 'totalInstances')
-          .extend({
-            estimated: resp.estimatedWallClockDuration,
-            instanceId,
+        try {
+          const instance = await api.createInstance({
+            groupId,
+            machineId,
+            platform,
+            spec,
+            runId,
           })
-          .value()
-        })
+
+          instanceId = instance.instanceId
+
+          return {
+            spec: instance.spec,
+            claimedInstances: instance.claimedInstances,
+            totalInstances: instance.totalInstances,
+            estimated: instance.estimatedWallClockDuration,
+            instanceId,
+          }
+        } catch (err) {
+          throwCloudCannotProceed({ err, group, ciBuildId, parallel })
+        }
+
+        // unreachable, as `throwCloudCannotProceed` throws a new error. However,
+        // typescript complains if we do not explicitly return undefined here
+        return undefined
       }
 
-      const afterSpecRun = (spec, results, config) => {
+      const afterSpecRun = (spec: SpecFile, results, config) => {
         // don't do anything if we failed to
         // create the instance
         if (!instanceId || results.skippedSpec) {
@@ -989,7 +1061,12 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         return specWriter.countStudioUsage(spec.absolute)
         .then((metadata) => {
+          if (!instanceId) {
+            return
+          }
+
           return postInstanceResults({
+            runId,
             group,
             config,
             results,
@@ -1026,10 +1103,13 @@ const createRunAndRecordSpecs = (options = {}) => {
           .finally(() => {
             // always attempt to upload stdout
             // even if uploading failed
-            return updateInstanceStdout({
-              captured,
-              instanceId,
-            })
+            if (instanceId) {
+              return updateInstanceStdout({
+                captured,
+                instanceId,
+                runId,
+              })
+            }
           })
         })
       }
@@ -1044,7 +1124,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         // this also means runtimeConfig will be missing
         runnables = runnables || {}
 
-        const r = testsUtils.flattenSuiteIntoRunnables(runnables)
+        const r = flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
@@ -1132,32 +1212,4 @@ const createRunAndRecordSpecs = (options = {}) => {
       })
     })
   })
-}
-
-module.exports = {
-  createRun,
-
-  createInstance,
-
-  postInstanceResults,
-
-  _postInstanceTests,
-
-  updateInstanceStdout,
-
-  uploadArtifacts,
-
-  throwIfNoProjectId,
-
-  throwIfIndeterminateCiBuildId,
-
-  throwIfIncorrectCiBuildIdUsage,
-
-  warnIfProjectIdButNoRecordOption,
-
-  throwIfRecordParamsWithoutRecording,
-
-  createRunAndRecordSpecs,
-
-  getCommitFromGitOrCi,
 }

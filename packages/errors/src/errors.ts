@@ -251,7 +251,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/already-complete`
   },
-  CLOUD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_REQUIRED: (arg1: {runUrl: string, tags?: string}) => {
     return errTemplate`\
         You did not pass the ${fmt.flag(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
 
@@ -268,7 +268,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-required`
   },
-  CLOUD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_DISALLOWED: (arg1: {runUrl: string, group?: string, ciBuildId?: string }) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
 
@@ -284,7 +284,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-disallowed`
   },
-  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any }) => {
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any, group?: string | null, ciBuildId?: string }) => {
     let params: any = arg1.parameters
 
     if (arg1.payload?.differentParams) {
@@ -338,7 +338,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
-  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null}) => {
+  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null, group?: string | null}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--group`)} flag, but this group name has already been used for this run.
 
@@ -559,6 +559,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
+  // this error is sometimes thrown when config file path can be nullable
   CLOUD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
         We could not find a Cypress Cloud project with the projectId: ${fmt.highlight(projectId)}

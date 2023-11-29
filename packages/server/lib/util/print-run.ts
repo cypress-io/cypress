@@ -578,7 +578,7 @@ type ArtifactLike = {
   fileSize?: number | BigInt
   message?: string
   skip?: boolean
-  error: string
+  error?: string
 }
 
 export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {

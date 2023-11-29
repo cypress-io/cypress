@@ -281,7 +281,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
+  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout = TWO_MINUTES) {
     const archivePath = this._archivePath
 
     if (!this._protocol || !archivePath || !this._db) {
@@ -300,7 +300,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         setTimeout(() => {
           controller.abort()
-        }, timeout ?? TWO_MINUTES)
+        }, timeout)
 
         const res = await fetch(uploadUrl, {
           agent,

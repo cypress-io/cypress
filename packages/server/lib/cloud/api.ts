@@ -22,6 +22,38 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../util/fs'
 import ProtocolManager from './protocol'
 import type { ProjectBase } from '../project-base'
+import type { SpecWithRelativeRoot, FoundBrowser } from '@packages/types'
+import type { SystemInfo } from '../util/system'
+
+type ScreenshotUploadUrl = {
+  screenshotId: string
+  uploadUrl: string
+}
+
+type PostInstanceResultsOptions = {
+  exception?: string | null
+  tests: Record<string, any>
+  metadata: any
+  config?: Record<string, any> | null
+  instanceId?: string
+  timeout?: number
+  runId: string
+  stats?: any
+  video: boolean
+  reporterStats: any
+  screenshots: any
+  config: any
+}
+type PostInstanceResultsResponse = {
+  screenshotUploadUrls: ScreenshotUploadUrl[]
+  videoUploadUrl?: string
+  captureUploadUrl?: string
+}
+
+export type Platform = Pick<SystemInfo, 'osCpus' | 'osName' | 'osMemory' | 'osVersion'> & {
+  browserName: FoundBrowser['displayName']
+  browserVersion: FoundBrowser['version']
+}
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -238,20 +270,24 @@ const isRetriableError = (err) => {
 
 export type CreateRunOptions = {
   projectRoot: string
-  ci: string
+  ci: {
+    params: any
+    provider: any
+  }
   ciBuildId: string
   projectId: string
   recordKey: string
   commit: string
-  specs: string[]
+  specs: SpecWithRelativeRoot[]
   group: string
-  platform: string
+  platform: Platform
   parallel: boolean
-  specPattern: string[]
+  specPattern: string | RegExp | string[]
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
   project: ProjectBase
+  autoCancelAfterFailures: number | false
 }
 
 type CreateRunResponse = {
@@ -264,6 +300,7 @@ type CreateRunResponse = {
     code: string
     message: string
     name: string
+    limit: number
   })[]
   captureProtocolUrl?: string | undefined
   capture?: {
@@ -304,7 +341,7 @@ let preflightResult = {
 
 let recordRoutes = apiRoutes
 
-module.exports = {
+const api = {
   rp,
 
   // For internal testing
@@ -339,7 +376,7 @@ module.exports = {
     .catch(tagError)
   },
 
-  createRun (options: CreateRunOptions) {
+  createRun (options: CreateRunOptions): Bluebird<CreateRunResponse> {
     const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.sendPreflight(preflightOptions)
@@ -395,10 +432,11 @@ module.exports = {
       debugProtocol({ captureProtocolUrl })
 
       let script
+      const protocolPath = captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
       try {
-        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+        if (protocolPath) {
+          script = await this.getCaptureProtocolScript(protocolPath)
         }
       } catch (e) {
         debugProtocol('Error downloading capture code', e)
@@ -428,14 +466,34 @@ module.exports = {
     .catch(tagError)
   },
 
-  createInstance (options) {
+  createInstance (options: {
+    groupId: string
+    machineId: string
+    platform: {
+      browserName: string
+      browserVersion: string
+      osCpus: unknown[]
+      osMemory: Record<string, unknown | null>
+      osName: string
+      osVersion: string
+    }
+    spec: string | null
+    runId: string
+    timeout?: number
+  }): Promise<{
+    claimedInstances: number
+    estimatedWallClockDuration: number | null
+    instanceId: string | null
+    spec: string | null
+    totalInstances: number
+  }> {
     const { runId, timeout } = options
 
     const body = _.pick(options, [
-      'spec',
       'groupId',
       'machineId',
       'platform',
+      'spec',
     ])
 
     return retryWithBackoff((attemptIndex) => {
@@ -477,7 +535,7 @@ module.exports = {
     })
   },
 
-  updateInstanceStdout (options) {
+  updateInstanceStdout (options: { instanceId: string, timeout?: number, stdout: string, runId: string }): Promise<void> {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
@@ -519,7 +577,7 @@ module.exports = {
     })
   },
 
-  postInstanceResults (options) {
+  postInstanceResults (options: PostInstanceResultsOptions): Promise<PostInstanceResultsResponse> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         url: recordRoutes.instanceResults(options.instanceId),
@@ -675,3 +733,5 @@ module.exports = {
 
   retryWithBackoff,
 }
+
+export default api
