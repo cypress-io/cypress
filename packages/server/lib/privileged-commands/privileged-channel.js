@@ -203,7 +203,7 @@
     // needs to use the fully-qualified url or else when the baseUrl includes
     // basic auth, the fetch fails with a security error
     // see https://github.com/cypress-io/cypress/issues/28336
-    const promise = fetch(`${window.location.origin}/${namespace}/add-verified-command`, {
+    const promise = fetch(`${win.location.origin}/${namespace}/add-verified-command`, {
       body: stringify({
         args,
         name: command.name,
