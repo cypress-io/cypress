@@ -6,7 +6,7 @@ const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
-const api = require(`../../../lib/cloud/api`)
+const api = require(`../../../lib/cloud/api`).default
 const exception = require(`../../../lib/cloud/exception`)
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
@@ -117,7 +117,7 @@ describe('lib/modes/record', () => {
   context('.createRunAndRecordSpecs', () => {
     describe('fallback commit information', () => {
       let resetEnv = null
-
+      let createRun
       const env = {
         COMMIT_INFO_BRANCH: 'my-branch-221',
         COMMIT_INFO_MESSAGE: 'best commit ever',
@@ -136,6 +136,8 @@ describe('lib/modes/record', () => {
         sinon.stub(commitInfo, 'getSha').resolves(null)
         sinon.stub(commitInfo, 'getRemoteOrigin').resolves(null)
         resetEnv = mockedEnv(env, { clear: true })
+
+        createRun = sinon.stub(api, 'createRun').resolves()
       })
 
       afterEach(() => {
@@ -143,7 +145,6 @@ describe('lib/modes/record', () => {
       })
 
       it('calls api.createRun with the commit extracted from environment variables', () => {
-        const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 
         return recordMode.createRunAndRecordSpecs({
@@ -395,55 +396,6 @@ describe('lib/modes/record', () => {
       .then(() => {
         expect(exception.create).not.to.be.called
       })
-    })
-  })
-
-  context('.createInstance', () => {
-    beforeEach(function () {
-      sinon.stub(api, 'createInstance')
-
-      this.options = {
-        runId: 'run-123',
-        groupId: 'group-123',
-        machineId: 'machine-123',
-        platform: {},
-        spec: { relative: 'cypress/integration/app_spec.coffee' },
-      }
-    })
-
-    it('calls api.createInstance', function () {
-      api.createInstance.resolves()
-
-      return recordMode.createInstance(this.options)
-      .then(() => {
-        expect(api.createInstance).to.be.calledWith({
-          runId: 'run-123',
-          groupId: 'group-123',
-          machineId: 'machine-123',
-          platform: {},
-          spec: 'cypress/integration/app_spec.coffee',
-        })
-      })
-    })
-
-    it('errors when statusCode is 503', async () => {
-      const err = new Error('foo')
-
-      err.statusCode = 503
-
-      api.createInstance.rejects(err)
-
-      sinon.spy(errors, 'get')
-
-      await expect(recordMode.createInstance({
-        runId: 'run-123',
-        groupId: 'group-123',
-        machineId: 'machine-123',
-        platform: {},
-        spec: { relative: 'cypress/integration/app_spec.coffee' },
-      })).to.be.rejected
-
-      expect(errors.get).to.have.been.calledWith('CLOUD_CANNOT_PROCEED_IN_SERIAL')
     })
   })
 

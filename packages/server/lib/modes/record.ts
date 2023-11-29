@@ -45,7 +45,7 @@ const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
   )
 }
 
-export const warnIfProjectIdButNoRecordOption = (projectId, options) => {
+export const warnIfProjectIdButNoRecordOption = (projectId, options): null | undefined => {
   if (haveProjectIdAndKeyButNoRecordOption(projectId, options)) {
     // log a warning telling the user
     // that they either need to provide us
@@ -53,6 +53,8 @@ export const warnIfProjectIdButNoRecordOption = (projectId, options) => {
     // record mode
     return errors.warning('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', projectId)
   }
+
+  return undefined
 }
 
 const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
@@ -512,27 +514,28 @@ type UpdateInstanceStdoutOptions = {
   captured: { toString: () => string } | null
 }
 
-export const updateInstanceStdout = (options: UpdateInstanceStdoutOptions): Promise<void> => {
+export const updateInstanceStdout = async (options: UpdateInstanceStdoutOptions): Promise<void> => {
   const { runId, instanceId, captured } = options
 
   const stdout: string = captured?.toString() || ''
 
-  return api.updateInstanceStdout({
-    runId,
-    stdout,
-    instanceId,
-  }).catch((err) => {
+  try {
+    await api.updateInstanceStdout({
+      runId,
+      stdout,
+      instanceId,
+    })
+  } catch (err) {
     debug('failed updating instance stdout %o', {
       stack: err.stack,
     })
 
     errors.warning('CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return exception.create(err)
-    }
-  }).finally(capture.restore)
+    await exception.create(err)
+  } finally {
+    capture.restore()
+  }
 }
 
 type PostInstanceResultsOptions = {
@@ -1017,7 +1020,8 @@ export const createRunAndRecordSpecs = (options: CreateRunAndRecordSpecsOptions)
       let captured: { toString: () => string } | null = null
       let instanceId: string | null = null
 
-      const beforeSpecRun = async (spec: string): Promise<BeforeSpecRunReturn | undefined> => {
+      const beforeSpecRun = async (spec: string | undefined): Promise<BeforeSpecRunReturn | undefined> => {
+        debug(spec)
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -1028,7 +1032,7 @@ export const createRunAndRecordSpecs = (options: CreateRunAndRecordSpecsOptions)
             groupId,
             machineId,
             platform,
-            spec,
+            spec: spec || null,
             runId,
           })
 

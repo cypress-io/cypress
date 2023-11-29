@@ -42,7 +42,6 @@ type PostInstanceResultsOptions = {
   video: boolean
   reporterStats: any
   screenshots: any
-  config: any
 }
 type PostInstanceResultsResponse = {
   screenshotUploadUrls: ScreenshotUploadUrl[]
@@ -487,6 +486,7 @@ const api = {
     spec: string | null
     totalInstances: number
   }> {
+    debug('createInstance %O', options)
     const { runId, timeout } = options
 
     const body = _.pick(options, [
