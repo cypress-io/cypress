@@ -18,48 +18,39 @@ type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
 const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
+const FAKE_HOST = 'http://cy-fake-host'
+
 class RelativeUrl {
-  constructor (private url: URL) {}
+  public readonly hostname: string
+  public readonly host: string
+  public readonly href: string
+  public readonly origin: string
+  public readonly protocol: string
+  public readonly pathname: string
+  public readonly search: string
 
-  get hostname () {
-    return this.url.hostname.replace('http://cy-fake-host', '')
-  }
-
-  get host () {
-    return this.url.host.replace('http://cy-fake-host', '')
-  }
-
-  get href () {
-    return this.url.href.replace('http://cy-fake-host', '')
-  }
-
-  get origin () {
-    return this.url.origin.replace('http://cy-fake-host', '')
-  }
-
-  get protocol () {
-    return ''
-  }
-
-  get port () {
-    return ''
-  }
-
-  get pathname () {
-    return this.url.pathname
-  }
-
-  get search () {
-    return this.url.search
+  constructor (private url: URL) {
+    this.hostname = url.hostname.replace(FAKE_HOST, '')
+    this.host = url.host.replace(FAKE_HOST, '')
+    this.href = url.href.replace(FAKE_HOST, '')
+    this.origin = url.origin.replace(FAKE_HOST, '')
+    this.protocol = ''
+    this.port = ''
+    this.pathname = url.pathname
+    this.search = url.search
   }
 
   set port (port) {
-    this.url.port = port
+    if (port.length === 0) {
+      return
+    }
+
+    throw new Error('RelativeUrl does not support setting port')
   }
 }
 
-const portIsDefault = (port: string | null) => {
-  return port && DEFAULT_PORTS.includes(port)
+const portIsDefault = (port: string) => {
+  return DEFAULT_PORTS.includes(port)
 }
 
 export const parseUrl = (url: string) => {
@@ -67,7 +58,7 @@ export const parseUrl = (url: string) => {
     return new URL(url)
   } catch (e) {
     // TODO: remove this hack after https://github.com/whatwg/url/issues/531 is resolved
-    const u = new URL(url, 'http://cy-fake-host')
+    const u = new URL(url, FAKE_HOST)
 
     return new RelativeUrl(u)
   }
