@@ -18,7 +18,7 @@ type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
 const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
-const FAKE_HOST = 'http://cy-fake-host'
+const FAKE_HOST = 'http://cy-fake-host/'
 
 class RelativeUrl {
   public readonly hostname: string
