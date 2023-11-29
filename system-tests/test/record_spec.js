@@ -2312,8 +2312,8 @@ describe('e2e record', () => {
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
             expect(artifactReport?.protocol).to.an('object')
-            expect(artifactReport!.protocol!.url).to.be.a('string')
-            expect(artifactReport!.protocol!.uploadDuration).to.be.a('number')
+            expect(artifactReport?.protocol?.url).to.be.a('string')
+            expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
           })
         })
       })
