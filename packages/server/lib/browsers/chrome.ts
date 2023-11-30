@@ -611,7 +611,15 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, protocolManager: options.protocolManager, fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({
+      hosts: ['127.0.0.1'],
+      port,
+      browserName: browser.displayName,
+      onAsynchronousError: options.onError,
+      onReconnect,
+      protocolManager: options.protocolManager,
+      fullyManageTabs: true,
+    })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -650,5 +658,9 @@ export = {
     // return the launched browser process
     // with additional method to close the remote connection
     return launchedBrowser
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

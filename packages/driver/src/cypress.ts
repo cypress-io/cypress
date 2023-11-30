@@ -647,6 +647,9 @@ class $Cypress {
       case 'cy:command:start':
         return this.emit('command:start', ...args)
 
+      case 'cy:command:start:async':
+        return this.emitThen('command:start:async', ...args)
+
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 

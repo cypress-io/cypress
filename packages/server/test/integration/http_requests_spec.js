@@ -988,7 +988,9 @@ describe('Routes', () => {
 
     context('basic request with correlation', () => {
       beforeEach(function () {
-        return this.setup('http://www.github.com', undefined, undefined, true)
+        return this.setup('http://www.github.com', undefined, undefined, true).then(() => {
+          this.networkProxy.setPreRequestTimeout(2000)
+        })
       })
 
       it('properly correlates when CDP failures come first', function () {
@@ -1085,6 +1087,147 @@ describe('Routes', () => {
 
             expect(res.body).to.include('hello from baz!')
           })
+        })
+      })
+
+      it('properly correlates when request has | character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar|baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar|baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar|baz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has | character with addPendingUrlWithoutPreRequest', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar|baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar|baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingUrlWithoutPreRequest('http://www.github.com/?foo=bar|baz')
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded | character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%7Cbaz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%7Cbaz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%7Cbaz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded " " (space) character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%20baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%20baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%20baz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded " character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%22')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%22',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%22',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
         })
       })
     })
