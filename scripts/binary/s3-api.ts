@@ -1,7 +1,7 @@
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
-import { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL, S3 } from '@aws-sdk/client-s3'
+import S3 from 'aws-sdk/clients/s3'
 
 export const hasOnlyStringValues = (o) => {
   return Object.values(o).every((v) => is.unemptyString(v))
@@ -22,11 +22,9 @@ export const s3helpers = {
     }
 
     return new S3({
-      credentials: {
-        accessKeyId: aws.accessKeyId,
-        secretAccessKey: aws.secretAccessKey,
-        sessionToken: aws.sessionToken,
-      },
+      accessKeyId: aws.accessKeyId,
+      secretAccessKey: aws.secretAccessKey,
+      sessionToken: aws.sessionToken,
     })
   },
 
@@ -85,12 +83,12 @@ export const s3helpers = {
    * and ACL 'public-read'
    */
   copyS3 (sourceKey: string, destinationKey: string, bucket: string,
-    contentType: string, acl: ObjectCannedACL,
-    s3: S3): Promise<CopyObjectCommandOutput> {
+    contentType: S3.ContentType, acl: S3.ObjectCannedACL,
+    s3: S3): Promise<S3.CopyObjectOutput> {
     return new Promise((resolve, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
-      const params: CopyObjectCommandInput = {
+      const params: S3.CopyObjectRequest = {
         Bucket: bucket,
         CopySource: `${bucket}/${sourceKey}`,
         Key: destinationKey,
@@ -118,7 +116,7 @@ export const s3helpers = {
    * but the returned object has these prefixes stripped. Thus if we set
    * a single "x-amz-meta-user: gleb", the resolved object will be simply {user: "gleb"}
   */
-  getUserMetadata (bucket: string, key: string, s3: S3): Promise<Record<string, string>> {
+  getUserMetadata (bucket: string, key: string, s3: S3): Promise<S3.Metadata> {
     return new Promise((resole, reject) => {
       debug('getting user metadata from %s %s', bucket, key)
 
@@ -141,15 +139,15 @@ export const s3helpers = {
    * Setting user metadata can be accomplished with copying the object back onto itself
    * with replaced metadata object.
   */
-  setUserMetadata (bucket: string, key: string, metadata: Record<string, string>,
-    contentType: string, acl: ObjectCannedACL, s3: S3): Promise<CopyObjectCommandOutput> {
+  setUserMetadata (bucket: string, key: string, metadata: S3.Metadata,
+    contentType: S3.ContentType, acl: S3.ObjectCannedACL, s3: S3): Promise<S3.CopyObjectOutput> {
     la(hasOnlyStringValues(metadata),
       'metadata object can only have string values', metadata)
 
     return new Promise((resolve, reject) => {
       debug('setting metadata to %o for %s %s', metadata, bucket, key)
 
-      const params: CopyObjectCommandInput = {
+      const params: S3.CopyObjectRequest = {
         Bucket: bucket,
         CopySource: `${bucket}/${key}`,
         Key: key,
