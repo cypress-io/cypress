@@ -37,9 +37,9 @@
   },
   "files": [
     "dist",
-    "index.d.ts"
+    "support"
   ],
-  "types": "index.d.ts",
+  "types": "dist/plugin/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
