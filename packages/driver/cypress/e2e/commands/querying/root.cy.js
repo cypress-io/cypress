@@ -47,23 +47,23 @@ describe('src/cy/commands/querying', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        this.logs = []
-
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'root') {
-            this.lastLog = log
-
-            this.logs.push(log)
-          }
+          this.lastLog = log
         })
 
         return null
       })
 
-      it('can turn off logging', () => {
-        cy.root({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+      it.only('can turn off logging', () => {
+        cy.root({ log: false })
+        .then(function () {
+          const rootLog = this.lastLog
+
+          expect(rootLog.get('name')).to.eq('root')
+          expect(rootLog.get('hidden')).to.be.true
         })
+
+        cy.getCommandLogInReporter('root', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

@@ -46,9 +46,6 @@ declare namespace Cypress {
   }
 
   interface InternalLogConfig {
-    // the JQuery element for the command. This will highlight the command
-    // in the main window when debugging
-    $el?: JQuery | string
     alias?: string
     aliasType?: 'agent' | 'route' | 'primitive' | 'dom' | undefined
     browserPreRequest?: any
@@ -69,6 +66,9 @@ declare namespace Cypress {
     count?: number
     // the name override for display purposes only
     displayName?: string
+    // the JQuery element for the command. This will highlight the command
+    // in the main window when debugging
+    $el?: JQuery | string
     // whether or not to show the log in the Reporter UI or only
     // store the log details on the command and log manager
     emitOnly?: boolean
@@ -82,6 +82,8 @@ declare namespace Cypress {
     functionName?: string
     // whether or not to start a new log group
     groupStart?: boolean
+    // whether or not the log should display in the reporter
+    hidden?: boolean
     hookId?: number
     id?: string
     // defaults to command
@@ -111,6 +113,7 @@ declare namespace Cypress {
         localStorage?: Array<LocalStorage> | null
       }
     }
+    // whether or not to collect snapshots for the command
     snapshot?: boolean
     snapshots?: []
     state?: 'failed' | 'passed' | 'pending' // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
@@ -129,7 +132,9 @@ declare namespace Cypress {
     url?: string
     viewportHeight?: number
     viewportWidth?: number
+    // whether or not the subject is visible on the dom
     visible?: boolean
+    // the timestamp of when the command started
     wallClockStartedAt?: string
   }
 }

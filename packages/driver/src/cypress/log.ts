@@ -14,7 +14,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
@@ -192,6 +192,7 @@ const defaults = function (state: StateFunc, config, obj) {
   _.defaults(obj, {
     id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
+    hidden: false,
     instrument: 'command',
     url: state('url'),
     hookId: state('hookId'),
@@ -628,7 +629,7 @@ class LogManager {
   }
 
   createLogFn (cy, state, config) {
-    return (options: any = {}) => {
+    return (options: Cypress.InternalLogConfig = {}) => {
       if (!_.isObject(options)) {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }

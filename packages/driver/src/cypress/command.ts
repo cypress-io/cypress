@@ -1,5 +1,8 @@
 import _ from 'lodash'
 import utils from './utils'
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:command')
 
 let idCounter = 1
 
@@ -74,6 +77,10 @@ export class $Command {
         log.finish()
       }
     })
+
+    if (debug.enabled) return
+
+    this.set('logs', [])
   }
 
   log (log) {

@@ -60,3 +60,27 @@ Cypress.Commands.add('originLoadUtils', (origin) => {
     Cypress.require('./utils')
   })
 })
+
+// this is here to test that cy.origin() dependencies used directly in the
+// support file work properly
+Cypress.Commands.add('getCommandLogInReporter', (commandName, opts = { isHidden: false }) => {
+  cy.then(() => {
+    // return withMutableReporterState(() => {
+    // Open current test if not already open, so we can find the command log
+    cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
+
+    const command = cy
+    .$$(`.runnable-active .command-method:contains(${commandName})`, top?.document)
+    .closest('.command')
+
+    if (opts.isHidden) {
+      expect(command, `${commandName} log in the reporter`).to.not.exist
+
+      return
+    }
+
+    expect(command, `${commandName} log in the reporter`).to.exist
+
+    return command
+  })
+})

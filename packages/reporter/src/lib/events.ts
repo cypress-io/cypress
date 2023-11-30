@@ -58,6 +58,8 @@ const events: Events = {
     }))
 
     runner.on('reporter:log:add', action('log:add', (log: LogProps) => {
+      if (log.hidden) return
+
       runnablesStore.addLog(log)
     }))
 

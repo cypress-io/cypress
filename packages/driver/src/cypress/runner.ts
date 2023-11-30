@@ -25,7 +25,7 @@ const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'hidden', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -2014,7 +2014,7 @@ export default {
       addLog (attrs, isInteractive) {
         // we don't need to hold a log reference to anything in memory when we don't
         // render the report or are headless because you cannot inspect any logs
-        if (_skipCollectingLogs || !isInteractive) {
+        if (_skipCollectingLogs || !isInteractive || attrs.hidden) {
           return
         }
 
