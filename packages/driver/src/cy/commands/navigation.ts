@@ -963,7 +963,15 @@ export default (Commands, Cypress, cy, state, config) => {
           remoteUrl = $Location.fullyQualifyUrl(url)
         }
 
+        const currentLocation = $Location.create(window.location.href)
         let remote = $Location.create(remoteUrl || url)
+
+        if (
+          currentLocation.hostname === remote.hostname
+          && currentLocation.protocol !== remote.protocol
+        ) {
+          throw new Error('🔴 Cypress detected a redirect loop 🔴')
+        }
 
         // reset auth options if we have them
         const a = remote.authObj

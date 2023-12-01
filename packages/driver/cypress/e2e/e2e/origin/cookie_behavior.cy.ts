@@ -815,6 +815,12 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
         })
       })
 
+      // visiting http when there is a valid https site triggers Chrome's
+      // https-first mode. when Cypress detects that it errors because otherwise
+      // it results in a redirect loop
+      // https://github.com/cypress-io/cypress/issues/25891
+      if (scheme === 'http') return
+
       // without cy.origin means the AUT has the same origin as top
       describe('w/o cy.origin', () => {
         describe('same site / same origin', () => {

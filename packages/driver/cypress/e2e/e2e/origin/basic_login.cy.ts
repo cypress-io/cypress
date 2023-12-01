@@ -4,7 +4,7 @@ describe('basic login', { browser: '!webkit' }, () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.origin('http://www.idp.com:3500', () => {
+      cy.origin('https://www.idp.com:3502', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -20,10 +20,10 @@ describe('basic login', { browser: '!webkit' }, () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       // Missing the call to go to idp.com
       cy.window().then((win) => {
-        win.location.href = 'http://www.idp.com:3500/fixtures/auth/idp.html'
+        win.location.href = 'https://www.idp.com:3502/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://www.idp.com:3500', () => {
+      cy.origin('https://www.idp.com:3502', () => {
         cy.get('[data-cy="username"]').type('FJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -35,9 +35,9 @@ describe('basic login', { browser: '!webkit' }, () => {
     })
 
     it('visits foobar first', () => {
-      cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html') // Establishes primary origin
+      cy.visit('https://www.foobar.com:3502/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.origin('http://www.idp.com:3500', () => {
+      cy.origin('https://www.idp.com:3502', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -51,6 +51,20 @@ describe('basic login', { browser: '!webkit' }, () => {
 
   // Scenario, Token based auth. Visit IDP hosted on secondary origin, login and redirect back to site.
   describe('visit secondary first', () => {
+    // What we don't want them to do, but should still work
+    // Visit IDP first
+    it('logs in and runs the test in cy.origin', () => { // Setting the base url
+      cy.visit('https://www.idp.com:3502/fixtures/auth/idp.html') // Visit idp.com
+      cy.get('[data-cy="username"]').type('FJohnson')
+      cy.get('[data-cy="login"]').click()
+
+      cy.origin('http://localhost:3500', () => {
+        cy.get('[data-cy="welcome"]')
+        .invoke('text')
+        .should('equal', 'Welcome FJohnson')
+      })
+    })
+
     describe('How to determine primary origin', () => {
       // NOTE: Enable to set the top origin to foobar before running the next test.
       it.skip('reset top', () => {
@@ -60,8 +74,8 @@ describe('basic login', { browser: '!webkit' }, () => {
       // Primary established via base url
       // TODO: baseUrl does not establish primary without a visit
       it.skip('logs in with primary set via baseurl', { baseUrl: 'http://localhost:3500' }, () => {
-        cy.origin('http://www.idp.com:3500', () => { // primary origin is localhost
-          cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
+        cy.origin('https://www.idp.com:3502', () => { // primary origin is localhost
+          cy.visit('https://www.idp.com:3502/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
           cy.get('[data-cy="login"]').click()
         })
@@ -72,13 +86,13 @@ describe('basic login', { browser: '!webkit' }, () => {
       })
 
       it('reset top', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
+        cy.visit('https://www.foobar.com:3502/fixtures/auth/index.html')
       })
 
       it('logs in with primary set via visit', () => {
         cy.visit('/fixtures/auth/index.html')
-        cy.origin('http://www.idp.com:3500', () => { // primary origin is localhost
-          cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
+        cy.origin('https://www.idp.com:3502', () => { // primary origin is localhost
+          cy.visit('https://www.idp.com:3502/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
           cy.get('[data-cy="login"]').click()
         })
@@ -90,7 +104,7 @@ describe('basic login', { browser: '!webkit' }, () => {
     })
 
     describe('session', () => {
-    // Custom login command that establishes a session
+      // Custom login command that establishes a session
       const login = (name) => {
         cy.session(name, () => {
           // Note, this assumes localhost is the primary origin, ideally we'd be able to specify this directly.
@@ -127,20 +141,6 @@ describe('basic login', { browser: '!webkit' }, () => {
         cy.get('[data-cy="welcome"]')
         .invoke('text')
         .should('equal', 'Welcome BJohnson')
-      })
-    })
-
-    // What we don't want them to do, but should still work
-    // Visit IDP first
-    it('logs in and runs the test in cy.origin', () => { // Setting the base url
-      cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html') // Visit idp.com
-      cy.get('[data-cy="username"]').type('FJohnson')
-      cy.get('[data-cy="login"]').click()
-
-      cy.origin('http://localhost:3500', () => {
-        cy.get('[data-cy="welcome"]')
-        .invoke('text')
-        .should('equal', 'Welcome FJohnson')
       })
     })
   })
