@@ -417,11 +417,11 @@ export class EventManager {
             return
           }
 
-          const hideCommandLog = Cypress.config('hideCommandLog')
+          const skipCollectingLogs = Cypress.config('hideCommandLog') || Cypress.config('hideRunnerUi')
 
           this.studioStore.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
+          const runnables = Cypress.runner.normalizeAll(runState.tests, skipCollectingLogs, testFilter)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -430,7 +430,7 @@ export class EventManager {
             this._runDriver(runState, testState)
           }
 
-          if (!hideCommandLog) {
+          if (!skipCollectingLogs) {
             this.reporterBus.emit('runnables:ready', runnables)
           }
 
@@ -479,7 +479,7 @@ export class EventManager {
     })
 
     Cypress.on('collect:run:state', () => {
-      if (Cypress.config('hideCommandLog')) {
+      if (Cypress.config('hideCommandLog') || Cypress.config('hideRunnerUi')) {
         return Bluebird.resolve()
       }
 
