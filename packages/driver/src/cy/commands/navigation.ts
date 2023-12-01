@@ -968,7 +968,8 @@ export default (Commands, Cypress, cy, state, config) => {
 
         if (
           currentLocation.hostname === remote.hostname
-          && currentLocation.protocol !== remote.protocol
+          && currentLocation.protocol === 'https'
+          && remote.protocol === 'http'
         ) {
           throw new Error('🔴 Cypress detected a redirect loop 🔴')
         }
