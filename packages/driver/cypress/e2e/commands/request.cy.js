@@ -73,6 +73,54 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      it('accepts object with url, method, headers, fixture with encoding', () => {
+        cy.request({
+          url: 'http://github.com/users',
+          method: 'POST',
+          fixture: 'path,encoding',
+          headers: {
+            'x-token': 'abc123',
+          },
+        })
+        .then(function () {
+          this.expectOptionsToBe({
+            url: 'http://github.com/users',
+            method: 'POST',
+            fixture: {
+              filePath: 'path',
+              encoding: 'encoding',
+            },
+            headers: {
+              'x-token': 'abc123',
+            },
+          })
+        })
+      })
+
+      it('accepts object with url, method, headers, fixture', () => {
+        cy.request({
+          url: 'http://github.com/users',
+          method: 'POST',
+          fixture: 'path',
+          headers: {
+            'x-token': 'abc123',
+          },
+        })
+        .then(function () {
+          this.expectOptionsToBe({
+            url: 'http://github.com/users',
+            method: 'POST',
+            fixture: {
+              filePath: 'path',
+              encoding: undefined,
+            },
+            headers: {
+              'x-token': 'abc123',
+            },
+          })
+        })
+      })
+
       it('accepts object with url + timeout', () => {
         cy.request({ url: 'http://localhost:8000/foo', timeout: 23456 }).then(function () {
           this.expectOptionsToBe({
