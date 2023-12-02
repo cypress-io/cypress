@@ -700,6 +700,34 @@ describe('lib/request', () => {
           expect(resp.status).to.eq(200)
         })
       })
+
+      it('can parse fixture option', function () {
+        const fixtureData = {
+          some: 'json',
+          foo: {
+            bar: 'baz',
+          },
+        }
+
+        nock('http://localhost:8080')
+        .matchHeader('accept', 'text/plain')
+        .post('/headers', fixtureData)
+        .reply(200)
+
+        return request.sendPromise({}, this.fn, (filePath, encoding) => {
+          return filePath === 'fakefixturename' && encoding === 'encoding' ? fixtureData : 'incorrect call'
+        }, {
+          url: 'http://localhost:8080/headers',
+          method: 'POST',
+          fixture: { filePath: 'fakefixturename', encoding: 'encoding' },
+          headers: {
+            Accept: 'text/plain',
+          },
+        })
+        .then((resp) => {
+          expect(resp.status).to.eq(200)
+        })
+      })
     })
 
     context('qs', () => {
