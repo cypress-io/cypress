@@ -145,8 +145,12 @@ export default (Commands, Cypress, cy, state, config) => {
         }
 
         if (!userOptions.method) {
-          options.method = 'POST'
+          $errUtils.throwErrByPath('request.fixture_without_method')
         }
+
+        const [filePath, encoding] = options.fixture.split(',')
+
+        options.fixture = { filePath, encoding: encoding === 'null' ? null : encoding }
       }
 
       // normalize the url by prepending it with our current origin

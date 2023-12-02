@@ -1392,7 +1392,11 @@ export default {
       docsUrl: 'https://on.cypress.io/request',
     },
     body_and_fixture: {
-      message: `${cmd('request')} was called with a body and a fixture which cannot be combined.`,
+      message: `${cmd('request')} was called with the \`body\` and \`fixture\` options which cannot be combined.`,
+      docsUrl: 'https://on.cypress.io/request',
+    },
+    fixture_without_method: {
+      message: `${cmd('request')} was called with the \`fixture\` option but is missing the \`method\` option.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     form_invalid: {
