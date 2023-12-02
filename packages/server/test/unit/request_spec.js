@@ -360,7 +360,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://www.github.com/foo',
         cookies: false,
       })
@@ -376,7 +376,7 @@ describe('lib/request', () => {
 
       // should not bomb on 500
       // because simple = false
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://www.github.com/foo',
         cookies: false,
       })
@@ -389,7 +389,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise(undefined, this.fn, {
+      return request.sendPromise(undefined, this.fn, () => {}, {
         url: 'http://www.github.com/foo',
         cookies: false,
         body: 'foobarbaz',
@@ -441,7 +441,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise(undefined, this.fn, {
+      return request.sendPromise(undefined, this.fn, () => {}, {
         url: 'http://www.github.com/dashboard',
         cookies: false,
       })
@@ -499,7 +499,7 @@ describe('lib/request', () => {
 
       const req = Request({ timeout: 2000 })
 
-      return req.sendPromise({}, this.fn, {
+      return req.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:1111/foo',
         cookies: false,
       })
@@ -517,7 +517,7 @@ describe('lib/request', () => {
         'Content-Type': 'application/json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
@@ -533,7 +533,7 @@ describe('lib/request', () => {
         'Content-Type': 'application/vnd.api+json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
@@ -549,7 +549,7 @@ describe('lib/request', () => {
         'Content-Type': 'application/json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
@@ -566,7 +566,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/plain',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -583,7 +583,7 @@ describe('lib/request', () => {
       .get('/foo')
       .reply(200, 'derp')
 
-      return request.sendPromise('foobarbaz', this.fn, {
+      return request.sendPromise('foobarbaz', this.fn, () => {}, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -598,7 +598,7 @@ describe('lib/request', () => {
       .get('/foo')
       .reply(200, 'it worked')
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise({}, this.fn, () => {}, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -617,7 +617,7 @@ describe('lib/request', () => {
 
       headers['user-agent'] = 'foobarbaz'
 
-      return request.sendPromise(headers, this.fn, {
+      return request.sendPromise(headers, this.fn, () => {}, {
         url: 'http://localhost:8080/foo',
         cookies: false,
         headers: {
@@ -637,7 +637,7 @@ describe('lib/request', () => {
 
       const headers = { 'user-agent': 'test' }
 
-      return request.sendPromise(headers, this.fn, {
+      return request.sendPromise(headers, this.fn, () => {}, {
         url: 'http://localhost:8080/foo',
         cookies: false,
         headers: {
@@ -656,7 +656,7 @@ describe('lib/request', () => {
         .get('/headers')
         .reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/headers',
           cookies: false,
         })
@@ -671,7 +671,7 @@ describe('lib/request', () => {
         .get('/headers')
         .reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/headers',
           cookies: false,
           headers: {
@@ -689,7 +689,7 @@ describe('lib/request', () => {
         .get('/headers')
         .reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/headers',
           cookies: false,
           headers: {
@@ -708,7 +708,7 @@ describe('lib/request', () => {
         .get('/foo?bar=baz&q=1')
         .reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/foo',
           cookies: false,
           qs: {
@@ -736,7 +736,7 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: true,
@@ -758,7 +758,7 @@ describe('lib/request', () => {
         .get('/dashboard')
         .reply(200, 'dashboard')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           method: 'POST',
           url: 'http://localhost:8080/login',
           cookies: false,
@@ -780,7 +780,7 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -802,7 +802,7 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -823,7 +823,7 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -844,7 +844,7 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
         })
@@ -857,7 +857,7 @@ describe('lib/request', () => {
 
       it('gets + attaches the cookies at each redirect', function () {
         return testAttachingCookiesWith(() => {
-          return request.sendPromise({}, this.fn, {
+          return request.sendPromise({}, this.fn, () => {}, {
             url: 'http://localhost:1234/',
           })
         })
@@ -873,7 +873,7 @@ describe('lib/request', () => {
       })
 
       it('takes converts body to x-www-form-urlencoded and sets header', function () {
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -898,7 +898,7 @@ describe('lib/request', () => {
           baz: 'quux',
         }
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -917,7 +917,7 @@ describe('lib/request', () => {
       it('does not set json=true', function () {
         const init = sinon.spy(request.rp.Request.prototype, 'init')
 
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -953,7 +953,7 @@ describe('lib/request', () => {
       })
 
       it('recovers from bad headers', function () {
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:9988/foo',
           cookies: false,
           headers: {
@@ -968,7 +968,7 @@ describe('lib/request', () => {
       })
 
       it('handles weird content in the body just fine', function () {
-        return request.sendPromise({}, this.fn, {
+        return request.sendPromise({}, this.fn, () => {}, {
           url: 'http://localhost:9988/foo',
           cookies: false,
           json: true,
