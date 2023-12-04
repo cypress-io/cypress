@@ -87,6 +87,15 @@
       };
       document.body.appendChild(loginWithApprovalBtn);
 
+      // Add Login button that redirects to the idp
+      const loginWithApprovalHttpsBtn = document.createElement("button");
+      loginWithApprovalHttpsBtn.innerHTML = "Login With Approval"
+      loginWithApprovalHttpsBtn.dataset.cy = "login-with-approval-https"
+      loginWithApprovalHttpsBtn.onclick = function () {
+        window.location.href = `https://www.foobar.com:3502/fixtures/auth/approval.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginWithApprovalHttpsBtn);
+
     } else {
       const token = JSON.parse(cypressAuthToken)
       // If the token exists, hooray, give them a logout button to destroy the token and refresh.
