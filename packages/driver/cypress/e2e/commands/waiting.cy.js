@@ -935,7 +935,7 @@ describe('src/cy/commands/waiting', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
           if (log.get('name') === 'wait') {
             this.lastWaitLog = log
@@ -947,12 +947,39 @@ describe('src/cy/commands/waiting', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging for explicit wait time', () => {
         cy.wait(10, { log: false }).then(function () {
-          const { lastLog } = this
+          const lastLog = this.lastLog
 
-          expect(lastLog).to.be.undefined
+          expect(lastLog.get('name')).to.eq('wait')
+          expect(lastLog.get('hidden')).to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('wait', { isHidden: true })
+      })
+
+      it('can turn off logging for wait for xhr', () => {
+        const response = { foo: 'foo' }
+
+        cy
+        .intercept('GET', /.*/, response).as('fetch')
+        .window().then((win) => {
+          xhrGet(win, '/foo')
+
+          return null
+        })
+        .wait('@fetch.response', { log: false })
+        .then(function (xhr) {
+          expect(xhr.response.body).to.deep.eq(response)
+
+          expect(this.lastWaitLog).to.be.ok
+          expect(this.lastWaitLog.get('name')).to.eq('wait')
+          expect(this.lastWaitLog.get('hidden')).to.be.true
+          expect(this.lastWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
       describe('number argument', () => {
@@ -1099,12 +1126,6 @@ describe('src/cy/commands/waiting', () => {
           })
           .wait(['@getFoo', '@getBar'])
         })
-      })
-
-      describe('function argument errors', () => {
-        it('.log')
-
-        it('#consoleProps')
       })
 
       describe('alias argument', () => {

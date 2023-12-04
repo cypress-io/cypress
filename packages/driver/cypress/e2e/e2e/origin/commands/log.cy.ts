@@ -7,7 +7,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
   beforeEach(() => {
     logs = []
 
-    cy.on('log:added', (attrs, log) => {
+    cy.on('_log:added', (attrs, log) => {
       logs.push(log)
     })
 
@@ -16,7 +16,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
   })
 
   it('logs in primary and secondary origins', () => {
-    cy.origin<string>('http://www.foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in cy.origin') {
@@ -65,5 +65,21 @@ context('cy.origin log', { browser: '!webkit' }, () => {
       expect(logs[6].get('id')).to.not.equal(lastTestLogId)
       assertLogLength(logs, 12)
     })
+  })
+
+  it('handles sending log:false logs to primary origin', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.get('#select-maps').select('train', { log: false })
+    }).then((id) => {
+      // Verify the log is also fired in the primary origin.
+      expect(logs[6].get('name'), 'log name').to.eq('get')
+      expect(logs[6].get('hidden'), 'log hidden').to.be.false
+      expect(logs[7].get('name'), 'log name').to.eq('select')
+      expect(logs[7].get('hidden'), 'log hidden').to.be.true
+    })
+
+    cy.getCommandLogInReporter('origin')
+    cy.getCommandLogInReporter('get')
+    cy.getCommandLogInReporter('select', { isHidden: true })
   })
 })

@@ -30,7 +30,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
   beforeEach(() => {
     logs = new Map()
 
-    cy.on('log:changed', (attrs, log) => {
+    cy.on('_log:changed', (attrs, log) => {
       logs.set(attrs.id, log)
     })
 
@@ -152,10 +152,14 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const expectedLogs = findCrossOriginLogs('wait', logs, 'localhost')
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
 
-        expect(expectedLogs).to.be.empty
+        expect(waitLog.name).to.eq('wait')
+        expect(waitLog.hidden).to.be.true
+        expect(waitLog.snapshots.length, 'log snapshot length').to.eq(1)
       })
+
+      cy.getCommandLogInReporter('wait', { isHidden: true })
     })
 
     it('waits for multiple aliases', () => {

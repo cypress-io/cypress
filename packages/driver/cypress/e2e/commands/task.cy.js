@@ -53,7 +53,7 @@ describe('src/cy/commands/task', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -69,8 +69,11 @@ describe('src/cy/commands/task', () => {
             return log.get('name') === 'task'
           })
 
-          expect(logs.length).to.eq(0)
+          expect(logs.length).to.eq(1)
+          expect(logs[0].get('hidden'), 'log hidden').to.be.true
         })
+
+        cy.getCommandLogInReporter(name, { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {

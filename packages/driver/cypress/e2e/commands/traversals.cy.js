@@ -139,11 +139,9 @@ describe('src/cy/commands/traversals', () => {
 
       describe('.log', () => {
         beforeEach(function () {
-          cy.on('log:added', (attrs, log) => {
+          cy.on('_log:added', (attrs, log) => {
             this.lastLog = log
           })
-
-          return null
         })
 
         it('logs immediately before resolving', (done) => {
@@ -214,8 +212,12 @@ describe('src/cy/commands/traversals', () => {
           cy.get('#list')[name](arg, { log: false }).then(function () {
             const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('get')
+            expect(lastLog.get('name'), 'log name').to.eq(name)
+            expect(lastLog.get('hidden'), 'log hidden').to.be.true
+            expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
+
+          cy.getCommandLogInReporter(name, { isHidden: true })
         })
       })
     })
