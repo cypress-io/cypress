@@ -234,14 +234,30 @@ describe('src/cy/commands/actions/focus', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'focus') {
             this.lastLog = log
             this.logs.push(log)
           }
         })
+      })
 
-        return null
+      it('can turn off logging', () => {
+        let lastLog
+
+        cy.get('input:first').focus({ log: false })
+
+        cy.then(function () {
+          lastLog = this.lastLog
+
+          expect(lastLog.get('name'), 'log name').to.eq('focus')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          // expect(lastLog.get('message'), 'log message').to.be.undefined
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          // expect(lastLog.invoke('consoleProps'), 'log consoleProps').to.be.undefined
+        })
+
+        cy.getCommandLogInReporter('focus', { isHidden: true })
       })
 
       it('logs immediately before resolving', () => {
@@ -684,15 +700,31 @@ describe('src/cy/commands/actions/focus', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'blur') {
             this.lastLog = log
 
             return this.logs.push(log)
           }
         })
+      })
 
-        return null
+      it('can turn off logging', () => {
+        let lastLog
+
+        cy.get('input:first').focus().blur({ log: false })
+
+        cy.then(function () {
+          lastLog = this.lastLog
+
+          expect(lastLog.get('name'), 'log name').to.eq('blur')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          // expect(lastLog.get('message'), 'log message').to.be.undefined
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          // expect(lastLog.invoke('consoleProps'), 'log consoleProps').to.be.undefined
+        })
+
+        cy.getCommandLogInReporter('blur', { isHidden: true })
       })
 
       it('logs immediately before resolving', () => {

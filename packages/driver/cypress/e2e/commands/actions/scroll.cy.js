@@ -553,7 +553,7 @@ describe('src/cy/commands/actions/scroll', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
 
           return this.logs.push(log)
@@ -562,12 +562,28 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
+      it('can turn off logging', () => {
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const lastLog = this.lastLog
+
+          expect(lastLog.get('name'), 'log name').to.eq('scrollTo')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('scrollTo', { isHidden: true })
+      })
+
       it('logs out scrollTo', () => {
         cy.get('#scroll-to-both').scrollTo(25).then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('scrollTo')
         })
+
+        cy.getCommandLogInReporter('scrollTo')
       })
 
       it('passes in $el if child command', () => {
@@ -951,7 +967,7 @@ describe('src/cy/commands/actions/scroll', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
 
           return this.logs.push(log)
@@ -960,12 +976,28 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
+      it('can turn off logging', () => {
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const lastLog = this.lastLog
+
+          expect(lastLog.get('name'), 'log name').to.eq('scrollIntoView')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('scrollIntoView', { isHidden: true })
+      })
+
       it('logs out scrollIntoView', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('scrollIntoView')
         })
+
+        cy.getCommandLogInReporter('scrollIntoView')
       })
 
       it('passes in $el', () => {

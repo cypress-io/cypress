@@ -581,7 +581,7 @@ class LogManager {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
 
-  trigger (log, event) {
+  trigger (log, internalEvent: '_log:added' | '_log:changed', publicEvent: 'command:log:added' | 'command:log:changed') {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
       return
@@ -607,15 +607,18 @@ class LogManager {
     // emitted attrs do not match the current toJSON
     if (!logAttrsEqual) {
       log._emittedAttrs = attrs
+      Cypress.emit(internalEvent, attrs, log)
 
-      return Cypress.action(event, attrs, log)
+      if (attrs.hidden) return // do not emit hidden logs to public apis
+
+      return Cypress.action(publicEvent, attrs, log)
     }
   }
 
   triggerLog (log) {
     log._hasInitiallyLogged = true
 
-    return this.trigger(log, 'command:log:added')
+    return this.trigger(log, '_log:added', 'command:log:added')
   }
 
   addToLogs (log) {
@@ -625,7 +628,7 @@ class LogManager {
   }
 
   fireChangeEvent (log) {
-    return this.trigger(log, 'command:log:changed')
+    return this.trigger(log, '_log:changed', 'command:log:changed')
   }
 
   createLogFn (cy, state, config) {

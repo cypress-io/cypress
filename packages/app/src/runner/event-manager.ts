@@ -631,6 +631,8 @@ export class EventManager {
         })
       }
 
+      // remove cross-origin log references from previous tests
+      crossOriginLogs = {}
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
@@ -731,7 +733,7 @@ export class EventManager {
 
     Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
-    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
+    Cypress.primaryOriginCommunicator.on('_log:added', (attrs, log) => {
       // If the mocha run is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
       if (hasMochaRunEnded) return
 
@@ -741,7 +743,7 @@ export class EventManager {
       crossOriginLogs[attrs.id] = Cypress.log(attrs)
     })
 
-    Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
+    Cypress.primaryOriginCommunicator.on('_log:changed', (attrs) => {
       // Retrieve the referenced log and update it.
       const log = crossOriginLogs[attrs.id]
 

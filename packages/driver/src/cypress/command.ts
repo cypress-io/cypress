@@ -80,7 +80,7 @@ export class $Command {
 
     if (debug.enabled) return
 
-    this.set('logs', [])
+    // this.set('logs', [])
   }
 
   log (log) {

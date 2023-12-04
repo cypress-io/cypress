@@ -1,4 +1,9 @@
-const attachCypressProtocolInfo = (info) => {
+type ProtocolInfo = {
+  type: 'cy:protocol-snapshot' | 'log:added' | 'log:changed' | 'page:loading'| 'test:before:run:async' | 'test:before:after:run:async' | 'test:after:run:async' | 'url:changed' | 'viewport:changed'
+  timestamp: DOMHighResTimeStamp
+}
+
+const attachCypressProtocolInfo = (info: ProtocolInfo) => {
   let cypressProtocolElement: HTMLElement | null = document.getElementById('__cypress-protocol')
 
   // If element does not exist, create it
@@ -20,7 +25,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     })
   })
 
-  Cypress.on('log:added', (attributes) => {
+  Cypress.on('_log:added', (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
@@ -36,7 +41,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     Cypress.backend('protocol:command:log:added', protocolProps)
   })
 
-  Cypress.on('log:changed', (attributes) => {
+  Cypress.on('_log:changed', (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
