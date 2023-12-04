@@ -3,7 +3,7 @@ describe('basic login', { browser: '!webkit' }, () => {
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
-      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+      cy.get('[data-cy="login-https-idp"]').click() // Takes you to idp.com
       cy.origin('https://www.idp.com:3502', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
@@ -36,7 +36,7 @@ describe('basic login', { browser: '!webkit' }, () => {
 
     it('visits foobar first', () => {
       cy.visit('https://www.foobar.com:3502/fixtures/auth/index.html') // Establishes primary origin
-      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+      cy.get('[data-cy="login-https-idp"]').click() // Takes you to idp.com
       cy.origin('https://www.idp.com:3502', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()

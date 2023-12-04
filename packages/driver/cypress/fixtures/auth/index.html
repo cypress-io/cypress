@@ -56,9 +56,18 @@
       loginIDPBtn.innerHTML = "Login IDP"
       loginIDPBtn.dataset.cy = "login-idp"
       loginIDPBtn.onclick = function () {
-        window.location.href = `https://www.idp.com:3502/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
       };
       document.body.appendChild(loginIDPBtn);
+
+      // Add Login button that redirects to the https idp
+      const loginHttpsIDPBtn = document.createElement("button");
+      loginHttpsIDPBtn.innerHTML = "Login IDP"
+      loginHttpsIDPBtn.dataset.cy = "login-https-idp"
+      loginHttpsIDPBtn.onclick = function () {
+        window.location.href = `https://www.idp.com:3502/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginHttpsIDPBtn);
 
       // Add Login button that redirects to the idp
       const loginFoobarBtn = document.createElement("button");
