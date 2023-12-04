@@ -782,11 +782,9 @@ describe('src/cy/commands/connectors', () => {
               },
             }
 
-            cy.on('log:added', (attrs, log) => {
+            cy.on('_log:added', (attrs, log) => {
               this.lastLog = log
             })
-
-            return null
           })
 
           it('logs obj as a function', function () {
@@ -820,14 +818,15 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('can be disabled', function () {
-            cy.noop(this.obj).invoke({ log: true }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog.invoke('consoleProps').props).to.have.property('Function', '.sum(1, 2)')
-              this.lastLog = undefined
+            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
+              const { lastLog } = this
+
+              expect(lastLog.get('name'), 'log name').to.eq('invoke')
+              expect(lastLog.get('hidden'), 'log hidden').to.be.true
+              expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
             })
 
-            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog).to.be.undefined
-            })
+            cy.getCommandLogInReporter('invoke', { isHidden: true })
           })
         })
       })
@@ -859,14 +858,9 @@ describe('src/cy/commands/connectors', () => {
             },
           }
 
-          this.logs = []
-
-          cy.on('log:added', (attrs, log) => {
+          cy.on('_log:added', (attrs, log) => {
             this.lastLog = log
-            this.logs?.push(log)
           })
-
-          return null
         })
 
         it('logs $el if subject is element', () => {
@@ -1345,14 +1339,9 @@ describe('src/cy/commands/connectors', () => {
 
           this.obj.baz.lorem = 'ipsum'
 
-          this.logs = []
-
-          cy.on('log:added', (attrs, log) => {
+          cy.on('_log:added', (attrs, log) => {
             this.lastLog = log
-            this.logs?.push(log)
           })
-
-          return null
         })
 
         it('logs immediately before resolving', (done) => {
@@ -1416,14 +1405,15 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('can be disabled', function () {
-          cy.noop(this.obj).its('num', { log: true }).then(function () {
-            expect(this.lastLog.invoke('consoleProps').props).to.have.property('Property', '.num')
-            this.lastLog = undefined
+          cy.noop(this.obj).its('num', { log: false }).then(function () {
+            const { lastLog } = this
+
+            expect(lastLog.get('name'), 'log name').to.eq('its')
+            expect(lastLog.get('hidden'), 'log hidden').to.be.true
+            expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
 
-          cy.noop(this.obj).its('num', { log: false }).then(function () {
-            expect(this.lastLog).to.be.undefined
-          })
+          cy.getCommandLogInReporter('its', { isHidden: true })
         })
       })
 

@@ -53,7 +53,7 @@ describe('src/cy/commands/exec', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -65,12 +65,14 @@ describe('src/cy/commands/exec', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.exec('ls', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'exec'
-          })
+          const { lastLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog.get('name'), 'log name').to.eq('exec')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('exec', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {

@@ -256,51 +256,50 @@ export default (Commands, Cypress, cy, state, config) => {
       // to the bare minimum to send to lib/request
       const requestOpts = _.pick(options, REQUEST_PROPS)
 
-      if (options.log) {
-        options._log = Cypress.log({
-          message: '',
-          timeout: options.timeout,
-          consoleProps () {
-            const resp = options.response || {}
-            let rr = resp.allRequestResponses || []
+      options._log = Cypress.log({
+        message: '',
+        hidden: !options.log,
+        timeout: options.timeout,
+        consoleProps () {
+          const resp = options.response || {}
+          let rr = resp.allRequestResponses || []
 
-            const obj = {}
+          const obj = {}
 
-            const word = $utils.plural(rr.length, 'Requests', 'Request')
+          const word = $utils.plural(rr.length, 'Requests', 'Request')
 
-            // if we have only a single request/response then
-            // flatten this to an object, else keep as array
-            rr = rr.length === 1 ? rr[0] : rr
+          // if we have only a single request/response then
+          // flatten this to an object, else keep as array
+          rr = rr.length === 1 ? rr[0] : rr
 
-            obj[word] = rr
-            obj['Yielded'] = _.pick(resp, 'status', 'duration', 'body', 'headers')
+          obj[word] = rr
+          obj['Yielded'] = _.pick(resp, 'status', 'duration', 'body', 'headers')
 
-            return obj
-          },
+          return obj
+        },
 
-          renderProps () {
-            let indicator
-            let status
-            const r = options.response
+        renderProps () {
+          let indicator
+          let status
+          const r = options.response
 
-            if (r) {
-              status = r.status
-            } else {
-              indicator = 'pending'
-              status = '---'
-            }
+          if (r) {
+            status = r.status
+          } else {
+            indicator = 'pending'
+            status = '---'
+          }
 
-            if (!indicator) {
-              indicator = options.response?.isOkStatusCode ? 'successful' : 'bad'
-            }
+          if (!indicator) {
+            indicator = options.response?.isOkStatusCode ? 'successful' : 'bad'
+          }
 
-            return {
-              message: `${options.method} ${status} ${getDisplayUrl(options.url)}`,
-              indicator,
-            }
-          },
-        })
-      }
+          return {
+            message: `${options.method} ${status} ${getDisplayUrl(options.url)}`,
+            indicator,
+          }
+        },
+      })
 
       // need to remove the current timeout
       // because we're handling timeouts ourselves

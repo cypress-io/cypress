@@ -636,7 +636,7 @@ describe('src/cy/commands/request', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'request') {
             this.lastLog = log
           }
@@ -655,8 +655,14 @@ describe('src/cy/commands/request', () => {
           log: false,
         })
         .then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.eq('request')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('request', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

@@ -138,7 +138,7 @@ describe('src/cy/commands/files', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -150,12 +150,14 @@ describe('src/cy/commands/files', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.readFile('foo.json', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'readFile'
-          })
+          const { lastLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog.get('name'), 'log name').to.eq('readFile')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('readFile', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {
@@ -593,24 +595,24 @@ describe('src/cy/commands/files', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
-
-        return null
       })
 
       it('can turn off logging', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'writeFile'
-          })
+          const { lastLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog.get('name'), 'log name').to.eq('writeFile')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('writeFile', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {
