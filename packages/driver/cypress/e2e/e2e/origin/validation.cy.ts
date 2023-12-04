@@ -189,10 +189,10 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('finds the right spec bridge with a subdomain', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.window().then((win) => {
-        win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+        win.location.href = `https://baz.foobar.com:3502/fixtures/auth/idp.html?redirect=${encodeURIComponent('http://localhost:3500/fixtures/auth/index.html')}`
       })
 
-      cy.origin('http://baz.foobar.com:3500', () => {
+      cy.origin('https://baz.foobar.com:3502', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
