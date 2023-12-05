@@ -14,7 +14,7 @@ _Released 12/5/2023_
 
 **Misc:**
 
-- Artifact upload duration is now reported to Cypress Cloud. Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418)
+- Artifact upload duration is now reported to Cypress Cloud. Fixes [#28238](https://github.com/cypress-io/cypress/issues/28238). Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418).
 
 ## 13.6.0
 
