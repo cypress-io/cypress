@@ -553,7 +553,7 @@ describe('src/cy/commands/actions/scroll', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
           return this.logs.push(log)
@@ -562,15 +562,21 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
 
         cy.then(function () {
-          const lastLog = this.lastLog
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('scrollTo')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollTo')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('scrollTo', { isHidden: true })
@@ -967,7 +973,7 @@ describe('src/cy/commands/actions/scroll', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
           return this.logs.push(log)
@@ -976,15 +982,21 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
 
         cy.then(function () {
-          const lastLog = this.lastLog
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('scrollIntoView')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollIntoView')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('scrollIntoView', { isHidden: true })

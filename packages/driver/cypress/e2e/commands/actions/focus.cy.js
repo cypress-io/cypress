@@ -234,7 +234,7 @@ describe('src/cy/commands/actions/focus', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'focus') {
             this.lastLog = log
             this.logs.push(log)
@@ -242,19 +242,21 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('can turn off logging', () => {
-        let lastLog
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
         cy.get('input:first').focus({ log: false })
 
         cy.then(function () {
-          lastLog = this.lastLog
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('focus')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          // expect(lastLog.get('message'), 'log message').to.be.undefined
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
-          // expect(lastLog.invoke('consoleProps'), 'log consoleProps').to.be.undefined
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('focus')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('focus', { isHidden: true })
@@ -700,7 +702,7 @@ describe('src/cy/commands/actions/focus', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'blur') {
             this.lastLog = log
 
@@ -709,18 +711,22 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('can turn off logging', () => {
-        let lastLog
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
         cy.get('input:first').focus().blur({ log: false })
 
         cy.then(function () {
-          lastLog = this.lastLog
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('blur')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('blur')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           // expect(lastLog.get('message'), 'log message').to.be.undefined
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           // expect(lastLog.invoke('consoleProps'), 'log consoleProps').to.be.undefined
         })
 

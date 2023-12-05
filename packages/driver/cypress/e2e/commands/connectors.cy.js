@@ -782,7 +782,7 @@ describe('src/cy/commands/connectors', () => {
               },
             }
 
-            cy.on('_log:added', (attrs, log) => {
+            cy.on('log:added', (attrs, log) => {
               this.lastLog = log
             })
           })
@@ -817,13 +817,19 @@ describe('src/cy/commands/connectors', () => {
             })
           })
 
-          it('can be disabled', function () {
-            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
-              const { lastLog } = this
+          it('can turn off logging', function () {
+            cy.on('_log:added', (attrs, log) => {
+              this.hiddenLog = log
+            })
 
-              expect(lastLog.get('name'), 'log name').to.eq('invoke')
-              expect(lastLog.get('hidden'), 'log hidden').to.be.true
-              expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
+              const { lastLog, hiddenLog } = this
+
+              expect(lastLog).to.be.undefined
+
+              expect(hiddenLog.get('name'), 'log name').to.eq('invoke')
+              expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+              expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
             })
 
             cy.getCommandLogInReporter('invoke', { isHidden: true })
@@ -1339,7 +1345,7 @@ describe('src/cy/commands/connectors', () => {
 
           this.obj.baz.lorem = 'ipsum'
 
-          cy.on('_log:added', (attrs, log) => {
+          cy.on('log:added', (attrs, log) => {
             this.lastLog = log
           })
         })
@@ -1404,13 +1410,19 @@ describe('src/cy/commands/connectors', () => {
           })
         })
 
-        it('can be disabled', function () {
-          cy.noop(this.obj).its('num', { log: false }).then(function () {
-            const { lastLog } = this
+        it('can turn off logging', function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
 
-            expect(lastLog.get('name'), 'log name').to.eq('its')
-            expect(lastLog.get('hidden'), 'log hidden').to.be.true
-            expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          cy.noop(this.obj).its('num', { log: false }).then(function () {
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog).to.be.undefined
+
+            expect(hiddenLog.get('name'), 'log name').to.eq('its')
+            expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
 
           cy.getCommandLogInReporter('its', { isHidden: true })

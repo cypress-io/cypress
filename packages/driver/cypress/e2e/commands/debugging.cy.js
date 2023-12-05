@@ -36,7 +36,7 @@ describe('src/cy/commands/debugging', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'debug') {
             this.lastLog = log
           }
@@ -45,15 +45,21 @@ describe('src/cy/commands/debugging', () => {
         return null
       })
 
-      it('can turn off logging', () => {
-        cy
-        .wrap([], { log: false })
-        .debug({ log: false }).then(function () {
-          const { lastLog } = this
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'debug') {
+            this.hiddenLog = log
+          }
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('debug')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.wrap([], { log: false })
+        .debug({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('debug')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('debug', { isHidden: true })
