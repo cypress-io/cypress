@@ -333,6 +333,24 @@ describe('src/cy/commands/querying', () => {
         return null
       })
 
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body', { log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
+        })
+
+        cy.getCommandLogInReporter('get', { isHidden: true })
+      })
+
       it('logs elements length', () => {
         let buttons = cy.$$('button')
 
@@ -517,6 +535,29 @@ describe('src/cy/commands/querying', () => {
         cy.get('body').as('b').get('@b').then(($body) => {
           expect($body.get(0)).to.eq(body.get(0))
         })
+      })
+
+      it('can get alias with logging off', () => {
+        const logs = []
+        let hiddenLog
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.on('_log:added', (attrs, log) => {
+          hiddenLog = log
+        })
+
+        cy.get('body', { log: false }).as('b').get('@b', { log: false })
+        .then(function () {
+          expect(logs.length).to.eq(0)
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
+        })
+
+        cy.getCommandLogInReporter('get', { isHidden: true })
       })
 
       it('re-queries the dom if any element in an alias isnt in the document', () => {

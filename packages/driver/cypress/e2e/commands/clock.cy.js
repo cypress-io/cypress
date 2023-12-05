@@ -353,15 +353,13 @@ describe('src/cy/commands/clock', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('_log:added', (attrs, log) => {
           const name = log.get('name')
 
           if (['clock', 'tick', 'restore'].includes(name)) {
             return this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs when created', function () {
@@ -404,8 +402,14 @@ describe('src/cy/commands/clock', () => {
           clock.tick()
           clock.restore()
 
-          expect(this.logs.length).to.equal(0)
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.eq('clock')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
+
+        cy.getCommandLogInReporter('clock', { isHidden: true })
       })
 
       it('only logs the first call', function () {
@@ -464,13 +468,11 @@ describe('src/cy/commands/clock', () => {
     beforeEach(function () {
       this.logs = []
 
-      cy.on('log:added', (attrs, log) => {
+      cy.on('_log:added', (attrs, log) => {
         if (log.get('name') === 'tick') {
           this.logs.push(log)
         }
       })
-
-      return null
     })
 
     it('moves time ahead and triggers callbacks', function (done) {
@@ -556,8 +558,14 @@ describe('src/cy/commands/clock', () => {
         .clock()
         .tick(10, { log: false })
         .then(function () {
-          expect(this.logs[0]).to.be.undefined
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.eq('tick')
+          expect(lastLog.get('hidden'), 'log hidden').to.be.true
+          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
+
+        cy.getCommandLogInReporter('tick', { isHidden: true })
       })
     })
   })

@@ -50,17 +50,21 @@ describe('src/cy/commands/querying', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
-
-        return null
       })
 
-      it.only('can turn off logging', () => {
+      it('can turn off logging', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.root({ log: false })
         .then(function () {
-          const rootLog = this.lastLog
+          const { lastLog, hiddenLog } = this
 
-          expect(rootLog.get('name')).to.eq('root')
-          expect(rootLog.get('hidden')).to.be.true
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('root')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
 
         cy.getCommandLogInReporter('root', { isHidden: true })

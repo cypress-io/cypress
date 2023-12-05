@@ -194,10 +194,21 @@ describe('src/cy/commands/querying/within', () => {
         return null
       })
 
-      it('can silence logging', () => {
-        cy.get('div:first').within({ log: false }, () => {}).then(function () {
-          assertLogLength(this.logs, 0)
+      it('can silence logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
         })
+
+        cy.get('div:first').within({ log: false }, () => {}).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('within')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

@@ -581,7 +581,7 @@ class LogManager {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
 
-  trigger (log, internalEvent: '_log:added' | '_log:changed', publicEvent: 'command:log:added' | 'command:log:changed') {
+  trigger (log, publicEvent: 'command:log:added' | 'command:log:changed') {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
       return
@@ -607,9 +607,6 @@ class LogManager {
     // emitted attrs do not match the current toJSON
     if (!logAttrsEqual) {
       log._emittedAttrs = attrs
-      Cypress.emit(internalEvent, attrs, log)
-
-      if (attrs.hidden) return // do not emit hidden logs to public apis
 
       return Cypress.action(publicEvent, attrs, log)
     }
@@ -618,7 +615,7 @@ class LogManager {
   triggerLog (log) {
     log._hasInitiallyLogged = true
 
-    return this.trigger(log, '_log:added', 'command:log:added')
+    return this.trigger(log, 'command:log:added')
   }
 
   addToLogs (log) {
@@ -628,7 +625,7 @@ class LogManager {
   }
 
   fireChangeEvent (log) {
-    return this.trigger(log, '_log:changed', 'command:log:changed')
+    return this.trigger(log, 'command:log:changed')
   }
 
   createLogFn (cy, state, config) {
@@ -637,13 +634,19 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
+      // if (!config('protocolEnabled') && options.hidden !== undefined && options.hidden) {
+      // //   console.log('return')
+
+      //   return
+      // }
+
       const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent, options)
 
       log.set(options)
 
       const onBeforeLog = state('onBeforeLog')
 
-      // dont trigger log if this function
+      // don't trigger log if this function
       // explicitly returns false
       if (_.isFunction(onBeforeLog)) {
         if (onBeforeLog.call(cy, log) === false) {

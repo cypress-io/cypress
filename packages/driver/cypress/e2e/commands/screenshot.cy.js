@@ -1125,7 +1125,7 @@ describe('src/cy/commands/screenshot', () => {
           }
         })
 
-        cy.screenshot({ log: false }).then(function () {
+        cy.screenshot('bar', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined

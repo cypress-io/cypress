@@ -69,9 +69,6 @@ declare namespace Cypress {
     // the JQuery element for the command. This will highlight the command
     // in the main window when debugging
     $el?: JQuery | string
-    // whether or not to show the log in the Reporter UI or only
-    // store the log details on the command and log manager
-    emitOnly?: boolean
     end?: boolean
     ended?: boolean
     err?: Error

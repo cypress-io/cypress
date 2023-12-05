@@ -227,13 +227,23 @@ describe('src/cy/commands/querying - shadow dom', () => {
         })
       })
 
-      it('can be turned off', () => {
+      it('can be turned off', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.get('#shadow-element-1').shadow({ log: false })
         .then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
           expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name')).to.eq('shadow')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
+
+        cy.getCommandLogInReporter('shadow', { isHidden: true })
       })
     })
   })

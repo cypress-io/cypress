@@ -59,7 +59,6 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
 
-        expect(this.hidden)
         expect(hiddenLog.get('name')).to.eq('getAllLocalStorage')
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
@@ -132,7 +131,6 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
 
-        expect(this.hidden)
         expect(hiddenLog.get('name')).to.eq('clearAllLocalStorage')
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
@@ -190,7 +188,6 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
 
-        expect(this.hidden)
         expect(hiddenLog.get('name')).to.eq('getAllSessionStorage')
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
