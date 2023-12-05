@@ -53,7 +53,7 @@ describe('src/cy/commands/task', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -63,17 +63,21 @@ describe('src/cy/commands/task', () => {
         return null
       })
 
-      it('can turn off logging', () => {
-        cy.task('foo', null, { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'task'
-          })
-
-          expect(logs.length).to.eq(1)
-          expect(logs[0].get('hidden'), 'log hidden').to.be.true
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
         })
 
-        cy.getCommandLogInReporter(name, { isHidden: true })
+        cy.task('foo', null, { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('task')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('task', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {

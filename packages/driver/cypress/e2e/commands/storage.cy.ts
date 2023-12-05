@@ -6,7 +6,7 @@ describe('src/cy/commands/storage', () => {
   beforeEach(() => {
     logs = []
 
-    cy.on('_log:added', (attrs, log: Cypress.Log) => {
+    cy.on('log:added', (attrs, log: Cypress.Log) => {
       logs.push(log)
     })
   })
@@ -48,12 +48,21 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('getAllLocalStorage')
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging', function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.getAllLocalStorage({ log: false }).then(() => {
-        assertLogLength(logs, 2)
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
-        expect(logs[1].get('name')).to.eq('getAllLocalStorage')
-        expect(logs[1].get('hidden')).to.be.true
+
+        expect(this.hidden)
+        expect(hiddenLog.get('name')).to.eq('getAllLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
 
       cy.getCommandLogInReporter('getAllLocalStorage', { isHidden: true })
@@ -112,12 +121,21 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('clearAllLocalStorage')
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging', function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.clearAllLocalStorage({ log: false }).then(() => {
-        assertLogLength(logs, 2)
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
-        expect(logs[1].get('name')).to.eq('clearAllLocalStorage')
-        expect(logs[1].get('hidden')).to.be.true
+
+        expect(this.hidden)
+        expect(hiddenLog.get('name')).to.eq('clearAllLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
 
       cy.getCommandLogInReporter('clearAllLocalStorage', { isHidden: true })
@@ -161,12 +179,21 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('getAllSessionStorage')
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging', function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.getAllSessionStorage({ log: false }).then(() => {
-        assertLogLength(logs, 2)
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
-        expect(logs[1].get('name')).to.eq('getAllSessionStorage')
-        expect(logs[1].get('hidden')).to.be.true
+
+        expect(this.hidden)
+        expect(hiddenLog.get('name')).to.eq('getAllSessionStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
 
       cy.getCommandLogInReporter('getAllSessionStorage', { isHidden: true })
@@ -225,15 +252,23 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('clearAllSessionStorage')
     })
 
-    it('does not log when log: false', () => {
-      cy.clearAllSessionStorage({ log: false }).then(() => {
-        assertLogLength(logs, 2)
-        expect(logs[0].get('name')).to.eq('visit')
-        expect(logs[1].get('name')).to.eq('clearAllSessionStorage')
-        expect(logs[1].get('hidden')).to.be.true
+    it('can turn off logging', function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
       })
 
-      cy.getCommandLogInReporter('clearAllSessionStorage', { isHidden: true })
+      cy.clearLocalStorage('foo', { log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog.get('name')).to.eq('clearLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+      })
+
+      cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
     })
   })
 
@@ -303,8 +338,6 @@ describe('src/cy/commands/storage', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
-
-        return null
       })
 
       it('ends immediately', () => {
@@ -328,20 +361,24 @@ describe('src/cy/commands/storage', () => {
 
     describe('without log', () => {
       beforeEach(function () {
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
 
-        return null
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
       })
 
       it('log is disabled', () => {
         cy.clearLocalStorage('foo', { log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('clearLocalStorage')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearLocalStorage')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
@@ -349,11 +386,13 @@ describe('src/cy/commands/storage', () => {
 
       it('log is disabled without key', () => {
         cy.clearLocalStorage({ log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('clearLocalStorage')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearLocalStorage')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })

@@ -1109,7 +1109,7 @@ describe('src/cy/commands/screenshot', () => {
       beforeEach(function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'screenshot') {
             this.lastLog = log
           }
@@ -1118,13 +1118,21 @@ describe('src/cy/commands/screenshot', () => {
         return null
       })
 
-      it('can turn off logging', () => {
-        cy.screenshot('bar', { log: false }).then(function () {
-          const { lastLog } = this
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'screenshot') {
+            this.hiddenLog = log
+          }
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('screenshot')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.screenshot({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('screenshot')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('screenshot', { isHidden: true })

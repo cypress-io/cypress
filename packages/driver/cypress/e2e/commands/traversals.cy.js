@@ -139,7 +139,7 @@ describe('src/cy/commands/traversals', () => {
 
       describe('.log', () => {
         beforeEach(function () {
-          cy.on('_log:added', (attrs, log) => {
+          cy.on('log:added', (attrs, log) => {
             this.lastLog = log
           })
         })
@@ -208,13 +208,18 @@ describe('src/cy/commands/traversals', () => {
           })
         })
 
-        it('can be turned off', () => {
-          cy.get('#list')[name](arg, { log: false }).then(function () {
-            const { lastLog } = this
+        it('can be turned off', function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
 
-            expect(lastLog.get('name'), 'log name').to.eq(name)
-            expect(lastLog.get('hidden'), 'log hidden').to.be.true
-            expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          cy.get('#list')[name](arg, { log: false }).then(function () {
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog.get('name')).to.eq('get')
+            expect(hiddenLog.get('name'), 'log name').to.eq(name)
+            expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
 
           cy.getCommandLogInReporter(name, { isHidden: true })

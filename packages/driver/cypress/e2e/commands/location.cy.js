@@ -113,7 +113,7 @@ describe('src/cy/commands/location', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -154,13 +154,18 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
-        cy.url({ log: false }).then(function () {
-          const { lastLog } = this
+      it('does not emit when {log: false}', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('url')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.url({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('url')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('url', { isHidden: true })
@@ -272,7 +277,7 @@ describe('src/cy/commands/location', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -313,13 +318,18 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
-        cy.hash({ log: false }).then(function () {
-          const { lastLog } = this
+      it('does not emit when {log: false}', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('hash')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.hash({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('hash')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('hash', { isHidden: true })
@@ -473,7 +483,7 @@ describe('src/cy/commands/location', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -499,25 +509,35 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false} as options', () => {
-        cy.location('href', { log: false }).then(function () {
-          const { lastLog } = this
+      it('does not emit when {log: false} as options', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('location')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.location('href', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('location')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('location', { isHidden: true })
       })
 
-      it('does not emit when {log: false} as key', () => {
-        cy.location({ log: false }).then(function () {
-          const { lastLog } = this
+      it('does not emit when {log: false} as key', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(lastLog.get('name'), 'log name').to.eq('location')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.location({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('location')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('location', { isHidden: true })
