@@ -1,6 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.1
 
+_Released 12/19/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Release cy.origin logs between tests. Fixed in [#28465](https://github.com/cypress-io/cypress/issues/28465).
+
+## 13.6.1
+
 _Released 12/5/2023_
 
 **Bugfixes:**
