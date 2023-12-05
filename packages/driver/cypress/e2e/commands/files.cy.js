@@ -138,23 +138,26 @@ describe('src/cy/commands/files', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.readFile('foo.json', { log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('readFile')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('readFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('readFile', { isHidden: true })
@@ -595,21 +598,26 @@ describe('src/cy/commands/files', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('writeFile')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('writeFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('writeFile', { isHidden: true })

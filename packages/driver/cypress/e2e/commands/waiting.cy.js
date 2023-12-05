@@ -935,7 +935,7 @@ describe('src/cy/commands/waiting', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           if (log.get('name') === 'wait') {
             this.lastWaitLog = log
@@ -947,19 +947,30 @@ describe('src/cy/commands/waiting', () => {
         return null
       })
 
-      it('can turn off logging for explicit wait time', () => {
-        cy.wait(10, { log: false }).then(function () {
-          const lastLog = this.lastLog
+      it('can turn off logging for explicit wait time', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(lastLog.get('name')).to.eq('wait')
-          expect(lastLog.get('hidden')).to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.wait(10, { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('wait')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
-      it('can turn off logging for wait for xhr', () => {
+      it('can turn off logging for wait for xhr', function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'wait') {
+            this.hiddenWaitLog = log
+          }
+        })
+
         const response = { foo: 'foo' }
 
         cy
@@ -971,12 +982,15 @@ describe('src/cy/commands/waiting', () => {
         })
         .wait('@fetch.response', { log: false })
         .then(function (xhr) {
+          const { lastWaitLog, hiddenWaitLog } = this
+
           expect(xhr.response.body).to.deep.eq(response)
 
-          expect(this.lastWaitLog).to.be.ok
-          expect(this.lastWaitLog.get('name')).to.eq('wait')
-          expect(this.lastWaitLog.get('hidden')).to.be.true
-          expect(this.lastWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastWaitLog).to.be.undefined
+          expect(hiddenWaitLog).to.be.ok
+          expect(hiddenWaitLog.get('name')).to.eq('wait')
+          expect(hiddenWaitLog.get('hidden')).to.be.true
+          expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('wait', { isHidden: true })

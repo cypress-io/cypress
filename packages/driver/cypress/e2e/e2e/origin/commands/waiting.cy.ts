@@ -142,7 +142,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
     })
 
-    it('doesn\'t log when log: false', () => {
+    it('can turn off logging', () => {
       cy.intercept('/foo', {}).as('foo')
 
       cy.origin('http://www.foobar.com:3500', () => {

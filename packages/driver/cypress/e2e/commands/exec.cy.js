@@ -53,7 +53,7 @@ describe('src/cy/commands/exec', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -61,15 +61,20 @@ describe('src/cy/commands/exec', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.exec('ls', { log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('exec')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('exec')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('exec', { isHidden: true })
