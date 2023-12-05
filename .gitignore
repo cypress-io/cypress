@@ -92,10 +92,6 @@ system-tests/lib/fixtureDirs.ts
 /packages/frontend-shared/src/generated
 /packages/frontend-shared/cypress/e2e/support/e2eProjectDirs.ts
 
-# from npm/create-cypress-tests
-/npm/create-cypress-tests/initial-template
-/npm/create-cypress-tests/src/test-output
-
 # Building app binary
 scripts/support
 binary-url.json
