@@ -631,6 +631,8 @@ export class EventManager {
         })
       }
 
+      // remove cross-origin log references from previous tests
+      crossOriginLogs = {}
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
