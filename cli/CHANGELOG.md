@@ -5,7 +5,7 @@ _Released 12/19/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Release cy.origin logs between tests. Fixed in [#28465](https://github.com/cypress-io/cypress/issues/28465).
+- Clean up the cy.origin() logs references between tests to reduce memory consumption. Fixed in [#28465](https://github.com/cypress-io/cypress/issues/28465).
 
 ## 13.6.1
 

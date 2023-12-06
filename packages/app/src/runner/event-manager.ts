@@ -31,7 +31,6 @@ let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
 }>) => {
   return undefined
 }
-let crossOriginLogs: {[key: string]: Cypress.Log} = {}
 let hasMochaRunEnded: boolean = false
 
 interface AddGlobalListenerOptions {
@@ -631,8 +630,6 @@ export class EventManager {
         })
       }
 
-      // remove cross-origin log references from previous tests
-      crossOriginLogs = {}
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
@@ -739,16 +736,17 @@ export class EventManager {
 
       // Create a new local log representation of the cross origin log.
       // It will be attached to the current command.
-      // We also keep a reference to it to update it in the future.
-      crossOriginLogs[attrs.id] = Cypress.log(attrs)
+      Cypress.log(attrs)
     })
 
     Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
       // Retrieve the referenced log and update it.
-      const log = crossOriginLogs[attrs.id]
+      const logs = Cypress.cy.queue.logs({ id: attrs.id })
 
+      if (logs.length) {
       // this will trigger a log changed event for the log itself.
-      log?.set(attrs)
+        logs[0]?.set(attrs)
+      }
     })
 
     // This message comes from the AUT, not the spec bridge. This is called in
@@ -860,8 +858,6 @@ export class EventManager {
     Cypress.stop()
     // Clean up the primary communicator to prevent possible memory leaks / dangling references before the Cypress instance is destroyed.
     Cypress.primaryOriginCommunicator.removeAllListeners()
-    // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
-    crossOriginLogs = {}
 
     this.studioStore.setInactive()
   }
