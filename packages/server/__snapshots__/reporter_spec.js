@@ -6,7 +6,7 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
     "pending": 1,
     "skipped": 0,
     "failures": 1,
-    "wallClockDuration": 0,
+    "wallClockDuration": 0
   },
   "reporter": "foo",
   "reporterStats": {
@@ -14,7 +14,7 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
     "tests": 1,
     "passes": 0,
     "pending": 0,
-    "failures": 1,
+    "failures": 1
   },
   "hooks": [],
   "tests": [
@@ -23,26 +23,26 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       "title": [
         "TodoMVC - React",
         "When page is initially opened",
-        "should focus on the todo input field",
+        "should focus on the todo input field"
       ],
       "state": "failed",
       "body": "",
-      "displayError": "at foo:1:1\\nat bar:1:1\\nat baz:1:1",
+      "displayError": "at foo:1:1\nat bar:1:1\nat baz:1:1",
       "attempts": [
         {
           "state": "failed",
           "error": {
             "message": "foo",
-            "stack": "at foo:1:1\\nat bar:1:1\\nat baz:1:1",
+            "stack": "at foo:1:1\nat bar:1:1\nat baz:1:1",
             "codeFrame": {
               "line": 7,
               "column": 8,
               "originalFile": "cypress/integration/spec.js",
               "relativeFile": "cypress/integration/spec.js",
               "absoluteFile": "/path/to/cypress/integration/spec.js",
-              "frame": "   5 | \\n   6 |   it('fails', () => {\\n>  7 |     cy.get('nope', { timeout: 1 })\\n     |        ^\\n   8 |   })\\n   9 | })\\n  10 | ",
-              "language": "js",
-            },
+              "frame": "   5 | \n   6 |   it('fails', () => {\n>  7 |     cy.get('nope', { timeout: 1 })\n     |        ^\n   8 |   })\n   9 | })\n  10 | ",
+              "language": "js"
+            }
           },
           "timings": null,
           "failedFromHookId": null,
@@ -50,16 +50,16 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
           "wallClockDuration": null,
           "videoTimestamp": null,
           "reasonToStop": null,
-          "initialStrategy": null,
-        },
-      ],
+          "initialStrategy": null
+        }
+      ]
     },
     {
       "testId": "r5",
       "title": [
         "TodoMVC - React",
         "When page is initially opened",
-        "does something good",
+        "does something good"
       ],
       "state": "pending",
       "body": "",
@@ -74,9 +74,9 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
           "wallClockDuration": null,
           "videoTimestamp": null,
           "reasonToStop": null,
-          "initialStrategy": null,
-        },
-      ],
-    },
-  ],
+          "initialStrategy": null
+        }
+      ]
+    }
+  ]
 }
