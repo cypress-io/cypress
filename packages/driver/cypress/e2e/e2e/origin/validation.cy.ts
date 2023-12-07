@@ -189,10 +189,10 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('finds the right spec bridge with a subdomain', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.window().then((win) => {
-        win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+        win.location.href = `https://baz.foobar.com:3502/fixtures/auth/idp.html?redirect=${encodeURIComponent('http://localhost:3500/fixtures/auth/index.html')}`
       })
 
-      cy.origin('http://baz.foobar.com:3500', () => {
+      cy.origin('https://baz.foobar.com:3502', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -383,22 +383,22 @@ describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
   describe('errors', () => {
     it('errors if the url param is same superDomainOrigin as top', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different domain than top. You passed `http://app.foobar.com` to the origin command, while top is at `http://www.foobar.com`.')
+        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different domain than top. You passed `https://app.foobar.com` to the origin command, while top is at `https://www.foobar.com`.')
 
         done()
       })
 
-      cy.intercept('http://www.foobar.com', {
+      cy.intercept('https://www.foobar.com', {
         body: '<html><head><title></title></head><body><p></body></html>',
       })
 
-      cy.intercept('http://app.foobar.com', {
+      cy.intercept('https://app.foobar.com', {
         body: '<html><head><title></title></head><body><p></body></html>',
       })
 
-      cy.visit('http://www.foobar.com')
+      cy.visit('https://www.foobar.com')
 
-      cy.origin('http://app.foobar.com', () => undefined)
+      cy.origin('https://app.foobar.com', () => undefined)
     })
 
     it('errors if the url param is same origin as top', (done) => {
