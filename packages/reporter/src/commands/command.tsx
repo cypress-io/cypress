@@ -38,7 +38,7 @@ export const formattedMessage = (message: string) => {
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
   const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  const underscorePreservedText = spaceEscapedText.replace(/_/g, '\\_')
+  const underscorePreservedText = spaceEscapedText.replace(/_+/gm, (initialUnderscores) => '&#95;'.repeat(initialUnderscores.length)) // &#32 HTML entity for underscore
   const converted = md.renderInline(underscorePreservedText)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
