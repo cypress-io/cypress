@@ -353,7 +353,7 @@ describe('src/cy/commands/clock', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('_log:added', (attrs, log) => {
+        cy.on('log:added', (attrs, log) => {
           const name = log.get('name')
 
           if (['clock', 'tick', 'restore'].includes(name)) {
@@ -376,18 +376,6 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('logs when restored', function () {
-        cy.clock().then((clock) => {
-          clock.restore()
-
-          const log = this.logs[1]
-
-          expect(this.logs.length).to.equal(2)
-          expect(log.get('name')).to.eq('restore')
-          expect(log.get('message')).to.eq('')
-        })
-      })
-
       it('does not log when auto-restored', function (done) {
         cy.clock().then(() => {
           Cypress.emit('test:before:run', {})
@@ -398,15 +386,20 @@ describe('src/cy/commands/clock', () => {
       })
 
       it('does not log when log: false', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.clock({ log: false }).then((clock) => {
           clock.tick()
           clock.restore()
 
           const lastLog = this.logs[0]
 
-          expect(lastLog.get('name'), 'log name').to.eq('clock')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(lastLog.get('name'), 'log name').to.not.eq('clock')
+          expect(this.hiddenLog.get('name'), 'log name').to.eq('clock')
+          expect(this.hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('clock', { isHidden: true })
@@ -468,7 +461,7 @@ describe('src/cy/commands/clock', () => {
     beforeEach(function () {
       this.logs = []
 
-      cy.on('_log:added', (attrs, log) => {
+      cy.on('log:added', (attrs, log) => {
         if (log.get('name') === 'tick') {
           this.logs.push(log)
         }
@@ -553,19 +546,85 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
+      it('does not emit when {log: false}', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy
         .clock()
         .tick(10, { log: false })
         .then(function () {
-          const lastLog = this.logs[0]
+          const { hiddenLog } = this
 
-          expect(lastLog.get('name'), 'log name').to.eq('tick')
-          expect(lastLog.get('hidden'), 'log hidden').to.be.true
-          expect(lastLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+          expect(this.logs.length).to.equal(0)
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('tick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
 
         cy.getCommandLogInReporter('tick', { isHidden: true })
+      })
+    })
+  })
+
+  describe('#restore', () => {
+    context('logging', () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          const name = log.get('name')
+
+          if (['clock', 'tick', 'restore'].includes(name)) {
+            return this.logs.push(log)
+          }
+        })
+      })
+
+      it('logs when restored', function () {
+        cy.clock().then((clock) => {
+          clock.restore()
+
+          const log = this.logs[1]
+
+          expect(this.logs.length).to.equal(2)
+          expect(log.get('name')).to.eq('restore')
+          expect(log.get('message')).to.eq('')
+        })
+      })
+
+      it('logs snapshot', () => {
+        cy.clock().then(function (clock) {
+          clock.restore()
+          const log = this.logs[0]
+
+          expect(log.get('snapshots').length).to.eq(1)
+        })
+      })
+
+      it('does not emit when {log: false}', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.clock().then(function (clock) {
+          clock.restore({ log: false })
+
+          const { hiddenLog } = this
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('restore')
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('restore')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('restore', { isHidden: true })
       })
     })
   })

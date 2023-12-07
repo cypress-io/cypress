@@ -616,8 +616,26 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('check')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('check', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -766,6 +784,22 @@ describe('src/cy/commands/actions/check', () => {
           expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
+
+          expect(consoleProps).to.have.property('table')
+          expect(consoleProps.table[1]()).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
         })
       })
 
@@ -1209,8 +1243,25 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check().uncheck({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('uncheck')
+          expect(hiddenLog.get('name'), 'log name').to.eq('uncheck')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('uncheck', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -1315,6 +1366,22 @@ describe('src/cy/commands/actions/check', () => {
           expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
+
+          expect(consoleProps).to.have.property('table')
+          expect(consoleProps.table[1]()).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
         })
       })
 

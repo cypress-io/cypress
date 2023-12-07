@@ -511,6 +511,46 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+        })
+      })
+
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.txt' }, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('selectFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('selectFile', { isHidden: true })
+      })
+
+      it('logs out select', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.txt' }).then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('name')).to.eq('selectFile')
+        })
+
+        cy.getCommandLogInReporter('selectFile')
+      })
+    })
+
     it('retries until label is not disabled', () => {
       cy.on('command:retry', () => {
         // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM

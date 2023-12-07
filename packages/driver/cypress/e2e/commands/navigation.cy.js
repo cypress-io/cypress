@@ -219,8 +219,6 @@ describe('src/cy/commands/navigation', () => {
 
           this.logs.push(log)
         })
-
-        return null
       })
 
       it('logs reload', () => {
@@ -229,10 +227,21 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
-        cy.reload({ log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
         })
+
+        cy.reload({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('reload')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('reload', { isHidden: true })
       })
 
       it('does not log \'Page Load\' events', () => {
@@ -520,12 +529,23 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy
         .visit('/fixtures/jquery.html')
         .go('back', { log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('go')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
+
+        cy.getCommandLogInReporter('go', { isHidden: true })
       })
 
       it('does not log \'Page Load\' events', () => {
@@ -1121,10 +1141,21 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
-        cy.visit('/timeout?ms=0', { log: false }).then(function () {
-          expect(this.lastLog).not.to.exist
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
         })
+
+        cy.visit('/timeout?ms=0', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('visit')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+
+        cy.getCommandLogInReporter('visit', { isHidden: true })
       })
 
       it('displays file attributes as consoleProps', () => {

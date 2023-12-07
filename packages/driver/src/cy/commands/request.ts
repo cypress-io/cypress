@@ -258,7 +258,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options._log = Cypress.log({
         message: '',
-        hidden: !options.log,
+        hidden: options.log === false,
         timeout: options.timeout,
         consoleProps () {
           const resp = options.response || {}

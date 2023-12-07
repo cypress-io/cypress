@@ -8,7 +8,7 @@ import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSna
 const debug = debugFn('cypress:driver:multi-origin')
 
 const CROSS_ORIGIN_PREFIX = 'cross:origin:'
-const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}_log:added`, `${CROSS_ORIGIN_PREFIX}_log:changed`]
+const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}log:changed`]
 const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
 
 /**

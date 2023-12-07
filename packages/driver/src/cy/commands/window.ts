@@ -97,7 +97,10 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
-    Cypress.log({ timeout: options.timeout, hidden: options.log === false }) // strip defaults when hidden? i.e. don't store window object
+    Cypress.log({
+      hidden: options.log === false,
+      timeout: options.timeout,
+    })
 
     return () => {
       const win = state('window')
@@ -112,7 +115,10 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
-    Cypress.log({ timeout: options.timeout, hidden: options.log === false }) // strip defaults when hidden? i.e. don't store document object
+    Cypress.log({
+      hidden: options.log === false,
+      timeout: options.timeout,
+    })
 
     return () => {
       const win = state('window')

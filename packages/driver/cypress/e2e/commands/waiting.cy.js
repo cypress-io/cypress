@@ -945,7 +945,7 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      it.only('can turn off logging for explicit wait time', { protocolEnabled: true }, function () {
+      it('can turn off logging for explicit wait time', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })

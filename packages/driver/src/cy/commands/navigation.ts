@@ -588,11 +588,9 @@ export default (Commands, Cypress, cy, state, config) => {
             throwArgsErr()
           }
 
-          if (options.log) {
-            options._log = Cypress.log({ timeout: options.timeout })
+          options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
-            options._log.snapshot('before', { next: 'after' })
-          }
+          options._log?.snapshot('before', { next: 'after' })
 
           cleanup = () => {
             knownCommandCausedInstability = false
@@ -628,9 +626,7 @@ export default (Commands, Cypress, cy, state, config) => {
         timeout: config('pageLoadTimeout'),
       })
 
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
-      }
+      options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
       const win = state('window')
 
@@ -795,21 +791,14 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('visit.body_circular', { args: { path } })
       }
 
-      if (options.log) {
-        let message = url
-
-        if (options.method !== 'GET') {
-          message = `${options.method} ${message}`
-        }
-
-        options._log = Cypress.log({
-          message,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: options.method === 'GET' ? url : `${options.method} ${url}`,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
 
       url = $Location.normalize(url)
 

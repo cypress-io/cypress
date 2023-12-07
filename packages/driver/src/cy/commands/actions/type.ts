@@ -46,7 +46,9 @@ export default function (Commands, Cypress, cy, state, config) {
       animationDistanceThreshold: config('animationDistanceThreshold'),
     })
 
-    if (options.log) {
+    // if this instance is not present, create a log instance for cy.type()
+    // cy.clear passes in their log instance
+    if (!options._log) {
       // figure out the options which actually change the behavior of clicks
       const deltaOptions = $utils.filterOutOptions(options)
 
@@ -94,6 +96,7 @@ export default function (Commands, Cypress, cy, state, config) {
       options._log = Cypress.log({
         message: [chars, deltaOptions],
         $el: options.$el,
+        hidden: options.log === false,
         timeout: options.timeout,
         consoleProps () {
           return {
@@ -614,23 +617,22 @@ export default function (Commands, Cypress, cy, state, config) {
     const clear = function (el) {
       const $el = $dom.wrap(el)
 
-      if (options.log) {
-        // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
+      // figure out the options which actually change the behavior of clicks
+      const deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = Cypress.log({
-          message: deltaOptions,
-          $el,
-          timeout: options.timeout,
-          consoleProps () {
-            return {
-              'Applied To': $dom.getElements($el),
-              'Elements': $el.length,
-              'Options': deltaOptions,
-            }
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: deltaOptions,
+        $el,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return {
+            'Applied To': $dom.getElements($el),
+            'Elements': $el.length,
+            'Options': deltaOptions,
+          }
+        },
+      })
 
       const callTypeCmd = ($el) => {
         return cy.now('type', $el, '{selectall}{del}', {

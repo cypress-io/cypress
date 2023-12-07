@@ -1187,8 +1187,26 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').trigger('mouseover', { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('trigger')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('trigger')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('trigger', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

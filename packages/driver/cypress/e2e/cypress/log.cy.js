@@ -1,6 +1,123 @@
 const { create, LogUtils } = require('@packages/driver/src/cypress/log')
 
+const objectDiff = (newAttrs, oldAttrs) => {
+  return Object.entries(newAttrs).reduce(
+    (diff, [key, value]) => {
+      const isEq = Cypress._.isEqualWith(oldAttrs[key], value, (objValue, othValue, key) => {
+        if (objValue === undefined && othValue === undefined) return true
+
+        if (key === 'updatedAtTimestamp') {
+          return true
+        }
+
+        return undefined
+      })
+
+      return isEq ? diff : { ...diff, [key]: value }
+    },
+    {},
+  )
+}
+
 describe('src/cypress/log', function () {
+  context('#triggerLog', function () {
+    beforeEach(function () {
+      this.cy = {
+        createSnapshot: cy.stub().returns({}),
+      }
+
+      // this.actionSpy = cy.stub(Cypress, 'action').callThrough()
+      this.state = cy.stub()
+      this.config = cy.stub()
+      this.log = create(Cypress, this.cy, this.state, this.config)
+    })
+
+    it('emits when log is created that auto-ends, only triggers one event', function () {
+      let addedEventCallCount = 0
+      let changedEventCallCount = 0
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'mock') {
+          addedEventCallCount++
+        }
+      })
+
+      cy.on('log:changed', (attrs, log) => {
+        if (attrs.name === 'mock') {
+          changedEventCallCount++
+        }
+      })
+
+      let log
+
+      cy.log('verify log:added event is triggered -- log({ name: mock })')
+      .then(() => {
+        log = this.log({ name: 'mock' })
+
+        expect(log._hasInitiallyLogged).to.be.true
+      })
+      .wait(6, { log: false }) // allow for log debounce
+      .then(() => {
+        expect(addedEventCallCount, 'log:added call count').to.eq(1)
+        expect(changedEventCallCount, 'log:changed call count').to.eq(0)
+      })
+    })
+
+    it('emits when log is changed', function () {
+      let addedEventCallCount = 0
+      let changedEventCallCount = 0
+      let originalAttrs
+      let changedAttrs
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'mock') {
+          addedEventCallCount++
+          originalAttrs = attrs
+        }
+      })
+
+      cy.on('log:changed', (attrs, log) => {
+        if (attrs.name === 'mock') {
+          changedEventCallCount++
+          changedAttrs = attrs
+        }
+      })
+
+      let log
+
+      cy.log('verify log:added event is triggered -- log({ name: mock })')
+      .then(() => {
+        log = this.log({ name: 'mock' })
+      }).then(() => {
+        expect(addedEventCallCount, 'log:added call count').to.eq(1)
+        expect(changedEventCallCount, 'log:changed call count').to.eq(0)
+      })
+      .log('verify log:changed event is triggered -- log.set({ callCount: 1 })')
+      .then(() => {
+        log.set({ callCount: 1 })
+      })
+      .wait(6, { log: false }) // allow for log debounce
+      .then(() => {
+        expect(addedEventCallCount, 'log:added call count').to.eq(1)
+        expect(changedEventCallCount, 'log:changed call count').to.eq(1)
+        const updatedAttrs = objectDiff(changedAttrs, originalAttrs)
+
+        expect(updatedAttrs).to.have.property('callCount', 1)
+        expect(updatedAttrs).to.have.property('updatedAtTimestamp')
+      })
+      .log('verify log:changed event is not triggered -- log.set({ callCount: 1 })')
+      .then(() => {
+        changedAttrs = null
+        log.set({ callCount: 1 })
+      })
+      .wait(6, { log: false }) // allow for log debounce
+      .then(() => {
+        expect(changedEventCallCount, 'log:changed call count').to.eq(1)
+        expect(changedAttrs).to.be.null
+      })
+    })
+  })
+
   context('#snapshot', function () {
     beforeEach(function () {
       this.cy = {

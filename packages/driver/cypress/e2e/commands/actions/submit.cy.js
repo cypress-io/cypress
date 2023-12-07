@@ -338,6 +338,26 @@ describe('src/cy/commands/actions/submit', () => {
         return null
       })
 
+      it('can turn off logging', function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('form:first').submit({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('submit')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+
+        cy.getCommandLogInReporter('submit', { isHidden: true })
+      })
+
       it('logs immediately before resolving', () => {
         const $form = cy.$$('form:first')
 

@@ -76,28 +76,15 @@ export default function (Commands, Cypress, cy, state) {
         log: true,
       })
 
-      const log = (name, message = '', snapshot = true, consoleProps = {}) => {
-        if (!options.log) {
-          return
-        }
-
+      const getConsoleProps = (consoleProps = {}) => {
         const details = clock!.details()
         const logNow = details.now
         const logMethods = details.methods.slice()
 
-        return Cypress.log({
-          name,
-          message: message ? message : '',
-          type: 'parent',
-          end: true,
-          snapshot,
-          consoleProps () {
-            return _.extend({
-              'Now': logNow,
-              'Methods replaced': logMethods,
-            }, consoleProps)
-          },
-        })
+        return _.extend({
+          'Now': logNow,
+          'Methods replaced': logMethods,
+        }, consoleProps)
       }
 
       clock = createClock(state('window'), now, methods)
@@ -113,24 +100,24 @@ export default function (Commands, Cypress, cy, state) {
           ms = 0
         }
 
-        let theLog
-
-        if (options.log !== false) {
-          theLog = log('tick', `${ms}ms`, false, {
+        const log = Cypress.log({
+          name: 'tick',
+          message: `${ms}ms`,
+          type: 'parent',
+          hidden: options.log === false,
+          end: true,
+          snapshot: false,
+          consoleProps: getConsoleProps({
             'Now': clock!.details().now + ms,
             'Ticked': `${ms} milliseconds`,
-          })
-        }
+          }),
+        })
 
-        if (theLog) {
-          theLog.snapshot('before', { next: 'after' })
-        }
+        log?.snapshot('before', { next: 'after' })
 
         const ret = tick.apply(this, [ms])
 
-        if (theLog) {
-          theLog.snapshot().end()
-        }
+        log?.snapshot().end()
 
         return ret
       }
@@ -140,9 +127,15 @@ export default function (Commands, Cypress, cy, state) {
       clock.restore = function (options: Partial<Cypress.Loggable> = {}) {
         const ret = restore.apply(this)
 
-        if (options.log !== false) {
-          log('restore')
-        }
+        Cypress.log({
+          name: 'restore',
+          message: '',
+          type: 'parent',
+          hidden: options.log === false,
+          end: true,
+          snapshot: true,
+          consoleProps: getConsoleProps(),
+        })
 
         ctx.clock = null
 
@@ -153,7 +146,15 @@ export default function (Commands, Cypress, cy, state) {
         return ret
       }
 
-      log('clock')
+      Cypress.log({
+        name: 'clock',
+        message: '',
+        type: 'parent',
+        hidden: options.log === false,
+        end: true,
+        snapshot: true,
+        consoleProps: getConsoleProps(),
+      })
 
       state('clock', clock)
 

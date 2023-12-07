@@ -3,7 +3,7 @@ const { _, $ } = Cypress
 
 describe('src/cy/commands/window', () => {
   context('#window', () => {
-    it.only('returns the remote window', () => {
+    it('returns the remote window', () => {
       cy.window().then((win) => {
         expect(win).to.eq(cy.state('$autIframe').prop('contentWindow'))
       })

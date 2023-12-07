@@ -241,15 +241,15 @@ export class Log {
   fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
   obj: any
 
-  private attributes: Record<string, any> = {}
+  private attributes: Record<string, any> = { }
+  private _emittedAttrs: Record<string, any> = {}
 
-  constructor (createSnapshot, state, config, fireChangeEvent, obj) {
+  constructor (createSnapshot, state, config, fireChangeEvent) {
     this.createSnapshot = createSnapshot
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
-    this.obj = defaults(state, config, obj)
 
     if (config('protocolEnabled')) {
       Cypress.on('test:after:run', () => {
@@ -300,42 +300,42 @@ export class Log {
   }
 
   set (key, val?) {
+    let obj = key
+
     if (_.isString(key)) {
-      this.obj = {}
-      this.obj[key] = val
-    } else {
-      this.obj = key
+      obj = {}
+      obj[key] = val
     }
 
-    if ('url' in this.obj) {
+    if ('url' in obj) {
       // always stringify the url property
-      this.obj.url = (this.obj.url != null ? this.obj.url : '').toString()
+      obj.url = (obj.url != null ? obj.url : '').toString()
     }
 
     // convert onConsole to consoleProps
     // for backwards compatibility
-    if (this.obj.onConsole) {
-      this.obj.consoleProps = this.obj.onConsole
+    if (obj.onConsole) {
+      obj.consoleProps = obj.onConsole
     }
 
     // if we have an alias automatically
     // figure out what type of alias it is
-    if (this.obj.alias) {
-      _.defaults(this.obj, { aliasType: this.obj.$el ? 'dom' : 'primitive' })
+    if (obj.alias) {
+      _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
     }
 
     // dont ever allow existing id's to be mutated
     if (this.attributes.id) {
-      delete this.obj.id
+      delete obj.id
     }
 
-    this.obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
+    obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
 
-    _.extend(this.attributes, this.obj)
+    _.extend(this.attributes, obj)
 
     // if we have an consoleProps function
     // then re-wrap it
-    if (this.obj && _.isFunction(this.obj.consoleProps)) {
+    if (obj && _.isFunction(obj.consoleProps)) {
       this.wrapConsoleProps()
     }
 
@@ -343,7 +343,7 @@ export class Log {
       this.setElAttrs()
     }
 
-    this.fireChangeEvent(this)
+    this._hasInitiallyLogged && this.fireChangeEvent(this)
 
     return this
   }
@@ -475,13 +475,11 @@ export class Log {
     }
 
     // make sure all $el elements are visible!
-    this.obj = {
+    return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
       visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
-    }
-
-    return this.set(this.obj, { silent: true })
+    })
   }
 
   merge (log) {
@@ -640,9 +638,9 @@ class LogManager {
       //   return
       // }
 
-      const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent, options)
+      const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent)
 
-      log.set(options)
+      log.set(defaults(state, config, options))
 
       const onBeforeLog = state('onBeforeLog')
 
@@ -670,19 +668,13 @@ class LogManager {
         log.error(log.get('error'))
       }
 
-      log.wrapConsoleProps()
-
-      this.addToLogs(log)
-      if (options.emitOnly) {
-        return
-      }
-
-      this.triggerLog(log)
-
       // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
       if (!command || log.get('end')) {
         log.end()
       }
+
+      this.addToLogs(log)
+      this.triggerLog(log)
 
       return log
     }

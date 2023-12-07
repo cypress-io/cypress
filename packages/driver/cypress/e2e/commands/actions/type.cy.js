@@ -2845,8 +2845,26 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
+    })
 
-      null
+    it('can turn off logging', function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').type('foobar', { log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+
+        expect(hiddenLog).to.be.ok
+        expect(hiddenLog.get('name'), 'log name').to.eq('type')
+        expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+      })
+
+      cy.getCommandLogInReporter('type', { isHidden: true })
     })
 
     it('passes in $el', () => {
@@ -2998,9 +3016,31 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      it('has a table of mouse events', () => {
+        cy.get(':text:first').type('hi')
+        .then(function ($input) {
+          const table = this.lastLog.invoke('consoleProps').table[1]()
+
+          expect(table).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
+        })
+      })
+
       // Updated not to input text when non-shift modifier is pressed
       // https://github.com/cypress-io/cypress/issues/5424
-      it('has a table of keys', () => {
+      it('has a table of keyboard events', () => {
         cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
         .then(function ($input) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
