@@ -103,7 +103,7 @@ describe('src/cy/commands/commands', () => {
     })
 
     describe('we inject log', () => {
-      it.only('for custom command if no log was created', () => {
+      it('for custom command if no log was created', () => {
         const logs = []
         const addLogs = (attrs, log) => {
           logs.push(log)
@@ -131,7 +131,7 @@ describe('src/cy/commands/commands', () => {
         cy.getCommandLogInReporter('customWithoutLog', { isHidden: true })
       })
 
-      it.only('for custom query if no log was created', () => {
+      it('for custom query if no log was created', () => {
         const logs = []
         const addLogs = (attrs, log) => {
           logs.push(log)

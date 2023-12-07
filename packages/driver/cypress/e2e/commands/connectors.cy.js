@@ -351,7 +351,7 @@ describe('src/cy/commands/connectors', () => {
           return null
         })
 
-        it.only('eventually passes the assertion', function () {
+        it('eventually passes the assertion', function () {
           cy.on('command:retry', _.after(2, () => {
             this.remoteWindow.$.fn.foo = () => {
               return 'foo'
@@ -367,7 +367,7 @@ describe('src/cy/commands/connectors', () => {
           })
         })
 
-        it.only('eventually fails the assertion', function (done) {
+        it('eventually fails the assertion', function (done) {
           cy.on('command:retry', _.after(2, () => {
             this.remoteWindow.$.fn.foo = () => {
               return 'foo'
