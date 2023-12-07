@@ -1,8 +1,5 @@
 import _ from 'lodash'
 import utils from './utils'
-import debugFn from 'debug'
-
-const debug = debugFn('cypress:driver:command')
 
 let idCounter = 1
 
@@ -61,11 +58,18 @@ export class $Command {
   }
 
   finishLogs () {
+    const logs = this.get('logs')
+    const hasCommandLog = _.some(logs, (l) => l.get('instrument') === 'command')
+
+    if (logs.length === 0 || !hasCommandLog) {
+      Cypress.log({ hidden: true, end: true, snapshot: true })
+    }
+
     // TODO: Investigate whether or not we can reuse snapshots between logs
     // that snapshot at the same time
 
     // Finish each of the logs we have, turning any potential errors into actual ones.
-    this.get('logs').forEach((log) => {
+    logs.forEach((log) => {
       if (log.get('next') || !log.get('snapshots')) {
         log.snapshot()
       }
@@ -77,17 +81,9 @@ export class $Command {
         log.finish()
       }
     })
-
-    if (debug.enabled) return
-
-    // this.set('logs', [])
   }
 
   log (log) {
-    // always set the chainerId of the log to ourselves
-    // so it can be queried on later
-    log.set('chainerId', this.get('chainerId'))
-
     this.get('logs').push(log)
 
     return this

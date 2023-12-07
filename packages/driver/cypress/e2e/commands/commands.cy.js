@@ -1,4 +1,5 @@
 const { _ } = Cypress
+import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/commands', () => {
   beforeEach(() => {
@@ -45,10 +46,10 @@ describe('src/cy/commands/commands', () => {
         .first()
       })
 
-      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
+      Cypress.Commands.add('login', { prevSubject: true }, (subject, email, log = true) => {
         cy
-        .wrap(subject.find('input:first'))
-        .type(email)
+        .wrap(subject.find('input:first'), { log })
+        .type(email, { log })
       })
     })
 
@@ -61,6 +62,109 @@ describe('src/cy/commands/commands', () => {
       .command('login', 'brian@foo.com')
       .then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
+      })
+
+      cy.getCommandLogInReporter('wrap')
+      cy.getCommandLogInReporter('type')
+    })
+
+    it('we capture logs from custom commands', () => {
+      const logs = []
+      const addLogs = (attrs, log) => {
+        logs.push(log)
+      }
+
+      cy.on('_log:added', addLogs)
+      cy.on('log:added', addLogs)
+
+      const input = cy.$$('input:first')
+
+      cy
+      .get('input:first')
+      .parent()
+      .command('login', 'brian@foo.com', false)
+      .then(($input) => {
+        cy.removeListener('_log:added', addLogs)
+        cy.removeListener('log:added', addLogs)
+
+        expect($input.get(0)).to.eq(input.get(0))
+
+        assertLogLength(logs, 4)
+        expect(logs[0].get('name')).to.eq('get')
+        expect(logs[1].get('name')).to.eq('parent')
+        expect(logs[2].get('name')).to.eq('wrap')
+        expect(logs[2].get('hidden')).to.be.true
+        expect(logs[3].get('name')).to.eq('type')
+        expect(logs[3].get('hidden')).to.be.true
+      })
+
+      cy.getCommandLogInReporter('wrap', { isHidden: true })
+      cy.getCommandLogInReporter('type', { isHidden: true })
+    })
+
+    describe('we inject log', () => {
+      it.only('for custom command if no log was created', () => {
+        const logs = []
+        const addLogs = (attrs, log) => {
+          logs.push(log)
+        }
+
+        cy.on('log:added', addLogs)
+        cy.on('_log:added', addLogs)
+
+        Cypress.Commands.add('customWithoutLog', (options) => {
+          options.log && Cypress.log({ name: 'customWithoutLog' })
+
+          return 'hello'
+        })
+
+        cy.customWithoutLog({ log: false })
+        .then(($input) => {
+          cy.removeListener('log:added', addLogs)
+          cy.removeListener('_log:added', addLogs)
+
+          assertLogLength(logs, 1)
+          expect(logs[0].get('name')).to.eq('customWithoutLog')
+          expect(logs[0].get('hidden')).to.be.true
+        })
+
+        cy.getCommandLogInReporter('customWithoutLog', { isHidden: true })
+      })
+
+      it.only('for custom query if no log was created', () => {
+        const logs = []
+        const addLogs = (attrs, log) => {
+          logs.push(log)
+        }
+
+        cy.on('log:added', addLogs)
+        cy.on('_log:added', addLogs)
+
+        Cypress.Commands.add('customWithoutLog', (options) => {
+          options.log && Cypress.log({ name: 'myCustomCommand' })
+
+          return 'hello'
+        })
+
+        let callCount
+
+        Cypress.Commands.addQuery('getCallCount', (options) => {
+          options.log && Cypress.log({ name: 'getCallCount', message: callCount })
+
+          return () => callCount
+        })
+
+        cy.getCallCount({ log: false })
+        .then(($input) => {
+          cy.removeListener('log:added', addLogs)
+          cy.removeListener('_log:added', addLogs)
+
+          assertLogLength(logs, 1)
+          expect(logs[0].get('name')).to.eq('getCallCount')
+          expect(logs[0].get('hidden')).to.be.true
+        })
+
+        cy.getCommandLogInReporter('getCallCount', { isHidden: true })
       })
     })
 

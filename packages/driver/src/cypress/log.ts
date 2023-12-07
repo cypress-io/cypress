@@ -120,13 +120,13 @@ export const LogUtils = {
 
 const defaults = function (state: StateFunc, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
+  const current = state('current')
+  const chainerId = current && current.get('chainerId')
 
   // dont set any defaults if this
   // is an agent or route because we
   // may not even be inside of a command
   if (instrument === 'command') {
-    const current = state('current')
-
     // we are logging a command instrument by default
     _.defaults(obj, current != null ? current.pick('name', 'type') : undefined)
 
@@ -168,8 +168,6 @@ const defaults = function (state: StateFunc, config, obj) {
     // so it can conditionally return either
     // parent or child (useful in assertions)
     if (_.isFunction(obj.type)) {
-      const chainerId = current && current.get('chainerId')
-
       obj.type = obj.type(current, cy.subjectChain(chainerId))
     }
   }
@@ -191,6 +189,7 @@ const defaults = function (state: StateFunc, config, obj) {
 
   _.defaults(obj, {
     id: `log-${window.location.origin}-${counter}`,
+    chainerId,
     state: 'pending',
     hidden: false,
     instrument: 'command',
@@ -339,7 +338,7 @@ export class Log {
       this.wrapConsoleProps()
     }
 
-    if (this.obj && this.obj.$el) {
+    if (obj && obj.$el) {
       this.setElAttrs()
     }
 
