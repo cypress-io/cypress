@@ -864,7 +864,7 @@ describe('src/cy/commands/connectors', () => {
             },
           }
 
-          cy.on('_log:added', (attrs, log) => {
+          cy.on('log:added', (attrs, log) => {
             this.lastLog = log
           })
         })
