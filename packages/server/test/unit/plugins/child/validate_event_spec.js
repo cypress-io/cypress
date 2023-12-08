@@ -4,6 +4,7 @@ const _ = require('lodash')
 const validateEvent = require('../../../../lib/plugins/child/validate_event')
 
 const events = [
+  ['after:browser:launch', 'a function', () => {}],
   ['after:run', 'a function', () => {}],
   ['after:screenshot', 'a function', () => {}],
   ['after:spec', 'a function', () => {}],

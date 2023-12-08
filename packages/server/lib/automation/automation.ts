@@ -127,6 +127,7 @@ export class Automation {
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':
+        case 'canceled:download':
         case 'complete:download':
           return data
         default:

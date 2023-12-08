@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
+import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks/mochaEvents'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -44,6 +45,8 @@ export default defineConfig({
       on('task', {
         initGitRepoForTestProject,
         resetGitRepoForTestProject,
+        writeMochaEventSnapshot,
+        readMochaEventSnapshot,
       })
 
       return await e2ePluginSetup(on, config)

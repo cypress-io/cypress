@@ -46,8 +46,8 @@ describe('e2e web worker', () => {
     spec: 'web_worker.cy.js',
     onRun: async (exec, browser) => {
       await exec()
-      expect(requestsForWebWorker).to.eq(1)
-      expect(requestsForSharedWorker).to.eq(1)
+      expect(requestsForWebWorker).to.eq(2)
+      expect(requestsForSharedWorker).to.eq(2)
     },
   })
 })

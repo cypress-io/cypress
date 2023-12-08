@@ -169,7 +169,9 @@ class RunPlugins {
       case '_get:task:body':
         return this.taskGetBody(ids, args)
       case 'before:browser:launch':
-        return browserLaunch.wrap(this.ipc, this.invoke, ids, args)
+        return browserLaunch.wrapBefore(this.ipc, this.invoke, ids, args)
+      case 'after:browser:launch':
+        return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
       default:
         debug('unexpected execute message:', event, args)
 
