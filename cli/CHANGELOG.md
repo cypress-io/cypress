@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+"_Released xx/xx/xxxx (PENDING)_"
+
+**Bugfixes:**
+
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616)
+
 ## 13.6.1
 
 _Released 12/5/2023_
@@ -10,7 +17,6 @@ _Released 12/5/2023_
 - Fixed an issue where commands would fail with the error `must only be invoked from the spec file or support file` if the project's `baseUrl` included basic auth credentials. Fixes [#27457](https://github.com/cypress-io/cypress/issues/27457) and [#28336](https://github.com/cypress-io/cypress/issues/28336).
 - Fixed an issue where some URLs would timeout in pre-request correlation. Addressed in [#28427](https://github.com/cypress-io/cypress/pull/28427).
 - Cypress will now correctly log errors and debug logs on Linux machines. Fixes [#5051](https://github.com/cypress-io/cypress/issues/5051) and [#24713](https://github.com/cypress-io/cypress/issues/24713).
-- 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616)
 
 **Misc:**
 
