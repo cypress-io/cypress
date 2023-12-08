@@ -71,7 +71,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
       })
 
       cy.visit('/fixtures/primary-origin.html')
-      cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
+      cy.get('a[data-cy="xhr-fetch-requests-onload-https"]').click()
     })
 
     // TODO: fix failing test: https://github.com/cypress-io/cypress/issues/23840
