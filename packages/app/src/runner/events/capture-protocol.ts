@@ -25,7 +25,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     })
   })
 
-  Cypress.on('_log:added', (attributes) => {
+  Cypress.on('log:added', (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
@@ -41,7 +41,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     Cypress.backend('protocol:command:log:added', protocolProps)
   })
 
-  Cypress.on('_log:changed', (attributes) => {
+  Cypress.on('log:changed', (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
@@ -110,6 +110,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
   })
 
   Cypress.on('test:before:after:run:async', async (attributes, _test, options) => {
+    console.log('capturePROTOCOL____test:before:after:run:async')
     attachCypressProtocolInfo({
       type: 'test:before:after:run:async',
       timestamp: performance.timeOrigin + performance.now(),

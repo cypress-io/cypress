@@ -59,11 +59,13 @@ export class $Command {
 
   finishLogs () {
     const logs = this.get('logs')
-    const hasCommandLog = _.some(logs, (l) => l.get('instrument') === 'command')
+    // const hasCommandLog = _.some(logs, (l) => l.get('instrument') === 'command')
 
-    if (logs.length === 0 || !hasCommandLog) {
-      Cypress.log({ hidden: true, end: true, snapshot: true })
-    }
+    // if (logs.length === 0 || !hasCommandLog) {
+    //   if (['as', 'end-logGroup', 'noop', 'then', 'within-restore'].includes(this.get('name'))) return
+
+    //   Cypress.log({ hidden: true, end: true, snapshot: true })
+    // }
 
     // TODO: Investigate whether or not we can reuse snapshots between logs
     // that snapshot at the same time
