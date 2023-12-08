@@ -30,8 +30,8 @@ describe('mocha custom methods', () => {
       expect(noExperimentalRetries.outerStatus).to.equal('passed')
       expect(noExperimentalRetries.attempts).to.equal(1)
       expect(noExperimentalRetries.shouldAttemptsContinue).to.be.false
-      expect(noExperimentalRetries.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(noExperimentalRetries.strategy).to.be.undefined
+      expect(undefinedStrategyTest.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(undefinedStrategyTest.thisAttemptInitialStrategy).to.equal('NONE')
       expect(undefinedStrategyTest.final).to.be.true
 
@@ -45,8 +45,8 @@ describe('mocha custom methods', () => {
       expect(detectFlakeAndPassOnThreshold.outerStatus).to.equal('passed')
       expect(detectFlakeAndPassOnThreshold.attempts).to.equal(1)
       expect(detectFlakeAndPassOnThreshold.shouldAttemptsContinue).to.be.false
-      expect(detectFlakeAndPassOnThreshold.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(detectFlakeAndPassOnThreshold.strategy).to.equal('detect-flake-and-pass-on-threshold')
+      expect(detectFlakeAndPassOnThresholdStrategyTest.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(detectFlakeAndPassOnThresholdStrategyTest.thisAttemptInitialStrategy).to.equal('NONE')
       expect(detectFlakeAndPassOnThresholdStrategyTest.final).to.be.true
 
@@ -60,8 +60,8 @@ describe('mocha custom methods', () => {
       expect(detectFlakeButAlwaysFail.outerStatus).to.equal('passed')
       expect(detectFlakeButAlwaysFail.attempts).to.equal(1)
       expect(detectFlakeButAlwaysFail.shouldAttemptsContinue).to.be.false
-      expect(detectFlakeButAlwaysFail.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(detectFlakeButAlwaysFail.strategy).to.equal('detect-flake-but-always-fail')
+      expect(detectFlakeButAlwaysFailStrategyTest.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
       expect(detectFlakeButAlwaysFailStrategyTest.thisAttemptInitialStrategy).to.equal('NONE')
       expect(detectFlakeButAlwaysFailStrategyTest.final).to.be.true
     })
@@ -77,8 +77,8 @@ describe('mocha custom methods', () => {
         expect(attempt1.outerStatus).to.be.undefined
         expect(attempt1.attempts).to.equal(1)
         expect(attempt1.shouldAttemptsContinue).to.be.true
-        expect(attempt1.reasonToStop).to.be.undefined
         expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
+        expect(mockTest1.reasonToStop).to.be.undefined
         expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
         expect(mockTest1.final).to.be.false
 
@@ -88,8 +88,8 @@ describe('mocha custom methods', () => {
         expect(attempt2.outerStatus).to.equal('passed')
         expect(attempt2.attempts).to.equal(2)
         expect(attempt2.shouldAttemptsContinue).to.be.false
-        expect(attempt2.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
         expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
+        expect(mockTest2.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
         expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
         expect(mockTest2.final).to.be.true
       })
@@ -103,8 +103,8 @@ describe('mocha custom methods', () => {
         expect(attempt1.outerStatus).to.be.undefined
         expect(attempt1.attempts).to.equal(1)
         expect(attempt1.shouldAttemptsContinue).to.be.true
-        expect(attempt1.reasonToStop).to.be.undefined
         expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
+        expect(mockTest1.reasonToStop).to.be.undefined
         expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
         expect(mockTest1.final).to.be.false
 
@@ -114,8 +114,8 @@ describe('mocha custom methods', () => {
         expect(attempt2.outerStatus).to.be.undefined
         expect(attempt2.attempts).to.equal(2)
         expect(attempt2.shouldAttemptsContinue).to.be.true
-        expect(attempt2.reasonToStop).to.be.undefined
         expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
+        expect(mockTest2.reasonToStop).to.be.undefined
         expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
         expect(mockTest2.final).to.be.false
 
@@ -125,8 +125,8 @@ describe('mocha custom methods', () => {
         expect(attempt3.outerStatus).to.equal('failed')
         expect(attempt3.attempts).to.equal(3)
         expect(attempt3.shouldAttemptsContinue).to.be.false
-        expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
         expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
+        expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
         expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
         expect(mockTest3.final).to.be.true
       })
@@ -146,8 +146,8 @@ describe('mocha custom methods', () => {
           expect(attempt1.outerStatus).to.be.undefined
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
-          expect(attempt1.reasonToStop).to.be.undefined
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -161,8 +161,8 @@ describe('mocha custom methods', () => {
           expect(attempt2.outerStatus).to.be.undefined
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
-          expect(attempt2.reasonToStop).to.be.undefined
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.false
 
@@ -176,8 +176,8 @@ describe('mocha custom methods', () => {
           expect(attempt3.outerStatus).to.be.undefined
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
-          expect(attempt3.reasonToStop).to.be.undefined
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.false
 
@@ -191,8 +191,8 @@ describe('mocha custom methods', () => {
           expect(attempt4.outerStatus).to.equal('passed')
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.false
-          expect(attempt4.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(attempt4.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest4.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest4.final).to.be.true
         })
@@ -209,8 +209,8 @@ describe('mocha custom methods', () => {
           expect(attempt1.outerStatus).to.be.undefined
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
-          expect(attempt1.reasonToStop).to.be.undefined
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -224,8 +224,8 @@ describe('mocha custom methods', () => {
           expect(attempt2.outerStatus).to.be.undefined
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
-          expect(attempt2.reasonToStop).to.be.undefined
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.false
 
@@ -239,8 +239,8 @@ describe('mocha custom methods', () => {
           expect(attempt3.outerStatus).to.be.undefined
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
-          expect(attempt3.reasonToStop).to.be.undefined
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.false
 
@@ -254,8 +254,8 @@ describe('mocha custom methods', () => {
           expect(attempt4.outerStatus).to.equal('failed')
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.false
-          expect(attempt4.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
           expect(attempt4.strategy).to.equal('detect-flake-and-pass-on-threshold')
+          expect(mockTest4.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest4.final).to.be.true
         })
@@ -274,8 +274,8 @@ describe('mocha custom methods', () => {
           expect(attempt1.outerStatus).to.be.undefined
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
-          expect(attempt1.reasonToStop).to.be.undefined
           expect(attempt1.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -289,8 +289,8 @@ describe('mocha custom methods', () => {
           expect(attempt2.outerStatus).to.be.undefined
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
-          expect(attempt2.reasonToStop).to.be.undefined
           expect(attempt2.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.false
 
@@ -304,8 +304,8 @@ describe('mocha custom methods', () => {
           expect(attempt3.outerStatus).to.be.undefined
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
-          expect(attempt3.reasonToStop).to.be.undefined
           expect(attempt3.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.final).to.be.false
 
           const mockTest4 = createMockTest('passed', [mockTest1, mockTest2, mockTest3], totalRetries)
@@ -318,8 +318,8 @@ describe('mocha custom methods', () => {
           expect(attempt4.outerStatus).to.equal('failed')
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.false
-          expect(attempt4.reasonToStop).to.equal('FAILED_REACHED_MAX_RETRIES')
           expect(attempt4.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest4.reasonToStop).to.equal('FAILED_REACHED_MAX_RETRIES')
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest4.final).to.be.true
           // make sure forceState is called on 'detect-flake-but-always-fail' in the case the last test attempt passed, but the outer status should indicate a failure
@@ -338,8 +338,8 @@ describe('mocha custom methods', () => {
           expect(attempt1.outerStatus).to.be.undefined
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
-          expect(attempt1.reasonToStop).to.be.undefined
           expect(attempt1.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -353,8 +353,8 @@ describe('mocha custom methods', () => {
           expect(attempt2.outerStatus).to.equal('failed')
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.false
-          expect(attempt2.reasonToStop).to.equal('FAILED_STOPPED_ON_FLAKE')
           expect(attempt2.strategy).to.equal('detect-flake-but-always-fail')
+          expect(mockTest2.reasonToStop).to.equal('FAILED_STOPPED_ON_FLAKE')
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.true
           // make sure forceState is called on 'detect-flake-but-always-fail' in the case the last test attempt passed, but the outer status should indicate a failure
@@ -378,7 +378,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -389,7 +389,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.be.undefined
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -400,7 +400,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.be.undefined
-            expect(attempt3.reasonToStop).to.equal('PASSED_BURN_IN')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_BURN_IN')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest3.final).to.be.true
           })
@@ -414,7 +414,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -425,7 +425,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.be.undefined
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -436,7 +436,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.be.undefined
-            expect(attempt3.reasonToStop).to.equal('FAILED_NO_RETRIES')
+            expect(mockTest3.reasonToStop).to.equal('FAILED_NO_RETRIES')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest3.final).to.be.true
           })
@@ -450,7 +450,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -461,7 +461,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.false
             expect(attempt2.strategy).to.be.undefined
-            expect(attempt2.reasonToStop).to.equal('FAILED_NO_RETRIES')
+            expect(mockTest2.reasonToStop).to.equal('FAILED_NO_RETRIES')
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.true
           })
@@ -475,7 +475,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.false
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.equal('FAILED_NO_RETRIES')
+            expect(mockTest1.reasonToStop).to.equal('FAILED_NO_RETRIES')
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.true
           })
@@ -493,7 +493,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.false
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
+            expect(mockTest1.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.true
           })
@@ -507,7 +507,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.false
             expect(attempt1.strategy).to.be.undefined
-            expect(attempt1.reasonToStop).to.equal('FAILED_NO_RETRIES')
+            expect(mockTest1.reasonToStop).to.equal('FAILED_NO_RETRIES')
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.true
           })
@@ -524,7 +524,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -535,7 +535,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.be.undefined
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -546,7 +546,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.be.undefined
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -557,7 +557,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.true
           expect(attempt4.strategy).to.be.undefined
-          expect(attempt4.reasonToStop).to.be.undefined
+          expect(mockTest4.reasonToStop).to.be.undefined
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.false
 
@@ -568,7 +568,7 @@ describe('mocha custom methods', () => {
           expect(attempt5.attempts).to.equal(5)
           expect(attempt5.shouldAttemptsContinue).to.be.false
           expect(attempt5.strategy).to.be.undefined
-          expect(attempt5.reasonToStop).to.equal('PASSED_BURN_IN')
+          expect(mockTest5.reasonToStop).to.equal('PASSED_BURN_IN')
           expect(mockTest5.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest5.final).to.be.true
         })
@@ -582,7 +582,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -593,7 +593,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.be.undefined
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -604,7 +604,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.be.undefined
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -615,7 +615,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.true
           expect(attempt4.strategy).to.be.undefined
-          expect(attempt4.reasonToStop).to.be.undefined
+          expect(mockTest4.reasonToStop).to.be.undefined
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.false
 
@@ -626,7 +626,7 @@ describe('mocha custom methods', () => {
           expect(attempt5.attempts).to.equal(5)
           expect(attempt5.shouldAttemptsContinue).to.be.false
           expect(attempt5.strategy).to.be.undefined
-          expect(attempt5.reasonToStop).to.equal('FAILED_NO_RETRIES')
+          expect(mockTest5.reasonToStop).to.equal('FAILED_NO_RETRIES')
           expect(mockTest5.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest5.final).to.be.true
         })
@@ -640,7 +640,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -651,7 +651,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.be.undefined
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -662,7 +662,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.be.undefined
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -673,7 +673,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.false
           expect(attempt4.strategy).to.be.undefined
-          expect(attempt4.reasonToStop).to.equal('FAILED_NO_RETRIES')
+          expect(mockTest4.reasonToStop).to.equal('FAILED_NO_RETRIES')
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.true
         })
@@ -687,7 +687,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -698,7 +698,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.be.undefined
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -709,7 +709,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.be.undefined
-          expect(attempt3.reasonToStop).to.equal('FAILED_NO_RETRIES')
+          expect(mockTest3.reasonToStop).to.equal('FAILED_NO_RETRIES')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.true
         })
@@ -723,7 +723,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -734,7 +734,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.false
           expect(attempt2.strategy).to.be.undefined
-          expect(attempt2.reasonToStop).to.equal('FAILED_NO_RETRIES')
+          expect(mockTest2.reasonToStop).to.equal('FAILED_NO_RETRIES')
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.true
         })
@@ -748,7 +748,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.false
           expect(attempt1.strategy).to.be.undefined
-          expect(attempt1.reasonToStop).to.equal('FAILED_NO_RETRIES')
+          expect(mockTest1.reasonToStop).to.equal('FAILED_NO_RETRIES')
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.true
         })
@@ -771,7 +771,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -782,7 +782,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -793,7 +793,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('PASSED_BURN_IN')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_BURN_IN')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest3.final).to.be.true
           })
@@ -807,7 +807,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -818,7 +818,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -829,7 +829,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest3.final).to.be.true
           })
@@ -843,7 +843,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -854,7 +854,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -865,7 +865,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -879,7 +879,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -890,7 +890,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
             expect(mockTest2.final).to.be.false
 
@@ -901,7 +901,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -915,7 +915,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -926,7 +926,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.false
 
@@ -937,7 +937,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -951,7 +951,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -962,7 +962,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.false
 
@@ -973,7 +973,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -987,7 +987,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -998,7 +998,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.false
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+            expect(mockTest2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.true
           })
@@ -1016,7 +1016,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.false
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
+            expect(mockTest1.reasonToStop).to.equal('PASSED_FIRST_ATTEMPT')
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.true
           })
@@ -1030,7 +1030,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -1041,7 +1041,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.false
 
@@ -1052,7 +1052,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -1066,7 +1066,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -1077,7 +1077,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.true
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.be.undefined
+            expect(mockTest2.reasonToStop).to.be.undefined
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.false
 
@@ -1088,7 +1088,7 @@ describe('mocha custom methods', () => {
             expect(attempt3.attempts).to.equal(3)
             expect(attempt3.shouldAttemptsContinue).to.be.false
             expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+            expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
             expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest3.final).to.be.true
           })
@@ -1102,7 +1102,7 @@ describe('mocha custom methods', () => {
             expect(attempt1.attempts).to.equal(1)
             expect(attempt1.shouldAttemptsContinue).to.be.true
             expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt1.reasonToStop).to.be.undefined
+            expect(mockTest1.reasonToStop).to.be.undefined
             expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
             expect(mockTest1.final).to.be.false
 
@@ -1113,7 +1113,7 @@ describe('mocha custom methods', () => {
             expect(attempt2.attempts).to.equal(2)
             expect(attempt2.shouldAttemptsContinue).to.be.false
             expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-            expect(attempt2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+            expect(mockTest2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
             expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
             expect(mockTest2.final).to.be.true
           })
@@ -1130,7 +1130,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1141,7 +1141,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1152,7 +1152,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -1163,7 +1163,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.true
           expect(attempt4.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt4.reasonToStop).to.be.undefined
+          expect(mockTest4.reasonToStop).to.be.undefined
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.false
 
@@ -1174,7 +1174,7 @@ describe('mocha custom methods', () => {
           expect(attempt5.attempts).to.equal(5)
           expect(attempt5.shouldAttemptsContinue).to.be.false
           expect(attempt5.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt5.reasonToStop).to.equal('PASSED_BURN_IN')
+          expect(mockTest5.reasonToStop).to.equal('PASSED_BURN_IN')
           expect(mockTest5.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest5.final).to.be.true
         })
@@ -1188,7 +1188,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1199,7 +1199,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1210,7 +1210,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -1221,7 +1221,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.true
           expect(attempt4.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt4.reasonToStop).to.be.undefined
+          expect(mockTest4.reasonToStop).to.be.undefined
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.false
 
@@ -1232,7 +1232,7 @@ describe('mocha custom methods', () => {
           expect(attempt5.attempts).to.equal(5)
           expect(attempt5.shouldAttemptsContinue).to.be.false
           expect(attempt5.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt5.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+          expect(mockTest5.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest5.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest5.final).to.be.true
         })
@@ -1246,7 +1246,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1257,7 +1257,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1268,7 +1268,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.true
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.be.undefined
+          expect(mockTest3.reasonToStop).to.be.undefined
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.false
 
@@ -1279,7 +1279,7 @@ describe('mocha custom methods', () => {
           expect(attempt4.attempts).to.equal(4)
           expect(attempt4.shouldAttemptsContinue).to.be.false
           expect(attempt4.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt4.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+          expect(mockTest4.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest4.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest4.final).to.be.true
         })
@@ -1293,7 +1293,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1304,7 +1304,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1315,7 +1315,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+          expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest3.final).to.be.true
         })
@@ -1329,7 +1329,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1340,7 +1340,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1351,7 +1351,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+          expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.true
         })
@@ -1365,7 +1365,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1376,7 +1376,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('BURN_IN')
           expect(mockTest2.final).to.be.false
 
@@ -1387,7 +1387,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+          expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.true
         })
@@ -1401,7 +1401,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1412,7 +1412,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.false
 
@@ -1423,7 +1423,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
+          expect(mockTest3.reasonToStop).to.equal('PASSED_MET_THRESHOLD')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.true
         })
@@ -1437,7 +1437,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1448,7 +1448,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.true
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.be.undefined
+          expect(mockTest2.reasonToStop).to.be.undefined
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.false
 
@@ -1459,7 +1459,7 @@ describe('mocha custom methods', () => {
           expect(attempt3.attempts).to.equal(3)
           expect(attempt3.shouldAttemptsContinue).to.be.false
           expect(attempt3.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+          expect(mockTest3.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
           expect(mockTest3.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest3.final).to.be.true
         })
@@ -1473,7 +1473,7 @@ describe('mocha custom methods', () => {
           expect(attempt1.attempts).to.equal(1)
           expect(attempt1.shouldAttemptsContinue).to.be.true
           expect(attempt1.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt1.reasonToStop).to.be.undefined
+          expect(mockTest1.reasonToStop).to.be.undefined
           expect(mockTest1.thisAttemptInitialStrategy).to.equal('NONE')
           expect(mockTest1.final).to.be.false
 
@@ -1484,7 +1484,7 @@ describe('mocha custom methods', () => {
           expect(attempt2.attempts).to.equal(2)
           expect(attempt2.shouldAttemptsContinue).to.be.false
           expect(attempt2.strategy).to.equal('detect-flake-and-pass-on-threshold')
-          expect(attempt2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
+          expect(mockTest2.reasonToStop).to.equal('FAILED_DID_NOT_MEET_THRESHOLD')
           expect(mockTest2.thisAttemptInitialStrategy).to.equal('RETRY')
           expect(mockTest2.final).to.be.true
         })

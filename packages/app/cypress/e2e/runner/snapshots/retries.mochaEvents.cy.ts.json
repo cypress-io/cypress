@@ -120,7 +120,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -161,7 +162,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -196,7 +198,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -243,8 +246,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -266,7 +268,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -277,8 +281,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -300,7 +303,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -326,8 +331,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -350,7 +354,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -361,8 +367,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -385,7 +390,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -655,7 +662,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -754,7 +762,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -810,7 +819,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -970,8 +980,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1014,7 +1023,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1025,8 +1036,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1069,7 +1079,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1095,8 +1107,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1140,7 +1151,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1151,8 +1164,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1196,7 +1208,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1466,7 +1480,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -1565,7 +1580,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1621,7 +1637,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1781,8 +1798,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1825,7 +1841,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1836,8 +1854,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1880,7 +1897,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1906,8 +1925,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -1951,7 +1969,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -1962,8 +1982,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2007,7 +2026,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -2362,7 +2383,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -2468,7 +2490,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2531,7 +2554,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2766,8 +2790,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2820,7 +2843,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -2831,8 +2856,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2885,7 +2909,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -2911,8 +2937,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2966,7 +2991,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -2977,8 +3004,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3032,7 +3058,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -3416,7 +3444,9 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -3514,7 +3544,9 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -3585,7 +3617,9 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3653,7 +3687,9 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3858,8 +3894,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3905,7 +3940,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -3916,8 +3953,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3963,7 +3999,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -3974,8 +4012,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -4021,7 +4058,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -4035,8 +4074,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -4083,7 +4121,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -4094,8 +4134,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 2,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -4142,7 +4181,9 @@
         "final": true,
         "currentRetry": 1,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -4358,8 +4399,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -4406,7 +4446,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4417,8 +4459,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -4465,7 +4506,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4476,8 +4519,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -4524,7 +4566,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -4538,8 +4582,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -4587,7 +4630,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4598,8 +4643,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -4647,7 +4691,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4900,8 +4946,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -4955,7 +5000,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4966,8 +5013,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -5021,7 +5067,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -5032,8 +5080,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -5087,7 +5134,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -5101,8 +5150,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -5157,7 +5205,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -5168,8 +5218,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -5224,7 +5273,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -5373,7 +5424,9 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -5490,7 +5543,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -5542,7 +5596,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -5591,7 +5646,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -5699,7 +5755,9 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "message": "[error message]",
@@ -5815,7 +5873,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -5866,7 +5925,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -5914,7 +5974,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -6043,8 +6104,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r7",
         "order": 4,
@@ -6078,7 +6138,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -6089,8 +6151,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r7",
         "order": 4,
@@ -6124,7 +6185,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -6135,8 +6198,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r7",
         "order": 4,
@@ -6170,7 +6232,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -6184,8 +6248,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r7",
         "order": 4,
@@ -6220,7 +6283,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -6231,8 +6296,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r7",
         "order": 4,
@@ -6267,7 +6331,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -6399,8 +6465,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r9",
         "order": 5,
@@ -6430,7 +6495,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6441,8 +6508,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r9",
         "order": 5,
@@ -6472,7 +6538,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6498,8 +6566,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r9",
         "order": 5,
@@ -6530,7 +6597,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6541,8 +6610,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r9",
         "order": 5,
@@ -6573,7 +6641,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6697,8 +6767,7 @@
           "attempts": 1,
           "strategy": "detect-flake-and-pass-on-threshold",
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false,
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "shouldAttemptsContinue": false
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -6720,7 +6789,8 @@
         "invocationDetails": "{Object 9}",
         "currentRetry": 0,
         "retries": -1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED"
       },
       {
         "message": "[error message]",
@@ -6824,7 +6894,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6871,7 +6943,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -6918,7 +6992,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7181,8 +7257,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -7226,7 +7301,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7237,8 +7314,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -7282,7 +7358,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7293,8 +7371,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -7338,7 +7415,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -7352,8 +7431,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -7398,7 +7476,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7409,8 +7489,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -7455,7 +7534,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7594,7 +7675,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -7686,7 +7768,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -7738,7 +7821,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7787,7 +7871,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -7908,7 +7993,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "message": "[error message]",
@@ -7999,7 +8085,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -8050,7 +8137,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8098,7 +8186,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8221,8 +8310,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -8258,7 +8346,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8269,8 +8359,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -8306,7 +8395,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8317,8 +8408,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -8354,7 +8444,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -8368,8 +8460,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -8406,7 +8497,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8417,8 +8510,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_MET_THRESHOLD"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -8455,7 +8547,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_MET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -8632,8 +8726,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -8677,7 +8770,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -8688,8 +8783,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -8733,7 +8827,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -8759,8 +8855,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -8805,7 +8900,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -8816,8 +8913,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -8862,7 +8958,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -8993,7 +9091,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -9034,7 +9133,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -9069,7 +9169,8 @@
         "final": false,
         "currentRetry": 0,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -9138,7 +9239,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "message": "[error message]",
@@ -9178,7 +9280,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -9212,7 +9315,8 @@
         "final": false,
         "currentRetry": 1,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -9259,8 +9363,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
+          "outerStatus": "failed"
         },
         "id": "r2",
         "order": 1,
@@ -9288,7 +9391,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       },
       {
         "message": "[error message]",
@@ -9305,8 +9410,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
+          "outerStatus": "failed"
         },
         "id": "r2",
         "order": 1,
@@ -9334,7 +9438,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -9345,8 +9451,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
+          "outerStatus": "failed"
         },
         "id": "r2",
         "order": 1,
@@ -9375,7 +9480,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [
@@ -9386,8 +9493,7 @@
           "strategy": "detect-flake-and-pass-on-threshold",
           "shouldAttemptsContinue": false,
           "attempts": 3,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD"
+          "outerStatus": "failed"
         },
         "id": "r2",
         "order": 1,
@@ -9416,7 +9522,9 @@
         "final": true,
         "currentRetry": 2,
         "retries": 2,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_DID_NOT_MEET_THRESHOLD",
+        "thisAttemptInitialStrategy": "RETRY"
       }
     ],
     [

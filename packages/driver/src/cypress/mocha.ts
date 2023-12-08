@@ -7,8 +7,8 @@ import $stackUtils from './stack_utils'
 // in the browser mocha is coming back
 // as window
 import * as mocha from 'mocha'
-import type { AttemptStrategy, CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, ReasonToStop } from '../burn-in'
-import { evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burn-in'
+import { CompleteBurnInConfig, EvaluateAttemptInput, LatestScore, NormalizedRetriesConfig, evaluateAttempt, getBurnInConfig, mergeBurnInConfig } from '../burn-in'
+import type { AttemptStrategy, ReasonToStop } from '@packages/types'
 
 const { getTestFromRunnable } = $utils
 
@@ -91,7 +91,6 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
     shouldAttemptsContinue,
     attempts: totalAttemptsAlreadyExecuted,
     outerStatus: output.outerTestStatus,
-    reasonToStop: output.reasonToStop,
   }
 }
 

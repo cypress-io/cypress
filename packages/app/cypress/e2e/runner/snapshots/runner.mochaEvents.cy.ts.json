@@ -97,8 +97,7 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false,
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "shouldAttemptsContinue": false
         },
         "id": "r3",
         "title": "\"before all\" hook for \"test 1\"",
@@ -120,7 +119,8 @@
         "invocationDetails": "{Object 9}",
         "currentRetry": 0,
         "retries": -1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED"
       },
       {
         "message": "[error message]",
@@ -180,7 +180,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -220,7 +222,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -260,7 +264,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -400,8 +406,7 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false,
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "shouldAttemptsContinue": false
         },
         "id": "r3",
         "title": "\"before each\" hook for \"test 1\"",
@@ -423,7 +428,8 @@
         "invocationDetails": "{Object 9}",
         "currentRetry": 0,
         "retries": -1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED"
       },
       {
         "message": "[error message]",
@@ -468,7 +474,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -507,7 +515,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -550,7 +560,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -590,7 +602,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -727,8 +741,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -751,7 +764,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -761,8 +776,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -785,7 +799,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -795,8 +811,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -819,7 +834,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -832,8 +849,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -857,7 +873,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -867,8 +885,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -892,7 +909,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -973,8 +992,7 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false,
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "shouldAttemptsContinue": false
         },
         "id": "r4",
         "title": "\"after all\" hook for \"test 2\"",
@@ -996,7 +1014,8 @@
         "invocationDetails": "{Object 9}",
         "currentRetry": 0,
         "retries": -1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED"
       },
       {
         "message": "[error message]",
@@ -1012,8 +1031,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r4",
         "order": 2,
@@ -1051,7 +1069,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1076,8 +1096,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r4",
         "order": 2,
@@ -1116,7 +1135,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1126,8 +1147,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r4",
         "order": 2,
@@ -1166,7 +1186,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1306,8 +1328,7 @@
         "_cypressTestStatusInfo": {
           "attempts": 1,
           "outerStatus": "failed",
-          "shouldAttemptsContinue": false,
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "shouldAttemptsContinue": false
         },
         "id": "r3",
         "title": "\"after each\" hook for \"test 1\"",
@@ -1329,7 +1350,8 @@
         "invocationDetails": "{Object 9}",
         "currentRetry": 0,
         "retries": -1,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED"
       },
       {
         "message": "[error message]",
@@ -1345,8 +1367,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1384,7 +1405,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1394,8 +1417,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1433,7 +1455,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -1446,8 +1470,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1486,7 +1509,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1496,8 +1521,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_HOOK_FAILED"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1536,7 +1560,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_HOOK_FAILED",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -1783,8 +1809,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_NO_RETRIES"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1841,7 +1866,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_NO_RETRIES",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "message": "[error message]",
@@ -1931,8 +1958,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_NO_RETRIES"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -1989,7 +2015,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_NO_RETRIES",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2014,8 +2042,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_NO_RETRIES"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -2073,7 +2100,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_NO_RETRIES",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2083,8 +2112,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "failed",
-          "reasonToStop": "FAILED_NO_RETRIES"
+          "outerStatus": "failed"
         },
         "id": "r3",
         "order": 1,
@@ -2142,7 +2170,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "FAILED_NO_RETRIES",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2448,8 +2478,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2500,7 +2529,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2510,8 +2541,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2562,7 +2592,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2587,8 +2619,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2640,7 +2671,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2650,8 +2683,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2703,7 +2735,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2825,8 +2859,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2849,7 +2882,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2859,8 +2894,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2883,7 +2917,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2908,8 +2944,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2933,7 +2968,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -2943,8 +2980,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -2968,7 +3004,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3230,8 +3268,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3275,7 +3312,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3285,8 +3324,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3330,7 +3368,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3340,8 +3380,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3385,7 +3424,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -3398,8 +3439,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3444,7 +3484,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3454,8 +3496,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r3",
         "order": 1,
@@ -3500,7 +3541,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3639,8 +3682,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -3677,7 +3719,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3687,8 +3731,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -3725,7 +3768,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3735,8 +3780,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -3773,7 +3817,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -3786,8 +3832,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -3825,7 +3870,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -3835,8 +3882,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r4",
         "order": 2,
@@ -3874,7 +3920,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4050,8 +4098,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -4095,7 +4142,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4105,8 +4154,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -4150,7 +4198,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4175,8 +4225,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -4221,7 +4270,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
@@ -4231,8 +4282,7 @@
         "_cypressTestStatusInfo": {
           "shouldAttemptsContinue": false,
           "attempts": 1,
-          "outerStatus": "passed",
-          "reasonToStop": "PASSED_FIRST_ATTEMPT"
+          "outerStatus": "passed"
         },
         "id": "r5",
         "order": 3,
@@ -4277,7 +4327,9 @@
         "final": true,
         "currentRetry": 0,
         "retries": 0,
-        "_slow": 10000
+        "_slow": 10000,
+        "reasonToStop": "PASSED_FIRST_ATTEMPT",
+        "thisAttemptInitialStrategy": "NONE"
       }
     ],
     [
