@@ -142,7 +142,7 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
 
-export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
 
 export type OffFn = (eventName: string, cb: (data: any) => void) => void
 

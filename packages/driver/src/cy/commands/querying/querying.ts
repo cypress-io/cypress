@@ -7,7 +7,7 @@ import $utils from '../../../cypress/utils'
 import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
-import { aliasRe, aliasIndexRe } from '../../aliases'
+import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -38,7 +38,9 @@ function getAlias (selector, log, cy) {
       aliasObj = cy.getAlias(toSelect)
     } catch (err) {
       // possibly this is a dynamic alias, check to see if there is a request
-      const requests = getAliasedRequests(alias, cy.state)
+      // We need to use the stripped alias
+      const strippedAlias = aliasDisplayName(toSelect)
+      const requests = getAliasedRequests(strippedAlias, cy.state)
 
       if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
         err.retry = false
@@ -46,7 +48,7 @@ function getAlias (selector, log, cy) {
       }
 
       aliasObj = {
-        alias,
+        alias: strippedAlias,
         command: cy.state('routes')[requests[0].routeId].command,
       }
     }

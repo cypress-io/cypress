@@ -290,6 +290,13 @@ export const isScrollable = ($el) => {
     return false
   }
 
+  // If we're at the documentElement, we check its size against the window
+  const documentElement = $document.getDocumentFromElement(el).documentElement
+
+  if (el === documentElement) {
+    return checkDocumentElement($window.getWindowByElement(el), el)
+  }
+
   // if we're any other element, we do some css calculations
   // to see that the overflow is correct and the scroll
   // area is larger than the actual height or width

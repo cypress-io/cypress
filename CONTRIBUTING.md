@@ -442,7 +442,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
   - Changes has user-facing impact:
     - `breaking` - A breaking change that will require a MVB
     - `dependency` - A change to a dependency that impact the user
-    - `deprecation` - A API deprecation notice for users
+    - `deprecation` - An API deprecation notice for users
     - `feat` - A new feature
     - `fix` - A bug fix or regression fix.
     - `misc` - a misc user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
