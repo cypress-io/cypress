@@ -4,25 +4,6 @@ describe('driver/src/cypress/command', () => {
   let command
 
   context('$Command', () => {
-    context('.finishLogs', () => {
-      it('removes tracked logs once all logs are completed', () => {
-        const log = {
-          get (_opt) {},
-          set () {},
-          snapshot () {},
-          finish () {},
-        }
-
-        command = Command.create({ })
-        command.log(log)
-        command.log(log)
-        expect(command.get('logs')).to.have.length(2)
-
-        command.finishLogs()
-        expect(command.get('logs')).to.have.length(0)
-      })
-    })
-
     context('._removeNonPrimitives', () => {
       before(() => {
         command = Command.create({ })

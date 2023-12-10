@@ -332,8 +332,8 @@ export class Log {
 
     _.extend(this.attributes, obj)
 
-    // if we have an consoleProps function
-    // then re-wrap it
+    // if we have an consoleProps then re-wrap it
+    // cy.clock sets obj / cross origin logs come as objs
     if (obj && _.isFunction(obj.consoleProps)) {
       this.wrapConsoleProps()
     }
@@ -578,7 +578,7 @@ class LogManager {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
 
-  trigger (log, publicEvent: 'command:log:added' | 'command:log:changed') {
+  trigger (log, event: 'command:log:added' | 'command:log:changed') {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
       return
@@ -605,7 +605,7 @@ class LogManager {
     if (!logAttrsEqual) {
       log._emittedAttrs = attrs
 
-      return Cypress.action(publicEvent, attrs, log)
+      return Cypress.action(event, attrs, log)
     }
   }
 
@@ -643,7 +643,7 @@ class LogManager {
 
       const onBeforeLog = state('onBeforeLog')
 
-      // don't trigger log if this function
+      // dont trigger log if this function
       // explicitly returns false
       if (_.isFunction(onBeforeLog)) {
         if (onBeforeLog.call(cy, log) === false) {
@@ -666,6 +666,8 @@ class LogManager {
       if (log.get('error')) {
         log.error(log.get('error'))
       }
+
+      log.wrapConsoleProps()
 
       // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
       if (!command || log.get('end')) {

@@ -110,7 +110,6 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
   })
 
   Cypress.on('test:before:after:run:async', async (attributes, _test, options) => {
-    console.log('capturePROTOCOL____test:before:after:run:async')
     attachCypressProtocolInfo({
       type: 'test:before:after:run:async',
       timestamp: performance.timeOrigin + performance.now(),

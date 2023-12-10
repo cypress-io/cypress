@@ -730,7 +730,7 @@ export class EventManager {
 
     Cypress.primaryOriginCommunicator.on('after:screenshot', handleAfterScreenshot)
 
-    Cypress.primaryOriginCommunicator.on('log:added', (attrs, log) => {
+    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
       // If the mocha run is over and the user enters interactive snapshot mode, do not add cross origin logs to the test runner.
       if (hasMochaRunEnded) return
 

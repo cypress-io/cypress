@@ -81,6 +81,9 @@ export class $Command {
       } else {
         log.set('snapshot', false)
         log.finish()
+        if (Cypress.isCrossOriginSpecBridge) {
+          log.fireChangeEvent.flush()
+        }
       }
     })
   }

@@ -111,9 +111,10 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
       cy.shouldWithTimeout(() => {
         const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
+        const consoleProps = spyLog.consoleProps
 
-        expect(spyLog.consoleProps.name).to.equal('spy-1')
-        expect(spyLog.consoleProps.type).to.equal('command')
+        expect(consoleProps.name).to.equal('spy-1')
+        expect(consoleProps.type).to.equal('command')
         expect(spyLog.callCount).to.be.a('number')
         expect(spyLog.functionName).to.equal('bar')
       })
@@ -130,9 +131,10 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
       cy.shouldWithTimeout(() => {
         const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
+        const consoleProps = stubLog.consoleProps
 
-        expect(stubLog.consoleProps.name).to.equal('stub-1')
-        expect(stubLog.consoleProps.type).to.equal('command')
+        expect(consoleProps.name).to.equal('stub-1')
+        expect(consoleProps.type).to.equal('command')
         expect(stubLog.callCount).to.be.a('number')
         expect(stubLog.functionName).to.equal('bar')
       })
@@ -150,7 +152,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         expect(clockLog.name).to.equal('clock')
 
-        const consoleProps = clockLog.consoleProps()
+        const consoleProps = clockLog.consoleProps
 
         expect(consoleProps.name).to.equal('clock')
         expect(consoleProps.type).to.equal('command')
@@ -173,7 +175,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         expect(tickLog.name).to.equal('tick')
 
-        const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
+        const consoleProps = tickLog.consoleProps
 
         expect(consoleProps.name).to.equal('tick')
         expect(consoleProps.type).to.equal('command')

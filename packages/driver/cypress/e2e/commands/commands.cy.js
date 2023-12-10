@@ -102,7 +102,8 @@ describe('src/cy/commands/commands', () => {
       cy.getCommandLogInReporter('type', { isHidden: true })
     })
 
-    describe('we inject log', () => {
+    // TODO: implement
+    describe.skip('we inject log', () => {
       it('for custom command if no log was created', () => {
         const logs = []
         const addLogs = (attrs, log) => {

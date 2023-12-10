@@ -30,7 +30,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
   beforeEach(() => {
     logs = new Map()
 
-    cy.on('_log:changed', (attrs, log) => {
+    cy.on('log:changed', (attrs, log) => {
       logs.set(attrs.id, log)
     })
 
@@ -143,6 +143,10 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
     })
 
     it('can turn off logging', () => {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
       cy.intercept('/foo', {}).as('foo')
 
       cy.origin('http://www.foobar.com:3500', () => {
