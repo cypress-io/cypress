@@ -3407,7 +3407,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
-  jobs:        
+  jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
         executor: linux-arm64
