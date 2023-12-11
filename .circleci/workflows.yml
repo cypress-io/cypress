@@ -3580,7 +3580,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3588,7 +3588,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3596,7 +3596,7 @@ windows-workflow: &windows-workflow
     - unit-tests:
         name: windows-unit-tests
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         requires:
           - windows-build
 
@@ -3622,19 +3622,20 @@ windows-workflow: &windows-workflow
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
+        resource_class: windows.xlarge
         requires:
           - windows-create-build-artifacts
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         requires:
           - windows-build
     - driver-integration-memory-tests:
         name: windows-driver-integration-memory-tests
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.xlarge
         requires:
           - windows-build
 
