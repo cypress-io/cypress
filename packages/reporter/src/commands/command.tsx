@@ -24,12 +24,14 @@ import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-c
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
-const md = new Markdown({ breaks: true })
-
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-export const formattedMessage = (message: string) => {
+export const formattedMessage = (message: string, type: string) => {
+  // we don't want <br> in our error messages, but allow it in Cypress.log
+  const mdObj = type === 'error' ? {} : { breaks: true }
+  const md = new Markdown(mdObj)
+
   if (!message) return ''
 
   const searchText = ['to match', 'to equal']
