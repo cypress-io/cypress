@@ -94,7 +94,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
+      - image: cypress/browsers-internal:node18.16.0-chrome114-ff115
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -104,7 +104,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
+      - image: cypress/browsers-internal:node18.16.0-chrome114-ff115
         user: node
     environment:
       PLATFORM: linux
@@ -2349,7 +2349,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base-internal:18.15.0
+      - image: cypress/base-internal:18.16.0
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries

@@ -26,14 +26,14 @@ function smokeTestDockerImage (dockerImage: string) {
 
 describe('binary node versions', () => {
   [
-    'cypress/base:18.15.0',
+    'cypress/base:18.16.0',
     'cypress/base:20.5.0',
   ].forEach(smokeTestDockerImage)
 })
 
 describe('type: module', () => {
   [
-    'cypress/base:18.6.0',
+    'cypress/base:18.16.0',
     'cypress/base:20.5.0',
   ].forEach((dockerImage) => {
     systemTests.it(`can run in ${dockerImage}`, {

@@ -1,4 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.1
+
+_Released 12/29/2023 (PENDING)_
+
+**Misc:**
+
+- Upgraded `electron` from `25.8.4` to `26.6.2`
+- Upgraded bundled Node.js version from `18.15.0` to `18.16.0`
+- Upraded bundled Chromium version from `114.0.5735.289` to `116.0.5845.228`
+
 ## 13.6.1
 
 _Released 12/5/2023_
