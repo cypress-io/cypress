@@ -3622,7 +3622,6 @@ windows-workflow: &windows-workflow
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
-        resource_class: windows.xlarge
         requires:
           - windows-create-build-artifacts
 
