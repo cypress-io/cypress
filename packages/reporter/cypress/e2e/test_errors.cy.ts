@@ -234,6 +234,7 @@ describe('test errors', () => {
       cy.wrap(runner.emit).should('be.calledWith', 'external:open', 'https://on.cypress.io/type')
     })
 
+    // https://github.com/cypress-io/cypress/issues/28452
     it('does not show br tags in formatted error message', () => {
       setError(commandErr)
 
