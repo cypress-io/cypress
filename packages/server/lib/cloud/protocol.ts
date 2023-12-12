@@ -167,9 +167,9 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('connecting to database at %s', dbPath)
     debug('better-sqlite3 location', require.resolve('better-sqlite3'))
-    debug('loading native binding from', path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')))
+    debug('loading native binding from', path.resolve(path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node'))))
     const db = Database(dbPath, {
-      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      nativeBinding: 'better-sqlite3/build/Release/better_sqlite3.node',
       verbose: debugVerbose,
     })
 
