@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.0
+
+_Released 12/6/2023 (PENDING)_
+
+**Features:**
+
+- Introduces shorthand version of using cy.request() with fixture data. Addresses [#3387](https://github.com/cypress-io/cypress/issues/3387).
+
 ## 13.6.1
 
 _Released 12/5/2023_

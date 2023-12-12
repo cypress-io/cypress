@@ -73,6 +73,54 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      it('accepts object with url, method, headers, fixture with encoding', () => {
+        cy.request({
+          url: 'http://github.com/users',
+          method: 'POST',
+          fixture: 'path,encoding',
+          headers: {
+            'x-token': 'abc123',
+          },
+        })
+        .then(function () {
+          this.expectOptionsToBe({
+            url: 'http://github.com/users',
+            method: 'POST',
+            fixture: {
+              filePath: 'path',
+              encoding: 'encoding',
+            },
+            headers: {
+              'x-token': 'abc123',
+            },
+          })
+        })
+      })
+
+      it('accepts object with url, method, headers, fixture', () => {
+        cy.request({
+          url: 'http://github.com/users',
+          method: 'POST',
+          fixture: 'path',
+          headers: {
+            'x-token': 'abc123',
+          },
+        })
+        .then(function () {
+          this.expectOptionsToBe({
+            url: 'http://github.com/users',
+            method: 'POST',
+            fixture: {
+              filePath: 'path',
+              encoding: undefined,
+            },
+            headers: {
+              'x-token': 'abc123',
+            },
+          })
+        })
+      })
+
       it('accepts object with url + timeout', () => {
         cy.request({ url: 'http://localhost:8000/foo', timeout: 23456 }).then(function () {
           this.expectOptionsToBe({
@@ -884,6 +932,38 @@ describe('src/cy/commands/request', () => {
         })
 
         cy.request()
+      })
+
+      it('throws when body is combined with fixture', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.request()` was called with the `body` and `fixture` options which cannot be combined.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+
+          done()
+        })
+
+        cy.request({ url: 'http://localhost:8080/users', method: 'POST', fixture: 'number', body: { data: 14 } })
+      })
+
+      it('throws when fixture option is used without method', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.request()` was called with the `fixture` option but is missing the `method` option.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+
+          done()
+        })
+
+        cy.request({ url: 'http://localhost:8080/users', fixture: 'number' })
       })
 
       it('throws when url is not FQDN', {

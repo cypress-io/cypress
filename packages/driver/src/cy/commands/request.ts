@@ -26,6 +26,7 @@ const REQUEST_DEFAULTS = {
   encoding: 'utf8',
   gzip: true,
   timeout: null,
+  fixture: null,
   followRedirect: true,
   failOnStatusCode: true,
   retryIntervals: [0, 100, 200, 200],
@@ -136,6 +137,20 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (!_.isString(options.url)) {
         $errUtils.throwErrByPath('request.url_wrong_type')
+      }
+
+      if (options.fixture) {
+        if (options.body) {
+          $errUtils.throwErrByPath('request.body_and_fixture')
+        }
+
+        if (!userOptions.method) {
+          $errUtils.throwErrByPath('request.fixture_without_method')
+        }
+
+        const [filePath, encoding] = options.fixture.split(',')
+
+        options.fixture = { filePath, encoding: encoding === 'null' ? null : encoding }
       }
 
       // normalize the url by prepending it with our current origin

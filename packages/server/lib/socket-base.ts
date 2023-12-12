@@ -410,7 +410,7 @@ export class SocketBase {
                 return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return options.onRequest(userAgent, automationRequest, getFixture, args[0])
               case 'reset:server:state':
                 return options.onResetServerState()
               case 'log:memory:pressure':
