@@ -2,7 +2,7 @@
 
 This package is responsible for copying the `cypress/e2e` and `app` files from [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink) into the cypress repository.
 
-The `cypress/e2e` tests, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink), are used for scaffolding user's e2e tests in `packages/data-context` and in `npm/create-cypress-tests`.
+The `cypress/e2e` tests, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink), are used for scaffolding user's e2e tests in `packages/data-context`.
 
 The `app` content, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink), is published to `cypress-io/cypress` repository's Github page, [https://example.cypress.io](https://example.cypress.io).
 
