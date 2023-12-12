@@ -6,6 +6,7 @@ _Released 12/19/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed Google Chrome for Testing version parsing issue. Fixes [#28123](https://github.com/cypress-io/cypress/issues/28123).
+- Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
 
 ## 13.6.1
 
