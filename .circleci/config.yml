@@ -2,15 +2,13 @@ version: 2.1
 setup: true
 
 orbs:
-  continuation: circleci/continuation@1.0.0
-
+  continuation: circleci/continuation@0.3.1
 
 jobs:
   verify-ci-should-run:
     docker:
       - image: cimg/node:current
     steps:
-      - checkout
       - run:
           name: Verify CI should run
           command: |
@@ -20,12 +18,12 @@ jobs:
               exit 0
             fi
 
-            if [[ <<pipeline.git.branch>> == "develop" || <<pipeline.git.branch>> == "release/"* ]]; then
+            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
               echo "Always run CI for develop and for release candidate branches."
               exit 0
             fi
 
-            LAST_COMMIT_MESSAGE=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
+            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
 
             if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
               echo "Always run CI when the commit message includes 'run ci'."
@@ -53,8 +51,17 @@ jobs:
 
             echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
             cancel_build
+
+      - run:
+          name: Download .circleci/workflows.yaml
+          command: |
+            if [[ "$CIRCLE_BRANCH" == "pull/"* ]]; then
+              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/develop/.circleci/workflows.yml
+            else 
+              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
+            fi
       - continuation/continue:
-          configuration_path: .circleci/workflows.yml
+          configuration_path: workflows.yml
 
 workflows:
   # the setup-workflow workflow is always triggered.
