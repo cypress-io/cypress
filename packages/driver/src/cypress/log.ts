@@ -190,6 +190,7 @@ const defaults = function (state: StateFunc, config, obj) {
   counter++
 
   _.defaults(obj, {
+    isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
     id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
     instrument: 'command',
@@ -351,7 +352,7 @@ export class Log {
     return _.pick(this.attributes, args)
   }
 
-  private addSnapshot (snapshot, options, shouldRebindSnapshotFn = true) {
+  private addSnapshot (snapshot, options) {
     const snapshots = this.get('snapshots') || []
 
     // don't add snapshot if we couldn't create one, which can happen
@@ -364,7 +365,7 @@ export class Log {
 
     this.set('snapshots', snapshots)
 
-    if (options.next && shouldRebindSnapshotFn) {
+    if (options.next) {
       this.set('next', options.next)
     }
 
@@ -372,33 +373,20 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests and the protocol is not enabled
-    if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
+    // bail early and don't snapshot if
+    // 1. we're in headless mode, we are
+    // 2. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
+    // 3. or we're not storing tests and the protocol is not enabled
+    if (
+      (!this.config('isInteractive')
+      || (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
+      || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
 
     if (this.get('next')) {
       name = this.get('next')
       this.set('next', null)
-    }
-
-    if (!Cypress.isCrossOriginSpecBridge) {
-      const activeSpecBridgeOriginIfApplicable = this.state('currentActiveOrigin') || undefined
-      // @ts-ignore
-      const { origin: originThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('url'))
-
-      if (activeSpecBridgeOriginIfApplicable && activeSpecBridgeOriginIfApplicable === originThatIsSoonToBeOrIsActive) {
-        Cypress.emit('request:snapshot:from:spec:bridge', {
-          log: this,
-          name,
-          options,
-          specBridge: activeSpecBridgeOriginIfApplicable,
-          addSnapshot: this.addSnapshot,
-        })
-
-        return this
-      }
     }
 
     const snapshot = this.createSnapshot(name, this.get('$el'))
