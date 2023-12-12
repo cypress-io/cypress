@@ -138,12 +138,11 @@ executors:
       PLATFORM: darwin
 
   linux-arm64: &linux-arm64-executor
-    docker:
-      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
+    machine:
+      image: ubuntu-2004:2022.04.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
-      CI_DOCKER: "true"
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
 
@@ -525,8 +524,15 @@ commands:
   # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
     description: Build better-sqlite3 for CentOS 7
+    parameters:
+      ci_docker:
+        default: CI_DOCKER
+        type: env_var_name
     steps:
-      - setup_remote_docker
+      - when:
+          condition: <<parameters.ci_docker>>
+          steps:
+            - setup_remote_docker
       - restore_cache:
           keys:
             - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
