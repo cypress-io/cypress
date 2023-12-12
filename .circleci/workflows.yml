@@ -530,7 +530,8 @@ commands:
         type: env_var_name
     steps:
       - when:
-          condition: <<parameters.ci_docker>>
+          condition: 
+            equal: [ 'true', <<parameters.ci_docker>> ]
           steps:
             - setup_remote_docker
       - restore_cache:
