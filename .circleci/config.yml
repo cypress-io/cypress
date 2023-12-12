@@ -25,7 +25,7 @@ jobs:
               exit 0
             fi
 
-            LAST_COMMIT_MESSAGE=<<pipeline.trigger_parameters.github_app.commit_message>>
+            LAST_COMMIT_MESSAGE=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
 
             if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
               echo "Always run CI when the commit message includes 'run ci'."
