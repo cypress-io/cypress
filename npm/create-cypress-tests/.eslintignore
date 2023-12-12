@@ -1,9 +1,0 @@
-**/dist
-**/*.d.ts
-**/package-lock.json
-**/tsconfig.json
-**/cypress/fixtures
-**/test/fixtures
-**/__snapshots__
-/initial-template
-/**/*.template.*
