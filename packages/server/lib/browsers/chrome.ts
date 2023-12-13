@@ -537,7 +537,7 @@ export = {
     await Promise.all([
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)

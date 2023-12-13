@@ -5,6 +5,8 @@ import type {
 } from '@packages/proxy'
 import type { ProtocolManagerShape } from '@packages/types'
 import Debug from 'debug'
+import { ServiceWorkerManager } from './service-worker-manager'
+import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
 const debugVerbose = Debug('cypress-verbose:proxy:http:util:prerequests')
@@ -108,6 +110,7 @@ export class PreRequests {
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
+  serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (
     requestTimeout = 2000,
@@ -147,8 +150,23 @@ export class PreRequests {
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
-    metrics.browserPreRequestsReceived++
     const key = `${browserPreRequest.method}-${decodeURI(browserPreRequest.url)}`
+
+    // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
+    // it's the service worker request via the `service-worker` header
+    if (browserPreRequest.headers?.['Service-Worker'] === 'script') {
+      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it', key)
+
+      return
+    }
+
+    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
+      debugVerbose('Not correlating request since it is fully controlled by service worker and the correlation will happen within the service worker', key)
+
+      return
+    }
+
+    metrics.browserPreRequestsReceived++
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -220,11 +238,10 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
-    // The initial request that loads the service worker does not get sent to CDP and it happens prior
-    // to the service worker target being added. Thus, we need to explicitly ignore it. We determine
-    // it's the service worker request via the `sec-fetch-dest` header
-    if (req.headers['sec-fetch-dest'] === 'serviceworker') {
-      ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
+    // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
+    // it's the service worker request via the `service-worker` header
+    if (req.headers?.['service-worker'] === 'script') {
+      ctxDebug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
 
       callback({
         noPreRequestExpected: true,
@@ -242,6 +259,7 @@ export class PreRequests {
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+
       callback({
         browserPreRequest: {
           ...pendingPreRequest.browserPreRequest,
@@ -305,7 +323,30 @@ export class PreRequests {
     delete pendingRequest.callback
   }
 
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    data.registrations.forEach((registration) => {
+      if (registration.isDeleted) {
+        this.serviceWorkerManager.unregisterServiceWorker({ registrationId: registration.registrationId })
+      } else {
+        this.serviceWorkerManager.registerServiceWorker({ registrationId: registration.registrationId, scopeURL: registration.scopeURL })
+      }
+    })
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    data.versions.forEach((version) => {
+      if (version.status === 'activated') {
+        this.serviceWorkerManager.addActivatedServiceWorker({ registrationId: version.registrationId, scriptURL: version.scriptURL })
+      }
+    })
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorURL: data.initiatorURL })
+  }
+
   reset () {
+    this.serviceWorkerManager = new ServiceWorkerManager()
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue

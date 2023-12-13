@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
+import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
@@ -14,7 +14,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void, public onDownloadLinkClicked?: (downloadUrl: string) => void, public onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated, public onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated, public onServiceWorkerClientSideRegistrationUpdated?: OnServiceWorkerClientSideRegistrationUpdated) {
     this.requests = {}
 
     // set the middleware

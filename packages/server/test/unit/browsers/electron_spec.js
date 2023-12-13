@@ -68,7 +68,7 @@ describe('lib/browsers/electron', () => {
     sinon.stub(Windows, 'installExtension').returns()
     sinon.stub(Windows, 'removeAllExtensions').returns()
     sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves(1234)
-    sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
+    sinon.stub(utils, 'initializeCDP').resolves()
 
     // mock CRI client during testing
     this.pageCriClient = {
@@ -396,7 +396,7 @@ describe('lib/browsers/electron', () => {
     it('handles download links via cdp', function () {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
-        expect(utils.handleDownloadLinksViaCDP).to.be.calledWith(this.pageCriClient, this.automation)
+        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
       })
     })
 

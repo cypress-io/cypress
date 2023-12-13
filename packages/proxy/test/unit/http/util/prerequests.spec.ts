@@ -37,6 +37,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -48,6 +49,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -60,6 +62,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -161,6 +164,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -230,7 +234,7 @@ describe('http/util/prerequests', () => {
   it('immediately handles a request from a service worker loading', () => {
     const cbServiceWorker = sinon.stub()
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'sec-fetch-dest': 'serviceworker' } } as any, () => {}, cbServiceWorker)
+    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'service-worker': 'script' } } as any, () => {}, cbServiceWorker)
 
     expect(cbServiceWorker).to.be.calledOnce
     expect(cbServiceWorker).to.be.calledWith()
@@ -257,7 +261,7 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 0)
   })
 
-  it('resets the queues', () => {
+  it('resets the queues and service worker manager', () => {
     let callbackCalled = false
 
     preRequests.addPending({ requestId: '1234', url: 'bar', method: 'GET' } as BrowserPreRequest)
@@ -267,13 +271,20 @@ describe('http/util/prerequests', () => {
 
     preRequests.addPendingUrlWithoutPreRequest('baz')
 
+    preRequests.serviceWorkerManager.registerServiceWorker({
+      registrationId: '1234',
+      scopeURL: 'foo',
+    })
+
     expectPendingCounts(1, 1, 1)
+    expect(preRequests.serviceWorkerManager['serviceWorkerRegistrations'].size).to.eq(1)
 
     preRequests.reset()
 
     expectPendingCounts(0, 0, 0)
 
     expect(callbackCalled).to.be.true
+    expect(preRequests.serviceWorkerManager['serviceWorkerRegistrations'].size).to.eq(0)
   })
 
   it('decodes the proxied url', () => {
@@ -295,5 +306,128 @@ describe('http/util/prerequests', () => {
 
     expect(preRequests.pendingPreRequests.length).to.eq(1)
     expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).not.to.be.undefined
+  })
+
+  it('properly ignores service worker prerequests', () => {
+    preRequests.addPending({
+      requestId: '1234',
+      url: 'foo',
+      method: 'GET',
+      headers: {
+        'Service-Worker': 'script',
+      },
+      resourceType: 'xhr',
+      originalResourceType: undefined,
+      documentURL: 'foo',
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+    })
+
+    preRequests.addPending({
+      requestId: '1234',
+      url: 'foo',
+      method: 'GET',
+      headers: {},
+      resourceType: 'xhr',
+      originalResourceType: undefined,
+      documentURL: 'foo',
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+    })
+
+    expectPendingCounts(0, 1)
+  })
+
+  it('properly ignores requests that are controlled by a service worker', () => {
+    const processBrowserPreRequestStub = sinon.stub(preRequests.serviceWorkerManager, 'processBrowserPreRequest')
+    const browserPreRequest = {
+      requestId: '1234',
+      url: 'foo',
+      method: 'GET',
+      headers: {},
+      resourceType: 'xhr',
+      originalResourceType: undefined,
+      documentURL: 'foo',
+      cdpRequestWillBeSentTimestamp: 1,
+      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+    }
+
+    processBrowserPreRequestStub.returns(true)
+
+    preRequests.addPending(browserPreRequest as BrowserPreRequest)
+
+    expectPendingCounts(0, 0)
+
+    expect(processBrowserPreRequestStub).to.be.calledWith(browserPreRequest)
+  })
+
+  it('processes service worker registration updated events', () => {
+    const registerServiceWorkerStub = sinon.stub(preRequests.serviceWorkerManager, 'registerServiceWorker')
+    const unregisterServiceWorkerStub = sinon.stub(preRequests.serviceWorkerManager, 'unregisterServiceWorker')
+    const registrations = [{
+      registrationId: '1234',
+      scopeURL: 'foo',
+      isDeleted: false,
+    }, {
+      registrationId: '1235',
+      scopeURL: 'bar',
+      isDeleted: true,
+    }]
+
+    preRequests.updateServiceWorkerRegistrations({
+      registrations,
+    })
+
+    expect(registerServiceWorkerStub).to.be.calledWith({
+      registrationId: '1234',
+      scopeURL: 'foo',
+    })
+
+    expect(unregisterServiceWorkerStub).to.be.calledWith({
+      registrationId: '1235',
+    })
+  })
+
+  it('processes service worker version updated events', () => {
+    const addActivatedServiceWorkerStub = sinon.stub(preRequests.serviceWorkerManager, 'addActivatedServiceWorker')
+    const versions = [{
+      versionId: '1234',
+      registrationId: '1234',
+      scriptURL: 'foo',
+      runningStatus: 'stopped',
+      status: 'activating',
+    }, {
+      versionId: '1235',
+      registrationId: '1235',
+      scriptURL: 'bar',
+      runningStatus: 'running',
+      status: 'activated',
+    }]
+
+    preRequests.updateServiceWorkerVersions({
+      versions,
+    } as any)
+
+    expect(addActivatedServiceWorkerStub).to.be.calledWith({
+      registrationId: '1235',
+      scriptURL: 'bar',
+    })
+
+    expect(addActivatedServiceWorkerStub).not.to.be.calledWith({
+      registrationId: '1234',
+      scriptURL: 'foo',
+    })
+  })
+
+  it('processes service worker client side registration updated events', () => {
+    const addInitiatorToServiceWorkerStub = sinon.stub(preRequests.serviceWorkerManager, 'addInitiatorToServiceWorker')
+    const registration = {
+      scriptURL: 'foo',
+      initiatorURL: 'bar',
+    }
+
+    preRequests.updateServiceWorkerClientSideRegistrations(registration)
+
+    expect(addInitiatorToServiceWorkerStub).to.be.calledWith(registration)
   })
 })

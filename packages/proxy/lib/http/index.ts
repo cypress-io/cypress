@@ -26,6 +26,7 @@ import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
+import type Protocol from 'devtools-protocol'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -429,10 +430,13 @@ export class Http {
     }
   }
 
-  reset () {
+  reset (options: { fullReset?: boolean } = {}) {
     this.buffers.reset()
     this.setAUTUrl(undefined)
-    this.preRequests.reset()
+
+    if (options.fullReset) {
+      this.preRequests.reset()
+    }
   }
 
   setBuffer (buffer) {
@@ -449,6 +453,18 @@ export class Http {
 
   addPendingUrlWithoutPreRequest (url: string) {
     this.preRequests.addPendingUrlWithoutPreRequest(url)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.preRequests.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.preRequests.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+    this.preRequests.updateServiceWorkerClientSideRegistrations(data)
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
