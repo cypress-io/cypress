@@ -322,7 +322,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
       const onPassFn = () => {
         cy.state('overrideAssert', undefined)
-        cy.state('current').set('currentAssertionCommand', undefined)
 
         return subject
       }
@@ -344,7 +343,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         cy.state('overrideAssert', undefined)
-        cy.state('current').set('currentAssertionCommand', undefined)
 
         err.isDefaultAssertionErr = isDefaultAssertionErr
 

@@ -1,12 +1,12 @@
 import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/storage', () => {
-  let logs: Cypress.Log[]
+  let logs
 
   beforeEach(() => {
     logs = []
 
-    cy.on('log:added', (attrs, log: Cypress.Log) => {
+    cy.on('log:added', (attrs, log) => {
       logs.push(log)
     })
   })

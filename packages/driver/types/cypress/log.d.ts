@@ -5,6 +5,7 @@ declare namespace Cypress {
   }
 
   interface Log extends Log {
+    _hasInitiallyLogged: boolean
     set<K extends keyof LogConfig | InternalLogConfig>(key: K, value: LogConfig[K]): InternalLog
     set(options: Partial<LogConfig | InternalLogConfig>)
     groupEnd(): void

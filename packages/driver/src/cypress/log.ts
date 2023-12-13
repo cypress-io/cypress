@@ -240,6 +240,7 @@ export class Log {
   fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
   obj: any
 
+  _hasInitiallyLogged: boolean = false
   private attributes: Record<string, any> = { }
   private _emittedAttrs: Record<string, any> = {}
 

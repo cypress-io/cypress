@@ -4,6 +4,7 @@ declare namespace Cypress {
   interface Chainable {
     originLoadUtils(origin: string): Chainable
     getAll(...aliases: string[]): Chainable
+    getCommandLogInReporter(commandName: string, opts?: { isHidden: boolean }): Chainable
     shouldWithTimeout(cb: (subj: {}) => void, timeout?: number): Chainable
     runSpecFileCustomPrivilegedCommands(): Chainable
     runSupportFileCustomPrivilegedCommands(): Chainable

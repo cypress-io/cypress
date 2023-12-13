@@ -32,7 +32,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
       cy.log('test log in cy.origin')
       cy.wrap(afterLogAdded)
     }).then((id) => {
-      lastTestLogId = id
+      lastTestLogId = id as string
       // Verify the log is also fired in the primary origin.
       expect(logs[6].get('message')).to.eq('test log in cy.origin')
       // Verify the log has the same ID as was generated in the cross-origin
