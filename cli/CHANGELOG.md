@@ -5,7 +5,7 @@ _Released 12/19/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed capture for Test Replay (which will affect styles) and intercepts specifically for requests that are routed through service workers. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
+- Fixed asset capture for Test Replay (which will potentially affect styles) specifically for requests that are routed through service workers. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
 - Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
 
 ## 13.6.1
