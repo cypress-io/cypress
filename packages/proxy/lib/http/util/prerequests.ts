@@ -148,7 +148,7 @@ export class PreRequests {
 
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${decodeURI(browserPreRequest.url)}`
+    const key = `${browserPreRequest.method}-${this.tryDecodeURI(browserPreRequest.url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -193,7 +193,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${decodeURI(url)}`
+    const key = `GET-${this.tryDecodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -236,7 +236,7 @@ export class PreRequests {
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${decodeURI(req.proxiedUrl)}`
+    const key = `${req.method}-${this.tryDecodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
@@ -319,5 +319,15 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+  }
+
+  private tryDecodeURI (url: string) {
+    // decodeURI can throw if the url is malformed
+    // in this case, we just return the original url
+    try {
+      return decodeURI(url)
+    } catch (e) {
+      return url
+    }
   }
 }
