@@ -34,7 +34,8 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/m,
+    // Chrome for testing can be any stable, beta, dev or canary version
+    versionRegex: /Google Chrome (?:for Testing )?(\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
     minSupportedVersion: MIN_CHROME_VERSION,
   },
