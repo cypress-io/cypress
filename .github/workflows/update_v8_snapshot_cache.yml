@@ -48,6 +48,9 @@ jobs:
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
+      - name: Install setuptools - Mac
+        if: ${{ matrix.platform == 'macos-latest' }}
+        run: sudo -H pip install setuptools
       - name: Checkout
         uses: actions/checkout@v3
         with:
