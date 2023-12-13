@@ -303,6 +303,7 @@ export = {
 
       await Promise.all([
         pageCriClient.send('Page.enable'),
+        pageCriClient.send('ServiceWorker.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),

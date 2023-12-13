@@ -28,12 +28,10 @@ context('lib/browsers/cdp_automation', () => {
         } as ProtocolManagerShape
 
         const localNetworkCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
-        const localServiceWorkerCommandStub = localCommand.withArgs('ServiceWorker.enable').resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
         expect(localNetworkCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
-        expect(localServiceWorkerCommandStub).to.have.been.calledWith('ServiceWorker.enable')
       })
 
       it('networkEnabledOptions - protocol disabled', async function () {

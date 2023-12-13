@@ -201,7 +201,6 @@ export class CdpAutomation implements CDPClient {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
-    await sendDebuggerCommandFn('ServiceWorker.enable')
 
     return cdpAutomation
   }
