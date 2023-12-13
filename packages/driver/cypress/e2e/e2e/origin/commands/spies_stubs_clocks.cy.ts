@@ -84,7 +84,6 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   })
 
   context('#consoleProps', () => {
-    const { _ } = Cypress
     let logs: Map<string, any>
 
     beforeEach(() => {

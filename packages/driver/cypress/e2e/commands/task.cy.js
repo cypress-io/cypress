@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise } = Cypress
+const { Promise } = Cypress
 
 describe('src/cy/commands/task', () => {
   context('#task', {
