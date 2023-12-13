@@ -288,6 +288,64 @@ describe('FileDataSource', () => {
         )
       })
 
+      it('does not ignore node_modules, if the working dir is located inside node_modules', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/node_modules/project/',
+          '/cypress/e2e/**.cy.js',
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          ['/cypress/e2e/**.cy.js'],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/node_modules/project/',
+            ignore: [],
+          },
+        )
+      })
+
+      it('does not ignore node_modules, if one of glob paths contains node_modules', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/',
+          [
+            '/node_modules/cypress/e2e/**.cy.js',
+            '/cypress/e2e/**.cy.js',
+          ],
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          [
+            'node_modules/cypress/e2e/**.cy.js',
+            'cypress/e2e/**.cy.js',
+          ],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/',
+            ignore: [],
+          },
+        )
+      })
+
+      it('uses supplied ignore options, when node_modules are not ignored', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/node_modules/project/',
+          '/node_modules/test_package/e2e/**.cy.js',
+          { ignore: ['ignore/foo.*', '/ignore/bar.*'] },
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          ['/node_modules/test_package/e2e/**.cy.js'],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/node_modules/project/',
+            ignore: ['ignore/foo.*', '/ignore/bar.*'],
+          },
+        )
+      })
+
       it('uses supplied globby options', async () => {
         const files = await fileDataSource.getFilesByGlob(
           '/',
