@@ -351,6 +351,7 @@ export class DataContext {
   }
 
   _reset () {
+    DataContext.#activeRequestCount = 0
     this.actions.servers.setAppSocketServer(undefined)
     this.actions.servers.setGqlSocketServer(undefined)
 
@@ -408,6 +409,7 @@ export class DataContext {
 
   static finishActiveRequest () {
     this.#activeRequestCount--
+
     if (this.#activeRequestCount === 0) {
       this.#awaitingEmptyRequestCount.forEach((fn) => fn())
       this.#awaitingEmptyRequestCount = []

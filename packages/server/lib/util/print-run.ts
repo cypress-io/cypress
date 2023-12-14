@@ -614,11 +614,11 @@ type ArtifactUploadResultLike = {
   success: boolean
   error?: string
   skipped?: boolean
-  duration?: number
+  uploadDuration?: number
 }
 
 export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike> (artifactUploadResult: T, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
-  const { pathToFile, key, fileSize, success, error, skipped, duration } = artifactUploadResult
+  const { pathToFile, key, fileSize, success, error, skipped, uploadDuration } = artifactUploadResult
 
   process.stdout.write(`  - ${labels[key]} `)
 
@@ -630,8 +630,8 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
     process.stdout.write(`- Failed Uploading`)
   }
 
-  if (duration) {
-    const durationOut = humanTime.short(duration, 2)
+  if (uploadDuration) {
+    const durationOut = humanTime.short(uploadDuration, 2)
 
     process.stdout.write(` ${success ? 'in' : 'after'} ${durationOut}`)
   }
@@ -647,4 +647,23 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   }
 
   process.stdout.write('\n')
+}
+
+const UPLOAD_ACTIVITY_INTERVAL = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') === 'undefined' ? 15000 : env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL')
+
+export const beginUploadActivityOutput = () => {
+  console.log('')
+  process.stdout.write(chalk.bold.blue('  Uploading Cloud Artifacts: '))
+  process.stdout.write(chalk.bold.blue('. '))
+  const uploadActivityInterval = setInterval(() => {
+    process.stdout.write(chalk.bold.blue('. '))
+  }, UPLOAD_ACTIVITY_INTERVAL)
+
+  return () => {
+    if (uploadActivityInterval) {
+      console.log('')
+    }
+
+    clearInterval(uploadActivityInterval)
+  }
 }
