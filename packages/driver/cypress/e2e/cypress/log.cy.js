@@ -1,4 +1,4 @@
-const { create, LogUtils } = require('@packages/driver/src/cypress/log')
+const { create, Log, LogUtils } = require('@packages/driver/src/cypress/log')
 
 const objectDiff = (newAttrs, oldAttrs) => {
   return Object.entries(newAttrs).reduce(
@@ -20,13 +20,266 @@ const objectDiff = (newAttrs, oldAttrs) => {
 }
 
 describe('src/cypress/log', function () {
+  context('#LogManager.createLog', () => {
+    beforeEach(function () {
+      this.cy = {
+        createSnapshot: cy.stub().returns({}),
+      }
+
+      this.state = cy.stub()
+      this.config = cy.stub()
+      this.log = create(Cypress, this.cy, this.state, this.config)
+    })
+
+    it('throws when arguments are not an object', function (done) {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`Cypress.log()` can only be called with an options object. Your argument was: `hi`')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/cypress-log')
+
+        done()
+      })
+
+      this.log('hi')
+    })
+
+    it('creates a log', function () {
+      const log = this.log({})
+
+      expect(log).to.be.ok
+    })
+
+    it('does not create a log when protocol is disabled', function () {
+      this.config.returns(false)
+      const log = this.log({ name: 'mock', hidden: false })
+      const hiddenLog = this.log({ name: 'mock', hidden: true })
+
+      expect(log).to.be.ok
+      expect(hiddenLog).to.be.undefined
+    })
+
+    it('creates a hidden log when protocol is enabled', function () {
+      this.config.returns(true)
+      const log = this.log({ name: 'mock', hidden: false })
+      const hiddenLog = this.log({ name: 'mock', hidden: true })
+
+      expect(log).to.be.ok
+      expect(hiddenLog).to.be.ok
+    })
+  })
+
+  context('#Log.set', () => {
+    beforeEach(function () {
+      this.createSnapshot = cy.stub().returns({})
+
+      this.state = cy.stub()
+      this.config = cy.stub()
+      this.fireChangeEvent = cy.stub()
+    })
+
+    it('can set with key-value pair', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set('key', 'value')
+
+      expect(log.attributes).have.property('key', 'value')
+    })
+
+    it('can set with object', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ key: 'value' })
+
+      expect(log.attributes).have.property('key', 'value')
+    })
+
+    it('stringifies url value', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ url: null })
+
+      expect(log.attributes).have.property('url', '')
+
+      log.set({ url: 'www.cypress.io' })
+
+      expect(log.attributes).have.property('url', 'www.cypress.io')
+    })
+
+    it('maintains backwards compatibility with onConsole', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+      const consoleProps = { Info: 'some info' }
+
+      log.set({ onConsole: consoleProps })
+      expect(log.attributes).have.property('consoleProps', consoleProps)
+      expect(log.attributes).not.have.property('onConsole')
+    })
+
+    it('determines aliasType when alias is set', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ alias: 'button' })
+      expect(log.attributes).have.property('alias', 'button')
+      expect(log.attributes).have.property('aliasType', 'primitive')
+
+      log.set({ alias: 'button', $el: 'button' })
+      expect(log.attributes).have.property('alias', 'button')
+      expect(log.attributes).have.property('aliasType', 'dom')
+    })
+
+    it('does not allow overriding the log id', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ id: 'log-1' })
+      log.set({ id: 'diff-id' })
+      expect(log.attributes).have.property('id', 'log-1')
+    })
+
+    it('adds updatedAtTimestamp each time the log is updated', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ key: 'value' })
+
+      expect(log.attributes).have.property('updatedAtTimestamp')
+    })
+
+    it('wraps consoleProps when consoleProps is set and is a function', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      const consoleProps = () => {
+        return {
+          Info: 'some info',
+        }
+      }
+
+      log.set({ consoleProps })
+      expect(log.attributes).have.property('consoleProps')
+      expect(log.attributes.consoleProps).to.be.a('function')
+      const wrappedProps = log.attributes.consoleProps()
+
+      expect(wrappedProps).have.property('name')
+      expect(wrappedProps).have.property('type', 'command')
+      expect(wrappedProps).have.property('props')
+      expect(wrappedProps.props).have.property('Info', 'some info')
+    })
+
+    it('sets element attributes when $el is set', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.setElAttrs = cy.stub()
+      log.set({ $el: 'button' })
+      expect(log.setElAttrs).to.have.been.called
+    })
+
+    it('only triggers change event if the log has already triggered the add event', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+      log.set({ key: 'value' })
+      log.fireChangeEvent.flush()
+      expect(this.fireChangeEvent).to.not.have.been.called
+
+      log._hasInitiallyLogged = true
+      log.set({ key: 'diff val' })
+      log.fireChangeEvent.flush()
+      expect(this.fireChangeEvent).to.have.been.called
+    })
+
+    describe('when protocol is disabled', function () {
+      it('does not truncate message value', function () {
+        this.config.withArgs('protocolEnabled').returns(false)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+        const longMessage = 'x'.repeat(5000)
+
+        log.set({ message: longMessage })
+        expect(log.attributes).have.property('message')
+        expect(log.attributes.message).have.have.length(5000)
+      })
+
+      it('does not truncates renderProps.message value', function () {
+        this.config.withArgs('protocolEnabled').returns(false)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        const longMessage = 'x'.repeat(5000)
+        const renderProps = () => {
+          return {
+            message: longMessage,
+          }
+        }
+
+        log.set({ renderProps })
+        expect(log.attributes).have.property('renderProps')
+        const renderedProps = log.attributes.renderProps()
+
+        expect(renderedProps).have.property('message')
+        expect(renderedProps.message).have.have.length(5000)
+      })
+    })
+
+    describe('when protocol is enabled', function () {
+      it('does not truncate message value', function () {
+        this.config.withArgs('protocolEnabled').returns(false)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+        const longMessage = 'x'.repeat(5000)
+
+        log.set({ message: longMessage })
+        expect(log.attributes).have.property('message')
+        expect(log.attributes.message).have.have.length(5000)
+      })
+
+      it('truncates message value of hidden log', function () {
+        this.config.withArgs('protocolEnabled').returns(true)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+        const longMessage = 'x'.repeat(5000)
+
+        log.set({ hidden: true, message: longMessage })
+        expect(log.attributes).have.property('message')
+        expect(log.attributes.message).have.have.length(3000)
+      })
+
+      it('does not truncates renderProps.message value', function () {
+        this.config.withArgs('protocolEnabled').returns(false)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        const longMessage = 'x'.repeat(5000)
+        const renderProps = () => {
+          return {
+            message: longMessage,
+          }
+        }
+
+        log.set({ renderProps })
+        expect(log.attributes).have.property('renderProps')
+        const renderedProps = log.attributes.renderProps()
+
+        expect(renderedProps).have.property('message')
+        expect(renderedProps.message).have.have.length(5000)
+      })
+
+      it('truncates renderProps.message value of hidden log', function () {
+        this.config.withArgs('protocolEnabled').returns(true)
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        const longMessage = 'x'.repeat(5000)
+        const renderProps = () => {
+          return {
+            message: longMessage,
+          }
+        }
+
+        log.set({ hidden: true, renderProps })
+        expect(log.attributes).have.property('renderProps')
+        const renderedProps = log.attributes.renderProps()
+
+        expect(renderedProps).have.property('message')
+        expect(renderedProps.message).have.have.length(3000)
+      })
+    })
+  })
+
   context('#triggerLog', function () {
     beforeEach(function () {
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
 
-      // this.actionSpy = cy.stub(Cypress, 'action').callThrough()
       this.state = cy.stub()
       this.config = cy.stub()
       this.log = create(Cypress, this.cy, this.state, this.config)

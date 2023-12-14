@@ -18,6 +18,8 @@ const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event fu
 const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
+const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
+
 let counter = 0
 
 export const LogUtils = {
@@ -307,6 +309,8 @@ export class Log {
       obj[key] = val
     }
 
+    const isHiddenLog = this.get('hidden') || obj.hidden
+
     if ('url' in obj) {
       // always stringify the url property
       obj.url = (obj.url != null ? obj.url : '').toString()
@@ -316,6 +320,13 @@ export class Log {
     // for backwards compatibility
     if (obj.onConsole) {
       obj.consoleProps = obj.onConsole
+      delete obj.onConsole
+    }
+
+    if (obj.message && this.config('protocolEnabled') && isHiddenLog) {
+      obj.message = Cypress.utils
+      .stringify(obj.message)
+      .substring(0, PROTOCOL_MESSAGE_TRUNCATION_LENGTH)
     }
 
     // if we have an alias automatically
@@ -337,6 +348,10 @@ export class Log {
     // cy.clock sets obj / cross origin logs come as objs
     if (obj && _.isFunction(obj.consoleProps)) {
       this.wrapConsoleProps()
+    }
+
+    if (obj.renderProps && this.config('protocolEnabled') && isHiddenLog) {
+      this.wrapRenderProps()
     }
 
     if (obj && obj.$el) {
@@ -568,6 +583,22 @@ export class Log {
       return _.extend(expectedPropertiesObj, {
         props: _.extend(rest, expectedPropertiesObj.props || {}),
       })
+    }
+  }
+
+  wrapRenderProps () {
+    const { renderProps } = this.attributes
+
+    this.attributes.renderProps = function (...invokedArgs) {
+      const renderedProps = renderProps.apply(this, invokedArgs)
+
+      if (renderedProps.message) {
+        renderedProps.message = Cypress.utils
+        .stringify(renderedProps.message)
+        .substring(0, PROTOCOL_MESSAGE_TRUNCATION_LENGTH)
+      }
+
+      return renderedProps
     }
   }
 }
