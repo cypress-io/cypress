@@ -242,7 +242,22 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('can turn off logging', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -711,7 +726,22 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('can turn off logging', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus().blur({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -725,9 +755,7 @@ describe('src/cy/commands/actions/focus', () => {
 
           expect(hiddenLog.get('name'), 'log name').to.eq('blur')
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
-          // expect(lastLog.get('message'), 'log message').to.be.undefined
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
-          // expect(lastLog.invoke('consoleProps'), 'log consoleProps').to.be.undefined
         })
 
         cy.getCommandLogInReporter('blur', { isHidden: true })

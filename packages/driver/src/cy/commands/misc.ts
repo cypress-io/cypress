@@ -41,7 +41,7 @@ export default (Commands, Cypress, cy, state) => {
       })
 
       if ($dom.isElement(arg)) {
-        options._log!.set({ $el: arg })
+        options._log?.set({ $el: arg })
       }
 
       return Promise.resolve(arg)

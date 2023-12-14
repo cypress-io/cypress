@@ -48,7 +48,22 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('getAllLocalStorage')
     })
 
-    it('can turn off logging', function () {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.getAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
@@ -120,7 +135,22 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('clearAllLocalStorage')
     })
 
-    it('can turn off logging', function () {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.clearAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
@@ -177,7 +207,22 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('getAllSessionStorage')
     })
 
-    it('can turn off logging', function () {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.getAllSessionStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
@@ -249,7 +294,22 @@ describe('src/cy/commands/storage', () => {
       cy.getCommandLogInReporter('clearAllSessionStorage')
     })
 
-    it('can turn off logging', function () {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.clearLocalStorage('foo', { log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
@@ -367,7 +427,16 @@ describe('src/cy/commands/storage', () => {
         })
       })
 
-      it('log is disabled', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.clearLocalStorage('foo', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.clearLocalStorage('foo', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 
@@ -381,18 +450,13 @@ describe('src/cy/commands/storage', () => {
         cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
       })
 
-      it('log is disabled without key', () => {
+      it('log is disabled without key', { protocolEnabled: false }, () => {
         cy.clearLocalStorage({ log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined
-
-          expect(hiddenLog.get('name'), 'log name').to.eq('clearLocalStorage')
-          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
-          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(hiddenLog).to.be.undefined
         })
-
-        cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
       })
     })
   })

@@ -56,7 +56,7 @@ describe('src/cypress/log', function () {
 
         expect(log._hasInitiallyLogged).to.be.true
       })
-      .wait(6, { log: false }) // allow for log debounce
+      .wait(60, { log: false }) // allow for log debounce
       .then(() => {
         expect(addedEventCallCount, 'log:added call count').to.eq(1)
         expect(changedEventCallCount, 'log:changed call count').to.eq(0)
@@ -96,7 +96,7 @@ describe('src/cypress/log', function () {
       .then(() => {
         log.set({ callCount: 1 })
       })
-      .wait(6, { log: false }) // allow for log debounce
+      .wait(60, { log: false }) // allow for log debounce
       .then(() => {
         expect(addedEventCallCount, 'log:added call count').to.eq(1)
         expect(changedEventCallCount, 'log:changed call count').to.eq(1)
@@ -110,7 +110,7 @@ describe('src/cypress/log', function () {
         changedAttrs = null
         log.set({ callCount: 1 })
       })
-      .wait(6, { log: false }) // allow for log debounce
+      .wait(60, { log: false }) // allow for log debounce
       .then(() => {
         expect(changedEventCallCount, 'log:changed call count').to.eq(1)
         expect(changedAttrs).to.be.null

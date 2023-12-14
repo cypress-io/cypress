@@ -962,7 +962,7 @@ describe('src/cy/commands/waiting', () => {
         cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
-      it('can turn off logging for wait for xhr', function () {
+      it('can turn off logging for wait for xhr', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'wait') {
             this.hiddenWaitLog = log

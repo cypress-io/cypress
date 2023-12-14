@@ -154,7 +154,20 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.url({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -318,7 +331,20 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.hash({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -509,7 +535,7 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false} as options', function () {
+      it('can turn off logging with {log: false} as options', { protocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -518,20 +544,29 @@ describe('src/cy/commands/location', () => {
           const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined
-          expect(hiddenLog.get('name'), 'log name').to.eq('location')
-          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
-          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          expect(hiddenLog).to.be.undefined
         })
-
-        cy.getCommandLogInReporter('location', { isHidden: true })
       })
 
-      it('does not emit when {log: false} as key', function () {
+      it('can turn off logging with {log: false} as key', { protocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
 
         cy.location({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.location('href', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined

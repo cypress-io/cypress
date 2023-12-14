@@ -68,7 +68,7 @@ describe('src/cy/commands/commands', () => {
       cy.getCommandLogInReporter('type')
     })
 
-    it('we capture logs from custom commands', () => {
+    it('we capture logs from custom commands', { protocolEnabled: true }, () => {
       const logs = []
       const addLogs = (attrs, log) => {
         logs.push(log)
@@ -100,73 +100,6 @@ describe('src/cy/commands/commands', () => {
 
       cy.getCommandLogInReporter('wrap', { isHidden: true })
       cy.getCommandLogInReporter('type', { isHidden: true })
-    })
-
-    // TODO: implement
-    describe.skip('we inject log', () => {
-      it('for custom command if no log was created', () => {
-        const logs = []
-        const addLogs = (attrs, log) => {
-          logs.push(log)
-        }
-
-        cy.on('log:added', addLogs)
-        cy.on('_log:added', addLogs)
-
-        Cypress.Commands.add('customWithoutLog', (options) => {
-          options.log && Cypress.log({ name: 'customWithoutLog' })
-
-          return 'hello'
-        })
-
-        cy.customWithoutLog({ log: false })
-        .then(($input) => {
-          cy.removeListener('log:added', addLogs)
-          cy.removeListener('_log:added', addLogs)
-
-          assertLogLength(logs, 1)
-          expect(logs[0].get('name')).to.eq('customWithoutLog')
-          expect(logs[0].get('hidden')).to.be.true
-        })
-
-        cy.getCommandLogInReporter('customWithoutLog', { isHidden: true })
-      })
-
-      it('for custom query if no log was created', () => {
-        const logs = []
-        const addLogs = (attrs, log) => {
-          logs.push(log)
-        }
-
-        cy.on('log:added', addLogs)
-        cy.on('_log:added', addLogs)
-
-        Cypress.Commands.add('customWithoutLog', (options) => {
-          options.log && Cypress.log({ name: 'myCustomCommand' })
-
-          return 'hello'
-        })
-
-        let callCount
-
-        Cypress.Commands.addQuery('getCallCount', (options) => {
-          options.log && Cypress.log({ name: 'getCallCount', message: callCount })
-
-          return () => callCount
-        })
-
-        cy.getCallCount({ log: false })
-        .then(($input) => {
-          cy.removeListener('log:added', addLogs)
-          cy.removeListener('_log:added', addLogs)
-
-          assertLogLength(logs, 1)
-          expect(logs[0].get('name')).to.eq('getCallCount')
-          expect(logs[0].get('hidden')).to.be.true
-        })
-
-        cy.getCommandLogInReporter('getCallCount', { isHidden: true })
-      })
     })
 
     it('works with namespaced commands', () => {

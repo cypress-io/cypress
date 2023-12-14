@@ -343,16 +343,16 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
         if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
-          options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
+          options._log?.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {
-          options._log.set('message', '--page loaded--').snapshot().end()
+          options._log?.set('message', '--page loaded--').snapshot().end()
         }
 
         resolve()
       }
 
       const onCrossOriginFailure = (err) => {
-        options._log.set('message', '--page loaded--').snapshot().error(err)
+        options._log?.set('message', '--page loaded--').snapshot().error(err)
 
         resolve()
       }
@@ -374,7 +374,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
       // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
-          options._log.set('message', '').end()
+          options._log?.set('message', '').end()
           resolve()
         }
       })

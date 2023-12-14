@@ -208,7 +208,20 @@ describe('src/cy/commands/traversals', () => {
           })
         })
 
-        it('can be turned off', function () {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.get('#list')[name](arg, { log: false }).then(function () {
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog.get('name')).to.eq('get')
+            expect(hiddenLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
           cy.on('_log:added', (attrs, log) => {
             this.hiddenLog = log
           })

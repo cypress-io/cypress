@@ -117,7 +117,7 @@ export default function (Commands, Cypress, cy, state, config) {
         },
       })
 
-      options._log!.snapshot('before', { next: 'after' })
+      options._log?.snapshot('before', { next: 'after' })
     }
 
     if (options.$el.length > 1) {

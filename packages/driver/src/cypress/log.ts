@@ -632,11 +632,9 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      // if (!config('protocolEnabled') && options.hidden !== undefined && options.hidden) {
-      // //   console.log('return')
-
-      //   return
-      // }
+      if (!config('protocolEnabled') && options.hidden !== undefined && options.hidden) {
+        return
+      }
 
       const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent)
 

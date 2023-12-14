@@ -479,7 +479,21 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
     })
 
-    it('can turn off logging', function () {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').clear({ log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })

@@ -38,7 +38,7 @@ export default (Commands, Cypress, cy) => {
         },
       })
 
-      options._log!.snapshot('before', { next: 'after' })
+      options._log?.snapshot('before', { next: 'after' })
 
       if (!options.$el.is('form')) {
         const node = $dom.stringify(options.$el)
