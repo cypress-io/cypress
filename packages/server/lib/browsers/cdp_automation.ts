@@ -481,7 +481,7 @@ export class CdpAutomation implements CDPClient {
       case 'remote:debugger:protocol':
         return this.sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
-        return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
+        return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png', optimizeForSpeed: true })
         .catch((err) => {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
         })

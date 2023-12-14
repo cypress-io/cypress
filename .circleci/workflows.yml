@@ -45,6 +45,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/screenshot_optimizeForSpeed', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -59,6 +60,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/screenshot_optimizeForSpeed', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -85,7 +87,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/screenshot_optimizeForSpeed', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
