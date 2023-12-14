@@ -7,7 +7,7 @@ _Released 12/19/2023 (PENDING)_
 
 - Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
 
-**Dependency Upgrades:**
+**Dependency Updates:**
 
 - Updated ts-node from `10.9.1` to `10.9.2`.
 
