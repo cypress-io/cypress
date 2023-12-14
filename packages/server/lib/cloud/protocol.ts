@@ -235,6 +235,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('responseStreamTimedOut', { isEssential: false }, options)
   }
 
+  async waitForStability (options): Promise<void> {
+    await this.invokeAsync('waitForStability', { isEssential: false }, options)
+  }
+
   canUpload (): boolean {
     return !!this._protocol && !!this._archivePath && !!this._db
   }

@@ -33,6 +33,7 @@ export interface AppCaptureProtocolCommon {
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
   responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void
+  waitForStability ({ stabilityId }: { stabilityId: string }): Promise<void>
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {

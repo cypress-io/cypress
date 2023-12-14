@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 const attachCypressProtocolInfo = (info) => {
   let cypressProtocolElement: HTMLElement | null = document.getElementById('__cypress-protocol')
 
@@ -68,6 +70,65 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp,
     })
   }
+
+  Cypress.on('window:before:load', (contentWindow) => {
+    // Create a mutation observer that tracks on dom additions
+    const listener = (mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          // @ts-ignore
+          Cypress.protocolNodesAdded = true
+        })
+      })
+    }
+    const observer = new MutationObserver(listener)
+
+    observer.observe(contentWindow.document, {
+      childList: true,
+      subtree: true,
+    })
+
+    // @ts-ignore
+    Cypress.mutationObserverFlushings = Cypress.mutationObserverFlushings || []
+
+    // @ts-ignore
+    Cypress.mutationObserverFlushings.push(() => {
+      listener(observer.takeRecords())
+    })
+
+    return
+  })
+
+  Cypress.on('cy:protocol:stability:wait', () => {
+    // @ts-ignore
+    Cypress.mutationObserverFlushings?.forEach((flushing) => {
+      flushing()
+    })
+
+    // @ts-ignore
+    if (Cypress.protocolNodesAdded) {
+      const timestamp = performance.timeOrigin + performance.now()
+      const stabilityId = uuidv4()
+
+      attachCypressProtocolInfo({
+        type: 'cy:protocol-stability',
+        stabilityId,
+        timestamp,
+      })
+
+      // @ts-ignore
+      Cypress.protocolNodesAdded = false
+
+      return Cypress.backend('protocol:stability:wait', {
+        stabilityId,
+      })
+    }
+
+    // @ts-ignore
+    Cypress.protocolNodesAdded = false
+
+    return Promise.resolve()
+  })
 
   Cypress.on('viewport:changed', viewportChangedHandler)
   // @ts-expect-error

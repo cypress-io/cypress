@@ -644,6 +644,9 @@ class $Cypress {
       case 'cy:viewport:changed':
         return this.emit('viewport:changed', ...args)
 
+      case 'cy:protocol:stability:wait':
+        return this.emitThen('cy:protocol:stability:wait')
+
       case 'cy:command:start':
         return this.emit('command:start', ...args)
 

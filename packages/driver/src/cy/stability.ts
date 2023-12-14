@@ -31,7 +31,9 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
 
   whenStable: (fn: () => any) => {
     if (state('isStable') !== false) {
-      return Promise.try(fn)
+      return Cypress.action('cy:protocol:stability:wait').then(() => {
+        return Promise.try(fn)
+      })
     }
 
     return new Promise((resolve, reject) => {
@@ -41,9 +43,11 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
         state('whenStable', null)
 
         // and invoke the original function
-        Promise.try(fn)
-        .then(resolve)
-        .catch(reject)
+        Cypress.action('cy:protocol:stability:wait').then(() => {
+          Promise.try(fn)
+          .then(resolve)
+          .catch(reject)
+        })
       })
     })
   },

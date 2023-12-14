@@ -22,6 +22,7 @@ declare namespace Cypress {
     (action: 'page:loading', fn: (loading: boolean) => void)
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
     (action: 'cy:protocol-snapshot', fn: () => void)
+    (action: 'cy:protocol:stability:wait', fn: () => void)
     (action: 'test:before:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test, options: ObjectLike) => void | Promise<any>): Cypress
   }
 
@@ -34,6 +35,7 @@ declare namespace Cypress {
     (task: 'protocol:test:before:after:run:async', attributes: any, options: any): Promise<void>
     (task: 'protocol:url:changed', input: any): Promise<void>
     (task: 'protocol:page:loading', input: any): Promise<void>
+    (task: 'protocol:stability:wait', options: any): Promise<void>
   }
 
   interface cy {
