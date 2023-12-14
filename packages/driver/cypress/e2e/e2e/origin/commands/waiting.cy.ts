@@ -142,7 +142,27 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
     })
 
-    it('can turn off logging', () => {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
+      cy.intercept('/foo', {}).as('foo')
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.then(() => window.xhrGet('/foo'))
+
+        cy.wait('@foo', { log: false })
+      })
+
+      cy.shouldWithTimeout(() => {
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
+
+        expect(waitLog[0]).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
       cy.on('_log:added', (attrs, log) => {
         logs.set(attrs.id, log)
       })
