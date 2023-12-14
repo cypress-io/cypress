@@ -67,12 +67,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  // FIXME: it seem cy.origin mutates the configuration to omit read-only configuration values on the
-  // secondary origin instead of relying on the config validation method which can be by-passed for driver
-  // tests when changing the test-config overrides for protocolEnabled on this test and the next one
-  it('does not send hidden logs to primary origin when protocol is disabled', function () {
-    if (Cypress.config('protocolEnabled')) this.skip()
-
+  it('does not send hidden logs to primary origin when protocol is disabled', { protocolEnabled: false }, function () {
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })
@@ -90,14 +85,10 @@ context('cy.origin log', { browser: '!webkit' }, () => {
 
     cy.getCommandLogInReporter('origin')
     cy.getCommandLogInReporter('get')
+    cy.getCommandLogInReporter('select', { isHidden: true })
   })
 
-  // FIXME: it seem cy.origin mutates the configuration to omit read-only configuration values on the
-  // secondary origin instead of relying on the config validation method which can be by-passed for driver
-  // tests when changing the test-config overrides for protocolEnabled on this test and the prev one
-  it('handles sending hidden logs to primary origin when protocol enabled', function () {
-    if (!Cypress.config('protocolEnabled')) this.skip()
-
+  it('handles sending hidden logs to primary origin when protocol enabled', { protocolEnabled: true }, function () {
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })

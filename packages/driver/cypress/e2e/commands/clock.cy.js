@@ -352,6 +352,7 @@ describe('src/cy/commands/clock', () => {
     context('logging', () => {
       beforeEach(function () {
         this.logs = []
+        this.hiddenLogs = []
 
         cy.on('log:added', (attrs, log) => {
           const name = log.get('name')
@@ -385,24 +386,46 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not log when log: false', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
-          this.hiddenLog = log
+          this.hiddenLogs.push(log)
         })
 
         cy.clock({ log: false }).then((clock) => {
           clock.tick()
           clock.restore()
+          expect(this.logs.length).to.equal(0)
+          expect(this.hiddenLogs.length).to.equal(0)
+        })
+      })
 
-          const lastLog = this.logs[0]
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLogs.push(log)
+        })
 
-          expect(lastLog.get('name'), 'log name').to.not.eq('clock')
-          expect(this.hiddenLog.get('name'), 'log name').to.eq('clock')
-          expect(this.hiddenLog.get('hidden'), 'log hidden').to.be.true
-          expect(this.hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        cy.clock({ log: false }).then((clock) => {
+          clock.tick()
+          clock.restore()
+          expect(this.logs.length).to.equal(0)
+          expect(this.hiddenLogs.length).to.equal(3)
+
+          expect(this.hiddenLogs[0].get('name'), 'log name').to.eq('clock')
+          expect(this.hiddenLogs[0].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[0].get('snapshots').length, 'log snapshot length').to.eq(1)
+
+          expect(this.hiddenLogs[1].get('name'), 'log name').to.eq('tick')
+          expect(this.hiddenLogs[1].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[1].get('snapshots').length, 'log snapshot length').to.eq(2)
+
+          expect(this.hiddenLogs[2].get('name'), 'log name').to.eq('restore')
+          expect(this.hiddenLogs[2].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[2].get('snapshots').length, 'log snapshot length').to.eq(1)
         })
 
         cy.getCommandLogInReporter('clock', { isHidden: true })
+        cy.getCommandLogInReporter('tick', { isHidden: true })
+        cy.getCommandLogInReporter('restore', { isHidden: true })
       })
 
       it('only logs the first call', function () {
@@ -546,7 +569,23 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not emit when {log: false}', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy
+        .clock()
+        .tick(10, { log: false })
+        .then(function () {
+          const { hiddenLog } = this
+
+          expect(this.logs.length).to.equal(0)
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -605,7 +644,24 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not emit when {log: false}', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.clock().then(function (clock) {
+          clock.restore({ log: false })
+
+          const { hiddenLog } = this
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('restore')
+
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
