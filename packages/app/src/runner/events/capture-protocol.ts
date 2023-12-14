@@ -75,8 +75,13 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     // Create a mutation observer that tracks on dom additions
     const listener = (mutations) => {
       mutations.forEach((mutation: MutationRecord) => {
+        if (mutation.target.childNodes.length === mutation.addedNodes.length) {
+          // @ts-ignore
+          Cypress.protocolNodesAdded = true
+        }
+
         mutation.addedNodes.forEach((node: Node) => {
-          if (mutation.target.childNodes.length === 1 || node.childNodes.length > 0) {
+          if (node.childNodes.length > 0) {
             // @ts-ignore
             Cypress.protocolNodesAdded = true
           }
