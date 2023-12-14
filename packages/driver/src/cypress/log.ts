@@ -350,7 +350,7 @@ export class Log {
       this.wrapConsoleProps()
     }
 
-    if (obj.renderProps && this.config('protocolEnabled') && isHiddenLog) {
+    if (obj.renderProps && _.isFunction(obj.renderProps) && isHiddenLog && this.config('protocolEnabled')) {
       this.wrapRenderProps()
     }
 
