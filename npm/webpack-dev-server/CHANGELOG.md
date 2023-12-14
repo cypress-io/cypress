@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.7.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.0...@cypress/webpack-dev-server-v3.7.1) (2023-11-22)
+
+
+### Bug Fixes
+
+* Allow absolute paths in indexHtmlFile ([#28324](https://github.com/cypress-io/cypress/issues/28324)) ([dcd6a18](https://github.com/cypress-io/cypress/commit/dcd6a18d9b43707a240101696e7b718f97380149))
+
 # [@cypress/webpack-dev-server-v3.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.1...@cypress/webpack-dev-server-v3.7.0) (2023-11-07)
 
 
