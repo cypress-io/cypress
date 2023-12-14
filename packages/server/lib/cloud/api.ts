@@ -19,6 +19,7 @@ import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
 
 import type { OptionsWithUrl } from 'request-promise'
+import { fs } from '../util/fs'
 import ProtocolManager from './protocol'
 import type { ProjectBase } from '../project-base'
 
@@ -639,7 +640,42 @@ module.exports = {
   async getCaptureProtocolScript (url: string) {
     const base64EncodedScript = 'BASE64_ENCODED_SCRIPT'
 
-    return Buffer.from(base64EncodedScript, 'base64').toString()
+    if (base64EncodedScript.length >= 30) {
+      return Buffer.from(base64EncodedScript, 'base64').toString()
+    }
+
+    // TODO(protocol): Ensure this is removed in production
+    if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+      debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+
+      return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
+    }
+
+    const res = await retryWithBackoff(async (attemptIndex) => {
+      return rp.get({
+        url,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-request-attempt': attemptIndex,
+          'x-cypress-signature': PUBLIC_KEY_VERSION,
+        },
+        agent,
+        encrypt: 'signed',
+        resolveWithFullResponse: true,
+      })
+    })
+
+    const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
+
+    if (!verified) {
+      debugProtocol(`Unable to verify protocol signature %s`, url)
+
+      return null
+    }
+
+    debugProtocol(`Loaded protocol via url %s`, url)
+
+    return res.body
   },
 
   retryWithBackoff,
