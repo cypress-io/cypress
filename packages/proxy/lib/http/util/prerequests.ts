@@ -96,6 +96,16 @@ class QueueMap<T> {
   }
 }
 
+const tryDecodeURI = (url: string) => {
+  // decodeURI can throw if the url is malformed
+  // in this case, we just return the original url
+  try {
+    return decodeURI(url)
+  } catch (e) {
+    return url
+  }
+}
+
 // This class' purpose is to match up incoming "requests" (requests from the browser received by the http proxy)
 // with "pre-requests" (events received by our browser extension indicating that the browser is about to make a request).
 // Because these come from different sources, they can be out of sync, arriving in either order.
@@ -150,7 +160,7 @@ export class PreRequests {
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
-    const key = `${browserPreRequest.method}-${decodeURI(browserPreRequest.url)}`
+    const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
 
     // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
     // it's the service worker request via the `service-worker` header
@@ -211,7 +221,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${decodeURI(url)}`
+    const key = `GET-${tryDecodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -253,7 +263,7 @@ export class PreRequests {
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${decodeURI(req.proxiedUrl)}`
+    const key = `${req.method}-${tryDecodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
