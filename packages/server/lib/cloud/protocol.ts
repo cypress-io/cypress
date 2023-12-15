@@ -166,11 +166,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
 
     debug('connecting to database at %s', dbPath)
-    debug('better-sqlite3 location', require.resolve('better-sqlite3'))
-    debug('loading native binding from', require.resolve(path.join('better-sqlite3', 'build', 'Release', 'better_sqlite3.node')))
 
     const db = Database(dbPath, {
-      nativeBinding: require(require.resolve(path.join('better-sqlite3', 'build', 'Release', 'better_sqlite3.node'))),
+      nativeBinding: require.resolve(path.join('better-sqlite3', 'build', 'Release', 'better_sqlite3.node')),
       verbose: debugVerbose,
     })
 
