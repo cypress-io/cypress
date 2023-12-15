@@ -70,7 +70,7 @@ describe('issue 1244', () => {
     })
 
     // TODO: fix flaky test
-    it('does not strip link _parent', { retries: 15 }, () => {
+    it('does not strip link _parent', { retries: 5 }, () => {
       cy.get('iframe').then(($iframe) => {
         const $el = $iframe.contents().find('a.inline_parent')
 
