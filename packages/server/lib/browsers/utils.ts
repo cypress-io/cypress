@@ -395,9 +395,6 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-// Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
-// We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
-// correlated in the proxy.
 const initializeCDP = async (criClient: CriClient, automation: Automation) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
@@ -410,9 +407,14 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
 
       switch (event.type) {
         case 'service-worker-registration':
+          // Chromium browsers and webkit do not give us guaranteed pre requests for service worker registrations but they still go through the proxy.
+          // We need to notify the proxy when they are registered so that we can know which requests are controlled by service workers.
           await automation.onServiceWorkerClientSideRegistrationUpdated?.(event)
           break
         case 'download':
+          // Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
+          // We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
+          // correlated in the proxy.
           await automation.onDownloadLinkClicked?.(event.destination)
           break
         default:

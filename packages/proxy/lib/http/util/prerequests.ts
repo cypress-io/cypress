@@ -162,17 +162,7 @@ export class PreRequests {
   addPending (browserPreRequest: BrowserPreRequest) {
     const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
 
-    // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
-    // it's the service worker request via the `service-worker` header
-    if (browserPreRequest.headers?.['Service-Worker'] === 'script') {
-      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it', key)
-
-      return
-    }
-
-    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
-      debugVerbose('Not correlating request since it is fully controlled by service worker and the correlation will happen within the service worker', key)
-
+    if (this.shouldIgnorePendingRequest(browserPreRequest)) {
       return
     }
 
@@ -250,7 +240,7 @@ export class PreRequests {
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
     // it's the service worker request via the `service-worker` header
-    if (req.headers?.['service-worker'] === 'script') {
+    if (PreRequests.hasServiceWorkerHeader(req.headers)) {
       ctxDebug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
 
       callback({
@@ -370,5 +360,28 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+  }
+
+  private static hasServiceWorkerHeader (headers: Record<string, string | string[] | undefined>) {
+    return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  }
+
+  private shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
+    // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
+    // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
+    // `service-worker` header
+    if (PreRequests.hasServiceWorkerHeader(browserPreRequest.headers)) {
+      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it: %o', browserPreRequest)
+
+      return true
+    }
+
+    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
+      debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
+
+      return true
+    }
+
+    return false
   }
 }

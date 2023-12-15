@@ -36,7 +36,12 @@ describe('lib/browsers/electron', () => {
       onError: () => {},
     }
 
-    this.automation = new Automation('foo', 'bar', 'baz')
+    this.automation = new Automation({
+      cyNamespace: 'foo',
+      cookieNamespace: 'bar',
+      screenshotsFolder: 'baz',
+    })
+
     this.win = _.extend(new EE(), {
       isDestroyed () {
         return false

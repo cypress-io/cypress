@@ -59,7 +59,7 @@ export class ServiceWorkerManager {
    */
   registerServiceWorker ({ registrationId, scopeURL }: RegisterServiceWorkerOptions) {
     // Only register service workers if they haven't already been registered
-    if (this.serviceWorkerRegistrations.has(registrationId) && this.serviceWorkerRegistrations.get(registrationId)?.scopeURL === scopeURL) {
+    if (this.serviceWorkerRegistrations.get(registrationId)?.scopeURL === scopeURL) {
       return
     }
 
@@ -104,7 +104,7 @@ export class ServiceWorkerManager {
     let initiatorAdded = false
 
     this.serviceWorkerRegistrations.forEach((registration) => {
-      if (registration.activatedServiceWorker && registration.activatedServiceWorker.scriptURL === scriptURL) {
+      if (registration.activatedServiceWorker?.scriptURL === scriptURL) {
         registration.activatedServiceWorker.initiatorURL = initiatorURL
 
         initiatorAdded = true
