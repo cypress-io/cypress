@@ -117,7 +117,13 @@ export class ProjectBase extends EE {
   protected ensureProp = ensureProp
 
   setOnTestsReceived (fn) {
-    this._recordTests = fn
+    this._recordTests = (runnables, cb) => {
+      return fn(runnables, (response) => {
+        this._recordTestsResponse = response
+
+        return cb(response)
+      })
+    }
   }
 
   get server () {
@@ -370,11 +376,16 @@ export class ProjectBase extends EE {
 
         if (this._recordTests) {
           this._protocolManager?.addRunnables(runnables)
+
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
 
           return
+        }
+
+        if (this._recordTestsResponse) {
+          return cb(this._recordTestsResponse)
         }
 
         cb()
