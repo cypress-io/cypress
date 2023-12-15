@@ -559,11 +559,13 @@ commands:
           name: Build better-sqlite3 for CentOS 7
           command: |
             if [[ ! -f better_sqlite3.node ]]; then
+              ls -l ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
               docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 27.0.0 --include-regex 'better_sqlite3.node$'"
               docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f centos7-builder
+              ls -l ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
             else
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
