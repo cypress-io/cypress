@@ -269,7 +269,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
               return []
             }
 
-            const selector = finder(el, { root: ownerDoc.body, threshold: 1, maxNumberOfTries: 1 })
+            // finder tries to find the shortest unique selector to an element,
+            // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
+            const selector = finder(el, { root: ownerDoc.body, threshold: 1, maxNumberOfTries: 0 })
             const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
