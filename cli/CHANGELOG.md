@@ -668,3 +668,8 @@ _Released 1/24/2023_
 - Video output link in `cypress run` mode has been added to it's own line to
   make the video output link more easily clickable in the terminal. Addresses
   [#23913](https://github.com/cypress-io/cypress/issues/23913).
+
+**Feature**
+
+-When passing the `--browser` flag alone, after selecting the testing type
+in the GUI, the browser will automatically launch.
