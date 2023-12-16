@@ -31,6 +31,11 @@ const { t } = useI18n()
 
 gql`
 query OpenBrowser {
+  localSettings {
+    preferences {
+      wasBrowserSetInCLI
+    }
+  }
   currentProject {
     id
     currentTestingType
