@@ -10,6 +10,10 @@ _Released 12/19/2023 (PENDING)_
 - Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
 - Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 
+**Performance:**
+
+- Improved performance when finding unique selectors for command log snapshots for Test Replay. Addressed in [#28536](https://github.com/cypress-io/cypress/pull/28536).
+
 **Dependency Updates:**
 
 - Updated ts-node from `10.9.1` to `10.9.2`. Fixed in [#28528](https://github.com/cypress-io/cypress/pull/28528).
