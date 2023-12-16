@@ -669,7 +669,7 @@ _Released 1/24/2023_
   make the video output link more easily clickable in the terminal. Addresses
   [#23913](https://github.com/cypress-io/cypress/issues/23913).
 
-**Feature**
+**Features:**
 
 -When passing the `--browser` flag alone, after selecting the testing type
 in the GUI, the browser will automatically launch.
