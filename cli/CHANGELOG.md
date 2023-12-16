@@ -671,6 +671,6 @@ _Released 1/24/2023_
 
 **Features:**
 
--When passing the `--browser` flag alone, after selecting the testing type
+- Passing `--browser` flag alone will launch after test selection
 in the GUI, the browser will automatically launch. Addresses 
 [#22003](https://github.com/cypress-io/cypress/issues/22003)
