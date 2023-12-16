@@ -4814,7 +4814,7 @@ exports['e2e events'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": "h1"
+              "selector": "h1:nth-child(1)"
             }
           ]
         }
@@ -4846,7 +4846,7 @@ exports['e2e events'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": "h1"
+              "selector": "h1:nth-child(1)"
             }
           ]
         },
@@ -4855,7 +4855,7 @@ exports['e2e events'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": "h1"
+              "selector": "h1:nth-child(1)"
             }
           ]
         }
@@ -6277,7 +6277,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -6308,7 +6308,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -6561,7 +6561,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -6592,7 +6592,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8016,7 +8016,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8047,7 +8047,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8300,7 +8300,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8331,7 +8331,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }

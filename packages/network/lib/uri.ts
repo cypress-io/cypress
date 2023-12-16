@@ -6,7 +6,7 @@
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
 import _ from 'lodash'
-import url, { URL } from 'url'
+import url from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)

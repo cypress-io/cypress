@@ -1230,6 +1230,35 @@ describe('Routes', () => {
           expect(res.body).to.include('hello from bar!')
         })
       })
+
+      it('handles malformed URIs', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=%A4')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=%A4',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=%A4',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
     })
 
     context('gzip', () => {
