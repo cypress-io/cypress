@@ -3,6 +3,12 @@
 
 _Released 12/19/2023 (PENDING)_
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003)
+
 **Bugfixes:**
 
 - Cypress no longer errors during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Fixes [#28385](https://github.com/cypress-io/cypress/issues/28385).
@@ -668,9 +674,3 @@ _Released 1/24/2023_
 - Video output link in `cypress run` mode has been added to it's own line to
   make the video output link more easily clickable in the terminal. Addresses
   [#23913](https://github.com/cypress-io/cypress/issues/23913).
-
-**Features:**
-
-- Passing `--browser` flag alone will launch after test selection
-in the GUI, the browser will automatically launch. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003)
