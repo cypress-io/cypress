@@ -287,7 +287,7 @@ const browserStatus = computed(() => {
 const testingTypeIcon = computed(() => props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2EIcon)
 
 onMounted(() => {
-  if (props.wasBrowserSetInCLI) {
+  if (props.wasBrowserSetInCLI && !browserStatus.value.open) {
     emit('launch')
   }
 })
