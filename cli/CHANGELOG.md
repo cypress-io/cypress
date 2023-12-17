@@ -7,7 +7,8 @@ _Released 12/19/2023 (PENDING)_
 
 - Running the command `cypress open --browser <browser-name>`will
 launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003)
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
