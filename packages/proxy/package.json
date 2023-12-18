@@ -44,5 +44,10 @@
   "files": [
     "lib"
   ],
-  "types": "./lib/index.ts"
+  "types": "./lib/index.ts",
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  }
 }

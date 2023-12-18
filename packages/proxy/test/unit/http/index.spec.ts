@@ -256,8 +256,7 @@ describe('http', function () {
 
     it('processes service worker registration updated events', () => {
       const http = new Http(httpOpts)
-      const registerServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'registerServiceWorker')
-      const unregisterServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'unregisterServiceWorker')
+      const updateServiceWorkerRegistrationsStub = sinon.stub(http.serviceWorkerManager, 'updateServiceWorkerRegistrations')
       const registrations = [{
         registrationId: '1234',
         scopeURL: 'foo',
@@ -272,19 +271,14 @@ describe('http', function () {
         registrations,
       })
 
-      expect(registerServiceWorkerStub).to.be.calledWith({
-        registrationId: '1234',
-        scopeURL: 'foo',
-      })
-
-      expect(unregisterServiceWorkerStub).to.be.calledWith({
-        registrationId: '1235',
+      expect(updateServiceWorkerRegistrationsStub).to.be.calledWith({
+        registrations,
       })
     })
 
     it('processes service worker version updated events', () => {
       const http = new Http(httpOpts)
-      const addActivatedServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'addActivatedServiceWorker')
+      const updateServiceWorkerVersionsStub = sinon.stub(http.serviceWorkerManager, 'updateServiceWorkerVersions')
       const versions = [{
         versionId: '1234',
         registrationId: '1234',
@@ -303,14 +297,8 @@ describe('http', function () {
         versions,
       } as any)
 
-      expect(addActivatedServiceWorkerStub).to.be.calledWith({
-        registrationId: '1235',
-        scriptURL: 'bar',
-      })
-
-      expect(addActivatedServiceWorkerStub).not.to.be.calledWith({
-        registrationId: '1234',
-        scriptURL: 'foo',
+      expect(updateServiceWorkerVersionsStub).to.be.calledWith({
+        versions,
       })
     })
 

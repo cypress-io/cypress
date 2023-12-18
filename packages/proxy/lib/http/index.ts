@@ -480,21 +480,11 @@ export class Http {
   }
 
   updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    data.registrations.forEach((registration) => {
-      if (registration.isDeleted) {
-        this.serviceWorkerManager.unregisterServiceWorker({ registrationId: registration.registrationId })
-      } else {
-        this.serviceWorkerManager.registerServiceWorker({ registrationId: registration.registrationId, scopeURL: registration.scopeURL })
-      }
-    })
+    this.serviceWorkerManager.updateServiceWorkerRegistrations(data)
   }
 
   updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    data.versions.forEach((version) => {
-      if (version.status === 'activated') {
-        this.serviceWorkerManager.addActivatedServiceWorker({ registrationId: version.registrationId, scriptURL: version.scriptURL })
-      }
-    })
+    this.serviceWorkerManager.updateServiceWorkerVersions(data)
   }
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {

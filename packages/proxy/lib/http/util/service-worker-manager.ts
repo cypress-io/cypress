@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import type { BrowserPreRequest } from '../../types'
+import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:proxy:service-worker-manager')
 
@@ -58,47 +59,27 @@ export class ServiceWorkerManager {
   private pendingInitiators: Map<string, string> = new Map<string, string>()
 
   /**
-   * Registers the given service worker with the given scope. Will not overwrite an existing registration.
+   * Goes through the list of service worker registrations and adds or removes them from the manager.
    */
-  registerServiceWorker ({ registrationId, scopeURL }: RegisterServiceWorkerOptions) {
-    // Only register service workers if they haven't already been registered
-    if (this.serviceWorkerRegistrations.get(registrationId)?.scopeURL === scopeURL) {
-      return
-    }
-
-    this.serviceWorkerRegistrations.set(registrationId, {
-      registrationId,
-      scopeURL,
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    data.registrations.forEach((registration) => {
+      if (registration.isDeleted) {
+        this.unregisterServiceWorker({ registrationId: registration.registrationId })
+      } else {
+        this.registerServiceWorker({ registrationId: registration.registrationId, scopeURL: registration.scopeURL })
+      }
     })
   }
 
   /**
-   * Unregisters the service worker with the given registration ID.
+   * Goes through the list of service worker versions and adds any that are activated to the manager.
    */
-  unregisterServiceWorker ({ registrationId }: UnregisterServiceWorkerOptions) {
-    this.serviceWorkerRegistrations.delete(registrationId)
-  }
-
-  /**
-   * Adds an activated service worker to the manager.
-   */
-  addActivatedServiceWorker ({ registrationId, scriptURL }: AddActivatedServiceWorkerOptions) {
-    const registration = this.serviceWorkerRegistrations.get(registrationId)
-
-    if (registration) {
-      const initiatorURL = this.pendingInitiators.get(scriptURL)
-
-      registration.activatedServiceWorker = {
-        registrationId,
-        scriptURL,
-        controlledURLs: new Set<string>(),
-        initiatorURL: initiatorURL || registration.activatedServiceWorker?.initiatorURL,
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    data.versions.forEach((version) => {
+      if (version.status === 'activated') {
+        this.addActivatedServiceWorker({ registrationId: version.registrationId, scriptURL: version.scriptURL })
       }
-
-      this.pendingInitiators.delete(scriptURL)
-    } else {
-      debug('Could not find service worker registration for registration ID %s', registrationId)
-    }
+    })
   }
 
   /**
@@ -157,5 +138,49 @@ export class ServiceWorkerManager {
     })
 
     return requestControlledByServiceWorker
+  }
+
+  /**
+   * Registers the given service worker with the given scope. Will not overwrite an existing registration.
+   */
+  private registerServiceWorker ({ registrationId, scopeURL }: RegisterServiceWorkerOptions) {
+    // Only register service workers if they haven't already been registered
+    if (this.serviceWorkerRegistrations.get(registrationId)?.scopeURL === scopeURL) {
+      return
+    }
+
+    this.serviceWorkerRegistrations.set(registrationId, {
+      registrationId,
+      scopeURL,
+    })
+  }
+
+  /**
+   * Unregisters the service worker with the given registration ID.
+   */
+  private unregisterServiceWorker ({ registrationId }: UnregisterServiceWorkerOptions) {
+    this.serviceWorkerRegistrations.delete(registrationId)
+  }
+
+  /**
+   * Adds an activated service worker to the manager.
+   */
+  private addActivatedServiceWorker ({ registrationId, scriptURL }: AddActivatedServiceWorkerOptions) {
+    const registration = this.serviceWorkerRegistrations.get(registrationId)
+
+    if (registration) {
+      const initiatorURL = this.pendingInitiators.get(scriptURL)
+
+      registration.activatedServiceWorker = {
+        registrationId,
+        scriptURL,
+        controlledURLs: new Set<string>(),
+        initiatorURL: initiatorURL || registration.activatedServiceWorker?.initiatorURL,
+      }
+
+      this.pendingInitiators.delete(scriptURL)
+    } else {
+      debug('Could not find service worker registration for registration ID %s', registrationId)
+    }
   }
 }
