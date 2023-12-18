@@ -173,8 +173,8 @@ export class CdpAutomation implements CDPClient {
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
-    onFn('ServiceWorker.workerRegistrationUpdated', this.onWorkerRegistrationUpdated)
-    onFn('ServiceWorker.workerVersionUpdated', this.onWorkerVersionUpdated)
+    onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
+    onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
     this.on = onFn
     this.off = offFn
@@ -266,11 +266,11 @@ export class CdpAutomation implements CDPClient {
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
   }
 
-  private onWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+  private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
     this.automation.onServiceWorkerRegistrationUpdated?.(params)
   }
 
-  private onWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+  private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
     this.automation.onServiceWorkerVersionUpdated?.(params)
   }
 

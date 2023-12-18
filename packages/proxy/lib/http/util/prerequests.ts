@@ -5,8 +5,7 @@ import type {
 } from '@packages/proxy'
 import type { ProtocolManagerShape } from '@packages/types'
 import Debug from 'debug'
-import { ServiceWorkerManager } from './service-worker-manager'
-import type Protocol from 'devtools-protocol'
+import { hasServiceWorkerHeader } from './headers'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
 const debugVerbose = Debug('cypress-verbose:proxy:http:util:prerequests')
@@ -120,7 +119,6 @@ export class PreRequests {
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
-  serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (
     requestTimeout = 2000,
@@ -161,10 +159,6 @@ export class PreRequests {
 
   addPending (browserPreRequest: BrowserPreRequest) {
     const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
-
-    if (this.shouldIgnorePendingRequest(browserPreRequest)) {
-      return
-    }
 
     metrics.browserPreRequestsReceived++
     const pendingRequest = this.pendingRequests.shift(key)
@@ -240,7 +234,7 @@ export class PreRequests {
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
     // it's the service worker request via the `service-worker` header
-    if (PreRequests.hasServiceWorkerHeader(req.headers)) {
+    if (hasServiceWorkerHeader(req.headers)) {
       ctxDebug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
 
       callback({
@@ -323,30 +317,7 @@ export class PreRequests {
     delete pendingRequest.callback
   }
 
-  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    data.registrations.forEach((registration) => {
-      if (registration.isDeleted) {
-        this.serviceWorkerManager.unregisterServiceWorker({ registrationId: registration.registrationId })
-      } else {
-        this.serviceWorkerManager.registerServiceWorker({ registrationId: registration.registrationId, scopeURL: registration.scopeURL })
-      }
-    })
-  }
-
-  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    data.versions.forEach((version) => {
-      if (version.status === 'activated') {
-        this.serviceWorkerManager.addActivatedServiceWorker({ registrationId: version.registrationId, scriptURL: version.scriptURL })
-      }
-    })
-  }
-
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
-    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorURL: data.initiatorURL })
-  }
-
   reset () {
-    this.serviceWorkerManager = new ServiceWorkerManager()
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue
@@ -360,28 +331,5 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
-  }
-
-  private static hasServiceWorkerHeader (headers: Record<string, string | string[] | undefined>) {
-    return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
-  }
-
-  private shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
-    // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
-    // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
-    // `service-worker` header
-    if (PreRequests.hasServiceWorkerHeader(browserPreRequest.headers)) {
-      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it: %o', browserPreRequest)
-
-      return true
-    }
-
-    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
-      debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
-
-      return true
-    }
-
-    return false
   }
 }

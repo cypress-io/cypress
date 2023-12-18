@@ -1,4 +1,7 @@
+import Debug from 'debug'
 import type { BrowserPreRequest } from '../../types'
+
+const debug = Debug('cypress:proxy:service-worker-manager')
 
 type ServiceWorkerRegistration = {
   registrationId: string
@@ -42,7 +45,7 @@ type AddInitiatorToServiceWorkerOptions = {
  *
  * At some point while 1 and 2 are happening:
  *
- * 3. We receive a message from the browser that a service worker has been registered with the `addInitiatorToServiceWorker` method.
+ * 3. We receive a message from the browser that a service worker has been initiated with the `addInitiatorToServiceWorker` method.
  *
  * At this point, when the manager tries to process a browser pre-request, it will check if the request is controlled by a service worker.
  * It determines it is controlled by a service worker if:
@@ -93,6 +96,8 @@ export class ServiceWorkerManager {
       }
 
       this.pendingInitiators.delete(scriptURL)
+    } else {
+      debug('Could not find service worker registration for registration ID %s', registrationId)
     }
   }
 
@@ -103,13 +108,14 @@ export class ServiceWorkerManager {
   addInitiatorToServiceWorker ({ scriptURL, initiatorURL }: AddInitiatorToServiceWorkerOptions) {
     let initiatorAdded = false
 
-    this.serviceWorkerRegistrations.forEach((registration) => {
+    for (const registration of this.serviceWorkerRegistrations.values()) {
       if (registration.activatedServiceWorker?.scriptURL === scriptURL) {
         registration.activatedServiceWorker.initiatorURL = initiatorURL
 
         initiatorAdded = true
+        break
       }
-    })
+    }
 
     if (!initiatorAdded) {
       this.pendingInitiators.set(scriptURL, initiatorURL)

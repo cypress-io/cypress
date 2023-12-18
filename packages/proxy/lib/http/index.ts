@@ -27,6 +27,8 @@ import type { CookieJar, SerializableAutomationCookie } from '@packages/server/l
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
+import { ServiceWorkerManager } from './util/service-worker-manager'
+import { hasServiceWorkerHeader } from './util/headers'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -274,6 +276,7 @@ export class Http {
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
+  serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -434,8 +437,10 @@ export class Http {
     this.buffers.reset()
     this.setAUTUrl(undefined)
 
+    // Only reset prerequests in situations where we no longer care about the previous prerequests (e.g. when we are starting a new spec in a new browser tab)
     if (options.resetPrerequests) {
       this.preRequests.reset()
+      this.serviceWorkerManager = new ServiceWorkerManager()
     }
   }
 
@@ -444,6 +449,10 @@ export class Http {
   }
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    if (this.shouldIgnorePendingRequest(browserPreRequest)) {
+      return
+    }
+
     this.preRequests.addPending(browserPreRequest)
   }
 
@@ -456,15 +465,25 @@ export class Http {
   }
 
   updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    this.preRequests.updateServiceWorkerRegistrations(data)
+    data.registrations.forEach((registration) => {
+      if (registration.isDeleted) {
+        this.serviceWorkerManager.unregisterServiceWorker({ registrationId: registration.registrationId })
+      } else {
+        this.serviceWorkerManager.registerServiceWorker({ registrationId: registration.registrationId, scopeURL: registration.scopeURL })
+      }
+    })
   }
 
   updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    this.preRequests.updateServiceWorkerVersions(data)
+    data.versions.forEach((version) => {
+      if (version.status === 'activated') {
+        this.serviceWorkerManager.addActivatedServiceWorker({ registrationId: version.registrationId, scriptURL: version.scriptURL })
+      }
+    })
   }
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
-    this.preRequests.updateServiceWorkerClientSideRegistrations(data)
+    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorURL: data.initiatorURL })
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
@@ -474,5 +493,24 @@ export class Http {
 
   setPreRequestTimeout (timeout: number) {
     this.preRequests.setPreRequestTimeout(timeout)
+  }
+
+  private shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
+    // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
+    // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
+    // `service-worker` header
+    if (hasServiceWorkerHeader(browserPreRequest.headers)) {
+      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it: %o', browserPreRequest)
+
+      return true
+    }
+
+    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
+      debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
+
+      return true
+    }
+
+    return false
   }
 }
