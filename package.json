@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.6.0",
+  "version": "13.6.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "binary-package": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js package",
     "check-binary-on-cdn": "node ./scripts/binary.js checkIfBinaryExistsOnCdn",
     "build": "lerna run build --stream && lerna run build-cli --stream",
-    "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope create-cypress-tests --scope",
+    "build-prod": "lerna run build-prod --stream && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope",
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
     "check-node-version": "node scripts/check-node-version.js",
@@ -162,7 +162,7 @@
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",
     "glob": "7.1.6",
-    "got": "11.8.5",
+    "got": "11.8.6",
     "graphql": "^15.5.1",
     "graphql-executor": "0.0.23",
     "gulp": "4.0.2",
@@ -207,7 +207,7 @@
     "through": "2.3.8",
     "through2": "^4.0.2",
     "tree-kill": "1.2.2",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "4.7.4",
     "yarn-deduplicate": "3.1.0"
   },
