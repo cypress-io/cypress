@@ -8,7 +8,7 @@ import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
-
+import v8 from 'v8'
 import * as packages from './util/packages'
 import * as meta from './meta'
 import xvfb from '../../cli/lib/exec/xvfb'
@@ -424,6 +424,7 @@ async function testExecutableVersion (buildAppExecutable: string, version: strin
   console.log('testing built app executable version')
   console.log(`by calling: ${buildAppExecutable} --version`)
 
+  console.log('cachedDataVersionTag: ', v8.cachedDataVersionTag())
   const args = ['--version']
 
   if (verify.needsSandbox()) {
