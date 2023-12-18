@@ -231,15 +231,6 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 2)
   })
 
-  it('immediately handles a request from a service worker loading', () => {
-    const cbServiceWorker = sinon.stub()
-
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'service-worker': 'script' } } as any, () => {}, cbServiceWorker)
-
-    expect(cbServiceWorker).to.be.calledOnce
-    expect(cbServiceWorker).to.be.calledWith()
-  })
-
   it('removes a pending request', () => {
     const cb = sinon.stub()
 

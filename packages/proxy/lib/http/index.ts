@@ -28,12 +28,15 @@ import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import { ServiceWorkerManager } from './util/service-worker-manager'
-import { hasServiceWorkerHeader } from './util/headers'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
     Math.floor(Math.random() * 0xFFFFFF),
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
+}
+
+const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
+  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
 }
 
 export const isVerboseTelemetry = true
@@ -336,6 +339,18 @@ export class Http {
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
+        // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
+        // it's the service worker request via the `service-worker` header
+        if (hasServiceWorkerHeader(req.headers)) {
+          ctx.debug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
+
+          cb({
+            noPreRequestExpected: true,
+          })
+
+          return
+        }
+
         return this.preRequests.get(ctx.req, ctx.debug, cb)
       },
       addPendingUrlWithoutPreRequest: (url) => {

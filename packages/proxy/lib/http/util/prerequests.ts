@@ -5,7 +5,6 @@ import type {
 } from '@packages/proxy'
 import type { ProtocolManagerShape } from '@packages/types'
 import Debug from 'debug'
-import { hasServiceWorkerHeader } from './headers'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
 const debugVerbose = Debug('cypress-verbose:proxy:http:util:prerequests')
@@ -232,18 +231,6 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
-    // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
-    // it's the service worker request via the `service-worker` header
-    if (hasServiceWorkerHeader(req.headers)) {
-      ctxDebug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
-
-      callback({
-        noPreRequestExpected: true,
-      })
-
-      return
-    }
-
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
