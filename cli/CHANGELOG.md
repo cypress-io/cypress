@@ -5,8 +5,7 @@ _Released 12/19/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed asset capture for Test Replay for requests that are routed through service workers. This addresses an issue where styles were not being applied properly in Test Replay. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
-- Fixed proxy request correlation for requests that span tests when test isolation is off. This could cause an issue where styles may not be properly applied in Test Replay or `cy.intercept` might not work properly. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
+- Fixed asset capture for Test Replay for requests that are routed through service workers and for requests that span tests when test isolation is off. This addresses an issue where styles would not being applied properly in Test Replay or `cy.intercept` would not work properly. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516) and [#28545](https://github.com/cypress-io/cypress/issues/28545).
 - Cypress no longer errors during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Fixes [#28385](https://github.com/cypress-io/cypress/issues/28385).
 - Fixed a regression in [`13.6.1`](https://docs.cypress.io/guides/references/changelog/13.6.1) where a malformed URI would crash Cypress. Fixes [#28521](https://github.com/cypress-io/cypress/issues/28521).
 - Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
