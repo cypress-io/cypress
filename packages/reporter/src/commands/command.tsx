@@ -39,8 +39,12 @@ export const formattedMessage = (message: string, type: string) => {
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
   const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
+
+  const underscorePreservedText = spaceEscapedText.replace(/_+/gm, (initialUnderscores) => '&#95;'.repeat(initialUnderscores.length)) // &#32 HTML entity for underscore
+
   // we don't want <br> in our error messages, but allow it in Cypress.log
-  const converted = type === 'error' ? md.renderInline(spaceEscapedText) : mdBreaks.renderInline(spaceEscapedText)
+  const converted = type === 'error' ? md.renderInline(underscorePreservedText) : mdBreaks.renderInline(underscorePreservedText)
+
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
   return [converted, ...assertion].join(' ')
