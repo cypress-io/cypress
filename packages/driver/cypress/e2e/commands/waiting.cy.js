@@ -945,21 +945,99 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      it('can turn off logging for explicit wait time', { protocolEnabled: true }, function () {
-        cy.on('_log:added', (attrs, log) => {
-          this.hiddenLog = log
+      describe('explicit wait time', function () {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog).to.be.undefined
+          })
         })
 
-        cy.wait(10, { log: false }).then(function () {
-          const { lastLog, hiddenLog } = this
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
 
-          expect(lastLog).to.be.undefined
-          expect(hiddenLog.get('name')).to.eq('wait')
-          expect(hiddenLog.get('hidden')).to.be.true
-          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog.get('name')).to.eq('wait')
+            expect(hiddenLog.get('hidden')).to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+
+          cy.getCommandLogInReporter('wait', { isHidden: true })
+        })
+      })
+
+      describe('wait for xhr', function () {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.undefined
+          })
+
+          cy.getCommandLogInReporter('wait', { isHidden: true })
         })
 
-        cy.getCommandLogInReporter('wait', { isHidden: true })
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.ok
+            expect(hiddenWaitLog.get('name')).to.eq('wait')
+            expect(hiddenWaitLog.get('hidden')).to.be.true
+            expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+
+          cy.getCommandLogInReporter('wait', { isHidden: true })
+        })
       })
 
       it('can turn off logging for wait for xhr', { protocolEnabled: true }, function () {

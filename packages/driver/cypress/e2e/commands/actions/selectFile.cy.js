@@ -555,7 +555,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.getCommandLogInReporter('selectFile', { isHidden: true })
       })
 
-      it('logs out select', () => {
+      it('logs out selectFile', () => {
         cy.get('#basic')
         .selectFile({ contents: '@foo', fileName: 'foo.txt' }).then(function () {
           const { lastLog } = this

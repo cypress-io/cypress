@@ -123,6 +123,9 @@ export const LogUtils = {
 const defaults = function (state: StateFunc, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
   const current = state('current')
+
+  // always set the chainerId of the log to ourselves
+  // so it can be queried on later
   const chainerId = current && current.get('chainerId')
 
   // dont set any defaults if this
@@ -240,7 +243,6 @@ export class Log {
   state: StateFunc
   config: any
   fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
-  obj: any
 
   _hasInitiallyLogged: boolean = false
   private attributes: Record<string, any> = { }
@@ -323,6 +325,8 @@ export class Log {
       delete obj.onConsole
     }
 
+    // truncate message when log is hidden to prevent bloating memory
+    // and the protocol database
     if (obj.message && this.config('protocolEnabled') && isHiddenLog) {
       obj.message = Cypress.utils
       .stringify(obj.message)
@@ -592,6 +596,8 @@ export class Log {
     this.attributes.renderProps = function (...invokedArgs) {
       const renderedProps = renderProps.apply(this, invokedArgs)
 
+      // truncate message when log is hidden to prevent bloating memory
+      // and the protocol database
       if (renderedProps.message) {
         renderedProps.message = Cypress.utils
         .stringify(renderedProps.message)

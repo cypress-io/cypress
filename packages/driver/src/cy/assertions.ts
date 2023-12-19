@@ -343,7 +343,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         cy.state('overrideAssert', undefined)
-
         err.isDefaultAssertionErr = isDefaultAssertionErr
 
         options.error = err

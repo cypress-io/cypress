@@ -563,15 +563,13 @@ describe('src/cy/commands/querying', () => {
           hiddenLog = log
         })
 
-        cy.get('body', { log: false }).as('b').get('@b', { log: false })
+        cy.get('body').as('b').get('@b', { log: false })
         .then(function () {
           expect(logs.length).to.eq(0)
           expect(hiddenLog.get('name')).to.eq('get')
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
-
-        cy.getCommandLogInReporter('get', { isHidden: true })
       })
 
       it('re-queries the dom if any element in an alias isnt in the document', () => {
