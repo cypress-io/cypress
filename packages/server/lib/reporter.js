@@ -665,8 +665,6 @@ class Reporter {
   }
 
   static loadReporter (reporterName, projectRoot) {
-    let p
-
     debug('trying to load reporter:', reporterName)
 
     // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
@@ -689,41 +687,12 @@ class Reporter {
       return reporterName
     }
 
-    // it's likely a custom reporter
-    // that is local (./custom-reporter.js)
-    // or one installed by the user through npm
-    try {
-      p = path.resolve(projectRoot, reporterName)
-
-      // try local
-      debug('trying to require local reporter with path:', p)
-
-      // using path.resolve() here so we can just pass an
-      // absolute path as the reporterName which avoids
-      // joining projectRoot unnecessarily
-      return require(p)
-    } catch (err) {
-      if (err.code !== 'MODULE_NOT_FOUND') {
-        // bail early if the error wasn't MODULE_NOT_FOUND
-        // because that means theres something actually wrong
-        // with the found reporter
-        throw err
-      }
-
-      p = path.resolve(projectRoot, 'node_modules', reporterName)
-
-      // try npm. if this fails, we're out of options, so let it throw
-      debug('trying to require local reporter with path:', p)
-
-      return require(p)
-    }
+    return require.resolve(reporterName, { paths: Reporter.getSearchPathsForReporter(projectRoot) })
   }
 
-  static getSearchPathsForReporter (reporterName, projectRoot) {
-    return _.uniq([
-      path.resolve(projectRoot, reporterName),
-      path.resolve(projectRoot, 'node_modules', reporterName),
-    ])
+  // This seems redundant, but it ensures that if the paths ever change, that the error message will contain the correct paths.
+  static getSearchPathsForReporter (projectRoot) {
+    return [projectRoot]
   }
 }
 
