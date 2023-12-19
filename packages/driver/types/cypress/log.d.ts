@@ -1,11 +1,13 @@
 // The type declarations for Cypress Logs & the corresponding configuration permutations
 declare namespace Cypress {
-  interface Cypress {
+  interface Cypress extends Cypress {
     log(options: Partial<LogConfig | InternalLogConfig>): Log | undefined
   }
 
   interface Log extends Log {
     _hasInitiallyLogged: boolean
+    get<K extends keyof InternalLogConfig>(attr: K): InternalLogConfig[K]
+    get(): InternalLogConfig
     set<K extends keyof LogConfig | InternalLogConfig>(key: K, value: LogConfig[K]): InternalLog
     set(options: Partial<LogConfig | InternalLogConfig>)
     groupEnd(): void
