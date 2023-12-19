@@ -309,6 +309,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const contents = await fs.readFile(file)
 
     // Backup state
+    await fs.remove(backupFile)
     await fs.move(file, backupFile, { overwrite: true })
 
     // Modify app
