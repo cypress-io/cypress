@@ -90,7 +90,7 @@ const TestError = (props: TestErrorProps) => {
         {groupPlaceholder}
         <div className='runnable-err-content'>
           <div className='runnable-err-message'>
-            <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
+            <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message, 'error') }} />
             <DocsUrl url={err.docsUrl} />
           </div>
           {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}

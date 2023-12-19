@@ -1,13 +1,10 @@
 import $ from 'jquery'
 import _ from 'lodash'
-import uniqueSelector from '@cypress/unique-selector'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
-import { debug as Debug } from 'debug'
-
-const debug = Debug('cypress:driver:snapshots')
+import { finder } from '@medv/finder'
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -272,14 +269,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
               return []
             }
 
-            const selector = uniqueSelector(el)
-
-            if (!selector) {
-              debug('could not find a unique selector for element %o', el)
-
-              return []
-            }
-
+            // finder tries to find the shortest unique selector to an element,
+            // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
+            const selector = finder(el, { root: ownerDoc.body, threshold: 1, maxNumberOfTries: 0 })
             const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
