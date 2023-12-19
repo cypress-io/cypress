@@ -252,7 +252,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const contents = await fs.readFile(file)
 
     // Backup state
-    await fs.move(file, `${file}.bak`)
+    await fs.move(file, `${file}.bak`, { overwrite: true })
 
     // Modify app
     await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
