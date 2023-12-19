@@ -46,6 +46,10 @@ declare namespace Cypress {
     (k: keyof ResolvedConfigOptions, v?: any): any
   }
 
+  interface TestConfigOverrides extends Cypress.TestConfigOverrides {
+    protocolEnabled?: boolean
+  }
+
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document

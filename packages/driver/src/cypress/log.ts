@@ -328,7 +328,7 @@ export class Log {
     // truncate message when log is hidden to prevent bloating memory
     // and the protocol database
     if (obj.message && this.config('protocolEnabled') && isHiddenLog) {
-      obj.message = Cypress.utils
+      obj.message = $utils
       .stringify(obj.message)
       .substring(0, PROTOCOL_MESSAGE_TRUNCATION_LENGTH)
     }
@@ -599,7 +599,7 @@ export class Log {
       // truncate message when log is hidden to prevent bloating memory
       // and the protocol database
       if (renderedProps.message) {
-        renderedProps.message = Cypress.utils
+        renderedProps.message = $utils
         .stringify(renderedProps.message)
         .substring(0, PROTOCOL_MESSAGE_TRUNCATION_LENGTH)
       }
