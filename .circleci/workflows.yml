@@ -1616,9 +1616,9 @@ jobs:
             - run:
                 name: "Linting Public types 🧹"
                 command: |
-                ls -la cli/types
-                ls -la cli/types/chai
-                yarn workspace cypress dtslint
+                  ls -la cli/types
+                  ls -la cli/types/chai
+                  yarn workspace cypress dtslint
             - run:
                 name: "Linting TS types 🧹"
                 command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
