@@ -16,6 +16,10 @@ _Released 12/19/2023 (PENDING)_
 
 - Updated ts-node from `10.9.1` to `10.9.2`. Cypress will longer error during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Addresses [#28385](https://github.com/cypress-io/cypress/issues/28385).
 
+**Misc:**
+
+- (this entry left intentionally empty). Addressed in [#28549](https://github.com/cypress-io/cypress/pull/28549)
+
 ## 13.6.1
 
 _Released 12/5/2023_
