@@ -2135,13 +2135,6 @@ jobs:
           path: npm/grep/test_results
       - store-npm-logs
 
-  npm-create-cypress-tests:
-    <<: *defaults
-    resource_class: small
-    steps:
-      - restore_cached_workspace
-      - run: yarn lerna run build --scope create-cypress-tests
-
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -2799,9 +2792,6 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-mount-utils:
         requires:
           - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -2821,7 +2811,6 @@ linux-x64-workflow: &linux-x64-workflow
           - check-ts
           - npm-angular
           - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
           - npm-react
           - npm-mount-utils
           - npm-vue
@@ -2877,7 +2866,6 @@ linux-x64-workflow: &linux-x64-workflow
           - check-ts
           - npm-angular
           - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
           - npm-react
           - npm-mount-utils
           - npm-vue
@@ -3195,9 +3183,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-mount-utils:
         requires:
           - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -3217,7 +3202,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - check-ts
           - npm-angular
           - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
           - npm-react
@@ -3273,7 +3257,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - check-ts
           - npm-angular
           - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
           - npm-react
           - npm-mount-utils
           - npm-vue
