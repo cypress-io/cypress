@@ -1431,18 +1431,18 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - wait-on-circle-jobs:
-          job-names: >
-            cli-visual-tests,
-            reporter-integration-tests,
-            run-app-component-tests-chrome,
-            run-app-integration-tests-chrome,
-            run-frontend-shared-component-tests-chrome,
-            run-launchpad-component-tests-chrome,
-            run-launchpad-integration-tests-chrome,
-            run-reporter-component-tests-chrome,
-            run-webpack-dev-server-integration-tests,
-            run-vite-dev-server-integration-tests
+      # - wait-on-circle-jobs:
+      #     job-names: >
+      #       cli-visual-tests,
+      #       reporter-integration-tests,
+      #       run-app-component-tests-chrome,
+      #       run-app-integration-tests-chrome,
+      #       run-frontend-shared-component-tests-chrome,
+      #       run-launchpad-component-tests-chrome,
+      #       run-launchpad-integration-tests-chrome,
+      #       run-reporter-component-tests-chrome,
+      #       run-webpack-dev-server-integration-tests,
+      #       run-vite-dev-server-integration-tests
       - run:
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
           # If all other jobs finish but `build:finalize` fails, we retry it once
@@ -2643,7 +2643,16 @@ linux-x64-workflow: &linux-x64-workflow
         context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - build
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
     - lint-types:
         requires:
           - build
@@ -3034,7 +3043,16 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         context: [test-runner:poll-circle-workflow, test-runner:percy]
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - contributor-pr
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
     - lint-types:
         requires:
           - build
