@@ -82,7 +82,7 @@ export const zipDir = function () {
 export const buildAppDir = function (...args: string[]) {
   switch (PLATFORM) {
     case 'darwin':
-      return buildDir('Cypress.app', 'Contents', 'resources', 'app', ...args)
+      return buildDir('Cypress.app', 'Contents', 'Resources', 'app', ...args)
     case 'linux':
     case 'win32':
       return buildDir('resources', 'app', ...args)
