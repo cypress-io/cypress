@@ -309,7 +309,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const contents = await fs.readFile(file)
 
     // Backup state
-    await fs.move(file, backupFile)
+    await fs.move(file, backupFile, { overwrite: true })
 
     // Modify app
     await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
