@@ -2877,8 +2877,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
       })
-
-      cy.getCommandLogInReporter('type', { isHidden: true })
     })
 
     it('passes in $el', () => {

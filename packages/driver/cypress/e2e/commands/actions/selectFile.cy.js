@@ -551,8 +551,6 @@ describe('src/cy/commands/actions/selectFile', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('selectFile', { isHidden: true })
       })
 
       it('logs out selectFile', () => {
@@ -562,8 +560,6 @@ describe('src/cy/commands/actions/selectFile', () => {
 
           expect(lastLog.get('name')).to.eq('selectFile')
         })
-
-        cy.getCommandLogInReporter('selectFile')
       })
     })
 

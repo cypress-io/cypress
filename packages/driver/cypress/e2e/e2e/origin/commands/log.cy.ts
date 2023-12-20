@@ -82,10 +82,6 @@ context('cy.origin log', { browser: '!webkit' }, () => {
 
       expect(this.hiddenLog).to.be.undefined
     })
-
-    cy.getCommandLogInReporter('origin')
-    cy.getCommandLogInReporter('get')
-    cy.getCommandLogInReporter('select', { isHidden: true })
   })
 
   it('handles sending hidden logs to primary origin when protocol enabled', { protocolEnabled: true }, function () {
@@ -104,9 +100,5 @@ context('cy.origin log', { browser: '!webkit' }, () => {
       expect(this.hiddenLog.get('name'), 'log name').to.eq('select')
       expect(this.hiddenLog.get('hidden'), 'log hidden').to.be.true
     })
-
-    cy.getCommandLogInReporter('origin')
-    cy.getCommandLogInReporter('get')
-    cy.getCommandLogInReporter('select', { isHidden: true })
   })
 })

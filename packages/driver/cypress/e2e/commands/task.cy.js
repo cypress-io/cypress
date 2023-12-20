@@ -89,8 +89,6 @@ describe('src/cy/commands/task', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('task', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {

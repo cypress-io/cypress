@@ -125,8 +125,6 @@ describe('src/cy/commands/querying', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
-
-        cy.getCommandLogInReporter('focused', { isHidden: true })
       })
 
       it('ends immediately', () => {

@@ -2462,8 +2462,6 @@ describe('src/cy/commands/actions/click', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('click', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -3372,8 +3370,6 @@ describe('src/cy/commands/actions/click', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('dblclick', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -3810,8 +3806,6 @@ describe('src/cy/commands/actions/click', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('rightclick', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

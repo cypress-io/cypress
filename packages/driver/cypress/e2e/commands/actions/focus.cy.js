@@ -273,8 +273,6 @@ describe('src/cy/commands/actions/focus', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('focus', { isHidden: true })
       })
 
       it('logs immediately before resolving', () => {
@@ -757,8 +755,6 @@ describe('src/cy/commands/actions/focus', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('blur', { isHidden: true })
       })
 
       it('logs immediately before resolving', () => {

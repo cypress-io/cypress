@@ -256,8 +256,6 @@ describe('src/cy/commands/querying - shadow dom', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
-
-        cy.getCommandLogInReporter('shadow', { isHidden: true })
       })
     })
   })

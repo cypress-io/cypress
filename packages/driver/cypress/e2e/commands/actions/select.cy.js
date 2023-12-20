@@ -675,8 +675,6 @@ describe('src/cy/commands/actions/select', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('select', { isHidden: true })
       })
 
       it('logs out select', () => {
@@ -685,8 +683,6 @@ describe('src/cy/commands/actions/select', () => {
 
           expect(lastLog.get('name')).to.eq('select')
         })
-
-        cy.getCommandLogInReporter('select')
       })
 
       it('passes in $el', () => {

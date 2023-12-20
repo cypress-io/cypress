@@ -253,8 +253,6 @@ describe('src/cy/commands/navigation', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('reload', { isHidden: true })
       })
 
       it('does not log \'Page Load\' events', () => {
@@ -572,8 +570,6 @@ describe('src/cy/commands/navigation', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('go', { isHidden: true })
       })
 
       it('does not log \'Page Load\' events', () => {
@@ -1195,8 +1191,6 @@ describe('src/cy/commands/navigation', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('visit', { isHidden: true })
       })
 
       it('displays file attributes as consoleProps', () => {

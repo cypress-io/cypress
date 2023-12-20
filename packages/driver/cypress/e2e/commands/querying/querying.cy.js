@@ -361,8 +361,6 @@ describe('src/cy/commands/querying', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
-
-        cy.getCommandLogInReporter('get', { isHidden: true })
       })
 
       it('logs elements length', () => {

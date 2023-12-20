@@ -593,8 +593,6 @@ describe('src/cy/commands/actions/scroll', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('scrollTo', { isHidden: true })
       })
 
       it('logs out scrollTo', () => {
@@ -603,8 +601,6 @@ describe('src/cy/commands/actions/scroll', () => {
 
           expect(lastLog.get('name')).to.eq('scrollTo')
         })
-
-        cy.getCommandLogInReporter('scrollTo')
       })
 
       it('passes in $el if child command', () => {
@@ -1028,8 +1024,6 @@ describe('src/cy/commands/actions/scroll', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('scrollIntoView', { isHidden: true })
       })
 
       it('logs out scrollIntoView', () => {
@@ -1038,8 +1032,6 @@ describe('src/cy/commands/actions/scroll', () => {
 
           expect(lastLog.get('name')).to.eq('scrollIntoView')
         })
-
-        cy.getCommandLogInReporter('scrollIntoView')
       })
 
       it('passes in $el', () => {

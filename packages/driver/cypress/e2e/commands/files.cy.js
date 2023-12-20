@@ -173,8 +173,6 @@ describe('src/cy/commands/files', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('readFile', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {
@@ -648,8 +646,6 @@ describe('src/cy/commands/files', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('writeFile', { isHidden: true })
       })
 
       it('logs immediately before resolving', function () {

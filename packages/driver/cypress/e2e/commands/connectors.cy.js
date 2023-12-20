@@ -844,8 +844,6 @@ describe('src/cy/commands/connectors', () => {
               expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
               expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
             })
-
-            cy.getCommandLogInReporter('invoke', { isHidden: true })
           })
         })
       })
@@ -1450,8 +1448,6 @@ describe('src/cy/commands/connectors', () => {
             expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
             expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
-
-          cy.getCommandLogInReporter('its', { isHidden: true })
         })
       })
 

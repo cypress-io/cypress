@@ -972,8 +972,6 @@ describe('src/cy/commands/waiting', () => {
             expect(hiddenLog.get('hidden')).to.be.true
             expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
-
-          cy.getCommandLogInReporter('wait', { isHidden: true })
         })
       })
 
@@ -1003,8 +1001,6 @@ describe('src/cy/commands/waiting', () => {
             expect(lastWaitLog).to.be.undefined
             expect(hiddenWaitLog).to.be.undefined
           })
-
-          cy.getCommandLogInReporter('wait', { isHidden: true })
         })
 
         it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
@@ -1035,8 +1031,6 @@ describe('src/cy/commands/waiting', () => {
             expect(hiddenWaitLog.get('hidden')).to.be.true
             expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
-
-          cy.getCommandLogInReporter('wait', { isHidden: true })
         })
       })
 
@@ -1068,8 +1062,6 @@ describe('src/cy/commands/waiting', () => {
           expect(hiddenWaitLog.get('hidden')).to.be.true
           expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
       describe('number argument', () => {

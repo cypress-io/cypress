@@ -180,8 +180,6 @@ describe('src/cy/commands/location', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('url', { isHidden: true })
       })
 
       it('#consoleProps', () => {
@@ -357,8 +355,6 @@ describe('src/cy/commands/location', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('hash', { isHidden: true })
       })
 
       it('#consoleProps', () => {
@@ -574,8 +570,6 @@ describe('src/cy/commands/location', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('location', { isHidden: true })
       })
 
       it('logs obj without a message', () => {

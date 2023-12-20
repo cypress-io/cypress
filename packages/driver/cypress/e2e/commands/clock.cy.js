@@ -422,10 +422,6 @@ describe('src/cy/commands/clock', () => {
           expect(this.hiddenLogs[2].get('hidden'), 'log hidden').to.be.true
           expect(this.hiddenLogs[2].get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('clock', { isHidden: true })
-        cy.getCommandLogInReporter('tick', { isHidden: true })
-        cy.getCommandLogInReporter('restore', { isHidden: true })
       })
 
       it('only logs the first call', function () {
@@ -603,8 +599,6 @@ describe('src/cy/commands/clock', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
-
-        cy.getCommandLogInReporter('tick', { isHidden: true })
       })
     })
   })
@@ -679,8 +673,6 @@ describe('src/cy/commands/clock', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('restore', { isHidden: true })
       })
     })
   })

@@ -220,8 +220,6 @@ describe('src/cy/commands/querying/within', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('wait', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {

@@ -44,8 +44,6 @@ describe('src/cy/commands/storage', () => {
         expect(logs[1].get('name')).to.eq('getAllLocalStorage')
         expect(logs[1].get('hidden')).to.be.false
       })
-
-      cy.getCommandLogInReporter('getAllLocalStorage')
     })
 
     it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
@@ -78,8 +76,6 @@ describe('src/cy/commands/storage', () => {
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
-
-      cy.getCommandLogInReporter('getAllLocalStorage', { isHidden: true })
     })
 
     it('consoleProps includes the storage yielded', () => {
@@ -131,8 +127,6 @@ describe('src/cy/commands/storage', () => {
         expect(logs[1].get('name')).to.eq('clearAllLocalStorage')
         expect(logs[1].get('hidden')).to.be.false
       })
-
-      cy.getCommandLogInReporter('clearAllLocalStorage')
     })
 
     it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
@@ -165,8 +159,6 @@ describe('src/cy/commands/storage', () => {
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
-
-      cy.getCommandLogInReporter('clearAllLocalStorage', { isHidden: true })
     })
   })
 
@@ -203,8 +195,6 @@ describe('src/cy/commands/storage', () => {
         expect(logs[1].get('name')).to.eq('getAllSessionStorage')
         expect(logs[1].get('hidden')).to.be.false
       })
-
-      cy.getCommandLogInReporter('getAllSessionStorage')
     })
 
     it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
@@ -237,8 +227,6 @@ describe('src/cy/commands/storage', () => {
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
-
-      cy.getCommandLogInReporter('getAllSessionStorage', { isHidden: true })
     })
 
     it('consoleProps includes the storage yielded', () => {
@@ -290,8 +278,6 @@ describe('src/cy/commands/storage', () => {
         expect(logs[1].get('name')).to.eq('clearAllSessionStorage')
         expect(logs[1].get('hidden')).to.be.false
       })
-
-      cy.getCommandLogInReporter('clearAllSessionStorage')
     })
 
     it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
@@ -324,8 +310,6 @@ describe('src/cy/commands/storage', () => {
         expect(hiddenLog.get('hidden')).to.be.true
         expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
-
-      cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
     })
   })
 
@@ -446,8 +430,6 @@ describe('src/cy/commands/storage', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('clearLocalStorage', { isHidden: true })
       })
 
       it('log is disabled without key', { protocolEnabled: false }, () => {

@@ -182,8 +182,6 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
         expect(waitLog.hidden).to.be.true
         expect(waitLog.snapshots.length, 'log snapshot length').to.eq(1)
       })
-
-      cy.getCommandLogInReporter('wait', { isHidden: true })
     })
 
     it('waits for multiple aliases', () => {

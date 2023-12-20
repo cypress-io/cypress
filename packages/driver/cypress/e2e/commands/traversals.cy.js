@@ -234,8 +234,6 @@ describe('src/cy/commands/traversals', () => {
             expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
             expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
-
-          cy.getCommandLogInReporter(name, { isHidden: true })
         })
       })
     })

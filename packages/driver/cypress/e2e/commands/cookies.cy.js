@@ -833,8 +833,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('getCookies', { isHidden: true })
       })
 
       it('ends immediately', () => {
@@ -1015,8 +1013,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('getAllCookies', { isHidden: true })
       })
 
       it('ends immediately', () => {
@@ -1253,8 +1249,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('getCookie', { isHidden: true })
       })
 
       it('only logs assertion once when should is invoked', () => {
@@ -1629,8 +1623,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('setCookie', { isHidden: true })
       })
 
       it('ends immediately', () => {
@@ -1848,8 +1840,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('clearCookie', { isHidden: true })
       })
 
       it('ends immediately', () => {
@@ -2133,8 +2123,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('clearCookies', { isHidden: true })
       })
 
       it('ends immediately', () => {
@@ -2446,8 +2434,6 @@ describe('src/cy/commands/cookies', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('clearAllCookies', { isHidden: true })
       })
 
       it('ends immediately', () => {

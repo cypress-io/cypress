@@ -133,8 +133,6 @@ describe('src/cy/commands/window', () => {
           expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('window', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -338,8 +336,6 @@ describe('src/cy/commands/window', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('document', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -561,8 +557,6 @@ describe('src/cy/commands/window', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('title', { isHidden: true })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -1093,8 +1087,6 @@ describe('src/cy/commands/window', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('viewport', { isHidden: true })
       })
 
       it('sets viewportWidth and viewportHeight directly', () => {

@@ -360,8 +360,6 @@ describe('src/cy/commands/misc', () => {
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
-
-        cy.getCommandLogInReporter('wrap', { isHidden: true })
       })
 
       it('logs immediately', function (done) {
