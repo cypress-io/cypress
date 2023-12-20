@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const fse = require('fs-extra')
+const fso = require('fs/promises')
 const cp = require('child_process')
 const execa = require('execa')
 const path = require('path')
@@ -252,14 +253,14 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const contents = await fs.readFile(file)
 
     // Backup state
-    await fs.move(file, `${file}.bak`, { overwrite: true })
+    await fso.rename(file, `${file}.bak`)
 
     // Modify app
     await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
     await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
 
     // Restore original state
-    await fs.move(`${file}.bak`, file, { overwrite: true })
+    await fso.rename(`${file}.bak`, file)
   }
 
   await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Integrity check failed for main index.js file')
@@ -269,7 +270,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
 
     // Backup state
-    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'))
+    await fso.rename(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'))
 
     // Modify app
     await fs.writeJSON(path.join(buildAppDir, 'package.json'), {
@@ -281,7 +282,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
 
     // Restore original state
-    await fs.move(path.join(buildAppDir, 'package.json.bak'), path.join(buildAppDir, 'package.json'), { overwrite: true })
+    await fso.rename(path.join(buildAppDir, 'package.json.bak'), path.join(buildAppDir, 'package.json'))
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
@@ -309,14 +310,14 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const contents = await fs.readFile(file)
 
     // Backup state
-    await fs.move(file, backupFile, { overwrite: true })
+    await fso.rename(file, backupFile)
 
     // Modify app
     await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
     await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2573 but got')
 
     // Restore original state
-    await fs.move(backupFile, file, { overwrite: true })
+    await fso.rename(backupFile, file)
   }
 
   await testTemporarilyRewritingEntryPoint()
