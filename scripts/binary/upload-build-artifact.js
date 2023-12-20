@@ -11,27 +11,6 @@ const { s3helpers } = require('./s3-api')
 
 const uploadTypes = uploadUtils.S3Configuration.betaUploadTypes
 
-const getCDN = function (uploadPath) {
-  return [uploadUtils.getUploadUrl(), uploadPath].join('/')
-}
-
-const getUploadDirForPlatform = function (options) {
-  const { version, uploadFolder, platformArch } = options
-
-  return ['beta', uploadFolder, version, platformArch].join('/')
-}
-// the artifact will be uploaded for every platform and uploaded into under a unique folder
-// https://cdn.cypress.io/beta/(binary|npm)/<version>/<platform>/<some unique version info>/cypress.zip
-// For binary:
-//     beta/binary/9.4.2/win32-x64/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.zip
-// For NPM package:
-//     beta/npm/9.4.2/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.tgz
-const getUploadPath = function (options) {
-  const { hash, uploadFileName } = options
-
-  return [getUploadDirForPlatform(options), hash, uploadFileName].join('/')
-}
-
 const setChecksum = async (filename, key) => {
   console.log('setting checksum for file %s', filename)
   console.log('on s3 object %s', key)
@@ -97,9 +76,8 @@ const uploadArtifactToS3 = function (args = []) {
 
   validateOptions(options)
 
-  const uploadPath = getUploadPath(options)
-
-  const cdnUrl = getCDN(uploadPath)
+  const uploadPath = uploadUtils.getBetaUploadPath(options)
+  const cdnUrl = uploadUtils.getBetaUploadPathUrl(options)
 
   if (options['dry-run']) {
     return new Promise((resolve) => resolve(cdnUrl))
@@ -128,9 +106,6 @@ const uploadArtifactToS3 = function (args = []) {
 }
 
 module.exports = {
-  getCDN,
-  getUploadDirForPlatform,
-  getUploadPath,
   setChecksum,
   uploadArtifactToS3,
 }

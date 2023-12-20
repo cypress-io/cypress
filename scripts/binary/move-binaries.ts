@@ -18,8 +18,6 @@ import uploadUtils from './util/upload'
 
 // @ts-ignore
 import { getUploadDirForPlatform } from './upload-build-artifact'
-// @ts-ignore
-import { zipName, getFullUploadPath } from './upload'
 
 /**
  * 40 character full sha commit string
@@ -191,7 +189,7 @@ export const moveBinaries = async (args = []) => {
       lastBuildPath,
       releaseOptions.commit, platformArch)
 
-    const s3zipPath = lastBuildPath + zipName
+    const s3zipPath = lastBuildPath + uploadUtils.S3Configuration.binaryZipName
 
     await s3helpers.verifyZipFileExists(s3zipPath, aws.bucket, s3)
 
@@ -224,9 +222,9 @@ export const moveBinaries = async (args = []) => {
       folder: aws.folder,
       version: releaseOptions.version,
       platformArch: lastBuild.platformArch,
-      name: zipName,
+      name: uploadUtils.S3Configuration.binaryZipName,
     }
-    const destinationPath = getFullUploadPath(options)
+    const destinationPath = uploadUtils.getFullUploadPath(options)
 
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
@@ -239,7 +237,7 @@ export const moveBinaries = async (args = []) => {
     })
   }
 
-  await uploadUtils.purgeDesktopAppAllPlatforms(releaseOptions.version, zipName)
+  await uploadUtils.purgeDesktopAppAllPlatforms(releaseOptions.version, uploadUtils.S3Configuration.binaryZipName)
 
   // return all available information
   return { lastBuilds, testRunners }

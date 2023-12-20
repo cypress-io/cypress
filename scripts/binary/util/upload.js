@@ -3,50 +3,20 @@ const human = require('human-interval')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const fse = require('fs-extra')
-const os = require('os')
 const Promise = require('bluebird')
 const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
 const _ = require('lodash')
 
+const {
+  S3Configuration,
+  getFullUploadPath,
+  getReleaseUrl,
+  isValidPlatformArch,
+  getValidPlatformArchs,
+  validPlatformArchs,
+} = require('./upload-path')
+
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
-
-const CDN_URL = 'https://cdn.cypress.io'
-
-const getUploadUrl = function () {
-  const url = CDN_URL
-
-  la(check.url(url), 'could not get CDN url', url)
-
-  return url
-}
-
-const formHashFromEnvironment = function () {
-  const {
-    env,
-  } = process
-
-  if (env.CIRCLECI) {
-    return `${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
-  }
-
-  throw new Error('Do not know how to form unique build hash on this CI')
-}
-
-const S3Configuration = {
-  bucket: 'cdn.cypress.io',
-  releaseFolder: 'desktop',
-  binaryZipName: 'cypress.zip',
-  betaUploadTypes: {
-    binary: {
-      uploadFolder: 'binary',
-      uploadFileName: 'cypress.zip',
-    },
-    'npm-package': {
-      uploadFolder: 'npm',
-      uploadFileName: 'cypress.tgz',
-    },
-  },
-}
 
 const getS3Credentials = async function () {
   // sso is not required for CirceCI
@@ -75,12 +45,6 @@ const getPublisher = async function () {
   })
 }
 
-const getDesktopUrl = function (version, osName, zipName) {
-  const url = getUploadUrl()
-
-  return [url, 'desktop', version, osName, zipName].join('/')
-}
-
 // purges desktop application url from Cloudflare cache
 const purgeDesktopAppFromCache = function ({ version, platformArch, zipName }) {
   la(check.unemptyString(version), 'missing desktop version', version)
@@ -89,13 +53,10 @@ const purgeDesktopAppFromCache = function ({ version, platformArch, zipName }) {
   la(check.extension('zip', zipName),
     'zip filename should end with .zip', zipName)
 
-  const url = getDesktopUrl(version, platformArch, zipName)
+  const url = getReleaseUrl(version, platformArch, zipName)
 
   return purgeCloudflareCache(url)
 }
-
-// all architectures we are building the test runner for
-const validPlatformArchs = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64']
 
 // purges links to desktop app for all platforms
 // for a given version
@@ -118,28 +79,6 @@ const purgeUrlsFromCloudflareCache = async function (urlsFilePath) {
   return Promise.map(_.compact(urls), purgeCloudflareCache, { concurrency: 5 })
 }
 
-// simple check for platform-arch string
-// example: isValidPlatformArch("darwin") // FALSE
-const isValidPlatformArch = check.oneOf(validPlatformArchs)
-
-const getValidPlatformArchs = () => {
-  return validPlatformArchs
-}
-
-const getUploadNameByOsAndArch = function (platform) {
-  const arch = os.arch()
-
-  const name = [platform, arch].join('-')
-
-  if (!isValidPlatformArch(name)) {
-    throw new Error(`${name} is not a valid upload destination. Does validPlatformArchs need updating?`)
-  }
-
-  la(isValidPlatformArch(name), 'formed invalid platform', name, 'from', platform, arch)
-
-  return name
-}
-
 const saveUrl = (filename) => {
   return (function (url) {
     la(check.unemptyString(filename), 'missing filename', filename)
@@ -157,14 +96,13 @@ module.exports = {
   S3Configuration,
   getS3Credentials,
   getPublisher,
+  getFullUploadPath,
+  getReleaseUrl,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
-  getUploadNameByOsAndArch,
-  validPlatformArchs,
-  getValidPlatformArchs,
   isValidPlatformArch,
+  getValidPlatformArchs,
+  validPlatformArchs,
   saveUrl,
-  formHashFromEnvironment,
-  getUploadUrl,
   purgeUrlsFromCloudflareCache,
 }

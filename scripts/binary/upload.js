@@ -12,62 +12,15 @@ const uploadUtils = require('./util/upload')
 
 fs = Promise.promisifyAll(fs)
 
-// TODO: refactor this
-// system expects desktop application to be inside a file
-// with this name
-const zipName = uploadUtils.S3Configuration.binaryZipName
-
 module.exports = {
-  zipName,
-
   async getPublisher () {
     return uploadUtils.getPublisher()
   },
 
-  // returns desktop folder for a given folder without platform
-  // something like desktop/0.20.1
-  getUploadVersionFolder (aws, version) {
-    la(check.unemptyString(aws.folder), 'aws object is missing desktop folder', aws.folder)
-    const dirName = [aws.folder, version].join('/')
-
-    return dirName
-  },
-
-  // store uploaded application in subfolders by version and platform
-  // something like desktop/0.20.1/darwin-x64/
-  getFullUploadPath (options) {
-    let { folder, version, platformArch, name } = options
-
-    if (!folder) {
-      folder = uploadUtils.S3Configuration.releaseFolder
-    }
-
-    la(check.unemptyString(folder), 'missing folder', options)
-    la(check.semver(version), 'missing or invalid version', options)
-    la(check.unemptyString(name), 'missing file name', options)
-    la(uploadUtils.isValidPlatformArch(platformArch),
-      'invalid platform and arch', platformArch)
-
-    const fileName = [folder, version, platformArch, name].join('/')
-
-    return fileName
-  },
-
-  getManifestUrl (folder, version, uploadOsName) {
-    const url = uploadUtils.getUploadUrl()
-
-    la(check.url(url), 'could not get upload url', url)
-
-    return {
-      url: [url, folder, version, uploadOsName, zipName].join('/'),
-    }
-  },
-
-  getRemoteManifest (folder, version) {
-    la(check.unemptyString(folder), 'missing manifest folder', folder)
+  getRemoteManifest (version) {
     la(check.semver(version), 'invalid manifest version', version)
 
-    const getUrl = this.getManifestUrl.bind(null, folder, version)
+    const getUrl = this.getReleaseUrl.bind(null, version)
 
     return {
       name: 'Cypress',
@@ -112,7 +65,7 @@ module.exports = {
       let manifest = null
 
       return new Promise((resolve, reject) => {
-        return this.createRemoteManifest(releaseFolder, version)
+        return this.createRemoteManifest(version)
         .then((src) => {
           manifest = src
 
