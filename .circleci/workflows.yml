@@ -152,7 +152,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "lerna-optimize-tasks" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "lerna-optimize-tasks" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2874,6 +2874,7 @@ linux-x64-workflow: &linux-x64-workflow
 
     - npm-release:
         context: test-runner:npm-release
+        # <<: *mainBuildFilters
         requires:
           # - build
           # - check-ts
@@ -2921,6 +2922,13 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
+          - test-against-staging
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-binary-against-kitchensink
+          - test-full-typescript-project
+          - test-npm-module-on-minimum-node-version
+          - test-types-cypress-and-jest
 
     - create-and-trigger-packaging-artifacts:
         context:
