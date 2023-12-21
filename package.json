@@ -10,6 +10,7 @@
     "binary-ensure": "node ./scripts/binary.js ensure",
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-release": "node ./scripts/binary.js release",
+    "binary-smoke-test": "node ./scripts/binary.js smoke",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
     "binary-package": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js package",

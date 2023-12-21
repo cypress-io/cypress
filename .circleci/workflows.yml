@@ -33,7 +33,7 @@ mainBuildFilters: &mainBuildFilters
         - 'publish-binary'
         - 'em/shallow-checkout'
         - 'cacie/chore/upgrade-electron-27'
-        - 'ryanm/chore/add-to-upgrade-electron-27'
+        - 'ryanm/chore/more-27-changes'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -45,7 +45,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/add-to-upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
     - matches:
@@ -59,7 +59,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/add-to-upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
@@ -86,7 +86,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/add-to-upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
@@ -1220,6 +1220,12 @@ commands:
             else
               yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
+      - run:
+          name: Smoke Test the Cypress binary
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
