@@ -20,8 +20,8 @@ const routes = require('./routes')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const CAPTURE_ERRORS = !undefined
-const DELETE_DB = !undefined
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
@@ -168,7 +168,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('connecting to database at %s', dbPath)
 
     const db = Database(dbPath, {
-      nativeBinding: require.resolve(path.join('better-sqlite3', 'build', 'Release', 'better_sqlite3.node')),
+      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       verbose: debugVerbose,
     })
 
