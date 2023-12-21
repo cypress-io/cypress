@@ -63,9 +63,6 @@ describe('src/cy/commands/commands', () => {
       .then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
-
-      cy.getCommandLogInReporter('wrap')
-      cy.getCommandLogInReporter('type')
     })
 
     it('we capture logs from custom commands', { protocolEnabled: true }, () => {
@@ -97,9 +94,6 @@ describe('src/cy/commands/commands', () => {
         expect(logs[3].get('name')).to.eq('type')
         expect(logs[3].get('hidden')).to.be.true
       })
-
-      cy.getCommandLogInReporter('wrap', { isHidden: true })
-      cy.getCommandLogInReporter('type', { isHidden: true })
     })
 
     it('works with namespaced commands', () => {

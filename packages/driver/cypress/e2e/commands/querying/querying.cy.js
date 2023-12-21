@@ -563,7 +563,7 @@ describe('src/cy/commands/querying', () => {
 
         cy.get('body').as('b').get('@b', { log: false })
         .then(function () {
-          expect(logs.length).to.eq(0)
+          expect(logs.length).to.eq(1)
           expect(hiddenLog.get('name')).to.eq('get')
           expect(hiddenLog.get('hidden')).to.be.true
           expect(hiddenLog.get('snapshots')).to.have.length(1)
