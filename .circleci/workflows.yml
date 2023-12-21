@@ -57,7 +57,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'em/circleci2', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -1134,17 +1134,6 @@ commands:
                         <<parameters.command>>
       - store-npm-logs
 
-  wait-on-circle-jobs:
-    description: Polls certain Circle CI jobs until they finish
-    parameters:
-      job-names:
-        description: comma separated list of circle ci job names to wait for
-        type: string
-    steps:
-      - run:
-          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
-
   check-if-binary-exists:
     steps:
       - run:
@@ -1431,18 +1420,6 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      # - wait-on-circle-jobs:
-      #     job-names: >
-      #       cli-visual-tests,
-      #       reporter-integration-tests,
-      #       run-app-component-tests-chrome,
-      #       run-app-integration-tests-chrome,
-      #       run-frontend-shared-component-tests-chrome,
-      #       run-launchpad-component-tests-chrome,
-      #       run-launchpad-integration-tests-chrome,
-      #       run-reporter-component-tests-chrome,
-      #       run-webpack-dev-server-integration-tests,
-      #       run-vite-dev-server-integration-tests
       - run:
           # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
           # If all other jobs finish but `build:finalize` fails, we retry it once
@@ -1459,7 +1436,7 @@ jobs:
     parameters:
       <<: *defaultsParameters
     steps:
-      - restore_cached_workspace
+      # - restore_cached_workspace
       - run:
           name: 'Determine if Release Workflow should be triggered'
           command: |
@@ -1467,13 +1444,36 @@ jobs:
               echo "Only move forward with the release when running on develop."
               circleci-agent step halt
             fi
-      - run:
-          name: "Wait for other Circle CI workflows to finish"
-          command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
+      # - run:
+      #     name: "Wait for other Circle CI workflows to finish"
+      #     command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
       - run:
           name: Ready to release
           command: echo 'Ready to release'
 
+  ready-to-release:
+    <<: *defaults
+    resource_class: small
+    parameters:
+      <<: *defaultsParameters
+    steps:
+      # - run:
+      #     name: 'Determine if Release Workflow should be triggered'
+      #     command: |
+      #       if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+      #         echo "Only move forward with the release when running on develop."
+      #         circleci-agent step halt
+      #       fi
+      # - run:
+      #     name: "Wait for other Circle CI workflows to finish"
+      #     command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
+      - run:
+          name: Ready to release
+          command: echo 'Ready to release'
+      - run:
+          name: Approve linux-x64 wait-for-X-workflow-job
+          command: node ./scripts/circle-ci/approve-workflow-job.ts
+  
   cli-visual-tests:
     <<: *defaults
     resource_class: small
@@ -2191,7 +2191,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: xlarge
+        default: small
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2809,16 +2809,30 @@ linux-x64-workflow: &linux-x64-workflow
     - v8-integration-tests:
         requires:
           - system-tests-node-modules-install
-    # This release definition must be updated with any new jobs
-    # Any attempts to automate this are welcome
-    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
-    - trigger-binary-release-workflow:
-        context: test-runner:poll-circle-workflow
+    - wait-for-windows-workflow-to-pass:
+        type: approval
         requires:
-          - build
+          - node_modules_install
+    - wait-for-linux-arm64-workflow-to-pass:
+        type: approval
+        requires:
+          - node_modules_install
+    - wait-for-darwin-x64-workflow-to-pass:
+        type: approval
+        requires:
+          - node_modules_install
+    - wait-for-darwin-arm64-workflow-to-pass:
+        type: approval
+        requires:
+          - node_modules_install
+    
+    - ready-to-release:
+        requires:
           - check-ts
           - npm-angular
           - npm-eslint-plugin-dev
+          - npm-puppeteer-unit-tests
+          - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
           - npm-vue
@@ -2835,11 +2849,13 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
+          - driver-integration-tests-webkit
           - driver-integration-memory-tests
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
           - system-tests-chrome
+          - system-tests-webkit
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
@@ -2853,67 +2869,128 @@ linux-x64-workflow: &linux-x64-workflow
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - npm-puppeteer-unit-tests
-          - npm-puppeteer-cypress-tests
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
           - v8-integration-tests
+          - wait-for-windows-workflow-to-pass
+          - wait-for-linux-arm64-workflow-to-pass
+          - wait-for-darwin-x64-workflow-to-pass
+          - wait-for-darwin-arm64-workflow-to-pass
+
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - ready-to-release
+        # requires:
+        #   - build
+        #   - check-ts
+        #   - npm-angular
+        #   - npm-eslint-plugin-dev
+        #   - npm-react
+        #   - npm-mount-utils
+        #   - npm-vue
+        #   - npm-webpack-batteries-included-preprocessor
+        #   - npm-webpack-preprocessor
+        #   - npm-vite-dev-server
+        #   - npm-vite-plugin-cypress-esm
+        #   - npm-webpack-dev-server
+        #   - npm-cypress-schematic
+        #   - lint-types
+        #   - linux-lint
+        #   - percy-finalize
+        #   - driver-integration-tests-firefox
+        #   - driver-integration-tests-chrome
+        #   - driver-integration-tests-chrome-beta
+        #   - driver-integration-tests-electron
+        #   - driver-integration-tests-webkit
+        #   - driver-integration-memory-tests
+        #   - system-tests-non-root
+        #   - system-tests-firefox
+        #   - system-tests-electron
+        #   - system-tests-chrome
+        #   - system-tests-webkit
+        #   - server-performance-tests
+        #   - server-integration-tests
+        #   - server-unit-tests
+        #   - "test binary as a non-root user"
+        #   - "test binary as a root user"
+        #   - test-types-cypress-and-jest
+        #   - test-full-typescript-project
+        #   - test-binary-against-kitchensink
+        #   - test-npm-module-on-minimum-node-version
+        #   - binary-system-tests
+        #   - test-kitchensink
+        #   - unit-tests
+        #   - verify-release-readiness
+        #   - cli-visual-tests
+        #   - reporter-integration-tests
+        #   - run-app-component-tests-chrome
+        #   - run-app-integration-tests-chrome
+        #   - run-frontend-shared-component-tests-chrome
+        #   # - run-launchpad-component-tests-chrome
+        #   - run-launchpad-integration-tests-chrome
+        #   - run-reporter-component-tests-chrome
+        #   - npm-puppeteer-unit-tests
+        #   - npm-puppeteer-cypress-tests
+        #   - run-webpack-dev-server-integration-tests
+        #   - run-vite-dev-server-integration-tests
+        #   - v8-integration-tests
+        #   - wait-for-windows-workflow-to-pass
+        #   - wait-for-linux-arm64-workflow-to-pass
+        #   - wait-for-darwin-x64-workflow-to-pass
+        #   - wait-for-darwin-arm64-workflow-to-pass
 
     - npm-release:
         context: test-runner:npm-release
         requires:
-          - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-vite-plugin-cypress-esm
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - npm-puppeteer-unit-tests
-          - npm-puppeteer-cypress-tests
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
+          - ready-to-release
+
+        # requires:
+        #   - build
+        #   - check-ts
+        #   - npm-angular
+        #   - npm-eslint-plugin-dev
+        #   - npm-react
+        #   - npm-mount-utils
+        #   - npm-vue
+        #   - npm-webpack-batteries-included-preprocessor
+        #   - npm-webpack-preprocessor
+        #   - npm-vite-dev-server
+        #   - npm-vite-plugin-cypress-esm
+        #   - npm-webpack-dev-server
+        #   - npm-cypress-schematic
+        #   - lint-types
+        #   - linux-lint
+        #   - percy-finalize
+        #   - driver-integration-tests-firefox
+        #   - driver-integration-tests-chrome
+        #   - driver-integration-tests-chrome-beta
+        #   - driver-integration-tests-electron
+        #   - driver-integration-memory-tests
+        #   - system-tests-non-root
+        #   - system-tests-firefox
+        #   - system-tests-electron
+        #   - system-tests-chrome
+        #   - server-performance-tests
+        #   - server-integration-tests
+        #   - server-unit-tests
+        #   - test-kitchensink
+        #   - unit-tests
+        #   - verify-release-readiness
+        #   - cli-visual-tests
+        #   - reporter-integration-tests
+        #   - run-app-component-tests-chrome
+        #   - run-app-integration-tests-chrome
+        #   - run-frontend-shared-component-tests-chrome
+        #   - run-launchpad-component-tests-chrome
+        #   - run-launchpad-integration-tests-chrome
+        #   - run-reporter-component-tests-chrome
+        #   - npm-puppeteer-unit-tests
+        #   - npm-puppeteer-cypress-tests
+        #   - run-webpack-dev-server-integration-tests
+        #   - run-vite-dev-server-integration-tests
+        #   - v8-integration-tests
 
     - create-and-trigger-packaging-artifacts:
         context:
@@ -3209,11 +3286,8 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - v8-integration-tests:
         requires:
           - system-tests-node-modules-install
-    # This release definition must be updated with any new jobs
-    # Any attempts to automate this are welcome
-    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
-    - trigger-binary-release-workflow:
-        context: test-runner:poll-circle-workflow
+
+    - ready-to-release:
         requires:
           - build
           - check-ts
@@ -3255,63 +3329,100 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
           - v8-integration-tests
+          - v8-integration-tests
+
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - ready-to-release
+        # requires:
+        #   - build
+        #   - check-ts
+        #   - npm-angular
+        #   - npm-eslint-plugin-dev
+        #   - npm-puppeteer-unit-tests
+        #   - npm-puppeteer-cypress-tests
+        #   - npm-react
+        #   - npm-mount-utils
+        #   - npm-vue
+        #   - npm-webpack-batteries-included-preprocessor
+        #   - npm-webpack-preprocessor
+        #   - npm-vite-dev-server
+        #   - npm-vite-plugin-cypress-esm
+        #   - npm-webpack-dev-server
+        #   - npm-cypress-schematic
+        #   - lint-types
+        #   - linux-lint
+        #   - percy-finalize
+        #   - driver-integration-tests-firefox
+        #   - driver-integration-tests-chrome
+        #   - driver-integration-tests-chrome-beta
+        #   - driver-integration-tests-electron
+        #   - driver-integration-memory-tests
+        #   - system-tests-non-root
+        #   - system-tests-firefox
+        #   - system-tests-electron
+        #   - system-tests-chrome
+        #   - server-performance-tests
+        #   - server-integration-tests
+        #   - server-unit-tests
+        #   - "test binary as a non-root user"
+        #   - "test binary as a root user"
+        #   - test-types-cypress-and-jest
+        #   - test-full-typescript-project
+        #   - test-binary-against-kitchensink
+        #   - test-npm-module-on-minimum-node-version
+        #   - binary-system-tests
+        #   - test-kitchensink
+        #   - unit-tests
+        #   - verify-release-readiness
+        #   - v8-integration-tests
+        #   - v8-integration-tests
+
 
     - npm-release:
         context: test-runner:npm-release
         requires:
-          - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-vite-plugin-cypress-esm
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
+          - ready-to-release
+        # requires:
+        #   - build
+        #   - check-ts
+        #   - npm-angular
+        #   - npm-eslint-plugin-dev
+        #   - npm-react
+        #   - npm-mount-utils
+        #   - npm-vue
+        #   - npm-webpack-batteries-included-preprocessor
+        #   - npm-webpack-preprocessor
+        #   - npm-vite-dev-server
+        #   - npm-vite-plugin-cypress-esm
+        #   - npm-webpack-dev-server
+        #   - npm-cypress-schematic
+        #   - lint-types
+        #   - linux-lint
+        #   - percy-finalize
+        #   - driver-integration-tests-firefox
+        #   - driver-integration-tests-chrome
+        #   - driver-integration-tests-chrome-beta
+        #   - driver-integration-tests-electron
+        #   - driver-integration-tests-webkit
+        #   - driver-integration-memory-tests
+        #   - system-tests-non-root
+        #   - system-tests-firefox
+        #   - system-tests-electron
+        #   - system-tests-chrome
+        #   - system-tests-webkit
+        #   - server-performance-tests
+        #   - server-integration-tests
+        #   - server-unit-tests
+        #   - test-kitchensink
+        #   - unit-tests
+        #   - verify-release-readiness
+        #   - v8-integration-tests
 
     - create-and-trigger-packaging-artifacts:
         context: [test-runner:upload, test-runner:build-binary, publish-binary]
@@ -3445,23 +3556,27 @@ linux-arm64-workflow: &linux-arm64-workflow
           - linux-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
-        name: linux-arm64-v8-integration-tests
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
     - driver-integration-memory-tests:
-        name: linux-arm64-driver-integration-memory-tests
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
     - server-unit-tests-cloud-environment:
-        name: linux-arm64-server-unit-tests-cloud-environment
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
+
+    - ready-to-release:
+        requires:
+          - linux-arm64-get-published-artifacts
+          - v8-integration-tests
+          - driver-integration-memory-tests
+          - server-unit-tests-cloud-environment
 
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
