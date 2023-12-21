@@ -254,6 +254,14 @@ const checkAccess = async (path) => {
   } catch (e) {
     console.error(`cannot access ${path}. UserInfo: `, os.userInfo())
 
+    try {
+      const stat = await fso.lstat(path)
+
+      console.log('stat', stat)
+    } catch (e) {
+      console.error(`cannot stat ${path}: `, e)
+    }
+
     return
   }
   console.log(`can access ${path} as user`, os.userInfo())
