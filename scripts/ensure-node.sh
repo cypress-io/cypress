@@ -4,7 +4,7 @@
 # The Windows executor ships with nvm-windows 1.1.7, which has compatibility issues with node 16.14.2.
 # When 1.1.7 is detected, we manually update to nvm-windows 1.1.9, which includes a fix for 16.14.2 support.
 if [[ $PLATFORM == 'windows' && $(echo `nvm version`) == '1.1.7'  ]]; then
-  curl -L -O https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip && tar -xvf nvm-noinstall.zip -C C:/ProgramData/nvm 
+  curl -L -O https://github.com/coreybutler/nvm-windows/releases/download/1.1.11/nvm-noinstall.zip && tar -xvf nvm-noinstall.zip -C C:/ProgramData/nvm 
 fi
 
 node_version=$(cat .node-version)
