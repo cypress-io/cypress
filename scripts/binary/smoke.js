@@ -251,15 +251,12 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
-    // Backup state
-    await fs.move(file, `${file}.bak`, { overwrite: true })
-
     // Modify app
     await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
     await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
 
     // Restore original state
-    await fs.move(`${file}.bak`, file, { overwrite: true })
+    await fs.writeFile(file, contents)
   }
 
   await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Integrity check failed for main index.js file')
@@ -267,9 +264,6 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
   const testAlteringEntryPoint = async (additionalCode, errorMessage) => {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
-
-    // Backup state
-    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'), { overwrite: true })
 
     // Modify app
     await fs.writeJSON(path.join(buildAppDir, 'package.json'), {
@@ -281,8 +275,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
 
     // Restore original state
-    await fs.move(path.join(buildAppDir, 'package.json.bak'), path.join(buildAppDir, 'package.json'), { overwrite: true })
-    await fs.remove(path.join(buildAppDir, 'index2.js'))
+    await fs.writeJSON(path.join(buildAppDir, 'package.json'), packageJsonContents)
   }
 
   await testAlteringEntryPoint('console.log("simple alteration")', 'Integrity check failed with expected stack length 9 but got 10')
@@ -305,18 +298,14 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
   const testTemporarilyRewritingEntryPoint = async () => {
     const file = path.join(buildAppDir, 'index.js')
-    const backupFile = path.join(buildAppDir, 'index.js.bak')
     const contents = await fs.readFile(file)
-
-    // Backup state
-    await fs.move(file, backupFile, { overwrite: true })
 
     // Modify app
     await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
     await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2573 but got')
 
     // Restore original state
-    await fs.move(backupFile, file, { overwrite: true })
+    await fs.writeFile(file, contents)
   }
 
   await testTemporarilyRewritingEntryPoint()
