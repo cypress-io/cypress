@@ -263,7 +263,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
-    ;[file, `${file}.bak`, path.dirname(file)].forEach(checkAccess)
+    await Promise.all([file, `${file}.bak`, path.dirname(file)].map(checkAccess))
 
     // Backup state
     await fso.rename(file, `${file}.bak`)
