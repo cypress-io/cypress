@@ -248,9 +248,22 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
   })
 }
 
+const checkAccess = async (path) => {
+  try {
+    await fso.access(path, fso.constants.W_OK | fso.constants.R_OK)
+  } catch (e) {
+    console.error(`cannot access ${path}. UserInfo: `, os.userInfo())
+
+    return
+  }
+  console.log(`can access ${path} as user`, os.userInfo())
+}
+
 const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
+
+    ;[file, `${file}.bak`, path.dirname(file)].forEach(checkAccess)
 
     // Backup state
     await fso.rename(file, `${file}.bak`)
