@@ -41,7 +41,7 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
-const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const CAPTURE_ERRORS = !undefined
 
 class DecryptionError extends Error {
   isDecryptionError = true
@@ -400,8 +400,8 @@ module.exports = {
       let script
 
       try {
-        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+        if (captureProtocolUrl || undefined) {
+          script = await this.getCaptureProtocolScript(captureProtocolUrl || undefined)
         }
       } catch (e) {
         debugProtocol('Error downloading capture code', e)
@@ -639,10 +639,10 @@ module.exports = {
 
   async getCaptureProtocolScript (url: string) {
     // TODO(protocol): Ensure this is removed in production
-    if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-      debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+    if (undefined) {
+      debugProtocol(`Loading protocol via script at local path %s`, undefined)
 
-      return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
+      return fs.promises.readFile(undefined, 'utf8')
     }
 
     const res = await retryWithBackoff(async (attemptIndex) => {

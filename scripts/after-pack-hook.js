@@ -6,9 +6,22 @@ const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
-const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudEnvironmentFileSource, validateEncryptionFile, getProtocolFileSource, validateCloudEnvironmentFile, validateProtocolFile } = require('./binary/binary-sources')
+const { getIntegrityCheckSource, getBinaryEntryPointSource, getBinaryByteNodeEntryPointSource, getEncryptionFileSource, getCloudEnvironmentFileSource, validateEncryptionFile, getProtocolFileSource, validateCloudEnvironmentFile, validateProtocolFile, getIndexJscHash, DUMMY_INDEX_JSC_HASH } = require('./binary/binary-sources')
+const verify = require('../cli/lib/tasks/verify')
+const execa = require('execa')
+const meta = require('./binary/meta')
 
 const CY_ROOT_DIR = path.join(__dirname, '..')
+
+const createJscFromCypress = async () => {
+  const args = []
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  await execa(`${meta.buildAppExecutable()}`, args)
+}
 
 module.exports = async function (params) {
   try {
@@ -58,6 +71,7 @@ module.exports = async function (params) {
     }
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+      const binaryByteNodeEntryPointSource = await getBinaryByteNodeEntryPointSource()
       const binaryEntryPointSource = await getBinaryEntryPointSource()
       const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
       const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
@@ -76,6 +90,10 @@ module.exports = async function (params) {
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
+      const integrityCheckSource = getIntegrityCheckSource(outputFolder)
+
+      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryByteNodeEntryPointSource)
+
       await Promise.all([
         validateEncryptionFile(encryptionFilePath),
         validateCloudEnvironmentFile(cloudEnvironmentFilePath),
@@ -87,6 +105,7 @@ module.exports = async function (params) {
         exePathPerPlatform[os.platform()],
         {
           version: FuseVersion.V1,
+          resetAdHocDarwinSignature: process.env.RESET_ADHOC_SIGNATURE === '1' && os.platform() === 'darwin' && os.arch() === 'arm64',
           [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
           [FuseV1Options.EnableNodeCliInspectArguments]: false,
         },
@@ -99,7 +118,22 @@ module.exports = async function (params) {
       await cleanupUnneededDependencies(outputFolder)
       await setupV8Snapshots({
         cypressAppPath: params.appOutDir,
-        integrityCheckSource: getIntegrityCheckSource(outputFolder),
+        integrityCheckSource,
+      })
+
+      await createJscFromCypress()
+
+      const indexJscHash = await getIndexJscHash(outputFolder)
+
+      await fs.remove(path.join(outputFolder, 'packages/server/index.js'))
+      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
+
+      await setupV8Snapshots({
+        cypressAppPath: params.appOutDir,
+        useExistingSnapshotScript: true,
+        updateSnapshotScriptContents: (contents) => {
+          return contents.replace(DUMMY_INDEX_JSC_HASH, indexJscHash)
+        },
       })
     } else {
       console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping snapshot require...`)
