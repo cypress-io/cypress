@@ -80,7 +80,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -118,7 +118,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -157,7 +157,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -334,7 +334,7 @@ exports['Long Cypress Cloud URL'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  app.cy.js                                                                       (1 of 1)
 
 ====================================================================================================
@@ -342,15 +342,15 @@ exports['Long Cypress Cloud URL'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖                                           XX:XX        1        2        3        4        5 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        2        3        4        5  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        2        3        4        5
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
+
   Recorded Run: http://cloud.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-url
 
 `
@@ -370,7 +370,7 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  test1.js                                                                        (1 of 1)
 
   (Results)
@@ -393,11 +393,11 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  test1.js                                 XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -
 
 ----------------------------------------------------------------------------------------------------
 
