@@ -27,23 +27,33 @@ import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-runni
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-const mdBreaks = new Markdown({ breaks: true })
 const md = new Markdown()
 
-export const formattedMessage = (message: string, type: string) => {
+const asterisksRegex = /^\*\*(.+?)\*\*$/gs
+const assertionEqMatchRegex = /expected|to match|to equal/
+const istoEqRegex = /to equal/
+const isEqOrMatchRegex = /to equal|to match/
+
+// used to format the display of command messages and error messages
+// we use markdown syntax within our error messages (code ticks, urls, etc)
+// and cy.log and Cypress.log supports markdown formatting
+export const formattedMessage = (message: string, type?: string) => {
   if (!message) return ''
 
-  const searchText = ['to match', 'to equal']
-  const regex = new RegExp(searchText.join('|'))
-  const split = message.split(regex)
-  const matchingText = searchText.find((text) => message.includes(text))
-  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  // we don't want <br> in our error messages, but allow it in Cypress.log
-  const converted = type === 'error' ? md.renderInline(spaceEscapedText) : mdBreaks.renderInline(spaceEscapedText)
-  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+  // if the message is our own error message or an assertion other than 'is equal' or 'is match'
+  // we want to render the markdown formatting
+  if (type === 'error' || !isEqOrMatchRegex.test(message)) {
+    return md.renderInline(message)
+  }
 
-  return [converted, ...assertion].join(' ')
+  // for 'is equal' or 'is match' print the exact text so that characters like _ and *
+  // are not escaped in the assertion display when comparing equality
+  const split = message.split(assertionEqMatchRegex).filter(Boolean)
+  const trimSplit = split.map((s) => s.trim())
+  // replace outside double asterisks with strong tags
+  const expectedActualArray = trimSplit.map((s) => s.replace(asterisksRegex, '<strong>$1</strong>'))
+
+  return `expected ${expectedActualArray[0]} ${istoEqRegex.test(message) ? 'to equal' : 'to match'} ${expectedActualArray[1]}`
 }
 
 const invisibleMessage = (model: CommandModel) => {

@@ -7,31 +7,42 @@ describe('formattedMessage', () => {
     expect(result).to.equal('')
   })
 
-  it('maintains special characters when using "to match"', () => {
-    const specialMessage = 'expected **__*abcdef*__** to match /__.*abcdef.*__/'
-    const result = formattedMessage(specialMessage)
+  describe('when to equal or to match assertions are used', () => {
+    it('does not display extraneous "*" for to equal assertions', () => {
+      const specialMessage = 'expected **abcdef** to equal **abcdef**'
+      const result = formattedMessage(specialMessage)
 
-    expect(result).to.equal('expected <strong><strong><em>abcdef</em></strong></strong> to match <strong>/__.*abcdef.*__/</strong>')
+      expect(result).to.equal('expected <strong>abcdef</strong> to equal <strong>abcdef</strong>')
+    })
+
+    it('maintains special characters when using "to match"', () => {
+      const specialMessage = 'expected **__*abcdef*__** to match **/__.*abcdef.*__/**'
+      const result = formattedMessage(specialMessage)
+
+      expect(result).to.equal('expected <strong>__*abcdef*__</strong> to match <strong>/__.*abcdef.*__/</strong>')
+    })
+
+    it('maintains special characters when using "to equal"', () => {
+      const specialMessage = 'expected *****abcdef***** to equal *****abcdef*****'
+      const result = formattedMessage(specialMessage)
+
+      expect(result).to.equal('expected <strong>***abcdef***</strong> to equal <strong>***abcdef***</strong>')
+    })
+
+    it('maintains initial spaces on new lines', () => {
+      const specialMessage = 'expected **hello\n world `code block`** to equal **hello\n world `code block`**'
+      const result = formattedMessage(specialMessage)
+
+      expect(result).to.equal('expected <strong>hello\n world `code block`</strong> to equal <strong>hello\n world `code block`</strong>')
+    })
   })
 
-  it('maintains special characters when using "to contain"', () => {
-    const specialMessage = 'expected ***abcdef*** to equal ***abcdef***'
-    const result = formattedMessage(specialMessage)
+  describe('when to equal or to match assertions are not used', () => {
+    it('displays special characters as markdown using "to match"', () => {
+      const specialMessage = 'expected **__*abcdef*__** to contain **/__.*abcdef.*__/**'
+      const result = formattedMessage(specialMessage)
 
-    expect(result).to.equal('expected <em><strong>abcdef</strong></em> to equal <strong>***abcdef***</strong>')
-  })
-
-  it('does NOT maintain special characters when "to equal" or "to match" are not in assertion', () => {
-    const specialMessage = 'expected ***abcdef*** to contain ***abcdef***'
-    const result = formattedMessage(specialMessage)
-
-    expect(result).to.equal('expected <em><strong>abcdef</strong></em> to contain <em><strong>abcdef</strong></em>')
-  })
-
-  it('maintains initial spaces on new lines', () => {
-    const specialMessage = 'hello\n world `code block`'
-    const result = formattedMessage(specialMessage)
-
-    expect(result).to.equal('hello<br>\n world <code>code block</code>')
+      expect(result).to.equal('expected <strong><strong><em>abcdef</em></strong></strong> to contain <strong>/<strong>.<em>abcdef.</em></strong>/</strong>')
+    })
   })
 })
