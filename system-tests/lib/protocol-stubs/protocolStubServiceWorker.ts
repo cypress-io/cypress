@@ -22,8 +22,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   private events = {
     numberOfResponseStreamReceivedEvents: 0,
     correlatedUrls: {},
+    multipleNetworkRequestEventsForSameRequestId: false,
   }
   private idToUrlAndFrameMap = new Map<string, URLAndFrame>()
+  private currentRequestWillBeSent: (event) => void
+  private cdpClient: any
 
   getDbMetadata (): { offset: number, size: number } {
     return {
@@ -37,7 +40,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
     const frameIds = this.events.correlatedUrls[this.idToUrlAndFrameMap[options.requestId].url] || []
 
-    if (!frameIds.includes(this.idToUrlAndFrameMap[options.requestId].frameId)) {
+    if (!this.events.correlatedUrls[this.idToUrlAndFrameMap[options.requestId].url]) {
       this.events.correlatedUrls[this.idToUrlAndFrameMap[options.requestId].url] = frameIds
     }
 
@@ -47,12 +50,19 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   connectToBrowser = async (cdpClient) => {
-    cdpClient.on('Network.requestWillBeSent', (event) => {
+    this.cdpClient = cdpClient
+    this.currentRequestWillBeSent = (event) => {
+      if (this.idToUrlAndFrameMap[event.requestId]) {
+        this.events.multipleNetworkRequestEventsForSameRequestId = true
+      }
+
       this.idToUrlAndFrameMap[event.requestId] = {
         url: event.request.url,
         frameId: event.frameId ? 'frame id' : 'no frame id',
       }
-    })
+    }
+
+    cdpClient.on('Network.requestWillBeSent', this.currentRequestWillBeSent)
   }
 
   addRunnables = (runnables) => {
@@ -69,6 +79,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   async afterSpec (): Promise<void> {
+    this.cdpClient.off('Network.requestWillBeSent', this.currentRequestWillBeSent)
     try {
       fs.outputFileSync(this.filename, JSON.stringify(this.events, null, 2))
     } catch (e) {
