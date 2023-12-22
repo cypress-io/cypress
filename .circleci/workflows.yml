@@ -1622,6 +1622,7 @@ jobs:
     parallelism: 1
     environment:
       GITHUB_TOKEN: $GH_TOKEN
+      SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCH: develop
     steps:
       - restore_cached_workspace
       - update_known_hosts
