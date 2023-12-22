@@ -32,7 +32,6 @@ mainBuildFilters: &mainBuildFilters
         - 'feature/experimental-retries'
         - 'publish-binary'
         - 'em/shallow-checkout'
-        - 'cacie/chore/fix-nvm-windows-ci'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -87,7 +86,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/chore/fix-nvm-windows-ci', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
