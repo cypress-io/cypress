@@ -18,7 +18,7 @@ _Released 12/19/2023 (PENDING)_
 
 **Misc:**
 
-- (this entry left intentionally empty). Addressed in [#28549](https://github.com/cypress-io/cypress/pull/28549)
+- This entry to satisfy the release readiness check. The PR referenced here was mislabeled `misc`; it should have been `chore`. Addressed in [#28549](https://github.com/cypress-io/cypress/pull/28549)
 
 ## 13.6.1
 
