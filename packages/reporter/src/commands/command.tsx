@@ -30,30 +30,38 @@ const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const md = new Markdown()
 
 const asterisksRegex = /^\*\*(.+?)\*\*$/gs
-const assertionEqMatchRegex = /expected|to match|to equal/
-const istoEqRegex = /to equal/
-const isEqOrMatchRegex = /to equal|to match/
+const assertionRegex = /expected | to([^\*])+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
 // and cy.log and Cypress.log supports markdown formatting
-export const formattedMessage = (message: string, type?: string) => {
+export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  // if the message is our own error message or an assertion other than 'is equal' or 'is match'
-  // we want to render the markdown formatting
-  if (type === 'error' || !isEqOrMatchRegex.test(message)) {
+  // the command message is formatted as 'expected <actual> to {assertion} <expected>'
+  const assertionArray = message.match(assertionRegex)
+
+  // if the command name is not an assertion or the format of the assertion is
+  // not something that matched our regex, we want to render the markdown formatting
+  if (name !== 'assert' || !assertionArray) {
     return md.renderInline(message)
   }
 
-  // for 'is equal' or 'is match' print the exact text so that characters like _ and *
-  // are not escaped in the assertion display when comparing equality
-  const split = message.split(assertionEqMatchRegex).filter(Boolean)
-  const trimSplit = split.map((s) => s.trim())
-  // replace outside double asterisks with strong tags
-  const expectedActualArray = trimSplit.map((s) => s.replace(asterisksRegex, '<strong>$1</strong>'))
+  // for assertions print the exact text so that characters like _ and *
+  // are not escaped in the assertion display when comparing values
+  const expectedActualArray = () => {
+    // get the expected and actual values
+    const split = message.split(assertionRegex).filter(Boolean)
+    const trimSplit = split.map((s) => s.trim()).filter(Boolean)
 
-  return `expected ${expectedActualArray[0]} ${istoEqRegex.test(message) ? 'to equal' : 'to match'} ${expectedActualArray[1]}`
+    // replace outside double asterisks with strong tags
+    return trimSplit.map((s) => s.replace(asterisksRegex, '<strong>$1</strong>'))
+  }
+
+  // put the message back together
+  const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+
+  return result.join('')
 }
 
 const invisibleMessage = (model: CommandModel) => {
@@ -238,7 +246,7 @@ const Message = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
   </span>
 ))
