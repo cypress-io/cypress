@@ -63,6 +63,13 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('expected <strong>glob*glob</strong> to contain <strong>*</strong>')
     })
+
+    it('bolds asterisks with complex assertions', () => {
+      const specialMessage = 'expected **span** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**'
+      const result = formattedMessage(specialMessage)
+
+      expect(result).to.equal('expected <strong>span</strong> to have CSS property <strong>background-color</strong> with the value <strong>rgb(0, 0, 0)</strong>, but the value was <strong>rgba(0, 0, 0, 0)</strong>')
+    })
   })
 
   describe('when not an assertion', () => {

@@ -30,7 +30,7 @@ const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const md = new Markdown()
 
 const asterisksRegex = /^\*\*(.+?)\*\*$/gs
-const assertionRegex = /expected | to([^\*])+/g
+const assertionRegex = /expected | to([^\*])+| with([^\*])+|, but([^\*])+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -41,14 +41,6 @@ export const formattedMessage = (message: string, name?: string) => {
   // the command message is formatted as 'expected <actual> to {assertion} <expected>'
   const assertionArray = message.match(assertionRegex)
 
-  // if the command name is not an assertion or the format of the assertion is
-  // not something that matched our regex, we want to render the markdown formatting
-  if (name !== 'assert' || !assertionArray) {
-    return md.renderInline(message)
-  }
-
-  // for assertions print the exact text so that characters like _ and *
-  // are not escaped in the assertion display when comparing values
   const expectedActualArray = () => {
     // get the expected and actual values
     const split = message.split(assertionRegex).filter(Boolean)
@@ -58,7 +50,14 @@ export const formattedMessage = (message: string, name?: string) => {
     return trimSplit.map((s) => s.replace(asterisksRegex, '<strong>$1</strong>'))
   }
 
-  // put the message back together
+  // if the command name is not an assertion or the format of the assertion is
+  // not something that matched our regex, we want to render the markdown formatting
+  if (name !== 'assert' || !assertionArray) {
+    return md.renderInline(message)
+  }
+
+  // for assertions print the exact text so that characters like _ and *
+  // are not escaped in the assertion display when comparing values
   const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
 
   return result.join('')
