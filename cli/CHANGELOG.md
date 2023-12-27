@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3
+
+_Released 1/2/2024  (PENDING)_
+
+**Bugfixes:**
+
+- Updated display of assertions to escape markdown formatting and properly render bold styles for assertion values. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#5679](https://github.com/cypress-io/cypress/issues/5679).
+
 ## 13.6.2
 
 _Released 12/26/2023_
