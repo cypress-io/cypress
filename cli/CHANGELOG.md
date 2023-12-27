@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3
+
+_Released 1/2/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
+
 ## 13.6.2
 
 _Released 12/26/2023_
