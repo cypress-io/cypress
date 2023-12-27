@@ -30,10 +30,10 @@ describe('formattedMessage', () => {
     })
 
     it('maintains special characters when using "to not match"', () => {
-      const specialMessage = 'expected **__*abcdef*__** to not match **/__.*abcde.*__/**'
+      const specialMessage = 'expected **__*abcdef*__** not to match **/__.*abcde.*__/**'
       const result = formattedMessage(specialMessage, 'assert')
 
-      expect(result).to.equal('expected <strong>__*abcdef*__</strong> to not match <strong>/__.*abcde.*__/</strong>')
+      expect(result).to.equal('expected <strong>__*abcdef*__</strong> not to match <strong>/__.*abcde.*__/</strong>')
     })
 
     it('maintains special characters when using "to equal"', () => {
