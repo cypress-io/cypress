@@ -734,7 +734,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       const elementString = stringifyActual($el)
       const assertionString = args[0].replace(/\./g, ' ')
 
-      let message = `expected **${elementString}** to ${assertionString}`
+      let message = `expect **${elementString}** to ${assertionString}`
 
       if (args[1]) {
         message = `${message} **${args[1]}**`
