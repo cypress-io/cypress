@@ -35,7 +35,7 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // 'expected **<span>** to exist in the DOM'
 // `expected **glob*glob** to contain *****`
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
-const assertionRegex = /expected | to([^\*])+| with([^\*])+|, but([^\*])+/g
+const assertionRegex = /expected | to[^\*]+| with[^\*]+|, but[^\*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -48,16 +48,15 @@ export const formattedMessage = (message: string, name?: string) => {
 
   const expectedActualArray = () => {
     // get the expected and actual values of assertions
-    const split = message.split(assertionRegex).filter(Boolean)
-    const trimSplit = split.map((s) => s.trim()).filter(Boolean)
+    const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
 
     // replace outside double asterisks with strong tags
-    return trimSplit.map((s) => {
+    return splitTrim.map((s) => {
       // we want to escape HTML chars so that they display
       // correctly in the command log: <p> -> &lt;p&gt;
-      const HTMLFormattedString = mdOnlyHTML.renderInline(s)
+      const HTMLEscapedString = mdOnlyHTML.renderInline(s)
 
-      return HTMLFormattedString.replace(asterisksRegex, `<strong>$1</strong>`)
+      return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
     })
   }
 
