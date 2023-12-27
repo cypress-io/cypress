@@ -70,6 +70,21 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('expected <strong>span</strong> to have CSS property <strong>background-color</strong> with the value <strong>rgb(0, 0, 0)</strong>, but the value was <strong>rgba(0, 0, 0, 0)</strong>')
     })
+
+    it('bolds asterisks with simple assertions', () => {
+      const specialMessage = 'expected **dom** to be visible'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('expected <strong>dom</strong> to be visible')
+    })
+
+    it('bolds assertions and displays html correctly', () => {
+      // expected <button#increment> to be enabled
+      const specialMessage = 'expected **<button#increment>** to be enabled'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('expected <strong>&lt;button#increment&gt;</strong> to be enabled')
+    })
   })
 
   describe('when not an assertion', () => {

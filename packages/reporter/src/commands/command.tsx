@@ -28,8 +28,13 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
 const md = new Markdown()
+const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
 
 const asterisksRegex = /^\*\*(.+?)\*\*$/gs
+// regex to match everything outside of expected/actual values like:
+// 'expected **<span>** to exist in the DOM'
+// `expected **glob*glob** to contain *****`
+// `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
 const assertionRegex = /expected | to([^\*])+| with([^\*])+|, but([^\*])+/g
 
 // used to format the display of command messages and error messages
@@ -42,12 +47,18 @@ export const formattedMessage = (message: string, name?: string) => {
   const assertionArray = message.match(assertionRegex)
 
   const expectedActualArray = () => {
-    // get the expected and actual values
+    // get the expected and actual values of assertions
     const split = message.split(assertionRegex).filter(Boolean)
     const trimSplit = split.map((s) => s.trim()).filter(Boolean)
 
     // replace outside double asterisks with strong tags
-    return trimSplit.map((s) => s.replace(asterisksRegex, '<strong>$1</strong>'))
+    return trimSplit.map((s) => {
+      // we want to escape HTML chars so that they display
+      // correctly in the command log: <p> -> &lt;p&gt;
+      const HTMLFormattedString = mdOnlyHTML.renderInline(s)
+
+      return HTMLFormattedString.replace(asterisksRegex, `<strong>$1</strong>`)
+    })
   }
 
   // if the command name is not an assertion or the format of the assertion is
