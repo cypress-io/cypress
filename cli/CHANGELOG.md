@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.3
 
-_Released 01/02/2024  (PENDING)_
+_Released 01/02/2024 (PENDING)_
 
 **Bugfixes:**
 
