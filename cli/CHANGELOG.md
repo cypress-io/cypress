@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3 
+
+_Released 1/02/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `zod` from `3.20.3` to `3.22.3`to address the [CVE-2023-4316](https://www.cve.org/CVERecord?id=CVE-2023-4316) security vulnerability. Addressed in [#27979](https://github.com/cypress-io/cypress/pull/27979).
+
 ## 13.6.2
 
 _Released 12/26/2023_
