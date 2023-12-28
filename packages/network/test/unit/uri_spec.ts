@@ -4,6 +4,24 @@ import { URL } from 'url'
 import { uri } from '../../lib'
 
 describe('lib/uri', () => {
+  context('.getPath', () => {
+    it('returns the pathname and search', () => {
+      expect(uri.getPath('http://localhost:9999/foo/bar?baz=quux#/index.html')).to.eq('/foo/bar?baz=quux')
+    })
+
+    it('supports encoded characters', () => {
+      expect(uri.getPath('http://localhost:9999?foo=0%3C1')).to.eq('/?foo=0%3C1')
+    })
+
+    it('does not encode the "|" character', () => {
+      expect(uri.getPath('http://localhost:9999?foo=bar|baz')).to.eq('/?foo=bar|baz')
+    })
+
+    it('works with relative urls', () => {
+      expect(uri.getPath('/foo/bar?foo=bar|baz')).to.eq('/foo/bar?foo=bar|baz')
+    })
+  })
+
   context('.isLocalhost', () => {
     it('http://localhost is localhost', () => {
       expect(uri.isLocalhost(new URL('http://localhost'))).to.be.true

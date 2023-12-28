@@ -231,6 +231,23 @@ describe('app/background', () => {
       })
     })
 
+    it('onChanged emits automation:push:request canceled:download', async function () {
+      const downloadDelta = {
+        id: '1',
+        state: {
+          current: 'canceled',
+        },
+      }
+
+      sinon.stub(browser.downloads.onChanged, 'addListener').yields(downloadDelta)
+
+      const ws = await this.connect()
+
+      expect(ws.emit).to.be.calledWith('automation:push:request', 'canceled:download', {
+        id: `${downloadDelta.id}`,
+      })
+    })
+
     it('onChanged does not emit if state does not exist', async function () {
       const downloadDelta = {
         id: '1',

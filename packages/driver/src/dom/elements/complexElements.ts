@@ -290,6 +290,7 @@ export const isScrollable = ($el) => {
     return false
   }
 
+  // If we're at the documentElement, we check its size against the window
   const documentElement = $document.getDocumentFromElement(el).documentElement
 
   if (el === documentElement) {

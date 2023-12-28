@@ -216,9 +216,9 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0 || ^=4.0.0, found 2.0.0-beta.70')
-    .should('contain.text', 'react. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0, found 15.6.2.')
-    .should('contain.text', 'react-dom. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0 but dependency was not found.')
+    .should('contain.text', 'vite. Expected ^2.0.0 || ^3.0.0 || ^4.0.0, found 2.0.0-beta.70')
+    .should('contain.text', 'react. Expected ^16.0.0 || ^17.0.0 || ^18.0.0, found 15.6.2.')
+    .should('contain.text', 'react-dom. Expected ^16.0.0 || ^17.0.0 || ^18.0.0 but dependency was not found.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
@@ -235,7 +235,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
+    .should('contain.text', '@vue/cli-service. Expected ^4.0.0 || ^5.0.0, found 3.12.1.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 2)

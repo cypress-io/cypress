@@ -2,14 +2,14 @@ import browserProps from '@packages/driver/src/cypress/browser'
 
 describe('src/cypress/browser', () => {
   beforeEach(function () {
-    this.commands = (browser = { name: 'chrome', family: 'chromium' }) => {
+    this.commands = (browser = { name: 'chrome', family: 'chromium', isHeadless: false }) => {
       return browserProps({ browser })
     }
   })
 
   context('.browser', () => {
     it('returns the current browser', function () {
-      expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium' })
+      expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium', isHeadless: false })
     })
   })
 
@@ -17,10 +17,12 @@ describe('src/cypress/browser', () => {
     it('returns true if it\'s a match', function () {
       expect(this.commands().isBrowser('chrome')).to.be.true
       expect(this.commands().isBrowser({ family: 'chromium' })).to.be.true
+      expect(this.commands().isBrowser({ isHeadless: false })).to.be.true
     })
 
     it('returns false if it\'s not a match', function () {
       expect(this.commands().isBrowser('firefox')).to.be.false
+      expect(this.commands().isBrowser({ isHeadless: true })).to.be.false
     })
 
     it('is case-insensitive', function () {
@@ -33,6 +35,7 @@ describe('src/cypress/browser', () => {
       expect(this.commands().isBrowser({
         family: 'chromium',
         name: '!firefox',
+        isHeadless: false,
       })).to.be['true']
 
       expect(this.commands().isBrowser({

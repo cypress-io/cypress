@@ -138,6 +138,9 @@ describe('config/src/validation', () => {
 
       result = validation.isValidRetriesConfig(mockKey, 2)
       expect(result).to.be.true
+
+      result = validation.isValidRetriesConfig(mockKey, 250)
+      expect(result).to.be.true
     })
 
     it('returns true for valid retry objects', () => {
@@ -145,7 +148,13 @@ describe('config/src/validation', () => {
 
       expect(result).to.be.true
 
+      result = validation.isValidRetriesConfig(mockKey, { runMode: 250 })
+      expect(result).to.be.true
+
       result = validation.isValidRetriesConfig(mockKey, { openMode: 1 })
+      expect(result).to.be.true
+
+      result = validation.isValidRetriesConfig(mockKey, { openMode: 250 })
       expect(result).to.be.true
 
       result = validation.isValidRetriesConfig(mockKey, {
@@ -165,6 +174,20 @@ describe('config/src/validation', () => {
       result = validation.isValidRetriesConfig(mockKey, { fakeMode: 1 })
       expect(result).to.not.be.true
       snapshot('invalid retry object', result)
+    })
+
+    it('returns error message for openMode as boolean without strategy', () => {
+      let result = validation.isValidRetriesConfig(mockKey, { openMode: true })
+
+      expect(result).to.not.be.true
+      snapshot(result)
+    })
+
+    it('returns error message for runMode as boolean without strategy', () => {
+      let result = validation.isValidRetriesConfig(mockKey, { runMode: true })
+
+      expect(result).to.not.be.true
+      snapshot(result)
     })
 
     it('returns true for valid retry object with experimental keys (default)', () => {
@@ -195,6 +218,17 @@ describe('config/src/validation', () => {
             })
 
             expect(result).to.be.true
+          })
+
+          it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 4,
+              },
+            })
+
+            expect(result).to.not.be.true
           })
         })
 
@@ -259,8 +293,8 @@ describe('config/src/validation', () => {
 
         it('invalid strategy w/ other options (valid)', () => {
           const result = validation.isValidRetriesConfig(mockKey, {
-            runMode: true,
-            openMode: false,
+            runMode: 1,
+            openMode: 2,
             experimentalStrategy: 'bar',
           })
 
@@ -309,18 +343,6 @@ describe('config/src/validation', () => {
               experimentalStrategy: strategy,
               experimentalOptions: {
                 maxRetries: 3.5,
-              },
-            })
-
-            expect(result).to.not.be.true
-            snapshot(result)
-          })
-
-          it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
-            const result = validation.isValidRetriesConfig(mockKey, {
-              experimentalStrategy: strategy,
-              experimentalOptions: {
-                maxRetries: 4,
               },
             })
 
@@ -399,6 +421,7 @@ describe('config/src/validation', () => {
               experimentalStrategy: 'detect-flake-and-pass-on-threshold',
               experimentalOptions: {
                 maxRetries: 3,
+                passesRequired: 2,
                 stopIfAnyPassed: true,
               },
             })
@@ -415,6 +438,7 @@ describe('config/src/validation', () => {
               experimentalOptions: {
                 maxRetries: 3,
                 passesRequired: 2,
+                stopIfAnyPassed: true,
               },
             })
 
@@ -427,6 +451,18 @@ describe('config/src/validation', () => {
               experimentalStrategy: 'detect-flake-but-always-fail',
               experimentalOptions: {
                 stopIfAnyPassed: false,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides maxRetries without stopIfAnyPassed', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-but-always-fail',
+              experimentalOptions: {
+                maxRetries: 2,
               },
             })
 

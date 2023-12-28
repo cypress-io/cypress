@@ -349,6 +349,7 @@ export class ProjectBase extends EE {
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
       onSavedStateChanged: (state: any) => this.saveState(state),
+      closeExtraTargets: this.closeExtraTargets,
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware
@@ -415,6 +416,10 @@ export class ProjectBase extends EE {
 
   async resetBrowserState () {
     return this.server.socket.resetBrowserState()
+  }
+
+  closeExtraTargets () {
+    return browsers.closeExtraTargets()
   }
 
   isRunnerSocketConnected () {

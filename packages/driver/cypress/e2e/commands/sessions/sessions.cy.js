@@ -68,6 +68,20 @@ describe('cy.session', { retries: 0 }, () => {
         .should('eq', 'about:blank')
       })
 
+      it('clears page before the end of each run when nextTestHasTestIsolationOn is undefined', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: undefined })
+
+          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
+        })
+        .url()
+        .should('eq', 'about:blank')
+      })
+
       it('does not clear the page before the end of each run if the next test has test isolation off', () => {
         cy.visit('/fixtures/form.html')
         .then(async () => {

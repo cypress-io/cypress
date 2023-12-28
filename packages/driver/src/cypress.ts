@@ -571,7 +571,7 @@ class $Cypress {
         return this.emitThen('test:before:run:async', ...args)
 
       case 'runner:test:before:after:run:async':
-        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0])
+        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0], args[2])
 
         return this.emitThen('test:before:after:run:async', ...args)
 
@@ -647,6 +647,9 @@ class $Cypress {
       case 'cy:command:start':
         return this.emit('command:start', ...args)
 
+      case 'cy:command:start:async':
+        return this.emitThen('command:start:async', ...args)
+
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
@@ -711,6 +714,9 @@ class $Cypress {
 
       case 'app:navigation:changed':
         return this.emit('navigation:changed', ...args)
+
+      case 'app:download:received':
+        return this.emit('download:received')
 
       case 'app:form:submitted':
         return this.emit('form:submitted', args[0])
