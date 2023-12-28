@@ -42,25 +42,24 @@ export default (Commands, Cypress, cy) => {
 
       const consoleProps: Record<string, any> = {}
 
-      if (options.log) {
-        // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
+      // figure out the options which actually change the behavior of clicks
+      const deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = Cypress.log({
-          $el: options.$el,
-          message: deltaOptions,
-          timeout: options.timeout,
-          consoleProps () {
-            // merge into consoleProps without mutating it
-            return _.extend({}, consoleProps, {
-              'Applied To': $dom.getElements(options.$el),
-              'Options': deltaOptions,
-            })
-          },
-        })
+      options._log = Cypress.log({
+        $el: options.$el,
+        message: deltaOptions,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          // merge into consoleProps without mutating it
+          return _.extend({}, consoleProps, {
+            'Applied To': $dom.getElements(options.$el),
+            'Options': deltaOptions,
+          })
+        },
+      })
 
-        options._log!.snapshot('before', { next: 'after' })
-      }
+      options._log?.snapshot('before', { next: 'after' })
 
       let node
 

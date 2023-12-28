@@ -617,6 +617,7 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
+      crossOriginLogs = {}
       const [attributes, test] = args
 
       this.reporterBus.emit('test:before:run:async', attributes)
@@ -831,7 +832,6 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-
     this.studioStore.setInactive()
   }
 
