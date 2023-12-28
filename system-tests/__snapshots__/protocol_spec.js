@@ -6272,7 +6272,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -6304,7 +6304,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -6767,198 +6767,6 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "x": "Any.Number",
         "y": "Any.Number"
       },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hidden": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hidden": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
@@ -8235,7 +8043,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8267,7 +8075,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
-              "selector": ":nth-child(1) > div"
+              "selector": "div:nth-child(1) > div:nth-child(1)"
             }
           ]
         }
@@ -8730,198 +8538,6 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "x": "Any.Number",
         "y": "Any.Number"
       },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hidden": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hidden": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hidden": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "Any.ISODate",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": "Any.Number",
-      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
