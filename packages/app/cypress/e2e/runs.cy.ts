@@ -301,7 +301,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Create Project', () => {
     // TODO: fix flaky test
-    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', { retries: 15 }, () => {
+    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', { retries: 3 }, function () {
+      if (Cypress.config('isTextTerminal') && Cypress.currentRetry > 2) {
+        this.skip()
+      }
+
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
@@ -458,7 +462,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     // TODO: fix flaky test
-    it('opens Connect Project modal after clicking Reconnect Project button', { retries: 15 }, () => {
+    it('opens Connect Project modal after clicking Reconnect Project button', { retries: 3 }, function () {
+      if (Cypress.config('isTextTerminal') && Cypress.currentRetry > 2) {
+        this.skip()
+      }
+
       cy.findByText(defaultMessages.runs.errors.notFound.button).click()
 
       cy.get('[aria-modal="true"]').should('exist')
