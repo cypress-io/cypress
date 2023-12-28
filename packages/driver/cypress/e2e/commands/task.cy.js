@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise } = Cypress
+const { Promise } = Cypress
 
 describe('src/cy/commands/task', () => {
   context('#task', {
@@ -63,13 +63,31 @@ describe('src/cy/commands/task', () => {
         return null
       })
 
-      it('can turn off logging', () => {
-        cy.task('foo', null, { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'task'
-          })
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
 
-          expect(logs.length).to.eq(0)
+        cy.task('foo', null, { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.task('foo', null, { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('task')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

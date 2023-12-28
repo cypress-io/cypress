@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3
+
+_Released 1/2/2024 (PENDING)_
+
+**Bugfixes:**
+
+- When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
+
 ## 13.6.2
 
 _Released 12/26/2023_
