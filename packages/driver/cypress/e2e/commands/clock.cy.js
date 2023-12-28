@@ -352,6 +352,7 @@ describe('src/cy/commands/clock', () => {
     context('logging', () => {
       beforeEach(function () {
         this.logs = []
+        this.hiddenLogs = []
 
         cy.on('log:added', (attrs, log) => {
           const name = log.get('name')
@@ -360,8 +361,6 @@ describe('src/cy/commands/clock', () => {
             return this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs when created', function () {
@@ -378,18 +377,6 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('logs when restored', function () {
-        cy.clock().then((clock) => {
-          clock.restore()
-
-          const log = this.logs[1]
-
-          expect(this.logs.length).to.equal(2)
-          expect(log.get('name')).to.eq('restore')
-          expect(log.get('message')).to.eq('')
-        })
-      })
-
       it('does not log when auto-restored', function (done) {
         cy.clock().then(() => {
           Cypress.emit('test:before:run', {})
@@ -399,12 +386,41 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not log when log: false', function () {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLogs.push(log)
+        })
+
         cy.clock({ log: false }).then((clock) => {
           clock.tick()
           clock.restore()
-
           expect(this.logs.length).to.equal(0)
+          expect(this.hiddenLogs.length).to.equal(0)
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLogs.push(log)
+        })
+
+        cy.clock({ log: false }).then((clock) => {
+          clock.tick()
+          clock.restore()
+          expect(this.logs.length).to.equal(0)
+          expect(this.hiddenLogs.length).to.equal(3)
+
+          expect(this.hiddenLogs[0].get('name'), 'log name').to.eq('clock')
+          expect(this.hiddenLogs[0].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[0].get('snapshots').length, 'log snapshot length').to.eq(1)
+
+          expect(this.hiddenLogs[1].get('name'), 'log name').to.eq('tick')
+          expect(this.hiddenLogs[1].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[1].get('snapshots').length, 'log snapshot length').to.eq(2)
+
+          expect(this.hiddenLogs[2].get('name'), 'log name').to.eq('restore')
+          expect(this.hiddenLogs[2].get('hidden'), 'log hidden').to.be.true
+          expect(this.hiddenLogs[2].get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -469,8 +485,6 @@ describe('src/cy/commands/clock', () => {
           this.logs.push(log)
         }
       })
-
-      return null
     })
 
     it('moves time ahead and triggers callbacks', function (done) {
@@ -551,12 +565,113 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy
         .clock()
         .tick(10, { log: false })
         .then(function () {
-          expect(this.logs[0]).to.be.undefined
+          const { hiddenLog } = this
+
+          expect(this.logs.length).to.equal(0)
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy
+        .clock()
+        .tick(10, { log: false })
+        .then(function () {
+          const { hiddenLog } = this
+
+          expect(this.logs.length).to.equal(0)
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('tick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+      })
+    })
+  })
+
+  describe('#restore', () => {
+    context('logging', () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          const name = log.get('name')
+
+          if (['clock', 'tick', 'restore'].includes(name)) {
+            return this.logs.push(log)
+          }
+        })
+      })
+
+      it('logs when restored', function () {
+        cy.clock().then((clock) => {
+          clock.restore()
+
+          const log = this.logs[1]
+
+          expect(this.logs.length).to.equal(2)
+          expect(log.get('name')).to.eq('restore')
+          expect(log.get('message')).to.eq('')
+        })
+      })
+
+      it('logs snapshot', () => {
+        cy.clock().then(function (clock) {
+          clock.restore()
+          const log = this.logs[0]
+
+          expect(log.get('snapshots').length).to.eq(1)
+        })
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.clock().then(function (clock) {
+          clock.restore({ log: false })
+
+          const { hiddenLog } = this
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('restore')
+
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.clock().then(function (clock) {
+          clock.restore({ log: false })
+
+          const { hiddenLog } = this
+          const lastLog = this.logs[0]
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('restore')
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('restore')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
     })
