@@ -19,6 +19,7 @@
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
+    "@medv/finder": "3.1.0",
     "@packages/config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

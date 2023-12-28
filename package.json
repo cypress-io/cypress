@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.6.1",
+  "version": "13.6.2",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -207,7 +207,7 @@
     "through": "2.3.8",
     "through2": "^4.0.2",
     "tree-kill": "1.2.2",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "4.7.4",
     "yarn-deduplicate": "3.1.0"
   },
