@@ -79,30 +79,29 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
       'Elements': $el.length,
     }
 
-    if (options.log) {
-      // figure out the userOptions which actually change the behavior of clicks
-      const deltaOptions = $utils.filterOutOptions(options)
+    // figure out the userOptions which actually change the behavior of clicks
+    const deltaOptions = $utils.filterOutOptions(options)
 
-      options._log = Cypress.log({
-        message: deltaOptions,
-        $el,
-        timeout: options.timeout,
-        consoleProps () {
-          return _.extend(consoleProps, {
-            Options: deltaOptions,
-          })
-        },
-      })
-
-      options._log.snapshot('before', { next: 'after' })
-
-      // warn cmd requires all subjects to have value when args passed to cmd
-      if (!($el.attr('value')) && (values.length > 0)) {
-        $errUtils.throwErrByPath('check_uncheck.element_missing_value_attribute', {
-          onFail: options._log,
-          args: { node, cmd: type },
+    options._log = Cypress.log({
+      hidden: options.log === false,
+      message: deltaOptions,
+      $el,
+      timeout: options.timeout,
+      consoleProps () {
+        return _.extend(consoleProps, {
+          Options: deltaOptions,
         })
-      }
+      },
+    })
+
+    options._log?.snapshot('before', { next: 'after' })
+
+    // warn cmd requires all subjects to have value when args passed to cmd
+    if (!($el.attr('value')) && (values.length > 0)) {
+      $errUtils.throwErrByPath('check_uncheck.element_missing_value_attribute', {
+        onFail: options._log,
+        args: { node, cmd: type },
+      })
     }
 
     // if the checkbox was already checked
@@ -125,7 +124,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
         const inputType = $el.is(':radio') ? 'radio' : 'checkbox'
 
         consoleProps.Note = `This ${inputType} was already ${type}ed. No operation took place.`
-        options._log.snapshot().end()
+        options._log?.snapshot().end()
       }
 
       matchingElements.push($el[0])
@@ -148,9 +147,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
       animationDistanceThreshold: options.animationDistanceThreshold,
       scrollBehavior: options.scrollBehavior,
     }).then(($el) => {
-      if (options._log) {
-        options._log.snapshot().end()
-      }
+      options._log?.snapshot().end()
 
       matchingElements.push($el[0])
     })
