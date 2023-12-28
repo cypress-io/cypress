@@ -34,9 +34,6 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
 
   if (process.env.TS_NODE_COMPILER) {
     try {
-      // @ts-expect-error - compilerOptions is an object we can assign properties on.
-      // It's the 'tsconfig.compilerOptions'.
-      compilerOptions.moduleResolution = 'node'
       compiler = require.resolve(process.env.TS_NODE_COMPILER, { paths: [path.dirname(registeredFile)] })
     } catch {
       // ts-node compiler not installed in project directory
@@ -66,7 +63,10 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
     dir: path.dirname(registeredFile),
-    transpileOnly: true, // transpile only (no type-check) for speed
+    transpileOnly: true, // transpile only (no type-check) for speed,
+    // See https://typestrong.org/ts-node/docs/options/#skipproject
+    // See https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#moduleresolution-bundler
+    skipProject: true, // This is necessary so that projects using compilerOptions.moduleResolution bundler don't fail
   }
 
   return opts
