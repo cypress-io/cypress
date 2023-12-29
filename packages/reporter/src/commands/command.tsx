@@ -60,17 +60,21 @@ export const formattedMessage = (message: string, name?: string) => {
     })
   }
 
-  // if the command name is not an assertion or the format of the assertion is
-  // not something that matched our regex, we want to render the markdown formatting
-  if (name !== 'assert' || !assertionArray) {
-    return md.renderInline(message)
+  if (name === 'assert' && assertionArray) {
+    // for assertions print the exact text so that characters like _ and *
+    // are not escaped in the assertion display when comparing values
+    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+
+    return result.join('')
   }
 
-  // for assertions print the exact text so that characters like _ and *
-  // are not escaped in the assertion display when comparing values
-  const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+  // if the command has url args, don't format those chars like __ and ~~
+  if (name === 'visit' || name === 'request' || name === 'origin') {
+    return message
+  }
 
-  return result.join('')
+  // format markdown for everything else
+  return md.renderInline(message)
 }
 
 const invisibleMessage = (model: CommandModel) => {

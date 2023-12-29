@@ -87,12 +87,35 @@ describe('formattedMessage', () => {
     })
   })
 
+  describe('when command that accepts url', () => {
+    it('cy.visit does not do markdown formatting', () => {
+      const specialMessage = 'http://www.test.com/__Path__99~~path~~'
+      const result = formattedMessage(specialMessage, 'visit')
+
+      expect(result).to.equal('http://www.test.com/__Path__99~~path~~')
+    })
+
+    it('cy.request does not do markdown formatting', () => {
+      const specialMessage = 'http://www.test.com/__Path__99~~path~~'
+      const result = formattedMessage(specialMessage, 'request')
+
+      expect(result).to.equal('http://www.test.com/__Path__99~~path~~')
+    })
+
+    it('cy.origin does not do markdown formatting', () => {
+      const specialMessage = 'http://www.test.com/__Path__99~~path~~'
+      const result = formattedMessage(specialMessage, 'origin')
+
+      expect(result).to.equal('http://www.test.com/__Path__99~~path~~')
+    })
+  })
+
   describe('when not an assertion', () => {
     it('displays special characters as markdown when not assertion', () => {
-      const specialMessage = 'expected **__*abcdef*__** to contain **/__.*abcdef.*__/**'
+      const specialMessage = 'message\n here `code block` with *formatting*'
       const result = formattedMessage(specialMessage)
 
-      expect(result).to.equal('expected <strong><strong><em>abcdef</em></strong></strong> to contain <strong>/<strong>.<em>abcdef.</em></strong>/</strong>')
+      expect(result).to.equal(`message\nhere <code>code block</code> with <em>formatting</em>`)
     })
   })
 })
