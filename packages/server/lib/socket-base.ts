@@ -132,6 +132,7 @@ export class SocketBase {
     callbacks: StartListeningCallbacks,
   ) {
     let runState: RunState | undefined = undefined
+    let actions: any[] | undefined = undefined
 
     _.defaults(options, {
       socketId: null,
@@ -404,6 +405,12 @@ export class SocketBase {
                 runState = args[0]
 
                 return null
+              case 'preserve:run:actions':
+                actions = args[0]
+
+                return null
+              case 'get:run:actions':
+                return actions
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 
