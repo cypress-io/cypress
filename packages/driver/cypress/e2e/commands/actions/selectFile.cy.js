@@ -511,6 +511,58 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+        })
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.txt' }, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.txt' }, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('selectFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+      })
+
+      it('logs out selectFile', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.txt' }).then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('name')).to.eq('selectFile')
+        })
+      })
+    })
+
     it('retries until label is not disabled', () => {
       cy.on('command:retry', () => {
         // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM
