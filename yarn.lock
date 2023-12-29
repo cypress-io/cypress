@@ -2502,10 +2502,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.2.tgz#cdca8da74f20e5b2926a06b4d2b91ebbe444694e"
   integrity sha512-5GPLRFLKFz6sn/Nh44s7aWpj18LQBmIh086wbVhGk4RlM29C9iDk3xobAy4WNJbAdLXZsutOT7BtkiRRlEfwtw==
 
-"@cypress/unique-selector@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.4.4.tgz#5e14be46ba5d7a4dad8eda07c0fd431a99227d83"
-  integrity sha512-hAvSShXUzIRpYDJNIC/OoQA/8stGcYGG2surkY/pMVElqWmAcfccjOWYbuii/ktP8zqUcPzxWKWCuFauJYWEfQ==
+"@cypress/unique-selector@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.0.5.tgz#1ce7889dd9ffe47e8b39d31da3a6b7e9a0c9c93d"
+  integrity sha512-WS1M1arFAcl2v+A4OHT4ZPAXQgoQuVwM4quyZZQUmJsshXZqbTFyT918WQujC6yikOddZgiVGk46CIBGoCMnow==
   dependencies:
     css.escape "^1.5.1"
 
@@ -12055,10 +12055,10 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-axe@0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-0.14.0.tgz#5f5e70fb36b8cb3ba73a8ba01e9262ff1268d5e2"
-  integrity sha512-7Rdjnko0MjggCmndc1wECAkvQBIhuy+DRtjF7bd5YPZRFvubfMNvrxfqD8PWQmxm7MZE0ffS4Xr43V6ZmvLopg==
+cypress-axe@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-1.5.0.tgz#95082734583da77b51ce9b7784e14a442016c7a1"
+  integrity sha512-Hy/owCjfj+25KMsecvDgo4fC/781ccL+e8p+UUYoadGVM2ogZF9XIKbiM6KI8Y3cEaSreymdD6ZzccbI2bY0lQ==
 
 cypress-each@^1.11.0:
   version "1.11.0"
