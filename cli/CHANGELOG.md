@@ -8,10 +8,6 @@ _Released 1/2/2024 (PENDING)_
 - Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
 
-**Performance:**
-
-- Improved performance when finding unique selectors for command log snapshots for Test Replay. Addressed in [#28536](https://github.com/cypress-io/cypress/pull/28536).
-
 **Dependency Updates:**
 
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
