@@ -273,6 +273,7 @@
     "**/socket.io-parser": "4.0.5",
     "**/ua-parser-js": "0.7.33",
     "@typescript-eslint/eslint-plugin": "4.18.0",
+    "browserify-sign": "4.2.2",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }
