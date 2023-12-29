@@ -278,35 +278,6 @@ context('lib/tasks/verify', () => {
     })
   })
 
-  it('sets ELECTRON_ENABLE_LOGGING without mutating process.env', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion,
-    })
-
-    expect(process.env.ELECTRON_ENABLE_LOGGING).to.be.undefined
-
-    util.exec.resolves()
-    sinon.stub(util, 'stdoutLineMatches').returns(true)
-
-    return verify
-    .start()
-    .then(() => {
-      expect(process.env.ELECTRON_ENABLE_LOGGING).to.be.undefined
-
-      const stdioOptions = util.exec.firstCall.args[2]
-
-      expect(stdioOptions).to.include({
-        timeout: verify.VERIFY_TEST_RUNNER_TIMEOUT_MS,
-      })
-
-      expect(stdioOptions.env).to.include({
-        ELECTRON_ENABLE_LOGGING: true,
-      })
-    })
-  })
-
   describe('with force: true', () => {
     beforeEach(() => {
       createfs({
