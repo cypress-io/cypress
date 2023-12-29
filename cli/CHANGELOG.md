@@ -9,6 +9,10 @@ _Released 1/2/2024 (PENDING)_
 - Updated display of assertions to escape markdown formatting and properly render bold styles for assertion values. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#5679](https://github.com/cypress-io/cypress/issues/5679).
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
 
+**Dependency Updates:**
+
+- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+
 ## 13.6.2
 
 _Released 12/26/2023_
