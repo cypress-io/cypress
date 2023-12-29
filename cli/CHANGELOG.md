@@ -6,7 +6,7 @@ _Released 1/2/2024 (PENDING)_
 **Bugfixes:**
 
 - Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
-- Updated display of assertions to escape markdown formatting and properly render bold styles for assertion values. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#5679](https://github.com/cypress-io/cypress/issues/5679).
+- Updated display of assertions and commands with a URL argument to escape markdown formatting so that values are displayed as is and assertion values display as bold. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#28100](https://github.com/cypress-io/cypress/issues/28100).
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
 
 **Dependency Updates:**
