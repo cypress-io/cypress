@@ -210,26 +210,23 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookie: Cypress.Cookie
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
+        hidden: !options.log,
+        timeout: responseTimeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
-          timeout: responseTimeout,
-          consoleProps () {
-            const obj = {}
+          if (cookie) {
+            obj['Yielded'] = cookie
+          } else {
+            obj['Yielded'] = 'null'
+            obj['Note'] = `No cookie with the name: '${name}' was found.`
+          }
 
-            if (cookie) {
-              obj['Yielded'] = cookie
-            } else {
-              obj['Yielded'] = 'null'
-              obj['Note'] = `No cookie with the name: '${name}' was found.`
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       if (!_.isString(name)) {
         $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
@@ -269,24 +266,21 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookies: Cypress.Cookie[] = []
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: userOptions.domain ? { domain: userOptions.domain } : '',
+        hidden: !options.log,
+        timeout: responseTimeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: userOptions.domain ? { domain: userOptions.domain } : '',
-          timeout: responseTimeout,
-          consoleProps () {
-            const obj = {}
+          if (cookies.length) {
+            obj['Yielded'] = cookies
+            obj['Num Cookies'] = cookies.length
+          }
 
-            if (cookies.length) {
-              obj['Yielded'] = cookies
-              obj['Num Cookies'] = cookies.length
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       validateDomainOption(userOptions.domain, 'getCookies', log)
 
@@ -318,24 +312,21 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       })
 
       let cookies: Cypress.Cookie[] = []
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: '',
+        hidden: !options.log,
+        timeout: options.timeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: '',
-          timeout: options.timeout,
-          consoleProps () {
-            const obj = {}
+          if (cookies.length) {
+            obj['Yielded'] = cookies
+            obj['Num Cookies'] = cookies.length
+          }
 
-            if (cookies.length) {
-              obj['Yielded'] = cookies
-              obj['Num Cookies'] = cookies.length
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       return automateCookies({
         event: 'get:cookies',
@@ -367,23 +358,20 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
       const cookie = _.extend(pickCookieProps(options), { name, value })
       let resultingCookie: Cypress.Cookie
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: userOptions.domain ? [name, value, { domain: userOptions.domain }] : [name, value],
+        hidden: !options.log,
+        timeout: responseTimeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: userOptions.domain ? [name, value, { domain: userOptions.domain }] : [name, value],
-          timeout: responseTimeout,
-          consoleProps () {
-            const obj = {}
+          if (resultingCookie) {
+            obj['Yielded'] = resultingCookie
+          }
 
-            if (resultingCookie) {
-              obj['Yielded'] = resultingCookie
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       cookie.sameSite = normalizeSameSite(cookie.sameSite)
 
@@ -454,27 +442,24 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookie: Cypress.Cookie
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: userOptions.domain ? [name, { domain: userOptions.domain }] : [name],
+        hidden: !options.log,
+        timeout: responseTimeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: userOptions.domain ? [name, { domain: userOptions.domain }] : [name],
-          timeout: responseTimeout,
-          consoleProps () {
-            const obj = {}
+          obj['Yielded'] = 'null'
 
-            obj['Yielded'] = 'null'
+          if (cookie) {
+            obj['Cleared Cookie'] = cookie
+          } else {
+            obj['Note'] = `No cookie with the name: '${name}' was found or removed.`
+          }
 
-            if (cookie) {
-              obj['Cleared Cookie'] = cookie
-            } else {
-              obj['Note'] = `No cookie with the name: '${name}' was found or removed.`
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       if (!_.isString(name)) {
         $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail: log })
@@ -520,28 +505,25 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookies: Cypress.Cookie[] = []
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: userOptions.domain ? { domain: userOptions.domain! } : '',
+        hidden: !options.log,
+        timeout: responseTimeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: userOptions.domain ? { domain: userOptions.domain! } : '',
-          timeout: responseTimeout,
-          consoleProps () {
-            const obj = {}
+          obj['Yielded'] = 'null'
 
-            obj['Yielded'] = 'null'
+          if (cookies.length) {
+            obj['Cleared Cookies'] = cookies
+            obj['Num Cookies'] = cookies.length
+          } else {
+            obj['Note'] = 'No cookies were found or removed.'
+          }
 
-            if (cookies.length) {
-              obj['Cleared Cookies'] = cookies
-              obj['Num Cookies'] = cookies.length
-            } else {
-              obj['Note'] = 'No cookies were found or removed.'
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       validateDomainOption(userOptions.domain, 'clearCookies', log)
 
@@ -576,28 +558,25 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       })
 
       let cookies: Cypress.Cookie[] = []
-      let log: Cypress.Log | undefined
+      const log: Cypress.Log | undefined = Cypress.log({
+        message: '',
+        hidden: !options.log,
+        timeout: options.timeout,
+        consoleProps () {
+          const obj = {}
 
-      if (options.log) {
-        log = Cypress.log({
-          message: '',
-          timeout: options.timeout,
-          consoleProps () {
-            const obj = {}
+          obj['Yielded'] = 'null'
 
-            obj['Yielded'] = 'null'
+          if (cookies.length) {
+            obj['Cleared Cookies'] = cookies
+            obj['Num Cookies'] = cookies.length
+          } else {
+            obj['Note'] = 'No cookies were found or removed.'
+          }
 
-            if (cookies.length) {
-              obj['Cleared Cookies'] = cookies
-              obj['Num Cookies'] = cookies.length
-            } else {
-              obj['Note'] = 'No cookies were found or removed.'
-            }
-
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       Cypress.emit('clear:cookies')
 

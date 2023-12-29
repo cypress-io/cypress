@@ -301,7 +301,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Create Project', () => {
     // TODO: fix flaky test
-    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', { retries: 15 }, () => {
+    it.skip('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
@@ -458,7 +458,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     // TODO: fix flaky test
-    it('opens Connect Project modal after clicking Reconnect Project button', { retries: 15 }, () => {
+    it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).click()
 
       cy.get('[aria-modal="true"]').should('exist')
