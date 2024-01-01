@@ -22,6 +22,7 @@
   "dependencies": {
     "@cypress/request": "^3.0.0",
     "@cypress/xvfb": "^1.2.4",
+    "@types/node": "^18.17.5",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
@@ -83,7 +84,6 @@
     "@types/lodash": "4.14.168",
     "@types/minimatch": "3.0.3",
     "@types/mocha": "8.0.3",
-    "@types/node": "^18.17.5",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.5",
     "chai": "3.5.0",
@@ -105,9 +105,6 @@
     "snap-shot-it": "7.9.6",
     "spawn-mock": "1.0.0",
     "strip-ansi": "6.0.0"
-  },
-  "peerDependencies": {
-    "@types/node": ">=16"
   },
   "files": [
     "bin",
