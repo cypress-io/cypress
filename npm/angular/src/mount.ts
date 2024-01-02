@@ -79,6 +79,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
    *   configured with the component instance as argument.
    * @example
    * import { ButtonComponent } from 'button/button.component'
+   * import { ButtonService } from 'button/button.service'
    * it('renders a button with Save text', () => {
    *  cy.mount(ButtonComponent, { setup: (component) => {
    *    component.label = TestBed.inject(ButtonService).getLabel()
