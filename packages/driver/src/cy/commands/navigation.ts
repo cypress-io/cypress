@@ -452,7 +452,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
     // reset any state on the backend
     // TODO: this is a bug in e2e it needs to be returned
-    return Cypress.backend('reset:server:state')
+    return Cypress.backend('reset:server:state', { testIsolation: Cypress.config('testIsolation') })
   })
 
   Cypress.on('test:before:run', reset)

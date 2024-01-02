@@ -429,10 +429,15 @@ export class Http {
     }
   }
 
-  reset () {
+  reset (options: { resetPrerequests: boolean }) {
     this.buffers.reset()
     this.setAUTUrl(undefined)
-    this.preRequests.reset()
+
+    // Only reset prerequests in situations where we no longer care about the previous
+    // prerequests (e.g. when we are starting a new spec in a new browser tab)
+    if (options.resetPrerequests) {
+      this.preRequests.reset()
+    }
   }
 
   setBuffer (buffer) {
