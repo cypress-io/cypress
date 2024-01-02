@@ -583,3 +583,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   return browserInstance
 }
+
+export async function closeExtraTargets () {
+  // we're currently holding off on implementing Firefox support in order
+  // to release Chromium support as soon as possible and may add Firefox
+  // support in the future
+  debug('Closing extra targets is not currently supported in Firefox')
+}

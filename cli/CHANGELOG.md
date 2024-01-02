@@ -1,4 +1,89 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3
+
+_Released 1/2/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
+- When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
+
+**Dependency Updates:**
+
+- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+
+- Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
+
+## 13.6.2
+
+_Released 12/26/2023_
+
+**Bugfixes:**
+
+- Fixed a regression in [`13.6.1`](https://docs.cypress.io/guides/references/changelog/13.6.1) where a malformed URI would crash Cypress. Fixes [#28521](https://github.com/cypress-io/cypress/issues/28521).
+- Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
+
+**Performance:**
+
+- Improved performance when finding unique selectors for command log snapshots for Test Replay. Addressed in [#28536](https://github.com/cypress-io/cypress/pull/28536).
+
+**Dependency Updates:**
+
+- Updated ts-node from `10.9.1` to `10.9.2`. Cypress will longer error during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Addresses [#28385](https://github.com/cypress-io/cypress/issues/28385).
+
+## 13.6.1
+
+_Released 12/5/2023_
+
+**Bugfixes:**
+
+- Fixed an issue where pages or downloads opened in a new tab were missing basic auth headers. Fixes [#28350](https://github.com/cypress-io/cypress/issues/28350).
+- Fixed an issue where request logging would default the `message` to the `args` of the currently running command even though those `args` would not apply to the request log and are not displayed. If the `args` are sufficiently large (e.g. when running the `cy.task` from the [code-coverage](https://github.com/cypress-io/code-coverage/) plugin) there could be performance/memory implications. Addressed in [#28411](https://github.com/cypress-io/cypress/pull/28411).
+- Fixed an issue where commands would fail with the error `must only be invoked from the spec file or support file` if the project's `baseUrl` included basic auth credentials. Fixes [#27457](https://github.com/cypress-io/cypress/issues/27457) and [#28336](https://github.com/cypress-io/cypress/issues/28336).
+- Fixed an issue where some URLs would timeout in pre-request correlation. Addressed in [#28427](https://github.com/cypress-io/cypress/pull/28427).
+- Cypress will now correctly log errors and debug logs on Linux machines. Fixes [#5051](https://github.com/cypress-io/cypress/issues/5051) and [#24713](https://github.com/cypress-io/cypress/issues/24713).
+
+**Misc:**
+
+- Artifact upload duration is now reported to Cypress Cloud. Fixes [#28238](https://github.com/cypress-io/cypress/issues/28238). Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418).
+
+## 13.6.0
+
+_Released 11/21/2023_
+
+**Features:**
+
+- Added an activity indicator to CLI output when artifacts (screenshots, videos, or Test Replay) are being uploaded to the cloud. Addresses [#28239](https://github.com/cypress-io/cypress/issues/28239). Addressed in [#28277](https://github.com/cypress-io/cypress/pull/28277).
+- When artifacts are uploaded to the Cypress Cloud, the duration of each upload will be displayed in the terminal. Addresses [#28237](https://github.com/cypress-io/cypress/issues/28237).
+
+**Bugfixes:**
+
+- We now allow absolute paths when setting `component.indexHtmlFile` in the Cypress config. Fixes [#27750](https://github.com/cypress-io/cypress/issues/27750).
+- Fixed an issue where dynamic intercept aliases now show with alias name instead of "no alias" in driver. Addresses [#24653](https://github.com/cypress-io/cypress/issues/24653)
+- Fixed an issue where [aliasing individual requests](https://docs.cypress.io/api/commands/intercept#Aliasing-individual-requests) with `cy.intercept()` led to an error when retrieving all of the aliases with `cy.get(@alias.all)` . Addresses [#25448](https://github.com/cypress-io/cypress/issues/25448)
+- The URL of the application under test and command error "Learn more" links now open externally instead of in the Cypress-launched browser. Fixes [#24572](https://github.com/cypress-io/cypress/issues/24572).
+- Fixed issue where some URLs would timeout in pre-request correlation. Addressed in [#28354](https://github.com/cypress-io/cypress/pull/28354).
+
+**Misc:**
+
+- Browser tabs and windows other than the Cypress tab are now closed between tests in Chromium-based browsers. Addressed in [#28204](https://github.com/cypress-io/cypress/pull/28204).
+- Cypress now ensures the main browser tab is active before running each command in Chromium-based browsers. Addressed in [#28334](https://github.com/cypress-io/cypress/pull/28334).
+
+**Dependency Updates:**
+
+- Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
+
+## 13.5.1
+
+_Released 11/14/2023_
+
+**Bugfixes:**
+
+- Fixed a regression in [`13.5.0`](https://docs.cypress.io/guides/references/changelog/13.5.0) where requests cached within a given spec may take longer to load than they did previously. Addresses [#28295](https://github.com/cypress-io/cypress/issues/28295).
+- Fixed an issue where pages opened in a new tab were missing response headers, causing them not to load properly. Fixes [#28293](https://github.com/cypress-io/cypress/issues/28293) and [#28303](https://github.com/cypress-io/cypress/issues/28303).
+- We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
+
 ## 13.5.0
 
 _Released 11/8/2023_

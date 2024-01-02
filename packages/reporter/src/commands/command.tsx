@@ -24,12 +24,13 @@ import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-c
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
-const md = new Markdown({ breaks: true })
-
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-export const formattedMessage = (message: string) => {
+const mdBreaks = new Markdown({ breaks: true })
+const md = new Markdown()
+
+export const formattedMessage = (message: string, type: string) => {
   if (!message) return ''
 
   const searchText = ['to match', 'to equal']
@@ -38,7 +39,8 @@ export const formattedMessage = (message: string) => {
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
   const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  const converted = md.renderInline(spaceEscapedText)
+  // we don't want <br> in our error messages, but allow it in Cypress.log
+  const converted = type === 'error' ? md.renderInline(spaceEscapedText) : mdBreaks.renderInline(spaceEscapedText)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
   return [converted, ...assertion].join(' ')

@@ -25,7 +25,7 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
       return
     }
 
-    if (overrideLevels === 'never') {
+    if (overrideLevels === 'never' && configKey !== 'protocolEnabled') {
       delete objectLikeConfig[configKey]
     }
   })
