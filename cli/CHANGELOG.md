@@ -3,11 +3,6 @@
 
 _Released 12/26/2023 (PENDING)_
 
-**Dependency Updates:**
-
-- Updated browserify-sign from `<=4.2.1` to `4.2.2`. Addresses [#28240](https://github.com/cypress-io/cypress/issues/28240).
-
-
 ## 13.6.2
 
 _Released 12/26/2023_
