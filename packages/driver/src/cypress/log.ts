@@ -394,7 +394,7 @@ export class Log {
 
   snapshot (name?, options: any = {}) {
     // bail early and don't snapshot if
-    // 1. we're in headless mode, we are
+    // 1. we're in headless mode
     // 2. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
     // 3. or we're not storing tests and the protocol is not enabled
     if (
