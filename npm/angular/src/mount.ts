@@ -289,7 +289,7 @@ function setupComponent<T> (
   }
 
   if (config?.setup) {
-    config.setup(component)
+    config.setup(fixture.componentInstance)
   }
 
   if (config.autoSpyOutputs) {
