@@ -19,8 +19,9 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
 const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
+
+const swcNode = pathToFileURL(require.resolve('@swc-node/register')).href
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -293,20 +294,22 @@ export class ProjectConfigIpc extends EventEmitter {
     // ts-node/esm for ESM
     if (hasTypeScriptInstalled(this.projectRoot)) {
       debug('found typescript in %s', this.projectRoot)
+
       if (isProjectUsingESModules) {
-        debug(`using --experimental-specifier-resolution=node with --loader ${tsNodeEsm}`)
-        // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
+        // Use swc-node loader so they can use TypeScript with `"type": "module".
         // The loader API is experimental and will change.
         // The same can be said for the other alternative, esbuild, so this is the
         // best option that leverages the existing modules we bundle in the binary.
         // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
-        // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        // @see SWC Node https://github.com/swc-project/swc-node
+        const swcNodeLoader = `--loader ${swcNode}`
+
+        debug(`using ${swcNodeLoader}`)
 
         if (childOptions.env.NODE_OPTIONS) {
-          childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
+          childOptions.env.NODE_OPTIONS += ` ${swcNodeLoader}`
         } else {
-          childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
+          childOptions.env.NODE_OPTIONS = swcNodeLoader
         }
       } else {
         // Not using ES Modules (via "type": "module"),
