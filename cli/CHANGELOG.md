@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.3
 
-_Released 1/2/2024 (PENDING)_
+_Released 1/16/2024 (PENDING)_
 
 **Bugfixes:**
 
@@ -11,9 +11,12 @@ _Released 1/2/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 
-- Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
+**Misc:**
+
+- Updated some documentation links to go through on.cypress.io. Addressed in [#28623](https://github.com/cypress-io/cypress/pull/28623).
 
 ## 13.6.2
 
