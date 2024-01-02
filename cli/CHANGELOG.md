@@ -12,6 +12,8 @@ _Released 1/2/2024 (PENDING)_
 
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 
+- Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
+
 ## 13.6.2
 
 _Released 12/26/2023_
