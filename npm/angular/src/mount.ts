@@ -72,6 +72,21 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
+  
+  /**
+   * @memberof MountConfig
+   * @description late evaluation setup callback. Called after the TestBed has been
+   *   configured with the component instance as argument.
+   * @example
+   * import { ButtonComponent } from 'button/button.component'
+   * it('renders a button with Save text', () => {
+   *  cy.mount(ButtonComponent, { setup: (component) => {
+   *    component.label = TestBed.inject(ButtonService).getLabel()
+   *  }})
+   *  cy.get('button').contains('Save')
+   * })
+   */
+  setup?: (componentInstance: T) => void
 }
 
 let activeFixture: ComponentFixture<any> | null = null
@@ -270,6 +285,10 @@ function setupComponent<T> (
 
   if (config?.componentProperties) {
     component = Object.assign(component, config.componentProperties)
+  }
+
+  if (config?.setup) {
+    config.setup(component)
   }
 
   if (config.autoSpyOutputs) {
