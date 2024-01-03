@@ -3761,17 +3761,31 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
-"@iconify/iconify@2.1.2", "@iconify/iconify@>=2.0.0-rc.6":
+"@iconify-json/logos@1.1.42":
+  version "1.1.42"
+  resolved "https://registry.yarnpkg.com/@iconify-json/logos/-/logos-1.1.42.tgz#85f62457ea54b727752b1fed8071847d17f28da1"
+  integrity sha512-/f+frtPm3m3Z30oy8Pk+QqRDkbmAiIaWGPl5CmsCXm15MVfvw9a/V/gD7WzdyuSGAZcFuQaqbHXj92y/n+2ifg==
+  dependencies:
+    "@iconify/types" "*"
+
+"@iconify-json/mdi@1.1.63":
+  version "1.1.63"
+  resolved "https://registry.yarnpkg.com/@iconify-json/mdi/-/mdi-1.1.63.tgz#264f4c7d2eeb0f48793338138ec689182608058c"
+  integrity sha512-b07dRM5LYdwJqd/lm+1+JDNDNSWHvpZ7ujb73oJxx3lmK1J0giDS0BSc4yia0hixNV0Z2q/4GyxAu/A8XqDnbg==
+  dependencies:
+    "@iconify/types" "*"
+
+"@iconify/iconify@>=2.0.0-rc.6":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@iconify/iconify/-/iconify-2.1.2.tgz#978e8f08c3b834816c82ae2933b3a70f143f7685"
   integrity sha512-QcUzFeEWkE/mW+BVtEGmcWATClcCOIJFiYUD/PiCWuTcdEA297o8D4oN6Ra44WrNOHu1wqNW4J0ioaDIiqaFOQ==
   dependencies:
     cross-fetch "^3.1.5"
 
-"@iconify/json@1.1.368":
-  version "1.1.368"
-  resolved "https://registry.yarnpkg.com/@iconify/json/-/json-1.1.368.tgz#a45ddc36efacd7d8f8ef44ed098ef2a21117765b"
-  integrity sha512-hFAgS3FnIZ17gjWNIidmg8WvPcHDmfEn/mSpdGDz9/e32Bv3bdlJOgFja29hJA2JgF1eShhIs39Q1sisjlAuSg==
+"@iconify/types@*":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@iconify/types/-/types-2.0.0.tgz#ab0e9ea681d6c8a1214f30cd741fe3a20cc57f57"
+  integrity sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==
 
 "@iconify/types@^1.1.0":
   version "1.1.0"
@@ -3789,11 +3803,6 @@
     debug "^4.3.4"
     kolorist "^1.5.1"
     local-pkg "^0.4.1"
-
-"@iconify/vue@3.0.0-beta.1":
-  version "3.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@iconify/vue/-/vue-3.0.0-beta.1.tgz#2cd2a775510cdb9f22c9eda94d4c2080d03fee2d"
-  integrity sha512-8FJRUj3y47FVBbRNeaf0R0MWlwmPiDRCR//BcvOKSVjOjNar/qLysn3Ns0cyQZJGOwxpsWkRpW3WrfX4JywlAg==
 
 "@intlify/bundle-utils@^5.4.0":
   version "5.5.0"
