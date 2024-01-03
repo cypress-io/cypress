@@ -277,7 +277,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             url: artifact.uploadUrl,
             fileSize: artifact.fileSize,
             key: artifact.reportKey,
-            duration: performance.now() - startTime,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -290,7 +290,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           pathToFile: artifact.filePath,
           fileSize: artifact.fileSize,
           key: artifact.reportKey,
-          duration: performance.now() - startTime,
+          uploadDuration: performance.now() - startTime,
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -309,7 +309,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
-            duration: performance.now() - startTime,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -319,7 +319,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
-          duration: performance.now() - startTime,
+          uploadDuration: performance.now() - startTime,
         }
       }
     }),
@@ -356,8 +356,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       return skipped && !report.error ? acc : {
         ...acc,
         [key]: {
-          // TODO: once cloud supports reporting duration, no longer omit this
-          ..._.omit(report, 'duration'),
+          ...report,
           error,
         },
       }
@@ -453,8 +452,8 @@ const uploadArtifacts = async (options = {}) => {
   try {
     debug('upload reprt: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
-      runId, instanceId, ...uploadReport,
-    })
+      runId, instanceId,
+    }, uploadReport)
 
     return res
   } catch (err) {
