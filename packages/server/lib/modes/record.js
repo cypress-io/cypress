@@ -469,7 +469,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 }
 
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -1036,14 +1036,12 @@ const createRunAndRecordSpecs = (options = {}) => {
           .finally(() => {
             // always attempt to upload stdout
             // even if uploading failed
-            const result = updateInstanceStdout({
+            return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
-
-            telemetry.getSpan('record:afterSpecRun')?.end()
-
-            return result
           })
         })
       }
