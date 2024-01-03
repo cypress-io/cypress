@@ -21,7 +21,7 @@ const Config = require('../config')
 const env = require('../util/env')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
-const { printPendingArtifactUpload, printCompletedArtifactUpload } = require('../util/print-run')
+const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } = require('../util/print-run')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 const { fs } = require('../util/fs')
@@ -240,6 +240,12 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     }
   })
 
+  let stopUploadActivityOutput
+
+  if (!quiet && preparedArtifacts.filter(({ skip }) => !skip).length) {
+    stopUploadActivityOutput = beginUploadActivityOutput()
+  }
+
   const uploadResults = await Promise.all(
     preparedArtifacts.map(async (artifact) => {
       if (artifact.skip) {
@@ -270,7 +276,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             url: artifact.uploadUrl,
             fileSize: artifact.fileSize,
             key: artifact.reportKey,
-            duration: performance.now() - startTime,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -283,7 +289,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           pathToFile: artifact.filePath,
           fileSize: artifact.fileSize,
           key: artifact.reportKey,
-          duration: performance.now() - startTime,
+          uploadDuration: performance.now() - startTime,
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -302,7 +308,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
-            duration: performance.now() - startTime,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -312,11 +318,15 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
-          duration: performance.now() - startTime,
+          uploadDuration: performance.now() - startTime,
         }
       }
     }),
-  )
+  ).finally(() => {
+    if (stopUploadActivityOutput) {
+      stopUploadActivityOutput()
+    }
+  })
 
   const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
     return !skipped
@@ -345,8 +355,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       return skipped && !report.error ? acc : {
         ...acc,
         [key]: {
-          // TODO: once cloud supports reporting duration, no longer omit this
-          ..._.omit(report, 'duration'),
+          ...report,
           error,
         },
       }
@@ -442,8 +451,8 @@ const uploadArtifacts = async (options = {}) => {
   try {
     debug('upload reprt: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
-      runId, instanceId, ...uploadReport,
-    })
+      runId, instanceId,
+    }, uploadReport)
 
     return res
   } catch (err) {

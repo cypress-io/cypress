@@ -562,6 +562,39 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollTo')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+      })
+
       it('logs out scrollTo', () => {
         cy.get('#scroll-to-both').scrollTo(25).then(function () {
           const { lastLog } = this
@@ -958,6 +991,39 @@ describe('src/cy/commands/actions/scroll', () => {
         })
 
         return null
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollIntoView')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs out scrollIntoView', () => {

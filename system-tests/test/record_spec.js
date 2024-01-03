@@ -38,6 +38,11 @@ let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -2293,7 +2298,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
-        it('retrieves the capture protocol and uploads the db', function () {
+        it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2302,8 +2307,13 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol?.url).to.be.a('string')
+            expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
           })
         })
       })
@@ -2511,6 +2521,11 @@ describe('e2e record', () => {
 })
 
 describe('capture-protocol api errors', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   enableCaptureProtocol()
 
   const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
