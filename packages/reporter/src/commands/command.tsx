@@ -27,23 +27,54 @@ import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-runni
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-const mdBreaks = new Markdown({ breaks: true })
 const md = new Markdown()
+const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
 
-export const formattedMessage = (message: string, type: string) => {
+const asterisksRegex = /^\*\*(.+?)\*\*$/gs
+// regex to match everything outside of expected/actual values like:
+// 'expected **<span>** to exist in the DOM'
+// `expected **glob*glob** to contain *****`
+// `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
+const assertionRegex = /expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
+
+// used to format the display of command messages and error messages
+// we use markdown syntax within our error messages (code ticks, urls, etc)
+// and cy.log and Cypress.log supports markdown formatting
+export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  const searchText = ['to match', 'to equal']
-  const regex = new RegExp(searchText.join('|'))
-  const split = message.split(regex)
-  const matchingText = searchText.find((text) => message.includes(text))
-  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  // we don't want <br> in our error messages, but allow it in Cypress.log
-  const converted = type === 'error' ? md.renderInline(spaceEscapedText) : mdBreaks.renderInline(spaceEscapedText)
-  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+  // the command message is formatted as 'expected <actual> to {assertion} <expected>'
+  const assertionArray = message.match(assertionRegex)
 
-  return [converted, ...assertion].join(' ')
+  const expectedActualArray = () => {
+    // get the expected and actual values of assertions
+    const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
+
+    // replace outside double asterisks with strong tags
+    return splitTrim.map((s) => {
+      // we want to escape HTML chars so that they display
+      // correctly in the command log: <p> -> &lt;p&gt;
+      const HTMLEscapedString = mdOnlyHTML.renderInline(s)
+
+      return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
+    })
+  }
+
+  if (name === 'assert' && assertionArray) {
+    // for assertions print the exact text so that characters like _ and *
+    // are not escaped in the assertion display when comparing values
+    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+
+    return result.join('')
+  }
+
+  // if the command has url args, don't format those chars like __ and ~~
+  if (name === 'visit' || name === 'request' || name === 'origin') {
+    return message
+  }
+
+  // format markdown for everything else
+  return md.renderInline(message)
 }
 
 const invisibleMessage = (model: CommandModel) => {
@@ -228,7 +259,7 @@ const Message = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
   </span>
 ))
