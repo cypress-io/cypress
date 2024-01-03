@@ -102,124 +102,204 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  it('creates expected snapshots for log not associated with commands', () => {
-    logs = []
-    let logsToVerify
+  describe('creates expected snapshots for log', () => {
+    describe('not associated with commands', () => {
+      let logsToVerify
 
-    cy.origin('http://www.foobar.com:3500', () => {
-      Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
-      Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
-      Cypress.log({ name: 'log 3', message: 'log({ snapshot: true })', snapshot: true })?.end()
-      Cypress.log({ name: 'log 4', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.end()
-      Cypress.log({ name: 'log 5', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).end()
+      beforeEach(() => {
+        logs = []
 
-      Cypress.log({ name: 'log 6', message: 'log without snapshots' })?.finish()
-      Cypress.log({ name: 'log 7', message: 'log().snapshot()' })?.snapshot().finish()
-      Cypress.log({ name: 'log 8', message: 'log({ snapshot: true })', snapshot: true })?.finish()
-      Cypress.log({ name: 'log 9', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.finish()
-      Cypress.log({ name: 'log 10', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).finish()
-    })
-    .then(() => {
-      logsToVerify = [...logs]
-    })
-    .wait(1500)
-    .then(() => {
-      // Verify the log is also fired in the primary origin.
-      expect(logsToVerify.length).to.eq(11)
+        cy.origin('http://www.foobar.com:3500', () => {
+          Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
+          Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
+          Cypress.log({ name: 'log 3', message: 'log({ snapshot: true })', snapshot: true })?.end()
+          Cypress.log({ name: 'log 4', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.end()
+          Cypress.log({ name: 'log 5', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).end()
 
-      expect(logsToVerify[1].get('name')).to.equal('log 1')
-      expect(logsToVerify[1].get('snapshots')).to.be.undefined
-
-      expect(logsToVerify[2].get('name')).to.equal('log 2')
-      expect(logsToVerify[2].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[3].get('name')).to.equal('log 3')
-      expect(logsToVerify[3].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[4].get('name')).to.equal('log 4')
-      expect(logsToVerify[4].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[5].get('name')).to.equal('log 5')
-      expect(logsToVerify[5].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[6].get('name')).to.equal('log 6')
-      expect(logsToVerify[6].get('snapshots')).to.be.undefined
-
-      expect(logsToVerify[7].get('name')).to.equal('log 7')
-      expect(logsToVerify[7].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[8].get('name')).to.equal('log 8')
-      expect(logsToVerify[8].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[9].get('name')).to.equal('log 9')
-      expect(logsToVerify[9].get('snapshots')).to.have.length(1)
-
-      expect(logsToVerify[10].get('name')).to.equal('log 10')
-      expect(logsToVerify[10].get('snapshots')).to.have.length(1)
-    })
-  })
-
-  it('creates expected snapshots for log associated with commands', () => {
-    logs = []
-    let logsToVerify
-
-    cy.origin('http://www.foobar.com:3500', () => {
-      // @ts-ignore
-      // add custom command to logs are associated to a command like typical cypress command logs would be
-      Cypress.Commands.add('commandToRun', () => {
-        Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
-        Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
-        Cypress.log({ name: 'log 3', message: 'log({ snapshot: true })', snapshot: true })?.end()
-        Cypress.log({ name: 'log 4', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.end()
-        Cypress.log({ name: 'log 5', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).end()
-
-        Cypress.log({ name: 'log 6', message: 'log without snapshots' })?.finish()
-        Cypress.log({ name: 'log 7', message: 'log().snapshot()' })?.snapshot().finish()
-        Cypress.log({ name: 'log 8', message: 'log({ snapshot: true })', snapshot: true })?.finish()
-        Cypress.log({ name: 'log 9', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.finish()
-        Cypress.log({ name: 'log 10', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).finish()
+          Cypress.log({ name: 'log 6', message: 'log without snapshots' })?.finish()
+          Cypress.log({ name: 'log 7', message: 'log().snapshot()' })?.snapshot().finish()
+          Cypress.log({ name: 'log 8', message: 'log({ snapshot: true })', snapshot: true })?.finish()
+          Cypress.log({ name: 'log 9', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.finish()
+          Cypress.log({ name: 'log 10', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).finish()
+        })
+        .then(() => {
+          logsToVerify = [...logs]
+        })
+        .wait(1500)
       })
 
-      // @ts-ignore
-      cy.commandToRun()
+      it('when run mode with protocol enabled', { numTestsKeptInMemory: 0, protocolEnabled: true }, () => {
+        // Verify the log is also fired in the primary origin.
+        expect(logsToVerify.length).to.eq(11)
+
+        expect(logsToVerify[1].get('name')).to.equal('log 1')
+        expect(logsToVerify[1].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[2].get('name')).to.equal('log 2')
+        expect(logsToVerify[2].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[3].get('name')).to.equal('log 3')
+        expect(logsToVerify[3].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[4].get('name')).to.equal('log 4')
+        expect(logsToVerify[4].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[5].get('name')).to.equal('log 5')
+        expect(logsToVerify[5].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[6].get('name')).to.equal('log 6')
+        expect(logsToVerify[6].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[7].get('name')).to.equal('log 7')
+        expect(logsToVerify[7].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[8].get('name')).to.equal('log 8')
+        expect(logsToVerify[8].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[9].get('name')).to.equal('log 9')
+        expect(logsToVerify[9].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[10].get('name')).to.equal('log 10')
+        expect(logsToVerify[10].get('snapshots')).to.have.length(1)
+      })
+
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, protocolEnabled: false }, () => {
+        // Verify the log is also fired in the primary origin.
+        expect(logsToVerify.length).to.eq(11)
+
+        expect(logsToVerify[1].get('name')).to.equal('log 1')
+        expect(logsToVerify[1].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[2].get('name')).to.equal('log 2')
+        expect(logsToVerify[2].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[3].get('name')).to.equal('log 3')
+        expect(logsToVerify[3].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[4].get('name')).to.equal('log 4')
+        expect(logsToVerify[4].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[5].get('name')).to.equal('log 5')
+        expect(logsToVerify[5].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[6].get('name')).to.equal('log 6')
+        expect(logsToVerify[6].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[7].get('name')).to.equal('log 7')
+        expect(logsToVerify[7].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[8].get('name')).to.equal('log 8')
+        expect(logsToVerify[8].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[9].get('name')).to.equal('log 9')
+        expect(logsToVerify[9].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[10].get('name')).to.equal('log 10')
+        expect(logsToVerify[10].get('snapshots')).to.be.undefined
+      })
     })
-    .then(() => {
-      logsToVerify = [...logs]
-    })
-    .wait(1500)
-    .then(() => {
-      // Verify the log is also fired in the primary origin.
-      expect(logsToVerify.length).to.eq(11)
 
-      expect(logsToVerify[1].get('name')).to.equal('log 1')
-      expect(logsToVerify[1].get('snapshots')).to.have.length(1)
+    describe('associated with commands', () => {
+      let logsToVerify
 
-      expect(logsToVerify[2].get('name')).to.equal('log 2')
-      expect(logsToVerify[2].get('snapshots')).to.have.length(1)
+      beforeEach(() => {
+        logs = []
 
-      expect(logsToVerify[3].get('name')).to.equal('log 3')
-      expect(logsToVerify[3].get('snapshots')).to.have.length(1)
+        cy.origin('http://www.foobar.com:3500', () => {
+          // @ts-ignore
+          // add custom command to logs are associated to a command like typical cypress command logs would be
+          Cypress.Commands.add('commandToRun', () => {
+            Cypress.log({ name: 'log 1', message: 'log without snapshots' })?.end()
+            Cypress.log({ name: 'log 2', message: 'log().snapshot()' })?.snapshot().end()
+            Cypress.log({ name: 'log 3', message: 'log({ snapshot: true })', snapshot: true })?.end()
+            Cypress.log({ name: 'log 4', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.end()
+            Cypress.log({ name: 'log 5', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).end()
 
-      expect(logsToVerify[4].get('name')).to.equal('log 4')
-      expect(logsToVerify[4].get('snapshots')).to.have.length(1)
+            Cypress.log({ name: 'log 6', message: 'log without snapshots' })?.finish()
+            Cypress.log({ name: 'log 7', message: 'log().snapshot()' })?.snapshot().finish()
+            Cypress.log({ name: 'log 8', message: 'log({ snapshot: true })', snapshot: true })?.finish()
+            Cypress.log({ name: 'log 9', message: 'log({ snapshot: true, end: true })', snapshot: true, end: true })?.finish()
+            Cypress.log({ name: 'log 10', message: 'log({ snapshot: true}).set({ snapshot: false })', snapshot: true })?.set({ 'snapshot': false }).finish()
+          })
 
-      expect(logsToVerify[5].get('name')).to.equal('log 5')
-      expect(logsToVerify[5].get('snapshots')).to.have.length(1)
+          // @ts-ignore
+          cy.commandToRun()
+        })
+        .then(() => {
+          logsToVerify = [...logs]
+        })
+        .wait(1500)
+      })
 
-      expect(logsToVerify[6].get('name')).to.equal('log 6')
-      expect(logsToVerify[6].get('snapshots')).to.have.length(1)
+      it('when run mode with protocol enabled', { numTestsKeptInMemory: 0, protocolEnabled: true }, () => {
+        // Verify the log is also fired in the primary origin.
+        expect(logsToVerify.length).to.eq(11)
 
-      expect(logsToVerify[7].get('name')).to.equal('log 7')
-      expect(logsToVerify[7].get('snapshots')).to.have.length(2)
+        expect(logsToVerify[1].get('name')).to.equal('log 1')
+        expect(logsToVerify[1].get('snapshots')).to.have.length(1)
 
-      expect(logsToVerify[8].get('name')).to.equal('log 8')
-      expect(logsToVerify[8].get('snapshots')).to.have.length(2)
+        expect(logsToVerify[2].get('name')).to.equal('log 2')
+        expect(logsToVerify[2].get('snapshots')).to.have.length(1)
 
-      expect(logsToVerify[9].get('name')).to.equal('log 9')
-      expect(logsToVerify[9].get('snapshots')).to.have.length(1)
+        expect(logsToVerify[3].get('name')).to.equal('log 3')
+        expect(logsToVerify[3].get('snapshots')).to.have.length(1)
 
-      expect(logsToVerify[10].get('name')).to.equal('log 10')
-      expect(logsToVerify[10].get('snapshots')).to.have.length(1)
+        expect(logsToVerify[4].get('name')).to.equal('log 4')
+        expect(logsToVerify[4].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[5].get('name')).to.equal('log 5')
+        expect(logsToVerify[5].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[6].get('name')).to.equal('log 6')
+        expect(logsToVerify[6].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[7].get('name')).to.equal('log 7')
+        expect(logsToVerify[7].get('snapshots')).to.have.length(2)
+
+        expect(logsToVerify[8].get('name')).to.equal('log 8')
+        expect(logsToVerify[8].get('snapshots')).to.have.length(2)
+
+        expect(logsToVerify[9].get('name')).to.equal('log 9')
+        expect(logsToVerify[9].get('snapshots')).to.have.length(1)
+
+        expect(logsToVerify[10].get('name')).to.equal('log 10')
+        expect(logsToVerify[10].get('snapshots')).to.have.length(1)
+      })
+
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, protocolEnabled: false }, () => {
+        // Verify the log is also fired in the primary origin.
+        expect(logsToVerify.length).to.eq(11)
+
+        expect(logsToVerify[1].get('name')).to.equal('log 1')
+        expect(logsToVerify[1].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[2].get('name')).to.equal('log 2')
+        expect(logsToVerify[2].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[3].get('name')).to.equal('log 3')
+        expect(logsToVerify[3].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[4].get('name')).to.equal('log 4')
+        expect(logsToVerify[4].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[5].get('name')).to.equal('log 5')
+        expect(logsToVerify[5].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[6].get('name')).to.equal('log 6')
+        expect(logsToVerify[6].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[7].get('name')).to.equal('log 7')
+        expect(logsToVerify[7].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[8].get('name')).to.equal('log 8')
+        expect(logsToVerify[8].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[9].get('name')).to.equal('log 9')
+        expect(logsToVerify[9].get('snapshots')).to.be.undefined
+
+        expect(logsToVerify[10].get('name')).to.equal('log 10')
+        expect(logsToVerify[10].get('snapshots')).to.be.undefined
+      })
     })
   })
 })
