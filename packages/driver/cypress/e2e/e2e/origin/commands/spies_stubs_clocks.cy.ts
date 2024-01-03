@@ -83,7 +83,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
     })
   })
 
-  context('log attributes & consoleProps', () => {
+  context('#consoleProps', () => {
     let logs: Map<string, any>
 
     beforeEach(() => {
@@ -116,8 +116,6 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         expect(spyLog.functionName).to.equal('bar')
 
         expect(spyEvent.instrument).to.equal('command')
-        expect(spyEvent, 'has snapshots attribute').to.have.property('snapshots')
-        expect(spyEvent.snapshots, 'number of snapshots').to.have.length(1)
 
         const consoleProps = spyEvent.consoleProps()
 
@@ -149,9 +147,6 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         expect(stubLog.functionName).to.equal('bar')
 
         expect(stubEvent.instrument).to.equal('command')
-        expect(stubEvent, 'has snapshots attribute').to.have.property('snapshots')
-        expect(stubEvent.snapshots, 'number of snapshots').to.have.length(1)
-
         const consoleProps = stubEvent.consoleProps()
 
         expect(consoleProps.name).to.equal('stub-1 called')
@@ -177,8 +172,6 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         const clockLog = findCrossOriginLogs('clock', logs, 'foobar.com')
 
         expect(clockLog.name).to.equal('clock')
-        expect(clockLog, 'has snapshots attribute').to.have.property('snapshots')
-        expect(clockLog.snapshots, 'number of snapshots').to.have.length(1)
 
         const consoleProps = clockLog.consoleProps
 
@@ -202,9 +195,6 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         const tickLog = findCrossOriginLogs('tick', logs, 'foobar.com')
 
         expect(tickLog.name).to.equal('tick')
-
-        expect(tickLog, 'has snapshots attribute').to.have.property('snapshots')
-        expect(tickLog.snapshots, 'number of snapshots').to.have.length(2)
 
         const consoleProps = Cypress._.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
 

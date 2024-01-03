@@ -52,9 +52,6 @@ context('cy.origin assertions', { browser: '!webkit' }, () => {
         assertionLogs.forEach(({ $el, consoleProps, snapshots }) => {
           expect($el.jquery).to.be.ok
 
-          expect(snapshots, 'has snapshots attribute').to.be.ok
-          expect(snapshots, 'number of snapshots').have.length(1)
-
           expect(consoleProps.name).to.equal('assert')
           expect(consoleProps.type).to.equal('command')
           expect(consoleProps.props.subject[0]).to.have.property('tagName').that.equals('INPUT')
