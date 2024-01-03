@@ -472,7 +472,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = (options: { testIsolation: boolean }) => {
-      this.networkProxy.reset({ resetPrerequests: !!options.testIsolation })
+      this.networkProxy.reset({ resetPreRequests: !!options.testIsolation })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
