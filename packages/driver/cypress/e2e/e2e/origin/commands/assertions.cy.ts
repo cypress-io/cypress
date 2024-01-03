@@ -49,7 +49,7 @@ context('cy.origin assertions', { browser: '!webkit' }, () => {
         expect(assertionLogs[0].consoleProps.props.Message).to.equal('expected <input> not to be checked')
         expect(assertionLogs[1].consoleProps.props.Message).to.equal('expected <input> not to be disabled')
 
-        assertionLogs.forEach(({ $el, consoleProps, snapshots }) => {
+        assertionLogs.forEach(({ $el, consoleProps }) => {
           expect($el.jquery).to.be.ok
 
           expect(consoleProps.name).to.equal('assert')
