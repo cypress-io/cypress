@@ -191,7 +191,6 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
-
   _.defaults(obj, {
     isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
     id: `log-${window.location.origin}-${counter}`,
@@ -394,12 +393,12 @@ export class Log {
 
   snapshot (name?, options: any = {}) {
     // bail early and don't snapshot if
-    // 1. we're in headless mode
-    // 2. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
+    // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
+    // 2. we're in headless mode
     // 3. or we're not storing tests and the protocol is not enabled
     if (
-      (!this.config('isInteractive')
-      || (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
+      (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
+      || (!this.config('isInteractive')
       || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
