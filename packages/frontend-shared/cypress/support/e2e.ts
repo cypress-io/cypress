@@ -369,7 +369,7 @@ function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
       return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
-        return cy.get('.spinner').should('not.exist', { timeout: 10000, log: false }).then(() => {
+        return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
           return val
         })
       })
