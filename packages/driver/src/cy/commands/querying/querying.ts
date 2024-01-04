@@ -59,7 +59,7 @@ function getAlias (selector, log, cy) {
 
     const { command } = aliasObj
 
-    log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
+    cy.state('current') === this && log?.set('referencesAlias', { name: alias })
 
     /*
      * There are two cases for aliases, each explained in more detail below:
@@ -84,7 +84,7 @@ function getAlias (selector, log, cy) {
       const index = match ? match[1] : requests.length
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10) - 1] || null)
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
@@ -149,12 +149,13 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    const log = userOptions.log !== false && (userOptions._log || Cypress.log({
+    const log = userOptions._log || Cypress.log({
       message: selector,
       type: 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
-    }))
+    })
 
     this.set('timeout', userOptions.timeout)
     this.set('_log', log)
@@ -204,7 +205,7 @@ export default (Commands, Cypress, cy, state) => {
         throw err
       }
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         $el,
         consoleProps: () => {
           return {
@@ -256,9 +257,10 @@ export default (Commands, Cypress, cy, state) => {
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
       message: $utils.stringify(_.compact([filter, text])),
       type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
@@ -353,7 +355,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })

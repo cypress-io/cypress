@@ -25,17 +25,16 @@ export default (Commands, Cypress, cy) => {
 
       let consoleOutput
 
-      if (options.log) {
-        consoleOutput = {}
+      consoleOutput = {}
 
-        options._log = Cypress.log({
-          message: _.truncate(cmd, { length: 25 }),
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleOutput
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: _.truncate(cmd, { length: 25 }),
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleOutput
+        },
+      })
 
       if (!cmd || !_.isString(cmd)) {
         $errUtils.throwErrByPath('exec.invalid_argument', {

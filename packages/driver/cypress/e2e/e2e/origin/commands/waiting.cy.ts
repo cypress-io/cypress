@@ -142,7 +142,11 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
     })
 
-    it('doesn\'t log when log: false', () => {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
       cy.intercept('/foo', {}).as('foo')
 
       cy.origin('http://www.foobar.com:3500', () => {
@@ -152,9 +156,31 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const expectedLogs = findCrossOriginLogs('wait', logs, 'localhost')
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
 
-        expect(expectedLogs).to.be.empty
+        expect(waitLog[0]).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
+      cy.intercept('/foo', {}).as('foo')
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.then(() => window.xhrGet('/foo'))
+
+        cy.wait('@foo', { log: false })
+      })
+
+      cy.shouldWithTimeout(() => {
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
+
+        expect(waitLog.name).to.eq('wait')
+        expect(waitLog.hidden).to.be.true
+        expect(waitLog.snapshots.length, 'log snapshot length').to.eq(1)
       })
     })
 
