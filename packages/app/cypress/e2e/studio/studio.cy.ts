@@ -91,7 +91,6 @@ it('visits a basic html page', () => {
     })
 
     assertStudioHookCount(2)
-
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
         cy.get('.__cypress-studio-assertions-menu').shadow().contains('be visible').realClick()
