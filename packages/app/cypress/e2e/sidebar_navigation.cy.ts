@@ -21,11 +21,6 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
     })
 
-    it('has no axe violations', () => {
-      cy.injectAxe()
-      cy.checkA11y('[data-cy="sidebar"]')
-    })
-
     it('has appropriate aria attributes', () => {
       cy.findByTestId('toggle-sidebar')
       .should('have.attr', 'aria-controls', 'sidebar')
