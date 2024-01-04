@@ -147,6 +147,10 @@ type ExecOptions = {
    */
   stripAnsi?: boolean
   /**
+   * By default runner ui is not rendered. Pass true to turn on.
+   */
+  runnerUi?: boolean
+  /**
    * Pass a function to assert on and/or modify the stdout before snapshotting.
    */
   onStdout?: (stdout: string) => string | void
@@ -644,6 +648,7 @@ const systemTests = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
+      runnerUi: false,
       inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
 
@@ -736,6 +741,10 @@ const systemTests = {
 
     if (options.key) {
       args.push(`--key=${options.key}`)
+    }
+
+    if (!options.runnerUi) {
+      args.push(`--no-runner-ui`)
     }
 
     if (options.reporter) {
@@ -946,7 +955,7 @@ const systemTests = {
       // prevent any Compression progress
       // messages from showing up
       VIDEO_COMPRESSION_THROTTLE: 120000,
-
+      DELAY_TO_LET_VIDEO_FINISH_MS: 0,
       // don't fail our own tests running from forked PR's
       CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
 
