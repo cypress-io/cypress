@@ -8,6 +8,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
@@ -468,7 +469,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 }
 
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -914,6 +915,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       browserVersion: browser.version,
     }
 
+    telemetry.startSpan({ name: 'record:createRun' })
+
     return createRun({
       projectRoot,
       git,
@@ -932,6 +935,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       project,
     })
     .then((resp) => {
+      telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -947,6 +951,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
+        telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -966,7 +971,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
+          const result = _
           .chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
@@ -974,6 +979,10 @@ const createRunAndRecordSpecs = (options = {}) => {
             instanceId,
           })
           .value()
+
+          telemetry.getSpan('record:beforeSpecRun')?.end()
+
+          return result
         })
       }
 
@@ -983,6 +992,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (!instanceId || results.skippedSpec) {
           return
         }
+
+        telemetry.startSpan({ name: 'record:afterSpecRun' })
 
         debug('after spec run %o', { spec })
 
@@ -1028,6 +1039,8 @@ const createRunAndRecordSpecs = (options = {}) => {
             return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
           })
         })
