@@ -6,7 +6,6 @@ const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
 const verify = require('../../cli/lib/tasks/verify')
-const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
 const fs = Promise.promisifyAll(fse)
@@ -324,6 +323,8 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
 const test = async function (buildAppExecutable, buildAppDir) {
   await scaffoldCommonNodeModules()
+  const Fixtures = require('@tooling/system-tests')
+
   await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
