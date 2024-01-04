@@ -2829,7 +2829,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-runner:build-binary
           - publish-binary
         requires:
-          - build
+          - node_modules_install
     - wait-for-binary-publish:
         type: approval
         requires:
