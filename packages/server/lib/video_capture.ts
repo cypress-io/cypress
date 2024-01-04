@@ -122,24 +122,25 @@ export function start (options: StartOptions) {
   const ended = deferredPromise()
   let done = false
   let wantsWrite = true
-  let skippedChunksCount = 0
-  let writtenChunksCount = 0
+  let skippedFramesCount = 0
+  let writtenFramesCount = 0
 
   _.defaults(options, {
     onError () {},
   })
 
-  const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
-    debugFrames('frames written:', writtenChunksCount)
+  const endVideoCapture = function (waitForMoreFrames = true) {
+    debugFrames('frames written:', writtenFramesCount)
 
     // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
     // written to the stream, so we don't end capture until we get at least 2
-    if (writtenChunksCount < 2) {
+    if (writtenFramesCount < 2 && waitForMoreFrames) {
       return new Bluebird((resolve) => {
         pt.once('data', resolve)
       })
       .then(() => endVideoCapture())
-      .timeout(waitForMoreChunksTimeout)
+      .timeout(3000)
+      .catch(() => endVideoCapture(false))
     }
 
     done = true
@@ -185,7 +186,7 @@ export function start (options: StartOptions) {
       lengths[data.length] = true
     }
 
-    writtenChunksCount++
+    writtenFramesCount++
 
     debugFrames('writing video frame')
 
@@ -200,9 +201,9 @@ export function start (options: StartOptions) {
         })
       }
     } else {
-      skippedChunksCount += 1
+      skippedFramesCount += 1
 
-      return debugFrames('skipping video frame %o', { skipped: skippedChunksCount })
+      return debugFrames('skipping video frame %o', { skipped: skippedFramesCount })
     }
   }
 
