@@ -35,6 +35,14 @@ export interface InitializeRoutes {
   testingType: Cypress.TestingType
 }
 
+function remoteStatesPropsToHostname ({ domain, subdomain, tld }: Cypress.RemoteState['props']) {
+  if (subdomain) {
+    return `${subdomain}.${domain}.${tld}`
+  }
+
+  return `${domain}.${tld}`
+}
+
 export const createCommonRoutes = ({
   config,
   networkProxy,
@@ -46,6 +54,44 @@ export const createCommonRoutes = ({
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
+
+  // TODO: add comment
+  //
+  // https://github.com/cypress-io/cypress/issues/25891
+  router.use('/', (req, res, next) => {
+    if (
+      (
+        req.path !== '/'
+        && req.path !== '/__/'
+        && !req.path.startsWith('/__cypress')
+      )
+      || req.protocol !== 'https'
+    ) {
+      return next()
+    }
+
+    const primary = remoteStates.getPrimary()
+
+    // it's possible this is undefined if the primary origin has not been
+    // established yet
+    if (!primary?.props) {
+      return next()
+    }
+
+    const primaryHostname = remoteStatesPropsToHostname(primary.props)
+
+    if (
+      primaryHostname === req.hostname
+      && primary.origin.startsWith('http:')
+    ) {
+      // @ts-ignore
+      res.status(301).redirect(req.proxiedUrl.replace('https://', 'http://'))
+
+      return
+    }
+
+    next()
+  })
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
