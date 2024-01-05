@@ -24,10 +24,16 @@ interface DocsUrlProps {
 const DocsUrl = ({ url }: DocsUrlProps) => {
   if (!url) return null
 
+  const openUrl = (url: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+
+    events.emit('external:open', url)
+  }
+
   const urlArray = _.castArray(url)
 
   return _.map(urlArray, (url) => (
-    <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
+    <a className='runnable-err-docs-url' href={url} key={url} onClick={openUrl(url)}>
       Learn more
     </a>
   ))

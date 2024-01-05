@@ -1678,12 +1678,25 @@ describe('src/cy/commands/actions/click', () => {
         it('can scroll to and click elements in html with scroll-behavior: smooth', () => {
           cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
+        })
+
+        // https://github.com/cypress-io/cypress/issues/28150
+        it('can scroll to and click elements in html with scroll-behavior: smooth and overflow-y: auto', () => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('body').invoke('css', 'overflow-y', 'auto')
+          cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
 
         // https://github.com/cypress-io/cypress/issues/3200
         it('can scroll to and click elements in ancestor element with scroll-behavior: smooth', () => {
           cy.get('#dom').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('#dom').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
       })
     })
@@ -2415,6 +2428,39 @@ describe('src/cy/commands/actions/click', () => {
           this.lastLog = log
 
           this.logs.push(log)
+        })
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').click({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('click')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').click({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('click')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('click')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
       })
 
@@ -3292,8 +3338,38 @@ describe('src/cy/commands/actions/click', () => {
 
           this.logs.push(log)
         })
+      })
 
-        null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').dblclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('dblclick')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').dblclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('dblclick')
+          expect(hiddenLog.get('name'), 'log name').to.eq('dblclick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -3698,8 +3774,38 @@ describe('src/cy/commands/actions/click', () => {
 
           this.logs.push(log)
         })
+      })
 
-        null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').rightclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('rightclick')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').rightclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('rightclick')
+          expect(hiddenLog.get('name'), 'log name').to.eq('rightclick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {

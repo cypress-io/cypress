@@ -8,6 +8,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
@@ -21,10 +22,11 @@ const Config = require('../config')
 const env = require('../util/env')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
-const { printPendingArtifactUpload, printCompletedArtifactUpload } = require('../util/print-run')
+const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } = require('../util/print-run')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 const { fs } = require('../util/fs')
+const { performance } = require('perf_hooks')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -239,6 +241,12 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     }
   })
 
+  let stopUploadActivityOutput
+
+  if (!quiet && preparedArtifacts.filter(({ skip }) => !skip).length) {
+    stopUploadActivityOutput = beginUploadActivityOutput()
+  }
+
   const uploadResults = await Promise.all(
     preparedArtifacts.map(async (artifact) => {
       if (artifact.skip) {
@@ -251,6 +259,8 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           ...(artifact.error && { error: artifact.error, success: false }),
         }
       }
+
+      const startTime = performance.now()
 
       debug('uploading artifact %O', {
         ...artifact,
@@ -267,6 +277,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             url: artifact.uploadUrl,
             fileSize: artifact.fileSize,
             key: artifact.reportKey,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -279,6 +290,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           pathToFile: artifact.filePath,
           fileSize: artifact.fileSize,
           key: artifact.reportKey,
+          uploadDuration: performance.now() - startTime,
         }
       } catch (err) {
         debug('failed to upload artifact %o', {
@@ -297,6 +309,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
             allErrors: err.errors,
             url: artifact.uploadUrl,
             pathToFile: artifact.filePath,
+            uploadDuration: performance.now() - startTime,
           }
         }
 
@@ -306,10 +319,15 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
+          uploadDuration: performance.now() - startTime,
         }
       }
     }),
-  )
+  ).finally(() => {
+    if (stopUploadActivityOutput) {
+      stopUploadActivityOutput()
+    }
+  })
 
   const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
     return !skipped
@@ -434,8 +452,8 @@ const uploadArtifacts = async (options = {}) => {
   try {
     debug('upload reprt: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
-      runId, instanceId, ...uploadReport,
-    })
+      runId, instanceId,
+    }, uploadReport)
 
     return res
   } catch (err) {
@@ -451,7 +469,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 }
 
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -897,6 +915,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       browserVersion: browser.version,
     }
 
+    telemetry.startSpan({ name: 'record:createRun' })
+
     return createRun({
       projectRoot,
       git,
@@ -915,6 +935,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       project,
     })
     .then((resp) => {
+      telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -930,6 +951,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
+        telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -949,7 +971,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
+          const result = _
           .chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
@@ -957,6 +979,10 @@ const createRunAndRecordSpecs = (options = {}) => {
             instanceId,
           })
           .value()
+
+          telemetry.getSpan('record:beforeSpecRun')?.end()
+
+          return result
         })
       }
 
@@ -966,6 +992,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (!instanceId || results.skippedSpec) {
           return
         }
+
+        telemetry.startSpan({ name: 'record:afterSpecRun' })
 
         debug('after spec run %o', { spec })
 
@@ -1011,6 +1039,8 @@ const createRunAndRecordSpecs = (options = {}) => {
             return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
           })
         })

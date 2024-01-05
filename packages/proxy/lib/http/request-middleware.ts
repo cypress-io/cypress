@@ -52,6 +52,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-from-extra-target']
 
     this.onlyRunMiddleware([
+      'MaybeSetBasicAuthHeaders',
       'SendRequestOutgoing',
     ])
   }

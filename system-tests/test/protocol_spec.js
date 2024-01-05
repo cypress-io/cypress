@@ -40,10 +40,10 @@ describe('capture-protocol', () => {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'protocol',
+        spec: 'protocol.cy.js,test-isolation.cy.js',
         record: true,
         expectedExitCode: 0,
         port: 2121,
-        spec: 'protocol.cy.js,test-isolation.cy.js',
         config: {
           hosts: {
             '*foobar.com': '127.0.0.1',

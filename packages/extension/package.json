@@ -12,7 +12,7 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
-    "watch": "node ../../scripts/run-webpack --watch --progress",
+    "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "@packages/icons": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "chai": "3.5.0",
+    "chokidar-cli": "2.1.0",
     "cross-env": "6.0.3",
     "eol": "0.9.1",
     "fs-extra": "9.1.0",
