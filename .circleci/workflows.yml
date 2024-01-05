@@ -3265,6 +3265,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
 linux-arm64-workflow: &linux-arm64-workflow
   jobs:
     - node_modules_install:
+        name: linux-arm64-node-modules-install
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
