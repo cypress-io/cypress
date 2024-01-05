@@ -10,6 +10,10 @@ _Released 1/2/2024 (PENDING)_
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
 - Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
 
+**Performance:**
+
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where requests may not correlate correctly when test isolation is off. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
+
 **Dependency Updates:**
 
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
