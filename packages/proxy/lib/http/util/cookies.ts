@@ -5,7 +5,7 @@ import { cors } from '@packages/network'
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
 import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestCredentialLevel } from '../../types'
-import type { ResourceType } from 'cypress/types/net-stubbing'
+import type { ResourceType } from '@packages/net-stubbing'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
 
