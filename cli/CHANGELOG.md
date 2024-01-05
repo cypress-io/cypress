@@ -11,6 +11,10 @@ _Released 1/16/2024 (PENDING)_
 - Fixed a regression in [`13.6.2`](https://docs.cypress.io/guides/references/changelog/13.6.2) where the `body` element was not highlighted correctly in Test Replay. Fixed in [#28627](https://github.com/cypress-io/cypress/pull/28627).
 - Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
 
+**Performance:**
+
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where requests may not correlate correctly when test isolation is off. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
+
 **Dependency Updates:**
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
