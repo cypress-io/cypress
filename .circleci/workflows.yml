@@ -3417,18 +3417,27 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         requires:
           - darwin-arm64-build
 
+    - test-kitchensink:
+        name: darwin-arm64-test-kitchensink
+        executor: darwin-arm64
+        resource_class: macos.m1.large.gen1
+        requires:
+          - darwin-arm64-build
+
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
         resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
+
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
         resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
+  
     - server-unit-tests-cloud-environment:
         name: darwin-arm64-server-unit-tests-cloud-environment
         executor: darwin-arm64
