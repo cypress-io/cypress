@@ -49,7 +49,9 @@ export class FileDataSource {
       return globPattern
     })
 
-    const ignoreGlob = (globOptions.ignore ?? []).concat('**/node_modules/**')
+    const nodeModulesInGlobPath = ([] as string[]).concat(glob).some((globPattern) => globPattern.includes('node_modules'))
+    const ignoreNodeModules = !!((cwd.includes('node_modules') || nodeModulesInGlobPath))
+    const ignoreGlob = (globOptions.ignore ?? []).concat(ignoreNodeModules ? [] : '**/node_modules/**')
 
     if (os.platform() === 'win32') {
       // globby can't work with backwards slashes
