@@ -31,7 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'feature/experimental-retries'
         - 'publish-binary'
-        - 'em/protocol-log-false'
+        - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -44,7 +44,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -57,7 +57,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -83,7 +83,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
+    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3265,7 +3265,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
 linux-arm64-workflow: &linux-arm64-workflow
   jobs:
     - node_modules_install:
-        name: linux-arm64-node-modules-install
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
@@ -3275,21 +3274,20 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-node-modules-install
+          - node-modules-install
 
     - create-and-trigger-packaging-artifacts:
-        name: linux-arm64-create-and-trigger-packaging-artifacts
         context: [test-runner:upload, test-runner:commit-status-checks, test-runner:build-binary, publish-binary]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-build
+          - node-modules-install
 
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
         type: approval
         requires:
-          - linux-arm64-create-and-trigger-packaging-artifacts
+          - create-and-trigger-packaging-artifacts
 
     - get-published-artifacts:
         name: linux-arm64-get-published-artifacts
@@ -3297,7 +3295,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-wait-for-binary-publish
+          - wait-for-binary-publish
 
     - v8-integration-tests:
         executor: linux-arm64
@@ -3318,7 +3316,6 @@ linux-arm64-workflow: &linux-arm64-workflow
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
-        name: darwin-x64-node-modules-install
         executor: mac
         resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
@@ -3329,10 +3326,9 @@ darwin-x64-workflow: &darwin-x64-workflow
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - darwin-x64-node-modules-install
+          - node-modules-install
 
     - create-build-artifacts:
-        name: darwin-x64-create-build-artifacts
         context:
           - test-runner:sign-mac-binary
           - test-runner:upload
@@ -3341,7 +3337,7 @@ darwin-x64-workflow: &darwin-x64-workflow
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - darwin-x64-build
+          - node_modules_install
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
@@ -3371,7 +3367,6 @@ darwin-x64-workflow: &darwin-x64-workflow
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
     - node_modules_install:
-        name: darwin-arm64-node-modules-install
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
@@ -3381,7 +3376,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
-          - darwin-arm64-node-modules-install
+          - node-modules-install
 
     - create-build-artifacts:
         name: darwin-arm64-create-build-artifacts
@@ -3393,7 +3388,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
-          - darwin-arm64-build
+          - node-modules-install
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
@@ -3417,7 +3412,6 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
-        name: windows-node-modules-install
         executor: windows
         resource_class: windows.large
         only-cache-for-root-user: true
@@ -3428,7 +3422,7 @@ windows-workflow: &windows-workflow
         executor: windows
         resource_class: windows.large
         requires:
-          - windows-node-modules-install
+          - node-modules-install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
@@ -3461,7 +3455,7 @@ windows-workflow: &windows-workflow
           - windows-build
 
     - create-build-artifacts:
-        name: windows-create-build-artifacts
+        name: create-build-artifacts
         executor: windows
         resource_class: windows.large
         context:
@@ -3470,13 +3464,13 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         requires:
-          - windows-build
+          - node-modules-install
 
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
-          - windows-create-build-artifacts
+          - create-build-artifacts
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
