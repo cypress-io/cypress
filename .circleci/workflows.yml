@@ -3274,14 +3274,14 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - create-and-trigger-packaging-artifacts:
         context: [test-runner:upload, test-runner:commit-status-checks, test-runner:build-binary, publish-binary]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
@@ -3326,7 +3326,7 @@ darwin-x64-workflow: &darwin-x64-workflow
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - create-build-artifacts:
         context:
@@ -3376,7 +3376,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - create-build-artifacts:
         name: darwin-arm64-create-build-artifacts
@@ -3388,7 +3388,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
@@ -3422,7 +3422,7 @@ windows-workflow: &windows-workflow
         executor: windows
         resource_class: windows.large
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
@@ -3464,7 +3464,7 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         requires:
-          - node-modules-install
+          - node_modules_install
 
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
