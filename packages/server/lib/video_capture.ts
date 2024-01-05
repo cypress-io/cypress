@@ -259,7 +259,7 @@ export function start (options: StartOptions) {
         .inputFPS(18)
 
         // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
-        // since video timest amp resets to 0, timestamps already written will be dropped
+        // since video timestamp resets to 0, timestamps already written will be dropped
         // .outputOption('-vsync vfr')
       } else {
         cmd
