@@ -23,6 +23,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
+import type Protocol from 'devtools-protocol'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -342,7 +343,31 @@ export class ProjectBase extends EE {
       this.server.addPendingUrlWithoutPreRequest(downloadUrl)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)
+    const onServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+      this.server.updateServiceWorkerRegistrations(data)
+    }
+
+    const onServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+      this.server.updateServiceWorkerVersions(data)
+    }
+
+    const onServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorURL: string }) => {
+      this.server.updateServiceWorkerClientSideRegistrations(data)
+    }
+
+    this._automation = new Automation({
+      cyNamespace: namespace,
+      cookieNamespace: socketIoCookie,
+      screenshotsFolder,
+      onBrowserPreRequest,
+      onRequestEvent,
+      onRequestServedFromCache,
+      onRequestFailed,
+      onDownloadLinkClicked,
+      onServiceWorkerRegistrationUpdated,
+      onServiceWorkerVersionUpdated,
+      onServiceWorkerClientSideRegistrationUpdated,
+    })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,

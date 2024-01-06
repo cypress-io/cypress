@@ -173,6 +173,8 @@ export class CdpAutomation implements CDPClient {
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
+    onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
+    onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
     this.on = onFn
     this.off = offFn
@@ -205,6 +207,7 @@ export class CdpAutomation implements CDPClient {
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
+
     let url = params.request.url
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
@@ -228,6 +231,8 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
+      initiator: params.initiator,
+      documentURL: params.documentURL,
       // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
       // normalize to milliseconds to be comparable to everything else we're gathering
       cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
@@ -246,7 +251,7 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
-    if (params.response.fromDiskCache) {
+    if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
       this.automation.onRequestServedFromCache?.(params.requestId)
 
       return
@@ -259,6 +264,14 @@ export class CdpAutomation implements CDPClient {
     }
 
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+  }
+
+  private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+    this.automation.onServiceWorkerRegistrationUpdated?.(params)
+  }
+
+  private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+    this.automation.onServiceWorkerVersionUpdated?.(params)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {

@@ -553,6 +553,10 @@ export class BrowserCriClient {
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
 
+    this.currentlyAttachedTarget.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
     if (target) {
       this.currentlyAttachedTarget = await create({
         target: target.targetId,
@@ -561,6 +565,7 @@ export class BrowserCriClient {
         port: this.port,
         protocolManager: this.protocolManager,
         fullyManageTabs: this.fullyManageTabs,
+        browserClient: this.browserClient,
       })
     } else {
       this.currentlyAttachedTarget = undefined
