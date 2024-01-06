@@ -9,7 +9,7 @@
     />
     <OpenBrowserList
       variant=""
-      :wasBrowserSetInCLI="query.data.value.localSettings.preferences.wasBrowserSetInCLI"
+      :was-browser-set-in-cli="query.data.value.localSettings.preferences.wasBrowserSetInCLI"
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"

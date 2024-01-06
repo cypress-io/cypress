@@ -215,7 +215,7 @@ useSubscription({ query: OpenBrowserList_BrowserStatusChangeDocument })
 
 const props = defineProps<{
   gql: OpenBrowserListFragment
-  wasBrowserSetInCLI: boolean | null
+  wasBrowserSetInCli: boolean | null
 }>()
 
 const emit = defineEmits<{
@@ -287,7 +287,7 @@ const browserStatus = computed(() => {
 const testingTypeIcon = computed(() => props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2EIcon)
 
 onMounted(() => {
-  if (props.wasBrowserSetInCLI && !browserStatus.value.open) {
+  if (props.wasBrowserSetInCli && !browserStatus.value.open) {
     emit('launch')
   }
 })
