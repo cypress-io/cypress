@@ -1,18 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.3
 
-_Released 1/2/2024 (PENDING)_
+_Released 1/6/2024 (PENDING)_
 
 **Bugfixes:**
 
 - Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
+- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 **Dependency Updates:**
 
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
+- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 ## 13.6.2
 
@@ -103,11 +105,6 @@ _Released 11/8/2023_
 - Fixed an issue determining visibility when an element is hidden by an ancestor with a shared edge. Fixes [#27514](https://github.com/cypress-io/cypress/issues/27514).
 - We now pass a flag to Chromium browsers to disable Chrome translation, both the manual option and the popup prompt, when a page with a differing language is detected. Fixes [#28225](https://github.com/cypress-io/cypress/issues/28225).
 - Stopped processing CDP events at the end of a spec when Test Isolation is off and Test Replay is enabled. Addressed in [#28213](https://github.com/cypress-io/cypress/pull/28213).
-- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
-
-**Dependency Updates:**
-
-- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 ## 13.4.0
 
