@@ -205,4 +205,32 @@ describe('http', function () {
       })
     })
   })
+
+  context('Http.reset', function () {
+    let httpOpts
+
+    beforeEach(function () {
+      httpOpts = { config: {}, middleware: {} }
+    })
+
+    it('resets preRequests when resetPreRequests is true', function () {
+      const http = new Http(httpOpts)
+
+      http.preRequests.reset = sinon.stub()
+
+      http.reset({ resetPreRequests: true })
+
+      expect(http.preRequests.reset).to.be.calledOnce
+    })
+
+    it('does not reset preRequests when resetPreRequests is false', function () {
+      const http = new Http(httpOpts)
+
+      http.preRequests.reset = sinon.stub()
+
+      http.reset({ resetPreRequests: false })
+
+      expect(http.preRequests.reset).to.not.be.called
+    })
+  })
 })

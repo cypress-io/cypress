@@ -663,35 +663,6 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
     })
 
-    Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
-      log: Cypress.Log
-      name?: string
-      options?: any
-      specBridge: string
-      addSnapshot: (snapshot: any, options: any, shouldRebindSnapshotFn: boolean) => Cypress.Log
-    }) => {
-      const eventID = log.get('id')
-
-      const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
-          origin: specBridge,
-          event: 'snapshot:generate:for:log',
-          data: {
-            name,
-            id: eventID,
-          },
-        }).then((crossOriginSnapshot) => {
-          const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
-
-          addSnapshot.apply(log, [snapshot, options, false])
-        })
-      }
-
-      requestSnapshot().catch(() => {
-        // If a spec bridge isn't present to respond this isn't an error and there is nothing to do.
-      })
-    })
-
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
       // In webkit the before:unload event could come in after the on load event has already happened.
       // To prevent hanging we will only set the state to unstable if we are currently on the same origin as the unload event,
