@@ -3,6 +3,13 @@
 
 _Released 1/16/2024 (PENDING)_
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
 **Bugfixes:**
 
 - Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
@@ -27,13 +34,6 @@ _Released 1/16/2024 (PENDING)_
 ## 13.6.2
 
 _Released 12/26/2023_
-
-**Features:**
-
-- Running the command `cypress open --browser <browser-name>`will
-launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003).
-Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
