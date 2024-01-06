@@ -429,10 +429,13 @@ export class Http {
     }
   }
 
-  reset () {
+  reset (options: { resetPreRequests: boolean }) {
     this.buffers.reset()
     this.setAUTUrl(undefined)
-    this.preRequests.reset()
+
+    if (options.resetPreRequests) {
+      this.preRequests.reset()
+    }
   }
 
   setBuffer (buffer) {
