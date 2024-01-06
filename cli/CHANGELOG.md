@@ -10,6 +10,7 @@ _Released 1/16/2024 (PENDING)_
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
 - Fixed a regression in [`13.6.2`](https://docs.cypress.io/guides/references/changelog/13.6.2) where the `body` element was not highlighted correctly in Test Replay. Fixed in [#28627](https://github.com/cypress-io/cypress/pull/28627).
 - Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
+- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 **Performance:**
 
@@ -19,6 +20,7 @@ _Released 1/16/2024 (PENDING)_
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
 
 **Misc:**
 
