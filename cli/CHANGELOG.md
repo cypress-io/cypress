@@ -1,7 +1,32 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.3
+
+_Released 1/16/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
+- Updated display of assertions and commands with a URL argument to escape markdown formatting so that values are displayed as is and assertion values display as bold. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#28100](https://github.com/cypress-io/cypress/issues/28100).
+- When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
+- Fixed a regression in [`13.6.2`](https://docs.cypress.io/guides/references/changelog/13.6.2) where the `body` element was not highlighted correctly in Test Replay. Fixed in [#28627](https://github.com/cypress-io/cypress/pull/28627).
+- Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
+
+**Performance:**
+
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog/13.3.2) where requests may not correlate correctly when test isolation is off. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
+
+**Dependency Updates:**
+
+- Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
+- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+
+**Misc:**
+
+- Updated some documentation links to go through on.cypress.io. Addressed in [#28623](https://github.com/cypress-io/cypress/pull/28623).
+
 ## 13.6.2
 
-_Released 12/19/2023 (PENDING)_
+_Released 12/26/2023_
 
 **Features:**
 
@@ -12,9 +37,9 @@ Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
-- Cypress no longer errors during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Fixes [#28385](https://github.com/cypress-io/cypress/issues/28385).
 - Fixed a regression in [`13.6.1`](https://docs.cypress.io/guides/references/changelog/13.6.1) where a malformed URI would crash Cypress. Fixes [#28521](https://github.com/cypress-io/cypress/issues/28521).
 - Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog/12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
+- Now 'node_modules' will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 
 **Performance:**
 
@@ -22,7 +47,7 @@ Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Dependency Updates:**
 
-- Updated ts-node from `10.9.1` to `10.9.2`. Fixed in [#28528](https://github.com/cypress-io/cypress/pull/28528).
+- Updated ts-node from `10.9.1` to `10.9.2`. Cypress will longer error during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Addresses [#28385](https://github.com/cypress-io/cypress/issues/28385).
 
 ## 13.6.1
 

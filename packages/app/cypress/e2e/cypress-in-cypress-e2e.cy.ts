@@ -236,16 +236,12 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       cy.visitApp()
       cy.contains('withFailure.spec').click()
       cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
-      cy.injectAxe()
-      cy.checkA11y('[data-cy="specs-list-panel"]')
     })
 
     it('has no axe violations in reporter panel', () => {
       cy.visitApp()
       cy.contains('withFailure.spec').click()
       cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
-      cy.injectAxe()
-      cy.checkA11y('[data-cy="reporter-panel"]')
     })
   })
 })

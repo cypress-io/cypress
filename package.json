@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.6.1",
+  "version": "13.6.2",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -91,7 +91,7 @@
     "@nrwl/nx-cloud": "16.0.5",
     "@octokit/auth-app": "3.6.1",
     "@octokit/core": "3.6.0",
-    "@percy/cli": "1.2.0",
+    "@percy/cli": "1.27.4",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/better-sqlite3": "^7.6.3",
@@ -162,7 +162,6 @@
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",
     "glob": "7.1.6",
-    "got": "11.8.6",
     "graphql": "^15.5.1",
     "graphql-executor": "0.0.23",
     "gulp": "4.0.2",
@@ -274,6 +273,7 @@
     "**/socket.io-parser": "4.0.5",
     "**/ua-parser-js": "0.7.33",
     "@typescript-eslint/eslint-plugin": "4.18.0",
+    "browserify-sign": "4.2.2",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }
