@@ -59,7 +59,7 @@ export class NetworkProxy {
     this.http.setBuffer(buffer)
   }
 
-  reset (options: { resetPreRequests: boolean } = { resetPreRequests: true }) {
+  reset (options: { resetPreRequests: boolean, resetBetweenSpecs: boolean } = { resetPreRequests: true, resetBetweenSpecs: false }) {
     this.http.reset(options)
   }
 

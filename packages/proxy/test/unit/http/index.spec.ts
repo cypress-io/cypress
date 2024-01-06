@@ -219,7 +219,7 @@ describe('http', function () {
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: true })
+      http.reset({ resetPreRequests: true, resetBetweenSpecs: false })
 
       expect(http.preRequests.reset).to.be.calledOnce
     })
@@ -229,12 +229,12 @@ describe('http', function () {
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: false })
+      http.reset({ resetPreRequests: false, resetBetweenSpecs: false })
 
       expect(http.preRequests.reset).to.not.be.called
-    }
+    })
   })
-  
+
   context('Service Worker', function () {
     let config
     let middleware

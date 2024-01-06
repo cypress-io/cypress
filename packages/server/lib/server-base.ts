@@ -473,7 +473,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = (options: { testIsolation: boolean }) => {
-      this.networkProxy.reset({ resetPreRequests: !!options.testIsolation })
+      this.networkProxy.reset({ resetPreRequests: !!options.testIsolation, resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
@@ -630,7 +630,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset({ resetPrerequests: true })
+    this._networkProxy?.reset({ resetPreRequests: true, resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
