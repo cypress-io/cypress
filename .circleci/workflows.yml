@@ -3341,7 +3341,7 @@ darwin-x64-workflow: &darwin-x64-workflow
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
-          - darwin-x64-node-modules-install
+          - darwin-x64-build
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
@@ -3393,7 +3393,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
-          - darwin-arm64-node-modules-install
+          - darwin-arm64-build
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
@@ -3470,7 +3470,7 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         requires:
-          - windows-node-modules-install
+          - windows-build
 
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
