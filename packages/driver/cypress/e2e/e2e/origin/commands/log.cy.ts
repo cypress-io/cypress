@@ -99,6 +99,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
 
       log2?.set({ message: 'world' })
     })
+    .wait(1500)
     .then(() => {
       Cypress.log({ name: 'log 1 details', message: secondaryLogs.log1, end: true })
 
