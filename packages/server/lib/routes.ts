@@ -55,10 +55,28 @@ export const createCommonRoutes = ({
   const router = Router()
   const { clientRoute, namespace } = config
 
-  // TODO: add comment
+  // When a test visits an http:// site and we load our main app page,
+  // (e.g. test has cy.visit('http://example.com'), we load http://example.com/__/)
+  // Chrome will make a request to the the https:// version (i.e. https://example.com/__/)
+  // to check if it's valid. If it is valid, it will load the https:// version
+  // instead. This leads to an infinite loop of Cypress trying to load
+  // the http:// version because that's what the test wants and Chrome
+  // loading the https:// version. Then since it doesn't match what the test
+  // is visiting, Cypress attempts to the load the http:// version and the loop
+  // continues.
+  // See https://blog.chromium.org/2023/08/towards-https-by-default.html for
+  // more info about Chrome's automatic https upgrades.
+  //
+  // The fix for Cypress is to signal to Chrome that the https:// version is
+  // not valid by replying with a 301 redirect when we detect that it's
+  // an https upgrade, which is when an https:// request comes through
+  // one of your own proxied routes, but the the primary domain (a.k.a remote state)
+  // is the http:// version of that domain
   //
   // https://github.com/cypress-io/cypress/issues/25891
   router.use('/', (req, res, next) => {
+    // we can short-circuit early if the request is not one of these paths,
+    // since only these paths will receive the relevant https upgrade check
     if (
       (
         req.path !== '/'
@@ -80,6 +98,8 @@ export const createCommonRoutes = ({
 
     const primaryHostname = remoteStatesPropsToHostname(primary.props)
 
+    // doamin matches (example.com === example.com), but incoming request is
+    // https:// (established aboved), while the primary origin is http://
     if (
       primaryHostname === req.hostname
       && primary.origin.startsWith('http:')
