@@ -90,6 +90,8 @@ import SkippedIcon from '~icons/cy/file-changes-skipped_x24.svg'
 import ErrorIcon from '~icons/cy/file-changes-error_x24.svg'
 import WarningIcon from '~icons/cy/file-changes-warning_x24.svg'
 
+const LEARN_MORE_URL = 'https://on.cypress.io/guides/configuration'
+
 const { t } = useI18n()
 
 const props = defineProps<{
@@ -100,7 +102,6 @@ const props = defineProps<{
   fileExtension: string
 }>()
 
-const LEARN_MORE_URL = 'https://on.cypress.io/guides/configuration'
 const openLearnMoreExternalLink = useExternalLink(LEARN_MORE_URL)
 
 const language = computed(() => {
