@@ -100,7 +100,7 @@
           {{ t('migration.renameAuto.modal.buttonSave') }}
         </Button>
         <Button
-          variant="outline"
+          variant="outline-light"
           @click="emit('cancel')"
         >
           {{ t('migration.renameAuto.modal.buttonCancel') }}

@@ -27,12 +27,11 @@
         />
         <template #footer>
           <Button
-            size="lg"
-            :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            size="40"
             @click="renameSpecs"
           >
             {{ buttonTitle }}
+            <ArrowRightIcon class="ml-[8px] w-[16px] h-[16px] icon-dark-white" />
           </Button>
         </template>
       </MigrationStep>
@@ -47,17 +46,16 @@
           <div class="flex gap-[16px]">
             <Button
               v-if="migration.manualFiles?.completed"
-              size="lg"
-              :suffix-icon="ArrowRightIcon"
-              suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
+              size="40"
               @click="finishedRenamingComponentSpecs"
             >
               {{ t('migration.wizard.step2.buttonDone') }}
+              <ArrowRightIcon class="ml-[8px] w-[16px] h-[16px] icon-dark-white" />
             </Button>
 
             <Button
               v-else
-              size="lg"
+              size="40"
               disabled
             >
               <template #prefix>
@@ -71,8 +69,8 @@
 
             <Button
               v-if="!migration.manualFiles?.completed"
-              size="lg"
-              variant="outline"
+              size="40"
+              variant="outline-light"
               @click="skipStep2"
             >
               {{ t('migration.wizard.step2.button') }}
@@ -89,13 +87,12 @@
         <RenameSupport :gql="migration" />
         <template #footer>
           <Button
-            size="lg"
-            :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            size="40"
             data-cy="renameSupportButton"
             @click="launchRenameSupportFile"
           >
             {{ t('migration.wizard.step3.button') }}
+            <ArrowRightIcon class="ml-[8px] w-[16px] h-[16px] icon-dark-white" />
           </Button>
         </template>
       </MigrationStep>
@@ -108,13 +105,12 @@
         <ConvertConfigFile :gql="migration" />
         <template #footer>
           <Button
-            size="lg"
-            :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            size="40"
             data-cy="convertConfigButton"
             @click="convertConfig"
           >
             {{ t('migration.wizard.step4.button') }}
+            <ArrowRightIcon class="ml-[8px] w-[16px] h-[16px] icon-dark-white" />
           </Button>
         </template>
       </MigrationStep>

@@ -16,7 +16,7 @@
     <hr class="my-4">
     <div class="flex gap-2">
       <Button
-        size="lg"
+        size="40"
         :disabled="needsChanges"
         @click="completeSetup"
       >
