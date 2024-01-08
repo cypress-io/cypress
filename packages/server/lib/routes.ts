@@ -98,8 +98,9 @@ export const createCommonRoutes = ({
 
     const primaryHostname = remoteStatesPropsToHostname(primary.props)
 
-    // doamin matches (example.com === example.com), but incoming request is
-    // https:// (established aboved), while the primary origin is http://
+    // domain matches (example.com === example.com), but incoming request is
+    // https:// (established above), while the domain the user is trying to
+    // visit (a.k.a primary origin) is http://
     if (
       primaryHostname === req.hostname
       && primary.origin.startsWith('http:')
