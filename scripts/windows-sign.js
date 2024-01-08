@@ -8,23 +8,14 @@
 
 // sampled from https://github.com/electron-userland/electron-builder/issues/6158#issuecomment-899798533
 const path = require('path')
-const fs = require('fs')
+const { tmpdir } = require('os')
+const fs = require('fs-extra')
 const childProcess = require('child_process')
 
-const TEMP_DIR = path.join(__dirname, 'release', 'temp')
+const TEMP_DIR = path.join(tmpdir(), 'release', 'tmp')
 
 // create the temp directory we need for CodeSignTool in order to avoid manual confirmations
-try {
-  fs.statSync(TEMP_DIR).isDirectory()
-} catch (e) {
-  if (e.message.includes('no such file or directory')) {
-    fs.mkdirSync(TEMP_DIR, { recursive: true })
-  }
-
-  if (!fs.statSync(TEMP_DIR).isDirectory()) {
-    throw e
-  }
-}
+fs.ensureDirSync(TEMP_DIR)
 
 function sign (configuration) {
   // credentials from ssl.com
