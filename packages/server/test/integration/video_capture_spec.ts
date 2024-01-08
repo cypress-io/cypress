@@ -105,7 +105,8 @@ describe('Video Capture', () => {
       writeVideoFrame(fse.readFileSync(image2Path))
       writeVideoFrame(fse.readFileSync(image3Path))
 
-      await endVideoCapture(false)
+      const waitForMoreFrames = false
+      await endVideoCapture(waitForMoreFrames)
     })
 
     // https://github.com/cypress-io/cypress/issues/6408
