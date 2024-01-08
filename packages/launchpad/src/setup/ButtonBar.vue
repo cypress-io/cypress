@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<{
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
-  mainVariant?: ButtonVariants
+  mainVariant?: ButtonVariants | 'pending'
 }>(), {
   alt: undefined,
   altFn: undefined,
