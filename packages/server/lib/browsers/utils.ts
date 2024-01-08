@@ -15,7 +15,7 @@ declare global {
     navigation?: {
       addEventListener: (event: string, listener: (event: any) => void) => void
     }
-    cypressDownloadLinkClicked: (url: string) => void
+    cypressUtilityBinding?: (url: string) => void
   }
 }
 
@@ -395,49 +395,104 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-// Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
-// We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
-// correlated in the proxy.
-const handleDownloadLinksViaCDP = async (criClient: CriClient, automation: Automation) => {
+const initializeCDP = async (criClient: CriClient, automation: Automation) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
-    name: 'cypressDownloadLinkClicked',
+    name: 'cypressUtilityBinding',
   })
 
   await criClient.on('Runtime.bindingCalled', async (data) => {
-    if (data.name === 'cypressDownloadLinkClicked') {
-      const url = data.payload
+    if (data.name === 'cypressUtilityBinding') {
+      const event = JSON.parse(data.payload)
 
-      await automation.onDownloadLinkClicked?.(url)
+      switch (event.type) {
+        case 'service-worker-registration':
+          // Chromium browsers and webkit do not give us guaranteed pre requests for service worker registrations but they still go through the proxy.
+          // We need to notify the proxy when they are registered so that we can know which requests are controlled by service workers.
+          await automation.onServiceWorkerClientSideRegistrationUpdated?.(event)
+          break
+        case 'download':
+          // Chromium browsers and webkit do not give us pre requests for download links but they still go through the proxy.
+          // We need to notify the proxy when they are clicked so that we can resolve the pending request waiting to be
+          // correlated in the proxy.
+          await automation.onDownloadLinkClicked?.(event.destination)
+          break
+        default:
+          throw new Error(`Unknown cypressUtilityBinding event type: ${event.type}`)
+      }
     }
   })
 
   await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
-    source: `(${listenForDownload.toString()})()`,
+    source: `
+    const binding = window['cypressUtilityBinding']
+    delete window['cypressUtilityBinding']
+    ;(${listenForDownload.toString()})(binding)
+    ;(${overrideServiceWorkerRegistration.toString()})(binding)
+    `,
   })
+}
+
+const overrideServiceWorkerRegistration = (binding) => {
+  const oldRegister = window.ServiceWorkerContainer.prototype.register
+
+  window.ServiceWorkerContainer.prototype.register = function (scriptURL, options) {
+    const anchor = document.createElement('a')
+
+    let resolvedHref: URL
+
+    if (typeof scriptURL === 'string') {
+      anchor.setAttribute('href', scriptURL)
+      resolvedHref = new URL(anchor.href)
+    } else {
+      resolvedHref = scriptURL
+    }
+
+    anchor.remove()
+    const resolvedUrl = `${resolvedHref.origin}${resolvedHref.pathname}`
+
+    const serviceWorkerRegistrationEvent = {
+      type: 'service-worker-registration',
+      scriptURL: resolvedUrl,
+      initiatorURL: window.location.href,
+    }
+
+    binding(JSON.stringify(serviceWorkerRegistrationEvent))
+
+    return oldRegister.apply(this, [scriptURL, options])
+  }
 }
 
 // The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
 // For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
-const listenForDownload = () => {
-  if (window.navigation) {
-    window.navigation.addEventListener('navigate', (event) => {
-      if (typeof event.downloadRequest === 'string') {
-        window.cypressDownloadLinkClicked(event.destination.url)
-      }
-    })
-  } else {
-    document.addEventListener('click', (event) => {
-      if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
-        window.cypressDownloadLinkClicked(event.target.href)
-      }
-    })
+const listenForDownload = (binding) => {
+  if (binding) {
+    const createDownloadEvent = (destination) => {
+      return JSON.stringify({
+        type: 'download',
+        destination,
+      })
+    }
 
-    document.addEventListener('keydown', (event) => {
-      if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
-        window.cypressDownloadLinkClicked(event.target.href)
-      }
-    })
+    if (window.navigation) {
+      window.navigation.addEventListener('navigate', (event) => {
+        if (typeof event.downloadRequest === 'string') {
+          binding(createDownloadEvent(event.destination.url))
+        }
+      })
+    } else {
+      document.addEventListener('click', (event) => {
+        if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
+          binding(createDownloadEvent(event.target.href))
+        }
+      })
+
+      document.addEventListener('keydown', (event) => {
+        if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
+          binding(createDownloadEvent(event.target.href))
+        }
+      })
+    }
   }
 }
 
@@ -477,7 +532,7 @@ export = {
 
   throwBrowserNotFound,
 
-  handleDownloadLinksViaCDP,
+  initializeCDP,
 
   listenForDownload,
 
