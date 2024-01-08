@@ -57,7 +57,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import type { VariantClassesTable } from '@cypress-design/vue-button'
+import type { VariantClassesTable as ButtonVariants } from '@cypress-design/vue-button'
 import Button from '@cypress-design/vue-button'
 import Switch from '@cy/components/Switch.vue'
 
@@ -73,7 +73,7 @@ const props = withDefaults(defineProps<{
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
-  mainVariant?: ButtonVariants | 'pending'
+  mainVariant?: ButtonVariants
 }>(), {
   alt: undefined,
   altFn: undefined,
