@@ -37,6 +37,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -48,6 +49,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -60,6 +62,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -161,6 +164,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -227,15 +231,6 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 2)
   })
 
-  it('immediately handles a request from a service worker loading', () => {
-    const cbServiceWorker = sinon.stub()
-
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'sec-fetch-dest': 'serviceworker' } } as any, () => {}, cbServiceWorker)
-
-    expect(cbServiceWorker).to.be.calledOnce
-    expect(cbServiceWorker).to.be.calledWith()
-  })
-
   it('removes a pending request', () => {
     const cb = sinon.stub()
 
@@ -257,7 +252,7 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 0)
   })
 
-  it('resets the queues', () => {
+  it('resets the queues and service worker manager', () => {
     let callbackCalled = false
 
     preRequests.addPending({ requestId: '1234', url: 'bar', method: 'GET' } as BrowserPreRequest)
