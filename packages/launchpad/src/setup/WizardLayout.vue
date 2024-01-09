@@ -33,9 +33,7 @@
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import type { VariantClassesTable } from '@cypress-design/vue-button'
-
-type ButtonVariants = keyof typeof VariantClassesTable
+import type { ButtonVariants } from '@cypress-design/vue-button'
 
 const { t } = useI18n()
 

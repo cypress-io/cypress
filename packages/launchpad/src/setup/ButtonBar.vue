@@ -57,10 +57,8 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Button, { type VariantClassesTable } from '@cypress-design/vue-button'
+import Button, { type ButtonVariants } from '@cypress-design/vue-button'
 import Switch from '@cy/components/Switch.vue'
-
-type ButtonVariants = keyof typeof VariantClassesTable
 
 const props = withDefaults(defineProps<{
   next?: string
