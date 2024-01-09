@@ -70,13 +70,11 @@ export const createCommonRoutes = ({
   // @ts-expect-error - TS doesn't like the Request intersection
   router.use('/', (req: Request & { proxiedUrl: string }, res, next) => {
     // we can short-circuit early if the request is not one of these paths,
-    // since only these paths will receive the relevant https upgrade check
+    // since only these paths will receive the relevant https upgrade check.
+    // also can skip any requests that aren't https:// since that's what
+    // Chrome is checking for
     if (
-      (
-        req.path !== '/'
-        && req.path !== clientRoute
-        && !req.path.startsWith(`/${namespace}`)
-      )
+      (req.path !== '/' && req.path !== clientRoute)
       || req.protocol !== 'https'
     ) {
       return next()
