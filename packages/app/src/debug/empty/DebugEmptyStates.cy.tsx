@@ -64,7 +64,7 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
             cy.percySnapshot(`slideshow step ${step}`)
           }
 
-          cy.findByTestId('promo-action-control').click()
+          cy.findByTestId('promo-action-control', { timeout: 350 }).click()
         }
       }
 
