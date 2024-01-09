@@ -72,7 +72,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
 
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
-- [] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.
+- [ ] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
 
 - [ ] If needed, update the **[V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml)** by running the GitHub workflow. Make sure to use the branch that contains the electron updates to populate the `'workflow from'` and `'branch to update'` arguments. Select `'Generate from scratch'` and `'commit directly to branch'`. This will usually take 6-8 hours to complete and is best to not be actively developing on the branch when this workflow runs.
