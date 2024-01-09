@@ -373,12 +373,29 @@ export class BrowserCriClient {
 
     await extraTargetCriClient.send('Fetch.enable')
 
+    function headersArray (headers: Protocol.Network.Headers) {
+      const result: { name: string, value: string }[] = []
+
+      for (const name in headers) {
+        if (!Object.is(headers[name], undefined)) {
+          result.push({ name, value: `${headers[name]}` })
+        }
+      }
+
+      return result
+    }
+
     // we mark extra targets with this header, so that the proxy can recognize
     // where they came from and run only the minimal middleware necessary
     extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      let originalHeaders = params.request.headers ?? {}
+
+      originalHeaders['X-Cypress-Is-From-Extra-Target'] = 'true'
+
+      const headers = headersArray(originalHeaders)
       const details: Protocol.Fetch.ContinueRequestRequest = {
         requestId: params.requestId,
-        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+        headers,
       }
 
       extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
