@@ -23,7 +23,7 @@
               <img
                 :src="provider.icon"
                 width="14"
-                :alt="provider.name + 'logo'"
+                :alt="`${provider.name} logo`"
               >
             </template>
             {{ provider.name }}
