@@ -82,4 +82,5 @@ const handleClear = () => {
 const toggleDropzone = () => {
   showDropzone.value = !showDropzone.value
 }
+// this is to trigger a new build
 </script>
