@@ -2,7 +2,6 @@
 
 import '@percy/cypress'
 import type { SnapshotOptions } from '@percy/core'
-import 'cypress-axe'
 
 export interface CustomSnapshotOptions extends SnapshotOptions{
   /**
@@ -53,22 +52,6 @@ declare global {
       percySnapshot(name?: string, options?: CustomSnapshotOptions): Chainable<() => void>
     }
   }
-}
-
-function setupAxeAndCheckA11y () {
-  if (Cypress.testingType === 'component') {
-    // skip axe in component tests for the time being,
-    // it has started to error after the a11y check for some reason
-    // and needs to be investigated
-    return
-  }
-
-  cy.injectAxe()
-
-  Cypress.log({ displayName: '♿️ Accessibility Check ♿️' })
-
-  // passing undefined here so that we can set the final boolean to ignore failures for now
-  cy.checkA11y(undefined, undefined, undefined, true)
 }
 
 class ElementOverrideManager {
@@ -258,8 +241,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
     if (Cypress.config().isInteractive) {
       // since Percy snapshots represent visually unique states in the application
       // doing an accessibility check here should cover all situations that need to a11y checks
-
-      setupAxeAndCheckA11y()
 
       return applySnapshotMutations({
         ...snapshotMutationOptions,

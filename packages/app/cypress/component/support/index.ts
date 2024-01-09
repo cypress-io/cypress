@@ -18,7 +18,6 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 
 // Import commands.js using ES2015 syntax:
 
-import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
