@@ -75,9 +75,11 @@ export type StatusInfo = {
 </script>
 
 <script lang="ts" setup>
+// eslint-disable-next-line no-duplicate-imports
 import { computed } from 'vue'
 import Button from '@cypress-design/vue-button'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
+// eslint-disable-next-line no-duplicate-imports
 import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
