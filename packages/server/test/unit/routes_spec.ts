@@ -19,7 +19,7 @@ describe('lib/routes', () => {
 
       routeOptions = {
         config: {
-          clientRoute: 'clientRoute',
+          clientRoute: '/__/',
           namespace: 'namespace',
         } as Cfg,
         getSpec: sinon.stub().returns({}),
@@ -109,29 +109,6 @@ describe('lib/routes', () => {
 
       expect(res.status).to.be.calledWith(301)
       expect(res.redirect).to.be.calledWith('http://foobar.com/__/')
-    })
-
-    it('sends 301 if a chrome https upgrade is detected for /__cypress*', () => {
-      const { router } = setupCommonRoutes()
-
-      const req = {
-        hostname: 'foobar.com',
-        path: '/__cypress/any',
-        proxiedUrl: 'https://foobar.com/__cypress/any',
-        protocol: 'https',
-      }
-      const res = {
-        status: sinon.stub(),
-        redirect: sinon.stub(),
-      }
-      const next = sinon.stub().throws('next() should not be called')
-
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
-
-      expect(res.status).to.be.calledWith(301)
-      expect(res.redirect).to.be.calledWith('http://foobar.com/__cypress/any')
     })
 
     it('is a noop if not a matching route', () => {
