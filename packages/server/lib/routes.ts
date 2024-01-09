@@ -69,23 +69,24 @@ export const createCommonRoutes = ({
   // https://github.com/cypress-io/cypress/issues/25891
   // @ts-expect-error - TS doesn't like the Request intersection
   router.use('/', (req: Request & { proxiedUrl: string }, res, next) => {
-    // we can short-circuit early if the request is not one of these paths,
-    // since only these paths will receive the relevant https upgrade check.
-    // also can skip any requests that aren't https:// since that's what
-    // Chrome is checking for
     if (
+      // only these paths will receive the relevant https upgrade check
       (req.path !== '/' && req.path !== clientRoute)
+      // not an https upgrade request if not https protocol
       || req.protocol !== 'https'
+      // primary has not been established by a cy.visit() yet
+      || !remoteStates.hasPrimary()
     ) {
       return next()
     }
 
-    // primary has not been established by a cy.visit() yet
-    if (!remoteStates.hasPrimary()) {
+    const primary = remoteStates.getPrimary()
+
+    // props can be null in certain circumstances even if the primary is established
+    if (!primary.props) {
       return next()
     }
 
-    const primary = remoteStates.getPrimary()
     const primaryHostname = cors.domainPropsToHostname(primary.props)
 
     // domain matches (example.com === example.com), but incoming request is

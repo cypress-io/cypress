@@ -63,7 +63,7 @@ export class RemoteStates {
   hasPrimary () {
     const remoteStates = Array.from(this.remoteStates.entries())
 
-    return remoteStates.length && remoteStates[0] && remoteStates[0][1]
+    return !!(remoteStates.length && remoteStates[0] && remoteStates[0][1])
   }
 
   getPrimary () {
