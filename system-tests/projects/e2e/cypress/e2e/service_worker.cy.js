@@ -1,10 +1,14 @@
 const swReq = (win) => {
-  return win.navigator?.serviceWorker?.ready.then(() => win)
+  return new Promise((resolve) => {
+    win.addEventListener('service-worker:ready', () => {
+      resolve(win)
+    })
+  })
 }
 
 // Timeout of 1500 will ensure that the proxy correlation timeout is not hit
 it('loads service worker', { defaultCommandTimeout: 1500 }, () => {
-  cy.visit('https://localhost:1515/service_worker.html')
+  cy.visit('https://localhost:1515/service-worker-assets/scope/service_worker.html')
   .then(swReq)
 })
 
@@ -13,6 +17,6 @@ it('loads service worker', { defaultCommandTimeout: 1500 }, () => {
 // cache that have different headers that need to be tested in the proxy.
 // Timeout of 1500 will ensure that the proxy correlation timeout is not hit
 it('loads service worker', { defaultCommandTimeout: 1500 }, () => {
-  cy.visit('https://localhost:1515/service_worker.html')
+  cy.visit('https://localhost:1515/service-worker-assets/scope/service_worker.html')
   .then(swReq)
 })

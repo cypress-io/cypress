@@ -109,13 +109,24 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const spyLog = findCrossOriginLogs('spy-1', logs, 'foobar.com')
-        const consoleProps = spyLog.consoleProps
+        const [spyLog, spyEvent] = findCrossOriginLogs('spy-1', logs, 'foobar.com')
 
-        expect(consoleProps.name).to.equal('spy-1')
-        expect(consoleProps.type).to.equal('command')
+        expect(spyLog.instrument).to.equal('agent')
         expect(spyLog.callCount).to.be.a('number')
         expect(spyLog.functionName).to.equal('bar')
+
+        expect(spyEvent.instrument).to.equal('command')
+
+        const consoleProps = spyEvent.consoleProps()
+
+        expect(consoleProps.name).to.equal('spy-1 called')
+        expect(consoleProps.type).to.equal('event')
+        expect(consoleProps.props).to.have.property('Alias', undefined)
+        expect(consoleProps.props).to.have.property('Arguments')
+        expect(consoleProps.props).to.have.property('Call #', 1)
+        expect(consoleProps.props).to.have.property('Returned', undefined)
+        expect(consoleProps.props).to.have.property('Spied Obj')
+        expect(consoleProps.props).to.have.property('spy', null)
       })
     })
 
@@ -129,13 +140,24 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const stubLog = findCrossOriginLogs('stub-1', logs, 'foobar.com')
-        const consoleProps = stubLog.consoleProps
+        const [stubLog, stubEvent] = findCrossOriginLogs('stub-1', logs, 'foobar.com')
 
-        expect(consoleProps.name).to.equal('stub-1')
-        expect(consoleProps.type).to.equal('command')
+        expect(stubLog.instrument).to.equal('agent')
         expect(stubLog.callCount).to.be.a('number')
         expect(stubLog.functionName).to.equal('bar')
+
+        expect(stubEvent.instrument).to.equal('command')
+        const consoleProps = stubEvent.consoleProps()
+
+        expect(consoleProps.name).to.equal('stub-1 called')
+        expect(consoleProps.type).to.equal('event')
+        expect(consoleProps.props).to.have.property('Alias', undefined)
+        expect(consoleProps.props).to.have.property('Arguments')
+        expect(consoleProps.props).to.have.property('Context')
+        expect(consoleProps.props).to.have.property('Call #', 1)
+        expect(consoleProps.props).to.have.property('Returned', undefined)
+        expect(consoleProps.props).to.have.property('Stubbed Obj')
+        expect(consoleProps.props).to.have.property('stub', null)
       })
     })
 

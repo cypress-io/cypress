@@ -47,7 +47,7 @@ export async function getProjectConfig (projectRoot: string): Promise<Cypress.An
     defaultProject = Object.keys(angularJson.projects).find((name) => angularJson.projects[name].projectType === 'application')
 
     if (!defaultProject) {
-      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://docs.cypress.io/guides/references/configuration#Options-API to see how to pass in a custom project configuration')
+      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://on.cypress.io/configuration to see how to pass in a custom project configuration')
     }
   }
 
