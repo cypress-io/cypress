@@ -12,7 +12,7 @@ const onServer = function (app) {
     maxAge: 3600000,
   }))
 
-  app.get('/cached-sw', (req, res) => {
+  app.get('/service-worker-assets/scope/cached-service-worker', (req, res) => {
     res.set({
       'Access-Control-Allow-Origin': '*',
     })

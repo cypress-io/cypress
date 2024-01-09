@@ -6,7 +6,7 @@ module.exports = {
     setupNodeEvents (on, config) {
       const plugin = require('./cypress/plugins')
 
-      // @see https://docs.cypress.io/guides/guides/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests
+      // @see https://on.cypress.io/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests
       // for videoUploadOnPasses workaround, which was removed in Cypress v13.0.0
       on(
         'after:spec',
