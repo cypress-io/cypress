@@ -60,12 +60,14 @@ export class RemoteStates {
     return _.cloneDeep(state)
   }
 
-  getPrimary () {
+  hasPrimary () {
     const remoteStates = Array.from(this.remoteStates.entries())
 
-    if (!remoteStates.length || !remoteStates[0] || !remoteStates[0][1]) return
+    return remoteStates.length && remoteStates[0] && remoteStates[0][1]
+  }
 
-    const state = remoteStates[0][1]
+  getPrimary () {
+    const state = Array.from(this.remoteStates.entries())[0][1]
 
     debug('getting primary remote state: %o', state)
 

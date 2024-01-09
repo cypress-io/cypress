@@ -81,14 +81,12 @@ export const createCommonRoutes = ({
       return next()
     }
 
-    const primary = remoteStates.getPrimary()
-
-    // it's possible this is undefined or lacking props if the primary origin
-    // has not been established yet
-    if (!primary?.props) {
+    // primary has not been established by a cy.visit() yet
+    if (!remoteStates.hasPrimary()) {
       return next()
     }
 
+    const primary = remoteStates.getPrimary()
     const primaryHostname = cors.domainPropsToHostname(primary.props)
 
     // domain matches (example.com === example.com), but incoming request is
