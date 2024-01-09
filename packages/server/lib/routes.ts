@@ -67,7 +67,8 @@ export const createCommonRoutes = ({
   // is the http:// version of that domain
   //
   // https://github.com/cypress-io/cypress/issues/25891
-  router.use('/', (req, res, next) => {
+  // @ts-expect-error - TS doesn't like the Request intersection
+  router.use('/', (req: Request & { proxiedUrl: string }, res, next) => {
     // we can short-circuit early if the request is not one of these paths,
     // since only these paths will receive the relevant https upgrade check
     if (
@@ -96,7 +97,6 @@ export const createCommonRoutes = ({
       primaryHostname === req.hostname
       && primary.origin.startsWith('http:')
     ) {
-      // @ts-ignore
       res.status(301).redirect(req.proxiedUrl.replace('https://', 'http://'))
 
       return

@@ -23,13 +23,13 @@ describe('lib/routes', () => {
           namespace: 'namespace',
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        // @ts-ignore
+        // @ts-expect-error
         networkProxy: {
           handleHttpRequest: () => {},
         } as NetworkProxy,
         nodeProxy: {} as HttpProxy,
         onError: () => {},
-        // @ts-ignore
+        // @ts-expect-error
         remoteStates: {
           hasPrimary: sinon.stub().returns(true),
           getPrimary: sinon.stub().returns({
