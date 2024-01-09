@@ -31,7 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'feature/experimental-retries'
         - 'publish-binary'
-        - 'em/protocol-log-false'
+        - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -43,8 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -57,7 +56,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
+    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -81,9 +80,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_windows_signing', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -154,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "em/protocol-log-false" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "chore/update_windows_signing" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1139,6 +1137,7 @@ commands:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
+            yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
 
   build-and-package-binary:
@@ -1155,8 +1154,10 @@ commands:
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
             set -e
-            NEEDS_CODE_SIGNING=`node -p 'process.platform === "win32" || process.platform === "darwin"'`
-            if [[ "$NEEDS_CODE_SIGNING" == "true" ]]; then
+            NEEDS_CODE_SIGNING_WINDOWS=`node -p 'process.platform === "win32"'`
+            NEEDS_CODE_SIGNING_MAC=`node -p 'process.platform === "darwin"'`
+
+            if [[ "$NEEDS_CODE_SIGNING_MAC" == "true" ]]; then
               echo "Checking for required environment variables..."
               if [ -z "$CSC_LINK" ]; then
                 echo "Need to provide environment variable CSC_LINK"
@@ -1166,6 +1167,29 @@ commands:
               if [ -z "$CSC_KEY_PASSWORD" ]; then
                 echo "Need to provide environment variable CSC_KEY_PASSWORD"
                 echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+              echo "Succeeded."
+            elif [[ "$NEEDS_CODE_SIGNING_WINDOWS" == "true" ]]; then
+              echo "Checking for required environment variables..."
+              if [ -z "$WINDOWS_SIGN_USER_NAME" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_NAME"
+                echo "with password for fetching and signing certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_USER_PASSWORD" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_PASSWORD"
+                echo "for fetching and signing certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_CREDENTIAL_ID" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_CREDENTIAL_ID"
+                echo "for identifying certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_USER_TOTP" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_TOTP"
+                echo "for signing certificate"
                 exit 1
               fi
               echo "Succeeded."
@@ -2829,7 +2853,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-runner:build-binary
           - publish-binary
         requires:
-          - build
+          - node_modules_install
     - wait-for-binary-publish:
         type: approval
         requires:
@@ -3282,7 +3306,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-build
+          - linux-arm64-node-modules-install
 
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
