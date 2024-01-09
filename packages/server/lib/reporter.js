@@ -353,7 +353,7 @@ class Reporter {
 
             fmt =
               Array(indents).join('  ') +
-              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
 
             // or Log: `✓(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
             // eslint-disable-next-line no-console
@@ -396,7 +396,7 @@ class Reporter {
 
           const fmt =
             Array(indents).join('  ') +
-            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
 
           // Log: `✖(Attempt 3 of 3) test title (300ms)` when a test fails and none of the retries have passed
           // eslint-disable-next-line no-console
@@ -451,7 +451,7 @@ class Reporter {
   }
 
   emit (event, arg) {
-    // iI using GA retries, log the retry attempt as the status of the attempt is not used
+    // if using GA retries, log the retry attempt as the status of the attempt is not used
     if (event === 'retry' && this.reporterName === 'spec' && !this.retriesConfig?.experimentalStrategy) {
       this._logRetry(arg)
     }
@@ -513,7 +513,7 @@ class Reporter {
       }
     }
 
-    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.retries + 1))
+    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.maxTotalTestRetriesOrBurnIn))
 
     // Log: `(Attempt 1 of 2) test title` when a test attempts without experimentalRetries configured.
     // OR

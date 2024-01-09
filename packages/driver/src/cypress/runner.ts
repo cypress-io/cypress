@@ -26,7 +26,7 @@ const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
   '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
-  'reasonToStop', 'thisAttemptInitialStrategy',
+  'reasonToStop', 'thisAttemptInitialStrategy', 'maxTotalTestRetriesOrBurnIn',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -500,6 +500,17 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
               _runner.fail(test, err)
             } else {
               // If the last test attempt passed, but the outerStatus isn't marked as failed, then we want to emit the mocha 'pass' event.
+              Cypress.action('runner:pass', wrap(test))
+            }
+          }
+
+          if (test.state === 'failed') {
+            if (test?._cypressTestStatusInfo?.outerStatus === 'passed') {
+              // If the last test attempt failed, but the outerStatus is marked as passed, then we want to emit the mocha 'pass' event.
+              // otherwise we won't get the log for the last failing attempt nor the passing test status
+              // this happens when a test is being burned-in and passes its first few attempts, but then on the last attempt
+              // the test fails so that retries kick in with experimentalStrategy detect-flake-and-pass-on-threshold.
+              // If we have enough passes to meet passesRequired, the test will have a passing status even though its last attempt failed.
               Cypress.action('runner:pass', wrap(test))
             }
           }

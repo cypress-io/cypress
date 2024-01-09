@@ -37,6 +37,7 @@ export type EvaluateAttemptOutput = {
   forceState?: 'passed'
   reasonToStop?: ReasonToStop
   outerTestStatus?: 'passed' | 'failed'
+  maxTotalTestRetriesOrBurnIn: number
 }
 
 export type BurnInConfig = {
@@ -99,6 +100,10 @@ export function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig:
   }
 }
 
+const getMaxTestRetriesOrBurnInAttempts = function (testRetries: number, testBurnInAttempts: number) {
+  return (Math.max(testRetries, testBurnInAttempts) ?? 0) + 1
+}
+
 export function evaluateAttempt (input: EvaluateAttemptInput) {
   const {
     latestScore,
@@ -111,8 +116,10 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
     currentAttemptResult,
     totalAttemptsAlreadyExecuted,
   } = input
+  const neededBurnInAttempts = getNeededBurnInAttempts(latestScore, burnInConfig)
+  const maxTotalTestRetriesOrBurnIn = getMaxTestRetriesOrBurnInAttempts(maxAttempts, neededBurnInAttempts)
 
-  const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE' }
+  const result: EvaluateAttemptOutput = { final: true, initialStrategy: potentialInitialStrategy ?? 'NONE', maxTotalTestRetriesOrBurnIn }
 
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in OR the test passed on the first attempt,
@@ -175,7 +182,6 @@ export function evaluateAttempt (input: EvaluateAttemptInput) {
     }
   } else {
     result.nextInitialStrategy = 'BURN_IN'
-    const neededBurnInAttempts = getNeededBurnInAttempts(latestScore, burnInConfig)
 
     if (neededBurnInAttempts > passedAttemptsCount) {
       result.final = false
