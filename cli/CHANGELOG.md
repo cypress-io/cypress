@@ -23,6 +23,7 @@ _Released 1/16/2024 (PENDING)_
 
 **Misc:**
 
+- Improved accessibility of some areas of the Cypress App. Addressed in [#28628](https://github.com/cypress-io/cypress/pull/28628).
 - Updated some documentation links to go through on.cypress.io. Addressed in [#28623](https://github.com/cypress-io/cypress/pull/28623).
 
 ## 13.6.2
