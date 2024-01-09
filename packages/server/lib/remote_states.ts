@@ -61,7 +61,11 @@ export class RemoteStates {
   }
 
   getPrimary () {
-    const state = Array.from(this.remoteStates.entries())[0][1]
+    const remoteStates = Array.from(this.remoteStates.entries())
+
+    if (!remoteStates.length || !remoteStates[0] || !remoteStates[0][1]) return
+
+    const state = remoteStates[0][1]
 
     debug('getting primary remote state: %o', state)
 

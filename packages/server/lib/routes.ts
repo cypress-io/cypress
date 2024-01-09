@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
+import { cors } from '@packages/network'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -33,14 +34,6 @@ export interface InitializeRoutes {
   remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
-}
-
-function remoteStatesPropsToHostname ({ domain, subdomain, tld }: Cypress.RemoteState['props']) {
-  if (subdomain) {
-    return `${subdomain}.${domain}.${tld}`
-  }
-
-  return `${domain}.${tld}`
 }
 
 export const createCommonRoutes = ({
@@ -80,8 +73,8 @@ export const createCommonRoutes = ({
     if (
       (
         req.path !== '/'
-        && req.path !== '/__/'
-        && !req.path.startsWith('/__cypress')
+        && req.path !== clientRoute
+        && !req.path.startsWith(`/${namespace}`)
       )
       || req.protocol !== 'https'
     ) {
@@ -90,13 +83,13 @@ export const createCommonRoutes = ({
 
     const primary = remoteStates.getPrimary()
 
-    // it's possible this is undefined if the primary origin has not been
-    // established yet
+    // it's possible this is undefined or lacking props if the primary origin
+    // has not been established yet
     if (!primary?.props) {
       return next()
     }
 
-    const primaryHostname = remoteStatesPropsToHostname(primary.props)
+    const primaryHostname = cors.domainPropsToHostname(primary.props)
 
     // domain matches (example.com === example.com), but incoming request is
     // https:// (established above), while the domain the user is trying to
