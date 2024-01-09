@@ -31,6 +31,7 @@ describe('lib/routes', () => {
         onError: () => {},
         // @ts-ignore
         remoteStates: {
+          hasPrimary: sinon.stub().returns(true),
           getPrimary: sinon.stub().returns({
             origin: 'http://foobar.com',
             props: {
@@ -155,7 +156,7 @@ describe('lib/routes', () => {
     })
 
     it('is a noop if primary remote state has not been established', () => {
-      routeOptions.remoteStates.getPrimary.returns(undefined)
+      routeOptions.remoteStates.hasPrimary.returns(false)
 
       const { router } = setupCommonRoutes()
 
