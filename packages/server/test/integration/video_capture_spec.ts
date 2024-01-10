@@ -106,6 +106,7 @@ describe('Video Capture', () => {
       writeVideoFrame(fse.readFileSync(image3Path))
 
       const waitForMoreFrames = false
+
       await endVideoCapture(waitForMoreFrames)
     })
 
