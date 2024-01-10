@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
@@ -373,29 +374,18 @@ export class BrowserCriClient {
 
     await extraTargetCriClient.send('Fetch.enable')
 
-    function headersArray (headers: Protocol.Network.Headers) {
-      const result: { name: string, value: string }[] = []
-
-      for (const name in headers) {
-        if (!Object.is(headers[name], undefined)) {
-          result.push({ name, value: `${headers[name]}` })
-        }
-      }
-
-      return result
-    }
-
     // we mark extra targets with this header, so that the proxy can recognize
     // where they came from and run only the minimal middleware necessary
     extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-      let originalHeaders = params.request.headers ?? {}
+      // headers are received as an object but need to be an array to modify them
+      const headers = _.map(params.request.headers, (value, name) => ({ name, value }))
 
-      originalHeaders['X-Cypress-Is-From-Extra-Target'] = 'true'
-
-      const headers = headersArray(originalHeaders)
       const details: Protocol.Fetch.ContinueRequestRequest = {
         requestId: params.requestId,
-        headers,
+        headers: [
+          ...headers,
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
       }
 
       extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
