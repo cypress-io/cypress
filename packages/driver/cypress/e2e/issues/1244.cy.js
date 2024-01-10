@@ -4,7 +4,10 @@ describe('issue 1244', () => {
       cy.on('window:before:unload', (e) => {
         const win = cy.state('window')
 
-        expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+        // not all pages that ge unloaded during this spec have getCounters()
+        if (win.location.href.includes('issue-1244.html')) {
+          expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+        }
       })
     })
   })
@@ -33,8 +36,7 @@ describe('issue 1244', () => {
 
       it('correctly redirects when target=_parent inline in dom', () => {
         cy.get(`${el}.inline_parent`).click()
-        cy.get('#dom').should('contain', 'DOM')
-        cy.url().should('include', 'dom.html')
+        cy.url().should('include', 'empty.html')
       })
 
       it('maintains behavior when target=_self', () => {
@@ -65,11 +67,17 @@ describe('issue 1244', () => {
         $el.trigger('click')
       })
 
-      cy.get('#dom').should('contain', 'DOM')
-      cy.url().should('include', 'dom.html')
+      cy.url().should('include', 'empty.html')
     })
 
-    // TODO: fix flaky test
+    // NOTE: a previous test opens dom.html in a new window. This request does not
+    // receive a cross-domain injection from the proxy, and the browser caches
+    // it. Top cannot communicate with this iframe, and relies on the cross-
+    // domain injection to determine href, etc. cy.ts hangs on waiting for
+    // the cross-domain injection to postMessage back to top, causing
+    // this test to hang. See: https://github.com/cypress-io/cypress/issues/28681
+
+    /*
     it('does not strip link _parent', { retries: 15 }, () => {
       cy.get('iframe').then(($iframe) => {
         const $el = $iframe.contents().find('a.inline_parent')
@@ -79,6 +87,17 @@ describe('issue 1244', () => {
 
       cy.get('#dom').should('contain', 'DOM')
       cy.url().should('include', 'dom.html')
+    })
+    */
+
+    it('does not strip link_parent', () => {
+      cy.get('iframe').then(($iframe) => {
+        const $el = $iframe.contents().find('a.inline_parent')
+
+        $el[0].click()
+      })
+
+      cy.url().should('include', 'empty.html')
     })
   })
 })
