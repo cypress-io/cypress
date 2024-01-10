@@ -67,6 +67,55 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
+  it('primary origin does not override secondary origins timestamps', () => {
+    logs = []
+    const secondaryLogs = {
+      log1: {
+        createdAtTimestamp: null,
+        updatedAtTimestamps: [],
+      },
+      log2: {
+        createdAtTimestamp: null,
+        updatedAtTimestamps: [],
+      },
+    }
+
+    Cypress.primaryOriginCommunicator.on('log:added', (attrs) => {
+      if (!secondaryLogs[attrs.name]) {
+        secondaryLogs[attrs.name] = { updatedAtTimestamps: [] }
+      }
+
+      secondaryLogs[attrs.name].createdAtTimestamp = attrs.createdAtTimestamp
+      secondaryLogs[attrs.name].updatedAtTimestamps.push(attrs.updatedAtTimestamp)
+    })
+
+    Cypress.primaryOriginCommunicator.on('log:changed', (attrs) => {
+      secondaryLogs[attrs.name]?.updatedAtTimestamps.push(attrs.updatedAtTimestamp)
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      Cypress.log({ name: 'log1' })
+      const log2 = Cypress.log({ name: 'log2' })
+
+      log2?.set({ message: 'world' })
+    })
+    .wait(1500)
+    .then(() => {
+      Cypress.log({ name: 'log 1 details', message: secondaryLogs.log1, end: true })
+
+      expect(logs[1].get('name')).to.eq('log1')
+      expect(logs[1].get('createdAtTimestamp')).to.eq(secondaryLogs.log1.createdAtTimestamp)
+      expect(logs[1].get('updatedAtTimestamp')).to.eq(secondaryLogs.log1.updatedAtTimestamps[0])
+
+      Cypress.log({ name: 'log 2 details', message: secondaryLogs.log2, end: true })
+      expect(logs[2].get('name')).to.eq('log2')
+      expect(logs[2].get('message')).to.eq('world')
+      expect(logs[2].get('createdAtTimestamp')).to.eq(secondaryLogs.log2.createdAtTimestamp)
+      expect(secondaryLogs.log2.updatedAtTimestamps).to.have.length(2)
+      expect(logs[2].get('updatedAtTimestamp')).to.eq(secondaryLogs.log2.updatedAtTimestamps[1])
+    })
+  })
+
   it('does not send hidden logs to primary origin when protocol is disabled', { protocolEnabled: false }, function () {
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log

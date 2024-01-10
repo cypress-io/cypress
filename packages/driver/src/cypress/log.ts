@@ -311,6 +311,16 @@ export class Log {
       obj[key] = val
     }
 
+    // dont ever allow existing id's to be mutated
+    if (this.attributes.id) {
+      delete obj.id
+    }
+
+    // dont ever allow cross-origin log's updatedAtTimestamp value to be mutated by primary origin log
+    if (Cypress.isCrossOriginSpecBridge || !(obj.isCrossOriginLog || this.attributes.isCrossOriginLog)) {
+      obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
+    }
+
     const isHiddenLog = this.get('hidden') || obj.hidden
 
     if ('url' in obj) {
@@ -338,13 +348,6 @@ export class Log {
     if (obj.alias) {
       _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
     }
-
-    // dont ever allow existing id's to be mutated
-    if (this.attributes.id) {
-      delete obj.id
-    }
-
-    obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
 
     _.extend(this.attributes, obj)
 
@@ -662,7 +665,7 @@ class LogManager {
 
       const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent)
 
-      log.set(defaults(state, config, options))
+      log.set(defaults(state, config, _.clone(options)))
 
       const onBeforeLog = state('onBeforeLog')
 

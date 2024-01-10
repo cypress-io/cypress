@@ -412,7 +412,7 @@ export class SocketBase {
               case 'http:request':
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
-                return options.onResetServerState()
+                return options.onResetServerState(args[0])
               case 'log:memory:pressure':
                 return firefoxUtil.log()
               case 'firefox:force:gc':
