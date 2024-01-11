@@ -22,9 +22,9 @@ _Released 1/16/2024 (PENDING)_
 **Dependency Updates:**
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
-- Updated  [`@cypress/unique-selector`](https://www.npmjs.com/package/@cypress/unique-selector) to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+- Updated [`@cypress/unique-selector`](https://www.npmjs.com/package/@cypress/unique-selector) to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 - Replace [`CircularJSON`](https://www.npmjs.com/package/circular-json) with its successor [`flatted`](https://www.npmjs.com/package/flatted) version `3.2.9`. This resolves decoding issues observed in complex objects sent from the browser. Addressed in [#28683](https://github.com/cypress-io/cypress/pull/28683).
-- Updated  [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `8.7.0` to `9.2.2` to fix Mac OSX Catalina issues. Addresses [#28697](https://github.com/cypress-io/cypress/issues/28697).
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `8.7.0` to `9.2.2` to fix macOS Catalina issues. Addresses [#28697](https://github.com/cypress-io/cypress/issues/28697).
 
 **Misc:**
 
