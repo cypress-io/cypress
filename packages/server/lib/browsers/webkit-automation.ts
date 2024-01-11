@@ -231,6 +231,7 @@ export class WebKitAutomation {
         headers: request.headers(),
         resourceType: normalizeResourceType(request.resourceType()),
         originalResourceType: request.resourceType(),
+        documentURL: request.frame().url(),
         cdpRequestWillBeSentTimestamp: request.timing().requestStart,
         cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
       }
