@@ -287,11 +287,17 @@ describe('lib/browsers/cri-client', function () {
       criClient.send.withArgs('Fetch.continueRequest').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
-      await criClient.on.lastCall.args[1]({ requestId: 'request-id' })
+      await criClient.on.lastCall.args[1]({
+        requestId: 'request-id',
+        request: { headers: { 'X-Another-Custom-Header': 'value' } },
+      })
 
       expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
         requestId: 'request-id',
-        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+        headers: [
+          { name: 'X-Another-Custom-Header', value: 'value' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
       })
     })
 
