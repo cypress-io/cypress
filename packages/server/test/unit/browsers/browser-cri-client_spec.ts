@@ -287,11 +287,17 @@ describe('lib/browsers/cri-client', function () {
       criClient.send.withArgs('Fetch.continueRequest').resolves()
 
       await BrowserCriClient._onAttachToTarget(options as any)
-      await criClient.on.lastCall.args[1]({ requestId: 'request-id' })
+      await criClient.on.lastCall.args[1]({
+        requestId: 'request-id',
+        request: { headers: { 'X-Another-Custom-Header': 'value' } },
+      })
 
       expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
         requestId: 'request-id',
-        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+        headers: [
+          { name: 'X-Another-Custom-Header', value: 'value' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
       })
     })
 
@@ -502,6 +508,12 @@ describe('lib/browsers/cri-client', function () {
       const mockCurrentlyAttachedTarget = {
         targetId: '100',
         close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [{
+            eventName: 'Network.requestWillBeSent',
+            cb: sinon.stub(),
+          }],
+        },
       }
 
       const mockUpdatedCurrentlyAttachedTarget = {
@@ -510,22 +522,28 @@ describe('lib/browsers/cri-client', function () {
 
       send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
       send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
-      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined }).resolves(mockUpdatedCurrentlyAttachedTarget)
 
       const browserClient = await getClient() as any
 
+      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient }).resolves(mockUpdatedCurrentlyAttachedTarget)
+
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      browserClient.browserClient.off = sinon.stub()
 
       await browserClient.resetBrowserTargets(true)
 
       expect(mockCurrentlyAttachedTarget.close).to.be.called
       expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
+      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedTarget.queue.subscriptions[0].cb)
     })
 
     it('closes the currently attached target without keeping a tab open', async function () {
       const mockCurrentlyAttachedTarget = {
         targetId: '100',
         close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [],
+        },
       }
 
       send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()

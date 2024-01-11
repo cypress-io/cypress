@@ -8,6 +8,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
@@ -165,13 +166,15 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
           debug('protocol fatal error encountered', {
             message: error.message,
+            captureMethod: error.captureMethod,
             stack: error.stack,
           })
 
           return {
             ...artifact,
             skip: true,
-            error: error.message || error.stack || 'Unknown Error',
+            error: error.message || 'Unknown Error',
+            errorStack: error.stack || 'Unknown Stack',
           }
         }
 
@@ -195,6 +198,13 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           error: err.message,
           stack: err.stack,
         })
+
+        return {
+          ...artifact,
+          skip: true,
+          error: err.message,
+          errorStack: err.stack,
+        }
       }
     }
 
@@ -211,6 +221,13 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           file: artifact.filePath,
           stack: err.stack,
         })
+
+        return {
+          ...artifact,
+          skip: true,
+          error: err.message,
+          errorStack: err.stack,
+        }
       }
     }
 
@@ -255,7 +272,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           key: artifact.reportKey,
           skipped: true,
           url: artifact.uploadUrl,
-          ...(artifact.error && { error: artifact.error, success: false }),
+          ...(artifact.error && {
+            error: artifact.error,
+            errorStack: artifact.errorStack,
+            success: false,
+          }),
         }
       }
 
@@ -316,6 +337,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           key: artifact.reportKey,
           success: false,
           error: err.message,
+          errorStack: err.stack,
           url: artifact.uploadUrl,
           pathToFile: artifact.filePath,
           uploadDuration: performance.now() - startTime,
@@ -350,13 +372,19 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
   return uploadResults.reduce((acc, { key, skipped, ...report }) => {
     if (key === 'protocol') {
-      const error = report.allErrors ? `Failed to upload after ${report.allErrors.length} attempts. Errors: ${report.allErrors.map((error) => error.message).join(', ')}` : report.error
+      let { error, errorStack, allErrors } = report
+
+      if (allErrors) {
+        error = `Failed to upload after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
+        errorStack = allErrors.map((error) => error.stack).join(', ')
+      }
 
       return skipped && !report.error ? acc : {
         ...acc,
         [key]: {
           ...report,
           error,
+          errorStack,
         },
       }
     }
@@ -449,7 +477,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   try {
-    debug('upload reprt: %O', uploadReport)
+    debug('upload report: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
       runId, instanceId,
     }, uploadReport)
@@ -468,7 +496,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 }
 
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -921,6 +949,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       browserVersion: browser.version,
     }
 
+    telemetry.startSpan({ name: 'record:createRun' })
+
     return createRun({
       projectRoot,
       git,
@@ -940,6 +970,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       burnInConfig: config?.experimentalBurnIn,
     })
     .then((resp) => {
+      telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -955,6 +986,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
+        telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -974,7 +1006,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
+          const result = _
           .chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
@@ -982,6 +1014,10 @@ const createRunAndRecordSpecs = (options = {}) => {
             instanceId,
           })
           .value()
+
+          telemetry.getSpan('record:beforeSpecRun')?.end()
+
+          return result
         })
       }
 
@@ -991,6 +1027,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (!instanceId || results.skippedSpec) {
           return
         }
+
+        telemetry.startSpan({ name: 'record:afterSpecRun' })
 
         debug('after spec run %o', { spec })
 
@@ -1036,6 +1074,8 @@ const createRunAndRecordSpecs = (options = {}) => {
             return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
           })
         })

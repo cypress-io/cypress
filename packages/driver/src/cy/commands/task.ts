@@ -24,26 +24,25 @@ export default (Commands, Cypress, cy) => {
 
       let consoleOutput
 
-      if (options.log) {
-        consoleOutput = {
-          task,
-          arg,
-        }
-
-        let message = task
-
-        if (arg) {
-          message += `, ${$utils.stringify(arg)}`
-        }
-
-        options._log = Cypress.log({
-          message,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleOutput
-          },
-        })
+      consoleOutput = {
+        task,
+        arg,
       }
+
+      let message = task
+
+      if (arg) {
+        message += `, ${$utils.stringify(arg)}`
+      }
+
+      options._log = Cypress.log({
+        hidden: !options.log,
+        message,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleOutput
+        },
+      })
 
       if (!task || !_.isString(task)) {
         $errUtils.throwErrByPath('task.invalid_argument', {
