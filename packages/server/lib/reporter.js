@@ -277,6 +277,17 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
+/**
+  * Latest score is (1 or -2) OR Burn-In is disabled: (maxRetries ?? 0)+1
+  * Latest score is -1 AND Burn-In is enabled: max(flaky, (maxRetries ?? 0)+1)
+  * Latest score is (null or 0) AND Burn-In is enabled: max(default, (maxRetries ?? 0)+1)
+  * test.retries has the max number of retries
+  * test.neededBurnInAttempts has the number of burn-in attempts needed based on the logic above with latest score and burn-in config
+  */
+const getMaxTotalRetriesOrBurnIn = function (test) {
+  return (Math.max(test.neededBurnInAttempts, test.retries + 1))
+}
+
 class Reporter {
   constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
@@ -367,9 +378,11 @@ class Reporter {
           if (cypressTestMetaData?.attempts > 1) {
             const lastTestStatus = getIconStatus(test.state)
 
+            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+
             fmt =
             Array(indents).join('  ') +
-            mochaColor(lastTestStatus.overallStatusColor, `  ${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
+            mochaColor(lastTestStatus.overallStatusColor, `  ${buildAttemptMessage(cypressTestMetaData.attempts, maxTotalTestRetriesOrBurnIn)}`)
 
             // Log: `(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
             // experimental retries are not enabled but burn-in is
@@ -383,10 +396,11 @@ class Reporter {
           // DON'T decorate the last test in the console as an attempt.
           if (cypressTestMetaData?.attempts > 1) {
             const lastTestStatus = getIconStatus(test.state)
+            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
 
             fmt =
               Array(indents).join('  ') +
-              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
+              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, maxTotalTestRetriesOrBurnIn)}`)
 
             // or Log: `✓(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
             // eslint-disable-next-line no-console
@@ -415,9 +429,11 @@ class Reporter {
         if (cypressTestMetaData?.attempts > 1) {
           const lastTestStatus = getIconStatus(test.state)
 
+          const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+
           const fmt =
             Array(indents).join('  ') +
-            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
+            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, maxTotalTestRetriesOrBurnIn)}`)
 
           // Log: `✖(Attempt 3 of 3) test title (300ms)` when a test fails and none of the retries have passed
           // eslint-disable-next-line no-console
@@ -534,7 +550,8 @@ class Reporter {
       }
     }
 
-    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.maxTotalTestRetriesOrBurnIn))
+    const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, maxTotalTestRetriesOrBurnIn))
 
     // Log: `(Attempt 1 of 2) test title` when a test attempts without experimentalRetries configured.
     // OR
