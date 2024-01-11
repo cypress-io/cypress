@@ -1,4 +1,5 @@
 const { _ } = Cypress
+import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/commands', () => {
   beforeEach(() => {
@@ -45,10 +46,10 @@ describe('src/cy/commands/commands', () => {
         .first()
       })
 
-      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
+      Cypress.Commands.add('login', { prevSubject: true }, (subject, email, log = true) => {
         cy
-        .wrap(subject.find('input:first'))
-        .type(email)
+        .wrap(subject.find('input:first'), { log })
+        .type(email, { log })
       })
     })
 
@@ -61,6 +62,37 @@ describe('src/cy/commands/commands', () => {
       .command('login', 'brian@foo.com')
       .then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
+      })
+    })
+
+    it('we capture logs from custom commands', { protocolEnabled: true }, () => {
+      const logs = []
+      const addLogs = (attrs, log) => {
+        logs.push(log)
+      }
+
+      cy.on('_log:added', addLogs)
+      cy.on('log:added', addLogs)
+
+      const input = cy.$$('input:first')
+
+      cy
+      .get('input:first')
+      .parent()
+      .command('login', 'brian@foo.com', false)
+      .then(($input) => {
+        cy.removeListener('_log:added', addLogs)
+        cy.removeListener('log:added', addLogs)
+
+        expect($input.get(0)).to.eq(input.get(0))
+
+        assertLogLength(logs, 4)
+        expect(logs[0].get('name')).to.eq('get')
+        expect(logs[1].get('name')).to.eq('parent')
+        expect(logs[2].get('name')).to.eq('wrap')
+        expect(logs[2].get('hidden')).to.be.true
+        expect(logs[3].get('name')).to.eq('type')
+        expect(logs[3].get('hidden')).to.be.true
       })
     })
 
