@@ -102,7 +102,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -131,7 +131,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
         config: {
           screenshotOnRunFailure: false,
@@ -163,7 +163,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -195,7 +195,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -227,7 +227,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -259,7 +259,7 @@ context('burn-in', () => {
         spec: 'runner/failing-all-hooks.runner.cy.js',
         configFile: 'cypress.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 4,
         config: {
           screenshotOnRunFailure: false,
@@ -363,7 +363,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -392,7 +392,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
         config: {
           screenshotOnRunFailure: false,
@@ -424,7 +424,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -456,7 +456,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -488,7 +488,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -547,7 +547,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -576,7 +576,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
         config: {
           screenshotOnRunFailure: false,
@@ -608,7 +608,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -640,7 +640,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -672,7 +672,7 @@ context('burn-in', () => {
         spec: 'passes-first-attempt-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -731,7 +731,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -760,7 +760,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
         config: {
           screenshotOnRunFailure: false,
@@ -792,7 +792,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -824,7 +824,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -856,7 +856,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -915,7 +915,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -945,7 +945,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
         config: {
           screenshotOnRunFailure: false,
@@ -977,7 +977,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-no-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -1007,7 +1007,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-high-pass-on-threshold.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -1039,7 +1039,7 @@ context('burn-in', () => {
         spec: 'deterministic-flaky.cy.js',
         configFile: 'burn-in-with-always-fail-stop-if-any-passed.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 1,
         config: {
           screenshotOnRunFailure: false,
@@ -1098,7 +1098,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 
@@ -1153,7 +1153,7 @@ context('burn-in', () => {
         spec: 'always-passes.cy.js',
         configFile: 'burn-in-no-retries.config.js',
         record: true,
-        snapshot: false,
+        snapshot: true,
         expectedExitCode: 0,
       })
 

@@ -100,8 +100,15 @@ export function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig:
   }
 }
 
+/**
+ * Latest score is (1 or -2) OR Burn-In is disabled: (maxRetries ?? 0)+1
+ * Latest score is -1 AND Burn-In is enabled: max(flaky, (maxRetries ?? 0)+1)
+ * Latest score is (null or 0) AND Burn-In is enabled: max(default, (maxRetries ?? 0)+1)
+ * @param testRetries maxRetries + 1
+ * @param testBurnInAttempts number of burn-in attempts needed based on latestScore and burn-in config
+ */
 const getMaxTestRetriesOrBurnInAttempts = function (testRetries: number, testBurnInAttempts: number) {
-  return (Math.max(testRetries, testBurnInAttempts) ?? 0) + 1
+  return (Math.max(testBurnInAttempts, testRetries))
 }
 
 export function evaluateAttempt (input: EvaluateAttemptInput) {

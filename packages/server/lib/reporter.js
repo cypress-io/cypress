@@ -297,6 +297,7 @@ class Reporter {
     // manage stats ourselves
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     this.retriesConfig = cypressConfig ? cypressConfig.retries : {}
+    this.burnInConfig = cypressConfig ? cypressConfig.experimentalBurnIn : false
     this.runnables = {}
     rootRunnable = this._createRunnable(rootRunnable, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
@@ -323,6 +324,7 @@ class Reporter {
       })
 
       const retriesConfig = this.retriesConfig
+      const burnInConfig = this.burnInConfig
 
       // Override the default reporter to always show test timing even for fast tests
       // and display slow ones in yellow rather than red
@@ -334,8 +336,24 @@ class Reporter {
 
         let fmt
 
+        const printFinalTestStatus = function () {
+          const finalTestStatus = getIconStatus(cypressTestMetaData.outerStatus || test.state)
+
+          const finalMessaging =
+            Array(indents).join('  ') +
+            mochaColor(finalTestStatus.overallStatusSymbolColor, `  ${ finalTestStatus.overallStatusSymbol ? finalTestStatus.overallStatusSymbol : ''}`) +
+            mochaColor(finalTestStatus.overallStatusColor, ' %s') +
+            mochaColor(durationColor, ' (%dms)')
+
+          // Log: ✓`test title` when the overall outerStatus of a test has passed
+          // OR
+          // Log: ✖`test title` when the overall outerStatus of a test has failed
+          // eslint-disable-next-line no-console
+          console.log(finalMessaging, test.title, test.duration)
+        }
+
         // Print the default if the experiment is not configured
-        if (!retriesConfig?.experimentalStrategy) {
+        if (!retriesConfig?.experimentalStrategy && !burnInConfig) {
           fmt =
             Array(indents).join('  ') +
             mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
@@ -345,6 +363,21 @@ class Reporter {
           // Log: `✓ test title (300ms)` when a test passes
           // eslint-disable-next-line no-console
           console.log(fmt, test.title, test.duration)
+        } else if (!retriesConfig?.experimentalStrategy && burnInConfig) {
+          if (cypressTestMetaData?.attempts > 1) {
+            const lastTestStatus = getIconStatus(test.state)
+
+            fmt =
+            Array(indents).join('  ') +
+            mochaColor(lastTestStatus.overallStatusColor, `  ${buildAttemptMessage(cypressTestMetaData.attempts, test.maxTotalTestRetriesOrBurnIn)}`)
+
+            // Log: `(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
+            // experimental retries are not enabled but burn-in is
+            // eslint-disable-next-line no-console
+            console.log(fmt, test.title)
+          }
+
+          printFinalTestStatus()
         } else {
           // If there have been no retries and experimental retries is configured,
           // DON'T decorate the last test in the console as an attempt.
@@ -360,19 +393,7 @@ class Reporter {
             console.log(fmt, test.title)
           }
 
-          const finalTestStatus = getIconStatus(cypressTestMetaData.outerStatus || test.state)
-
-          const finalMessaging =
-            Array(indents).join('  ') +
-            mochaColor(finalTestStatus.overallStatusSymbolColor, `  ${ finalTestStatus.overallStatusSymbol ? finalTestStatus.overallStatusSymbol : ''}`) +
-            mochaColor(finalTestStatus.overallStatusColor, ' %s') +
-            mochaColor(durationColor, ' (%dms)')
-
-          // Log: ✓`test title` when the overall outerStatus of a test has passed
-          // OR
-          // Log: ✖`test title` when the overall outerStatus of a test has failed
-          // eslint-disable-next-line no-console
-          console.log(finalMessaging, test.title, test.duration)
+          printFinalTestStatus()
         }
       }
 
