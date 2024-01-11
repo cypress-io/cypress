@@ -1594,14 +1594,15 @@ space
     })
 
     describe('special characters', () => {
-      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' ')
+      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; : ~'.split(' ')
 
-      it(`finds content by string with characters`, () => {
+      it(`finds selector with characters`, () => {
+        Cypress.config({ numTestsKeptInMemory: 0 })
         _.each(specialCharacters, (char) => {
-          const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
+          const button = $(`<button id="form-field${char}:r1:">special char ${char} content</button>`).appendTo(cy.$$('body'))
 
-          cy.contains('span', char).then(($span) => {
-            expect($span.get(0)).to.eq(span.get(0))
+          cy.contains('button', char).then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
           })
         })
       })
