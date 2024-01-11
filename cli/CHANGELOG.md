@@ -22,7 +22,7 @@ _Released 1/16/2024 (PENDING)_
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
 - Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
-- Replace [`CircularJSON`](https://www.npmjs.com/package/circular-json) with its successor [`flatted`](https://www.npmjs.com/package/flatted) version `3.2.9`. This resolves decoding issues observed in complex objects sent from the browser with `socket.io`. Addressed in [#?](https://github.com/cypress-io/cypress/pull/?).
+- Replace [`CircularJSON`](https://www.npmjs.com/package/circular-json) with its successor [`flatted`](https://www.npmjs.com/package/flatted) version `3.2.9`. This resolves decoding issues observed in complex objects sent from the browser. Addressed in [#28683](https://github.com/cypress-io/cypress/pull/28683).
 
 **Misc:**
 
