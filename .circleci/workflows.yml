@@ -31,7 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'feature/experimental-retries'
         - 'publish-binary'
-        - 'em/protocol-log-false'
+        - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -55,7 +55,8 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -81,7 +82,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_windows_signing', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'em/shallow-checkout', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -1137,6 +1137,7 @@ commands:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
+            yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
 
   build-and-package-binary:
@@ -2852,7 +2853,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-runner:build-binary
           - publish-binary
         requires:
-          - build
+          - node_modules_install
     - wait-for-binary-publish:
         type: approval
         requires:
@@ -3305,7 +3306,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-build
+          - linux-arm64-node-modules-install
 
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish

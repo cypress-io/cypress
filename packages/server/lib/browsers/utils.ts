@@ -434,32 +434,36 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
 }
 
 const overrideServiceWorkerRegistration = (binding) => {
-  const oldRegister = window.ServiceWorkerContainer.prototype.register
+  // The service worker container won't be available in different situations (like in the placeholder iframes we create
+  // in open mode). So only override the register function if it exists.
+  if (window.ServiceWorkerContainer) {
+    const oldRegister = window.ServiceWorkerContainer.prototype.register
 
-  window.ServiceWorkerContainer.prototype.register = function (scriptURL, options) {
-    const anchor = document.createElement('a')
+    window.ServiceWorkerContainer.prototype.register = function (scriptURL, options) {
+      const anchor = document.createElement('a')
 
-    let resolvedHref: URL
+      let resolvedHref: URL
 
-    if (typeof scriptURL === 'string') {
-      anchor.setAttribute('href', scriptURL)
-      resolvedHref = new URL(anchor.href)
-    } else {
-      resolvedHref = scriptURL
+      if (typeof scriptURL === 'string') {
+        anchor.setAttribute('href', scriptURL)
+        resolvedHref = new URL(anchor.href)
+      } else {
+        resolvedHref = scriptURL
+      }
+
+      anchor.remove()
+      const resolvedUrl = `${resolvedHref.origin}${resolvedHref.pathname}`
+
+      const serviceWorkerRegistrationEvent = {
+        type: 'service-worker-registration',
+        scriptURL: resolvedUrl,
+        initiatorURL: window.location.href,
+      }
+
+      binding(JSON.stringify(serviceWorkerRegistrationEvent))
+
+      return oldRegister.apply(this, [scriptURL, options])
     }
-
-    anchor.remove()
-    const resolvedUrl = `${resolvedHref.origin}${resolvedHref.pathname}`
-
-    const serviceWorkerRegistrationEvent = {
-      type: 'service-worker-registration',
-      scriptURL: resolvedUrl,
-      initiatorURL: window.location.href,
-    }
-
-    binding(JSON.stringify(serviceWorkerRegistrationEvent))
-
-    return oldRegister.apply(this, [scriptURL, options])
   }
 }
 
