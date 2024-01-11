@@ -1,38 +1,37 @@
 ---
-"cypress": patch
-"@packages/app": patch
-"@packages/config": patch
-"@packages/data-context": patch
-"@packages/driver": patch
-"@packages/electron": patch
-"@packages/errors": patch
-"@packages/example": patch
-"@packages/extension": patch
-"@packages/frontend-shared": patch
-"@packages/graphql": patch
-"@packages/https-proxy": patch
-"@packages/icons": patch
-"@packages/launcher": patch
-"@packages/launchpad": patch
-"@packages/net-stubbing": patch
-"@packages/network": patch
-"@packages/packherd-require": patch
-"@packages/proxy": patch
-"@packages/reporter": patch
-"@packages/resolve-dist": patch
-"@packages/rewriter": patch
-"@packages/root": patch
-"@packages/runner": patch
-"@packages/scaffold-config": patch
-"@packages/server": patch
-"@packages/socket": patch
-"@packages/telemetry": patch
-"@packages/ts": patch
-"@packages/types": patch
-"@packages/v8-snapshot-require": patch
-"@packages/web-config": patch
+"@packages/driver": minor
+"@packages/server": minor
+"cypress": minor
+"@packages/app": minor
+"@packages/config": minor
+"@packages/data-context": minor
+"@packages/electron": minor
+"@packages/errors": minor
+"@packages/example": minor
+"@packages/extension": minor
+"@packages/frontend-shared": minor
+"@packages/graphql": minor
+"@packages/https-proxy": minor
+"@packages/icons": minor
+"@packages/launcher": minor
+"@packages/launchpad": minor
+"@packages/net-stubbing": minor
+"@packages/network": minor
+"@packages/packherd-require": minor
+"@packages/proxy": minor
+"@packages/reporter": minor
+"@packages/resolve-dist": minor
+"@packages/rewriter": minor
+"@packages/root": minor
+"@packages/runner": minor
+"@packages/scaffold-config": minor
+"@packages/socket": minor
+"@packages/telemetry": minor
+"@packages/ts": minor
+"@packages/types": minor
+"@packages/v8-snapshot-require": minor
+"@packages/web-config": minor
 ---
-
 
 **Bugfixes:**
 
@@ -53,7 +52,7 @@
 **Dependency Updates:**
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
-- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+- Updated `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 - Replace [`CircularJSON`](https://www.npmjs.com/package/circular-json) with its successor [`flatted`](https://www.npmjs.com/package/flatted) version `3.2.9`. This resolves decoding issues observed in complex objects sent from the browser. Addressed in [#28683](https://github.com/cypress-io/cypress/pull/28683).
 
 **Misc:**
