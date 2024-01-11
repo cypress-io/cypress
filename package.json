@@ -69,6 +69,9 @@
     "watch": "yarn gulp watch",
     "prepare": "husky install"
   },
+  "dependencies": {
+    "@changesets/cli": "2.27.1"
+  },
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
