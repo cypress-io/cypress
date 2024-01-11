@@ -23,6 +23,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     numberOfResponseStreamReceivedEvents: 0,
     correlatedUrls: {},
     multipleNetworkRequestEventsForSameRequestId: false,
+    exceptionThrown: false,
   }
   private idToUrlAndFrameMap = new Map<string, URLAndFrame>()
   private currentRequestWillBeSent: (event) => void
@@ -63,6 +64,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     }
 
     cdpClient.on('Network.requestWillBeSent', this.currentRequestWillBeSent)
+    cdpClient.on('Runtime.exceptionThrown', (event) => {
+      this.events.exceptionThrown = true
+    })
   }
 
   addRunnables = (runnables) => {

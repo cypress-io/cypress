@@ -1,8 +1,15 @@
 navigator.serviceWorker?.register('/service-worker-assets/scope/service-worker.js')
 
 navigator.serviceWorker?.ready.then(async () => {
-  await fetch('/service-worker-assets/example.json')
-  await fetch('/service-worker-assets/scope/cached-service-worker')
+  const exampleResponse = await fetch('/service-worker-assets/example.json')
+  const example = await exampleResponse.json()
+  const cachedServiceWorkerResults = await fetch('/service-worker-assets/scope/cached-service-worker')
+  const cached = await cachedServiceWorkerResults.text()
 
-  window.dispatchEvent(new Event('service-worker:ready'))
+  window.dispatchEvent(new CustomEvent('service-worker:ready', {
+    detail: {
+      example,
+      cached,
+    },
+  }))
 })
