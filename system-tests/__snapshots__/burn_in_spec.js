@@ -5140,3 +5140,144 @@ exports['burn-in override burn-in not allowed PASSED_FIRST_ATTEMPT 2'] = [
     'initialStrategy': 'NONE',
   },
 ]
+
+exports['burn-in modified/new test PASSED_MET_THRESHOLD with last attempt failing 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (passes-first-attempts-but-fails-after.cy.js)                              │
+  │ Searched:   cypress/e2e/passes-first-attempts-but-fails-after.cy.js                            │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  passes-first-attempts-but-fails-after.cy.js                                     (1 of 1)
+  Estimated: X second(s)
+
+
+  passes then fails
+    ✓(Attempt 1 of 5) passes first 2 attempts and then fails
+    ✓(Attempt 2 of 5) passes first 2 attempts and then fails
+    ✖(Attempt 3 of 5) passes first 2 attempts and then fails
+    ✓ passes first 2 attempts and then fails
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     passes-first-attempts-but-fails-after.cy.js                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  passes-first-attempts-but-fails-aft      XX:XX        1        1        -        -        - │
+  │    er.cy.js                                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
+
+exports['burn-in modified/new test PASSED_MET_THRESHOLD with last attempt failing 2'] = [
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'NONE',
+  },
+  {
+    'state': 'passed',
+    'error': null,
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': null,
+    'initialStrategy': 'BURN_IN',
+  },
+  {
+    'state': 'failed',
+    'error': {
+      'name': 'AssertionError',
+      'message': 'expected true to be false',
+      'stack': '    at Context.eval (webpack:///./cypress/e2e/passes-first-attempts-but-fails-after.cy.js:6:25)',
+      'codeFrame': {
+        'line': 6,
+        'column': 26,
+        'originalFile': 'cypress/e2e/passes-first-attempts-but-fails-after.cy.js',
+        'relativeFile': 'cypress/e2e/passes-first-attempts-but-fails-after.cy.js',
+        'absoluteFile': '/path/to/absoluteFile',
+        'frame': '  4 |       expect(true).to.be.true\n  5 |     } else {\n> 6 |       expect(true).to.be.false\n    |                          ^\n  7 |     }\n  8 |   })\n  9 | })',
+        'language': 'js',
+      },
+    },
+    'timings': {
+      'lifecycle': 'Any.Number',
+      'test': {
+        'fnDuration': 'Any.Number',
+        'afterFnDuration': 'Any.Number',
+      },
+    },
+    'failedFromHookId': null,
+    'wallClockStartedAt': 'Any.ISODate',
+    'wallClockDuration': 'Any.Number',
+    'videoTimestamp': null,
+    'reasonToStop': 'PASSED_MET_THRESHOLD',
+    'initialStrategy': 'BURN_IN',
+  },
+]

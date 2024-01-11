@@ -156,6 +156,38 @@ context('burn-in', () => {
       systemTests.snapshot(normalizedAttempts)
     })
 
+    it('PASSED_MET_THRESHOLD with last attempt failing', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'experimental-retries',
+        spec: 'passes-first-attempts-but-fails-after.cy.js',
+        configFile: 'default-burn-in-with-pass-on-threshold.js',
+        record: true,
+        snapshot: true,
+        expectedExitCode: 0,
+        config: {
+          screenshotOnRunFailure: false,
+        },
+      })
+
+      const requests = getRequests()
+
+      assertRequestUrls()
+      assertRunnerCapabilities(requests)
+
+      const postInstanceTests = requests[3].body.tests
+
+      expect(postInstanceTests.length).to.eq(1)
+
+      const postInstanceTestAttempts = postInstanceTests[0].attempts
+
+      assertAttempts(postInstanceTestAttempts, 3, 'PASSED_MET_THRESHOLD', 'BURN_IN')
+
+      const normalizedAttempts = normalizeAttempts(postInstanceTestAttempts)
+
+      systemTests.snapshot(normalizedAttempts)
+    })
+
     it('FAILED_REACHED_MAX_RETRIES', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
