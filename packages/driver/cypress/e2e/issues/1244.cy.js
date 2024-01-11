@@ -4,7 +4,7 @@ describe('issue 1244', () => {
       cy.on('window:before:unload', (e) => {
         const win = cy.state('window')
 
-        // not all pages that ge unloaded during this spec have getCounters()
+        // not all pages that get unloaded during this spec have getCounters()
         if (win.location.href.includes('issue-1244.html')) {
           expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
         }
