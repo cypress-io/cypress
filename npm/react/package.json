@@ -1,6 +1,6 @@
 {
   "name": "@cypress/react",
-  "version": "0.0.0-development",
+  "version": "8.0.0",
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
@@ -16,11 +16,10 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
-    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/mount-utils": "4.0.0",
     "@types/semver": "7.5.0",
     "@vitejs/plugin-react": "4.0.0",
     "axios": "0.21.2",
-    "cypress": "0.0.0-development",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",

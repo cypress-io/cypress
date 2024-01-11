@@ -1,6 +1,6 @@
 {
   "name": "@cypress/schematic",
-  "version": "0.0.0-development",
+  "version": "2.5.1",
   "description": "Official Cypress schematic for the Angular CLI",
   "main": "./src",
   "scripts": {

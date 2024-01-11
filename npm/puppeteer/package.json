@@ -1,6 +1,6 @@
 {
   "name": "@cypress/puppeteer",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Plugin for enhancing Cypress tests with Puppeteer",
   "private": false,
   "main": "dist/plugin/index.js",

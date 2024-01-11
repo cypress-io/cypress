@@ -2,12 +2,12 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["cli", "@packages/*"]],
-  "linked": [],
+  "fixed": [],
+  "linked": [["cypress", "@packages/*"]],
   "access": "restricted",
   "baseBranch": "develop",
   "updateInternalDependencies": "patch",
-  "ignore": ["npm/*","system-tests","scripts", "tooling/*"],
+  "ignore": ["@cypress/*","internal-scripts","@tooling/*"],
   "snapshot": {
     "useCalculatedVersion": true,
     "prereleaseTemplate": "{tag}-{commit}"

@@ -1,6 +1,6 @@
 {
   "name": "@cypress/vite-dev-server",
-  "version": "0.0.0-development",
+  "version": "5.0.7",
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "index.js",
   "scripts": {

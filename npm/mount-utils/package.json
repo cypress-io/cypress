@@ -1,6 +1,6 @@
 {
   "name": "@cypress/mount-utils",
-  "version": "0.0.0-development",
+  "version": "4.0.0",
   "description": "Shared utilities for the various component testing adapters",
   "main": "dist/index.js",
   "scripts": {
