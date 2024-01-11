@@ -34,16 +34,14 @@ export default (Commands, Cypress, cy, state) => {
 
       // we'll handle the timeout ourselves
       cy.clearTimeout()
+      options._log = Cypress.log({
+        message: arg,
+        hidden: options.log === false,
+        timeout: options.timeout,
+      })
 
-      if (options.log !== false) {
-        options._log = Cypress.log({
-          message: arg,
-          timeout: options.timeout,
-        })
-
-        if ($dom.isElement(arg)) {
-          options._log!.set({ $el: arg })
-        }
+      if ($dom.isElement(arg)) {
+        options._log?.set({ $el: arg })
       }
 
       return Promise.resolve(arg)

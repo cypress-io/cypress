@@ -23,6 +23,7 @@ interface serializedRunnable {
   title: string
   parent: serializedRunnable
   ctx: {}
+  _currentRetry: number
   _timeout: number
   titlePath: string
 }
@@ -44,6 +45,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 
   runnable.ctx = data.ctx
   runnable.id = data.id
+  runnable._currentRetry = data._currentRetry
   runnable._timeout = data._timeout
   // Short circuit title path to avoid implementing it up the parent chain.
   runnable.titlePath = () => {

@@ -31,7 +31,7 @@ export default (Commands, Cypress, cy, state) => {
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
 
-    const log = userOptions.log !== false && Cypress.log({ message: file, timeout })
+    const log = Cypress.log({ message: file, hidden: userOptions.log === false, timeout })
 
     if (!file || !_.isString(file)) {
       $errUtils.throwErrByPath('files.invalid_argument', {
@@ -178,15 +178,14 @@ export default (Commands, Cypress, cy, state) => {
 
       const consoleProps = {}
 
-      if (options.log) {
-        options._log = Cypress.log({
-          message: fileName,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: fileName,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
 
       if (!fileName || !_.isString(fileName)) {
         $errUtils.throwErrByPath('files.invalid_argument', {

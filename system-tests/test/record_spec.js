@@ -2436,6 +2436,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2461,6 +2462,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2486,6 +2488,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2599,6 +2602,7 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol).to.exist()
         expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })

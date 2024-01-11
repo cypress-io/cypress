@@ -1,6 +1,7 @@
 import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
+import type Protocol from 'devtools-protocol'
 
 export class NetworkProxy {
   http: Http
@@ -19,6 +20,18 @@ export class NetworkProxy {
 
   addPendingUrlWithoutPreRequest (url: string) {
     this.http.addPendingUrlWithoutPreRequest(url)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.http.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.http.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+    this.http.updateServiceWorkerClientSideRegistrations(data)
   }
 
   handleHttpRequest (req, res) {
@@ -46,8 +59,8 @@ export class NetworkProxy {
     this.http.setBuffer(buffer)
   }
 
-  reset () {
-    this.http.reset()
+  reset (options: { resetPreRequests: boolean, resetBetweenSpecs: boolean } = { resetPreRequests: true, resetBetweenSpecs: false }) {
+    this.http.reset(options)
   }
 
   setProtocolManager (protocolManager) {
