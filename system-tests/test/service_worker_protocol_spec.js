@@ -30,6 +30,9 @@ describe('capture-protocol', () => {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           project: 'protocol',
+          // Here we are testing that service worker and non-service worker specs can intermingle properly
+          // Also, protocol.cy.js is not secure which will cause window.ServiceWorkerContainer to not be available
+          // in the browser. We test that no exceptions are thrown when this happens.
           spec: 'protocol.cy.js,service-worker.cy.js',
           record: true,
           expectedExitCode: 0,
@@ -49,6 +52,8 @@ describe('capture-protocol', () => {
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load.js': ['frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker.html': ['frame id', 'no frame id', 'no frame id'],
           })
+
+          expect(parsedProtocolEvents.exceptionThrown).to.be.false
         })
       })
     })
