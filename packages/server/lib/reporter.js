@@ -384,7 +384,7 @@ class Reporter {
             Array(indents).join('  ') +
             mochaColor(lastTestStatus.overallStatusColor, `  ${buildAttemptMessage(cypressTestMetaData.attempts, maxTotalTestRetriesOrBurnIn)}`)
 
-            // Log: `(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
+            // Log: `(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed and
             // experimental retries are not enabled but burn-in is
             // eslint-disable-next-line no-console
             console.log(fmt, test.title)
