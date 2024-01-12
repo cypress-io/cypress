@@ -1,12 +1,12 @@
 const { changeCatagories, userFacingChanges } = require('../../../scripts/semantic-commits/change-categories')
 const fs = require('node:fs/promises')
 const path = require('path')
+const uuid = require('uuid')
 
 const CHANGESET_DIR = path.join(__dirname, '..', '..', '..', 'cli', 'changesets')
 
 const gracefullyHandle = async (promises) => {
   let result
-  const warnings = []
   const errs = []
 
   try {
@@ -21,24 +21,45 @@ const gracefullyHandle = async (promises) => {
     errs.push(err)
   }
 
-  if (warnings.length) {
-    warnings.forEach((warn) => console.warn(warn))
-  }
-
   if (errs.length) {
     errs.forEach((err) => console.error(err))
-    exit(1)
+    process.exit(1)
   }
 
   return result
+}
+
+const getChangesets = async () => {
+  return fs.readdir(CHANGESET_DIR)
 }
 
 module.exports = {
   CHANGESET_DIR,
   changeCatagories,
   userFacingChanges,
-  getChangesets: async () => {
-    return fs.readdir(CHANGESET_DIR)
+  addChangeset: async (changeType, message) => {
+    const changeEntry = [
+      '---',
+      `type: ${changeType}`,
+      '---',
+      '',
+      message,
+    ].join('\n')
+    const fileName = `${uuid.v4()}.md`
+    const changesetPath = path.join(CHANGESET_DIR, fileName)
+
+    await fs.writeFile(changesetPath, changeEntry)
+
+    console.log('Added the following changeset to', changesetPath, '\n')
+    console.log(changeEntry)
+  },
+  getChangesets,
+  deleteChangesets: async () => {
+    const changesets = await getChangesets()
+
+    gracefullyHandle(changesets.map((changesetFilename) => {
+      return fs.unlink(path.join(CHANGESET_DIR, changesetFilename))
+    }))
   },
   parseChangeset: async (changesetFilename) => {
     let contents = await fs.readFile(path.join(CHANGESET_DIR, changesetFilename), 'utf8')
@@ -49,7 +70,7 @@ module.exports = {
      * type: ?
      * ---
      *
-     * entry...
+     * message
      */
     contents = contents.split('\n')
 
@@ -72,7 +93,5 @@ module.exports = {
     gracefullyHandle(changesets.map((changesetFilename) => {
       return fs.unlink(changesetFilename)
     }))
-  },
-  verifyChangesets: async () => {
   },
 }

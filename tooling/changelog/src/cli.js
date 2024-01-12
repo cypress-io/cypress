@@ -1,8 +1,6 @@
-// @ts-check
 const commander = require('commander')
 const debug = require('debug')('tooling:changelog')
 const addChangeset = require('./add-changeset')
-const verifyChangesets = require('./verify-changesets')
 const createChangelog = require('./create-changelog')
 
 const createProgram = () => {
@@ -39,12 +37,9 @@ module.exports = {
     .command('add-change')
     .description('add a new changelog entry')
     .usage('[type message]')
+    .option('-t, --type [type]', 'What type of change is this?')
+    .option('-m, --message [words...]', 'What was changed?')
     .action(addChangeset)
-
-    program
-    .command('verify-changesets')
-    .description('Verifies that all changesets are valid.')
-    .action(verifyChangesets)
 
     program
     .command('create-changelog')

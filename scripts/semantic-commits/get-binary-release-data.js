@@ -201,14 +201,17 @@ const getReleaseData = async (latestReleaseInfo) => {
     })
   }))
 
+  console.log('')
   console.log('Next release version is', nextVersion)
 
+  console.log('')
   console.log(`${prsInRelease.length} pull requests have merged since ${latestReleaseInfo.version} was released.`)
 
   prsInRelease.forEach((link) => {
     console.log('  -', link)
   })
 
+  console.log('')
   console.log(`${issuesInRelease.length} issues addressed since ${latestReleaseInfo.version} was released.`)
 
   issuesInRelease.forEach((link) => {

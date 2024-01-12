@@ -7,9 +7,11 @@ module.exports = async () => {
   const errs = []
 
   try {
+    console.log('Getting changesets checked into Git.')
     const changesets = await getChangesets()
 
-    console.log('There are', changesets.length, 'changes.\n  -', changesets.join('\n  - '))
+    console.log('There are', changesets.length, 'changes.')
+    console.log('')
 
     const promises = changesets.map((changeset) => {
       return parseChangeset(changeset)
@@ -38,8 +40,6 @@ module.exports = async () => {
     errs.forEach((err) => console.error(err))
     exit(1)
   }
-
-  console.log()
 
   return changeSetDetails
 }
