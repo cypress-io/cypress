@@ -4,9 +4,9 @@ const path = require('path')
 const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
 const { getReleaseData } = require('./semantic-commits/get-binary-release-data')
 const { getResolvedMessage } = require('./semantic-commits/get-resolve-message')
+const { userFacingChanges } = require('./semantic-commits/change-categories')
 
-const { deleteChangesets, userFacingChanges } = require('./changeset')
-const verifyChangesets = require('./verify-changesets')
+const { deleteChangesets, getChangesets, parseChangeset } = require('./changeset')
 
 const CHANGELOG = path.join(__dirname, '..', '..', '..', 'cli', 'CHANGELOG.md')
 
@@ -87,8 +87,7 @@ async function createChangelog ({ nextVersion, commits, changesets }) {
 
   if (!hasUserFacingCommits) {
     console.log('Does not contain any user-facing changes that impacts the next Cypress release.')
-
-    return []
+    process.exit(0)
   }
 
   console.log('Creating Changelog Content')
@@ -124,17 +123,21 @@ async function createChangelog ({ nextVersion, commits, changesets }) {
     _handleErrors(errors)
   }
 
-  if (changelog.length === 4) {
-    throw new Error('entries were not added...')
-  }
-
-  console.log('changelog')
-
   return changelog
 }
 
 module.exports = async () => {
-  const changesets = await verifyChangesets()
+  let changesetsFilenames = await getChangesets()
+  const changesets = await Promise.all(changesetsFilenames.map((changesetsFilename) => {
+    return parseChangeset(changesetsFilename)
+    .then((details) => {
+      if (!Object.keys(userFacingChanges).includes(details.type)) {
+        console.log(`${details.changesetFilename} has type ${details.type}, which does not require a changeset. This will not get added to the changelog.`)
+      }
+
+      return details
+    })
+  }))
 
   if (!changesets.length) {
     console.log('No changes. Nothing to release.')

@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "add-change": "node ./bin/changelog add-change",
+    "create-changelog": "node ./bin/changelog create-changelog",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "lint": "eslint --ext .js,.ts,.json, .",

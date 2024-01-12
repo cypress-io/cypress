@@ -4,6 +4,7 @@
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
+    "add-change": "yarn workspace @tooling/changelog add-change",
     "binary-build": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
@@ -25,6 +26,7 @@
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
+    "create-changelog": "yarn workspace @tooling/changelog create-changelog",
     "cypress:open": "yarn gulp open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
@@ -276,8 +278,5 @@
     "browserify-sign": "4.2.2",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
-  },
-  "dependencies": {
-    "changeset": "0.2.6"
   }
 }
