@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { Http, HttpStages } from '../../../lib/http'
+import { BrowserPreRequest } from '../../../lib'
 
 describe('http', function () {
   context('Http.handle', function () {
@@ -203,6 +204,176 @@ describe('http', function () {
         expect(on).to.be.calledTwice
         expect(off).to.have.callCount(10)
       })
+    })
+  })
+
+  context('Http.reset', function () {
+    let httpOpts
+
+    beforeEach(function () {
+      httpOpts = { config: {}, middleware: {} }
+    })
+
+    it('resets preRequests when resetPreRequests is true', function () {
+      const http = new Http(httpOpts)
+
+      http.preRequests.reset = sinon.stub()
+
+      http.reset({ resetPreRequests: true, resetBetweenSpecs: false })
+
+      expect(http.preRequests.reset).to.be.calledOnce
+    })
+
+    it('does not reset preRequests when resetPreRequests is false', function () {
+      const http = new Http(httpOpts)
+
+      http.preRequests.reset = sinon.stub()
+
+      http.reset({ resetPreRequests: false, resetBetweenSpecs: false })
+
+      expect(http.preRequests.reset).to.not.be.called
+    })
+  })
+
+  context('Service Worker', function () {
+    let config
+    let middleware
+    let incomingRequest
+    let incomingResponse
+    let error
+    let httpOpts
+
+    beforeEach(function () {
+      config = {}
+      incomingRequest = sinon.stub()
+      incomingResponse = sinon.stub()
+      error = sinon.stub()
+
+      middleware = {
+        [HttpStages.IncomingRequest]: [incomingRequest],
+        [HttpStages.IncomingResponse]: [incomingResponse],
+        [HttpStages.Error]: [error],
+      }
+
+      httpOpts = { config, middleware }
+    })
+
+    it('properly ignores requests that are controlled by a service worker', () => {
+      const http = new Http(httpOpts)
+      const processBrowserPreRequestStub = sinon.stub(http.serviceWorkerManager, 'processBrowserPreRequest')
+      const addPendingStub = sinon.stub(http.preRequests, 'addPending')
+      const browserPreRequest = {
+        requestId: '1234',
+        url: 'foo',
+        method: 'GET',
+        headers: {},
+        resourceType: 'xhr',
+        originalResourceType: undefined,
+        documentURL: 'foo',
+        cdpRequestWillBeSentTimestamp: 1,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+      }
+
+      processBrowserPreRequestStub.returns(true)
+
+      http.addPendingBrowserPreRequest(browserPreRequest as BrowserPreRequest)
+
+      expect(processBrowserPreRequestStub).to.be.calledWith(browserPreRequest)
+      expect(addPendingStub).not.to.be.called
+    })
+
+    it('processes service worker registration updated events', () => {
+      const http = new Http(httpOpts)
+      const updateServiceWorkerRegistrationsStub = sinon.stub(http.serviceWorkerManager, 'updateServiceWorkerRegistrations')
+      const registrations = [{
+        registrationId: '1234',
+        scopeURL: 'foo',
+        isDeleted: false,
+      }, {
+        registrationId: '1235',
+        scopeURL: 'bar',
+        isDeleted: true,
+      }]
+
+      http.updateServiceWorkerRegistrations({
+        registrations,
+      })
+
+      expect(updateServiceWorkerRegistrationsStub).to.be.calledWith({
+        registrations,
+      })
+    })
+
+    it('processes service worker version updated events', () => {
+      const http = new Http(httpOpts)
+      const updateServiceWorkerVersionsStub = sinon.stub(http.serviceWorkerManager, 'updateServiceWorkerVersions')
+      const versions = [{
+        versionId: '1234',
+        registrationId: '1234',
+        scriptURL: 'foo',
+        runningStatus: 'stopped',
+        status: 'activating',
+      }, {
+        versionId: '1235',
+        registrationId: '1235',
+        scriptURL: 'bar',
+        runningStatus: 'running',
+        status: 'activated',
+      }]
+
+      http.updateServiceWorkerVersions({
+        versions,
+      } as any)
+
+      expect(updateServiceWorkerVersionsStub).to.be.calledWith({
+        versions,
+      })
+    })
+
+    it('processes service worker client side registration updated events', () => {
+      const http = new Http(httpOpts)
+      const addInitiatorToServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'addInitiatorToServiceWorker')
+      const registration = {
+        scriptURL: 'foo',
+        initiatorURL: 'bar',
+      }
+
+      http.updateServiceWorkerClientSideRegistrations(registration)
+
+      expect(addInitiatorToServiceWorkerStub).to.be.calledWith(registration)
+    })
+
+    it('properly ignores service worker prerequests', () => {
+      const http = new Http(httpOpts)
+      const processBrowserPreRequestStub = sinon.stub(http.serviceWorkerManager, 'processBrowserPreRequest')
+
+      http.addPendingBrowserPreRequest({
+        requestId: '1234',
+        url: 'foo',
+        method: 'GET',
+        headers: {
+          'Service-Worker': 'script',
+        },
+        resourceType: 'xhr',
+        originalResourceType: undefined,
+        documentURL: 'foo',
+        cdpRequestWillBeSentTimestamp: 1,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+      })
+
+      http.addPendingBrowserPreRequest({
+        requestId: '1234',
+        url: 'foo',
+        method: 'GET',
+        headers: {},
+        resourceType: 'xhr',
+        originalResourceType: undefined,
+        documentURL: 'foo',
+        cdpRequestWillBeSentTimestamp: 1,
+        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
+      })
+
+      expect(processBrowserPreRequestStub).to.be.calledOnce
     })
   })
 })

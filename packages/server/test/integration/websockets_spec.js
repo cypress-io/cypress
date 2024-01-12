@@ -219,7 +219,11 @@ describe('Web Sockets', () => {
 
   context('socket.io handling', () => {
     beforeEach(function () {
-      this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+      this.automation = new Automation({
+        cyNamespace: this.cfg.namespace,
+        cookieNamespace: this.cfg.socketIoCookie,
+        screenshotsFolder: this.cfg.screenshotsFolder,
+      })
 
       return this.server.startWebsockets(this.automation, this.cfg, {})
     })
