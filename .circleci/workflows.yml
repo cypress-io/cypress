@@ -32,6 +32,7 @@ mainBuildFilters: &mainBuildFilters
         - 'feature/experimental-retries'
         - 'publish-binary'
         - 'cacie/chore/upgrade-electron-27'
+        - 'ryanm/chore/more-27-changes'
         - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
@@ -44,6 +45,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
     - matches:
@@ -57,6 +59,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'em/circle2', << pipeline.git.branch >> ]
@@ -83,6 +86,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/experimental-retries', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/more-27-changes', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_windows_signing', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
@@ -1231,6 +1235,12 @@ commands:
             else
               yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
+      - run:
+          name: Smoke Test the Cypress binary
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
