@@ -156,9 +156,7 @@ const getReleaseData = async (latestReleaseInfo) => {
   const commits = []
 
   console.log(semanticCommits.length)
-  const limitForTesting = [semanticCommits[0]]
-
-  await Bluebird.each(limitForTesting, (async (semanticResult) => {
+  await Bluebird.each(semanticCommits, (async (semanticResult) => {
     if (!semanticResult) return
 
     const { type: semanticType, references } = semanticResult
@@ -180,7 +178,6 @@ const getReleaseData = async (latestReleaseInfo) => {
     const pullRequest = await fetchPullRequest(octokit, ref.issue)
     const pullRequestFiles = await fetchPullRequestFiles(octokit, ref.issue)
 
-    pullRequestFiles.push({ filename: 'cli/changesets/28641.md', status: 'added' })
     const changesetFilenames = pullRequestFiles.filter((file) => {
       return file.status === 'added' && file.filename.includes('cli/changesets/')
     }).map((file) => file.filename)
