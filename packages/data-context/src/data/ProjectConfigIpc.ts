@@ -9,7 +9,6 @@ import inspector from 'inspector'
 import debugLib from 'debug'
 import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
-import { pathToFileURL } from 'url'
 import os from 'os'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
@@ -19,8 +18,8 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).href
-const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
+const tsxCjs = toPosix(require.resolve('tsx/cjs'))
+const tsxEsm = toPosix(require.resolve('tsx/esm'))
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -289,40 +288,41 @@ export class ProjectConfigIpc extends EventEmitter {
     }
 
     // If they've got TypeScript installed, we can use
-    // ts-node for CommonJS
-    // ts-node/esm for ESM
+    // tsx for CommonJS
+    // tsx/esm for ESM
+    // Once the app is on at least node 18.18.0 for its internal runtime,
+    // we can leverage --import syntax to parse ESM and CJS with the same loader
+    // and remove this gate. @see https://github.com/privatenumber/tsx?tab=readme-ov-file#nodejs-loader
     if (hasTypeScriptInstalled(this.projectRoot)) {
       debug('found typescript in %s', this.projectRoot)
       if (isProjectUsingESModules) {
-        debug(`using --experimental-specifier-resolution=node with --loader ${tsNodeEsm}`)
-        // Use the ts-node/esm loader so they can use TypeScript with `"type": "module".
+        debug(`using --experimental-specifier-resolution=node with --loader ${tsxEsm}`)
+        // Use the tsx/esm loader so they can use TypeScript with `"type": "module".
         // The loader API is experimental and will change.
         // The same can be said for the other alternative, esbuild, so this is the
         // best option that leverages the existing modules we bundle in the binary.
-        // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
+        // @see tsx esm loader https://github.com/privatenumber/tsx?tab=readme-ov-file#esm-only-loader
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        const tsxEsmLoaderWithModifier = `--experimental-specifier-resolution=node --loader ${tsxEsm}`
 
         if (childOptions.env.NODE_OPTIONS) {
-          childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`
+          childOptions.env.NODE_OPTIONS += ` ${tsxEsmLoaderWithModifier}`
         } else {
-          childOptions.env.NODE_OPTIONS = tsNodeEsmLoader
+          childOptions.env.NODE_OPTIONS = tsxEsmLoaderWithModifier
         }
       } else {
-        // Not using ES Modules (via "type": "module"),
-        // so we just register the standard ts-node module
-        // to handle TypeScript that is compiled to CommonJS.
-        // We do NOT use the `--loader` flag because we have some additional
-        // custom logic for ts-node when used with CommonJS that needs to be evaluated
-        // so we need to load and evaluate the hook first using the `--require` module API.
-        const tsNodeLoader = `--require "${tsNode}"`
+      // Not using ES Modules (via "type": "module"),
+      // so we just register the tsx/cjs module
+      // to handle TypeScript that is compiled to CommonJS.
 
-        debug(`using cjs with --require ${tsNode}`)
+        const tsxCjsLoader = `--require ${tsxCjs}`
+
+        debug(`using cjs with ${tsxCjsLoader}`)
 
         if (childOptions.env.NODE_OPTIONS) {
-          childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+          childOptions.env.NODE_OPTIONS += ` ${tsxCjsLoader}`
         } else {
-          childOptions.env.NODE_OPTIONS = tsNodeLoader
+          childOptions.env.NODE_OPTIONS = tsxCjsLoader
         }
       }
     } else {

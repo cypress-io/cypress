@@ -39,7 +39,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
     'packages/server/lib/plugins/child/require_async_child.js',
-    'packages/server/lib/plugins/child/register_ts_node.js',
     'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
