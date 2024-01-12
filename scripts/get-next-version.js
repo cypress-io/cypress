@@ -5,8 +5,8 @@ const { promisify } = require('util')
 const minimist = require('minimist')
 
 const checkedInBinaryVersion = require('../package.json').version
-const { changeCatagories } = require('./semantic-commits/change-categories')
-const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
+const { changeCatagories } = require('../tooling/changelog/src/semantic-commits/change-categories')
+const { getCurrentReleaseData } = require('../tooling/changelog/src/semantic-commits/get-current-release-data')
 
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']

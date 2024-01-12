@@ -1,5 +1,4 @@
 const { getChangesets, parseChangeset, userFacingChanges } = require('./changeset')
-const { exit } = require('process')
 
 module.exports = async () => {
   let changeSetDetails
@@ -38,7 +37,7 @@ module.exports = async () => {
 
   if (errs.length) {
     errs.forEach((err) => console.error(err))
-    exit(1)
+    process.exit(1)
   }
 
   return changeSetDetails

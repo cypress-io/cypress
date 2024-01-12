@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests"
+  ],
+  "rules": {
+    "no-console": "off"
+  }
+}

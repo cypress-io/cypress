@@ -1,8 +1,9 @@
 const fs = require('fs-extra')
 const path = require('path')
 
-const { getCurrentReleaseData } = require('../../../scripts/semantic-commits/get-current-release-data')
-const { getReleaseData } = require('../../../scripts/semantic-commits/get-binary-release-data')
+const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
+const { getReleaseData } = require('./semantic-commits/get-binary-release-data')
+const { getResolvedMessage } = require('./semantic-commits/get-resolve-message')
 
 const { deleteChangesets, userFacingChanges } = require('./changeset')
 const verifyChangesets = require('./verify-changesets')
@@ -11,38 +12,6 @@ const CHANGELOG = path.join(__dirname, '..', '..', '..', 'cli', 'CHANGELOG.md')
 
 // whether or not the semantic type is a user-facing semantic-type
 const hasUserFacingChange = (type) => Object.keys(userFacingChanges).includes(type)
-
-function _linksText (links) {
-  // one issue: [#num]
-  // two issues: [#num] and [#num]
-  // two+ issues: [#num], [#num] and [#num]
-  const linkMessage = [links.slice(0, -1).join(', '), links.slice(-1)[0]].join(links.length < 2 ? '' : ' and ')
-
-  return linkMessage
-}
-
-/**
- * Formats the resolved message that is appended to the changelog entry to indicate what
- * issues where addressed by a given change. If no issues are addressed, it references the
- * pull request which made the change.
- */
-function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
-  if (associatedIssues.length) {
-    const issueMessage = userFacingChanges[semanticType].message.hasIssue
-
-    const links = associatedIssues.sort((a, b) => a - b)
-    .map((issueNumber) => {
-      return `[#${issueNumber}](https://github.com/cypress-io/cypress/issues/${issueNumber})`
-    })
-
-    return `${issueMessage} ${_linksText(links)}.`
-  }
-
-  const prMessage = userFacingChanges[semanticType].message.onlyPR
-  const links = [`[#${prNumber}](https://github.com/cypress-io/cypress/pull/${prNumber})`]
-
-  return `${prMessage} ${_linksText(links)}.`
-}
 
 const _handleErrors = (errors) => {
   console.error('There was one or more errors when comparing the Git commits data to the changesets...')
@@ -77,7 +46,7 @@ const addResolveMessageToChangesets = ({ commits, changesets }) => {
       return
     }
 
-    const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
+    const resolveMessage = getResolvedMessage(semanticType, prNumber, associatedIssues)
 
     // find each changeset file and add the resolveMessage details - most commits should only have one.
     changesetFilenames.forEach((file) => {
@@ -111,12 +80,7 @@ const addResolveMessageToChangesets = ({ commits, changesets }) => {
 }
 
 /**
- * Determines if the Cypress changelog has the correct next version and changelog entires given the provided
- * list of commits.
- *
- * Can be skipped by setting the SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES
- * environment variable in CircleCI to a branch or comma-separated list of
- * branches
+ * Creates Cypress changelog with the correct next version, the appropriate change sections and adds the associated issues / prs links to each entry.
  */
 async function createChangelog ({ nextVersion, commits, changesets }) {
   const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
@@ -219,5 +183,5 @@ module.exports = async () => {
   await fs.writeFile(CHANGELOG, updatedChangelog, 'utf8')
 
   console.log('Changelog has been updated! Deleting all changesets for next release.')
-  // await deleteChangesets()
+  await deleteChangesets()
 }

@@ -4,7 +4,7 @@ const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
 
 const { getCurrentReleaseData } = require('./get-current-release-data')
-const { getNextVersionForBinary } = require('../get-next-version')
+const { getNextVersionForBinary } = require('../../../../scripts/get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
 const ensureAuth = () => {

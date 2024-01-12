@@ -1,4 +1,3 @@
-const { changeCatagories, userFacingChanges } = require('../../../scripts/semantic-commits/change-categories')
 const fs = require('node:fs/promises')
 const path = require('path')
 const uuid = require('uuid')
@@ -35,8 +34,6 @@ const getChangesets = async () => {
 
 module.exports = {
   CHANGESET_DIR,
-  changeCatagories,
-  userFacingChanges,
   addChangeset: async (changeType, message) => {
     const changeEntry = [
       '---',
@@ -86,12 +83,5 @@ module.exports = {
       // used to compare to the filename returned by git which uses forward slashes
       changesetFilename: `cli/changesets/${changesetFilename}`,
     }
-  },
-  deleteChangesets: async () => {
-    const changesets = await gracefullyHandle([this.getChangesets])
-
-    gracefullyHandle(changesets.map((changesetFilename) => {
-      return fs.unlink(changesetFilename)
-    }))
   },
 }

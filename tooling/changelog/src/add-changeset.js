@@ -1,5 +1,6 @@
 const inquirer = require('inquirer')
-const { addChangeset, userFacingChanges, changeCatagories } = require('./changeset')
+const { userFacingChanges, changeCatagories } = require('./semantic-commits/change-categories')
+const { addChangeset } = require('./changeset')
 
 const changeTypes = Object.keys(changeCatagories)
 const userFacingChangeTypes = Object.keys(userFacingChanges)

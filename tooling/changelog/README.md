@@ -1,36 +1,36 @@
-## @tooling/packherd
+## @tooling/changelog
 
-Herds all dependencies reachable from an entry and packs them.
+Tool for creating consistent changesets in Cypress and for generating a Changelog form the changesets that follow the semantic commit rules defined for Cypress.
 
-**Table of Contents**
+### Add a Changeset
 
-- [Summary](#summary)
-- [Creating a Bundle with Packherd](#creating-a-bundle-with-packherd)
+Quick tool to create a changeset file in the expected format with a unique file name.
 
-## Summary
+```bash
+yarn add-change
+```
+You will be prompted for the change type and message.
 
-packherd has three main tasks:
+Or shortcut with `-t` and `-m`
 
-1. bundling application files and providing related metadata
-2. loading modules that have been bundled previously and are provided via fully instantiated
-   module exports or definition functions that return a module export when invoked
-3. transpiling TypeScript modules on demand and maintaining a cache of them 
+```bash
+yarn add-change -t fix -me 'Fixed an issue...'
+```
 
-`1.` is provided by this package. `2.` and `3.` are provided by `@packages/packherd-require`. While `1.` and `2.` are very related 
-and work hand in hand, `3.` is unrelated to them and was just added here since it is another feature that requires to intercept module loads.
+### Create the Changelog
 
-## Creating a Bundle with Packherd
+Create the changelog for the release. Read the output to ensure nothing needs attention before committing the `cli/CHANGELOG.md` updates. This will delete the changesets to start fresh for the next release.
 
-Calling the [packherd function][packherd fn] and providing the desired [packherd opts][packherd
-opts] will return the `Buffer` of the bundle, a `meta` [esbuild metafile][esbuild metafile], a
-`Buffer` containing the sourceMap if it was generated as well as any warnings that esbuild
-emitted.
+```bash
+yarn create-changelog
+```
 
-The caller can then store this data or use it for further operations, i.e. to generate a
-snapshot as is the case for the [v8-snapshot][v8-snapshot] module.
+#### Release Data
 
-[packherd fn]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/packherd.ts#L44
-[packherd opts]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/packherd.ts#L14-L27
-[esbuild metafile]:https://esbuild.github.io/api/#metafile
+When this command execute, it will save the release data to `tmp/releaseData/releaseData.json`. Use this artifact to when running the [cypress-io/release-automations][release-automations] `do:comment` to tag the associated issues and PRs with the release information once the release has been successful.
 
-[v8-snapshot]:https://github.com/thlorenz/v8-snapshot
+```shell
+cd packages/issues-in-release && npm run do:comment -- --release-data <path_to_releaseData.json>`
+````
+
+[release-automations]: https://github.com/cypress-io/release-automations

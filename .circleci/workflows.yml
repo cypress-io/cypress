@@ -1601,20 +1601,6 @@ jobs:
           path: packages/errors/__snapshot-images__
       - store-npm-logs
 
-  verify-release-readiness:
-    <<: *defaults
-    resource_class: small
-    parallelism: 1
-    environment:
-      GITHUB_TOKEN: $GH_TOKEN
-    steps:
-      - restore_cached_workspace
-      - update_known_hosts
-      - run: yarn test-npm-package-release-script
-      - run: node ./scripts/semantic-commits/validate-binary-changelog.js
-      - store_artifacts:
-          path: /tmp/releaseData
-
   lint-types:
     <<: *defaults
     parallelism: 1
@@ -2649,10 +2635,6 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - verify-release-readiness:
-        context: test-runner:npm-release
-        requires:
-          - build
     - server-unit-tests:
         requires:
           - build
@@ -2838,7 +2820,6 @@ linux-x64-workflow: &linux-x64-workflow
           - binary-system-tests
           - test-kitchensink
           - unit-tests
-          - verify-release-readiness
           - v8-integration-tests
 
     - npm-release:
@@ -2995,10 +2976,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - unit-tests:
         requires:
           - build
-    - verify-release-readiness:
-        context: test-runner:npm-release
-        requires:
-          - contributor-pr
     - server-unit-tests:
         requires:
           - build
@@ -3183,7 +3160,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - binary-system-tests
           - test-kitchensink
           - unit-tests
-          - verify-release-readiness
           - v8-integration-tests
 
     - npm-release:

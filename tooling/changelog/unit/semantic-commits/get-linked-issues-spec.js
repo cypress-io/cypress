@@ -1,7 +1,7 @@
 const { expect, use } = require('chai')
 const sinonChai = require('sinon-chai')
 
-const { getLinkedIssues } = require('../../semantic-commits/get-linked-issues')
+const { getLinkedIssues } = require('../../src/semantic-commits/get-linked-issues')
 
 use(sinonChai)
 

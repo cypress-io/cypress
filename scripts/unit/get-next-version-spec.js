@@ -26,7 +26,7 @@ describe('get-next-version', () => {
 
     const npmRelease = proxyquire('../get-next-version', {
       'conventional-recommended-bump': bumpStub,
-      './semantic-commits/get-current-release-data': {
+      '../tooling/changelog/src/get-current-release-data': {
         getCurrentReleaseData: getCurrentReleaseDataStub,
       },
       '../package.json': sinon.stub({ version: releasedVersion }),
