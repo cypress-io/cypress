@@ -25,6 +25,7 @@
     "./node_modules/express/node_modules/debug/src/node.js",
     "./node_modules/finalhandler/node_modules/debug/src/node.js",
     "./node_modules/firefox-profile/node_modules/jsonfile/index.js",
+    "./node_modules/flatted/cjs/index.js",
     "./node_modules/fs-extra/node_modules/jsonfile/index.js",
     "./node_modules/get-package-info/node_modules/debug/src/node.js",
     "./node_modules/graceful-fs/polyfills.js",
@@ -1621,7 +1622,6 @@
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/validation.js",
     "./node_modules/ci-info/index.js",
     "./node_modules/ci-info/vendors.json",
-    "./node_modules/circular-json/build/circular-json.node.js",
     "./node_modules/cli-truncate/index.js",
     "./node_modules/cli-truncate/node_modules/slice-ansi/index.js",
     "./node_modules/coffeescript/lib/coffeescript/lexer.js",
@@ -4315,5 +4315,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d4da5f6f9eeb449c7e07614e43b21e654f6540bccab22e17e2c88cf2979dc30c"
+  "deferredHash": "bb67d59bf279158784f481c9c8c63df31ff512a24266261dadeba62a5126c36c"
 }
