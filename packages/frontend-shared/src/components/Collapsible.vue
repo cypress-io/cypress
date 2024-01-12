@@ -6,6 +6,7 @@
   >
     <div
       data-cy="collapsible-header"
+      role="button"
       :aria-expanded="isOpen"
       class="rounded-t focus:outline-indigo-500"
       :class="{'rounded-b': !isOpen}"

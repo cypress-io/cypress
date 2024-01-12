@@ -62,11 +62,17 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
         - Update the `xcode` version to one with the same major Node.js version bundled. There is usually not an exact match, this is ok as long as the major version number as the same.
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 
-- [ ] For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the electron target in this project's .circleci configuration is updated as well. Set the target branch on that project as a `branch` property on the request body in [../../scripts/binary/trigger-publish-binary-pipeline.js](../../scripts/binary/trigger-publish-binary-pipeline.js) script, so that you can test in CI. Remove this before merging, and ensure that branch is merged as well.
+- [ ] **Update `cypress-publish-binary`** For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the electron target in this project's .circleci configuration is updated as well. Set the Remove this before merging, and ensure that branch is merged as well.
+  - [ ] Create a new branch in `cypress-publish-binary`
+  - [ ] Update `electron` version in `package.json`
+  - [ ] Update the target `electron` version in the circle configuration
+  - [ ] Update the docker image to the new browsers-internal image made in the previous step
+  - [ ] Temporarily update the circle configuration to allow `cypress` to run against the branch
+  - [ ] Temporarily set target `cypress-publish-binary` branch as a `branch` property on the request body in [../../scripts/binary/trigger-publish-binary-pipeline.js](../../scripts/binary/trigger-publish-binary-pipeline.js) script, so that you can test against this branch from the electron upgrade branch
 
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
-- [] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.
+- [ ] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
 
 - [ ] If needed, update the **[V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml)** by running the GitHub workflow. Make sure to use the branch that contains the electron updates to populate the `'workflow from'` and `'branch to update'` arguments. Select `'Generate from scratch'` and `'commit directly to branch'`. This will usually take 6-8 hours to complete and is best to not be actively developing on the branch when this workflow runs.
