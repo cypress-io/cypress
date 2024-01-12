@@ -1602,30 +1602,58 @@ export default {
       },
 
       run (fn, response) {
-        Cypress.__actions = response?.actions
-
         if (_startTime == null) {
           _startTime = dayjs().toJSON()
         }
 
         _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
 
-        return _runner.run((failures) => {
-          // if we happen to make it all the way through
-          // the run, then just set _runner.stopped to true here
-          _runner.stopped = true
+        if (Cypress.isInteractive) {
+          // don't worry about actions if running in open mode
+          return _runner.run((failures) => {
+            // if we happen to make it all the way through
+            // the run, then just set _runner.stopped to true here
+            _runner.stopped = true
 
-          // remove all the listeners
-          // so no more events fire
-          // since a test failure may 'leak' after a run completes
-          _runner.removeAllListeners()
+            // remove all the listeners
+            // so no more events fire
+            // since a test failure may 'leak' after a run completes
+            _runner.removeAllListeners()
 
-          // TODO this functions is not correctly
-          // synchronized with the 'end' event that
-          // we manage because of uncaught hook errors
-          if (fn) {
-            return fn(failures, getTestResults(_tests))
-          }
+            // TODO this functions is not correctly
+            // synchronized with the 'end' event that
+            // we manage because of uncaught hook errors
+            if (fn) {
+              return fn(failures, getTestResults(_tests))
+            }
+          })
+        }
+
+        return Cypress.backend('get:run:actions')
+        .then((preservedActions: any) => {
+          const actions = response?.actions ?? preservedActions
+
+          Cypress.__actions = actions
+
+          return Cypress.backend('preserve:run:actions', actions)
+        }).then(() => {
+          return _runner.run((failures) => {
+            // if we happen to make it all the way through
+            // the run, then just set _runner.stopped to true here
+            _runner.stopped = true
+
+            // remove all the listeners
+            // so no more events fire
+            // since a test failure may 'leak' after a run completes
+            _runner.removeAllListeners()
+
+            // TODO this functions is not correctly
+            // synchronized with the 'end' event that
+            // we manage because of uncaught hook errors
+            if (fn) {
+              return fn(failures, getTestResults(_tests))
+            }
+          })
         })
       },
 
