@@ -58,10 +58,13 @@ module.exports = {
       return fs.unlink(path.join(CHANGESET_DIR, changesetFilename))
     }))
   },
-  parseChangeset: async (changesetFilename) => {
-    let contents = await fs.readFile(path.join(CHANGESET_DIR, changesetFilename), 'utf8')
+  parseChangesets: async () => {
+    const changesets = await getChangesets()
 
-    /**
+    return Promise.all(changesets.map(async (changesetFilename) => {
+      let contents = await fs.readFile(path.join(CHANGESET_DIR, changesetFilename), 'utf8')
+
+      /**
      * EXPECTED FORMAT:
      * ---
      * type: ?
@@ -69,19 +72,20 @@ module.exports = {
      *
      * message
      */
-    contents = contents.split('\n')
+      contents = contents.split('\n')
 
-    contents.shift() // remove ---
-    const type = contents.shift().replace('type:', '').trim()
+      contents.shift() // remove ---
+      const type = contents.shift().replace('type:', '').trim()
 
-    contents.shift() // remove ---
-    const entry = contents.join('\n').trim()
+      contents.shift() // remove ---
+      const entry = contents.join('\n').trim()
 
-    return {
-      type,
-      entry,
-      // used to compare to the filename returned by git which uses forward slashes
-      changesetFilename: `cli/changesets/${changesetFilename}`,
-    }
+      return {
+        type,
+        entry,
+        // used to compare to the filename returned by git which uses forward slashes
+        changesetFilename: `cli/changesets/${changesetFilename}`,
+      }
+    }))
   },
 }

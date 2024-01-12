@@ -1,7 +1,7 @@
 const commander = require('commander')
 const debug = require('debug')('tooling:changelog')
 const addChangeset = require('./add-changeset')
-const createChangelog = require('./create-changelog')
+const { changelog } = require('./binary-changelog')
 
 const createProgram = () => {
   const program = new commander.Command()
@@ -44,7 +44,7 @@ module.exports = {
     program
     .command('create-changelog')
     .description('Determines next Cypress version & creates the changelog for the release.')
-    .action(createChangelog)
+    .action(changelog)
 
     debug('program parsing arguments')
 
@@ -52,7 +52,6 @@ module.exports = {
   },
 }
 
-// @ts-ignore
 if (!module.parent) {
   console.error('This CLI module should be required from another Node module')
   console.error('and not executed directly')

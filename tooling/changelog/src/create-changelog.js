@@ -1,12 +1,8 @@
 const fs = require('fs-extra')
 const path = require('path')
 
-const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
-const { getReleaseData } = require('./semantic-commits/get-binary-release-data')
 const { getResolvedMessage } = require('./semantic-commits/get-resolve-message')
 const { userFacingChanges } = require('./semantic-commits/change-categories')
-
-const { deleteChangesets, getChangesets, parseChangeset } = require('./changeset')
 
 const CHANGELOG = path.join(__dirname, '..', '..', '..', 'cli', 'CHANGELOG.md')
 
@@ -91,12 +87,12 @@ async function createChangelog ({ nextVersion, commits, changesets }) {
   }
 
   console.log('Creating Changelog Content')
-  let changelog = []
+  let changelogContentToAdd = []
 
-  changelog.push(`## ${nextVersion}`)
-  changelog.push('')
-  changelog.push(`_Released ${getFormattedDate()}_`) // TODO REAL DATE
-  changelog.push('')
+  changelogContentToAdd.push(`## ${nextVersion}`)
+  changelogContentToAdd.push('')
+  changelogContentToAdd.push(`_Released ${getFormattedDate()}_`) // TODO REAL DATE
+  changelogContentToAdd.push('')
 
   const errors = addResolveMessageToChangesets({ commits, changesets })
 
@@ -111,68 +107,17 @@ async function createChangelog ({ nextVersion, commits, changesets }) {
     }
 
     // add changelog section
-    changelog.push(`${section}\n`)
+    changelogContentToAdd.push(`${section}\n`)
 
     // add each changelog entry
-    entriesForType.forEach(({ entry }) => changelog.push(`- ${entry}`))
+    entriesForType.forEach(({ entry }) => changelogContentToAdd.push(`- ${entry}`))
 
-    changelog.push('') // line break between sections
+    changelogContentToAdd.push('') // line break between sections
   })
 
   if (errors.length) {
     _handleErrors(errors)
   }
-
-  return changelog
-}
-
-module.exports = async () => {
-  let changesetsFilenames = await getChangesets()
-  const changesets = await Promise.all(changesetsFilenames.map((changesetsFilename) => {
-    return parseChangeset(changesetsFilename)
-    .then((details) => {
-      if (!Object.keys(userFacingChanges).includes(details.type)) {
-        console.log(`${details.changesetFilename} has type ${details.type}, which does not require a changeset. This will not get added to the changelog.`)
-      }
-
-      return details
-    })
-  }))
-
-  if (!changesets.length) {
-    console.log('No changes. Nothing to release.')
-    process.exit(0)
-  }
-
-  const latestReleaseInfo = await getCurrentReleaseData()
-  const releaseData = await getReleaseData(latestReleaseInfo)
-
-  const dirPath = path.join(path.sep, 'tmp', 'releaseData')
-
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath)
-  }
-
-  releaseData.changesets = changesets
-
-  fs.writeFileSync(path.join(dirPath, 'releaseData.json'), JSON.stringify(releaseData, null, 2))
-
-  console.log('')
-  console.log('Release data saved to', path.join(dirPath, 'releaseData.json'))
-  console.log('')
-
-  const {
-    nextVersion,
-    changedFiles,
-    commits,
-  } = releaseData
-
-  const changelogContentToAdd = await createChangelog({
-    nextVersion,
-    changedFiles,
-    commits,
-    changesets,
-  })
 
   let currentChangelogContent = await fs.readFile(CHANGELOG, 'utf8')
 
@@ -185,6 +130,7 @@ module.exports = async () => {
 
   await fs.writeFile(CHANGELOG, updatedChangelog, 'utf8')
 
-  console.log('Changelog has been updated! Deleting all changesets for next release.')
-  await deleteChangesets()
+  console.log('Changelog has been updated!')
 }
+
+module.exports.createChangelog = createChangelog
