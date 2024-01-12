@@ -8,9 +8,9 @@ const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
 const ensureAuth = () => {
-  if (!process.env.GH_TOKEN) {
-    throw new Error('The GH_TOKEN env is not set.')
-  }
+  // if (!process.env.GH_TOKEN) {
+  //   throw new Error('The GH_TOKEN env is not set.')
+  // }
 }
 
 /**
@@ -94,6 +94,30 @@ const fetchPullRequest = async (octokit, pullNumber) => {
   }
 }
 
+const fetchPullRequestFiles = async (octokit, pullNumber) => {
+  try {
+    const { data: pullRequestFiles } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', {
+      owner: 'cypress-io',
+      repo: 'cypress',
+      pull_number: pullNumber,
+    })
+
+    return pullRequestFiles
+  } catch (err) {
+    console.log(`Error while fetching PR #${pullNumber} files:`, err)
+
+    const { rateLimitHit, retryAfter } = parseRateLimit(err)
+
+    if (rateLimitHit) {
+      console.log(`Rate limit hit - Retry fetching PR #${pullNumber} after ${retryAfter}ms`)
+
+      return Bluebird.delay(retryAfter).then(() => fetchPullRequest(octokit, pullNumber))
+    }
+
+    throw err
+  }
+}
+
 /**
  * Get the next release version given the semantic commits in the git history. Then using the commit history,
  * determine which files have changed, list of PRs merged and issues resolved since the latest tag was
@@ -117,12 +141,24 @@ const getReleaseData = async (latestReleaseInfo) => {
   semanticCommits = _.uniqBy(semanticCommits, (commit) => commit.header)
 
   const changedFiles = await getChangedFilesSinceLastRelease(latestReleaseInfo)
+  const binaryFiles = changedFiles.filter((filename) => {
+    return /^(cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md' && !filename.includes('cli/changesets')
+  })
+
+  if (binaryFiles.length === 0) {
+    console.log('Does not contain changes that impacts the next Cypress release. No need to create the changelog.')
+
+    process.exit(0)
+  }
 
   const issuesInRelease = []
   const prsInRelease = []
   const commits = []
 
-  await Bluebird.each(semanticCommits, (async (semanticResult) => {
+  console.log(semanticCommits.length)
+  const limitForTesting = [semanticCommits[0]]
+
+  await Bluebird.each(limitForTesting, (async (semanticResult) => {
     if (!semanticResult) return
 
     const { type: semanticType, references } = semanticResult
@@ -142,11 +178,18 @@ const getReleaseData = async (latestReleaseInfo) => {
     }
 
     const pullRequest = await fetchPullRequest(octokit, ref.issue)
+    const pullRequestFiles = await fetchPullRequestFiles(octokit, ref.issue)
+
+    pullRequestFiles.push({ filename: 'cli/changesets/28641.md', status: 'added' })
+    const changesetFilenames = pullRequestFiles.filter((file) => {
+      return file.status === 'added' && file.filename.includes('cli/changesets/')
+    }).map((file) => file.filename)
     const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
 
     commits.push({
       commitMessage: semanticResult.header,
       semanticType,
+      changesetFilenames,
       prNumber: ref.issue,
       associatedIssues,
     })
