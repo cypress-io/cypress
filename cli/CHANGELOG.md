@@ -14,6 +14,7 @@ _Released 1/16/2024 (PENDING)_
 - Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
 - Fixed asset capture for Test Replay for requests that are routed through service workers. This addresses an issue where styles were not being applied properly in Test Replay and `cy.intercept` was not working properly for requests in this scenario. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
 - Fixed an issue where visiting an `http://` site would result in an infinite reload/redirect loop in Chrome 114+. Fixes [#25891](https://github.com/cypress-io/cypress/issues/25891).
+- Fixed an issue where requests made from extra tabs do not include their original headers. Fixes [#28641](https://github.com/cypress-io/cypress/issues/28641).
 
 **Performance:**
 
