@@ -1,5 +1,4 @@
 const commander = require('commander')
-const debug = require('debug')('tooling:changelog')
 const addChangeset = require('./add-changeset')
 const { changelog } = require('./binary-changelog')
 
@@ -45,8 +44,6 @@ module.exports = {
     .command('create-changelog')
     .description('Determines next Cypress version & creates the changelog for the release.')
     .action(changelog)
-
-    debug('program parsing arguments')
 
     return program.parse(args)
   },

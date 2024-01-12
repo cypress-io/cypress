@@ -16,7 +16,6 @@
     "bluebird": "3.5.3",
     "commander": "6.2.1",
     "conventional-recommended-bump": "6.1.0",
-    "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "inquirer": "8.2.4",
     "lodash": "^4.17.21",
