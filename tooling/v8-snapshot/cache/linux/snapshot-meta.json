@@ -25,6 +25,7 @@
     "./node_modules/express/node_modules/debug/src/node.js",
     "./node_modules/finalhandler/node_modules/debug/src/node.js",
     "./node_modules/firefox-profile/node_modules/jsonfile/index.js",
+    "./node_modules/flatted/cjs/index.js",
     "./node_modules/fs-extra/node_modules/jsonfile/index.js",
     "./node_modules/get-package-info/node_modules/debug/src/node.js",
     "./node_modules/graceful-fs/polyfills.js",
@@ -1621,7 +1622,6 @@
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/validation.js",
     "./node_modules/ci-info/index.js",
     "./node_modules/ci-info/vendors.json",
-    "./node_modules/circular-json/build/circular-json.node.js",
     "./node_modules/cli-truncate/index.js",
     "./node_modules/cli-truncate/node_modules/slice-ansi/index.js",
     "./node_modules/coffeescript/lib/coffeescript/lexer.js",
@@ -3987,6 +3987,7 @@
     "./packages/proxy/lib/http/util/inject.ts",
     "./packages/proxy/lib/http/util/replace_stream.ts",
     "./packages/proxy/lib/http/util/rewriter.ts",
+    "./packages/proxy/lib/http/util/service-worker-manager.ts",
     "./packages/proxy/lib/http/util/top-simulation.ts",
     "./packages/proxy/lib/index.ts",
     "./packages/proxy/lib/network-proxy.ts",
@@ -4314,5 +4315,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "eac0b3a082ef15b9e9470322b24f2a5a7ff7f3f04194507c10c5a02113fc5b6d"
+  "deferredHash": "7b68f75cf349b943f73bba5d23ce0d8519988bb6fe0ffec689eb82404a5493b4"
 }
