@@ -182,7 +182,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -224,7 +225,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -266,7 +268,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -476,7 +479,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -517,7 +521,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -562,7 +567,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -604,7 +610,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -766,7 +773,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -801,7 +809,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -836,7 +845,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -875,7 +885,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -911,7 +922,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1071,7 +1083,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1137,7 +1150,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1188,7 +1202,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1407,7 +1422,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1457,7 +1473,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -1511,7 +1528,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1562,7 +1580,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_HOOK_FAILED",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -1868,7 +1887,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_NO_RETRIES",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "message": "[error message]",
@@ -2017,7 +2037,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_NO_RETRIES",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2102,7 +2123,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_NO_RETRIES",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2172,7 +2194,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "FAILED_NO_RETRIES",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2531,7 +2554,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2594,7 +2618,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2673,7 +2698,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2737,7 +2763,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2884,7 +2911,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2919,7 +2947,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -2970,7 +2999,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3006,7 +3036,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3314,7 +3345,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3370,7 +3402,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3426,7 +3459,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -3486,7 +3520,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3543,7 +3578,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3721,7 +3757,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3770,7 +3807,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3819,7 +3857,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       },
       {
         "nextTestHasTestIsolationOn": true
@@ -3872,7 +3911,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -3922,7 +3962,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -4144,7 +4185,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -4200,7 +4242,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -4272,7 +4315,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
@@ -4329,7 +4373,8 @@
         "retries": 0,
         "_slow": 10000,
         "reasonToStop": "PASSED_FIRST_ATTEMPT",
-        "thisAttemptInitialStrategy": "NONE"
+        "thisAttemptInitialStrategy": "NONE",
+        "neededBurnInAttempts": 0
       }
     ],
     [
