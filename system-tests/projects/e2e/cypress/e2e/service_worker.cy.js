@@ -1,6 +1,13 @@
 const swReq = (win) => {
   return new Promise((resolve) => {
-    win.addEventListener('service-worker:ready', () => {
+    win.addEventListener('service-worker:ready', (event) => {
+      expect(event.detail).to.deep.equal({
+        example: {
+          foo: 'bar',
+        },
+        cached: 'this response will be used by service worker',
+      })
+
       resolve(win)
     })
   })
