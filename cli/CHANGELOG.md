@@ -15,6 +15,7 @@ _Released 1/16/2024 (PENDING)_
 - Fixed asset capture for Test Replay for requests that are routed through service workers. This addresses an issue where styles were not being applied properly in Test Replay and `cy.intercept` was not working properly for requests in this scenario. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
 - Fixed an issue where visiting an `http://` site would result in an infinite reload/redirect loop in Chrome 114+. Fixes [#25891](https://github.com/cypress-io/cypress/issues/25891).
 - Fixed an issue where requests made from extra tabs do not include their original headers. Fixes [#28641](https://github.com/cypress-io/cypress/issues/28641).
+- Fixed an issue where `cy.wait()` would sometimes throw an error reading a property of undefined when returning responses. Fixes [#28233](https://github.com/cypress-io/cypress/issues/28233).
 
 **Performance:**
 
@@ -23,8 +24,9 @@ _Released 1/16/2024 (PENDING)_
 **Dependency Updates:**
 
 - Remove dependency on `@types/node` package. Addresses [#28473](https://github.com/cypress-io/cypress/issues/28473).
-- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
+- Updated [`@cypress/unique-selector`](https://www.npmjs.com/package/@cypress/unique-selector) to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 - Replace [`CircularJSON`](https://www.npmjs.com/package/circular-json) with its successor [`flatted`](https://www.npmjs.com/package/flatted) version `3.2.9`. This resolves decoding issues observed in complex objects sent from the browser. Addressed in [#28683](https://github.com/cypress-io/cypress/pull/28683).
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `8.7.0` to `9.2.2` to fix macOS Catalina issues. Addresses [#28697](https://github.com/cypress-io/cypress/issues/28697).
 
 **Misc:**
 
