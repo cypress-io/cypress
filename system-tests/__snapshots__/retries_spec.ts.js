@@ -164,8 +164,8 @@ exports['retries / supports retries (chrome)'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed).png            (1280x603)
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed) (attempt 2     (1280x603)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed).png            (1280x591)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed) (attempt 2     (1280x591)
      ).png                                                                                          
 
 
