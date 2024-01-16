@@ -155,7 +155,6 @@ const getReleaseData = async (latestReleaseInfo) => {
   const prsInRelease = []
   const commits = []
 
-  console.log(semanticCommits.length)
   await Bluebird.each(semanticCommits, (async (semanticResult) => {
     if (!semanticResult) return
 

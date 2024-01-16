@@ -11,7 +11,7 @@ const { getCurrentReleaseData } = require('../tooling/changelog/src/semantic-com
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
-const getNextVersionForPath = async (path) => {
+const getNextVersionForPath = async (cyPath) => {
   const { version: releasedVersion } = await getCurrentReleaseData(false)
 
   let commits
@@ -46,7 +46,7 @@ const getNextVersionForPath = async (path) => {
 
   const { releaseType } = await bump({
     whatBump,
-    path,
+    path: path.join(__dirname, '..', cyPath),
   })
 
   let nextVersion = semver.inc(checkedInBinaryVersion, releaseType || 'patch')
