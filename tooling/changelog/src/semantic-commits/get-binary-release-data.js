@@ -2,10 +2,12 @@ const Bluebird = require('bluebird')
 const childProcess = require('child_process')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
+const debugLib = require('debug')
 
 const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../../../../scripts/get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
+const debug = debugLib('scripts:semantic-commits:get-binary-release-data')
 
 const ensureAuth = () => {
   // if (!process.env.GH_TOKEN) {
@@ -80,8 +82,6 @@ const fetchPullRequest = async (octokit, pullNumber) => {
 
     return pullRequest
   } catch (err) {
-    console.log(`Error while fetching PR #${pullNumber}:`, err)
-
     const { rateLimitHit, retryAfter } = parseRateLimit(err)
 
     if (rateLimitHit) {
@@ -166,35 +166,61 @@ const getReleaseData = async (latestReleaseInfo) => {
       return
     }
 
-    const ref = references.find((r) => !r.raw.includes('revert #'))
+    const refs = references.filter((r) => !r.raw.includes('revert #'))
 
-    if (!ref) {
+    if (!refs.length) {
       console.log('Commit does not have an associated pull request number...')
 
       return
     }
 
-    const pullRequest = await fetchPullRequest(octokit, ref.issue)
-    const pullRequestFiles = await fetchPullRequestFiles(octokit, ref.issue)
+    for (const [idx, ref] of refs.entries()) {
+      let pullRequest
+      let pullRequestFiles
 
-    const changesetFilenames = pullRequestFiles.filter((file) => {
-      return file.status === 'added' && file.filename.includes('cli/changesets/')
-    }).map((file) => file.filename)
-    const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
+      try {
+        pullRequest = await fetchPullRequest(octokit, ref.issue)
+        debug(`Pull request #${ref.issue} found!`)
 
-    commits.push({
-      commitMessage: semanticResult.header,
-      semanticType,
-      changesetFilenames,
-      prNumber: ref.issue,
-      associatedIssues,
-    })
+        pullRequestFiles = await fetchPullRequestFiles(octokit, ref.issue)
+      } catch (err) {
+        debug(`Error while fetching PR #${ ref.issue}:`, err)
+        // If we have tried to fetch all other references and all of them failed,
+        // print the failure of the last reference and exit
+        if (idx === refs.length) {
+          debug(`all references exhausted and no PR could be found!`)
+          console.log(`Error while fetching PR #${ ref.issue}:`, err)
+          throw err
+        } else {
+          // otherwise, we still might be able to link a PR to the commit
+          debug(`Other references need to be tried. Continuing to see if we can find a corresponding pull request.`)
+        }
 
-    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${ref.issue}`)
+        continue
+      }
 
-    associatedIssues.forEach((issueNumber) => {
-      issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)
-    })
+      const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
+      const changesetFilenames = pullRequestFiles.filter((file) => {
+        return file.status === 'added' && file.filename.includes('cli/changesets/')
+      }).map((file) => file.filename)
+
+      commits.push({
+        commitMessage: semanticResult.header,
+        semanticType,
+        changesetFilenames,
+        prNumber: ref.issue,
+        associatedIssues,
+      })
+
+      prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${ref.issue}`)
+
+      associatedIssues.forEach((issueNumber) => {
+        issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)
+      })
+
+      // since we found our pull request, we don't need to check the rest of the references
+      break
+    }
   }))
 
   console.log('')
