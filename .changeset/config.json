@@ -7,7 +7,7 @@
   "access": "restricted",
   "baseBranch": "develop",
   "updateInternalDependencies": "patch",
-  "ignore": ["internal-scripts","@tooling/*"],
+  "ignore": ["internal-scripts"],
   "snapshot": {
     "useCalculatedVersion": true,
     "prereleaseTemplate": "{tag}-{commit}"

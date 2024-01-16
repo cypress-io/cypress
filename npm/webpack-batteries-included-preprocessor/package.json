@@ -1,6 +1,6 @@
 {
   "name": "@cypress/webpack-batteries-included-preprocessor",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
   "scripts": {
@@ -46,7 +46,7 @@
     "webpack": "^5.88.2"
   },
   "devDependencies": {
-    "@cypress/webpack-preprocessor": "6.0.1",
+    "@cypress/webpack-preprocessor": "6.0.2",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^5.28.1",
     "chai": "^4.2.0",
@@ -56,7 +56,7 @@
     "typescript": "^4.7.4"
   },
   "peerDependencies": {
-    "@cypress/webpack-preprocessor": "^5.4.4 || ^6"
+    "@cypress/webpack-preprocessor": "^6.0.2"
   },
   "files": [
     "index.js",

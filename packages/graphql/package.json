@@ -1,6 +1,6 @@
 {
   "name": "@packages/graphql",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "private": true,
   "main": "index.js",
   "browser": "src/index.ts",
@@ -33,9 +33,9 @@
     "ws": "^8.5.0"
   },
   "devDependencies": {
-    "@packages/data-context": "0.0.0-development",
-    "@packages/root": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
+    "@packages/data-context": "13.7.0",
+    "@packages/root": "13.7.0",
+    "@packages/types": "13.7.0",
     "@types/dedent": "^0.7.0",
     "@types/graphql-resolve-batch": "1.1.6",
     "@types/micromatch": "4.0.2",

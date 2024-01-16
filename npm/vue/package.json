@@ -1,6 +1,6 @@
 {
   "name": "@cypress/vue",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
-    "@cypress/mount-utils": "4.0.0",
+    "@cypress/mount-utils": "4.0.1",
     "@vitejs/plugin-vue": "4.2.0",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.3.2",
@@ -33,7 +33,7 @@
   },
   "peerDependencies": {
     "@cypress/webpack-dev-server": "*",
-    "cypress": ">=7.0.0",
+    "cypress": ">=13.7.0",
     "vue": ">=3.0.0"
   },
   "files": [

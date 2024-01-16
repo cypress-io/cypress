@@ -1,6 +1,6 @@
 {
   "name": "@packages/v8-snapshot-require",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "description": "Various utils related to create v8 snapshots for electron apps.",
   "private": true,
   "main": "dist/snapshot-require.js",
@@ -15,7 +15,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@packages/packherd-require": "0.0.0-development",
+    "@packages/packherd-require": "13.7.0",
     "debug": "^4.3.4",
     "source-map-js": "^0.6.2"
   },

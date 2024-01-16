@@ -1,6 +1,6 @@
 {
   "name": "@packages/network",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -29,9 +29,9 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^3.0.0",
     "@cypress/request-promise": "^5.0.0",
-    "@packages/https-proxy": "0.0.0-development",
-    "@packages/socket": "0.0.0-development",
-    "@packages/ts": "0.0.0-development",
+    "@packages/https-proxy": "13.7.0",
+    "@packages/socket": "13.7.0",
+    "@packages/ts": "13.7.0",
     "@types/concat-stream": "1.6.0",
     "express": "4.17.3",
     "mocha": "6.2.2",

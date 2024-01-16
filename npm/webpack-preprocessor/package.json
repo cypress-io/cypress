@@ -1,6 +1,6 @@
 {
   "name": "@cypress/webpack-preprocessor",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Cypress preprocessor for bundling JavaScript via webpack",
   "private": false,
   "main": "dist",

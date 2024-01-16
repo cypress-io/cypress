@@ -1,6 +1,6 @@
 {
   "name": "@packages/socket",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "private": true,
   "browser": "lib/browser.ts",
   "scripts": {
@@ -24,7 +24,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@packages/types": "0.0.0-development",
+    "@packages/types": "13.7.0",
     "@types/uuid": "8.3.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",

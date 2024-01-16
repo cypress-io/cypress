@@ -1,6 +1,6 @@
 {
   "name": "@packages/telemetry",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "description": "open telemetry wrapper used throughout the cypress monorepo to instrument the cypress app",
   "private": true,
   "main": "dist/node.js",
@@ -26,7 +26,7 @@
     "@opentelemetry/semantic-conventions": "1.12.0"
   },
   "devDependencies": {
-    "@packages/ts": "0.0.0-development",
+    "@packages/ts": "13.7.0",
     "mocha": "7.0.1"
   },
   "files": [

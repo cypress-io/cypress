@@ -1,6 +1,6 @@
 {
   "name": "@cypress/puppeteer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Plugin for enhancing Cypress tests with Puppeteer",
   "private": false,
   "main": "dist/plugin/index.js",
@@ -33,7 +33,7 @@
     "typescript": "4.7.4"
   },
   "peerDependencies": {
-    "cypress": ">=13.6.0"
+    "cypress": ">=13.7.0"
   },
   "files": [
     "dist",

@@ -1,6 +1,6 @@
 {
   "name": "@packages/frontend-shared",
-  "version": "0.0.0-development",
+  "version": "13.7.0",
   "private": true,
   "scripts": {
     "build": "node ./script/build.js",
