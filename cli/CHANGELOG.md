@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.3
 
-_Released 1/16/2024 (PENDING)_
+_Released 1/16/2024_
 
 **Bugfixes:**
 
+- Force `moduleResolution` to `node` when `typescript` projects are detected to correctly run Cypress. This change should not have a large impact as `commonjs` is already forced when `ts-node` is registered. This fix does not impact the ESM Typescript configuration loader. Fixes [#27731](https://github.com/cypress-io/cypress/issues/27731).
 - No longer wait for additional frames when recording a video for a spec that was skipped by the Cloud due to Auto Cancellation. Fixes [#27898](https://github.com/cypress-io/cypress/issues/27898).
 - Now `node_modules` will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 - Updated display of assertions and commands with a URL argument to escape markdown formatting so that values are displayed as is and assertion values display as bold. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#28100](https://github.com/cypress-io/cypress/issues/28100).
