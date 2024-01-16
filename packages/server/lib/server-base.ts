@@ -40,6 +40,7 @@ import statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
+import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -471,8 +472,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
-    options.onResetServerState = () => {
-      this.networkProxy.reset()
+    options.onResetServerState = (options: { testIsolation: boolean }) => {
+      this.networkProxy.reset({ resetPreRequests: !!options.testIsolation, resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
@@ -505,6 +506,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
     this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -617,7 +630,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset()
+    this._networkProxy?.reset({ resetPreRequests: true, resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 

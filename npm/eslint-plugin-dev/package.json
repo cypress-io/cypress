@@ -30,7 +30,7 @@
     "babel-eslint": "^7.2.3",
     "eslint": ">= 3.2.1",
     "eslint-plugin-json-format": ">= 2.0.0",
-    "eslint-plugin-mocha": "^4.11.0",
+    "eslint-plugin-mocha": " >= 4.11.0",
     "eslint-plugin-react": "^7.22.0"
   },
   "bin": {
