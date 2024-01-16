@@ -25,6 +25,7 @@
     "./node_modules/express/node_modules/debug/src/node.js",
     "./node_modules/finalhandler/node_modules/debug/src/node.js",
     "./node_modules/firefox-profile/node_modules/jsonfile/index.js",
+    "./node_modules/flatted/cjs/index.js",
     "./node_modules/fs-extra/node_modules/jsonfile/index.js",
     "./node_modules/get-package-info/node_modules/debug/src/node.js",
     "./node_modules/graceful-fs/polyfills.js",
@@ -178,6 +179,8 @@
     "./node_modules/@cypress/commit-info/node_modules/semver/semver.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/browser.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/request-promise/lib/rp.js",
     "./node_modules/@cypress/request/index.js",
     "./node_modules/@cypress/request/lib/helpers.js",
@@ -1622,7 +1625,6 @@
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/validation.js",
     "./node_modules/ci-info/index.js",
     "./node_modules/ci-info/vendors.json",
-    "./node_modules/circular-json/build/circular-json.node.js",
     "./node_modules/cli-truncate/index.js",
     "./node_modules/cli-truncate/node_modules/slice-ansi/index.js",
     "./node_modules/coffeescript/lib/coffeescript/lexer.js",
@@ -3985,6 +3987,7 @@
     "./packages/proxy/lib/http/util/inject.ts",
     "./packages/proxy/lib/http/util/replace_stream.ts",
     "./packages/proxy/lib/http/util/rewriter.ts",
+    "./packages/proxy/lib/http/util/service-worker-manager.ts",
     "./packages/proxy/lib/http/util/top-simulation.ts",
     "./packages/proxy/lib/index.ts",
     "./packages/proxy/lib/network-proxy.ts",
@@ -4312,5 +4315,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "30882b5fc0ea16d52dc06032f70d588e3e98eea6fd417da00b88749dd9061ae1"
+  "deferredHash": "122c604c5e0e25c69beeba17625aa8c911d75c62aab6bc3e5e18497b4ab79441"
 }
