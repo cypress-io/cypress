@@ -786,9 +786,9 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1280x591)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails (fai     (1280x599)
      led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1280x591)
+  -  /XXX/XXX/XXX/cypress/screenshots/1_fails.cy.js/simple failing spec -- fails agai     (1280x599)
      n (failed).png                                                                                 
 
 
