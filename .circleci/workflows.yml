@@ -2407,6 +2407,7 @@ jobs:
       - run:
           name: Checkout Typescript Example
           command: |
+            git fetch origin full-typescript
             git checkout full-typescript
       - run:
           name: Install dependencies 📦
