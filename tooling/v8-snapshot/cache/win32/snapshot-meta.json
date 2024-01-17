@@ -297,7 +297,6 @@
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/path-exists/index.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/xml2js.js",
     "./node_modules/fluent-ffmpeg/index.js",
     "./node_modules/fluent-ffmpeg/lib/fluent-ffmpeg.js",
     "./node_modules/fluent-ffmpeg/lib/utils.js",
@@ -467,6 +466,7 @@
     "./node_modules/os-homedir/index.js",
     "./node_modules/pako/lib/utils/strings.js",
     "./node_modules/pako/lib/zlib/trees.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/xml2js.js",
     "./node_modules/performance-now/lib/performance-now.js",
     "./node_modules/phin/lib/phin.compiled.js",
     "./node_modules/picomatch/index.js",
@@ -1917,11 +1917,6 @@
     "./node_modules/firefox-profile/node_modules/jsonfile/node_modules/universalify/index.js",
     "./node_modules/firefox-profile/node_modules/jsonfile/utils.js",
     "./node_modules/firefox-profile/node_modules/universalify/index.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/bom.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/builder.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/defaults.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/parser.js",
-    "./node_modules/firefox-profile/node_modules/xml2js/lib/processors.js",
     "./node_modules/fluent-ffmpeg/lib/capabilities.js",
     "./node_modules/fluent-ffmpeg/lib/ffprobe.js",
     "./node_modules/fluent-ffmpeg/lib/options/audio.js",
@@ -2649,6 +2644,11 @@
     "./node_modules/parse-bmfont-binary/index.js",
     "./node_modules/parse-bmfont-xml/lib/index.js",
     "./node_modules/parse-bmfont-xml/lib/parse-attribs.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/bom.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/builder.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/defaults.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/parser.js",
+    "./node_modules/parse-bmfont-xml/node_modules/xml2js/lib/processors.js",
     "./node_modules/parse-glob/index.js",
     "./node_modules/parse-glob/node_modules/is-extglob/index.js",
     "./node_modules/parse-glob/node_modules/is-glob/index.js",
@@ -4315,5 +4315,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b12cff9da9eaa55abfa7f82ffe13fadb50eed48c087fe78b0409bd984443428a"
+  "deferredHash": "c372459c60afcff3be9b0e9cec69776ddc3524002b9af554ef24366d1bfcac53"
 }
