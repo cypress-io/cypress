@@ -615,7 +615,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()

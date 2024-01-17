@@ -254,6 +254,10 @@ export default (Commands, Cypress, cy, state) => {
         // responses are sorted in the order the user specified them. if there are multiples of the same
         // alias awaited, they're sorted in execution order
         resp.sort((a, b) => {
+          if (!a.browserRequestId || !b.browserRequestId) {
+            return 0
+          }
+
           // sort responses based on browser request ID
           const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
           const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
