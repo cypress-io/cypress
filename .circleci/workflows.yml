@@ -2406,8 +2406,8 @@ jobs:
           repo: cypress-test-tiny
       - run:
           name: Checkout Typescript Example
+          working_directory: /tmp/cypress-test-tiny
           command: |
-            git fetch origin full-typescript
             git checkout full-typescript
       - run:
           name: Install dependencies 📦
