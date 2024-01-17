@@ -33,6 +33,9 @@ describe('lots of requests', () => {
               for (let j = 0; j < 50; j++) {
                 fetch('/largeJson?test=${test}&i=${i}&j=' + j).catch(() => {})
               }
+              for (let j = 0; j < 10; j++) {
+                fetch('http://localhost:3555/fail?test=${test}&i=${i}&j=' + j).catch(() => {})
+              }
             </script>
           </head>
           <body>
@@ -120,15 +123,15 @@ describe('lots of requests', () => {
     })
   })
 
-  // describe('network error', { testIsolation: true }, () => {
-  //   // beforeEach(() => {
-  //   //   cy.intercept('GET', '/largeJson?test=9&i=*&j=5', { forceNetworkError: true })
-  //   // })
+  describe('network error', { testIsolation: true }, () => {
+    // beforeEach(() => {
+    //   cy.intercept('GET', '/largeJson?test=9&i=*&j=8', { forceNetworkError: true })
+    // })
 
-  //   it('test 9', () => {
-  //     cy.visit('http://localhost:3500/lots-of-requests?test=9&i=1')
-  //     cy.wait(new Array(50).fill('@largeJson'))
-  //     cy.get('table tr').should('have.length', 200, { timeout: 10000 })
-  //   })
-  // })
+    it('test 9', () => {
+      cy.visit('http://localhost:3500/lots-of-requests?test=9&i=1')
+      // cy.wait(new Array(50).fill('@largeJson'))
+      cy.get('table tr').should('have.length', 200, { timeout: 10000 })
+    })
+  })
 })

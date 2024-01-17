@@ -500,6 +500,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.removePendingBrowserPreRequest(requestId)
   }
 
+  getBrowserPreRequests () {
+    return this._networkProxy?.getPendingBrowserPreRequests()
+  }
+
   emitRequestEvent (eventName, data) {
     this.socket.toDriver('request:event', eventName, data)
   }
@@ -630,7 +634,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset({ resetPreRequests: true, resetBetweenSpecs: true })
+    this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 

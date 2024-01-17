@@ -371,10 +371,14 @@ export class Http {
       }
 
       ctx.error = error
-      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled) {
+
+      // if there is a pre-request and the error has not been handled and the request has not been destroyed
+      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
+      //
+      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
+      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
+      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
         ctx.req.browserPreRequest.errorHandled = true
-        // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-        // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
         const preRequest = {
           ...ctx.req.browserPreRequest,
           requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
@@ -472,6 +476,10 @@ export class Http {
 
   removePendingBrowserPreRequest (requestId: string) {
     this.preRequests.removePendingPreRequest(requestId)
+  }
+
+  getPendingBrowserPreRequests () {
+    return this.preRequests.pendingPreRequests
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
