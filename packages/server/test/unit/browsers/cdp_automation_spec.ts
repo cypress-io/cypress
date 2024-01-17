@@ -24,13 +24,14 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: true,
+          networkEnableOptions: enabledObject,
         } as ProtocolManagerShape
 
-        const localCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
+        const localNetworkCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
-        expect(localCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
+        expect(localNetworkCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
 
       it('networkEnabledOptions - protocol disabled', async function () {
@@ -49,6 +50,7 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localManager = {
           protocolEnabled: false,
+          networkEnableOptions: disabledObject,
         } as ProtocolManagerShape
 
         const localCommandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
@@ -72,6 +74,8 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
         onRequestServedFromCache: sinon.stub(),
         onRequestFailed: sinon.stub(),
+        onServiceWorkerRegistrationUpdated: sinon.stub(),
+        onServiceWorkerVersionUpdated: sinon.stub(),
       }
 
       cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation)
@@ -91,7 +95,7 @@ context('lib/browsers/cdp_automation', () => {
         const startScreencast = this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
         const screencastFrameAck = this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').resolves()
 
-        await cdpAutomation.startVideoRecording(writeVideoFrame)
+        await cdpAutomation.startVideoRecording(writeVideoFrame, {})
 
         expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
         expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
@@ -188,6 +192,30 @@ context('lib/browsers/cdp_automation', () => {
         )
       })
 
+      it('triggers onRequestEvent when response is cached from service worker but data length is > 0', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromServiceWorker: true,
+            encodedDataLength: 1,
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).to.have.been.calledWith(
+          'response:received', {
+            requestId: browserResponseReceived.requestId,
+            status: browserResponseReceived.response.status,
+            headers: browserResponseReceived.response.headers,
+          },
+        )
+      })
+
       it('cleans up prerequests when response is cached from disk', function () {
         const browserResponseReceived = {
           requestId: '0',
@@ -195,6 +223,24 @@ context('lib/browsers/cdp_automation', () => {
             status: 200,
             headers: {},
             fromDiskCache: true,
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).not.to.have.been.called
+      })
+
+      it('cleans up prerequests when response is cached from service worker and data length is <= 0', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromServiceWorker: true,
+            encodedDataLength: -1,
           },
         }
 
@@ -231,6 +277,41 @@ context('lib/browsers/cdp_automation', () => {
         .yield(browserRequestFailed)
 
         expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
+      })
+    })
+
+    describe('.onWorkerRegistrationUpdated', function () {
+      it('triggers onServiceWorkerRegistrationUpdated', function () {
+        const browserWorkerRegistrationUpdated = {
+          registrations: [{
+            registrationId: '0',
+            scopeURL: 'https://www.google.com',
+          }],
+        }
+
+        this.onFn
+        .withArgs('ServiceWorker.workerRegistrationUpdated')
+        .yield(browserWorkerRegistrationUpdated)
+
+        expect(this.automation.onServiceWorkerRegistrationUpdated).to.have.been.calledWith(browserWorkerRegistrationUpdated)
+      })
+    })
+
+    describe('.onWorkerVersionUpdated', function () {
+      it('triggers onServiceWorkerVersionUpdated', function () {
+        const browserWorkerVersionUpdated = {
+          versions: [{
+            registrationId: '0',
+            versionId: '1',
+            scriptURL: 'https://www.google.com',
+          }],
+        }
+
+        this.onFn
+        .withArgs('ServiceWorker.workerVersionUpdated')
+        .yield(browserWorkerVersionUpdated)
+
+        expect(this.automation.onServiceWorkerVersionUpdated).to.have.been.calledWith(browserWorkerVersionUpdated)
       })
     })
 

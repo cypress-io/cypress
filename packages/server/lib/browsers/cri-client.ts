@@ -8,6 +8,7 @@ import type WebSocket from 'ws'
 import type CDP from 'chrome-remote-interface'
 
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
+import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -27,11 +28,13 @@ type EnqueuedCommand = {
   command: CdpCommand
   params?: object
   p: DeferredPromise
+  sessionId?: string
 }
 
 type EnableCommand = {
   command: CdpCommand
   params?: object
+  sessionId?: string
 }
 
 type Subscription = {
@@ -42,6 +45,12 @@ type Subscription = {
 interface CDPClient extends CDP.Client {
   off: EventEmitter['off']
   _ws: WebSocket
+}
+
+export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
+  maxTotalBufferSize: 0,
+  maxResourceBufferSize: 0,
+  maxPostDataSize: 0,
 }
 
 export interface CriClient {
@@ -130,14 +139,27 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
+type CreateParams = {
+  target: string
+  onAsynchronousError: Function
+  host?: string
+  port?: number
+  onReconnect?: (client: CriClient) => void
+  protocolManager?: ProtocolManagerShape
+  fullyManageTabs?: boolean
+  browserClient?: CriClient
+}
 
-export const create = async (
-  target: string,
-  onAsynchronousError: Function,
-  host?: string,
-  port?: number,
-  onReconnect?: (client: CriClient) => void,
-): Promise<CriClient> => {
+export const create = async ({
+  target,
+  onAsynchronousError,
+  host,
+  port,
+  onReconnect,
+  protocolManager,
+  fullyManageTabs,
+  browserClient,
+}: CreateParams): Promise<CriClient> => {
   const subscriptions: Subscription[] = []
   const enableCommands: EnableCommand[] = []
   let enqueuedCommands: EnqueuedCommand[] = []
@@ -173,12 +195,12 @@ export const create = async (
 
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
-    await Promise.all(enableCommands.map(({ command, params }) => {
-      return cri.send(command, params)
+    await Promise.all(enableCommands.map(({ command, params, sessionId }) => {
+      return cri.send(command, params, sessionId)
     }))
 
     enqueuedCommands.forEach((cmd) => {
-      cri.send(cmd.command, cmd.params).then(cmd.p.resolve as any, cmd.p.reject as any)
+      cri.send(cmd.command, cmd.params, cmd.sessionId).then(cmd.p.resolve as any, cmd.p.reject as any)
     })
 
     enqueuedCommands = []
@@ -243,15 +265,58 @@ export const create = async (
 
     maybeDebugCdpMessages(cri)
 
-    // Only reconnect when we're not running cypress in cypress. There are a lot of disconnects that happen that we don't want to reconnect on
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    // Having a host set indicates that this is the child cri target, a.k.a.
+    // the main Cypress tab (as opposed to the root browser cri target)
+    const isChildTarget = !!host
+
+    // don't reconnect in these circumstances
+    if (
+      // is a child target. we only need to reconnect the root browser target
+      !isChildTarget
+      // running cypress in cypress - there are a lot of disconnects that happen
+      // that we don't want to reconnect on
+      && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    ) {
       cri.on('disconnect', retryReconnect)
     }
 
-    cri.on('Inspector.targetCrashed', async () => {
-      debug('crash detected')
-      crashed = true
-    })
+    // We're only interested in child target traffic. Browser cri traffic is
+    // handled in browser-cri-client.ts. The basic approach here is we attach
+    // to targets and enable network traffic. We must attach in a paused state
+    // so that we can enable network traffic before the target starts running.
+    if (isChildTarget) {
+      cri.on('Target.targetCrashed', async (event) => {
+        if (event.targetId !== target) {
+          return
+        }
+
+        debug('crash detected')
+        crashed = true
+      })
+
+      if (fullyManageTabs) {
+        cri.on('Target.attachedToTarget', async (event) => {
+          try {
+            // Service workers get attached at the page and browser level. We only want to handle them at the browser level
+            // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
+            if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
+              await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+            }
+
+            if (event.waitingForDebugger) {
+              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+            }
+          } catch (error) {
+            // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
+            debug('error attaching to target cri', error)
+          }
+        })
+
+        // Ideally we could use filter rather than checking the type above, but that was added relatively recently
+        await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
+        await cri.send('Target.setDiscoverTargets', { discover: true })
+      }
+    }
   }
 
   await connect()
@@ -259,7 +324,7 @@ export const create = async (
   client = {
     targetId: target,
 
-    async send (command: CdpCommand, params?: object) {
+    async send (command: CdpCommand, params?: object, sessionId?: string) {
       if (crashed) {
         return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
       }
@@ -277,6 +342,10 @@ export const create = async (
             obj.params = params
           }
 
+          if (sessionId) {
+            obj.sessionId = sessionId
+          }
+
           enqueuedCommands.push(obj)
         })
       }
@@ -292,12 +361,16 @@ export const create = async (
           obj.params = params
         }
 
+        if (sessionId) {
+          obj.sessionId = sessionId
+        }
+
         enableCommands.push(obj)
       }
 
       if (connected) {
         try {
-          return await cri.send(command, params)
+          return await cri.send(command, params, sessionId)
         } catch (err) {
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The
@@ -307,7 +380,7 @@ export const create = async (
             throw err
           }
 
-          debug('encountered closed websocket on send %o', { command, params, err })
+          debug('encountered closed websocket on send %o', { command, params, sessionId, err })
 
           const p = enqueue() as Promise<any>
 
@@ -331,7 +404,12 @@ export const create = async (
       subscriptions.push({ eventName, cb })
       debug('registering CDP on event %o', { eventName })
 
-      return cri.on(eventName, cb)
+      cri.on(eventName, cb)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      if (eventName.startsWith('Network.')) {
+        browserClient?.on(eventName, cb)
+      }
     },
 
     off (eventName, cb) {
@@ -339,7 +417,12 @@ export const create = async (
         return sub.eventName === eventName && sub.cb === cb
       }), 1)
 
-      return cri.off(eventName, cb)
+      cri.off(eventName, cb)
+      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+      // Long term we should use flat mode entirely across all of chrome remote interface
+      if (eventName.startsWith('Network.')) {
+        browserClient?.off(eventName, cb)
+      }
     },
 
     get ws () {

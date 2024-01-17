@@ -85,6 +85,7 @@ export type ProtocolManagerOptions = {
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
+  networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>

@@ -21,11 +21,17 @@ process.once('exit', () => {
   debug('metrics: %o', metrics)
 })
 
-export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequestWithTimings) => void
+export type CorrelationInformation = {
+  browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
+}
 
-type PendingRequest = {
+export type GetPreRequestCb = (correlationInformation: CorrelationInformation) => void
+
+export type PendingRequest = {
+  key: string
   ctxDebug
-  callback: GetPreRequestCb
+  callback?: GetPreRequestCb
   timeout: NodeJS.Timeout
   timedOut?: boolean
   proxyRequestReceivedTimestamp: number
@@ -69,13 +75,32 @@ class QueueMap<T> {
     })
   }
   removeExact (queueKey: string, value: T) {
-    const i = this.queues[queueKey].findIndex((v) => v === value)
+    const i = this.queues[queueKey]?.findIndex((v) => v === value)
 
-    this.queues[queueKey].splice(i, 1)
-    if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
+    if (i > -1) {
+      this.queues[queueKey].splice(i, 1)
+      if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
+    }
   }
+
+  forEach (fn: (value: T) => void) {
+    Object.values(this.queues).forEach((queue) => {
+      queue.forEach(fn)
+    })
+  }
+
   get length () {
     return Object.values(this.queues).reduce((prev, cur) => prev + cur.length, 0)
+  }
+}
+
+const tryDecodeURI = (url: string) => {
+  // decodeURI can throw if the url is malformed
+  // in this case, we just return the original url
+  try {
+    return decodeURI(url)
+  } catch (e) {
+    return url
   }
 }
 
@@ -132,8 +157,9 @@ export class PreRequests {
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
+    const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
+
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${browserPreRequest.url}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -148,10 +174,15 @@ export class PreRequests {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
-        pendingRequest.callback({
-          ...browserPreRequest,
-          ...timings,
+        pendingRequest.callback?.({
+          browserPreRequest: {
+            ...browserPreRequest,
+            ...timings,
+          },
+          noPreRequestExpected: false,
         })
+
+        delete pendingRequest.callback
 
         return
       }
@@ -173,13 +204,17 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${url}`
+    const key = `GET-${tryDecodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
       debugVerbose('Handling %s without a CDP prerequest', key)
       clearTimeout(pendingRequest.timeout)
-      pendingRequest.callback()
+      pendingRequest.callback?.({
+        noPreRequestExpected: true,
+      })
+
+      delete pendingRequest.callback
 
       return
     }
@@ -189,7 +224,7 @@ export class PreRequests {
     })
   }
 
-  removePending (requestId: string) {
+  removePendingPreRequest (requestId: string) {
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
       return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
     })
@@ -199,19 +234,23 @@ export class PreRequests {
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${req.proxiedUrl}`
+    const key = `${req.method}-${tryDecodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+
       callback({
-        ...pendingPreRequest.browserPreRequest,
-        cdpRequestWillBeSentTimestamp: pendingPreRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp,
-        cdpLagDuration: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
-        proxyRequestCorrelationDuration: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
+        browserPreRequest: {
+          ...pendingPreRequest.browserPreRequest,
+          cdpRequestWillBeSentTimestamp: pendingPreRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp,
+          cdpLagDuration: pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingPreRequest.cdpRequestWillBeSentTimestamp,
+          proxyRequestCorrelationDuration: Math.max(pendingPreRequest.cdpRequestWillBeSentReceivedTimestamp - proxyRequestReceivedTimestamp, 0),
+        },
+        noPreRequestExpected: false,
       })
 
       return
@@ -222,12 +261,15 @@ export class PreRequests {
     if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pending url without pre request', key)
-      callback()
+      callback({
+        noPreRequestExpected: true,
+      })
 
       return
     }
 
     const pendingRequest: PendingRequest = {
+      key,
       ctxDebug,
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
@@ -235,14 +277,46 @@ export class PreRequests {
         ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
-        callback()
+        callback({
+          noPreRequestExpected: false,
+        })
+
+        delete pendingRequest.callback
       }, this.requestTimeout),
     }
 
     this.pendingRequests.push(key, pendingRequest)
+
+    return pendingRequest
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
+  }
+
+  setPreRequestTimeout (requestTimeout: number) {
+    this.requestTimeout = requestTimeout
+  }
+
+  removePendingRequest (pendingRequest: PendingRequest) {
+    this.pendingRequests.removeExact(pendingRequest.key, pendingRequest)
+    clearTimeout(pendingRequest.timeout)
+    delete pendingRequest.callback
+  }
+
+  reset () {
+    this.pendingPreRequests = new QueueMap<PendingPreRequest>()
+
+    // Clear out the pending requests timeout callbacks first then clear the queue
+    this.pendingRequests.forEach(({ callback, timeout }) => {
+      clearTimeout(timeout)
+      metrics.unmatchedRequests++
+      callback?.({
+        noPreRequestExpected: false,
+      })
+    })
+
+    this.pendingRequests = new QueueMap<PendingRequest>()
+    this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   }
 }

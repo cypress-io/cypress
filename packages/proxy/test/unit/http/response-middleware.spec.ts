@@ -13,6 +13,7 @@ describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(ResponseMiddleware)).to.have.ordered.members([
       'LogResponse',
+      'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
@@ -95,6 +96,53 @@ describe('http/response-middleware', function () {
             throw new Error('onError should not be called')
           },
         })
+      })
+    })
+  })
+
+  describe('FilterNonProxiedResponse', () => {
+    const { FilterNonProxiedResponse } = ResponseMiddleware
+    let ctx
+    let headers
+
+    beforeEach(() => {
+      headers = { 'header-name': 'header-value' }
+      ctx = {
+        onlyRunMiddleware: sinon.stub(),
+        incomingRes: { headers },
+        req: {},
+        res: {
+          set: sinon.stub(),
+          off: (event, listener) => {},
+        },
+      }
+    })
+
+    it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', () => {
+      ctx.req.isFromExtraTarget = true
+
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.res.set).to.be.calledWith(headers)
+
+        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+          'AttachPlainTextStreamFn',
+          'PatchExpressSetHeader',
+          'MaybeSendRedirectToClient',
+          'CopyResponseStatusCode',
+          'MaybeEndWithEmptyBody',
+          'GzipBody',
+          'SendResponseBodyToClient',
+        ])
+      })
+    })
+
+    it('runs all subsequent middleware if request is not from an extra target', () => {
+      ctx.req.isFromMainTarget = false
+
+      return testMiddleware([FilterNonProxiedResponse], ctx)
+      .then(() => {
+        expect(ctx.onlyRunMiddleware).not.to.be.called
       })
     })
   })

@@ -253,6 +253,66 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
 
+      it('searches specs with "-" or "_" when search contains space', function () {
+        clearSearchAndType('accounts list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('accounts-list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('accounts_list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains space', function () {
+        clearSearchAndType('a b c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('a-b-c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('a_b_c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
       it('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'
 

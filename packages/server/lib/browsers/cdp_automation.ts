@@ -13,7 +13,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import type { CriClient } from './cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -140,9 +140,9 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0]) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
 
-export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
 
 export type OffFn = (eventName: string, cb: (data: any) => void) => void
 
@@ -173,6 +173,8 @@ export class CdpAutomation implements CDPClient {
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
+    onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
+    onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
     this.on = onFn
     this.off = offFn
@@ -198,23 +200,14 @@ export class CdpAutomation implements CDPClient {
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
-    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 64 * 1024,
-    } : {
-      maxTotalBufferSize: 0,
-      maxResourceBufferSize: 0,
-      maxPostDataSize: 0,
-    }
-
-    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
+    await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
     return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
+
     let url = params.request.url
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
@@ -238,6 +231,8 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
+      initiator: params.initiator,
+      documentURL: params.documentURL,
       // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
       // normalize to milliseconds to be comparable to everything else we're gathering
       cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
@@ -256,7 +251,7 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
-    if (params.response.fromDiskCache) {
+    if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
       this.automation.onRequestServedFromCache?.(params.requestId)
 
       return
@@ -269,6 +264,14 @@ export class CdpAutomation implements CDPClient {
     }
 
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+  }
+
+  private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+    this.automation.onServiceWorkerRegistrationUpdated?.(params)
+  }
+
+  private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+    this.automation.onServiceWorkerVersionUpdated?.(params)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {

@@ -316,24 +316,27 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     return false
   }
 
-  const elProps = $coordinates.getElementPositioning($el)
-
   if (canClipContent($el, $ancestor)) {
+    const elProps = $coordinates.getElementPositioning($el)
     const ancestorProps = $coordinates.getElementPositioning($ancestor)
+
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+      return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
+    }
 
     // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
-      (elProps.fromElWindow.left > (ancestorProps.width + ancestorProps.fromElWindow.left)) ||
+      (elProps.fromElWindow.left >= (ancestorProps.width + ancestorProps.fromElWindow.left)) ||
 
       // target el is to the left of the ancestor's visible area
-      ((elProps.fromElWindow.left + elProps.width) < ancestorProps.fromElWindow.left) ||
+      ((elProps.fromElWindow.left + elProps.width) <= ancestorProps.fromElWindow.left) ||
 
       // target el is under the ancestor's visible area
-      (elProps.fromElWindow.top > (ancestorProps.height + ancestorProps.fromElWindow.top)) ||
+      (elProps.fromElWindow.top >= (ancestorProps.height + ancestorProps.fromElWindow.top)) ||
 
       // target el is above the ancestor's visible area
-      ((elProps.fromElWindow.top + elProps.height) < ancestorProps.fromElWindow.top)
+      ((elProps.fromElWindow.top + elProps.height) <= ancestorProps.fromElWindow.top)
     ) {
       return true
     }
@@ -555,5 +558,11 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 /* eslint-enable no-cond-assign */
 
 export default {
-  isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsHidden, isW3CFocusable, isW3CRendered,
+  isVisible,
+  isHidden,
+  isStrictlyHidden,
+  isHiddenByAncestors,
+  getReasonIsHidden,
+  isW3CFocusable,
+  isW3CRendered,
 }

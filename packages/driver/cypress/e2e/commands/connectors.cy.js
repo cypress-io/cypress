@@ -785,8 +785,6 @@ describe('src/cy/commands/connectors', () => {
             cy.on('log:added', (attrs, log) => {
               this.lastLog = log
             })
-
-            return null
           })
 
           it('logs obj as a function', function () {
@@ -819,14 +817,32 @@ describe('src/cy/commands/connectors', () => {
             })
           })
 
-          it('can be disabled', function () {
-            cy.noop(this.obj).invoke({ log: true }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog.invoke('consoleProps').props).to.have.property('Function', '.sum(1, 2)')
-              this.lastLog = undefined
+          it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+            cy.on('_log:added', (attrs, log) => {
+              this.hiddenLog = log
             })
 
             cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog).to.be.undefined
+              const { lastLog, hiddenLog } = this
+
+              expect(lastLog).to.be.undefined
+              expect(hiddenLog).to.be.undefined
+            })
+          })
+
+          it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+            cy.on('_log:added', (attrs, log) => {
+              this.hiddenLog = log
+            })
+
+            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
+              const { lastLog, hiddenLog } = this
+
+              expect(lastLog).to.be.undefined
+
+              expect(hiddenLog.get('name'), 'log name').to.eq('invoke')
+              expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+              expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
             })
           })
         })
@@ -859,14 +875,9 @@ describe('src/cy/commands/connectors', () => {
             },
           }
 
-          this.logs = []
-
           cy.on('log:added', (attrs, log) => {
             this.lastLog = log
-            this.logs?.push(log)
           })
-
-          return null
         })
 
         it('logs $el if subject is element', () => {
@@ -1345,14 +1356,9 @@ describe('src/cy/commands/connectors', () => {
 
           this.obj.baz.lorem = 'ipsum'
 
-          this.logs = []
-
           cy.on('log:added', (attrs, log) => {
             this.lastLog = log
-            this.logs?.push(log)
           })
-
-          return null
         })
 
         it('logs immediately before resolving', (done) => {
@@ -1415,14 +1421,32 @@ describe('src/cy/commands/connectors', () => {
           })
         })
 
-        it('can be disabled', function () {
-          cy.noop(this.obj).its('num', { log: true }).then(function () {
-            expect(this.lastLog.invoke('consoleProps').props).to.have.property('Property', '.num')
-            this.lastLog = undefined
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
           })
 
           cy.noop(this.obj).its('num', { log: false }).then(function () {
-            expect(this.lastLog).to.be.undefined
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog).to.be.undefined
+            expect(hiddenLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.noop(this.obj).its('num', { log: false }).then(function () {
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog).to.be.undefined
+
+            expect(hiddenLog.get('name'), 'log name').to.eq('its')
+            expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
         })
       })

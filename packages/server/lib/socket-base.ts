@@ -145,7 +145,7 @@ export class SocketBase {
       onSpecChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
-      checkForAppErrors () {},
+      closeExtraTargets () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
@@ -412,7 +412,7 @@ export class SocketBase {
               case 'http:request':
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
-                return options.onResetServerState()
+                return options.onResetServerState(args[0])
               case 'log:memory:pressure':
                 return firefoxUtil.log()
               case 'firefox:force:gc':
@@ -478,6 +478,8 @@ export class SocketBase {
                 return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                   debug('error exporting telemetry data from browser %s', err)
                 })
+              case 'close:extra:targets':
+                return options.closeExtraTargets()
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

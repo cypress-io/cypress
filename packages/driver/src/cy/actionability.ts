@@ -479,8 +479,8 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
           }
         }
 
-        parent = $dom.getFirstScrollableParent(parent)
-      } while (parent)
+        parent = $dom.getParent(parent)
+      } while (parent.length)
     } catch (err) {
       // the above shouldn't error, but out of an abundance of caution, we
       // ignore any errors since this fix isn't worth failing the test over

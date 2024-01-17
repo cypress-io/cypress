@@ -1,3 +1,21 @@
+# [@cypress/webpack-dev-server-v3.7.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.2...@cypress/webpack-dev-server-v3.7.3) (2024-01-12)
+
+# [@cypress/webpack-dev-server-v3.7.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.1...@cypress/webpack-dev-server-v3.7.2) (2023-12-26)
+
+# [@cypress/webpack-dev-server-v3.7.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.0...@cypress/webpack-dev-server-v3.7.1) (2023-11-22)
+
+
+### Bug Fixes
+
+* Allow absolute paths in indexHtmlFile ([#28324](https://github.com/cypress-io/cypress/issues/28324)) ([dcd6a18](https://github.com/cypress-io/cypress/commit/dcd6a18d9b43707a240101696e7b718f97380149))
+
+# [@cypress/webpack-dev-server-v3.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.1...@cypress/webpack-dev-server-v3.7.0) (2023-11-07)
+
+
+### Features
+
+* add support for angular 17 ([#28152](https://github.com/cypress-io/cypress/issues/28152)) ([e8fc268](https://github.com/cypress-io/cypress/commit/e8fc26895354366211ace7e6550fe38c348c28bd))
+
 # [@cypress/webpack-dev-server-v3.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.0...@cypress/webpack-dev-server-v3.6.1) (2023-09-07)
 
 # [@cypress/webpack-dev-server-v3.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.3...@cypress/webpack-dev-server-v3.6.0) (2023-09-07)

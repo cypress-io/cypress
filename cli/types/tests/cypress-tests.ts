@@ -1159,6 +1159,39 @@ namespace CypressLocalStorageTests {
   cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
 }
 
+namespace CypressRetriesSpec {
+  Cypress.config('retries', {
+    openMode: 0,
+    runMode: 1
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-and-pass-on-threshold",
+    experimentalOptions: {
+      maxRetries: 2,
+      passesRequired: 2
+    }
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-but-always-fail",
+    experimentalOptions: {
+      maxRetries: 2,
+      stopIfAnyPassed: true
+    }
+  })
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { passesRequired: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { stopIfAnyPassed: true} }) // $ExpectError
+}
+
 namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).prevUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>

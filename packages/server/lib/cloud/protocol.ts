@@ -72,6 +72,14 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
+  get networkEnableOptions () {
+    return this.protocolEnabled ? {
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
+      maxPostDataSize: 64 * 1024,
+    } : undefined
+  }
+
   async setupProtocol (script: string, options: ProtocolManagerOptions) {
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 
