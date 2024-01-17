@@ -2397,35 +2397,28 @@ jobs:
         description: Executor name to use
         type: executor
         default: cy-doc
-      wd:
-        description: Working directory, should be OUTSIDE cypress monorepo folder
-        type: string
-        default: /root/test-full-typescript
     <<: *defaults
     resource_class: small
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
-      - run: mkdir <<parameters.wd>>
+      - clone-repo-and-checkout-branch:
+          repo: cypress-test-tiny
       - run:
-          name: Create new NPM package ⚗️
-          working_directory: <<parameters.wd>>
-          command: npm init -y
+          name: Checkout Typescript Example
+          command: |
+            git checkout full-typescript
       - run:
           name: Install dependencies 📦
-          working_directory: <<parameters.wd>>
+          working_directory: /tmp/cypress-test-tiny
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
             npm install /root/cypress/cypress.tgz typescript
       - run:
-          name: Scaffold full TypeScript project 🏗
-          working_directory: <<parameters.wd>>
-          command: npx @bahmutov/cly@1.9.0 init --typescript
-      - run:
           name: Run project tests 🗳
-          working_directory: <<parameters.wd>>
-          command: npx cypress run
+          working_directory: /tmp/cypress-test-tiny
+          command: npm run cypress:run
 
   # install NPM + binary zip and run against staging API
   test-binary-against-staging:
@@ -2576,7 +2569,6 @@ jobs:
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir test-binary
       - run:
           # install NPM from built NPM package folder
           name: Install Cypress
