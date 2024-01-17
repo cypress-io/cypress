@@ -47,7 +47,8 @@ export default (Commands, Cypress, cy, state, config) => {
       return _.identity
     }
 
-    const log = options.log !== false && Cypress.log({
+    const log = Cypress.log({
+      hidden: options.log === false,
       snapshot: true,
       autoEnd: false,
       timeout: 0,
@@ -102,7 +103,8 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addQuery('debug', function debug (options: Partial<Cypress.Loggable> = {}) {
-    options.log !== false && Cypress.log({
+    Cypress.log({
+      hidden: options.log === false,
       snapshot: true,
       end: true,
       timeout: 0,

@@ -23,6 +23,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
+import type Protocol from 'devtools-protocol'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -342,13 +343,38 @@ export class ProjectBase extends EE {
       this.server.addPendingUrlWithoutPreRequest(downloadUrl)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)
+    const onServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+      this.server.updateServiceWorkerRegistrations(data)
+    }
+
+    const onServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+      this.server.updateServiceWorkerVersions(data)
+    }
+
+    const onServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorURL: string }) => {
+      this.server.updateServiceWorkerClientSideRegistrations(data)
+    }
+
+    this._automation = new Automation({
+      cyNamespace: namespace,
+      cookieNamespace: socketIoCookie,
+      screenshotsFolder,
+      onBrowserPreRequest,
+      onRequestEvent,
+      onRequestServedFromCache,
+      onRequestFailed,
+      onDownloadLinkClicked,
+      onServiceWorkerRegistrationUpdated,
+      onServiceWorkerVersionUpdated,
+      onServiceWorkerClientSideRegistrationUpdated,
+    })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
       onSavedStateChanged: (state: any) => this.saveState(state),
+      closeExtraTargets: this.closeExtraTargets,
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware
@@ -415,6 +441,10 @@ export class ProjectBase extends EE {
 
   async resetBrowserState () {
     return this.server.socket.resetBrowserState()
+  }
+
+  closeExtraTargets () {
+    return browsers.closeExtraTargets()
   }
 
   isRunnerSocketConnected () {

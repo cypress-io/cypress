@@ -114,35 +114,36 @@ export type StartOptions = {
   // If set, expect input frames as webm chunks.
   webmInput?: boolean
   // Callback for asynchronous errors in video capturing/compression.
-  onError?: (err: Error, stdout: string, stderr: string) => void
+  onError?: (err: Error) => void
 }
 
 export function start (options: StartOptions) {
   const pt = new stream.PassThrough()
   const ended = deferredPromise()
-  let done = false
+  let doneCapturing = false
   let wantsWrite = true
-  let skippedChunksCount = 0
-  let writtenChunksCount = 0
+  let skippedFramesCount = 0
+  let writtenFramesCount = 0
 
   _.defaults(options, {
     onError () {},
   })
 
-  const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
-    debugFrames('frames written:', writtenChunksCount)
+  const endVideoCapture = function (waitForMoreFrames = true) {
+    debugFrames('frames written:', writtenFramesCount)
 
     // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
     // written to the stream, so we don't end capture until we get at least 2
-    if (writtenChunksCount < 2) {
+    if (writtenFramesCount < 2 && waitForMoreFrames) {
       return new Bluebird((resolve) => {
         pt.once('data', resolve)
       })
       .then(() => endVideoCapture())
-      .timeout(waitForMoreChunksTimeout)
+      .timeout(3000)
+      .catch(() => endVideoCapture(false))
     }
 
-    done = true
+    doneCapturing = true
 
     pt.end()
 
@@ -158,7 +159,7 @@ export function start (options: StartOptions) {
     // our stream yet because paint
     // events can linger beyond
     // finishing the actual video
-    if (done) {
+    if (doneCapturing) {
       return
     }
 
@@ -185,7 +186,7 @@ export function start (options: StartOptions) {
       lengths[data.length] = true
     }
 
-    writtenChunksCount++
+    writtenFramesCount++
 
     debugFrames('writing video frame')
 
@@ -200,9 +201,9 @@ export function start (options: StartOptions) {
         })
       }
     } else {
-      skippedChunksCount += 1
+      skippedFramesCount += 1
 
-      return debugFrames('skipping video frame %o', { skipped: skippedChunksCount })
+      return debugFrames('skipping video frame %o', { skipped: skippedFramesCount })
     }
   }
 
@@ -228,8 +229,14 @@ export function start (options: StartOptions) {
       }).on('error', (err, stdout, stderr) => {
         debug('capture errored: %o', { error: err.message, stdout, stderr })
 
-        // bubble errors up
-        options.onError?.(err, stdout, stderr)
+        if (err.message.includes('ffmpeg exited with code 1: pipe:0')) {
+          err.message = 'Insufficient frames captured to create video.'
+        }
+
+        // bubble errors up if occurs before endCapture is called
+        if (!doneCapturing) {
+          options.onError?.(err)
+        }
 
         // reject the ended promise
         return ended.reject(err)

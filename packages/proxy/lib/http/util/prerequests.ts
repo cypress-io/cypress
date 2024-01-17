@@ -94,6 +94,16 @@ class QueueMap<T> {
   }
 }
 
+const tryDecodeURI = (url: string) => {
+  // decodeURI can throw if the url is malformed
+  // in this case, we just return the original url
+  try {
+    return decodeURI(url)
+  } catch (e) {
+    return url
+  }
+}
+
 // This class' purpose is to match up incoming "requests" (requests from the browser received by the http proxy)
 // with "pre-requests" (events received by our browser extension indicating that the browser is about to make a request).
 // Because these come from different sources, they can be out of sync, arriving in either order.
@@ -147,8 +157,9 @@ export class PreRequests {
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
+    const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
+
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${browserPreRequest.url}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -193,7 +204,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${url}`
+    const key = `GET-${tryDecodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -220,28 +231,16 @@ export class PreRequests {
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
-    // The initial request that loads the service worker does not get sent to CDP and it happens prior
-    // to the service worker target being added. Thus, we need to explicitly ignore it. We determine
-    // it's the service worker request via the `sec-fetch-dest` header
-    if (req.headers['sec-fetch-dest'] === 'serviceworker') {
-      ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
-
-      callback({
-        noPreRequestExpected: true,
-      })
-
-      return
-    }
-
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${req.proxiedUrl}`
+    const key = `${req.method}-${tryDecodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+
       callback({
         browserPreRequest: {
           ...pendingPreRequest.browserPreRequest,

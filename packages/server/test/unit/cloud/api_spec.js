@@ -1524,20 +1524,26 @@ describe('lib/cloud/api', () => {
 
   context('.updateInstanceArtifacts', () => {
     beforeEach(function () {
-      this.artifactProps = {
+      this.artifactOptions = {
         runId: 'run-id-123',
         instanceId: 'instance-id-123',
+      }
+
+      this.artifactProps = {
         screenshots: [{
           url: `http://localhost:1234/screenshots/upload/instance-id-123/a877e957-f90e-4ba4-9fa8-569812f148c4.png`,
           uploadSize: 100,
+          uploadDuration: 100,
         }],
         video: {
           url: `http://localhost:1234/video/upload/instance-id-123/f17754c4-581d-4e08-a922-1fa402f9c6de.mp4`,
           uploadSize: 122,
+          uploadDuration: 100,
         },
         protocol: {
           url: `http://localhost:1234/protocol/upload/instance-id-123/2ed89c81-e7eb-4b97-8a6e-185c410471df.db`,
           uploadSize: 123,
+          uploadDuration: 100,
         },
       }
       // TODO: add schema validation
@@ -1546,7 +1552,7 @@ describe('lib/cloud/api', () => {
     it('PUTs/instances/:id/artifacts', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.artifactProps.runId)
+      .matchHeader('x-cypress-run-id', this.artifactOptions.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
@@ -1557,7 +1563,7 @@ describe('lib/cloud/api', () => {
       })
       .reply(200)
 
-      return api.updateInstanceArtifacts(this.artifactProps)
+      return api.updateInstanceArtifacts(this.artifactOptions, this.artifactProps)
     })
   })
 })

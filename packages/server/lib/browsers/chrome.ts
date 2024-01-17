@@ -438,9 +438,6 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
-    // control memory caching per execution context so that font flooding does not occur: https://github.com/cypress-io/cypress/issues/28215
-    args.push('--enable-features=ScopeMemoryCachePerContext')
-
     return args
   },
 
@@ -538,9 +535,10 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
+      pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)
@@ -614,7 +612,15 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, protocolManager: options.protocolManager, fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({
+      hosts: ['127.0.0.1'],
+      port,
+      browserName: browser.displayName,
+      onAsynchronousError: options.onError,
+      onReconnect,
+      protocolManager: options.protocolManager,
+      fullyManageTabs: true,
+    })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -653,5 +659,9 @@ export = {
     // return the launched browser process
     // with additional method to close the remote connection
     return launchedBrowser
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

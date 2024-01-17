@@ -16,9 +16,9 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "circular-json": "0.5.9",
     "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
+    "flatted": "3.2.9",
     "socket.io": "4.0.1",
     "socket.io-client": "4.0.1",
     "uuid": "8.3.2"
@@ -28,6 +28,7 @@
     "@types/uuid": "8.3.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
+    "devtools-protocol": "0.0.927104",
     "mocha": "3.5.3",
     "resolve-pkg": "2.0.0"
   },
@@ -39,6 +40,7 @@
   "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
+      "devtools-protocol",
       "engine.io",
       "engine.io-parser",
       "socket.io",

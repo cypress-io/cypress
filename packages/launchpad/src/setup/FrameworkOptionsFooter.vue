@@ -1,4 +1,4 @@
-<template>
+<template role="option">
   <div class="flex bg-gray-50 h-[48px] py-[12px] px-[17px] text-gray-800 items-center">
     <div>
       <Icon
