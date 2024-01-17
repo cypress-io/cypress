@@ -448,15 +448,12 @@ export class Http {
     }
   }
 
-  reset (options: { resetPreRequests: boolean, resetBetweenSpecs: boolean }) {
+  reset (options: { resetBetweenSpecs: boolean }) {
     this.buffers.reset()
     this.setAUTUrl(undefined)
 
-    if (options.resetPreRequests) {
-      this.preRequests.reset()
-    }
-
     if (options.resetBetweenSpecs) {
+      this.preRequests.reset()
       this.serviceWorkerManager = new ServiceWorkerManager()
     }
   }

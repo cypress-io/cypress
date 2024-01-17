@@ -214,22 +214,22 @@ describe('http', function () {
       httpOpts = { config: {}, middleware: {} }
     })
 
-    it('resets preRequests when resetPreRequests is true', function () {
+    it('resets preRequests when resetBetweenSpecs is true', function () {
       const http = new Http(httpOpts)
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: true, resetBetweenSpecs: false })
+      http.reset({ resetBetweenSpecs: true })
 
       expect(http.preRequests.reset).to.be.calledOnce
     })
 
-    it('does not reset preRequests when resetPreRequests is false', function () {
+    it('does not reset preRequests when resetBetweenSpecs is false', function () {
       const http = new Http(httpOpts)
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: false, resetBetweenSpecs: false })
+      http.reset({ resetBetweenSpecs: false })
 
       expect(http.preRequests.reset).to.not.be.called
     })
