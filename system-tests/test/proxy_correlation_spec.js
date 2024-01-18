@@ -65,6 +65,7 @@ describe('e2e proxy correlation spec', () => {
     },
     config: {
       experimentalWebKitSupport: true,
+      defaultCommandTimeout: 10000,
     },
     onStderr (stderr) {
       const requests = timedOutRequests(stderr)
