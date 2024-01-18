@@ -25,7 +25,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
     manager.addInitiatorToServiceWorker({
       scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/index.html',
+      initiatorOrigin: 'http://localhost:8080/',
     })
 
     // A script request emanated from the service worker's initiator is controlled
@@ -182,7 +182,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
     manager.addInitiatorToServiceWorker({
       scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/index.html',
+      initiatorOrigin: 'http://localhost:8080/',
     })
 
     // A script request emanated from the service worker's initiator is controlled
@@ -339,7 +339,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
     manager.addInitiatorToServiceWorker({
       scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/index.html',
+      initiatorOrigin: 'http://localhost:8080/',
     })
 
     // A script request emanated from the service worker's initiator is controlled
@@ -496,7 +496,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
     manager.addInitiatorToServiceWorker({
       scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/index.html',
+      initiatorOrigin: 'http://localhost:8080/',
     })
 
     // A script request emanated from the service worker's initiator is controlled
@@ -569,7 +569,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
     manager.addInitiatorToServiceWorker({
       scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/index.html',
+      initiatorOrigin: 'http://localhost:8080/',
     })
 
     // A script request emanated from the service worker's initiator is controlled
