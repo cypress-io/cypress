@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.4
+
+_Released 1/30/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#27731](https://github.com/cypress-io/cypress/pull/28748).
+
 ## 13.6.3
 
 _Released 1/16/2024_
