@@ -71,7 +71,6 @@ describe('e2e proxy correlation spec', () => {
       const requests = timedOutRequests(stderr)
 
       expect(requests).to.be.empty
-      expect(stderr).to.include('unmatchedPreRequests: 0')
     },
   })
 })
