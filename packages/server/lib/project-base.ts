@@ -416,7 +416,7 @@ export class ProjectBase extends EE {
         reporterInstance.emit(event, runnable)
 
         if (event === 'test:before:run') {
-          debugVerbose('browserPreRequests prior to running %s: %o', runnable.title, this.server.getBrowserPreRequests())
+          debugVerbose('browserPreRequests prior to running %s: %O', runnable.title, this.server.getBrowserPreRequests())
 
           this.emit('test:before:run', {
             runnable,

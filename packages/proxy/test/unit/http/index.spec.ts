@@ -80,6 +80,44 @@ describe('http', function () {
       })
     })
 
+    it('creates fake pending browser pre request', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          requestId: '1234',
+          errorHandled: false,
+        }
+
+        this.res.destroyed = false
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-expect-error
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(http.addPendingBrowserPreRequest).to.be.calledOnceWith({
+          requestId: '1234-retry-1',
+          errorHandled: false,
+        })
+
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
     it('ensures not to create fake pending browser pre requests on multiple errors', function () {
       incomingRequest.callsFake(function () {
         this.req.browserPreRequest = {
@@ -106,6 +144,39 @@ describe('http', function () {
         expect(incomingResponse).to.not.be.called
         expect(http.addPendingBrowserPreRequest).to.not.be.called
         expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
+    it('does not create fake pending browser pre request when the response is destroyed', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          errorHandled: false,
+        }
+
+        this.res.destroyed = true
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-expect-error
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(http.addPendingBrowserPreRequest).to.not.be.called
         expect(on).to.not.be.called
         expect(off).to.be.calledThrice
       })

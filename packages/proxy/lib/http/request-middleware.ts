@@ -100,7 +100,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     shouldCorrelatePreRequest: shouldCorrelatePreRequests,
   })
 
-  if (!this.shouldCorrelatePreRequests()) {
+  if (!shouldCorrelatePreRequests) {
     span?.end()
 
     return this.next()
