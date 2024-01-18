@@ -489,8 +489,8 @@ export class Http {
     this.serviceWorkerManager.updateServiceWorkerVersions(data)
   }
 
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
-    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorURL: data.initiatorURL })
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
+    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorOrigin: data.initiatorOrigin })
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {

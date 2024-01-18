@@ -335,7 +335,7 @@ describe('http', function () {
       const addInitiatorToServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'addInitiatorToServiceWorker')
       const registration = {
         scriptURL: 'foo',
-        initiatorURL: 'bar',
+        initiatorOrigin: 'bar',
       }
 
       http.updateServiceWorkerClientSideRegistrations(registration)

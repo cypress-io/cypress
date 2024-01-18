@@ -516,7 +516,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.updateServiceWorkerVersions(data)
   }
 
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
   }
 

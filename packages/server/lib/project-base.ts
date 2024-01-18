@@ -351,7 +351,7 @@ export class ProjectBase extends EE {
       this.server.updateServiceWorkerVersions(data)
     }
 
-    const onServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorURL: string }) => {
+    const onServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorOrigin: string }) => {
       this.server.updateServiceWorkerClientSideRegistrations(data)
     }
 

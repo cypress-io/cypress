@@ -1,5 +1,3 @@
-navigator.serviceWorker?.register(new URL('http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service-worker.js'))
-
 navigator.serviceWorker?.ready.then(async () => {
   const exampleResponse = await fetch('/cypress/fixtures/service-worker-assets/example.json')
   const example = await exampleResponse.json()
