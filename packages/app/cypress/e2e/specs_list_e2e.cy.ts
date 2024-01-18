@@ -319,11 +319,14 @@ describe('App: Spec List (E2E)', () => {
         clearSearchAndType(targetSpecFile)
         cy.contains('a', targetSpecFile).click()
 
+        // make sure we are on the spec view before clicking back to the specs list
+        cy.findByTestId('runnable-header').contains(targetSpecFile)
+
         cy.contains('input', targetSpecFile).should('not.exist')
 
         cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
 
-        cy.get('input').should('be.visible').and('have.value', targetSpecFile)
+        cy.get('@searchField').should('be.visible').and('have.value', targetSpecFile)
 
         cy.findByTestId('sidebar-link-specs-page').click()
 
