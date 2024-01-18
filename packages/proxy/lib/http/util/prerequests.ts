@@ -275,6 +275,7 @@ export class PreRequests {
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
         ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -308,7 +309,10 @@ export class PreRequests {
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue
-    this.pendingRequests.forEach(({ callback, timeout }) => {
+    this.pendingRequests.forEach(({ callback, timeout, timedOut }) => {
+      // If the request has already timed out, just return
+      if (timedOut) return
+
       clearTimeout(timeout)
       metrics.unmatchedRequests++
       callback?.({
