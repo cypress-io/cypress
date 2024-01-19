@@ -372,7 +372,7 @@ export class Http {
 
       ctx.error = error
 
-      // if there is a pre-request and the error has not been handled and the request has not been destroyed
+      // if there is a pre-request and the error has not been handled and the response has not been destroyed
       // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
       //
       // browsers will retry requests in the event of network errors, but they will not send pre-requests,
