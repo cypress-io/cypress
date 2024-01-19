@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "./changelog.js",
+  "commit": false,
+  "fixed": [["cypress", "@packages/*"]],
+  "linked": [
+    []
+  ],
+  "access": "restricted",
+  "baseBranch": "npm-package-versions",
+  "updateInternalDependencies": "patch",
+  "ignore": [],
+  "snapshot": {
+    "useCalculatedVersion": true,
+    "prereleaseTemplate": "{tag}-{commit}"
+  },
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "updateInternalDependents": "out-of-range",
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
+}

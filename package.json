@@ -72,6 +72,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
+    "@changesets/cli": "2.27.1",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "^3.0.0",
     "@cypress/request-promise": "^5.0.0",

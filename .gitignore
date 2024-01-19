@@ -8,6 +8,7 @@ build
 _test-output
 cypress.zip
 .babel-cache
+# packages/*/CHANGELOG.md
 
 # from config, compiled .js files
 packages/config/src/*.js
