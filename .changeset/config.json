@@ -8,7 +8,6 @@
   ],
   "access": "restricted",
   "baseBranch": "npm-package-versions",
-  "updateInternalDependencies": "patch",
   "ignore": [],
   "snapshot": {
     "useCalculatedVersion": true,
