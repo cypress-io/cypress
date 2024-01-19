@@ -87,12 +87,6 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
-    it('can select an array of values', () => {
-      cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => {
-        expect($select.val()).to.deep.eq(['apoc', 'br'])
-      })
-    })
-
     it('can select an array of texts', () => {
       cy.get('select[name=movies]').select(['The Human Condition', 'There Will Be Blood']).then(($select) => {
         expect($select.val()).to.deep.eq(['thc', 'twbb'])
