@@ -81,6 +81,10 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
+export function domainPropsToHostname ({ domain, subdomain, tld }: Record<string, any>) {
+  return _.compact([subdomain, domain, tld]).join('.')
+}
+
 /**
  * same-origin: Whether or not a a urls scheme, port, and host match. @see https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
  * same-super-domain-origin: Whether or not a url's scheme, domain, top-level domain, and port match

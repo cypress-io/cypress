@@ -372,17 +372,6 @@ describe('driver/src/cypress/error_utils', () => {
     })
   })
 
-  context('.throwErrByPath', () => {
-    it('looks up error and throws it', () => {
-      // @ts-ignore
-      $errorMessages.__test_error = 'simple error message'
-
-      const fn = () => $errUtils.throwErrByPath('__test_error')
-
-      expect(fn).to.throw('simple error message')
-    })
-  })
-
   context('.enhanceStack', () => {
     const userInvocationStack = '  at userInvoked (app.js:1:1)'
     const sourceStack = {

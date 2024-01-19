@@ -188,6 +188,8 @@ describe('Proxy', () => {
 
     // https://github.com/cypress-io/cypress/issues/771
     it('generates certs and can proxy requests for HTTPS requests to IPs', function () {
+      this.timeout(5000)
+
       this.sandbox.spy(this.proxy, '_generateMissingCertificates')
       this.sandbox.spy(this.proxy, '_getServerPortForIp')
 

@@ -191,8 +191,8 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
-
   _.defaults(obj, {
+    isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
     id: `log-${window.location.origin}-${counter}`,
     chainerId,
     state: 'pending',
@@ -311,6 +311,16 @@ export class Log {
       obj[key] = val
     }
 
+    // dont ever allow existing id's to be mutated
+    if (this.attributes.id) {
+      delete obj.id
+    }
+
+    // dont ever allow cross-origin log's updatedAtTimestamp value to be mutated by primary origin log
+    if (Cypress.isCrossOriginSpecBridge || !(obj.isCrossOriginLog || this.attributes.isCrossOriginLog)) {
+      obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
+    }
+
     const isHiddenLog = this.get('hidden') || obj.hidden
 
     if ('url' in obj) {
@@ -339,13 +349,6 @@ export class Log {
       _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
     }
 
-    // dont ever allow existing id's to be mutated
-    if (this.attributes.id) {
-      delete obj.id
-    }
-
-    obj.updatedAtTimestamp = performance.now() + performance.timeOrigin
-
     _.extend(this.attributes, obj)
 
     // if we have an consoleProps then re-wrap it
@@ -371,7 +374,7 @@ export class Log {
     return _.pick(this.attributes, args)
   }
 
-  private addSnapshot (snapshot, options, shouldRebindSnapshotFn = true) {
+  private addSnapshot (snapshot, options) {
     const snapshots = this.get('snapshots') || []
 
     // don't add snapshot if we couldn't create one, which can happen
@@ -384,7 +387,7 @@ export class Log {
 
     this.set('snapshots', snapshots)
 
-    if (options.next && shouldRebindSnapshotFn) {
+    if (options.next) {
       this.set('next', options.next)
     }
 
@@ -392,33 +395,20 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests and the protocol is not enabled
-    if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
+    // bail early and don't snapshot if
+    // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
+    // 2. we're in headless mode
+    // 3. or we're not storing tests and the protocol is not enabled
+    if (
+      (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
+      || (!this.config('isInteractive')
+      || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
 
     if (this.get('next')) {
       name = this.get('next')
       this.set('next', null)
-    }
-
-    if (!Cypress.isCrossOriginSpecBridge) {
-      const activeSpecBridgeOriginIfApplicable = this.state('currentActiveOrigin') || undefined
-      // @ts-ignore
-      const { origin: originThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('url'))
-
-      if (activeSpecBridgeOriginIfApplicable && activeSpecBridgeOriginIfApplicable === originThatIsSoonToBeOrIsActive) {
-        Cypress.emit('request:snapshot:from:spec:bridge', {
-          log: this,
-          name,
-          options,
-          specBridge: activeSpecBridgeOriginIfApplicable,
-          addSnapshot: this.addSnapshot,
-        })
-
-        return this
-      }
     }
 
     const snapshot = this.createSnapshot(name, this.get('$el'))
@@ -675,7 +665,7 @@ class LogManager {
 
       const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent)
 
-      log.set(defaults(state, config, options))
+      log.set(defaults(state, config, _.clone(options)))
 
       const onBeforeLog = state('onBeforeLog')
 

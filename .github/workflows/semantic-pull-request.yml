@@ -1,5 +1,21 @@
 name: "Semantic Pull Request"
-
+# @see https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
+permissions:
+  actions: none
+  checks: none
+  # to check out & read the repository
+  contents: read
+  deployments: none
+  id-token: none
+  issues: none
+  discussions: none
+  packages: none
+  pages: none
+  # to read pull-request data, including commits/issues linked
+  pull-requests: read
+  repository-projects: none
+  security-events: none
+  statuses: none
 on:
   pull_request_target:
     types:
