@@ -284,7 +284,7 @@ const events = {
   * test.retries has the max number of retries
   * test.neededBurnInAttempts has the number of burn-in attempts needed based on the logic above with latest score and burn-in config
   */
-const getMaxTotalRetriesOrBurnIn = function (test) {
+const getMaxTotalRetriesOrNeededBurnInAttempts = function (test) {
   return (Math.max(test.neededBurnInAttempts, test.retries + 1))
 }
 
