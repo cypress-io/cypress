@@ -1,6 +1,6 @@
 {
   "name": "@packages/app",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
@@ -29,8 +29,8 @@
     "@headlessui/vue": "1.4.0",
     "@iconify-json/mdi": "1.1.63",
     "@intlify/unplugin-vue-i18n": "0.10.0",
-    "@packages/frontend-shared": "0.0.0-development",
-    "@packages/telemetry": "0.0.0-development",
+    "@packages/frontend-shared": "^13",
+    "@packages/telemetry": "^13",
     "@percy/cypress": "^3.1.2",
     "@popperjs/core": "2.11.6",
     "@testing-library/cypress": "9.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@packages/errors",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "description": "Error definitions and utilities for Cypress",
   "main": "index.js",
   "browser": "src/index.ts",
@@ -22,8 +22,8 @@
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
-    "@packages/ts": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
+    "@packages/ts": "^13",
+    "@packages/types": "^13",
     "@types/chai": "4.2.15",
     "@types/mocha": "8.2.2",
     "@types/node": "18.17.5",

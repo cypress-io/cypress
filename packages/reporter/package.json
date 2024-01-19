@@ -1,6 +1,6 @@
 {
   "name": "@packages/reporter",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "browser": "src/main.tsx",
   "scripts": {
@@ -17,9 +17,9 @@
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "6.0.0",
-    "@packages/driver": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
-    "@packages/web-config": "0.0.0-development",
+    "@packages/driver": "^13",
+    "@packages/types": "^13",
+    "@packages/web-config": "^13",
     "@reach/dialog": "0.10.5",
     "classnames": "2.3.1",
     "css-element-queries": "1.2.3",

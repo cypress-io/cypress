@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -75,7 +75,7 @@
     "@cypress/svelte": "^2.0.0",
     "@cypress/vue": "^6.0.0",
     "@cypress/vue2": "^2.0.0",
-    "@packages/root": "0.0.0-development",
+    "@packages/root": "^13",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.40",

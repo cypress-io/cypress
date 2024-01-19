@@ -1,6 +1,6 @@
 {
   "name": "@packages/resolve-dist",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "fs-extra": "9.1.0"
   },
   "devDependencies": {
-    "@packages/ts": "0.0.0-development"
+    "@packages/ts": "^13"
   },
   "files": [
     "lib"

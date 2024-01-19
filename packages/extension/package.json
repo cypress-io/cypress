@@ -1,6 +1,6 @@
 {
   "name": "@packages/extension",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,8 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@packages/icons": "0.0.0-development",
-    "@packages/socket": "0.0.0-development",
+    "@packages/icons": "^13",
+    "@packages/socket": "^13",
     "chai": "3.5.0",
     "chokidar-cli": "2.1.0",
     "cross-env": "6.0.3",

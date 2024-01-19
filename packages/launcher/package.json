@@ -1,6 +1,6 @@
 {
   "name": "@packages/launcher",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "private": true,
   "scripts": {
     "check-ts": "tsc --noEmit",
@@ -25,8 +25,8 @@
     "win-version-info": "5.0.1"
   },
   "devDependencies": {
-    "@packages/ts": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
+    "@packages/ts": "^13",
+    "@packages/types": "^13",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "mocha": "3.5.3",

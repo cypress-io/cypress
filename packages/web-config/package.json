@@ -1,6 +1,6 @@
 {
   "name": "@packages/web-config",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "devDependencies": {
     "@babel/core": "7.23.2",
     "@babel/helper-define-map": "7.18.6",

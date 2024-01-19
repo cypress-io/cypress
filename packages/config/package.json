@@ -1,6 +1,6 @@
 {
   "name": "@packages/config",
-  "version": "0.0.0-development",
+  "version": "13.6.3",
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
   "main": "index.js",
@@ -32,10 +32,10 @@
     "return-deep-diff": "0.4.0"
   },
   "devDependencies": {
-    "@packages/errors": "0.0.0-development",
-    "@packages/root": "0.0.0-development",
-    "@packages/ts": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
+    "@packages/errors": "^13",
+    "@packages/root": "^13",
+    "@packages/ts": "^13",
+    "@packages/types": "^13",
     "@types/mocha": "9.1.0",
     "babel-plugin-tester": "^10.1.0",
     "chai": "4.2.0",
