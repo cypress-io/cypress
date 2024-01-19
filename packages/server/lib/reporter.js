@@ -378,7 +378,7 @@ class Reporter {
           if (cypressTestMetaData?.attempts > 1) {
             const lastTestStatus = getIconStatus(test.state)
 
-            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrNeededBurnInAttempts(test)
 
             fmt =
             Array(indents).join('  ') +
@@ -396,7 +396,7 @@ class Reporter {
           // DON'T decorate the last test in the console as an attempt.
           if (cypressTestMetaData?.attempts > 1) {
             const lastTestStatus = getIconStatus(test.state)
-            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+            const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrNeededBurnInAttempts(test)
 
             fmt =
               Array(indents).join('  ') +
@@ -429,7 +429,7 @@ class Reporter {
         if (cypressTestMetaData?.attempts > 1) {
           const lastTestStatus = getIconStatus(test.state)
 
-          const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+          const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrNeededBurnInAttempts(test)
 
           const fmt =
             Array(indents).join('  ') +
@@ -550,7 +550,7 @@ class Reporter {
       }
     }
 
-    const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrBurnIn(test)
+    const maxTotalTestRetriesOrBurnIn = getMaxTotalRetriesOrNeededBurnInAttempts(test)
     const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, maxTotalTestRetriesOrBurnIn))
 
     // Log: `(Attempt 1 of 2) test title` when a test attempts without experimentalRetries configured.
