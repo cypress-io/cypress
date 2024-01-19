@@ -1,6 +1,6 @@
 {
   "name": "@cypress/grep",
-  "version": "0.0.0-development",
+  "version": "4.0.1",
   "description": "Filter tests using substring",
   "main": "src/support.js",
   "scripts": {

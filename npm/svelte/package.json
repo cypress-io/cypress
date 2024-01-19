@@ -1,6 +1,6 @@
 {
   "name": "@cypress/svelte",
-  "version": "0.0.0-development",
+  "version": "2.0.0",
   "description": "Browser-based Component Testing for Svelte.js with Cypress.io 🧡",
   "main": "dist/cypress-svelte.cjs.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "check-ts": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/mount-utils": "^4.0.0",
     "svelte": "^3.49.0",
     "typescript": "^4.7.4"
   },

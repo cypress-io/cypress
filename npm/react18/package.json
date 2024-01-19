@@ -1,6 +1,6 @@
 {
   "name": "@cypress/react18",
-  "version": "0.0.0-development",
+  "version": "2.0.0",
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
@@ -11,8 +11,8 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
-    "@cypress/mount-utils": "0.0.0-development",
-    "@cypress/react": "0.0.0-development",
+    "@cypress/mount-utils": "^4.0.0",
+    "@cypress/react": "^8.0.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@types/react": "^16",
