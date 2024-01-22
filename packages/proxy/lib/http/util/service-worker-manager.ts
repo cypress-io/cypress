@@ -120,6 +120,9 @@ export class ServiceWorkerManager {
       const activatedServiceWorker = registration.activatedServiceWorker
       const paramlessDocumentURL = browserPreRequest.documentURL.split('?')[0]
 
+      // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
+      // we have an activated service worker, the request URL does not come from the service worker, and the request
+      // originates from the same origin as the service worker or from a script that is also controlled by the service worker.
       if (!activatedServiceWorker ||
         activatedServiceWorker.scriptURL === paramlessDocumentURL ||
         !activatedServiceWorker.initiatorOrigin ||

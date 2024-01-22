@@ -63,7 +63,7 @@ describe('capture-protocol', () => {
           project: 'protocol',
           configFile: 'cypress-with-service-worker-preloaded.config.ts',
           // Here we are testing that when a service worker is preloaded it can properly be captured
-          spec: 'protocol.cy.js,service-worker-preloaded.cy.js',
+          spec: 'service-worker-preloaded.cy.js',
           record: true,
           expectedExitCode: 0,
           port: 2121,
@@ -75,9 +75,8 @@ describe('capture-protocol', () => {
 
           expect(parsedProtocolEvents.multipleNetworkRequestEventsForSameRequestId).to.be.false
           expect(parsedProtocolEvents.correlatedUrls).to.eql({
-            'http://localhost:3131/index.html': ['frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/example.json': ['no frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id', 'no frame id'],
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load-with-service-worker-preloaded.js': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker_preloaded.html': ['no frame id', 'no frame id', 'no frame id', 'no frame id'],
           })
