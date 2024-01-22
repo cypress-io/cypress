@@ -18,18 +18,16 @@
       aria-controls="dropzone"
       class="h-full text-[16px]"
       data-cy="addProjectButton"
-      size="lg"
-      :variant="showDropzone ? 'pending' : 'primary'"
+      size="40"
+      :variant="showDropzone ? 'indigo-light' : 'indigo-dark'"
       :aria-expanded="showDropzone"
       @click="toggleDropzone"
     >
-      <template #prefix>
-        <i-cy-add-large_x16
-          class="transform duration-150"
-          :class="showDropzone ?
-            'icon-dark-gray-100 rotate-45' : 'icon-dark-indigo-300'"
-        />
-      </template>
+      <i-cy-add-large_x16
+        class="duration-150 transform mr-[8px]"
+        :class="showDropzone ?
+          'icon-dark-gray-100 rotate-45' : 'icon-dark-indigo-300'"
+      />
       {{ t('globalPage.addProjectButton') }}
     </Button>
   </div>
@@ -55,7 +53,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import Input from '@cy/components/Input.vue'
 import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'

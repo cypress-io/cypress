@@ -69,9 +69,12 @@ const getPublisher = async function () {
     params: {
       Bucket: S3Configuration.bucket,
     },
-    accessKeyId: aws.accessKeyId,
-    secretAccessKey: aws.secretAccessKey,
-    sessionToken: aws.sessionToken,
+    credentials: {
+      accessKeyId: aws.accessKeyId,
+      secretAccessKey: aws.secretAccessKey,
+      sessionToken: aws.sessionToken,
+    },
+    region: 'us-east-1',
   })
 }
 
