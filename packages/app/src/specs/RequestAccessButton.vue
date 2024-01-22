@@ -1,31 +1,39 @@
 <template>
   <Button
     v-if="projectConnectionStatus === 'UNAUTHORIZED'"
-    :prefix-icon="SendIcon"
-    prefix-icon-class="icon-dark-white icon-light-transparent"
+    size="32"
     data-cy="request-access-button"
     @click="requestAccess"
   >
+    <IconObjectPaperAirplane
+      stroke-color="white"
+      fill-color="transparent"
+      class="mr-[8px]"
+    />
     {{ t("specPage.requestAccessButton") }}
   </Button>
   <Button
     v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
-    :prefix-icon="SendIcon"
-    prefix-icon-class="icon-dark-white icon-light-transparent"
+    size="32"
     data-cy="access-requested-button"
     class="btn-disabled"
     disabled
   >
+    <IconObjectPaperAirplane
+      stroke-color="white"
+      fill-color="transparent"
+      class="mr-[8px]"
+    />
     {{ t("specPage.requestSentButton") }}
   </Button>
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
-import SendIcon from '~icons/cy/paper-airplane_x16.svg'
+import { computed } from 'vue'
+import Button from '@cypress-design/vue-button'
+import { IconObjectPaperAirplane } from '@cypress-design/vue-icon'
 import { RequestAccessButtonFragment, RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 
 gql`

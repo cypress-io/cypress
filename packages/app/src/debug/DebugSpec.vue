@@ -156,24 +156,27 @@
             :disabled="!runAllFailuresState.disabled"
             :distance="8"
           >
-            <Button
+            <RouterLink
               data-cy="run-failures"
-              variant="white"
+              :class="[VariantClassesTable['outline-light'], SizeClassesTable[32]]"
               class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
-              :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath), mode: 'debug' } }"
+              :to="{
+                path: '/specs/runner',
+                query: {
+                  file: posixify(specData.fullPath),
+                  mode: 'debug'
+                }
+              }"
             >
-              <template #prefix>
-                <IconActionRefresh
-                  data-cy="icon-refresh"
-                  stroke-color="indigo-500"
-                />
-              </template>
+              <IconActionRefresh
+                data-cy="icon-refresh"
+                stroke-color="indigo-500"
+                class="mr-[8px]"
+              />
               <!-- Wrapping this with a default template to avoid an unneeded space -->
-              <template #default>
-                {{ t('debugPage.runFailures.btn') }}
-              </template>
-            </Button>
+              {{ t('debugPage.runFailures.btn') }}
+            </RouterLink>
             <template
               v-if="runAllFailuresState.disabled"
               #popper
@@ -219,14 +222,15 @@
 
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
+import { VariantClassesTable, SizeClassesTable } from '@cypress-design/constants-button'
+import { RouterLink } from 'vue-router'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
-import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
-import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import ResultCounts from '@cy/components/ResultCounts.vue'
+import Tooltip from '@cy/components/Tooltip.vue'
 import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
 import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'

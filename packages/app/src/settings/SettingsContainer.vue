@@ -47,11 +47,18 @@
     </p>
     <Button
       class="mx-auto group"
-      variant="outline"
-      :prefix-icon="SettingsIcon"
-      prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
+      variant="outline-light"
+      size="32"
       :href="t('settingsPage.footer.buttonLink')"
     >
+      <IconObjectGear
+        class="mr-[8px]"
+        stroke-color="gray-500"
+        fill-color="gray-50"
+        hocus-stroke-color="indigo-400"
+        hocus-fill-color="indigo-50"
+        interactive-on-group
+      />
       {{ t('settingsPage.footer.button') }}
     </Button>
   </div>
@@ -62,7 +69,7 @@
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
 import SettingsCard from './SettingsCard.vue'
@@ -74,8 +81,8 @@ import type { SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
-import SettingsIcon from '~icons/cy/settings_x16.svg'
 import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
+import { IconObjectGear } from '@cypress-design/vue-icon'
 
 const { t } = useI18n()
 

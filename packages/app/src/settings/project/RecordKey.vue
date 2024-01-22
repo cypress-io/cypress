@@ -31,11 +31,14 @@
         variant="outline"
       />
       <Button
-        variant="outline"
-        :prefix-icon="IconExport"
-        prefix-icon-class="icon-dark-gray-500"
+        variant="outline-light"
+        size="32"
         @click="openManageKeys"
       >
+        <IconActionExport
+          stroke-color="gray-500"
+          class="mr-[8px]"
+        />
         {{ t('settingsPage.recordKey.manageKeys') }}
       </Button>
     </div>
@@ -44,13 +47,13 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import Button from '@cypress-design/vue-button'
+import { IconActionExport } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
-import Button from '@cy/components/Button.vue'
 import CopyButton from '@cy/gql-components/CopyButton.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import IconTerminal from '~icons/cy/terminal_x16.svg'
-import IconExport from '~icons/cy/export_x16.svg'
 import type { RecordKeyFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
 import CodeBox from './CodeBox.vue'

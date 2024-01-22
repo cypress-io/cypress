@@ -15,27 +15,28 @@
       <slot />
     </p>
     <Button
-      :prefix-icon="buttonIcon"
-      prefix-icon-class="icon-dark-white icon-light-transparent"
       :disabled="buttonDisabled"
       @click="emit('button-click')"
     >
+      <IconForButton class="icon-dark-white icon-light-transparent mr-[8px]" />
       {{ buttonText }}
     </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent, SVGAttributes } from 'vue'
-import Button from '@cy/components/Button.vue'
+import { computed, type FunctionalComponent, type SVGAttributes } from 'vue'
+import Button from '@cypress-design/vue-button'
 
-defineProps<{
+const props = defineProps<{
   icon: 'access' | 'error'
   message: string
   buttonText: string
   buttonIcon: FunctionalComponent<SVGAttributes, {}>
   buttonDisabled?: boolean
 }>()
+
+const IconForButton = computed(() => props.buttonIcon ?? undefined)
 
 const emit = defineEmits<{
   (event: 'button-click'): void

@@ -3,7 +3,7 @@
     <Alert
       :title="t('runner.automation.disconnected.title')"
       status="warning"
-      :icon="ErrorOutlineIcon"
+      :icon="IconStatusErroredOutline"
       :dismissible="false"
       class="w-full max-w-[600px]"
     >
@@ -12,18 +12,24 @@
           {{ t('runner.automation.disconnected.description') }}
         </p>
         <Button
-          size="md"
-          :prefix-icon="RefreshIcon"
-          prefix-icon-class="icon-dark-white"
+          size="32"
           @click="relaunch"
         >
+          <IconActionRefresh
+            stroke-color="white"
+            class="mr-[8px]"
+          />
           {{ t('runner.automation.disconnected.reload') }}
         </Button>
         <ExternalLink
           class="mt-[16px] text-indigo-500"
           href="https://on.cypress.io/launching-browsers"
         >
-          <i-cy-book_x16 class="ml-[8px] -top-[2px] relative inline-block icon-dark-indigo-500 icon-light-indigo-100" />
+          <IconObjectBook
+            stroke-color="indigo-500"
+            fill-color="indigo-100"
+            class="ml-[8px] -top-[2px] relative inline-block"
+          />
           {{ t('runner.automation.shared.link') }}
         </ExternalLink>
       </div>
@@ -32,16 +38,15 @@
 </template>
 
 <script setup lang="ts">
+import Button from '@cypress-design/vue-button'
+import { IconActionRefresh, IconObjectBook, IconStatusErroredOutline } from '@cypress-design/vue-icon'
 import AutInfo from './AutInfo.vue'
-import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import RefreshIcon from '~icons/cy/refresh_x16'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { AutomationDisconnected_RelaunchBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Alert from '@cy/components/Alert.vue'
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const { t } = useI18n()
 
