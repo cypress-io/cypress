@@ -21,17 +21,22 @@
 
     <Button
       :href="createOrganizationUrl"
-      :include-graphql-port="true"
+      size="32"
       data-cy="create-organization-button"
-      :prefix-icon="OrganizationIcon"
-      prefix-icon-class="icon-dark-white icon-light-indigo-500"
     >
+      <IconGeneralOfficeBuilding
+        class="mr-[8px]"
+        stroke-color="white"
+        fill-color="indigo-500"
+      />
       {{ t('specPage.banners.createOrganization.buttonLabel') }}
     </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
+import Button from '@cypress-design/vue-button'
+import { IconGeneralOfficeBuilding } from '@cypress-design/vue-icon'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
@@ -41,7 +46,6 @@ import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 gql`
 query CreateOrganizationBanner {

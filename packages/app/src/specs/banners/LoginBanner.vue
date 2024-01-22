@@ -20,11 +20,14 @@
     </p>
 
     <Button
-      :prefix-icon="ConnectIcon"
       class="mt-[24px]"
+      size="32"
       data-cy="login-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Login Banner'})"
     >
+      <IconObjectChainLink
+        class="mr-[8px]"
+      />
       {{ t('specPage.banners.login.buttonLabel') }}
     </Button>
   </TrackedBanner>
@@ -33,11 +36,12 @@
 <script setup lang="ts">
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { IconObjectChainLink } from '@cypress-design/vue-icon'
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 defineProps<{

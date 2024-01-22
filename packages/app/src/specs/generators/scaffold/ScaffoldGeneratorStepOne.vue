@@ -45,7 +45,7 @@
     </ul>
     <StandardModalFooter>
       <Button
-        size="lg"
+        size="40"
         @click="emits('close')"
       >
         {{ t('createSpec.e2e.importFromScaffold.specsAddedButton') }}
@@ -56,12 +56,12 @@
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
+import Button from '@cypress-design/vue-button'
 import { ScaffoldGeneratorStepOne_E2eExamplesDocument } from '../../../generated/graphql'
 import { computed, onMounted } from 'vue'
 import { buildSpecTree } from '../../../specs/tree/useCollapsibleTree'
 import { useCollapsibleTree } from '../../tree/useCollapsibleTree'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
-import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import type { FoundSpec } from '@packages/types/src'
 

@@ -45,29 +45,41 @@
         <div>
           <Button
             v-if="cloudStatusMatches('isLoggedOut')"
-            :prefix-icon="UserOutlineIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="login-button"
             @click="emits('showLoginConnect')"
           >
+            <IconUserGeneralOutline
+              stroke-color="white"
+              fill-color="transparent"
+              class="mr-[8px]"
+            />
             {{ t('specPage.cloudLoginButton') }}
           </Button>
           <Button
             v-else-if="cloudStatusMatches('needsProjectConnect')"
-            :prefix-icon="ConnectIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="connect-button"
             @click="emits('showLoginConnect')"
           >
+            <IconObjectChainLink
+              stroke-color="white"
+              fill-color="transparent"
+              class="mr-[8px]"
+            />
             {{ t("specPage.connectProjectButton") }}
           </Button>
           <Button
             v-else-if="project.isNotFound"
-            :prefix-icon="ConnectIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
+            size="32"
             data-cy="reconnect-button"
             @click="emits('showLoginConnect')"
           >
+            <IconObjectChainLink
+              stroke-color="white"
+              fill-color="transparent"
+              class="mr-[8px]"
+            />
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
           <RequestAccessButton
@@ -81,12 +93,11 @@
 </template>
 
 <script setup lang="ts">
+import { IconObjectChainLink, IconUserGeneralOutline } from '@cypress-design/vue-icon'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import ConnectIcon from '~icons/cy/chain-link_x16.svg'
-import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'

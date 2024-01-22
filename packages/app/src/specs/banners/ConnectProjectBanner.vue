@@ -20,17 +20,18 @@
     </p>
 
     <Button
-      :prefix-icon="ConnectIcon"
       class="mt-[24px]"
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
     >
+      <IconObjectChainLink class="mr-[8px]" />
       {{ t('specPage.banners.connectProject.buttonLabel') }}
     </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
+import { IconObjectChainLink } from '@cypress-design/vue-icon'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
