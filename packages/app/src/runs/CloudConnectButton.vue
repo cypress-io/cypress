@@ -24,7 +24,7 @@
 import Button from '@cypress-design/vue-button'
 import { IconObjectChainLink, IconTechnologyCypress } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
-import { useUserProjectStatusStore } from '@cy/store/user-project-status-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const { openLoginConnectModal, user } = useUserProjectStatusStore()
 

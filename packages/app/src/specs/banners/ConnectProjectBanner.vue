@@ -21,6 +21,7 @@
 
     <Button
       class="mt-[24px]"
+      size="32"
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
     >
@@ -32,9 +33,9 @@
 
 <script setup lang="ts">
 import { IconObjectChainLink } from '@cypress-design/vue-icon'
+import Button from '@cypress-design/vue-button'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
-import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'

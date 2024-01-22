@@ -18,20 +18,23 @@
     <Button
       data-cy="no-results-clear"
       class="mx-auto mt-[20px]"
-      size="lg"
-      variant="outline"
+      size="40"
+      variant="outline-light"
       @click="emit('clear')"
     >
-      <template #prefix>
-        <i-cy-delete_x12 class="w-[12px] icon-dark-gray-400" />
-      </template>
+      <IconActionDelete
+        stroke-color="gray-400"
+        class="w-[12px] mr-[8px]"
+      />
+
       {{ t('noResults.clearSearch') }}
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from './Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconActionDelete } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 

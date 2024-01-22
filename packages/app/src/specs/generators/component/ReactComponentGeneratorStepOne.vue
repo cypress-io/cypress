@@ -46,22 +46,31 @@
           v-if="result"
           class="flex gap-[16px] items-center"
         >
-          <Button
-            size="lg"
-            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: 'true' } }"
-            :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
+          <RouterButton
+            size="40"
+            variant="indigo-dark"
+            :to="{
+              name: 'SpecRunner',
+              query: {
+                file: posixify(result.file.relative)
+              },
+              params: {
+                shouldShowTroubleRenderingAlert: 'true'
+              }
+            }"
             @click="emits('close')"
           >
-            {{ t('createSpec.successPage.runSpecButton') }}
-          </Button>
+            <IconTechnologyTestResults stroke-color="white" />
+            {{
+              t('createSpec.successPage.runSpecButton')
+            }}
+          </RouterButton>>
           <Button
-            size="lg"
-            :prefix-icon="PlusButtonIcon"
-            prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
-            variant="outline"
+            size="40"
+            variant="outline-light"
             @click="emits('restart')"
           >
+            <IconActionAddLarge stroke-color="gray-500" />
             {{ t('createSpec.successPage.createAnotherSpecButton') }}
           </Button>
         </StandardModalFooter>
@@ -75,6 +84,8 @@
 </template>
 <script setup lang="ts">
 import { useVModels, whenever } from '@vueuse/core'
+import { IconActionAddLarge, IconTechnologyTestResults } from '@cypress-design/vue-icon'
+import Button from '@cypress-design/vue-button'
 import { useI18n } from '@cy/i18n'
 import ExpandableFileChooser from '../ExpandableFileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
@@ -83,12 +94,10 @@ import { gql, useQuery, useMutation } from '@urql/vue'
 import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import { ReactComponentGeneratorStepOneDocument, ReactComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
-import Button from '@cy/components/Button.vue'
-import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
-import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
 import ReactComponentList from './ReactComponentList.vue'
 import { posixify } from '../../../paths'
+import RouterButton from '../../../components/RouterButton.vue'
 
 const props = defineProps<{
   title: string

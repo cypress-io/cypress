@@ -156,9 +156,10 @@
             :disabled="!runAllFailuresState.disabled"
             :distance="8"
           >
-            <RouterLink
+            <RouterButton
               data-cy="run-failures"
-              :class="[VariantClassesTable['outline-light'], SizeClassesTable[32]]"
+              variant="indigo-dark"
+              size="32"
               class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
               :to="{
@@ -174,9 +175,8 @@
                 stroke-color="indigo-500"
                 class="mr-[8px]"
               />
-              <!-- Wrapping this with a default template to avoid an unneeded space -->
               {{ t('debugPage.runFailures.btn') }}
-            </RouterLink>
+            </RouterButton>
             <template
               v-if="runAllFailuresState.disabled"
               #popper
@@ -188,7 +188,8 @@
                 <span class="text-center">{{ runAllFailuresState.message }}</span>
                 <Button
                   v-if="runAllFailuresState.cta"
-                  variant="text"
+                  variant="outline-gray"
+                  size="32"
                   class="rounded-md font-medium bg-gray-800 my-[12px]"
                   @click="runAllFailuresState.cta?.action"
                 >
@@ -222,8 +223,7 @@
 
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
-import { VariantClassesTable, SizeClassesTable } from '@cypress-design/constants-button'
-import { RouterLink } from 'vue-router'
+import Button from '@cypress-design/vue-button'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
@@ -237,6 +237,7 @@ import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
 import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
 import OpenFileInIDE from '@cy/gql-components/OpenFileInIDE.vue'
+import RouterButton from '../components/RouterButton.vue'
 
 export interface Spec {
   id: string
