@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.4
+
+_Released 1/30/2024 (PENDING)_
+
+**Misc:**
+
+- Improved accessibility of some areas of the Cypress App. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
+
 ## 13.6.3
 
 _Released 1/16/2024_
