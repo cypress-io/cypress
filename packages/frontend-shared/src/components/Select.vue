@@ -71,7 +71,10 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
+          <ListboxOptions
+            as="div"
+            class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none"
+          >
             <ListboxOption
               v-for="option in props.options"
               :key="get(option, itemKey)"
