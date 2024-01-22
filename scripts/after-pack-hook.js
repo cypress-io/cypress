@@ -105,7 +105,7 @@ module.exports = async function (params) {
         exePathPerPlatform[os.platform()],
         {
           version: FuseVersion.V1,
-          resetAdHocDarwinSignature: process.env.RESET_ADHOC_SIGNATURE === '1' && os.platform() === 'darwin' && os.arch() === 'arm64',
+          resetAdHocDarwinSignature: os.platform() === 'darwin' && os.arch() === 'arm64',
           [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
           [FuseV1Options.EnableNodeCliInspectArguments]: false,
         },
@@ -127,6 +127,15 @@ module.exports = async function (params) {
 
       await fs.remove(path.join(outputFolder, 'packages/server/index.js'))
       await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
+
+      await flipFuses(
+        exePathPerPlatform[os.platform()],
+        {
+          version: FuseVersion.V1,
+          [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
+          [FuseV1Options.EnableNodeCliInspectArguments]: false,
+        },
+      )
 
       await setupV8Snapshots({
         cypressAppPath: params.appOutDir,
