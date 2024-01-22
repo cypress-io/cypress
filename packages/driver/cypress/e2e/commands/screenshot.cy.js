@@ -78,27 +78,6 @@ describe('src/cy/commands/screenshot', () => {
 
     it('is noop when screenshotOnRunFailure is false', () => {
       Cypress.config('isInteractive', false)
-      cy.stub(Screenshot, 'getConfig').returns({
-        screenshotOnRunFailure: false,
-      })
-
-      cy.spy(Cypress, 'action').log(false)
-
-      const test = {
-        err: new Error,
-      }
-
-      const runnable = cy.state('runnable')
-
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      .then(() => {
-        expect(Cypress.action).not.to.be.calledWith('test:set:state')
-        expect(Cypress.automation).not.to.be.called
-      })
-    })
-
-    it('is noop when screenshotOnRunFailure is false', () => {
-      Cypress.config('isInteractive', false)
       Cypress.config('screenshotOnRunFailure', false)
 
       cy.spy(Cypress, 'action').log(false)
