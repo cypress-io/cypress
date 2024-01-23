@@ -47,6 +47,7 @@ interface CypressTest extends Mocha.Test {
   thisAttemptInitialStrategy?: AttemptStrategy
   nextAttemptStrategy?: AttemptStrategy
   reasonToStop?: ReasonToStop
+  neededBurnInAttempts: number
 }
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
@@ -78,6 +79,7 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
 
   const output = evaluateAttempt(input)
 
+  test.neededBurnInAttempts = output.neededBurnInAttempts
   test.thisAttemptInitialStrategy = output.initialStrategy
   test.nextAttemptStrategy = output.nextInitialStrategy
   test.final = output.final
