@@ -27,10 +27,10 @@ function returnShadowRootIfShadowDomNode (node: Element): ShadowRoot | null {
 }
 
 type SelectorNode = {
-  frameId: string | null
+  frameId?: string
   selector: string
   ownerDoc: Document | ShadowRoot
-  host: SelectorNode | null
+  host?: SelectorNode
 }
 /**
  *
@@ -38,13 +38,13 @@ type SelectorNode = {
  * @returns SelectorNode if the selector can be discovered. For regular elements, this should only be one object deep, but for ShadowDom
  * elements, the SelectorNode tree could be N levels deep until the root is discovered
  */
-function constructElementSelectorTree (elem: Element): SelectorNode | null {
+function constructElementSelectorTree (elem: Element): SelectorNode | undefined {
   try {
     const ownerDoc = elem.ownerDocument
     const elWindow = ownerDoc.defaultView
 
     if (elWindow === null) {
-      return null
+      return undefined
     }
 
     // finder tries to find the shortest unique selector to an element,
@@ -55,7 +55,7 @@ function constructElementSelectorTree (elem: Element): SelectorNode | null {
 
     const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
-    return { selector, frameId, ownerDoc: elem.ownerDocument, host: null }
+    return { selector, frameId, ownerDoc: elem.ownerDocument, host: undefined }
   } catch {
     // the element may not always be found since it's possible for the element to be removed from the DOM
     // Or maybe its in the shadow DOM.
@@ -68,7 +68,7 @@ function constructElementSelectorTree (elem: Element): SelectorNode | null {
       if (shadowRoot.mode !== 'open') {
         // cannot see into closed shadow DOM. Cannot reconstruct for Test Replay
         // this code should NOT be reachable
-        return null
+        return undefined
       }
 
       // Look up the details of the shadowRoot to see which element the ShadowRoot is bound to, i.e. the host.
@@ -78,11 +78,11 @@ function constructElementSelectorTree (elem: Element): SelectorNode | null {
       const selectorFromShadowWorld = finder(elem, { root: shadowRoot as unknown as Element, threshold: 1, maxNumberOfTries: 0 })
 
       // gives us enough information to associate the shadow element to the ShadowRoot/host to reconstruct in Test Replay
-      return { selector: selectorFromShadowWorld, frameId: null, ownerDoc: shadowRoot, host: hostDetails }
+      return { selector: selectorFromShadowWorld, frameId: undefined, ownerDoc: shadowRoot, host: hostDetails }
     }
   }
 
-  return null
+  return undefined
 }
 
 export const create = ($$: $Cy['$$'], state: StateFunc) => {
@@ -390,22 +390,14 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const snapshot: {
         name: string
         timestamp: number
-        elementsToHighlight?: {
-          selector: string
-          frameId: string
-        }[] | {
-          isShadowDom: boolean
-          selector: string
-          rootSelector: string
-          rootFrameId: string
-        }
+        elementsToHighlight?: Omit<SelectorNode, 'ownerDoc'>[]
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
         snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
           // remove unserializable types from the selector tree that were needed to build the recursive selector
           // structure, such as ownerDoc
-          const cleanElementSelectorTree = (el: SelectorNode | null): Omit<SelectorNode, 'ownerDoc'> | null => {
+          const cleanElementSelectorTree = (el: SelectorNode | undefined): Omit<SelectorNode, 'ownerDoc'> | undefined => {
             if (el?.ownerDoc) {
               // @ts-expect-error
               delete el.ownerDoc
