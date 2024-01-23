@@ -122,7 +122,7 @@
             :aria-label="t(props.debugEnabled ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable', { runNumber: run.runNumber })"
             @click="onDebugClick"
           >
-            <IconTechnologyDebugger
+            <IconObjectBugSmall
               aria-hidden="true"
               class="h-[16px] w-[16px] mr-2 shrink-0"
             />
@@ -143,6 +143,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { IconTimeClock, IconTechnologyBranchH, IconObjectBugSmall } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
@@ -155,7 +156,6 @@ import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
-import { IconTechnologyDebugger, IconTimeClock, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
