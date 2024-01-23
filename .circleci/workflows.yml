@@ -658,7 +658,7 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ -v MAIN_RECORD_KEY ]]; then
-              GROUP_PREFIX = ''
+              GROUP_PREFIX=''
               if [[ $(node ./scripts/get-platform-key.js) != 'linux-x64' ]]; then
                 GROUP_PREFIX=$(node ./scripts/get-platform-key.js)-
               fi
