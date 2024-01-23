@@ -192,6 +192,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   createSnapshot: ISnapshots['createSnapshot']
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
+  attachShadowDomStyles: ISnapshots['attachShadowDomStyles']
 
   resetTimer: ReturnType<typeof createTimer>['reset']
   overrides: IOverrides
@@ -321,6 +322,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.createSnapshot = snapshots.createSnapshot
     this.detachDom = snapshots.detachDom
     this.getStyles = snapshots.getStyles
+    this.attachShadowDomStyles = snapshots.attachShadowDomStyles
 
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
