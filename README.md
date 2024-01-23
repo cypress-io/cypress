@@ -4,7 +4,7 @@
       <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
       <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
       <img alt="Cypress Logo" src="./assets/cypress-logo-light.png">
-    </picture>    
+    </picture>
   </a>
 </p>
 <p align="center">
@@ -56,6 +56,10 @@ npm install cypress --save-dev
 or
 ```bash
 yarn add cypress --dev
+```
+or
+```bash
+pnpm add cypress --save-dev
 ```
 
 ![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
