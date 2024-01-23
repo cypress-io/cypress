@@ -2680,10 +2680,10 @@ linux-x64-workflow: &linux-x64-workflow
     #     context: test-runner:cypress-record-key
     #     requires:
     #       - build
-    # - driver-integration-tests-electron:
-    #     context: test-runner:cypress-record-key
-    #     requires:
-    #       - build
+    - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     # - driver-integration-tests-webkit:
     #     context: test-runner:cypress-record-key
     #     requires:
