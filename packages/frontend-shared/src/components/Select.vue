@@ -138,7 +138,9 @@
                 </span>
               </div>
             </ListboxOption>
-            <slot name="footer" />
+            <li role="option">
+              <slot name="footer" />
+            </li>
           </ListboxOptions>
         </transition>
       </div>
