@@ -658,6 +658,10 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ -v MAIN_RECORD_KEY ]]; then
+              GROUP_PREFIX = ''
+              if [[ $(node ./scripts/get-platform-key.js) != 'linux-x64' ]]; then
+                GROUP_PREFIX=$(node ./scripts/get-platform-key.js)-
+              fi
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
@@ -667,7 +671,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>> --ci-build-id <<pipeline.id>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group $GROUP_PREFIX<<parameters.package>>-<<parameters.type>> --ci-build-id <<pipeline.id>>
             else
               # external PR
 
