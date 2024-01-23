@@ -457,7 +457,7 @@ const overrideServiceWorkerRegistration = (binding) => {
       const serviceWorkerRegistrationEvent = {
         type: 'service-worker-registration',
         scriptURL: resolvedUrl,
-        initiatorURL: window.location.href,
+        initiatorOrigin: window.location.origin,
       }
 
       binding(JSON.stringify(serviceWorkerRegistrationEvent))

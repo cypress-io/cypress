@@ -1,5 +1,3 @@
-navigator.serviceWorker?.register(new URL('http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service-worker.js'))
-
 navigator.serviceWorker?.ready.then(async () => {
   // Wait for the service worker to be ready and deterministically ensure these requests are handled by the service worker
   await new Promise((resolve) => setTimeout(resolve, 500))
