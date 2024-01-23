@@ -13,7 +13,7 @@ type ServiceWorkerRegistration = {
 type ServiceWorker = {
   registrationId: string
   scriptURL: string
-  initiatorURL?: string
+  initiatorOrigin?: string
   controlledURLs: Set<string>
 }
 
@@ -33,7 +33,7 @@ type AddActivatedServiceWorkerOptions = {
 
 type AddInitiatorToServiceWorkerOptions = {
   scriptURL: string
-  initiatorURL: string
+  initiatorOrigin: string
 }
 
 /**
@@ -51,7 +51,7 @@ type AddInitiatorToServiceWorkerOptions = {
  * At this point, when the manager tries to process a browser pre-request, it will check if the request is controlled by a service worker.
  * It determines it is controlled by a service worker if:
  *
- * 1. The document URL for the browser pre-request matches the initiator URL for the service worker.
+ * 1. The document URL for the browser pre-request matches the initiator origin for the service worker.
  * 2. The request URL is within the scope of the service worker or the request URL's initiator is controlled by the service worker.
  */
 export class ServiceWorkerManager {
@@ -86,12 +86,12 @@ export class ServiceWorkerManager {
    * Adds an initiator URL to a service worker. If the service worker has not yet been activated, the initiator URL is added to a pending list and will
    * be added to the service worker when it is activated.
    */
-  addInitiatorToServiceWorker ({ scriptURL, initiatorURL }: AddInitiatorToServiceWorkerOptions) {
+  addInitiatorToServiceWorker ({ scriptURL, initiatorOrigin }: AddInitiatorToServiceWorkerOptions) {
     let initiatorAdded = false
 
     for (const registration of this.serviceWorkerRegistrations.values()) {
       if (registration.activatedServiceWorker?.scriptURL === scriptURL) {
-        registration.activatedServiceWorker.initiatorURL = initiatorURL
+        registration.activatedServiceWorker.initiatorOrigin = initiatorOrigin
 
         initiatorAdded = true
         break
@@ -99,7 +99,7 @@ export class ServiceWorkerManager {
     }
 
     if (!initiatorAdded) {
-      this.pendingInitiators.set(scriptURL, initiatorURL)
+      this.pendingInitiators.set(scriptURL, initiatorOrigin)
     }
   }
 
@@ -120,7 +120,13 @@ export class ServiceWorkerManager {
       const activatedServiceWorker = registration.activatedServiceWorker
       const paramlessDocumentURL = browserPreRequest.documentURL.split('?')[0]
 
-      if (!activatedServiceWorker || activatedServiceWorker.initiatorURL !== paramlessDocumentURL) {
+      // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
+      // we have an activated service worker, the request URL does not come from the service worker, and the request
+      // originates from the same origin as the service worker or from a script that is also controlled by the service worker.
+      if (!activatedServiceWorker ||
+        activatedServiceWorker.scriptURL === paramlessDocumentURL ||
+        !activatedServiceWorker.initiatorOrigin ||
+        !paramlessDocumentURL.startsWith(activatedServiceWorker.initiatorOrigin)) {
         return
       }
 
@@ -169,13 +175,13 @@ export class ServiceWorkerManager {
     const registration = this.serviceWorkerRegistrations.get(registrationId)
 
     if (registration) {
-      const initiatorURL = this.pendingInitiators.get(scriptURL)
+      const initiatorOrigin = this.pendingInitiators.get(scriptURL)
 
       registration.activatedServiceWorker = {
         registrationId,
         scriptURL,
         controlledURLs: new Set<string>(),
-        initiatorURL: initiatorURL || registration.activatedServiceWorker?.initiatorURL,
+        initiatorOrigin: initiatorOrigin || registration.activatedServiceWorker?.initiatorOrigin,
       }
 
       this.pendingInitiators.delete(scriptURL)
