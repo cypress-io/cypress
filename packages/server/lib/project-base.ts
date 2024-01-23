@@ -50,6 +50,7 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
+const debugVerbose = Debug('cypress-verbose:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -415,6 +416,8 @@ export class ProjectBase extends EE {
         reporterInstance.emit(event, runnable)
 
         if (event === 'test:before:run') {
+          debugVerbose('browserPreRequests prior to running %s: %O', runnable.title, this.server.getBrowserPreRequests())
+
           this.emit('test:before:run', {
             runnable,
             previousResults: reporterInstance?.results() || {},
