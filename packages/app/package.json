@@ -22,7 +22,7 @@
   "dependencies": {},
   "devDependencies": {
     "@cypress-design/constants-button": "^0.1.0",
-    "@cypress-design/vue-button": "^0.10.2",
+    "@cypress-design/vue-button": "^0.11.1",
     "@cypress-design/vue-icon": "^0.31.2",
     "@cypress-design/vue-statusicon": "^0.5.0",
     "@cypress-design/vue-tabs": "^0.5.1",
