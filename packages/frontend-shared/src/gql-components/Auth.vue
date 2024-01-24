@@ -4,7 +4,7 @@
     class="flex gap-[16px]"
   >
     <Button
-      size="40"
+      size="lg"
       @click="handleTryAgain"
     >
       <template
@@ -17,8 +17,8 @@
       {{ t('topNav.login.actionTryAgain') }}
     </Button>
     <Button
-      variant="outline-light"
-      size="40"
+      variant="outline"
+      size="lg"
       @click="handleCancel"
     >
       {{ t('topNav.login.actionCancel') }}
@@ -35,27 +35,30 @@
   <div v-else>
     <Button
       v-if="loginMutationIsPending"
-      size="40"
-      variant="disabled"
+      size="lg"
+      variant="pending"
       aria-live="polite"
-      disabled
+      :disabled="true"
     >
-      <IconLoading
-        stroke-color="white"
-        fill-color="gray-400"
-        class="animate-spin mr-[8px]"
-      />
+      <template
+        #prefix
+      >
+        <i-cy-loading_x16
+          class="animate-spin icon-dark-white icon-light-gray-400"
+        />
+      </template>
       {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
     </Button>
     <Button
       v-else
       ref="loginButtonRef"
-      size="40"
+      size="lg"
+      variant="primary"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
+      :prefix-icon="buttonPrefixIcon"
       @click="handleLoginOrContinue"
     >
-      <IconObjectChainLink class="mr-[8px]" />
       {{ buttonText }}
     </Button>
   </div>
@@ -63,12 +66,12 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { IconObjectChainLink, IconLoading } from '@cypress-design/vue-icon'
-import Button from '@cypress-design/vue-button'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import ChainIcon from '~icons/cy/chain-link_x16.svg'
+
 import {
   Auth_LoginDocument,
   Auth_LogoutDocument,
@@ -77,7 +80,7 @@ import {
 import type {
   AuthFragment,
 } from '../generated/graphql'
-
+import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
@@ -246,6 +249,10 @@ const buttonText = computed(() => {
   }
 
   return strings.login
+})
+
+const buttonPrefixIcon = computed(() => {
+  return showConnectButton.value ? ChainIcon : undefined
 })
 
 </script>

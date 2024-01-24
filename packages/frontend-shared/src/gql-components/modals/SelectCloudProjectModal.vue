@@ -158,28 +158,20 @@
     >
       <div class="flex gap-[16px]">
         <Button
-          size="40"
+          size="lg"
+          :prefix-icon="newProject ? CreateIcon : ConnectIcon"
+          prefix-icon-class="icon-dark-white"
           :disabled="disableButton"
           data-cy="connect-project"
           @click="createOrConnectProject"
         >
-          <IconActionAddLarge
-            v-if="newProject"
-            class="mr-[8px]"
-            stroke-color="white"
-          />
-          <IconObjectChainLink
-            v-else
-            class="mr-[8px]"
-            stroke-color="white"
-          />
           {{ newProject
             ? t('runs.connect.modal.selectProject.createProject')
             : t('runs.connect.modal.selectProject.connectProject') }}
         </Button>
         <Button
-          variant="outline-light"
-          size="40"
+          variant="outline"
+          size="lg"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
@@ -192,15 +184,16 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import Button from '@cypress-design/vue-button'
-import { IconActionAddLarge, IconObjectChainLink } from '@cypress-design/vue-icon'
 import StandardModal from '@cy/components/StandardModal.vue'
+import Button from '@cy/components/Button.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 import Alert from '@cy/components/Alert.vue'
+import ConnectIcon from '~icons/cy/chain-link_x16.svg'
+import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
