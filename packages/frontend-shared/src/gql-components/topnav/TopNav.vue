@@ -46,6 +46,7 @@
       </p>
       <Button
         class="!w-full"
+        size="32"
         @click="showUpdateModal = true"
       >
         Update to {{ versions.latest.version }}
@@ -194,21 +195,21 @@
 </template>
 
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
+import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
+import { useI18n } from '@cy/i18n'
+import { gql, useMutation } from '@urql/vue'
+import Button from '@cypress-design/vue-button'
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import { gql, useMutation } from '@urql/vue'
 import { TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import type { TopNavFragment } from '../../generated/graphql'
-import { useI18n } from '@cy/i18n'
-import { computed, ref, watch, watchEffect } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
-import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
-import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 

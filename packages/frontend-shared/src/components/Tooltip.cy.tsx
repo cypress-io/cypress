@@ -1,5 +1,5 @@
 import Tooltip from './Tooltip.vue'
-import Button from './Button.vue'
+import Button from '@cypress-design/vue-button'
 
 const slotContents = (x: number) => ({
   popper: () => <span>Tooltip {x}</span>,

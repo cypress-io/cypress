@@ -21,6 +21,8 @@
   "devDependencies": {
     "@antfu/utils": "^0.7.0",
     "@cypress-design/css": "^0.13.3",
+    "@cypress-design/vue-button": "^0.10.2",
+    "@cypress-design/vue-icon": "^0.31.2",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify-json/logos": "1.1.42",
@@ -69,7 +71,7 @@
     "tailwindcss": "^3.3.1",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.24.1",
-    "vite": "4.5.2",
+    "vite": "4.3.2",
     "vite-plugin-components": "0.11.3",
     "vite-svg-loader": "4.0.0",
     "vue": "3.2.47",
