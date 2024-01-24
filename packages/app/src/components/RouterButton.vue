@@ -1,5 +1,5 @@
 <template>
-  <button
+  <a
     v-if="props.disabled"
     :class="[
       StaticClasses,
@@ -8,9 +8,10 @@
       'opacity-70'
     ]"
     aria-disabled="true"
+    role="link"
   >
     <slot />
-  </button>
+  </a>
   <RouterLink
     v-else
     :to="to"
