@@ -160,7 +160,7 @@
               data-cy="run-failures"
               variant="white"
               size="32"
-              class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
+              class="gap-x-[8px] items-center whitespace-nowrap"
               :disabled="runAllFailuresState.disabled"
               :to="{
                 path: '/specs/runner',

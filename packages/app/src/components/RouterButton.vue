@@ -2,6 +2,7 @@
   <button
     v-if="props.disabled"
     :class="[
+      StaticClasses,
       VariantClassesTable[props.variant],
       SizeClassesTable[props.size],
       'opacity-70'
@@ -14,8 +15,9 @@
     v-else
     :to="to"
     :class="[
+      StaticClasses,
       VariantClassesTable[props.variant],
-      SizeClassesTable[props.size]
+      SizeClassesTable[props.size],
     ]"
   >
     <slot />
@@ -24,7 +26,7 @@
 
 <script lang="ts" setup>
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
-import { VariantClassesTable, SizeClassesTable, type ButtonVariants, type ButtonSizes } from '@cypress-design/constants-button'
+import { StaticClasses, VariantClassesTable, SizeClassesTable, type ButtonVariants, type ButtonSizes } from '@cypress-design/constants-button'
 
 const props = defineProps<{
   to: RouteLocationRaw
