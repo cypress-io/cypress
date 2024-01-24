@@ -89,5 +89,5 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
 
 #### Electron crashes immediately after initializing the Protocol database
 
-*Solution*: ???
+*Solution*: This is often due to a mismatched prebuild of `better-sqlite3`. Ensure your repository is clear of untracked files with `git clean -xfd`, and run `yarn` again. If the issue persists, ensure you are running the latest version of your operating system. Electron prebuilds key to darwin/linux/windows, and do not differentiate between versions of the same.
 
