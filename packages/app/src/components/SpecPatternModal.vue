@@ -44,11 +44,11 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import StandardModal from '@cy/components/StandardModal.vue'
 import SpecPatterns from '../components/SpecPatterns.vue'
-import { useI18n } from '@cy/i18n'
 import type { SpecPatternModalFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
