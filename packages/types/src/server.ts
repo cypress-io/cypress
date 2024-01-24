@@ -64,7 +64,7 @@ export type OnServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.W
 
 export type OnServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => void
 
-export type OnServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorURL: string }) => void
+export type OnServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorOrigin: string }) => void
 
 export interface AutomationMiddleware {
   onPush?: NullableMiddlewareHook

@@ -18,6 +18,10 @@ export class NetworkProxy {
     this.http.removePendingBrowserPreRequest(requestId)
   }
 
+  getPendingBrowserPreRequests () {
+    return this.http.getPendingBrowserPreRequests()
+  }
+
   addPendingUrlWithoutPreRequest (url: string) {
     this.http.addPendingUrlWithoutPreRequest(url)
   }
@@ -30,7 +34,7 @@ export class NetworkProxy {
     this.http.updateServiceWorkerVersions(data)
   }
 
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.http.updateServiceWorkerClientSideRegistrations(data)
   }
 
@@ -59,7 +63,7 @@ export class NetworkProxy {
     this.http.setBuffer(buffer)
   }
 
-  reset (options: { resetPreRequests: boolean, resetBetweenSpecs: boolean } = { resetPreRequests: true, resetBetweenSpecs: false }) {
+  reset (options: { resetBetweenSpecs: boolean } = { resetBetweenSpecs: false }) {
     this.http.reset(options)
   }
 
