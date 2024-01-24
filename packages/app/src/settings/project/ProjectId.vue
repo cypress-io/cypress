@@ -28,7 +28,7 @@
       />
       <CopyButton
         :text="props.gql.currentProject?.projectId"
-        variant="outline-light"
+        variant="outline"
       />
     </div>
   </SettingsSection>
