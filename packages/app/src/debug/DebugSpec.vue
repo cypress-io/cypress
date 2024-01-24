@@ -158,7 +158,7 @@
           >
             <RouterButton
               data-cy="run-failures"
-              variant="indigo-dark"
+              variant="white"
               size="32"
               class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
@@ -172,7 +172,7 @@
             >
               <IconActionRefresh
                 data-cy="icon-refresh"
-                class="mr-[8px]"
+                stroke-color="indigo-500"
               />
               {{ t('debugPage.runFailures.btn') }}
             </RouterButton>
