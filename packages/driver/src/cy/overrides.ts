@@ -20,6 +20,35 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
         })
       }
 
+      if (config('protocolEnabled')) {
+        const originalAttachShadow = contentWindow.HTMLElement.prototype.attachShadow
+
+        contentWindow.HTMLElement.prototype.attachShadow = function (options) {
+          const returnVal = originalAttachShadow.call(this, options)
+
+          // since scrolls on elements cannot see outside the shadowDOM, we want to attach
+          // a scroll event to the shadowRoot and propagate a synthetic event to protocol
+          this.shadowRoot.addEventListener('scroll', (event) => {
+            const isADocument =
+                event.target instanceof Document
+
+            // if this is a scroll on an element, we want to propagate it.
+            // otherwise, document scrolls will propagate to protocol
+            if (!isADocument) {
+              const syntheticScrollEvent = new CustomEvent('cypress:shadow-dom:element:scroll', {
+                bubbles: true,
+                composed: true,
+                detail: event,
+              })
+
+              this.dispatchEvent(syntheticScrollEvent)
+            }
+          }, true)
+
+          return returnVal
+        }
+      }
+
       contentWindow.HTMLElement.prototype.focus = function (focusOption) {
         return focused.interceptFocus(this, contentWindow, focusOption)
       }
