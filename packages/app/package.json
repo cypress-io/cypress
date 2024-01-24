@@ -25,6 +25,7 @@
     "@cypress-design/vue-icon": "^0.26.0",
     "@cypress-design/vue-statusicon": "^0.5.0",
     "@cypress-design/vue-tabs": "^0.5.1",
+    "@cypress-design/vue-testresult": "file:../../../cypress-design/components/TestResult/vue",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify-json/mdi": "1.1.63",

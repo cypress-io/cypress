@@ -15,7 +15,7 @@
           data-cy="spec-contents"
           class="flex w-full grid px-[18px] gap-y-[8px] items-center"
         >
-          <div class="grow flex w-full gap-x-2 truncate items-center">
+          <div class="flex items-center w-full truncate grow gap-x-2">
             <Tooltip
               v-if="foundLocally"
               placement="bottom"
@@ -84,7 +84,7 @@
             </Tooltip>
             <div
               data-cy="spec-path"
-              class="grow text-base non-italic truncate"
+              class="text-base truncate grow non-italic"
             >
               <span
                 class="font-normal text-gray-600"
@@ -196,22 +196,14 @@
           </Tooltip>
         </div>
       </div>
-      <TransitionGroupQuickFade>
-        <div
-          v-for="thumbprint in Object.keys(specData.failedTests)"
-          :key="`test-${thumbprint}`"
-          data-cy="test-group"
-          class="flex flex-col flex-start border-b-gray-100 border-b-[1px] w-full pr-[16px] pl-[16px] justify-center"
-          :class="Object.keys(specData.groups).length > 1 ? 'pb-[16px]': 'hover:bg-gray-50 focus-within:bg-gray-50'"
-        >
-          <DebugFailedTest
-            v-if="specData.failedTests[thumbprint].length >= 1"
-            :failed-tests-result="specData.failedTests[thumbprint]"
-            :groups="groupsPerTest[thumbprint]"
-            :expandable="Object.keys(specData.groups).length > 1"
-          />
-        </div>
-      </TransitionGroupQuickFade>
+      <TestResult
+        v-for="tr in specData.failedTests.ab123"
+        :key="tr.id"
+        :data-cy-status="tr.status"
+        :status="tr.instance.status.toLowerCase()"
+        :names="tr.titleParts"
+        :flaky="tr.isFlaky"
+      />
     </div>
   </div>
 </template>
@@ -219,10 +211,9 @@
 
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
+import TestResult from '@cypress-design/vue-testresult'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
-import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
-import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
@@ -303,17 +294,6 @@ const specData = computed(() => {
     testingType: props.testingType,
     fullPath: props.spec.fullPath,
   }
-})
-
-/**
- * Helper function that maps each test's thumbprint to all the groups in it
- */
-const groupsPerTest = computed(() => {
-  return Object.keys(props.testResults).reduce<Record<string, StatsMetadata_GroupsFragment[]>>((acc, currThumbprint) => {
-    acc[currThumbprint] = props.testResults[currThumbprint].map((test) => props.groups[test.instance?.groupId || ''])
-
-    return acc
-  }, {})
 })
 
 const runAllFailuresState = computed(() => {
