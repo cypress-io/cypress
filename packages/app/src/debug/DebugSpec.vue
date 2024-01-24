@@ -5,11 +5,11 @@
   >
     <div
       data-cy="debug-spec-item"
-      class="rounded flex flex-col border-gray-100 border-t-[1px] border-x-[1px] w-full overflow-hidden items-start box-border"
+      class="box-border flex flex-col items-stretch w-full rounded"
     >
       <div
         data-cy="debug-spec-header"
-        class="rounded-t flex flex-row bg-gray-50 border-b-[1px] border-b-gray-100 w-full py-[12px] items-center"
+        class="rounded-t flex flex-row bg-gray-50 border border-b-0 border-gray-100 w-full py-[12px] items-center"
       >
         <div
           data-cy="spec-contents"
@@ -196,10 +196,12 @@
           </Tooltip>
         </div>
       </div>
+      <!-- <pre>
+        {{ JSON.stringify(specData) }}
+      </pre> -->
       <TestResult
         v-for="tr in specData.failedTests.ab123"
         :key="tr.id"
-        :data-cy-status="tr.status"
         :status="tr.instance.status.toLowerCase()"
         :names="tr.titleParts"
         :flaky="tr.isFlaky"
@@ -208,7 +210,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
 import TestResult from '@cypress-design/vue-testresult'
@@ -317,5 +318,4 @@ const runAllFailuresState = computed(() => {
 
   return { disabled: false }
 })
-
 </script>

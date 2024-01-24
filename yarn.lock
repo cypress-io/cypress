@@ -2866,13 +2866,6 @@
   dependencies:
     "@cypress-design/css" "^0.16.0"
 
-"@cypress-design/icon-registry@^0.27.0":
-  version "0.27.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.27.0.tgz#3feedb6bad82c7a461a348f72e62225fe912c49b"
-  integrity sha512-2tiH0YklKLYQ59pduni9aAsCu5uMKf/ZVHFjoP5xZW8em3FP5NZtmIAZzdIWLXjqihz/Q4TcOAL77qi8T11UJQ==
-  dependencies:
-    "@cypress-design/css" "^0.15.1"
-
 "@cypress-design/icon-registry@^0.28.0":
   version "0.28.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.28.0.tgz#a3c5336f7b544d8be82b6a941b8915ba7084d5c9"
@@ -2901,13 +2894,6 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.33.1"
 
-"@cypress-design/vue-icon@^0.25.0":
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.25.0.tgz#1ccc1dbfd0906a392dbb37c50e97bdfd59bbd50f"
-  integrity sha512-WDgN4bWUVXDZginoSErUHPnKDs/mQDXmqLphWA2SJTPTeZRUGDO5h5e9X6l979MWa5tqezu5vYkW44q7rBQItw==
-  dependencies:
-    "@cypress-design/icon-registry" "^0.27.0"
-
 "@cypress-design/vue-icon@^0.26.0":
   version "0.26.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.26.0.tgz#f56bee36514dc4f9b9606a75f69201e312ff9c70"
@@ -2934,7 +2920,7 @@
 "@cypress-design/vue-testresult@file:../cypress-design/components/TestResult/vue":
   version "0.0.1"
   dependencies:
-    "@cypress-design/constants-testresult" "file:../../Library/Caches/Yarn/v6/npm-@cypress-design-vue-testresult-0.0.1-28e04168-3d84-4815-a8d5-197a9db5b21f-1706113253483/node_modules/@cypress-design/constants"
+    "@cypress-design/constants-testresult" "file:../../Library/Caches/Yarn/v6/npm-@cypress-design-vue-testresult-0.0.1-122a3a42-2cea-45e2-b918-52a42429548f-1706126211184/node_modules/@cypress-design/constants"
     "@cypress-design/vue-icon" "*"
     "@cypress-design/vue-statusicon" "*"
 
@@ -7081,6 +7067,11 @@
   integrity sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==
   dependencies:
     defer-to-connect "^2.0.0"
+
+"@tailwindcss/container-queries@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@tailwindcss/container-queries/-/container-queries-0.1.1.tgz#9a759ce2cb8736a4c6a0cb93aeb740573a731974"
+  integrity sha512-p18dswChx6WnTSaJCSGx6lTmrGzNNvm2FtXmiO6AuA1V4U5REyoqwmT6kgAsIMdjo07QdAfYXHJ4hnMtfHzWgA==
 
 "@testing-library/cypress@9.0.0":
   version "9.0.0"

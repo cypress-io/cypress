@@ -87,9 +87,11 @@ describe('<DebugSpecList />', () => {
     })
 
     cy.mount(() => (
-      <DebugSpecList
-        specs={specs}
-      />
+      <div class="p-[24px]">
+        <DebugSpecList
+          specs={specs}
+        />
+      </div>
     ))
   })
 })

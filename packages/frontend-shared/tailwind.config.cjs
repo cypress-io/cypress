@@ -1,5 +1,7 @@
 const cypressCSS = require('@cypress-design/css')
 
+const containerPlugin = require('@tailwindcss/container-queries')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   presets: [cypressCSS.TailwindConfig()],
@@ -31,6 +33,7 @@ module.exports = {
     },
   },
   plugins: [
+    containerPlugin,
     function ({ addVariant }) {
       addVariant('children', '& > *')
     },
