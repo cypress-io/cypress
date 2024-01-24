@@ -34,7 +34,7 @@ export class NetworkProxy {
     this.http.updateServiceWorkerVersions(data)
   }
 
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorURL: string }) {
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.http.updateServiceWorkerClientSideRegistrations(data)
   }
 
