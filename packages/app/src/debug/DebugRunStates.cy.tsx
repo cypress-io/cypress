@@ -101,7 +101,7 @@ describe('Debug page states', () => {
 
         cy.contains('You\'ve reached your monthly test result limit')
         cy.contains('Your Free Cypress Cloud plan includes 100 monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.')
-        cy.findByTestId('external').contains('Contact admin')
+        cy.findByTestId('overlimit-action-button').contains('Contact admin')
       })
 
       it('displays messaging for plan admins', () => {
@@ -119,7 +119,7 @@ describe('Debug page states', () => {
 
         cy.contains('You\'ve reached your monthly test result limit')
         cy.contains('Your Free Cypress Cloud plan includes 100 monthly recorded test results. Upgrade your plan now to view more test results.')
-        cy.findByTestId('external').contains('Upgrade plan')
+        cy.findByTestId('overlimit-action-button').contains('Upgrade plan')
       })
     })
 
@@ -139,7 +139,7 @@ describe('Debug page states', () => {
 
         cy.contains('Beyond data retention')
         cy.contains('Your data retention limit is 30 days and these tests ran 60 days ago. Upgrade your plan to increase your data retention limit.')
-        cy.findByTestId('external').contains('Contact admin')
+        cy.findByTestId('overlimit-action-button').contains('Contact admin')
       })
 
       it('displays messaging for plan admins', () => {
@@ -157,7 +157,7 @@ describe('Debug page states', () => {
 
         cy.contains('Beyond data retention')
         cy.contains('Your data retention limit is 30 days and these tests ran 60 days ago. Upgrade your plan to increase your data retention limit.')
-        cy.findByTestId('external').contains('Upgrade plan')
+        cy.findByTestId('overlimit-action-button').contains('Upgrade plan')
       })
     })
 
@@ -180,7 +180,7 @@ describe('Debug page states', () => {
 
         cy.contains('You\'ve reached your monthly test result limit')
         cy.contains('Your Free Cypress Cloud plan includes 30 monthly recorded test results. Upgrade your plan now to view more test results.')
-        cy.findByTestId('external').contains('Upgrade plan')
+        cy.findByTestId('overlimit-action-button').contains('Upgrade plan')
       })
     })
   })

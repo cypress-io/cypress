@@ -13,6 +13,7 @@
       size="40"
       class="mt-[25px]"
       :href="actionUrl"
+      data-cy="overlimit-action-button"
     >
       {{ copy.actionLabel }}
     </Button>
