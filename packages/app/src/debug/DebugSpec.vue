@@ -172,7 +172,6 @@
             >
               <IconActionRefresh
                 data-cy="icon-refresh"
-                stroke-color="indigo-500"
                 class="mr-[8px]"
               />
               {{ t('debugPage.runFailures.btn') }}
