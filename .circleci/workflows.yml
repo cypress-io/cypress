@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-        - 'cacie/chore/upgrade-electron-27'
+        - 'cacie/dep/electron-27'
         - 'chore/update_octokit'
         - 'publish-binary'
         - 'em/circle2'
@@ -43,7 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_octokit', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
     - matches:
@@ -56,7 +56,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_octokit', << pipeline.git.branch >> ]
     - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
@@ -81,7 +81,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/chore/upgrade-electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_octokit', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
