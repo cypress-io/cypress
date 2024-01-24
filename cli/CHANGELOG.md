@@ -5,7 +5,6 @@ _Released 1/30/2024 (PENDING)_
 
 ** Dependency Updates:**
 
-- Updated  `@cypress/unique-selector` to include a performance optimization. It's possible this could improve performance of the selector playground. Addressed in [#28571](https://github.com/cypress-io/cypress/pull/28571).
 - Upgraded `electron` from `25.8.4` to `27.1.3`
 - Upgraded bundled Node.js version from `18.15.0` to `18.17.0`
 - Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`
