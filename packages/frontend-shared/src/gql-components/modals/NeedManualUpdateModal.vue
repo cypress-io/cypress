@@ -33,19 +33,19 @@
     <template #footer>
       <div class="flex gap-[16px]">
         <Button
-          size="lg"
-          variant="pending"
+          size="40"
+          variant="disabled"
         >
-          <template #prefix>
-            <i-cy-loading_x16
-              class="animate-spin icon-dark-white icon-light-gray-400"
-            />
-          </template>
+          <IconLoading
+            class="animate-spin mr-[8px]"
+            stroke-color="white"
+            fill-color="gray-400"
+          />
           {{ t('runs.connect.modal.connectManually.waitingButton') }}
         </Button>
         <Button
-          variant="outline"
-          size="lg"
+          variant="outline-light"
+          size="40"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
@@ -58,8 +58,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
+import Button from '@cypress-design/vue-button'
+import { IconLoading } from '@cypress-design/vue-icon'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cy/components/Button.vue'
 import Alert from '@cy/components/Alert.vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'

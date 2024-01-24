@@ -16,29 +16,30 @@
           <Button
             :href="getUrl(provider.link)"
             class="!w-[210px]"
-            size="lg"
-            variant="outline"
+            size="40"
+            variant="outline-light"
           >
-            <template #prefix>
-              <img
-                :src="provider.icon"
-                width="14"
-                :alt="`${provider.name} logo`"
-              >
-            </template>
+            <img
+              :src="provider.icon"
+              width="14"
+              :alt="`${provider.name} logo`"
+              class="mr-[8px]"
+            >
             {{ provider.name }}
           </Button>
         </li>
         <li>
           <Button
             :href="getUrl(seeOtherGuidesInfo)"
-            variant="outline"
-            size="lg"
+            variant="outline-light"
+            size="40"
             class="!w-[210px]"
           >
-            <template #prefix>
-              <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
-            </template>
+            <IconObjectBook
+              stroke-color="gray-500"
+              fill-color="gray-50"
+              class="mr-[8px]"
+            />
             {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
           </Button>
         </li>
@@ -122,7 +123,7 @@
             utm_campaign: 'Learn More',
           },
         })"
-      size="lg"
+      size="40"
       class="mt-[12px]"
     >
       {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
@@ -134,8 +135,8 @@
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+import Button from '@cypress-design/vue-button'
 const { t } = useI18n()
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -148,6 +149,7 @@ import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 import ExternalLink from '../ExternalLink.vue'
+import { IconObjectBook } from '@cypress-design/vue-icon'
 
 const props = defineProps<{
   type: DocsMenuVariant
