@@ -125,6 +125,7 @@
             <IconObjectBugSmall
               aria-hidden="true"
               class="h-[16px] w-[16px] mr-2 shrink-0"
+              fill-color="indigo-200"
             />
             {{ t('runs.card.debugLabel') }}
           </Button>
