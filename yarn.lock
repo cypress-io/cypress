@@ -2807,10 +2807,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@cypress-design/constants-button@^0.1.0", "@cypress-design/constants-button@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.1.tgz#8f5e4ef7273561acf6d10025fc735dd15c070c3f"
-  integrity sha512-Hjxe3SIjPz3Iwk2RP6vK6ZfIVIeTdbY23IoQmjbLQhS7U21D8wdblzMfmcrol4x3zrqDasFTNOKY/1yeRhTtPA==
+"@cypress-design/constants-button@^0.1.0", "@cypress-design/constants-button@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.2.tgz#737f92dc841c464f0e5329acb6098048f56c2ec4"
+  integrity sha512-gMZcj6Hjsz01aIGefv6dDkxN0ZN+HyFHho2AydWFKg+riKYZKPYQlfvqsKQLJsYtLfpAFeIAY/hff1Q9hy280A==
 
 "@cypress-design/constants-statusicon@^0.2.0":
   version "0.2.0"
@@ -2868,12 +2868,12 @@
   dependencies:
     "@cypress-design/css" "^0.15.1"
 
-"@cypress-design/vue-button@^0.11.4":
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.4.tgz#824e28fa5c4beda85764f26d9756bd61f9e3ee4c"
-  integrity sha512-PzWb0G33HvkeX2HZMUpAgPhQSnzfdwxh4ZdyBrajdG3ABeDhtq9c+AfMgaQ2cI555VjoXtCBqU7vnm/tG0o0hg==
+"@cypress-design/vue-button@^0.11.5":
+  version "0.11.5"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.5.tgz#f29cdd644810986fbf1c18680dceadaafaca39cf"
+  integrity sha512-LaCTjF4B7o4MK1GMesnIvElh8Y0/vLKFfqxQO7X39HgSEMt52ESNxQiPNPReTmedA8aiecS14BS32yl3A+O7qw==
   dependencies:
-    "@cypress-design/constants-button" "^0.1.1"
+    "@cypress-design/constants-button" "^0.1.2"
 
 "@cypress-design/vue-icon@^0.25.0":
   version "0.25.0"
