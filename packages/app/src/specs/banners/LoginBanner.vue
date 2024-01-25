@@ -20,7 +20,6 @@
     </p>
 
     <Button
-      class="mt-[24px]"
       size="32"
       data-cy="login-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Login Banner'})"

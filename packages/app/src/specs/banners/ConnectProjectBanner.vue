@@ -20,7 +20,6 @@
     </p>
 
     <Button
-      class="mt-[24px]"
       size="32"
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
