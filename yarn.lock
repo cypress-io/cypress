@@ -2868,7 +2868,7 @@
   dependencies:
     "@cypress-design/css" "^0.15.1"
 
-"@cypress-design/vue-button@^0.11.3", "@cypress-design/vue-button@^0.11.4":
+"@cypress-design/vue-button@^0.11.4":
   version "0.11.4"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.4.tgz#824e28fa5c4beda85764f26d9756bd61f9e3ee4c"
   integrity sha512-PzWb0G33HvkeX2HZMUpAgPhQSnzfdwxh4ZdyBrajdG3ABeDhtq9c+AfMgaQ2cI555VjoXtCBqU7vnm/tG0o0hg==
