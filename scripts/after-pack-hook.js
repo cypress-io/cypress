@@ -126,6 +126,7 @@ module.exports = async function (params) {
 
       const indexJscHash = await getIndexJscHash(outputFolder)
 
+      // This file is not needed at this point since it's been replaced by the jsc. So we remove it.
       await fs.remove(path.join(outputFolder, 'packages/server/index.js'))
       await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
 
