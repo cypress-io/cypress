@@ -738,6 +738,108 @@ describe('http/request-middleware', () => {
     })
   })
 
+  describe('CorrelateBrowserPreRequest', () => {
+    const { CorrelateBrowserPreRequest } = RequestMiddleware
+
+    it('skips if shouldCorrelatePreRequests returns false', async () => {
+      const ctx = {
+        res: {
+          off: sinon.stub(),
+        },
+        shouldCorrelatePreRequests: () => false,
+        getPreRequest: sinon.stub(),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      .then(() => {
+        expect(ctx.getPreRequest).not.to.be.called
+      })
+    })
+
+    it('sets browserPreRequest on the request', async () => {
+      const browserPreRequest = sinon.stub()
+
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          headers: [],
+        },
+        res: {
+          off: sinon.stub(),
+          once: sinon.stub(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: sinon.stub().yields({
+          browserPreRequest,
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      .then(() => {
+        expect(ctx.getPreRequest).to.be.calledOnce
+        expect(ctx.req.browserPreRequest).to.equal(browserPreRequest)
+        expect(ctx.res.once).to.be.calledWith('close')
+        expect(ctx.res.off).to.be.calledWith('close')
+      })
+    })
+
+    it('sets noPreRequestExpected on the request', async () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          browserPreRequest: undefined,
+          noPreRequestExpected: undefined,
+          headers: [],
+        },
+        res: {
+          off: sinon.stub(),
+          once: sinon.stub(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: sinon.stub().yields({
+          noPreRequestExpected: true,
+        }),
+      }
+
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      .then(() => {
+        expect(ctx.getPreRequest).to.be.calledOnce
+        expect(ctx.req.noPreRequestExpected).to.be.true
+        expect(ctx.res.once).to.be.calledWith('close')
+        expect(ctx.res.off).to.be.calledWith('close')
+      })
+    })
+
+    it('errors when the request is destroyed prior to receiving a pre-request', () => {
+      const ctx = {
+        req: {
+          proxiedUrl: 'https://www.cypress.io/',
+          destroyed: true,
+          browserPreRequest: undefined,
+          noPreRequestExpected: undefined,
+          headers: [],
+        },
+        res: {
+          off: sinon.stub(),
+          once: sinon.stub(),
+        },
+        shouldCorrelatePreRequests: () => true,
+        getPreRequest: sinon.stub(),
+        onError: sinon.stub(),
+      }
+
+      testMiddleware([CorrelateBrowserPreRequest], ctx)
+      ctx.res.once.callArg(1)
+
+      expect(ctx.getPreRequest).to.be.calledOnce
+      expect(ctx.req.noPreRequestExpected).to.be.undefined
+      expect(ctx.req.browserPreRequest).to.be.undefined
+      expect(ctx.res.once).to.be.calledWith('close')
+      expect(ctx.onError).to.be.calledOnce
+    })
+  })
+
   describe('SendRequestOutgoing', () => {
     const { SendRequestOutgoing } = RequestMiddleware
 

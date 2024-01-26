@@ -178,7 +178,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` artifact from the `verify-release-readiness` CircleCI job and run the following command inside of [cypress-io/release-automations][release-automations]:
 
     ```shell
-    cd packages/issues-in-release && npm run do:comment -- --release-data <path_to_releaseData.json>
+    npm run do:comment -- --release-data <path_to_releaseData.json>
     ```
 
 22. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
