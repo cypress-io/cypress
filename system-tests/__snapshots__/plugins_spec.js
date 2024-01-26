@@ -368,7 +368,7 @@ The following are valid events:
  - file:preprocessor
  - task
 
-Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+Learn more at https://on.cypress.io/writing-a-plugin#config
 
 InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]

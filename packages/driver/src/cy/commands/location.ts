@@ -6,7 +6,7 @@ export default (Commands, Cypress, cy) => {
   Commands.addQuery('url', function url (options: Partial<Cypress.UrlOptions> = {}) {
     this.set('timeout', options.timeout)
 
-    options.log !== false && Cypress.log({ message: '', timeout: options.timeout })
+    Cypress.log({ message: '', hidden: options.log === false, timeout: options.timeout })
 
     return () => {
       const href = cy.getRemoteLocation('href')
@@ -18,7 +18,7 @@ export default (Commands, Cypress, cy) => {
   Commands.addQuery('hash', function url (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
 
-    options.log !== false && Cypress.log({ message: '', timeout: options.timeout })
+    Cypress.log({ message: '', hidden: options.log === false, timeout: options.timeout })
 
     return () => cy.getRemoteLocation('hash')
   })
@@ -32,7 +32,11 @@ export default (Commands, Cypress, cy) => {
 
     this.set('timeout', options.timeout)
 
-    options.log !== false && Cypress.log({ message: _.isString(key) ? key : '', timeout: options.timeout })
+    Cypress.log({
+      message: _.isString(key) ? key : '',
+      hidden: options.log === false,
+      timeout: options.timeout,
+    })
 
     return () => {
       const location = cy.getRemoteLocation()
