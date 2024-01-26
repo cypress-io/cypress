@@ -2807,10 +2807,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@cypress-design/constants-button@*", "@cypress-design/constants-button@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.0.tgz#d32788484eda0a05ce72a53d9529ec7284174e77"
-  integrity sha512-HE5QQT6T8GDSgBDUBywOdnTvRXErrvGHm8YQuvj2iqzCTv9B0RhNQUVKSoyN9/LKyVcIXoa/ZaJLeTMVTlf+pg==
+"@cypress-design/constants-button@*", "@cypress-design/constants-button@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.3.tgz#6a3e14bbd0cf6d6c51763f3cc3b286dadc407a77"
+  integrity sha512-0ZBn1DvctrlypkXmclp9L8jwtaXKKBs2goPh43TgYoDNcX/IrNnmn1K/ivRcEN3Zq00qlz7Jgwv7fIxD/w8beg==
 
 "@cypress-design/constants-statusicon@^0.2.0":
   version "0.2.0"
@@ -2823,16 +2823,6 @@
   integrity sha512-2ndtAO0ycA0kgpAaCho9T4Y18a9XUbAL/S06hvwSKR7PuEmmpVx9ndGY2STaWcx5qKLRoBfMQWuPwDrN82dk5A==
   dependencies:
     "@cypress-design/icon-registry" "*"
-
-"@cypress-design/css@^0.13.3":
-  version "0.13.3"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.13.3.tgz#3501e2cdbf671d75f75c8f081030fb0b27bf1714"
-  integrity sha512-+Jj/7K5gkFUOVScssUc39UOEeZiPEtiSjo+/UfxtrpN2or1c8z+56GQqDwgrdf5z5CBSicnWky+LjBS3kREglQ==
-  dependencies:
-    "@windicss/plugin-interaction-variants" "^1.0.0"
-    lodash "^4.17.21"
-    resolve-pkg "^2.0.0"
-    tailwindcss "^3.3.2"
 
 "@cypress-design/css@^0.15.1":
   version "0.15.1"
@@ -2853,6 +2843,16 @@
     lodash "^4.17.21"
     resolve-pkg "^2.0.0"
     tailwindcss "^3.3.3"
+
+"@cypress-design/css@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.17.1.tgz#ff1863d2bce196394f55e6da6077e595b3e5ebfb"
+  integrity sha512-eQlCwbifrTTU8qApJv+c4rS5u1sI06yaGZAYeA4J47mOe3Goxadq7P3lVVW0n3WZrcHEZvkAh5qj0AN2Hpsakg==
+  dependencies:
+    "@tailwindcss/container-queries" "^0.1.1"
+    lodash "^4.17.21"
+    resolve-pkg "^2.0.0"
+    tailwindcss "^3.4.1"
 
 "@cypress-design/icon-registry@*", "@cypress-design/icon-registry@^0.33.1":
   version "0.33.1"
@@ -2882,12 +2882,12 @@
   dependencies:
     "@cypress-design/constants-button" "*"
 
-"@cypress-design/vue-button@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.0.tgz#d324e658e60a38bd57f8761b2a7dfc76430e41cf"
-  integrity sha512-ro44uCyadSOyK/4bHnPZUvXjdBpZ89kpNjZ/mmrI9TQTjTrN+Za3PU99zYowNzijkLK5AEwqJfMtAjN/ojUZnQ==
+"@cypress-design/vue-button@^0.11.6":
+  version "0.11.6"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.6.tgz#57f6a9f03034e1c84f311a1fef2ecb5cf3f50c80"
+  integrity sha512-tERjqnX07SV9haaq83eOJ35wJ9bW8c1xv6arVxT+mJIPqDAMeob60uUrXDY3m7xRTKNr7PjP1/gcKuuPELR/NQ==
   dependencies:
-    "@cypress-design/constants-button" "^0.1.0"
+    "@cypress-design/constants-button" "^0.1.3"
 
 "@cypress-design/vue-icon@^0.25.0":
   version "0.25.0"
@@ -7179,6 +7179,11 @@
   integrity sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==
   dependencies:
     defer-to-connect "^2.0.0"
+
+"@tailwindcss/container-queries@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@tailwindcss/container-queries/-/container-queries-0.1.1.tgz#9a759ce2cb8736a4c6a0cb93aeb740573a731974"
+  integrity sha512-p18dswChx6WnTSaJCSGx6lTmrGzNNvm2FtXmiO6AuA1V4U5REyoqwmT6kgAsIMdjo07QdAfYXHJ4hnMtfHzWgA==
 
 "@testing-library/cypress@9.0.0":
   version "9.0.0"
@@ -19601,10 +19606,10 @@ jimp@^0.2.21:
     tinycolor2 "^1.1.2"
     url-regex "^3.0.0"
 
-jiti@^1.18.2:
-  version "1.18.2"
-  resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.18.2.tgz#80c3ef3d486ebf2450d9335122b32d121f2a83cd"
-  integrity sha512-QAdOptna2NYiSSpv0O/BwoHBSmz4YhpzJHyi+fnMRTXFjp7B8i/YG5Z8IfusxB1ufjcD2Sre1F3R+nX3fvy7gg==
+jiti@^1.18.2, jiti@^1.19.1:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.0.tgz#7c97f8fe045724e136a397f7340475244156105d"
+  integrity sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==
 
 jose@^4.11.2:
   version "4.11.2"
@@ -29117,20 +29122,20 @@ tailwindcss@1.1.4:
     pretty-hrtime "^1.0.3"
     reduce-css-calc "^2.1.6"
 
-tailwindcss@^3.3.1, tailwindcss@^3.3.2, tailwindcss@^3.3.3:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.3.3.tgz#90da807393a2859189e48e9e7000e6880a736daf"
-  integrity sha512-A0KgSkef7eE4Mf+nKJ83i75TMyq8HqY3qmFIJSWy8bNt0v1lG7jUcpGpoTFxAwYcWOphcTBLPPJg+bDfhDf52w==
+tailwindcss@^3.3.1, tailwindcss@^3.3.3, tailwindcss@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.4.1.tgz#f512ca5d1dd4c9503c7d3d28a968f1ad8f5c839d"
+  integrity sha512-qAYmXRfk3ENzuPBakNK0SRrUDipP8NQnEY6772uDhflcQz5EhRdD7JNZxyrFHVQNCwULPBn6FNPp9brpO7ctcA==
   dependencies:
     "@alloc/quick-lru" "^5.2.0"
     arg "^5.0.2"
     chokidar "^3.5.3"
     didyoumean "^1.2.2"
     dlv "^1.1.3"
-    fast-glob "^3.2.12"
+    fast-glob "^3.3.0"
     glob-parent "^6.0.2"
     is-glob "^4.0.3"
-    jiti "^1.18.2"
+    jiti "^1.19.1"
     lilconfig "^2.1.0"
     micromatch "^4.0.5"
     normalize-path "^3.0.0"
