@@ -15,6 +15,10 @@ _Released 1/30/2024 (PENDING)_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
+**Misc:**
+
+- Added missing properties to the `Cypress.spec` interface for TypeScript users. Addresses [#27835](https://github.com/cypress-io/cypress/issues/27835).
+
 ## 13.6.3
 
 _Released 1/16/2024_
