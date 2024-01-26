@@ -571,6 +571,11 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         mouseDownPhase.targetEl &&
         $elements.getFirstCommonAncestor(mouseUpPhase.targetEl, mouseDownPhase.targetEl)
 
+        // Only send click event if element is not disabled.
+        if ($elements.isDisabled(commonAncestor)) {
+          return { skipClickEventReason: 'element was disabled' }
+        }
+
         return { elToClick: commonAncestor }
       }
 
