@@ -139,6 +139,7 @@ module.exports = async function (params) {
         },
       )
 
+      // Regenerate the v8 snapshots. This time, we replace the JSC hash with what we calculated earlier. We use the existing snapshot script to avoid having to go through the entire v8 snapshot process
       await setupV8Snapshots({
         cypressAppPath: params.appOutDir,
         useExistingSnapshotScript: true,
