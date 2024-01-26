@@ -121,6 +121,7 @@ module.exports = async function (params) {
         integrityCheckSource,
       })
 
+      // Use Cypress to create the JSC entry point file
       await createJscFromCypress()
 
       const indexJscHash = await getIndexJscHash(outputFolder)
