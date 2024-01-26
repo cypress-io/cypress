@@ -33,6 +33,7 @@ _Released 1/16/2024_
 - Fixed an issue where visiting an `http://` site would result in an infinite reload/redirect loop in Chrome 114+. Fixes [#25891](https://github.com/cypress-io/cypress/issues/25891).
 - Fixed an issue where requests made from extra tabs do not include their original headers. Fixes [#28641](https://github.com/cypress-io/cypress/issues/28641).
 - Fixed an issue where `cy.wait()` would sometimes throw an error reading a property of undefined when returning responses. Fixes [#28233](https://github.com/cypress-io/cypress/issues/28233).
+- Fixed an issue where `.click()` commands on children of disabled elemenets would still produce "click" events -- even without {force: true}. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
 
 **Performance:**
 
