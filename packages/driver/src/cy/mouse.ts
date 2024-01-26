@@ -569,13 +569,13 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
         // Only send click event if element is not disabled.
         // First find an parent element that can actually be disabled
-        const isActuallyDisabledElement = (el) => {
+        const canBeDisabled = (el) => {
           const actuallyDisabledElements = ['button', 'input', 'select', 'textarea', 'optgroup', 'option', 'fieldset']
 
           return actuallyDisabledElements.indexOf($elements.getTagName(el)) > -1
         }
 
-        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, isActuallyDisabledElement) || $elements.findParent(mouseDownPhase.targetEl, isActuallyDisabledElement)
+        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, canBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, canBeDisabled)
 
         // Then check if parent is indeed disabled
         if (parentThatCanBeDisabled !== null && $elements.isDisabled(parentThatCanBeDisabled)) {
