@@ -10,6 +10,90 @@ export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
 export const FINAL_SNAPSHOT_NAME = 'final state'
 
+type SelectorNode = {
+  frameId?: string
+  selector: string
+  ownerDoc: Document | ShadowRoot
+  host?: SelectorNode
+}
+
+const returnShadowRootIfShadowDomNode = (node: Element): ShadowRoot | null => {
+  const isNodeShadowRoot = (n: any) => n?.toString() === '[object ShadowRoot]'
+
+  let parent = node && node.parentNode
+
+  while (parent) {
+    if (isNodeShadowRoot(parent)) {
+      return parent as ShadowRoot
+    }
+
+    parent = parent.parentNode
+  }
+
+  return null
+}
+
+/**
+ *
+ * @param elem - either an HTML Element or an element that lives within the ShadowDom or the Root Document
+ * @returns SelectorNode if the selector can be discovered. For regular elements, this should only be one object deep, but for ShadowDom
+ * elements, the SelectorNode tree could be N levels deep until the root is discovered
+ */
+function constructElementSelectorTree (elem: Element): SelectorNode | undefined {
+  try {
+    const ownerDoc = elem.ownerDocument
+    const elWindow = ownerDoc.defaultView
+
+    if (elWindow === null) {
+      return undefined
+    }
+
+    // finder tries to find the shortest unique selector to an element,
+    // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
+    // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
+    // @see https://github.com/antonmedv/finder/issues/75
+    const selector = finder(elem, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
+
+    if (!selector) {
+      throw new Error('Selector not defined! Fall through to shadowDom lookup')
+    }
+
+    const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+
+    return { selector, frameId, ownerDoc: elem.ownerDocument, host: undefined }
+  } catch {
+    // the element may not always be found since it's possible for the element to be removed from the DOM
+    // Or maybe its in the shadow DOM.
+    // If it is a shadow DOM element, return the ShadowRoot as well to relate the node to the root document
+    try {
+      const shadowRoot = returnShadowRootIfShadowDomNode(elem)
+
+      // If we have a shadow DOM element, get the frameId and unique selector of the ShadowRoot
+      // see https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot
+      if (shadowRoot) {
+        if (shadowRoot.mode !== 'open') {
+          // cannot see into closed shadow DOM. Cannot reconstruct for Test Replay
+          // this code should NOT be reachable
+          return undefined
+        }
+
+        // Look up the details of the shadowRoot to see which element the ShadowRoot is bound to, i.e. the host.
+        const hostDetails = constructElementSelectorTree(shadowRoot.host)
+
+        // look up our element inside the context of the ShadowRoot
+        const selectorFromShadowWorld = finder(elem, { root: shadowRoot as unknown as Element, threshold: 1, maxNumberOfTries: 0 })
+
+        // gives us enough information to associate the shadow element to the ShadowRoot/host to reconstruct in Test Replay
+        return { selector: selectorFromShadowWorld, frameId: undefined, ownerDoc: shadowRoot, host: hostDetails }
+      }
+    } catch {
+      return undefined
+    }
+  }
+
+  return undefined
+}
+
 export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const snapshotsCss = createSnapshotsCSS($$, state)
   const snapshotsMap = new WeakMap()
@@ -253,34 +337,27 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const snapshot: {
         name: string
         timestamp: number
-        elementsToHighlight?: {
-          selector: string
-          frameId: string
-        }[]
+        elementsToHighlight?: Omit<SelectorNode, 'ownerDoc'>[]
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
         snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
-          try {
-            const ownerDoc = el.ownerDocument
-            const elWindow = ownerDoc.defaultView
-
-            if (elWindow === null) {
-              return []
+          // remove unserializable types from the selector tree that were needed to build the recursive selector
+          // structure, such as ownerDoc
+          const cleanElementSelectorTree = (el: SelectorNode | undefined): Omit<SelectorNode, 'ownerDoc'> | undefined => {
+            if (el?.ownerDoc) {
+              // @ts-expect-error
+              delete el.ownerDoc
             }
 
-            // finder tries to find the shortest unique selector to an element,
-            // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
-            // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
-            // @see https://github.com/antonmedv/finder/issues/75
-            const selector = finder(el, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
-            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
-
-            return [{ selector, frameId }]
-          } catch {
-            // the element may not always be found since it's possible for the element to be removed from the DOM
-            return []
+            return el?.host ? cleanElementSelectorTree(el.host) : el
           }
+
+          const elToHighlight = constructElementSelectorTree(el)
+
+          cleanElementSelectorTree(elToHighlight)
+
+          return elToHighlight ? [elToHighlight] : []
         })
       }
 

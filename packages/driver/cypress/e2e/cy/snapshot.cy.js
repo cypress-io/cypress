@@ -255,6 +255,32 @@ describe('driver/src/cy/snapshots', () => {
         expect(name).to.equal('snapshot')
         expect(timestamp).to.be.a('number')
       })
+
+      it('captures shadow DOM selectors structure properly', {
+        protocolEnabled: true,
+      }, () => {
+        cy.visit('/fixtures/shadow-dom-type.html')
+        cy.window().then((win) => {
+          win.__cypressProtocolMetadata = { frameId: 'test-frame-id' }
+
+          cy.get('#shadow-dom-input', {
+            includeShadowDom: true,
+          }).then((shadowDomSlot) => {
+            const { elementsToHighlight, name, timestamp } = cy.createSnapshot('snapshot', shadowDomSlot)
+
+            expect(elementsToHighlight?.length).to.equal(1)
+            const elementToHighlight = elementsToHighlight[0]
+
+            expect(elementToHighlight.selector).to.equal('#shadow-dom-input')
+            expect(elementToHighlight.frameId).to.be.undefined
+            expect(elementToHighlight.host.selector).to.equal('#element')
+            expect(elementToHighlight.host.frameId).to.equal('test-frame-id')
+            expect(elementToHighlight.host.host).to.be.undefined
+            expect(name).to.equal('snapshot')
+            expect(timestamp).to.be.a('number')
+          })
+        })
+      })
     })
   })
 
