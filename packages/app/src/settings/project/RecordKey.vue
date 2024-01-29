@@ -28,7 +28,7 @@
       />
       <CopyButton
         :text="recordKey"
-        variant="outline"
+        variant="outline-light"
       />
       <Button
         variant="outline"
