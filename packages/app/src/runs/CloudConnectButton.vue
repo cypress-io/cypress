@@ -1,7 +1,7 @@
 <template>
   <Button
+    size="32"
     :class="props.class"
-    prefix-icon-class="icon-dark-white icon-light-transparent"
     @click="openLoginConnectModal({ utmMedium: utmMedium, utmContent: utmContent })"
   >
     <IconObjectChainLink
