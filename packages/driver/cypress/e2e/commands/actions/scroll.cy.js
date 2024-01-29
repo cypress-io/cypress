@@ -839,13 +839,28 @@ describe('src/cy/commands/actions/scroll', () => {
     })
 
     describe('shadow dom', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/shadow-dom.html')
-      })
-
       // https://github.com/cypress-io/cypress/issues/7986
       it('does not hang', () => {
+        cy.visit('/fixtures/shadow-dom.html')
         cy.get('.shadow-1', { includeShadowDom: true }).scrollIntoView()
+      })
+
+      it('captures scroll events inside nested shadow dom and emits on the cypress:protocol:shadow-dom:element:scroll event', {
+        protocolEnabled: true,
+      }, (done) => {
+        cy.visit('/fixtures/shadow-dom-scroll.html')
+
+        cy.window().then((win) => {
+          win.document.addEventListener('cypress:protocol:shadow-dom:element:scroll', (event) => {
+            expect(event.composed).to.be.true
+            expect(event.bubbles).to.be.true
+            expect(event.target.id).to.equal('scroll-box-container')
+            done()
+          })
+
+          // test to make sure scroll event is bubbled up to the root document from the nested shadow DOM
+          cy.get('#scroll-to-button', { includeShadowDom: true }).scrollIntoView()
+        })
       })
     })
 
