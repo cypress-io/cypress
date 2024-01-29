@@ -196,11 +196,8 @@
           </Tooltip>
         </div>
       </div>
-      <!-- <pre>
-        {{ JSON.stringify(specData) }}
-      </pre> -->
       <TestResult
-        v-for="tr in specData.failedTests.ab123"
+        v-for="tr in specData.flattenedFailedTests"
         :key="tr.id"
         :status="tr.instance.status.toLowerCase()"
         :names="tr.titleParts"
@@ -287,6 +284,9 @@ const specData = computed(() => {
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,
+    flattenedFailedTests: Object.values(props.testResults || {}).reduce((acc, testGroup) => {
+      return acc.concat(testGroup)
+    }, []),
     testsPassed: debugResultsCalc(props.spec.testsPassed),
     testsFailed: debugResultsCalc(props.spec.testsFailed),
     testsPending: debugResultsCalc(props.spec.testsPending),
