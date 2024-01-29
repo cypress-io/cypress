@@ -15,6 +15,7 @@
       <slot />
     </p>
     <Button
+      size="32"
       :disabled="buttonDisabled"
       @click="emit('button-click')"
     >
