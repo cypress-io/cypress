@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shadow DOM Scroll Fixture</title>
+</head>
+<body>
+  <h1>Shadow DOM Scroll Fixture</h1>
+  <div id="scroll-box-container"></div>
+<script>
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync("#scroll-box { overflow: scroll; height: 100px; width: 100px; float: left; }");
+
+    const host = document.querySelector("#scroll-box-container");
+    const shadow = host.attachShadow({ mode: "open" });
+
+    shadow.adoptedStyleSheets = [sheet];
+    const scrollBox = document.createElement("div");
+    scrollBox.id = 'scroll-box'
+    shadow.appendChild(scrollBox);
+
+    const scrollParagraph = document.createElement("p");
+    scrollParagraph.style = `height: 200px; width: 200px;`
+    scrollParagraph.textContent = `Scroll me!`
+    scrollBox.append(scrollParagraph)
+
+    const scrollButton = document.createElement("button");
+    scrollButton.id = `scroll-to-button`
+    scrollButton.textContent = `SCROLL TO ME!`
+    scrollBox.append(scrollButton)
+</script>
+</body>
+</html>
