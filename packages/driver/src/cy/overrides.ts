@@ -35,7 +35,7 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
             // if this is a scroll on an element, we want to propagate it.
             // otherwise, document scrolls will propagate to protocol
             if (!isADocument) {
-              const syntheticScrollEvent = new CustomEvent('cypress:shadow-dom:element:scroll', {
+              const syntheticScrollEvent = new CustomEvent('cypress:protocol:shadow-dom:element:scroll', {
                 bubbles: true,
                 composed: true,
                 detail: event,
