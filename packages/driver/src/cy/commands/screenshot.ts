@@ -37,6 +37,9 @@ type AutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions,
 
 const getViewportHeight = (state: StateFunc) => {
   // TODO this doesn't seem correct
+  state({ __windowOuterHeight: window.outerHeight })
+  state({ __windowInnerHeight: window.innerHeight })
+
   return Math.min(state('viewportHeight'), window.innerHeight)
 }
 
@@ -159,7 +162,9 @@ const validateNumScreenshots = (numScreenshots: number, automationOptions: Autom
 
 const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: AutomationOptions) => {
   const scrollAndTake = ({ y, clip, afterScroll }: Scroll, index) => {
-    win.scrollTo(0, y)
+    console.log('scrollTo', y)
+    document.querySelector('.aut-panel').scrollTo(0, y)
+
     if (afterScroll) {
       clip = afterScroll()
     }
@@ -188,9 +193,15 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
-  const docHeight = $(doc).height() as number
+  // this should equal Cypress.state('viewportHeight')
+  const autHeight = $(doc).height() as number
+  // browser's viewport height available to render content
   const viewportHeight = getViewportHeight(state)
-  const numScreenshots = Math.ceil(docHeight / viewportHeight)
+  const numScreenshots = Math.ceil(autHeight / viewportHeight)
+
+  console.log('autHeight', autHeight)
+  console.log('viewportHeight', viewportHeight)
+  console.log('numScreenshots', numScreenshots)
 
   validateNumScreenshots(numScreenshots, automationOptions)
 
@@ -199,7 +210,7 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
     let clip
 
     if ((index + 1) === numScreenshots) {
-      const heightLeft = docHeight - (viewportHeight * index)
+      const heightLeft = autHeight - (viewportHeight * index)
 
       clip = {
         x: automationOptions.clip.x,
@@ -258,6 +269,8 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
   const viewportWidth = getViewportWidth(state)
   const numScreenshots = Math.ceil(elPosition.height / viewportHeight)
 
+  console.log('elHeight', elPosition)
+  console.log('numscreenshots', numScreenshots)
   validateNumScreenshots(numScreenshots, automationOptions)
 
   const scrolls: Scroll[] = _.map(_.times(numScreenshots), (index) => {
@@ -282,8 +295,11 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
       }
 
       if ((index + 1) === numScreenshots) {
-        const overlap = ((numScreenshots - 1) * viewportHeight) + elPosition.fromElViewport.top
+        const overlap = (index * viewportHeight) + elPosition.fromElViewport.top
         const heightLeft = elPosition.fromElViewport.bottom - overlap
+        // const heightLeft = elPosition.height - (elPosition.fromElViewport.top)
+
+        console.log({ heightLeft })
 
         return {
           x,
@@ -299,6 +315,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
         width,
         // TODO: try simplifying to just 'viewportHeight'
         height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height),
+        // height: Math.min(viewportHeight, elPosition.height),
       }
     }
 
@@ -404,6 +421,8 @@ const takeScreenshot = (
   }
 
   const after = ($body: JQuery<HTMLBodyElement>) => {
+    // return // uncomment to debug screenshot rendering when isAppScreenshot
+
     // could fail if iframe is cross-origin, so fail gracefully
     try {
       if (disableTimersAndAnimations) {
@@ -472,7 +491,7 @@ const takeScreenshot = (
       return takeElementScreenshot($el, state, automationOptions)
     }
 
-    if (capture === 'fullPage') {
+    if (capture === 'fullPage' || (capture === 'runner' && automationOptions.hideRunnerUi)) {
       return takeFullPageScreenshot(state, automationOptions)
     }
 
@@ -498,7 +517,7 @@ export default function (Commands, Cypress, cy, state, config) {
     if (
       !test.err
       || !screenshotConfig.screenshotOnRunFailure
-      || config('isInteractive')
+      // || config('isInteractive')
       || test.err.isPending
       || !config('screenshotOnRunFailure')
     ) {

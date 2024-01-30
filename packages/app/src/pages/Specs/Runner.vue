@@ -146,12 +146,8 @@ iframe.aut-iframe {
   background: white;
 }
 
-.is-screenshotting #main-pane {
+.is-screenshotting.screenshot-scrolling .aut-panel {
   overflow: auto !important;
-}
-
-.is-screenshotting.screenshot-scrolling #main-pane {
-  overflow: visible !important;
 }
 
 #resizable-panels-root {
@@ -165,11 +161,11 @@ iframe.aut-iframe {
 }
 
 iframe.spec-iframe {
-    border: none;
-    height: 0;
-    position: absolute;
-    visibility: hidden;
-    width: 0;
+  border: none;
+  height: 0;
+  position: absolute;
+  visibility: hidden;
+  width: 0;
 }
 
 .highlight {
@@ -186,19 +182,14 @@ iframe.spec-iframe {
 
 #unified-runner {
   position: relative;
-    margin: 0 auto;
+  margin: 0 auto;
 }
 
 .is-screenshotting #unified-runner {
-    margin: unset;
+  margin: unset;
 }
 
 #unified-runner > .screenshot-height-container {
   height: 100%
 }
-
-.is-screenshotting #unified-runner > .screenshot-height-container {
-  height: min(100%, 100vh);
-}
-
 </style>
