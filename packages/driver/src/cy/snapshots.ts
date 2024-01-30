@@ -96,6 +96,7 @@ function constructElementSelectorTree (elem: Element): SelectorNode | undefined 
 
 export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const snapshotsCss = createSnapshotsCSS($$, state)
+  const shadowStyleExecutorMap = new WeakMap()
   const snapshotsMap = new WeakMap()
   const snapshotDocument = new Document()
 
@@ -205,6 +206,18 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
   }
 
+  const attachShadowDomStyles = (snapshot) => {
+    const snapshotHydrationFunctions = shadowStyleExecutorMap.get(snapshot)
+
+    try {
+      if (snapshotHydrationFunctions) {
+        snapshotHydrationFunctions.forEach((hydrator) => hydrator())
+      }
+    } catch (e) {
+      // if we fail for any reason, die silently for now?
+    }
+  }
+
   const detachDom = (iframeContents) => {
     const { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
     const htmlAttrs = getHtmlAttrs(iframeContents.find('html')[0])
@@ -257,7 +270,52 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // this can fail if snapshotting before the page has fully loaded,
     // so we catch this below and return null for the snapshot
     // https://github.com/cypress-io/cypress/issues/15816
+    // create an array of shadowDom CSS hydration functions to inject styles onto the page once the snapshot is rendered
+    // we cannot adapt the stylesheets UNTIL the document is rendered. Otherwise you will run into
+    // different document errors. @see https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets#exceptions
+    let cssFunctionArr: Array<() => void> = []
+
+    function hydrateShadowDom (originalRef, clonedImport) {
+      function hydrate (node, clone) {
+        let shadow = node.shadowRoot
+
+        if (shadow) {
+          // if a shadow node, hydrate the shadow dom into our clone as well as its children
+          clone.attachShadow({ mode: shadow.mode }).append(...[].map.call(shadow.childNodes, (c) => {
+            const childClone = snapshotDocument.importNode(c, true)
+
+            hydrate(c, childClone)
+
+            return childClone
+          }))
+
+          // and store the style hydration to be execution if/when the snapshot is rendered in open mode
+          cssFunctionArr.push(() => {
+            // since this a proxy, we need to get the length and then access the prop in the array
+            for (let i = 0; i < shadow.adoptedStyleSheets.length; i++) {
+              const sheet = shadow.adoptedStyleSheets[i]
+
+              clone.shadowRoot.adoptedStyleSheets.push(sheet)
+            }
+          })
+        } else {
+          for (let i = 0; i < node.children.length; i++) hydrate(node.children[i], clone.children[i])
+        }
+      }
+
+      hydrate(originalRef, clonedImport)
+
+      return clonedImport
+    }
+
     const $body = $$(snapshotDocument.importNode($$('body')[0], true))
+
+    try {
+      // attempt to hydrate the shadow DOM document/styles into the imported body node
+      hydrateShadowDom($$('body')[0], $body[0])
+    } catch (e) {
+      // if we fail to hydrate the shadowDom values into the transient body, then disregard
+    }
     // for the head and body, get an array of all CSS,
     // whether it's links or style tags
     // if it's same-origin, it will get the actual styles as a string
@@ -295,6 +353,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       $htmlAttrs,
       headStyleIds,
       bodyStyleIds,
+      shadowDomStyleHydrationFns: cssFunctionArr,
     }
   }
 
@@ -308,6 +367,8 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       $htmlAttrs,
       headStyles,
       bodyStyles,
+      // TODO: figure out for cross-origin
+      shadowDomStyleHydrationFns: null,
     }
   }
 
@@ -370,6 +431,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const {
         $body,
         $htmlAttrs,
+        shadowDomStyleHydrationFns,
         ...styleAttrs
       } = preprocessedSnapshot ? reifySnapshotBody(preprocessedSnapshot) : createSnapshotBody($elToHighlight)
 
@@ -432,6 +494,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
         })
       }
 
+      // if shadowDom styles are detected, then store the hydration function for later
+      if (shadowDomStyleHydrationFns) {
+        shadowStyleExecutorMap.set(snapshot, shadowDomStyleHydrationFns)
+      }
+
       return snapshot
     } catch (e) {
       return null
@@ -442,6 +509,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     createSnapshot,
     detachDom,
     getStyles,
+    attachShadowDomStyles,
     onCssModified: snapshotsCss.onCssModified,
     onBeforeWindowLoad: snapshotsCss.onBeforeWindowLoad,
   }

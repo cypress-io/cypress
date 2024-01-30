@@ -179,6 +179,9 @@ export class AutIframe {
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
 
+    // now that the body is rendered, we can attach our shadowDomStyles
+    Cypress ? Cypress.cy.attachShadowDomStyles(snapshot) : null
+
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     this.debouncedToggleSelectorPlayground(selectorPlaygroundStore.isEnabled)
