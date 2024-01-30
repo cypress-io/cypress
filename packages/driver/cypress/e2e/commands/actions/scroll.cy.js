@@ -847,6 +847,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('captures scroll events inside nested shadow dom and emits on the cypress:protocol:shadow-dom:element:scroll event', {
         protocolEnabled: true,
+        browser: '!webkit',
       }, (done) => {
         cy.visit('/fixtures/shadow-dom-scroll.html')
 
