@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.6.4
+## 13.6.5
 
-_Released 1/30/2024 (PENDING)_
+_Released 2/13/2024 (PENDING)_
 
 ** Dependency Updates:**
 
@@ -9,13 +9,17 @@ _Released 1/30/2024 (PENDING)_
 - Upgraded bundled Node.js version from `18.15.0` to `18.17.0`
 - Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`
 
-**Bugfixes:**
+## 13.6.4
 
-- Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#28747](https://github.com/cypress-io/cypress/issues/28747).
+_Released 1/30/2024_
 
 **Performance:**
 
 - Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where aborted requests may not correlate correctly. Fixes [#28734](https://github.com/cypress-io/cypress/issues/28734).
+
+**Bugfixes:**
+
+- Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#28747](https://github.com/cypress-io/cypress/issues/28747).
 
 **Misc:**
 
