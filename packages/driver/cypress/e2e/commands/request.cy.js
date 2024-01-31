@@ -129,6 +129,7 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/28789
       context('accepts trivial RFC 8259 compliant body objects', () => {
         it('accepts body equal to true', () => {
           cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: true }).then(function () {
