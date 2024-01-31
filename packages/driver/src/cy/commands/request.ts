@@ -82,9 +82,11 @@ export default (Commands, Cypress, cy, state, config) => {
     request (...args) {
       const o: any = {}
       const userOptions = o
+      let bodyIsExplicitlyDefined = false
 
       if (_.isObject(args[0])) {
         _.extend(userOptions, args[0])
+        bodyIsExplicitlyDefined = _.has(args[0], 'body')
       } else if (args.length === 1) {
         o.url = args[0]
       } else if (args.length === 2) {
@@ -97,11 +99,13 @@ export default (Commands, Cypress, cy, state, config) => {
           // set url + body
           o.url = args[0]
           o.body = args[1]
+          bodyIsExplicitlyDefined = true
         }
       } else if (args.length === 3) {
         o.method = args[0]
         o.url = args[1]
         o.body = args[2]
+        bodyIsExplicitlyDefined = true
       }
 
       let options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
@@ -223,7 +227,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // only set json to true if form isnt true
       // and we have a valid object for body
-      if ((options.form !== true) && isValidJsonObj(options.body)) {
+      if ((options.form !== true) && isValidJsonObj(options.body, bodyIsExplicitlyDefined)) {
         options.json = true
       }
 
