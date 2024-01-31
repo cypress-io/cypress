@@ -43,8 +43,9 @@ const hasFormUrlEncodedContentTypeHeader = (headers) => {
   return header && (_.toLower(header) === 'content-type')
 }
 
-const isValidJsonObj = (body) => {
-  return _.isObject(body) && !_.isFunction(body)
+const isValidJsonObj = (body, isExplicitlyDefined: boolean = false) => {
+  return (_.isObject(body) || _.isBoolean(body) || (isExplicitlyDefined && _.isNull(body)))
+    && !_.isFunction(body)
 }
 
 const whichAreOptional = (val, key) => {
