@@ -937,6 +937,7 @@ describe('lib/request', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/28789
     context('json=true', () => {
       beforeEach(() => {
         nock('http://localhost:8080')
