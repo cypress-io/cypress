@@ -698,6 +698,7 @@ module.exports = function (options = {}) {
       // either turn these both on or off
       options.followAllRedirects = options.followRedirect
 
+      // https://github.com/cypress-io/cypress/issues/28789
       if (options.json === true) {
         if (options.body === true || options.body === false || options.body === null) options.body = String(options.body)
       }
