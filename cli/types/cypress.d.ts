@@ -7,7 +7,7 @@ declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
   type HttpMethod = string
-  type RequestBody = string | object
+  type RequestBody = string | object | boolean | null
   type ViewportOrientation = 'portrait' | 'landscape'
   type PrevSubject = keyof PrevSubjectMap
   type TestingType = 'e2e' | 'component'
