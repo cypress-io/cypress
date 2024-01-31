@@ -62,7 +62,7 @@ or
 pnpm add cypress --save-dev
 ```
 
-![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
+![installing-cli e1693232](./assets/cypress-installation.gif)
 
 
 ## Contributing
