@@ -698,6 +698,10 @@ module.exports = function (options = {}) {
       // either turn these both on or off
       options.followAllRedirects = options.followRedirect
 
+      if (options.json === true) {
+        if (options.body === true || options.body === false || options.body === null) options.body = String(options.body)
+      }
+
       if (options.form === true) {
         // reset form to whatever body is
         // and nuke body
