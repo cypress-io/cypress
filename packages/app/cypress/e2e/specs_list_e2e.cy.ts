@@ -317,6 +317,11 @@ describe('App: Spec List (E2E)', () => {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
+
+        // wait for the filter to take effect
+        cy.findAllByTestId('spec-item').should('have.length', 1)
+
+        // then click on the spec to navigate to it
         cy.contains('a', targetSpecFile).click()
 
         // make sure we are on the spec view before clicking back to the specs list

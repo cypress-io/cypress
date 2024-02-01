@@ -10,9 +10,10 @@
       {{ copy.message }}
     </span>
     <Button
-      size="lg"
+      size="40"
       class="mt-[25px]"
       :href="actionUrl"
+      data-cy="overlimit-action-button"
     >
       {{ copy.actionLabel }}
     </Button>
@@ -21,8 +22,8 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
+import Button from '@cypress-design/vue-button'
 import LockedProject from '~icons/cy/locked-project_x48.svg'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 import type { DebugReasonsRunIsHiddenFragment, OverLimitActionTypeEnum } from '../generated/graphql'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'

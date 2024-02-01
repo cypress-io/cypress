@@ -21,13 +21,13 @@
           {{ t('settingsPage.notifications.enableNotificationsLabel') }}
         </div>
 
-        <ButtonDS
+        <Button
           size="32"
           class="font-normal"
           @click="enableNotifications"
         >
           {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
-        </ButtonDS>
+        </Button>
       </div>
 
       <div class="px-[16px] divide-y divide-gray-50">
@@ -75,9 +75,9 @@
           </div>
         </div>
         <div class="py-[16px]">
-          <!-- TODO: Use design system button when https://github.com/cypress-io/cypress-design/issues/254 is fixed -->
           <Button
-            variant="white"
+            variant="outline-light"
+            size="32"
             data-cy="send-test-notification"
             :disabled="!desktopNotificationsEnabled"
             @click="showTestNotification"
@@ -108,8 +108,7 @@ import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { NotificationSettingsFragment, SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
 import Checkbox from '@packages/frontend-shared/src/components/Checkbox.vue'
-import ButtonDS from '@cypress-design/vue-button'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { debouncedWatch } from '@vueuse/core'

@@ -5,13 +5,18 @@
       :gql="props.gql"
     >
       <Button
-        variant="outline"
+        variant="outline-light"
+        size="32"
         class="top-4 right-4 absolute"
-        :prefix-icon="IconCode"
-        prefix-icon-class="text-gray-500"
         @click="onClick"
       >
-        {{ t('file.edit') }}
+        <IconDocumentCode
+          stroke-color="gray-500"
+          class="mr-[8px]"
+        />
+        {{
+          t('file.edit')
+        }}
       </Button>
     </OpenConfigFileInIDE>
     <code
@@ -49,8 +54,8 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
-import IconCode from '~icons/mdi/code'
+import Button from '@cypress-design/vue-button'
+import { IconDocumentCode } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import RenderObject from './renderers/RenderObject.vue'

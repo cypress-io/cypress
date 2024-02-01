@@ -18,10 +18,11 @@
           :disabled="isDisabled"
           class="rounded-none border-gray-100 border-r-[1px] mr-[12px]"
           variant="text"
+          size="32"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
-          <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
+          <IconGeneralCrosshairs :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
         <input
           ref="autUrlInputRef"
@@ -49,11 +50,12 @@
           data-cy="playground-activator"
           :disabled="isDisabled"
           class="border-gray-100 mr-[12px]"
-          variant="outline"
+          variant="outline-light"
+          size="32"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
         >
-          <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
+          <IconGeneralCrosshairs :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
       </div>
       <SpecRunnerDropdown
@@ -84,7 +86,10 @@
         data-cy="viewport"
       >
         <template #heading>
-          <i-cy-ruler_x16 class="icon-dark-gray-500 icon-light-gray-400" />
+          <IconObjectRuler
+            stroke-color="gray-500"
+            fill-color="gray-400"
+          />
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
@@ -125,11 +130,14 @@
               <Button
                 class="font-medium"
                 data-cy="viewport-docs"
-                :prefix-icon="BookIcon"
-                prefix-icon-class="icon-dark-indigo-500"
-                variant="outline"
+                variant="outline-light"
+                size="32"
                 :href="t('runner.viewportTooltip.buttonHref')"
               >
+                <IconObjectBook
+                  class="mr-[8px]"
+                  stroke-color="indigo-500"
+                />
                 {{ t('runner.viewportTooltip.buttonText') }}
               </Button>
             </div>
@@ -152,7 +160,11 @@
       dismissible
     >
       <template #title>
-        <i-cy-book_x16 class="pr-[2px] inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+        <IconObjectBook
+          stroke-color="indigo-500"
+          fill-color="indigo-200"
+          class="pr-[2px] inline-block"
+        />
         <ExternalLink href="https://on.cypress.io/styling-components">
           {{ t('runner.header.reviewDocs') }}
         </ExternalLink>
@@ -165,6 +177,8 @@
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import Button from '@cypress-design/vue-button'
+import { IconGeneralCrosshairs, IconObjectBook, IconObjectRuler } from '@cypress-design/vue-icon'
 import { useAutStore, useSpecStore, useSelectorPlaygroundStore } from '../store'
 import { useAutHeader } from './useAutHeader'
 import { gql } from '@urql/vue'
@@ -174,16 +188,14 @@ import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import Alert from '@cy/components/Alert.vue'
 import StudioControls from './studio/StudioControls.vue'
 import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
-import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
-import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
+import VerticalBrowserListItems from '@cy/gql-components/topnav/VerticalBrowserListItems.vue'
+import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import BookIcon from '~icons/cy/book_x16'
 import { useStudioStore } from '../store/studio-store'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
 

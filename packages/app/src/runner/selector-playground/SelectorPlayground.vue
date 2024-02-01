@@ -99,8 +99,8 @@
           #default="{focus}"
         >
           <Button
-            size="md"
-            variant="outline"
+            size="32"
+            variant="outline-light"
             data-cy="playground-copy"
             class="override-border"
             @click="copyToClipboard"
@@ -120,8 +120,8 @@
         >
           <Button
             key="fudge"
-            size="md"
-            variant="outline"
+            size="32"
+            variant="outline-light"
             data-cy="playground-print"
             class="override-border"
             @click="printSelected()"
@@ -137,12 +137,12 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { useElementSize } from '@vueuse/core'
+import Button from '@cypress-design/vue-button'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { useElementSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@cy/gql-components/useClipboard'
 import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
