@@ -126,6 +126,8 @@ describe('App - Debug Page', () => {
 
     cy.visitApp()
 
+    cy.findByTestId('spec-list-container').should('be.visible')
+
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
 
