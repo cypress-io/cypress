@@ -324,7 +324,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
-        cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+        cy.contains('header button', 'Specs').click({ force: true })
 
         cy.get('@searchField').should('be.visible').and('have.value', targetSpecFile)
 

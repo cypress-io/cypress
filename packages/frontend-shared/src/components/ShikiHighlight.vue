@@ -60,7 +60,7 @@ shikiWrapperClasses computed property.
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton"
-      variant="outline"
+      variant="outline-light"
       tabindex="-1"
       class="bg-white ml-auto mt-[-32px] sticky"
       :class="numberOfLines === 1 ? 'bottom-[5px] right-[5px]' : 'bottom-[8px] right-[8px]'"

@@ -15,22 +15,24 @@
     />
     <Button
       v-if="retryable"
-      size="md"
-      :prefix-icon="RefreshIcon"
-      prefix-icon-class="icon-dark-white"
+      size="32"
       @click="emits('retry')"
     >
+      <IconActionRefresh
+        stroke-color="white"
+        class="mr-[8px]"
+      />
       {{ t('warnings.retry') }}
     </Button>
   </Alert>
 </template>
 
 <script lang="ts" setup>
+import Button from '@cypress-design/vue-button'
+import { IconActionRefresh } from '@cypress-design/vue-icon'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
-import Button from '@cy/components/Button.vue'
-import RefreshIcon from '~icons/cy/refresh_x16'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'

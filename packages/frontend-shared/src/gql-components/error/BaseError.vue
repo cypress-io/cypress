@@ -20,22 +20,26 @@
           class="font-medium w-full pt-[12px] gap-4 inline-flex justify-center "
         >
           <Button
-            variant="outline"
+            size="32"
+            variant="outline-light"
             data-testid="error-retry-button"
-            :prefix-icon="RestartIcon"
-            prefix-icon-class="icon-dark-indigo-500"
             @click="emit('retry', baseError.id)"
           >
+            <IconActionRestart stroke-color="indigo-500" />
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
 
           <Button
-            variant="outline"
+            size="32"
+            variant="outline-light"
             data-testid="error-docs-button"
-            :prefix-icon="BookIcon"
-            prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
           >
+            <IconObjectBook
+              stroke-color="indigo-500"
+              hocus-stroke-color="indigo-500"
+              hocus-fill-color="indigo-50"
+            />
             {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
           </Button>
         </div>
@@ -111,16 +115,15 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconObjectBook, IconActionRestart } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { useMarkdown } from '../../composables/useMarkdown'
-import RestartIcon from '~icons/cy/restart_x16.svg'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
-import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment BaseError on ErrorWrapper {

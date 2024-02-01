@@ -36,26 +36,26 @@
       <div class="flex gap-[16px]">
         <Button
           v-if="waitingOrgToBeCreated"
-          size="lg"
+          size="40"
           variant="pending"
         >
-          <template #prefix>
-            <i-cy-loading_x16
-              class="animate-spin icon-dark-white icon-light-gray-400"
-            />
-          </template>
+          <IconLoading
+            class="animate-spin mr-[8px]"
+            stroke-color="white"
+            fill-color="gray-400"
+          />
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
         </Button>
         <Button
           v-else
-          size="lg"
+          size="40"
           @click="refetch()"
         >
           {{ t('runs.connect.modal.createOrg.refreshButton') }}
         </Button>
         <Button
-          variant="outline"
-          size="lg"
+          variant="outline-light"
+          size="40"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
@@ -67,9 +67,10 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
+import Button from '@cypress-design/vue-button'
+import { IconLoading } from '@cypress-design/vue-icon'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cy/components/Button.vue'
 import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
