@@ -1,7 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.5
+
+_Released <RELEASE_DATE> (PENDING)_
+
+**Bugfixes:**
+Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
+
 ## 13.6.4
 
-_Released 1/30/2024 (PENDING)_
+_Released 1/30/2024_
 
 **Bugfixes:**
 
@@ -33,7 +40,6 @@ _Released 1/16/2024_
 - Fixed an issue where visiting an `http://` site would result in an infinite reload/redirect loop in Chrome 114+. Fixes [#25891](https://github.com/cypress-io/cypress/issues/25891).
 - Fixed an issue where requests made from extra tabs do not include their original headers. Fixes [#28641](https://github.com/cypress-io/cypress/issues/28641).
 - Fixed an issue where `cy.wait()` would sometimes throw an error reading a property of undefined when returning responses. Fixes [#28233](https://github.com/cypress-io/cypress/issues/28233).
-- Fixed an issue where `.click()` commands on children of disabled elemenets would still produce "click" events -- even without {force: true}. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
 
 **Performance:**
 
