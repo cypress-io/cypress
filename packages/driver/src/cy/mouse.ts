@@ -576,7 +576,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
         }
 
-        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, canBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, canBeDisabled)
+        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, findParentThatCanBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, findParentThatCanBeDisabled)
 
         // Then check if parent is indeed disabled
         if (parentThatCanBeDisabled !== null && $elements.isDisabled($(parentThatCanBeDisabled))) {
