@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.5
 
-_Released <RELEASE_DATE> (PENDING)_
+_Released 2/13/2024 (PENDING)_
 
 **Bugfixes:**
 Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
