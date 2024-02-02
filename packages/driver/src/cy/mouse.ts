@@ -574,7 +574,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
           return elementsThatCanBeDisabled.includes($elements.getTagName(el)) ? el : null
         }
-        }
 
         const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, findParentThatCanBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, findParentThatCanBeDisabled)
 
