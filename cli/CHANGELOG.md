@@ -9,6 +9,10 @@ _Released 2/13/2024 (PENDING)_
 - Upgraded bundled Node.js version from `18.15.0` to `18.17.0`
 - Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`
 
+**Misc:**
+
+- Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
+
 ## 13.6.4
 
 _Released 1/30/2024_
