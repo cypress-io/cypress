@@ -227,7 +227,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // only set json to true if form isnt true
       // and we have a valid object for body
-      if ((options.form !== true) && isValidJsonObj(options.body, bodyIsExplicitlyDefined)) {
+      if ((options.form !== true) && isValidBody(options.body, bodyIsExplicitlyDefined)) {
         options.json = true
       }
 
