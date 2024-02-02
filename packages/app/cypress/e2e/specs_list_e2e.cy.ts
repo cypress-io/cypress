@@ -317,6 +317,10 @@ describe('App: Spec List (E2E)', () => {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
+
+        // wait for filter
+        cy.findAllByTestId('spec-item').should('have.length', 1)
+
         cy.contains('a', targetSpecFile).click()
 
         // make sure we are on the spec view before clicking back to the specs list
@@ -324,9 +328,12 @@ describe('App: Spec List (E2E)', () => {
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
-        cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+        cy.contains('button', 'Specs').click({ force: true })
 
-        cy.get('@searchField').should('be.visible').and('have.value', targetSpecFile)
+        // wait until specs list is visible
+        cy.findByTestId('specs-list-container').should('be.visible')
+
+        cy.get('@searchField').should('have.value', targetSpecFile)
 
         cy.findByTestId('sidebar-link-specs-page').click()
 
