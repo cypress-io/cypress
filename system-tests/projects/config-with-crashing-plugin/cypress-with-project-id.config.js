@@ -6,7 +6,7 @@ module.exports = {
       on('before:spec', () => {
         setTimeout(() => {
           throw new Error('Async error from plugins file')
-        }, 1000)
+        }, 0)
       })
 
       return config
