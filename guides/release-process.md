@@ -191,7 +191,6 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
-    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose/issues/71)
 
 Take a break, you deserve it! 👉😎👉
 
