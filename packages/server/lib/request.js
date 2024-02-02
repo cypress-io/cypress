@@ -700,7 +700,7 @@ module.exports = function (options = {}) {
 
       // https://github.com/cypress-io/cypress/issues/28789
       if (options.json === true) {
-        if (options.body === true || options.body === false || options.body === null) options.body = String(options.body)
+        if (_.isBoolean(options.body) || _.isNull(options.body)) options.body = String(options.body)
       }
 
       if (options.form === true) {
