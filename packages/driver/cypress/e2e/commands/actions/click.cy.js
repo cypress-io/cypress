@@ -559,7 +559,7 @@ describe('src/cy/commands/actions/click', () => {
       btn.attr('disabled', true)
       btn.append(span)
 
-      cy.get('span').click()
+      cy.get('button:first span').click()
 
       cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
       cy.getAll('btn', 'focus click').each(shouldNotBeCalled)
