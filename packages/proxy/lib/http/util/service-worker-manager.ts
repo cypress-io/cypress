@@ -1,4 +1,5 @@
 import Debug from 'debug'
+import pDefer from 'p-defer'
 import type { BrowserPreRequest } from '../../types'
 import type Protocol from 'devtools-protocol'
 
@@ -57,6 +58,7 @@ type AddInitiatorToServiceWorkerOptions = {
 export class ServiceWorkerManager {
   private serviceWorkerRegistrations: Map<string, ServiceWorkerRegistration> = new Map<string, ServiceWorkerRegistration>()
   private pendingInitiators: Map<string, string> = new Map<string, string>()
+  private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
 
   /**
    * Goes through the list of service worker registrations and adds or removes them from the manager.
@@ -103,21 +105,33 @@ export class ServiceWorkerManager {
     }
   }
 
+  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
+    const promises = this.pendingPotentiallyControlledRequests.get(event.url)
+
+    if (promises) {
+      const currentPromiseForUrl = promises.shift()
+
+      currentPromiseForUrl?.resolve(event.isControlled)
+    }
+  }
+
   /**
    * Processes a browser pre-request to determine if it is controlled by a service worker. If it is, the service worker's controlled URLs are updated with the given request URL.
    *
    * @param browserPreRequest The browser pre-request to process.
    * @returns `true` if the request is controlled by a service worker, `false` otherwise.
    */
-  processBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+  async processBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     if (browserPreRequest.initiator?.type === 'preload') {
       return false
     }
 
-    let requestControlledByServiceWorker = false
+    let requestPotentiallyControlledByServiceWorker = false
+    let activatedServiceWorker: ServiceWorker | undefined
+    const paramlessURL = browserPreRequest.url.split('?')[0]
 
     this.serviceWorkerRegistrations.forEach((registration) => {
-      const activatedServiceWorker = registration.activatedServiceWorker
+      activatedServiceWorker = registration.activatedServiceWorker
       const paramlessDocumentURL = browserPreRequest.documentURL.split('?')[0]
 
       // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
@@ -130,7 +144,6 @@ export class ServiceWorkerManager {
         return
       }
 
-      const paramlessURL = browserPreRequest.url.split('?')[0]
       const paramlessInitiatorURL = browserPreRequest.initiator?.url?.split('?')[0]
       const paramlessCallStackURL = browserPreRequest.initiator?.stack?.callFrames[0]?.url?.split('?')[0]
       const urlIsControlled = paramlessURL.startsWith(registration.scopeURL)
@@ -138,12 +151,32 @@ export class ServiceWorkerManager {
       const topStackUrlIsControlled = paramlessCallStackURL && activatedServiceWorker.controlledURLs?.has(paramlessCallStackURL)
 
       if (urlIsControlled || initiatorUrlIsControlled || topStackUrlIsControlled) {
-        activatedServiceWorker.controlledURLs.add(paramlessURL)
-        requestControlledByServiceWorker = true
+        requestPotentiallyControlledByServiceWorker = true
       }
     })
 
-    return requestControlledByServiceWorker
+    if (activatedServiceWorker && requestPotentiallyControlledByServiceWorker && await this.isURLControlledByServiceWorker(browserPreRequest.url)) {
+      activatedServiceWorker.controlledURLs.add(paramlessURL)
+
+      return true
+    }
+
+    return false
+  }
+
+  private isURLControlledByServiceWorker (url: string) {
+    let promises = this.pendingPotentiallyControlledRequests.get(url)
+
+    if (!promises) {
+      promises = []
+      this.pendingPotentiallyControlledRequests.set(url, promises)
+    }
+
+    const deferred = pDefer<boolean>()
+
+    promises.push(deferred)
+
+    return deferred.promise
   }
 
   /**

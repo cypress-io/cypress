@@ -324,8 +324,8 @@ export class ProjectBase extends EE {
       projectRoot,
     })
 
-    const onBrowserPreRequest = (browserPreRequest) => {
-      this.server.addBrowserPreRequest(browserPreRequest)
+    const onBrowserPreRequest = async (browserPreRequest) => {
+      await this.server.addBrowserPreRequest(browserPreRequest)
     }
 
     const onRequestEvent = (eventName, data) => {
@@ -356,6 +356,10 @@ export class ProjectBase extends EE {
       this.server.updateServiceWorkerClientSideRegistrations(data)
     }
 
+    const onServiceWorkerFetch = (event: { url: string, isControlled: boolean }) => {
+      this.server.handleServiceWorkerFetch(event)
+    }
+
     this._automation = new Automation({
       cyNamespace: namespace,
       cookieNamespace: socketIoCookie,
@@ -368,6 +372,7 @@ export class ProjectBase extends EE {
       onServiceWorkerRegistrationUpdated,
       onServiceWorkerVersionUpdated,
       onServiceWorkerClientSideRegistrationUpdated,
+      onServiceWorkerFetch,
     })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {

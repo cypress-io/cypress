@@ -832,6 +832,72 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeInjectServiceWorker: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'has:service:worker:header', parentSpan: this.resMiddlewareSpan, isVerbose })
+  const hasServiceWorkerHeader = this.req.headers?.['service-worker'] === 'script' || this.req.headers?.['Service-Worker'] === 'script'
+
+  span?.setAttributes({
+    wantsSecurityRemoved: this.res.wantsSecurityRemoved || false,
+  })
+
+  if (!hasServiceWorkerHeader) {
+    span?.end()
+
+    return this.next()
+  }
+
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.setEncoding('utf8')
+
+  this.incomingResStream.pipe(concatStream(async (body) => {
+    function overwriteAddEventListener () {
+      const oldAddEventListener = self.addEventListener
+
+      self.addEventListener = (type, listener, options) => {
+        if (type === 'fetch') {
+          const newListener = (event) => {
+            const oldRespondWith = event.respondWith
+
+            let respondWithCalled = false
+
+            event.respondWith = (response) => {
+              respondWithCalled = true
+
+              oldRespondWith.call(event, response)
+            }
+
+            const returnValue = listener(event)
+
+            self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
+
+            return returnValue
+          }
+
+          return oldAddEventListener(type, newListener, options)
+        }
+
+        return oldAddEventListener(type, listener, options)
+      }
+    }
+    const updatedBody = `
+(${overwriteAddEventListener})();
+${body}
+`
+
+    const pt = new PassThrough
+
+    pt.write(updatedBody)
+    pt.end()
+
+    this.incomingResStream = pt
+
+    this.next()
+  })).on('error', this.onError).once('close', () => {
+    span?.end()
+  })
+}
+
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
@@ -909,6 +975,7 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
+  MaybeInjectServiceWorker,
   GzipBody,
   SendResponseBodyToClient,
 }

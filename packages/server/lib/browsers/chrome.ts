@@ -484,7 +484,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, fullyManageTabs: false })
+    const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, fullyManageTabs: false, onServiceWorkerFetch: automation.onServiceWorkerFetch })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
@@ -620,6 +620,7 @@ export = {
       onReconnect,
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
+      onServiceWorkerFetch: automation.onServiceWorkerFetch,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)

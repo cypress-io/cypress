@@ -492,8 +492,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
@@ -522,6 +522,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
+    this.networkProxy.handleServiceWorkerFetch(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {

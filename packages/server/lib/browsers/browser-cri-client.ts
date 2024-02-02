@@ -24,6 +24,7 @@ type BrowserCriClientOptions = {
   onAsynchronousError: Function
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
+  onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
 }
 
 type BrowserCriClientCreateOptions = {
@@ -34,6 +35,7 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
+  onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
 }
 
 interface ManageTabsOptions {
@@ -180,6 +182,7 @@ export class BrowserCriClient {
   private onAsynchronousError: Function
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
+  private onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -192,7 +195,7 @@ export class BrowserCriClient {
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
 
-  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs }: BrowserCriClientOptions) {
+  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs, onServiceWorkerFetch }: BrowserCriClientOptions) {
     this.browserClient = browserClient
     this.versionInfo = versionInfo
     this.host = host
@@ -201,6 +204,7 @@ export class BrowserCriClient {
     this.onAsynchronousError = onAsynchronousError
     this.protocolManager = protocolManager
     this.fullyManageTabs = fullyManageTabs
+    this.onServiceWorkerFetch = onServiceWorkerFetch
   }
 
   /**
@@ -225,6 +229,7 @@ export class BrowserCriClient {
       onReconnect,
       port,
       protocolManager,
+      onServiceWorkerFetch,
     } = options
 
     const host = await ensureLiveBrowser(hosts, port, browserName)
@@ -240,7 +245,7 @@ export class BrowserCriClient {
         fullyManageTabs,
       })
 
-      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs })
+      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs, onServiceWorkerFetch })
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -292,6 +297,17 @@ export class BrowserCriClient {
       // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
       if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+
+        // Might be able to listen to this somewhere else
+        browserClient.on('Runtime.bindingCalled', async (event, sessionId) => {
+          if (event.name === '__cypressServiceWorkerFetchEvent') {
+            const { url, respondWithCalled } = JSON.parse(event.payload)
+
+            browserCriClient.onServiceWorkerFetch?.({ url, isControlled: respondWithCalled })
+          }
+        })
+
+        await browserClient.send('Runtime.addBinding', { name: '__cypressServiceWorkerFetchEvent' }, event.sessionId)
       }
     } catch (error) {
       // it's possible that the target was closed before we could enable
