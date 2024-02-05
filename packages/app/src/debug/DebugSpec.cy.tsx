@@ -164,7 +164,7 @@ const testResultSingleGroup: {[thumbprint: string]: TestResults[]} = {
   ],
 }
 
-describe('<DebugSpec/> with multiple test results', () => {
+describe('<DebugSpec/> with multiple test results', { viewportWidth: 960, viewportHeight: 400 }, () => {
   const spec = {
     id: '8879798756s88d',
     path: 'cypress/tests/',
@@ -210,7 +210,7 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('runResults-pending-count').should('have.text', 'pending 1')
     cy.findByTestId('metaData-Results-spec-duration').should('have.text', 'spec-duration 02:23')
 
-    cy.findAllByTestId('test-group').each((ele) => {
+    cy.findAllByTestId('cd-tr-container').each((ele) => {
       cy.wrap(ele).within(() => {
         cy.findByTestId('debug-artifacts').should('not.be.visible')
         cy.findByTestId('test-row').realHover().then(() => {
