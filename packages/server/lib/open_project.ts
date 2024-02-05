@@ -16,7 +16,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance } from './browsers/types'
-
+import devServer from './plugins/dev-server'
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
@@ -80,6 +80,28 @@ export class OpenProject {
     const cfg = this.projectBase.getConfig()
 
     if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
+
+    // might want to do this only in run mode?
+    // don't do this for cy in cy tests
+    if (this.projectBase.testingType === 'component' && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+      const timeoutInMillis = 30000
+
+      debug(`Component testing detected. Waiting up to ${timeoutInMillis} milliseconds for dev-server compilation to be completed...`)
+      try {
+        const timeoutError = new Error(`Timed out after ${timeoutInMillis} milliseconds.`)
+        let timeout = (ms) => new Promise((resolve, reject) => setTimeout(() => reject(timeoutError), ms))
+
+        await Promise.race([devServer.asyncIsDevServerReady, timeout(timeoutInMillis)])
+        debug(`dev-server has been compiled!`)
+      } catch (e) {
+        debug(`Oh no! dev-server did not compile due to: ${e.message}`)
+        throw e
+      }
+    } else {
+      // if we are in e2e mode, resolve the promise so it doesn't reject with a timeout
+      // if this works we obviously need a better way to do this...
+      devServer.isDevServerReadyPromiseResolver()
+    }
 
     const options: BrowserLaunchOpts = {
       browser,

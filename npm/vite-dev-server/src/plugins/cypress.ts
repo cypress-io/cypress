@@ -46,6 +46,9 @@ export const Cypress = (
     specsPathsSet = getSpecsPathsSet(specs)
   })
 
+  // TODO: find a more appropriate place to do this
+  devServerEvents.emit('dev-server:compile:success')
+
   return {
     name: 'cypress:main',
     enforce: 'pre',

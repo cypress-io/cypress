@@ -6,6 +6,11 @@ const plugins = require('../plugins')
 const errors = require('../errors')
 
 const baseEmitter = new EE()
+let isDevServerReadyPromiseResolver
+// give the dev server up to 30 seconds to compile. Otherwise reject the promise and fail before launching the browser
+const isDevServerReadyPromise = new Promise((resolve, reject) => {
+  isDevServerReadyPromiseResolver = resolve
+})
 
 plugins.registerHandler((ipc) => {
   baseEmitter.on('dev-server:specs:changed', (specs) => {
@@ -15,11 +20,17 @@ plugins.registerHandler((ipc) => {
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
+
+  baseEmitter.on('dev-server:compile:success', () => {
+    isDevServerReadyPromiseResolver()
+  })
 })
 
 // for simpler stubbing from unit tests
 const API = {
   emitter: baseEmitter,
+  asyncIsDevServerReady: isDevServerReadyPromise,
+  isDevServerReadyPromiseResolver,
 
   start ({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
