@@ -161,7 +161,7 @@ declare global {
       /**
        * Verifies the specs page is visible (list, no specs, or create spec page)
        */
-      specsPageIsVisible(specSetup?: 'new-project' | 'no-specs'): Chainable<any>
+      specsPageIsVisible(specsSetup?: 'new-project' | 'no-specs'): Chainable<any>
       /**
        * Visits the Cypress launchpad
        */
