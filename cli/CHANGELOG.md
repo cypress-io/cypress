@@ -6,9 +6,6 @@ _Released 2/13/2024 (PENDING)_
 **Misc:**
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
-
-**Bugfixes:**
-
 - Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
 
 ## 13.6.4
