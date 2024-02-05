@@ -335,11 +335,11 @@ describe('App Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitApp()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('profileButton')
       })
 
       it('shows user in top nav when logged in', () => {
-        cy.get('@logInButton').click()
+        cy.get('@profileButton').click()
 
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
@@ -353,7 +353,7 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('replaces user avatar after logout', () => {
-        cy.get('@logInButton').click()
+        cy.get('@profileButton').click()
 
         cy.withCtx((ctx, o) => {
           o.sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
@@ -371,6 +371,9 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('component-tests', ['--component'])
         cy.startAppServer('component')
 
+        cy.loginUser()
+        cy.visitApp()
+
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.result.data?.cloudProjectBySlug) {
             return new obj.Response('Unauthorized', { status: 401 })
@@ -379,20 +382,16 @@ describe('App Top Nav Workflows', () => {
           return obj.result
         })
 
-        cy.loginUser()
-        cy.visitApp()
-
-        cy.get('@logInButton').click()
+        cy.get('@profileButton').click()
 
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
 
         cy.findByTestId('sidebar-link-runs-page').click()
-        cy.get('@logInButton').click()
 
         cy.findByTestId('app-header-bar').within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log in' }).click()
+          cy.findByRole('button', { name: 'Log in' })
         })
       })
     })
