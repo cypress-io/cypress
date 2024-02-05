@@ -9,7 +9,7 @@ _Released 2/13/2024 (PENDING)_
 
 **Bugfixes:**
 
-- LaunchPad: Stop reopening browsers after closing when clicking on close button. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852)
+- Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
 
 ## 13.6.4
 
