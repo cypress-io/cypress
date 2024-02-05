@@ -506,7 +506,7 @@ describe('App: Specs', () => {
         cy.scaffoldProject('pristine-with-e2e-testing')
         cy.openProject('pristine-with-e2e-testing')
         cy.startAppServer('e2e')
-        cy.visitApp()
+        cy.visitApp('', {}, 'new-project')
       })
 
       context('scaffold example files', () => {

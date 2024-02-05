@@ -322,7 +322,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing', ['--component'])
       cy.startAppServer('component')
-      cy.visitApp()
+      cy.visitApp('', {}, 'new-project')
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {
