@@ -25,6 +25,7 @@ describe('App Top Nav Workflows', () => {
       cy.openProject('launchpad')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.findByTestId('app-header-bar').should('be.visible').and('contain', 'Specs')
     })
@@ -37,6 +38,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad', ['--browser', 'firefox'])
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('top-nav-active-browser-icon')
         .should('have.attr', 'src')
@@ -57,6 +59,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -143,6 +146,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -175,6 +179,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
       })
 
       it('shows dropdown with version info if user version is outdated', () => {
@@ -243,6 +248,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: `v${pkg.version}`,
@@ -258,6 +264,7 @@ describe('App Top Nav Workflows', () => {
       cy.openProject('launchpad')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -334,6 +341,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('profileButton')
       })
@@ -373,6 +381,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.result.data?.cloudProjectBySlug) {
@@ -456,6 +465,7 @@ describe('App Top Nav Workflows', () => {
           cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
           cy.startAppServer()
           cy.visitApp()
+          cy.specsPageIsVisible()
           cy.remoteGraphQLIntercept(async (obj) => {
             if (obj.result.data?.cloudViewer) {
               obj.result.data.cloudViewer.organizations = {
@@ -488,6 +498,7 @@ describe('App Top Nav Workflows', () => {
           cy.openProject('component-tests')
           cy.startAppServer()
           cy.visitApp()
+          cy.specsPageIsVisible()
         })
 
         it('shows log in modal workflow for user with name and email', () => {
@@ -698,6 +709,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer('e2e', { skipMockingPrompts: true })
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         verifyBannerDoesNotExist()
       })
@@ -708,6 +720,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer('e2e', { skipMockingPrompts: true })
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         verifyBannerDoesNotExist()
       })
@@ -728,6 +741,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         verifyBannerDoesNotExist()
       })
@@ -739,6 +753,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         verifyBannerDoesNotExist()
       })
@@ -752,6 +767,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
       })
@@ -764,6 +780,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
         cy.findByRole('button', { name: 'Dismiss banner' }).click()
@@ -785,6 +802,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
         cy.contains('button', 'Remind me later').click()
@@ -815,6 +833,7 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
         cy.contains('button', 'Enable desktop notifications').click()
@@ -850,6 +869,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
@@ -868,6 +888,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')

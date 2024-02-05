@@ -157,7 +157,11 @@ declare global {
       /**
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
-      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>, appSetup?: string): Chainable<AUTWindow>
+      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
+      /**
+       * Verifies the specs page is visible (list, no specs, or create spec page)
+       */
+      specsPageIsVisible(specSetup?: 'new-project' | 'no-specs'): Chainable<any>
       /**
        * Visits the Cypress launchpad
        */
@@ -343,7 +347,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
   })
 }
 
-function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>, appSetup?: string) {
+function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -360,28 +364,24 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>, appSetup
 
       return config.clientRoute
     }).then((clientRoute) => {
-      if (href) {
-        return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
-      }
-
-      cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}`, opts)
-
-      // we know the main route will go to the specs list
-      // just make sure the page is done rendering before taking any action
-      if (appSetup === 'new-project') {
-        // if this is a new project, we'll be on the create spec page
-        return cy.get('[data-cy=create-spec-page-cards]').should('be.visible')
-      }
-
-      if (appSetup === 'no-specs') {
-        // if this is an existing project with no specs, we'll be on the no specs found page
-        return cy.get('[data-cy=create-spec-page-description]').should('be.visible')
-      }
-
-      // if our tests seeded specs, we'll be on the specs list page
-      return cy.get('[data-cy=spec-list-container]').should('be.visible')
+      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
     })
   })
+}
+
+function specsPageIsVisible (specsSetup) {
+  if (specsSetup === 'new-project') {
+    // if this is a new project, we'll be on the create spec page
+    return cy.get('[data-cy=create-spec-page-cards]').should('be.visible')
+  }
+
+  if (specsSetup === 'no-specs') {
+    // if this is an existing project with no specs, we'll be on the no specs found page
+    return cy.get('[data-cy=create-spec-page-description]').should('be.visible')
+  }
+
+  // if our tests seeded specs, we'll be on the specs list page
+  return cy.get('[data-cy=spec-list-container]').should('be.visible')
 }
 
 function visitLaunchpad () {
@@ -565,6 +565,7 @@ Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('specsPageIsVisible', specsPageIsVisible)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('skipWelcome', skipWelcome)

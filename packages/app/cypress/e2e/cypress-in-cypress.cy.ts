@@ -17,6 +17,7 @@ function startAtSpecsPage (testingType: typeof testingTypes[number]) {
 
   cy.startAppServer(testingType)
   cy.visitApp()
+  cy.specsPageIsVisible()
 }
 
 function openProject (testingType: typeof testingTypes[number]) {
@@ -122,6 +123,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.startAppServer(testingType)
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
@@ -253,6 +255,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
 
       cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
@@ -268,6 +271,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').should('exist')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.app.browserStatus = 'open'

@@ -41,6 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
   }
 
