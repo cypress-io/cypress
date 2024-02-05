@@ -7,6 +7,10 @@ _Released 2/13/2024 (PENDING)_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
+**BugFixes:**
+
+- LaunchPad: Stop reopening browsers after closing when clicking on close button. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852)
+
 ## 13.6.4
 
 _Released 1/30/2024_
