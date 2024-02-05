@@ -210,7 +210,8 @@ describe('Create from component card', () => {
         cy.scaffoldProject('no-specs-vue-2')
         cy.openProject('no-specs-vue-2', ['--component'])
         cy.startAppServer('component')
-        cy.visitApp()
+        // we're visiting a page where no specs are present, so noSpecs = true
+        cy.visitApp('', {}, true)
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/components/HelloWorld.cy.js')
@@ -221,7 +222,8 @@ describe('Create from component card', () => {
         cy.scaffoldProject('no-specs-vue-2')
         cy.openProject('no-specs-vue-2', ['--config-file', 'cypress-custom-spec-pattern.config.js', '--component'])
         cy.startAppServer('component')
-        cy.visitApp()
+        // we're visiting a page where no specs are present, so noSpecs = true
+        cy.visitApp('', {}, true)
 
         cy.findByText('New spec').click()
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
@@ -235,7 +237,8 @@ describe('Create from component card', () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
-        cy.visitApp()
+        // we're visiting a page where no specs are present, so noSpecs = true
+        cy.visitApp('', {}, true)
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/App.cy.jsx')
@@ -246,7 +249,8 @@ describe('Create from component card', () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
-        cy.visitApp()
+        // we're visiting a page where no specs are present, so noSpecs = true
+        cy.visitApp('', {}, true)
 
         cy.findByText('New spec').click()
         cy.findAllByTestId('card').eq(0).as('ComponentCard')

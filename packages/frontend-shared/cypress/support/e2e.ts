@@ -157,7 +157,7 @@ declare global {
       /**
        * Visits the Cypress app, for Cypress-in-Cypress testing
        */
-      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
+      visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>, noSpecs?: boolean): Chainable<AUTWindow>
       /**
        * Visits the Cypress launchpad
        */
@@ -343,7 +343,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
   })
 }
 
-function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
+function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>, noSpecs?: boolean) {
   const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
@@ -364,10 +364,16 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
         return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
       }
 
-      // we know the main route will go to the specs list
-      // just make sure it's done rendering before taking any action
       cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}`, opts)
 
+      // we know the main route will go to the specs list
+      // just make sure the page is done rendering before taking any action
+      if (noSpecs) {
+        // if our tests haven't seeded any specs, we'll be on the create spec page
+        return cy.get('[data-cy=create-spec-page-cards]').should('be.visible')
+      }
+
+      // if our tests seeded specs, we'll be on the specs list page
       return cy.get('[data-cy=spec-list-container]').should('be.visible')
     })
   })
