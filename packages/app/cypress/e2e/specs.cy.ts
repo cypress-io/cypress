@@ -9,8 +9,7 @@ describe('App: Specs', () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs')
         cy.startAppServer('e2e')
-        // we're visiting a page where no specs are present, so noSpecs = true
-        cy.visitApp('', {}, true)
+        cy.visitApp('', {}, 'new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -231,8 +230,7 @@ describe('App: Specs', () => {
         cy.openProject('no-specs')
 
         cy.startAppServer('e2e')
-        // we're visiting a page where no specs are present, so noSpecs = true
-        cy.visitApp('', {}, true)
+        cy.visitApp('', {}, 'new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -330,8 +328,7 @@ describe('App: Specs', () => {
         })
 
         cy.startAppServer('e2e')
-        // we're visiting a page where no specs are present, so noSpecs = true
-        cy.visitApp('', {}, true)
+        cy.visitApp('', {}, 'no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -545,8 +542,7 @@ describe('App: Specs', () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
-        // we're visiting a page where no specs are present, so noSpecs = true
-        cy.visitApp('', {}, true)
+        cy.visitApp('', {}, 'new-project')
 
         cy.findAllByTestId('card').eq(1).as('TemplateSpecCard')
       })
@@ -676,8 +672,7 @@ describe('App: Specs', () => {
         })
 
         cy.startAppServer('component')
-        // we're visiting a page where no specs are present, so noSpecs = true
-        cy.visitApp('', {}, true)
+        cy.visitApp('', {}, 'no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -782,8 +777,7 @@ describe('App: Specs', () => {
       cy.scaffoldProject('no-specs')
       cy.openProject('no-specs')
       cy.startAppServer('e2e')
-      // we're visiting a page where no specs are present, so noSpecs = true
-      cy.visitApp('', {}, true)
+      cy.visitApp('', {}, 'new-project')
 
       cy.findByRole('heading', {
         level: 1,
