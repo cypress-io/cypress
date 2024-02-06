@@ -22,6 +22,7 @@ describe('configChange subscription', () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
     cy.visitApp()
+    cy.specsPageIsVisible()
   })
 
   describe('on config page', () => {

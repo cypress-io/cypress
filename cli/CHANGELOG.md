@@ -3,7 +3,11 @@
 
 _Released 2/13/2024 (PENDING)_
 
-** Dependency Updates:**
+**Bugfixes:**
+
+- Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
+
+**Dependency Updates:**
 
 - Upgraded `electron` from `25.8.4` to `27.1.3`
 - Upgraded bundled Node.js version from `18.15.0` to `18.17.0`

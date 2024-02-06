@@ -9,6 +9,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -48,6 +49,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -68,6 +70,7 @@ describe('Config options', () => {
     }, { specWithWhitespace })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains(specWithWhitespace).click()
     cy.get('.passed > .num').should('contain', 2)
   })
@@ -78,6 +81,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 2)
@@ -89,6 +93,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 2)
@@ -147,6 +152,7 @@ describe('sourcemaps', () => {
 
     const verifySourcemap = (specName: string, line: number, column: number) => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 2)

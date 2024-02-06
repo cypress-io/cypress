@@ -159,6 +159,10 @@ declare global {
        */
       visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
       /**
+       * Verifies the specs page is visible (list, no specs, or create spec page)
+       */
+      specsPageIsVisible(specsSetup?: 'new-project' | 'no-specs'): Chainable<any>
+      /**
        * Visits the Cypress launchpad
        */
       visitLaunchpad(href?: string): Chainable<AUTWindow>
@@ -365,6 +369,21 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   })
 }
 
+function specsPageIsVisible (specsSetup) {
+  if (specsSetup === 'new-project') {
+    // if this is a new project, we'll be on the create spec page
+    return cy.get('[data-cy=create-spec-page-cards]').should('be.visible')
+  }
+
+  if (specsSetup === 'no-specs') {
+    // if this is an existing project with no specs, we'll be on the no specs found page
+    return cy.get('[data-cy=create-spec-page-description]').should('be.visible')
+  }
+
+  // if our tests seeded specs, we'll be on the specs list page
+  return cy.get('[data-cy=spec-list-container]').should('be.visible')
+}
+
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
@@ -546,6 +565,7 @@ Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('specsPageIsVisible', specsPageIsVisible)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('skipWelcome', skipWelcome)
