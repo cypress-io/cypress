@@ -1092,15 +1092,16 @@ describe('lib/util/ci_provider', () => {
     resetEnv = mockedEnv({
       WEBAPPIO: 'true',
 
-      WEBAPPIO_JOB_ID: 'jobId',
-      WEBAPPIO_RUNNER_ID: 'runnerId',
+      JOB_ID: 'jobId',
+      RUNNER_ID: 'runnerId',
       RETRY_INDEX: 'retryIndex',
+      EXPOSE_WEBSITE_HOST: 'exposeWebsiteHost',
 
       // git info
-      WEBAPPIO_PULL_REQUEST: 'pullRequest',
-      WEBAPPIO_REPO_NAME: 'repoName',
-      WEBAPPIO_REPO_OWNER: 'repoOwner',
-      WEBAPPIO_BRANCH: 'branch',
+      PULL_REQUEST_URL: 'pullRequest',
+      REPOSITORY_NAME: 'repoName',
+      REPOSITORY_OWNER: 'repoOwner',
+      GIT_BRANCH: 'branch',
       GIT_TAG: 'tag',
       GIT_COMMIT: 'commit',
       GIT_COMMIT_TITLE: 'commitTitle',
@@ -1108,14 +1109,15 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('webappio')
     expectsCiParams({
-      webappioJobId: 'jobId',
-      webappioRunnerId: 'runnerId',
+      jobId: 'jobId',
+      runnerId: 'runnerId',
       retryIndex: 'retryIndex',
       gitTag: 'tag',
-      webappioBranch: 'branch',
-      webappioPullRequest: 'pullRequest',
-      webappioRepoName: 'repoName',
-      webappioRepoOwner: 'repoOwner',
+      gitBranch: 'branch',
+      pullRequestUrl: 'pullRequest',
+      repositoryName: 'repoName',
+      repositoryOwner: 'repoOwner',
+      exposeWebsiteHost: 'exposeWebsiteHost',
     })
 
     return expectsCommitParams({

@@ -420,14 +420,15 @@ const _providerCiParams = () => {
     ]),
     // https://docs.webapp.io/layerfile-reference/build-env
     webappio: extract([
-      'WEBAPPIO_JOB_ID',
-      'WEBAPPIO_RUNNER_ID',
+      'JOB_ID',
+      'RUNNER_ID',
       'RETRY_INDEX',
-      'WEBAPPIO_PULL_REQUEST',
-      'WEBAPPIO_REPO_NAME',
-      'WEBAPPIO_REPO_OWNER',
-      'WEBAPPIO_BRANCH',
+      'PULL_REQUEST_URL',
+      'REPOSITORY_NAME',
+      'REPOSITORY_OWNER',
+      'GIT_BRANCH',
       'GIT_TAG', // short hex for commits
+      'EXPOSE_WEBSITE_HOST',
     ]),
   }
 }
@@ -623,7 +624,7 @@ const _providerCommitParams = () => {
     },
     webappio: {
       sha: env.GIT_COMMIT,
-      branch: env.WEBAPPIO_BRANCH,
+      branch: env.GIT_BRANCH,
       message: env.GIT_COMMIT_TITLE,
     },
   }
