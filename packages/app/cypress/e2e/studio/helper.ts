@@ -3,6 +3,7 @@ export function launchStudio () {
   cy.openProject('experimental-studio')
   cy.startAppServer('e2e')
   cy.visitApp()
+  cy.specsPageIsVisible()
   cy.get(`[data-cy-row="spec.cy.js"]`).click()
 
   cy.waitForSpecToFinish()

@@ -115,6 +115,7 @@ describe('App: Spec List - Flaky Indicator', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
   })
 

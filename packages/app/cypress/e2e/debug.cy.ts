@@ -48,6 +48,7 @@ describe('App - Debug Page', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
 
@@ -125,6 +126,7 @@ describe('App - Debug Page', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
@@ -232,6 +234,7 @@ describe('App - Debug Page', () => {
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
