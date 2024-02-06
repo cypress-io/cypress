@@ -17,6 +17,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
      */
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /runs', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
 
@@ -35,6 +36,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
 
@@ -53,6 +55,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
     it('cleans up the primaryOriginCommunicator events when navigating to run a different spec', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
 
@@ -90,6 +93,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
@@ -116,6 +120,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
