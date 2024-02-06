@@ -662,7 +662,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="terminal-prompt-input').should('have.value', 'npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
-      cy.withRetryableCtx(function (ctx) {
+      cy.withRetryableCtx((ctx) => {
         expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
