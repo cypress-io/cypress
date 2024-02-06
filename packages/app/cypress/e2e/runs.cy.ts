@@ -652,15 +652,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays a copy button and copies correct command in E2E', () => {
+      const recordE2EText = 'npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+
       scaffoldTestingTypeAndVisitRunsPage('e2e')
       cy.withCtx(async (ctx, o) => {
         o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
+      cy.get('[data-cy="terminal-prompt-input').should('have.value', recordE2EText)
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith(recordE2EText)
       })
     })
   })
