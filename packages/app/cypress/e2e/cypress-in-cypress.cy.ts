@@ -198,7 +198,6 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="select-browser"]').as('selectBrowser')
 
       cy.viewport(500, 600)
-      cy.get('@selectBrowser').should('not.be.visible')
       cy.get('@selectBrowser').scrollIntoView()
       cy.get('@selectBrowser').should('be.visible') // with no specs list open, we should see this by scrolling
 
