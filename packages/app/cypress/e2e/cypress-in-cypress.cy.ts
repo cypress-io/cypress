@@ -198,10 +198,9 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="select-browser"]').as('selectBrowser')
 
       cy.viewport(500, 600)
-      cy.get('@selectBrowser')
-      .should('not.be.visible')
-      .scrollIntoView()
-      .should('be.visible') // with no specs list open, we should see this by scrolling
+      cy.get('@selectBrowser').should('not.be.visible')
+      cy.get('@selectBrowser').scrollIntoView()
+      cy.get('@selectBrowser').should('be.visible') // with no specs list open, we should see this by scrolling
 
       dragHandleToClientX('panel2', 200).then(() => {
         cy.contains('Chrome 1').should('be.visible')
@@ -210,10 +209,9 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       .click({ force: true })
 
-      cy.get('@selectBrowser')
-      .should('not.be.visible')
-      .scrollIntoView()
-      .should('not.be.visible') // with specs list open, scrolling is not enough to see this
+      cy.get('@selectBrowser').should('not.be.visible')
+      cy.get('@selectBrowser').scrollIntoView()
+      cy.get('@selectBrowser').should('not.be.visible') // with specs list open, scrolling is not enough to see this
 
       dragHandleToClientX('panel1', 130)
       cy.get('@selectBrowser')
