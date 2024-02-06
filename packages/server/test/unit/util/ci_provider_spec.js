@@ -1095,7 +1095,6 @@ describe('lib/util/ci_provider', () => {
       JOB_ID: 'jobId',
       RUNNER_ID: 'runnerId',
       RETRY_INDEX: 'retryIndex',
-      EXPOSE_WEBSITE_HOST: 'exposeWebsiteHost',
 
       // git info
       PULL_REQUEST_URL: 'pullRequest',
@@ -1117,7 +1116,6 @@ describe('lib/util/ci_provider', () => {
       pullRequestUrl: 'pullRequest',
       repositoryName: 'repoName',
       repositoryOwner: 'repoOwner',
-      exposeWebsiteHost: 'exposeWebsiteHost',
     })
 
     return expectsCommitParams({

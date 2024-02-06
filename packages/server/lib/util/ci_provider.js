@@ -428,7 +428,6 @@ const _providerCiParams = () => {
       'REPOSITORY_OWNER',
       'GIT_BRANCH',
       'GIT_TAG', // short hex for commits
-      'EXPOSE_WEBSITE_HOST',
     ]),
   }
 }
