@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script>
+    const makeRequests = () => {
+      for (let i = 0; i < 50; i++) {
+        fetch(`/1mb?i=${Math.random()}`).then(() => {
+          if (i === 49) {
+            document.getElementById('output').innerText = 'done'
+          }
+        }).catch(() => {})
+      }
+    }
+
+    navigator.serviceWorker.register('/fixtures/service-worker.js')
+    .then((registration) => {
+      const serviceWorker = registration.installing || registration.waiting
+      if (serviceWorker) {
+        const controllerChangeCalled = false
+        navigator.serviceWorker.addEventListener('controllerchange', (e) => {
+          console.log('controllerchange', e.target.controller.state)
+          controllerChangeCalled = true
+          makeRequests()
+        })
+
+        serviceWorker.addEventListener('statechange', (e) => {
+          console.log('statechange', e.target.state)
+          if (e.target.state === 'activated' && !controllerChangeCalled) {
+            // service worker activated, reload page so it can intercept requests
+            location.reload()
+          }
+        })
+      } else {
+        makeRequests()
+      }
+    })
+  </script>
+</head>
+<body>
+  <h1>hi</h1>
+  <div id="output"></div>
+</body>
+</html>

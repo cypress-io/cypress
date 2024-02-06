@@ -59,6 +59,7 @@ export class ServiceWorkerManager {
   private serviceWorkerRegistrations: Map<string, ServiceWorkerRegistration> = new Map<string, ServiceWorkerRegistration>()
   private pendingInitiators: Map<string, string> = new Map<string, string>()
   private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
+  private pendingServiceWorkerFetches: Map<string, boolean[]> = new Map<string, boolean[]>()
 
   /**
    * Goes through the list of service worker registrations and adds or removes them from the manager.
@@ -109,9 +110,21 @@ export class ServiceWorkerManager {
     const promises = this.pendingPotentiallyControlledRequests.get(event.url)
 
     if (promises) {
+      debug('found pending controlled request promise: %o', event)
+
       const currentPromiseForUrl = promises.shift()
 
       currentPromiseForUrl?.resolve(event.isControlled)
+    } else {
+      const fetches = this.pendingServiceWorkerFetches.get(event.url)
+
+      debug('no pending controlled request promise found, adding a pending service worker fetch: %o', event)
+
+      if (fetches) {
+        fetches.push(event.isControlled)
+      } else {
+        this.pendingServiceWorkerFetches.set(event.url, [event.isControlled])
+      }
     }
   }
 
@@ -152,6 +165,8 @@ export class ServiceWorkerManager {
 
       if (urlIsControlled || initiatorUrlIsControlled || topStackUrlIsControlled) {
         requestPotentiallyControlledByServiceWorker = true
+      } else {
+        console.log('not controlled', paramlessURL, paramlessInitiatorURL, paramlessCallStackURL, registration.scopeURL)
       }
     })
 
@@ -165,6 +180,20 @@ export class ServiceWorkerManager {
   }
 
   private isURLControlledByServiceWorker (url: string) {
+    const fetches = this.pendingServiceWorkerFetches.get(url)
+
+    if (fetches) {
+      const isControlled = fetches.shift()
+
+      debug('found pending service worker fetch: %o', { url, isControlled })
+
+      if (fetches.length === 0) {
+        this.pendingServiceWorkerFetches.delete(url)
+      }
+
+      return Promise.resolve(isControlled)
+    }
+
     let promises = this.pendingPotentiallyControlledRequests.get(url)
 
     if (!promises) {
@@ -175,6 +204,7 @@ export class ServiceWorkerManager {
     const deferred = pDefer<boolean>()
 
     promises.push(deferred)
+    debug('adding pending controlled request promise: %s', url)
 
     return deferred.promise
   }
@@ -213,7 +243,7 @@ export class ServiceWorkerManager {
       registration.activatedServiceWorker = {
         registrationId,
         scriptURL,
-        controlledURLs: new Set<string>(),
+        controlledURLs: registration.activatedServiceWorker?.controlledURLs || new Set<string>(),
         initiatorOrigin: initiatorOrigin || registration.activatedServiceWorker?.initiatorOrigin,
       }
 

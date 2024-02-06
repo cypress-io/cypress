@@ -21,9 +21,7 @@ export type RequestMiddleware = HttpMiddleware<{
 }>
 
 const LogRequest: RequestMiddleware = function () {
-  this.debug('proxying request %o', {
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
-  })
+  console.log('proxying request %o', this.req.proxiedUrl)
 
   this.next()
 }

@@ -9,7 +9,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '.'
+import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -833,14 +833,12 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 }
 
 const MaybeInjectServiceWorker: ResponseMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'has:service:worker:header', parentSpan: this.resMiddlewareSpan, isVerbose })
-  const hasServiceWorkerHeader = this.req.headers?.['service-worker'] === 'script' || this.req.headers?.['Service-Worker'] === 'script'
+  const span = telemetry.startSpan({ name: 'maybe:inject:service:worker', parentSpan: this.resMiddlewareSpan, isVerbose })
+  const hasHeader = hasServiceWorkerHeader(this.req.headers)
 
-  span?.setAttributes({
-    wantsSecurityRemoved: this.res.wantsSecurityRemoved || false,
-  })
+  span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
 
-  if (!hasServiceWorkerHeader) {
+  if (!hasHeader) {
     span?.end()
 
     return this.next()
@@ -857,18 +855,19 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
       self.addEventListener = (type, listener, options) => {
         if (type === 'fetch') {
           const newListener = (event) => {
+            // we want to override the respondWith method so we can track if it was called
+            // to determine if the service worker intercepted the request
             const oldRespondWith = event.respondWith
-
             let respondWithCalled = false
 
             event.respondWith = (response) => {
               respondWithCalled = true
-
               oldRespondWith.call(event, response)
             }
 
             const returnValue = listener(event)
 
+            // call the CDP binding to inform the backend whether or not the service worker intercepted the request
             self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
 
             return returnValue

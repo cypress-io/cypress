@@ -171,7 +171,7 @@ export class PreRequests {
         proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
       }
 
-      debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
+      console.log('Incoming pre-request %s matches pending request. %o', key, browserPreRequest.requestId)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback?.({
@@ -195,7 +195,7 @@ export class PreRequests {
       return
     }
 
-    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
+    console.log('Caching pre-request %s to be matched later. %o', key, browserPreRequest.requestId)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
       cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
@@ -239,7 +239,7 @@ export class PreRequests {
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+      console.log('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest.requestId)
 
       callback({
         browserPreRequest: {
@@ -260,7 +260,7 @@ export class PreRequests {
 
     if (pendingUrlWithoutPreRequests) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pending url without pre request', key)
+      console.log('Incoming request %s matches known pending url without pre request', key)
       callback({
         noPreRequestExpected: true,
       })
@@ -282,6 +282,9 @@ export class PreRequests {
           noPreRequestExpected: false,
         })
 
+        // TODO: Why aren't we removing the pending request entirely?
+        // opening DevTools causes a pendingRequest to be created, but a pre-request never comes in
+        // this.removePendingRequest(pendingRequest)
         delete pendingRequest.callback
       }, this.requestTimeout),
     }
