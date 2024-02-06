@@ -84,7 +84,7 @@ export class OpenProject {
     // might want to do this only in run mode?
     // don't do this for cy in cy tests
     if (this.projectBase.testingType === 'component' && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-      const timeoutInMillis = 30000
+      const timeoutInMillis = 120000
 
       debug(`Component testing detected. Waiting up to ${timeoutInMillis} milliseconds for dev-server compilation to be completed...`)
       try {
