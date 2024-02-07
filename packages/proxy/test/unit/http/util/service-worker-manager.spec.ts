@@ -2,161 +2,215 @@ import { expect } from 'chai'
 import { ServiceWorkerManager } from '../../../../lib/http/util/service-worker-manager'
 
 describe('lib/http/util/service-worker-manager', () => {
-  it('will detect when requests are controlled by a service worker', () => {
-    const manager = new ServiceWorkerManager()
+  describe('will detect when requests are controlled by a service worker', () => {
+    let manager: ServiceWorkerManager
 
-    manager.updateServiceWorkerRegistrations({
-      registrations: [{
-        registrationId: '1',
-        scopeURL: 'http://localhost:8080',
-        isDeleted: false,
-      }],
-    })
+    beforeEach(() => {
+      manager = new ServiceWorkerManager()
 
-    manager.updateServiceWorkerVersions({
-      versions: [{
-        versionId: '1',
-        runningStatus: 'running',
-        registrationId: '1',
+      manager.updateServiceWorkerRegistrations({
+        registrations: [{
+          registrationId: '1',
+          scopeURL: 'http://localhost:8080',
+          isDeleted: false,
+        }],
+      })
+
+      manager.updateServiceWorkerVersions({
+        versions: [{
+          versionId: '1',
+          runningStatus: 'running',
+          registrationId: '1',
+          scriptURL: 'http://localhost:8080/sw.js',
+          status: 'activated',
+        }],
+      })
+
+      manager.addInitiatorToServiceWorker({
         scriptURL: 'http://localhost:8080/sw.js',
-        status: 'activated',
-      }],
+        initiatorOrigin: 'http://localhost:8080/',
+      })
     })
 
-    manager.addInitiatorToServiceWorker({
-      scriptURL: 'http://localhost:8080/sw.js',
-      initiatorOrigin: 'http://localhost:8080/',
+    it('controls a script request emanated from the service worker\'s initiator', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-1',
+        method: 'GET',
+        url: 'http://localhost:8080/foo.js',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      manager.handleServiceWorkerFetch({
+        url: 'http://localhost:8080/foo.js',
+        isControlled: true,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.true
     })
 
-    // A script request emanated from the service worker's initiator is controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-1',
-      method: 'GET',
-      url: 'http://localhost:8080/foo.js',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.true
-
-    // A script request emanated from the previous script request is controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-2',
-      method: 'GET',
-      url: 'http://example.com/bar.css',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'script',
-        stack: {
-          callFrames: [{
-            url: 'http://localhost:8080/foo.js',
-            lineNumber: 1,
-            columnNumber: 1,
-            functionName: '',
-            scriptId: '1',
-          }],
-        },
-      },
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.true
-
-    // A script request emanated from the previous css is controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-3',
-      method: 'GET',
-      url: 'http://example.com/baz.woff2',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'script',
+    it('controls a script request emanated from the previous script request', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-2',
+        method: 'GET',
         url: 'http://example.com/bar.css',
-      },
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.true
-
-    // A script request emanated from a different script request is not controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-4',
-      method: 'GET',
-      url: 'http://example.com/quux.js',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'script',
-        stack: {
-          callFrames: [{
-            url: 'http://example.com/bar.js',
-            lineNumber: 1,
-            columnNumber: 1,
-            functionName: '',
-            scriptId: '1',
-          }],
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'script',
+          stack: {
+            callFrames: [{
+              url: 'http://localhost:8080/foo.js',
+              lineNumber: 1,
+              columnNumber: 1,
+              functionName: '',
+              scriptId: '1',
+            }],
+          },
         },
-      },
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.false
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
 
-    // A script request emanated from a different css request is not controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-5',
-      method: 'GET',
-      url: 'http://example.com/quux.css',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'script',
-        url: 'http://example.com/baz.css',
-      },
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.false
+      manager.handleServiceWorkerFetch({
+        url: 'http://example.com/bar.css',
+        isControlled: true,
+      })
 
-    // A script request emanated from a different document is not controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-6',
-      method: 'GET',
-      url: 'http://example.com/quux.css',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'script',
-        url: 'http://example.com/baz.css',
-      },
-      documentURL: 'http://example.com/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.false
+      const isControlled = await result
 
-    // A preload request is not controlled
-    expect(manager.processBrowserPreRequest({
-      requestId: 'id-7',
-      method: 'GET',
-      url: 'http://example.com/quux.css',
-      headers: {},
-      resourceType: 'fetch',
-      originalResourceType: undefined,
-      initiator: {
-        type: 'preload',
-      },
-      documentURL: 'http://localhost:8080/index.html',
-      cdpRequestWillBeSentTimestamp: 0,
-      cdpRequestWillBeSentReceivedTimestamp: 0,
-    })).to.be.false
+      expect(isControlled).to.be.true
+    })
+
+    it('controls a script request emanated from the previous css', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-3',
+        method: 'GET',
+        url: 'http://example.com/baz.woff2',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'script',
+          url: 'http://example.com/bar.css',
+        },
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      manager.handleServiceWorkerFetch({
+        url: 'http://example.com/bar.css',
+        isControlled: true,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.true
+    })
+
+    it('does not control a script request emanated from a different script request', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-4',
+        method: 'GET',
+        url: 'http://example.com/quux.js',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'script',
+          stack: {
+            callFrames: [{
+              url: 'http://example.com/bar.js',
+              lineNumber: 1,
+              columnNumber: 1,
+              functionName: '',
+              scriptId: '1',
+            }],
+          },
+        },
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.false
+    })
+
+    it('does not control a script request emanated from a different css request', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-5',
+        method: 'GET',
+        url: 'http://example.com/quux.css',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'script',
+          url: 'http://example.com/baz.css',
+        },
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.false
+    })
+
+    it('does not control a script request emanated from a different document', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-6',
+        method: 'GET',
+        url: 'http://example.com/quux.css',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'script',
+          url: 'http://example.com/baz.css',
+        },
+        documentURL: 'http://example.com/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.false
+    })
+
+    it('a preload request is not controlled', async () => {
+      const result = manager.processBrowserPreRequest({
+        requestId: 'id-7',
+        method: 'GET',
+        url: 'http://example.com/quux.css',
+        headers: {},
+        resourceType: 'fetch',
+        originalResourceType: undefined,
+        initiator: {
+          type: 'preload',
+        },
+        documentURL: 'http://localhost:8080/index.html',
+        cdpRequestWillBeSentTimestamp: 0,
+        cdpRequestWillBeSentReceivedTimestamp: 0,
+      })
+
+      const isControlled = await result
+
+      expect(isControlled).to.be.false
+    })
   })
 
   it('will not detect requests when not controlled by an active service worker', () => {
@@ -618,4 +672,6 @@ describe('lib/http/util/service-worker-manager', () => {
       cdpRequestWillBeSentReceivedTimestamp: 0,
     })).to.be.false
   })
+
+  it('')
 })

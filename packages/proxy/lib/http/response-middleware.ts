@@ -21,6 +21,7 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
+import { rewriteServiceWorker } from './util/service-worker-manager'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -849,43 +850,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    function overwriteAddEventListener () {
-      // @ts-expect-error
-      const oldAddEventListener = self.addEventListener
-
-      // @ts-expect-error
-      self.addEventListener = (type, listener, options) => {
-        if (type === 'fetch') {
-          const newListener = (event) => {
-            // we want to override the respondWith method so we can track if it was called
-            // to determine if the service worker intercepted the request
-            const oldRespondWith = event.respondWith
-            let respondWithCalled = false
-
-            event.respondWith = (response) => {
-              respondWithCalled = true
-              oldRespondWith.call(event, response)
-            }
-
-            const returnValue = listener(event)
-
-            // @ts-expect-error
-            // call the CDP binding to inform the backend whether or not the service worker intercepted the request
-            self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
-
-            return returnValue
-          }
-
-          return oldAddEventListener(type, newListener, options)
-        }
-
-        return oldAddEventListener(type, listener, options)
-      }
-    }
-    const updatedBody = `
-(${overwriteAddEventListener})();
-${body}
-`
+    const updatedBody = rewriteServiceWorker(body)
 
     const pt = new PassThrough
 

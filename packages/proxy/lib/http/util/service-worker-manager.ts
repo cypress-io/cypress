@@ -1,7 +1,10 @@
+/// <reference lib="dom" />
+
 import Debug from 'debug'
 import pDefer from 'p-defer'
 import type { BrowserPreRequest } from '../../types'
 import type Protocol from 'devtools-protocol'
+import type { CriClient } from '@packages/server/lib/browsers/cri-client'
 
 const debug = Debug('cypress:proxy:service-worker-manager')
 
@@ -35,6 +38,70 @@ type AddActivatedServiceWorkerOptions = {
 type AddInitiatorToServiceWorkerOptions = {
   scriptURL: string
   initiatorOrigin: string
+}
+
+export type ServiceWorkerFetchHandler = (event: { url: string, isControlled: boolean }) => void
+
+/**
+ * Adds and listens to the service worker fetch event CDP binding.
+ * @param browserClient the browser client to add the binding to
+ * @param browserCriClient the browser CRI client to add the service worker fetch event handler to
+ * @param event the attached to target event
+ */
+export const addServiceWorkerFetchEventHandler = async (browserClient: CriClient, event: Protocol.Target.AttachedToTargetEvent, handler: ServiceWorkerFetchHandler) => {
+  browserClient.on('Runtime.bindingCalled', async (event, _sessionId) => {
+    if (event.name === '__cypressServiceWorkerFetchEvent') {
+      const { url, respondWithCalled } = JSON.parse(event.payload)
+
+      handler({ url, isControlled: respondWithCalled })
+    }
+  })
+
+  await browserClient.send('Runtime.addBinding', { name: '__cypressServiceWorkerFetchEvent' }, event.sessionId)
+}
+
+/**
+ * Rewrites the service worker to add an event listener for fetch events.
+ * @param body the body of the service worker to rewrite
+ * @returns the rewritten service worker
+ */
+export const rewriteServiceWorker = (body: Buffer) => {
+  function overwriteAddEventListener () {
+    const oldAddEventListener = self.addEventListener
+
+    self.addEventListener = (type, listener, options) => {
+      if (type === 'fetch') {
+        const newListener = (event) => {
+          // we want to override the respondWith method so we can track if it was called
+          // to determine if the service worker intercepted the request
+          const oldRespondWith = event.respondWith
+          let respondWithCalled = false
+
+          event.respondWith = (response) => {
+            respondWithCalled = true
+            oldRespondWith.call(event, response)
+          }
+
+          const returnValue = listener(event)
+
+          // @ts-expect-error
+          // call the CDP binding to inform the backend whether or not the service worker intercepted the request
+          self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
+
+          return returnValue
+        }
+
+        return oldAddEventListener(type, newListener, options)
+      }
+
+      return oldAddEventListener(type, listener, options)
+    }
+  }
+  const updatedBody = `
+(${overwriteAddEventListener})();
+${body}`
+
+  return updatedBody
 }
 
 /**

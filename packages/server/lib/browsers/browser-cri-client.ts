@@ -7,6 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
+import { ServiceWorkerFetchHandler, addServiceWorkerFetchEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -24,7 +25,7 @@ type BrowserCriClientOptions = {
   onAsynchronousError: Function
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
-  onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
+  onServiceWorkerFetch: ServiceWorkerFetchHandler
 }
 
 type BrowserCriClientCreateOptions = {
@@ -35,7 +36,7 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
-  onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
+  onServiceWorkerFetch: ServiceWorkerFetchHandler
 }
 
 interface ManageTabsOptions {
@@ -182,7 +183,7 @@ export class BrowserCriClient {
   private onAsynchronousError: Function
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
-  private onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
+  onServiceWorkerFetch: ServiceWorkerFetchHandler
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -195,16 +196,16 @@ export class BrowserCriClient {
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
 
-  private constructor ({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs, onServiceWorkerFetch }: BrowserCriClientOptions) {
-    this.browserClient = browserClient
-    this.versionInfo = versionInfo
-    this.host = host
-    this.port = port
-    this.browserName = browserName
-    this.onAsynchronousError = onAsynchronousError
-    this.protocolManager = protocolManager
-    this.fullyManageTabs = fullyManageTabs
-    this.onServiceWorkerFetch = onServiceWorkerFetch
+  private constructor (options: BrowserCriClientOptions) {
+    this.browserClient = options.browserClient
+    this.versionInfo = options.versionInfo
+    this.host = options.host
+    this.port = options.port
+    this.browserName = options.browserName
+    this.onAsynchronousError = options.onAsynchronousError
+    this.protocolManager = options.protocolManager
+    this.fullyManageTabs = options.fullyManageTabs
+    this.onServiceWorkerFetch = options.onServiceWorkerFetch
   }
 
   /**
@@ -245,7 +246,17 @@ export class BrowserCriClient {
         fullyManageTabs,
       })
 
-      const browserCriClient = new BrowserCriClient({ browserClient, versionInfo, host, port, browserName, onAsynchronousError, protocolManager, fullyManageTabs, onServiceWorkerFetch })
+      const browserCriClient = new BrowserCriClient({
+        browserClient,
+        versionInfo,
+        host,
+        port,
+        browserName,
+        onAsynchronousError,
+        protocolManager,
+        fullyManageTabs,
+        onServiceWorkerFetch,
+      })
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -255,7 +266,8 @@ export class BrowserCriClient {
     }, browserName, port)
   }
 
-  static async _manageTabs ({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager }: ManageTabsOptions) {
+  static async _manageTabs (options: ManageTabsOptions) {
+    const { browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager } = options
     const promises = [
       browserClient.send('Target.setDiscoverTargets', { discover: true }),
       browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
@@ -275,7 +287,7 @@ export class BrowserCriClient {
         // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
         await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       } catch (error) {
-      // it's possible that the target was closed before we can run. If so, just ignore
+        // it's possible that the target was closed before we can run. If so, just ignore
         debug('error running Runtime.runIfWaitingForDebugger:', error)
       }
     })
@@ -298,16 +310,7 @@ export class BrowserCriClient {
       if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
 
-        // Might be able to listen to this somewhere else
-        browserClient.on('Runtime.bindingCalled', async (event, sessionId) => {
-          if (event.name === '__cypressServiceWorkerFetchEvent') {
-            const { url, respondWithCalled } = JSON.parse(event.payload)
-
-            browserCriClient.onServiceWorkerFetch?.({ url, isControlled: respondWithCalled })
-          }
-        })
-
-        await browserClient.send('Runtime.addBinding', { name: '__cypressServiceWorkerFetchEvent' }, event.sessionId)
+        await addServiceWorkerFetchEventHandler(browserClient, event, browserCriClient.onServiceWorkerFetch)
       }
     } catch (error) {
       // it's possible that the target was closed before we could enable
@@ -529,7 +532,15 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({ target: target.targetId, onAsynchronousError: this.onAsynchronousError, host: this.host, port: this.port, protocolManager: this.protocolManager, fullyManageTabs: this.fullyManageTabs, browserClient: this.browserClient })
+      this.currentlyAttachedTarget = await create({
+        target: target.targetId,
+        onAsynchronousError: this.onAsynchronousError,
+        host: this.host,
+        port: this.port,
+        protocolManager: this.protocolManager,
+        fullyManageTabs: this.fullyManageTabs,
+        browserClient: this.browserClient,
+      })
 
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
