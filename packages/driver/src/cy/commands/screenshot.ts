@@ -287,7 +287,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
       if ((index + 1) === numScreenshots) {
         const overlap = (index * viewportHeight) + elPosition.fromElViewport.top
         const heightLeft = elPosition.fromElViewport.bottom - overlap
-        // const heightLeft = elPosition.height - (elPosition.fromElViewport.top)
 
         return {
           x,
@@ -504,6 +503,7 @@ export default function (Commands, Cypress, cy, state, config) {
     if (
       !test.err
       || !screenshotConfig.screenshotOnRunFailure
+      // TO DO REVERT THIS CHANGE MADE FOR TESTING IN OPEN MODE
       // || config('isInteractive')
       || test.err.isPending
       || !config('screenshotOnRunFailure')
