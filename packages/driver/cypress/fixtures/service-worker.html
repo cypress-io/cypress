@@ -19,13 +19,11 @@
       if (serviceWorker) {
         const controllerChangeCalled = false
         navigator.serviceWorker.addEventListener('controllerchange', (e) => {
-          console.log('controllerchange', e.target.controller.state)
           controllerChangeCalled = true
           makeRequests()
         })
 
         serviceWorker.addEventListener('statechange', (e) => {
-          console.log('statechange', e.target.state)
           if (e.target.state === 'activated' && !controllerChangeCalled) {
             // service worker activated, reload page so it can intercept requests
             location.reload()
