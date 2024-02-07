@@ -35,7 +35,7 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
-const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
+export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
   return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
 }
 
@@ -466,8 +466,8 @@ export class Http {
     return this.buffers.set(buffer)
   }
 
-  addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    if (this.shouldIgnorePendingRequest(browserPreRequest)) {
+  async addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    if (await this.shouldIgnorePendingRequest(browserPreRequest)) {
       return
     }
 
@@ -498,6 +498,10 @@ export class Http {
     this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorOrigin: data.initiatorOrigin })
   }
 
+  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
+    this.serviceWorkerManager.handleServiceWorkerFetch(event)
+  }
+
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)
@@ -507,7 +511,7 @@ export class Http {
     this.preRequests.setPreRequestTimeout(timeout)
   }
 
-  private shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
+  private async shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
     // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
     // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
     // `service-worker` header
@@ -517,12 +521,14 @@ export class Http {
       return true
     }
 
-    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
+    const isControlled = await this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)
+
+    if (isControlled) {
       debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
 
       return true
     }
 
-    return false
+    return isControlled
   }
 }

@@ -282,6 +282,9 @@ export class PreRequests {
           noPreRequestExpected: false,
         })
 
+        // TODO: Why aren't we removing the pending request entirely?
+        // opening DevTools causes a pendingRequest to be created, but a pre-request never comes in
+        // this.removePendingRequest(pendingRequest)
         delete pendingRequest.callback
       }, this.requestTimeout),
     }

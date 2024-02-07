@@ -9,7 +9,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '.'
+import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -832,6 +832,74 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeInjectServiceWorker: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:inject:service:worker', parentSpan: this.resMiddlewareSpan, isVerbose })
+  const hasHeader = hasServiceWorkerHeader(this.req.headers)
+
+  span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
+
+  if (!hasHeader) {
+    span?.end()
+
+    return this.next()
+  }
+
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.setEncoding('utf8')
+
+  this.incomingResStream.pipe(concatStream(async (body) => {
+    function overwriteAddEventListener () {
+      // @ts-expect-error
+      const oldAddEventListener = self.addEventListener
+
+      // @ts-expect-error
+      self.addEventListener = (type, listener, options) => {
+        if (type === 'fetch') {
+          const newListener = (event) => {
+            // we want to override the respondWith method so we can track if it was called
+            // to determine if the service worker intercepted the request
+            const oldRespondWith = event.respondWith
+            let respondWithCalled = false
+
+            event.respondWith = (response) => {
+              respondWithCalled = true
+              oldRespondWith.call(event, response)
+            }
+
+            const returnValue = listener(event)
+
+            // @ts-expect-error
+            // call the CDP binding to inform the backend whether or not the service worker intercepted the request
+            self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
+
+            return returnValue
+          }
+
+          return oldAddEventListener(type, newListener, options)
+        }
+
+        return oldAddEventListener(type, listener, options)
+      }
+    }
+    const updatedBody = `
+(${overwriteAddEventListener})();
+${body}
+`
+
+    const pt = new PassThrough
+
+    pt.write(updatedBody)
+    pt.end()
+
+    this.incomingResStream = pt
+
+    this.next()
+  })).on('error', this.onError).once('close', () => {
+    span?.end()
+  })
+}
+
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
@@ -909,6 +977,7 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
+  MaybeInjectServiceWorker,
   GzipBody,
   SendResponseBodyToClient,
 }

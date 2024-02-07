@@ -10,8 +10,8 @@ export class NetworkProxy {
     this.http = new Http(opts)
   }
 
-  addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
-    this.http.addPendingBrowserPreRequest(preRequest)
+  async addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
+    await this.http.addPendingBrowserPreRequest(preRequest)
   }
 
   removePendingBrowserPreRequest (requestId: string) {
@@ -36,6 +36,10 @@ export class NetworkProxy {
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.http.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
+    this.http.handleServiceWorkerFetch(event)
   }
 
   handleHttpRequest (req, res) {

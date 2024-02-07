@@ -205,7 +205,7 @@ export class CdpAutomation implements CDPClient {
     return cdpAutomation
   }
 
-  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
 
     let url = params.request.url
@@ -239,7 +239,7 @@ export class CdpAutomation implements CDPClient {
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
-    this.automation.onBrowserPreRequest?.(browserPreRequest)
+    await this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {

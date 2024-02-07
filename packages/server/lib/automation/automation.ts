@@ -6,7 +6,7 @@ import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
 
-export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
+export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
 export type AutomationOptions = {
   cyNamespace?: string
@@ -20,6 +20,7 @@ export type AutomationOptions = {
   onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated
   onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
   onServiceWorkerClientSideRegistrationUpdated?: OnServiceWorkerClientSideRegistrationUpdated
+  onServiceWorkerFetch?: (event: { url: string, isControlled: boolean }) => void
 }
 
 export class Automation {
@@ -35,6 +36,7 @@ export class Automation {
   public onServiceWorkerRegistrationUpdated: OnServiceWorkerRegistrationUpdated | undefined
   public onServiceWorkerVersionUpdated: OnServiceWorkerVersionUpdated | undefined
   public onServiceWorkerClientSideRegistrationUpdated: OnServiceWorkerClientSideRegistrationUpdated | undefined
+  public onServiceWorkerFetch: ((event: { url: string, isControlled: boolean }) => void) | undefined
 
   constructor (options: AutomationOptions) {
     this.onBrowserPreRequest = options.onBrowserPreRequest
@@ -45,6 +47,7 @@ export class Automation {
     this.onServiceWorkerRegistrationUpdated = options.onServiceWorkerRegistrationUpdated
     this.onServiceWorkerVersionUpdated = options.onServiceWorkerVersionUpdated
     this.onServiceWorkerClientSideRegistrationUpdated = options.onServiceWorkerClientSideRegistrationUpdated
+    this.onServiceWorkerFetch = options.onServiceWorkerFetch
 
     this.requests = {}
 
