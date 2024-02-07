@@ -37,9 +37,6 @@ type AutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions,
 
 const getViewportHeight = (state: StateFunc) => {
   // TODO this doesn't seem correct
-  state({ __windowOuterHeight: window.outerHeight })
-  state({ __windowInnerHeight: window.innerHeight })
-
   return Math.min(state('viewportHeight'), window.innerHeight)
 }
 
@@ -162,7 +159,6 @@ const validateNumScreenshots = (numScreenshots: number, automationOptions: Autom
 
 const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: AutomationOptions) => {
   const scrollAndTake = ({ y, clip, afterScroll }: Scroll, index) => {
-    console.log('scrollTo', y)
     document.querySelector('.aut-panel').scrollTo(0, y)
 
     if (afterScroll) {
@@ -198,10 +194,6 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
   // browser's viewport height available to render content
   const viewportHeight = getViewportHeight(state)
   const numScreenshots = Math.ceil(autHeight / viewportHeight)
-
-  console.log('autHeight', autHeight)
-  console.log('viewportHeight', viewportHeight)
-  console.log('numScreenshots', numScreenshots)
 
   validateNumScreenshots(numScreenshots, automationOptions)
 
@@ -269,8 +261,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
   const viewportWidth = getViewportWidth(state)
   const numScreenshots = Math.ceil(elPosition.height / viewportHeight)
 
-  console.log('elHeight', elPosition)
-  console.log('numscreenshots', numScreenshots)
   validateNumScreenshots(numScreenshots, automationOptions)
 
   const scrolls: Scroll[] = _.map(_.times(numScreenshots), (index) => {
@@ -299,8 +289,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
         const heightLeft = elPosition.fromElViewport.bottom - overlap
         // const heightLeft = elPosition.height - (elPosition.fromElViewport.top)
 
-        console.log({ heightLeft })
-
         return {
           x,
           y: overlap,
@@ -315,7 +303,6 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
         width,
         // TODO: try simplifying to just 'viewportHeight'
         height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height),
-        // height: Math.min(viewportHeight, elPosition.height),
       }
     }
 
@@ -491,7 +478,7 @@ const takeScreenshot = (
       return takeElementScreenshot($el, state, automationOptions)
     }
 
-    if (capture === 'fullPage' || (capture === 'runner' && automationOptions.hideRunnerUi)) {
+    if (capture === 'fullPage') {
       return takeFullPageScreenshot(state, automationOptions)
     }
 
