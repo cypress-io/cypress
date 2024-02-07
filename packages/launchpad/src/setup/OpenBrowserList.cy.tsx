@@ -148,4 +148,26 @@ describe('<OpenBrowserList />', () => {
 
     cy.get('[aria-checked="true"]').should('not.exist')
   })
+
+  it('does not call "launch" when clicking on "close"', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (res) => {
+        res.browserStatus = 'open'
+        res.activeBrowser!.isFocusSupported = false
+      },
+      render: (gqlVal) => {
+        return (
+          <div class="border-current border resize overflow-auto">
+            <OpenBrowserList
+              gql={gqlVal}
+              onLaunch={cy.stub().as('launch')}
+              onCloseBrowser={cy.stub().as('closeBrowser')}/>
+          </div>)
+      },
+    })
+
+    cy.contains('button', defaultMessages.openBrowser.close).click()
+    cy.get('@closeBrowser').should('have.been.called')
+    cy.get('@launch').should('not.have.been.called')
+  })
 })
