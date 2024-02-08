@@ -76,9 +76,9 @@ export const rewriteServiceWorker = (body: Buffer) => {
           const oldRespondWith = event.respondWith
           let respondWithCalled = false
 
-          event.respondWith = (response) => {
+          event.respondWith = (...args) => {
             respondWithCalled = true
-            oldRespondWith.call(event, response)
+            oldRespondWith.call(event, ...args)
           }
 
           const returnValue = listener(event)

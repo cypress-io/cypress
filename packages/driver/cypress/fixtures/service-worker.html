@@ -5,7 +5,7 @@
   <script>
     const makeRequests = () => {
       for (let i = 0; i < 50; i++) {
-        fetch(`/1mb?i=${Math.random()}`).then(() => {
+        fetch(`/1mb?i=${i}&j=${Math.random()}`).then((response) => {
           if (i === 49) {
             document.getElementById('output').innerText = 'done'
           }
