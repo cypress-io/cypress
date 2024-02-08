@@ -50,6 +50,7 @@ describe('e2e cy.origin retries', () => {
 
   systemTests.it('passes runnable state to the secondary origin', {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
+    port: PORT,
     spec: 'cy_origin_retries_runnable.cy.ts',
   })
 })
