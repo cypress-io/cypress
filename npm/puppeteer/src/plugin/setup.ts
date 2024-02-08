@@ -1,6 +1,7 @@
 import isPlainObject from 'lodash/isPlainObject'
 import defaultPuppeteer, { Browser, PuppeteerNode } from 'puppeteer-core'
 import { pluginError } from './util'
+import { activateMainTab } from './activateMainTab'
 
 type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
 
@@ -61,7 +62,7 @@ export function setup (options: SetupOptions) {
   let debuggerUrl: string
 
   try {
-    options.on('after:browser:launch', async (browser, options) => {
+    options.on('after:browser:launch', async (browser: Cypress.Browser, options) => {
       cypressBrowser = browser
       debuggerUrl = options.webSocketDebuggerUrl
     })
@@ -110,6 +111,16 @@ export function setup (options: SetupOptions) {
       } catch (err: any) {
         error = err
       } finally {
+        const [page] = await browser.pages()
+
+        if (page) {
+          try {
+            await page.evaluate(activateMainTab)
+          } catch (e) {
+            return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled.'))
+          }
+        }
+
         await browser.disconnect()
       }
 
