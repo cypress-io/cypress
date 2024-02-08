@@ -7,7 +7,8 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
-import { ServiceWorkerFetchHandler, serviceWorkerFetchEventHandler, serviceWorkerFetchEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
+import { serviceWorkerFetchEventHandler, serviceWorkerFetchEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerFetchHandler } from '@packages/proxy/lib/http/util/service-worker'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
