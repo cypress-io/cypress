@@ -3987,7 +3987,7 @@
     "./packages/proxy/lib/http/util/inject.ts",
     "./packages/proxy/lib/http/util/replace_stream.ts",
     "./packages/proxy/lib/http/util/rewriter.ts",
-    "./packages/proxy/lib/http/util/service-worker.ts",
+    "./packages/proxy/lib/http/util/service-worker-manager.ts",
     "./packages/proxy/lib/http/util/top-simulation.ts",
     "./packages/proxy/lib/index.ts",
     "./packages/proxy/lib/network-proxy.ts",
