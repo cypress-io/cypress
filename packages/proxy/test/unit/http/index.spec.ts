@@ -345,7 +345,7 @@ describe('http', function () {
         cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
       }
 
-      processBrowserPreRequestStub.returns(true)
+      processBrowserPreRequestStub.resolves(true)
 
       http.addPendingBrowserPreRequest(browserPreRequest as BrowserPreRequest)
 
@@ -445,6 +445,20 @@ describe('http', function () {
       })
 
       expect(processBrowserPreRequestStub).to.be.calledOnce
+    })
+
+    it('handles service worker fetch requests', () => {
+      const http = new Http(httpOpts)
+      const handleServiceWorkerFetchStub = sinon.stub(http.serviceWorkerManager, 'handleServiceWorkerFetch')
+
+      const event = {
+        url: 'foo',
+        isControlled: true,
+      }
+
+      http.handleServiceWorkerFetch(event)
+
+      expect(handleServiceWorkerFetchStub).to.be.calledWith(event)
     })
   })
 })

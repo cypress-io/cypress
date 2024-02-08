@@ -8,6 +8,7 @@ import { RemoteStates } from '@packages/server/lib/remote_states'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
+import * as serviceWorker from '../../../lib/http/util/service-worker'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -2282,6 +2283,84 @@ describe('http/response-middleware', function () {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
         },
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+  })
+
+  describe('MaybeInjectServiceWorker', function () {
+    const { MaybeInjectServiceWorker } = ResponseMiddleware
+    let ctx
+    let rewriteServiceWorkerStub
+
+    beforeEach(() => {
+      rewriteServiceWorkerStub = sinon.spy(serviceWorker, 'rewriteServiceWorker')
+    })
+
+    afterEach(() => {
+      rewriteServiceWorkerStub.restore()
+    })
+
+    it('does not rewrite service worker if the request does not have the service worker header', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/not-service-worker.js',
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(rewriteServiceWorkerStub).not.to.be.called
+      })
+    })
+
+    it('rewrites the service worker', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(rewriteServiceWorkerStub).to.be.calledOnce
+        expect(rewriteServiceWorkerStub).to.be.calledWith('foo')
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          ...props.res,
+        },
+        req: {
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {},
         remoteStates,
         debug: (formatter, ...args) => {
           debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)

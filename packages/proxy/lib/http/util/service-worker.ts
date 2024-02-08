@@ -4,9 +4,8 @@ import Debug from 'debug'
 import pDefer from 'p-defer'
 import type { BrowserPreRequest } from '../../types'
 import type Protocol from 'devtools-protocol'
-import type { CriClient } from '@packages/server/lib/browsers/cri-client'
 
-const debug = Debug('cypress:proxy:service-worker-manager')
+const debug = Debug('cypress:proxy:service-worker')
 
 type ServiceWorkerRegistration = {
   registrationId: string
@@ -40,6 +39,8 @@ type AddInitiatorToServiceWorkerOptions = {
   initiatorOrigin: string
 }
 
+export const serviceWorkerFetchEventHandlerName = '__cypressServiceWorkerFetchEvent'
+
 export type ServiceWorkerFetchHandler = (event: { url: string, isControlled: boolean }) => void
 
 /**
@@ -48,16 +49,14 @@ export type ServiceWorkerFetchHandler = (event: { url: string, isControlled: boo
  * @param browserCriClient the browser CRI client to add the service worker fetch event handler to
  * @param event the attached to target event
  */
-export const addServiceWorkerFetchEventHandler = async (browserClient: CriClient, event: Protocol.Target.AttachedToTargetEvent, handler: ServiceWorkerFetchHandler) => {
-  browserClient.on('Runtime.bindingCalled', async (event, _sessionId) => {
-    if (event.name === '__cypressServiceWorkerFetchEvent') {
+export const serviceWorkerFetchEventHandler = (handler: ServiceWorkerFetchHandler) => {
+  return (event) => {
+    if (event.name === serviceWorkerFetchEventHandlerName) {
       const { url, respondWithCalled } = JSON.parse(event.payload)
 
       handler({ url, isControlled: respondWithCalled })
     }
-  })
-
-  await browserClient.send('Runtime.addBinding', { name: '__cypressServiceWorkerFetchEvent' }, event.sessionId)
+  }
 }
 
 /**
@@ -180,6 +179,10 @@ export class ServiceWorkerManager {
       debug('found pending controlled request promise: %o', event)
 
       const currentPromiseForUrl = promises.shift()
+
+      if (promises.length === 0) {
+        this.pendingPotentiallyControlledRequests.delete(event.url)
+      }
 
       currentPromiseForUrl?.resolve(event.isControlled)
     } else {

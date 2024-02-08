@@ -27,7 +27,7 @@ import type { CookieJar, SerializableAutomationCookie } from '@packages/server/l
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
-import { ServiceWorkerManager } from './util/service-worker-manager'
+import { ServiceWorkerManager } from './util/service-worker'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -521,14 +521,12 @@ export class Http {
       return true
     }
 
-    const isControlled = await this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)
-
-    if (isControlled) {
+    if (await this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
       debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
 
       return true
     }
 
-    return isControlled
+    return false
   }
 }

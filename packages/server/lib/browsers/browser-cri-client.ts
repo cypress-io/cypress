@@ -7,7 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
-import { ServiceWorkerFetchHandler, addServiceWorkerFetchEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { type ServiceWorkerFetchHandler, serviceWorkerFetchEventHandler, serviceWorkerFetchEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -212,13 +212,15 @@ export class BrowserCriClient {
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
    * browser target
    *
-   * @param browserName the display name of the browser being launched
-   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
-   * @param hosts the hosts to which to attempt to connect
-   * @param onAsynchronousError callback for any cdp fatal errors
-   * @param onReconnect callback for when the browser cri client reconnects to the browser
-   * @param port the port to which to connect
-   * @param protocolManager the protocol manager to use with the browser cri client
+   * @param {BrowserCriClientCreateOptions} options the options for creating the browser cri client
+   * @param options.browserName the display name of the browser being launched
+   * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param options.hosts the hosts to which to attempt to connect
+   * @param options.onAsynchronousError callback for any cdp fatal errors
+   * @param options.onReconnect callback for when the browser cri client reconnects to the browser
+   * @param options.port the port to which to connect
+   * @param options.protocolManager the protocol manager to use with the browser cri client
+   * @param options.onServiceWorkerFetch callback for when a service worker fetch event is received
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
   static async create (options: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
@@ -309,13 +311,21 @@ export class BrowserCriClient {
       // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
       if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
-
-        await addServiceWorkerFetchEventHandler(browserClient, event, browserCriClient.onServiceWorkerFetch)
       }
     } catch (error) {
       // it's possible that the target was closed before we could enable
       // network and continue, in that case, just ignore
       debug('error running Network.enable:', error)
+    }
+
+    try {
+      // attach a binding to the runtime so that we can listen for service worker fetch events
+      if (event.targetInfo.type === 'service_worker') {
+        browserClient.on('Runtime.bindingCalled', serviceWorkerFetchEventHandler(browserCriClient.onServiceWorkerFetch))
+        await browserClient.send('Runtime.addBinding', { name: serviceWorkerFetchEventHandlerName }, event.sessionId)
+      }
+    } catch (error) {
+      debug('error adding service worker fetch event listener:', error)
     }
 
     if (!waitingForDebugger) {
