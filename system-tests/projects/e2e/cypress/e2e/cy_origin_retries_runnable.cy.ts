@@ -1,8 +1,8 @@
 describe('cy.origin test retries passes runnable', () => {
   context('withBeforeEach', () => {
     beforeEach(() => {
-      cy.visit('cypress/fixtures/primary-origin.html')
-      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.visit('/primary_origin.html')
+      cy.get('a[data-cy="cross_origin_secondary_link"]').click()
     })
 
     it(`passes runnable state to the secondary origin first attempt`, { retries: 0 }, () => {
