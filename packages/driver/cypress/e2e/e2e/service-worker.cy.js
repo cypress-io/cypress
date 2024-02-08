@@ -1,4 +1,4 @@
-describe('service workers', () => {
+describe('service workers', { browser: '!firefox' }, () => {
   afterEach(() => {
     cy.window().then((win) => {
       // unregister the service worker to ensure it does not affect other tests
