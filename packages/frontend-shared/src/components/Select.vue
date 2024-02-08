@@ -71,16 +71,18 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
+          <ListboxOptions
+            class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none"
+          >
             <ListboxOption
               v-for="option in props.options"
               :key="get(option, itemKey)"
               v-slot="{ active, selected }"
-              as="ul"
+              as="li"
               :value="option"
               :disabled="option.disabled || false"
             >
-              <li
+              <div
                 class="border-transparent cursor-pointer border py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
                   'font-medium bg-jade-50': isSelectedOption(option),
@@ -134,9 +136,11 @@
                     </span>
                   </slot>
                 </span>
-              </li>
+              </div>
             </ListboxOption>
-            <slot name="footer" />
+            <li role="option">
+              <slot name="footer" />
+            </li>
           </ListboxOptions>
         </transition>
       </div>
