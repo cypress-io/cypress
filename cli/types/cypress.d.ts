@@ -291,10 +291,14 @@ declare namespace Cypress {
    */
   interface Spec {
     name: string // "config_passing_spec.js"
-    relative: string // "cypress/integration/config_passing_spec.js" or "__all" if clicked all specs button
-    absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
+    relative: string // "cypress/e2e/config_passing_spec.cy.js" or "__all" if clicked all specs button
+    absolute: string // "/Users/janelane/app/cypress/e2e/config_passing_spec.cy.js"
     specFilter?: string // optional spec filter used by the user
     specType?: CypressSpecType
+    baseName?: string // "config_passing_spec.cy.js"
+    fileExtension?: string // ".js"
+    fileName?: string // "config_passing_spec.cy"
+    id?: string // "U3BlYzovVXNlcnMvamFuZWxhbmUvYXBwL2N5cHJlc3MvZTJlL2NvbmZpZ19wYXNzaW5nX3NwZWMuY3kuanM="
   }
 
   /**
@@ -754,7 +758,7 @@ declare namespace Cypress {
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
-      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
@@ -818,7 +822,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args: any[]) => any[] | void
+    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
 
     /**
      * Load files
@@ -2637,7 +2641,7 @@ declare namespace Cypress {
      * Time to wait (ms)
      *
      * @default defaultCommandTimeout
-     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     * @see https://on.cypress.io/configuration#Timeouts
      */
     timeout: number
   }
@@ -2662,21 +2666,21 @@ declare namespace Cypress {
      * Time to wait for the request (ms)
      *
      * @default {@link Timeoutable#timeout}
-     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     * @see https://on.cypress.io/configuration#Timeouts
      */
     requestTimeout: number
     /**
      * Time to wait for the response (ms)
      *
      * @default {@link Timeoutable#timeout}
-     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     * @see https://on.cypress.io/configuration#Timeouts
      */
     responseTimeout: number
   }
 
   /**
    * Options to force an event, skipping Actionability check
-   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   * @see https://on.cypress.io/interacting-with-elements#Actionability
    */
   interface Forceable {
     /**
@@ -2693,7 +2697,7 @@ declare namespace Cypress {
 
   /**
    * Options to affect Actionability checks
-   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   * @see https://on.cypress.io/interacting-with-elements#Actionability
    */
   interface ActionableOptions extends Forceable {
     /**
@@ -2851,6 +2855,30 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
+  type RetryStrategyWithModeSpecs = RetryStrategy & {
+    openMode: boolean; // defaults to false
+    runMode: boolean; // defaults to true
+  }
+
+  type RetryStrategy =
+    | RetryStrategyDetectFlakeAndPassOnThresholdType
+    | RetryStrategyDetectFlakeButAlwaysFailType
+
+  interface RetryStrategyDetectFlakeAndPassOnThresholdType {
+    experimentalStrategy: "detect-flake-and-pass-on-threshold"
+    experimentalOptions?: {
+      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      passesRequired: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0 and <= maxRetries
+    }
+  }
+
+  interface RetryStrategyDetectFlakeButAlwaysFailType {
+    experimentalStrategy: "detect-flake-but-always-fail"
+    experimentalOptions?: {
+      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      stopIfAnyPassed: boolean; // defaults to false if experimentalOptions is not provided
+    }
+  }
   interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
@@ -2858,7 +2886,7 @@ declare namespace Cypress {
      */
     baseUrl: string | null
     /**
-     * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
+     * Any values to be set as [environment variables](https://on.cypress.io/environment-variables)
      * @default {}
      */
     env: { [key: string]: any }
@@ -2878,7 +2906,7 @@ declare namespace Cypress {
      */
     port: number | null
     /**
-     * The [reporter](https://docs.cypress.io/guides/guides/reporters.html) used when running headlessly or in CI
+     * The [reporter](https://on.cypress.io/reporters) used when running headlessly or in CI
      * @default "spec"
      */
     reporter: string
@@ -3122,7 +3150,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
+    retries: Nullable<number | ({ runMode?: Nullable<number>, openMode?: Nullable<number> }) | RetryStrategyWithModeSpecs>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},
@@ -3318,7 +3346,7 @@ declare namespace Cypress {
 
   interface CypressComponentDependency {
     /**
-     * Unique idenitifer.
+     * Unique identifier.
      * @example 'reactscripts'
      */
     type: string
@@ -3453,7 +3481,7 @@ declare namespace Cypress {
     componentIndexHtml?: () => string
 
     /**
-     * Used for the Create From Comopnent feature.
+     * Used for the Create From Component feature.
      * This is currently not supported for third party frameworks.
      */
     specPattern?: '**/*.cy.ts'
@@ -5985,7 +6013,11 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
-  interface BrowserLaunchOptions {
+  interface AfterBrowserLaunchDetails {
+    webSocketDebuggerUrl: string
+  }
+
+  interface BeforeBrowserLaunchOptions {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
@@ -6066,12 +6098,13 @@ declare namespace Cypress {
   }
 
   interface PluginEvents {
+    (action: 'after:browser:launch', fn: (browser: Browser, browserLaunchDetails: AfterBrowserLaunchDetails) => void | Promise<void>): void
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
     (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
-    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, afterBrowserLaunchOptions: BeforeBrowserLaunchOptions) => void | Promise<void> | BeforeBrowserLaunchOptions | Promise<BeforeBrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void

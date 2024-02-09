@@ -134,7 +134,7 @@ export class Scroller {
     this._userScrollThresholdMs = SCROLL_THRESHOLD_MS
   }
 
-  __setScrollThreholdMs (ms: number) {
+  __setScrollThresholdMs (ms: number) {
     const isCypressInCypress = document.defaultView !== top
 
     // only allow this to be set in testing

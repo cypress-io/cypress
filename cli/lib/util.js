@@ -331,7 +331,7 @@ const util = {
   },
 
   supportsColor () {
-    // if we've been explictly told not to support
+    // if we've been explicitly told not to support
     // color then turn this off
     if (process.env.NO_COLOR) {
       return false

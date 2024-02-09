@@ -1,4 +1,4 @@
-import type { AppCaptureProtocolInterface, CDPClient, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, CDPClient, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
@@ -45,4 +45,5 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions) {
     //throw new Error('error in responseEndedWithEmptyBody')
   }
+  responseStreamTimedOut: (options: ResponseStreamTimedOutOptions) => {}
 }

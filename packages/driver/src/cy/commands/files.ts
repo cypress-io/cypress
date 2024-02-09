@@ -31,7 +31,7 @@ export default (Commands, Cypress, cy, state) => {
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
 
-    const log = userOptions.log !== false && Cypress.log({ message: file, timeout })
+    const log = Cypress.log({ message: file, hidden: userOptions.log === false, timeout })
 
     if (!file || !_.isString(file)) {
       $errUtils.throwErrByPath('files.invalid_argument', {
@@ -106,7 +106,7 @@ export default (Commands, Cypress, cy, state) => {
           })
         }
 
-        // We have a ENOENT error - the file doesn't exist. Whether this is an error or not is deterimened
+        // We have a ENOENT error - the file doesn't exist. Whether this is an error or not is determined
         // by verifyUpcomingAssertions, when the command_queue receives the null file contents.
         fileResult = { contents: null, filePath: err.filePath }
       })
@@ -178,15 +178,14 @@ export default (Commands, Cypress, cy, state) => {
 
       const consoleProps = {}
 
-      if (options.log) {
-        options._log = Cypress.log({
-          message: fileName,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: fileName,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
 
       if (!fileName || !_.isString(fileName)) {
         $errUtils.throwErrByPath('files.invalid_argument', {

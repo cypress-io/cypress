@@ -41,7 +41,7 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   // statusCode must be a three-digit integer
   // @see https://tools.ietf.org/html/rfc2616#section-6.1.1
-  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 100, 999))) {
+  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 100, 1000))) {
     err('`statusCode` must be a number between 100 and 999 (inclusive).')
   }
 

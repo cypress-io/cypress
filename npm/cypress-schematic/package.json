@@ -54,5 +54,16 @@
   "ng-add": {
     "save": "devDependencies"
   },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/src/**/*.js",
+          "{projectRoot}/src/**/*.d.ts",
+          "{projectRoot}/src/**/*.js.map"
+        ]
+      }
+    }
+  },
   "schematics": "./src/schematics/collection.json"
 }

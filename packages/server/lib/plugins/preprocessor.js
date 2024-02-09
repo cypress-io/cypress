@@ -67,7 +67,7 @@ const API = {
       // we should be watching the file if we are NOT
       // in a text terminal aka cypress run
       // TODO: rename this to config.isRunMode
-      // vs config.isInterativeMode
+      // vs config.isInteractiveMode
       const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
       const baseFilePath = filePath.replace(config.projectRoot, '')

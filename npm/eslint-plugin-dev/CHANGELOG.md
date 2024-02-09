@@ -1,3 +1,10 @@
+# [@cypress/eslint-plugin-dev-v5.3.3](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.3.2...@cypress/eslint-plugin-dev-v5.3.3) (2024-01-12)
+
+
+### Bug Fixes
+
+* allow for versions greater than 4 for eslint-plugin-mocha to prevent force installing dependencies when eslint-plugin-mocha is bumbed in comsumer packages ([#27944](https://github.com/cypress-io/cypress/issues/27944)) ([bf05978](https://github.com/cypress-io/cypress/commit/bf0597847e71f34303364929f9c34cdd6c0e7ad8))
+
 # [@cypress/eslint-plugin-dev-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/eslint-plugin-dev-v5.3.1...@cypress/eslint-plugin-dev-v5.3.2) (2022-08-15)
 
 

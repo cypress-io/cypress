@@ -225,6 +225,24 @@ describe('test errors', () => {
       cy.percySnapshot()
     })
 
+    it('opens "Learn more" link externally', () => {
+      setError(commandErr)
+
+      cy.spy(runner, 'emit')
+
+      cy.get('.runnable-err-message').contains('Learn more').click()
+      cy.wrap(runner.emit).should('be.calledWith', 'external:open', 'https://on.cypress.io/type')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/28452
+    it('does not show br tags in formatted error message', () => {
+      setError(commandErr)
+
+      cy.spy(runner, 'emit')
+
+      cy.get('.runnable-err-message').find('br').should('not.exist')
+    })
+
     // NOTE: still needs to be implemented
     it.skip('renders and escapes markdown with leading/trailing whitespace', () => {
       setError(commandErr)

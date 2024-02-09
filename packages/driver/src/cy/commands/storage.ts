@@ -31,19 +31,18 @@ const getAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress
 
   let storageByOrigin: Cypress.StorageByOrigin = {}
 
-  if (options.log) {
-    Cypress.log({
-      consoleProps () {
-        const obj = {}
+  Cypress.log({
+    hidden: options.log === false,
+    consoleProps () {
+      const obj = {}
 
-        if (Object.keys(storageByOrigin).length) {
-          obj['Yielded'] = storageByOrigin
-        }
+      if (Object.keys(storageByOrigin).length) {
+        obj['Yielded'] = storageByOrigin
+      }
 
-        return obj
-      },
-    })
-  }
+      return obj
+    },
+  })
 
   const storages = await getStorage(Cypress, { origin: '*' })
 
@@ -62,9 +61,7 @@ const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypre
     ...userOptions,
   }
 
-  if (options.log) {
-    Cypress.log({})
-  }
+  Cypress.log({ hidden: options.log === false })
 
   await clearStorage(Cypress, type)
 
@@ -94,12 +91,11 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
 
       const remote = clearLocalStorage(state, keys)
 
-      if (options.log) {
-        Cypress.log({
-          snapshot: true,
-          end: true,
-        })
-      }
+      Cypress.log({
+        hidden: options.log === false,
+        snapshot: true,
+        end: true,
+      })
 
       // return the remote local storage object
       return remote

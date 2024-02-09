@@ -86,7 +86,7 @@ export async function encryptRequest (params: CypressRequestOptions, publicKey?:
 
 /**
  * Given the returned JWE and the symmetric symmetric key used in the original request,
- * decrypts the repsonse payload, which is assumed to be JSON
+ * decrypts the response payload, which is assumed to be JSON
  */
 export async function decryptResponse (jwe: GeneralJWE, encryptionKey: crypto.KeyObject): Promise<any> {
   const result = await generalDecrypt(jwe, encryptionKey)

@@ -261,11 +261,11 @@ export const create = (state: StateFunc) => ({
       return true
     }
 
-    // if our focused element isnt the same as the previously
+    // if our focused element isn't the same as the previously
     // focused el then what probably happened is our mouse
-    // down event caused our element to receive focuse
+    // down event caused our element to receive focus
     // without the browser sending the focus event
-    // which happens when the window isnt in focus
+    // which happens when the window isn't in focus
     if ($previouslyFocusedEl.get(0) !== $focused.get(0)) {
       return true
     }

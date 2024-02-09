@@ -13,7 +13,7 @@ interface DetectFramework {
   bundler?: WizardBundler['type']
 }
 
-export async function areAllDepsSatisified (projectPath: string, framework: Cypress.ResolvedComponentFrameworkDefinition) {
+export async function areAllDepsSatisfied (projectPath: string, framework: Cypress.ResolvedComponentFrameworkDefinition) {
   for (const dep of framework.detectors) {
     const result = await isDependencyInstalled(dep, projectPath)
 
@@ -35,7 +35,7 @@ export async function areAllDepsSatisified (projectPath: string, framework: Cypr
 export async function detectFramework (projectPath: string, frameworks: Cypress.ResolvedComponentFrameworkDefinition[]): Promise<DetectFramework> {
   // first see if it's a template
   for (const framework of frameworks.filter((x) => x.category === 'template')) {
-    const hasAllDeps = await areAllDepsSatisified(projectPath, framework)
+    const hasAllDeps = await areAllDepsSatisfied(projectPath, framework)
 
     // so far all the templates we support only have 1 bundler,
     // for example CRA only works with webpack,
@@ -54,7 +54,7 @@ export async function detectFramework (projectPath: string, frameworks: Cypress.
   for (const library of frameworks.filter((x) => x.category === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
-    const hasLibrary = await areAllDepsSatisified(projectPath, library)
+    const hasLibrary = await areAllDepsSatisfied(projectPath, library)
 
     for (const bundler of WIZARD_BUNDLERS) {
       const detectBundler = await isDependencyInstalled(bundler, projectPath)

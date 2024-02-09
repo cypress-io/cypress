@@ -46,6 +46,7 @@ export const stubQuery: MaybeResolver<Query> = {
   videoEmbedHtml () {
     return `<iframe
       src="https://player.vimeo.com/video/855168407?h=0cbc785eef"
+      title="Video about what is new in Cypress"
       class="rounded h-full bg-gray-1000 w-full"
       frameborder="0"
       allow="autoplay; fullscreen; picture-in-picture"

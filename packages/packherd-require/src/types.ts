@@ -33,7 +33,7 @@ export type ModuleDefinition = (
  *  - 'module-uri:node': uri was already a full path
  *  - 'module-fullpath:node': resolved relative to parent
  *  - 'cache:direct': resolved directly from `packherd` module export cache
- *  - 'cach:node': resolved from cache after determining full path via Node.js
+ *  - 'cache:node': resolved from cache after determining full path via Node.js
  * @property fullPath: full path to the resolved module
  *
  * @private

@@ -4,7 +4,7 @@
       <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
       <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
       <img alt="Cypress Logo" src="./assets/cypress-logo-light.png">
-    </picture>    
+    </picture>
   </a>
 </p>
 <p align="center">
@@ -19,11 +19,6 @@
 
 <p align="center">
   Fast, easy and reliable testing for anything that runs in a browser.
-</p>
-<p align="center">
-  <a href="https://bit.ly/3P7ufFf">
-    <img alt="Cypress Conf Link" src="https://github-production-user-asset-6210df.s3.amazonaws.com/1087311/261085338-e2915eb2-13da-4ca6-b909-f835c6b6074d.jpeg" width="40%" height="40%" />
-  </a>
 </p>
 <p align="center">
   Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
@@ -62,8 +57,12 @@ or
 ```bash
 yarn add cypress --dev
 ```
+or
+```bash
+pnpm add cypress --save-dev
+```
 
-![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
+![installing-cli e1693232](./assets/cypress-installation.gif)
 
 
 ## Contributing

@@ -40,6 +40,7 @@ import statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
+import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -216,6 +217,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
+  }
+
+  setPreRequestTimeout (timeout: number) {
+    this._networkProxy?.setPreRequestTimeout(timeout)
   }
 
   setupCrossOriginRequestHandling () {
@@ -468,7 +473,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset()
+      this.networkProxy.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
@@ -495,8 +500,28 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.removePendingBrowserPreRequest(requestId)
   }
 
+  getBrowserPreRequests () {
+    return this._networkProxy?.getPendingBrowserPreRequests()
+  }
+
   emitRequestEvent (eventName, data) {
     this.socket.toDriver('request:event', eventName, data)
+  }
+
+  addPendingUrlWithoutPreRequest (downloadUrl: string) {
+    this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
+    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -609,7 +634,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset()
+    this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
@@ -953,7 +978,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
-        // however, network errors will be obsfucated by the proxying so this is not an ideal solution
+        // however, network errors will be obfuscated by the proxying so this is not an ideal solution
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,

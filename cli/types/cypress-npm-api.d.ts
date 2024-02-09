@@ -382,7 +382,7 @@ declare module 'cypress' {
      * recommend wrapping your config object with `defineConfig()`
      * @example
      * module.exports = defineConfig({
-     *   viewportWith: 400
+     *    viewportWidth: 400
      * })
      *
      * @see ../types/cypress-npm-api.d.ts

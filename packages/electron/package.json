@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "node ./bin/cypress-electron --install",
-    "build-prod": "yarn build",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "start": "./bin/cypress-electron",
@@ -24,10 +23,10 @@
     "minimist": "1.2.8"
   },
   "devDependencies": {
-    "electron-packager": "17.0.0",
+    "electron-packager": "17.1.2",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "5.16.9"
+    "systeminformation": "5.21.7"
   },
   "files": [
     "dist",

@@ -804,6 +804,7 @@ namespace CypressDomTests {
   Cypress.dom.stringify(el, 'foo') // $ExpectType string
   Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
+  Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
   Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
   Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
   Cypress.dom.getReasonIsHidden(el) // $ExpectType string
@@ -839,6 +840,7 @@ namespace CypressDomTests {
   Cypress.dom.stringify('', 'foo') // $ExpectError
   Cypress.dom.getElements(el) // $ExpectError
   Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
+  Cypress.dom.getContainsSelector('foo', 'bar', { invalid: false }) // $ExpectError
   Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
   Cypress.dom.getWindowByElement('') // $ExpectError
   Cypress.dom.getReasonIsHidden('') // $ExpectError
@@ -1157,6 +1159,39 @@ namespace CypressLocalStorageTests {
   })
   cy.clearAllSessionStorage({ log: false })
   cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
+}
+
+namespace CypressRetriesSpec {
+  Cypress.config('retries', {
+    openMode: 0,
+    runMode: 1
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-and-pass-on-threshold",
+    experimentalOptions: {
+      maxRetries: 2,
+      passesRequired: 2
+    }
+  })
+
+  Cypress.config('retries', {
+    openMode: false,
+    runMode: false,
+    experimentalStrategy: "detect-flake-but-always-fail",
+    experimentalOptions: {
+      maxRetries: 2,
+      stopIfAnyPassed: true
+    }
+  })
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { passesRequired: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { stopIfAnyPassed: true} }) // $ExpectError
 }
 
 namespace CypressTraversalTests {

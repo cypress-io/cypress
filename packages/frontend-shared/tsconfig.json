@@ -61,8 +61,7 @@
       "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress",
       "cypress-real-events", 
-      "cypress",
-      "cypress-axe"
+      "cypress"
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

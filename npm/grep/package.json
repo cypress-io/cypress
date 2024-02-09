@@ -41,5 +41,10 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "!cypress"
+    ]
   }
 }

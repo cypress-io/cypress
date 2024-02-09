@@ -51,12 +51,12 @@
         <li
           class="flex flex-row text-sm gap-x-2 items-center justify-center"
         >
-          <DebugRunNumber
+          <RunNumber
             v-if="(debug.runNumber && debug.status)"
             :status="debug.status"
             :value="debug.runNumber"
           />
-          <DebugResults
+          <RunResults
             :gql="props.gql"
             data-cy="debug-results"
           />
@@ -92,7 +92,7 @@
           v-if="debug.createdAt"
           data-cy="debug-header-createdAt"
         >
-          <IconTimeStopwatch
+          <IconTimeClock
             size="16"
             class="mr-2"
             stroke-color="gray-500"
@@ -106,14 +106,14 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
-import DebugResults from './DebugResults.vue'
+import RunResults from '../runs/RunResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
-import { IconTimeStopwatch } from '@cypress-design/vue-icon'
+import { IconTimeClock } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
-import DebugRunNumber from './DebugRunNumber.vue'
+import RunNumber from '../runs/RunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'

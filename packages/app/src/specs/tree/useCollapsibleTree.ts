@@ -11,6 +11,8 @@ export type RawNode <T> = {
 }
 
 export type FuzzyFoundSpec<T = FoundSpec> = T & {
+  normalizedBaseName: string
+  normalizedRelative: string
   fuzzyIndexes: {
     relative: number[]
     baseName: number[]

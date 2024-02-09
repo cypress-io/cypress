@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  dev:
+    image: cypress/browsers:latest
+    ports:
+      # Share debugging ports
+      - 5566:5566
+      - 5567:5567
+    environment:
+      # Use Hist file from shared volume
+      HISTFILE: /root/hist/.bash_history
+      # Setup inspect to use the more permissive address when debugging so
+      # that we can connect to it from outside the docker container
+      CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE: '0.0.0.0:5566'
+      # This disables CI mode which causes cypress to build differently
+      CI: ''
+    command: /bin/bash
+    working_dir: /opt/cypress
+    volumes:
+      # Copy Cypress source to docker container
+      - .:/opt/cypress
+      - bash-history:/root/hist
+  watch:
+    image: cypress/browsers:latest
+    environment:
+      # This disables CI mode which causes cypress to build differently
+      CI: ''
+    command: yarn watch
+    working_dir: /opt/cypress
+    volumes:
+      # Copy Cypress source to docker container
+      - .:/opt/cypress
+  ci:
+    # This should mirror the image used in workflows.yml
+    image: cypress/browsers-internal:node18.15.0-chrome114-ff115
+    ports:
+      - 5566:5566
+      - 5567:5567
+    command: /bin/bash
+    environment:
+      HISTFILE: /root/hist/.bash_history
+      CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE: '0.0.0.0:5566'
+    working_dir: /opt/cypress
+    volumes:
+      - .:/opt/cypress
+      - bash-history:/root/hist
+
+# persist terminal history between runs in a virtual volume
+volumes:
+  bash-history:

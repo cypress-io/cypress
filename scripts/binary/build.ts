@@ -8,7 +8,6 @@ import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
-import tar from 'tar'
 
 import * as packages from './util/packages'
 import * as meta from './meta'
@@ -40,7 +39,6 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
-  createTar?: boolean
 }
 
 /**
@@ -78,7 +76,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, keepBuild = false, createTar } = options
+  const { platform, version, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -102,7 +100,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
+    await execa('yarn', ['lerna', 'run', 'build', '--concurrency', '4'], {
+      stdio: 'inherit',
+      cwd: CY_ROOT_DIR,
+    })
+
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
@@ -135,8 +138,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
     scripts: {
-      // After the `yarn --production` install, we need to patch packages and trigger a server build to rebuild native bindings for `better-sqlite3`
-      postinstall: 'patch-package && yarn workspace @packages/server rebuild-better-sqlite3',
+      // After the `yarn --production` install, we need to patch packages
+      postinstall: 'patch-package',
     },
   }, { spaces: 2 })
 
@@ -154,6 +157,12 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     cwd: DIST_DIR,
     stdio: 'inherit',
   })
+
+  log('#copying better-sqlite3')
+  fs.copySync(
+    path.join(CY_ROOT_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+    path.join(DIST_DIR, 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node'),
+  )
 
   // TODO: Validate no-hoists / single copies of libs
 
@@ -213,12 +222,6 @@ require('./packages/server/index.js')
   // transformSymlinkRequires
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
-
-  // optionally create a tar of the `cypress-build` directory. This is used in CI.
-  if (createTar) {
-    log('#create tar from dist dir')
-    await tar.c({ file: 'cypress-dist.tgz', gzip: true, cwd: os.tmpdir() }, ['cypress-build'])
-  }
 
   log(`#testDistVersion ${meta.distDir()}`)
   await testDistVersion(meta.distDir(), version)

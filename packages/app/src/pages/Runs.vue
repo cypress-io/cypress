@@ -1,13 +1,18 @@
 <template>
   <div class="h-full p-[24px] relative">
     <TransitionQuickFade mode="out-in">
-      <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
+      <RunsSkeleton
+        v-if="query.fetching.value || !query.data.value"
+        :is-using-git="isUsingGit"
+      />
       <RunsContainer
         v-else
         :gql="query.data.value"
         :runs="runs"
         :online="isOnlineRef"
         data-cy="runs-container"
+        :all-run-ids="allRunIds"
+        :current-commit-info="currentCommitInfo"
         @re-execute-runs-query="reExecuteRunsQuery"
       />
     </TransitionQuickFade>
@@ -38,7 +43,7 @@ if (isUsingGit) {
   runComposable = useProjectRuns
 }
 
-const { runs, reExecuteRunsQuery, query } = runComposable(isOnlineRef)
+const { runs, reExecuteRunsQuery, query, allRunIds, currentCommitInfo } = runComposable(isOnlineRef)
 
 watchEffect(() => {
   // We want to keep track of the previous state to refetch the query

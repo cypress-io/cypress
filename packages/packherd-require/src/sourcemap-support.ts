@@ -317,7 +317,7 @@ class SourcemapSupport {
   private static _instance?: SourcemapSupport
 
   /**
-   * Creates a [SourcmapSupport] instance unless one was created previously.
+   * Creates a [SourcemapSupport] instance unless one was created previously.
    * NOTE: that it is impossible for a process to have two instances and the
    * parameters the first one was created with will remain active for the process lifetime.
    */

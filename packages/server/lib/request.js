@@ -330,7 +330,7 @@ const createRetryingRequestStream = function (opts = {}) {
         // if we've already begun processing the requests
         // response, then that means we failed during transit
         // and its no longer safe to retry. all we can do now
-        // is propogate the error upwards
+        // is propagate the error upwards
         debug('received an error on request after response started %o', merge(opts, { err }))
 
         return emitError(err)

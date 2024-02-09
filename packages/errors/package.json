@@ -22,7 +22,6 @@
     "strip-ansi": "6.0.0"
   },
   "devDependencies": {
-    "@packages/config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",

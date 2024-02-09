@@ -218,7 +218,7 @@ export class RelevantRunsDataSource {
   }
 
   #takeLatestRuns (runs: RelevantRunInfo[]) {
-    const latestRuns = take(runs, 10)
+    const latestRuns = take(runs, 100)
 
     debug('latest runs after take', latestRuns)
 

@@ -328,6 +328,43 @@ context('network stubbing', () => {
     expect(sendContentLength).to.eq(realContentLength)
   })
 
+  it('does not intercept requests to the dev server', async () => {
+    destinationApp.get('/__cypress/src/main.js', (req, res) => res.send('it worked'))
+
+    // setup an intercept that matches all requests
+    // and has a static response
+    netStubbingState.routes.push({
+      id: '1',
+      routeMatcher: {
+        url: '*',
+      },
+      hasInterceptor: false,
+      staticResponse: {
+        body: 'foo',
+      },
+      getFixture,
+      matches: 1,
+    })
+
+    config.devServerPublicPathRoute = '/__cypress/src'
+
+    // request to the dev server does NOT get intercepted
+    await supertest(app)
+    .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
+    .then((res) => {
+      expect(res.status).to.eq(200)
+      expect(res.text).to.eq('it worked')
+    })
+
+    // request NOT to the dev server DOES get intercepted
+    await supertest(app)
+    .get(`/http://localhost:${destinationPort}/`)
+    .then((res) => {
+      expect(res.status).to.eq(200)
+      expect(res.text).to.eq('foo')
+    })
+  })
+
   describe('CSP Headers', () => {
     // Loop through valid CSP header names can verify that we handle them
     [

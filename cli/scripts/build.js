@@ -1,8 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
 const shell = require('shelljs')
-const minimist = require('minimist')
-
 const fs = require('../lib/fs')
 
 // grab the current version and a few other properties
@@ -72,9 +70,7 @@ function makeUserPackageFile (branchName) {
 module.exports = makeUserPackageFile
 
 if (!module.parent) {
-  const args = minimist(process.argv)
-
-  makeUserPackageFile(args.branch)
+  makeUserPackageFile(process.env.BRANCH)
   .catch((err) => {
     /* eslint-disable no-console */
     console.error('Could not write user package file')

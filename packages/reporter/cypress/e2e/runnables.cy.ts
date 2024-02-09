@@ -191,7 +191,7 @@ describe('runnables', () => {
     let spy: Cypress.Agent<sinon.SinonSpy>
 
     beforeEach(() => {
-      scroller.__setScrollThreholdMs(500)
+      scroller.__setScrollThresholdMs(500)
       spy = cy.spy(appState, 'temporarilySetAutoScrolling')
 
       start({

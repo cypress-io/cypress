@@ -212,6 +212,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       allVisibleSpecsShouldBePlaceholders()
     })
   })
@@ -219,6 +220,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
   context('when logged out', () => {
     beforeEach(() => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
 
@@ -265,6 +267,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
 
@@ -310,6 +313,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
 
@@ -325,6 +329,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       simulateRunData()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
 
@@ -571,6 +576,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-specs-page').click()
     })
 
@@ -608,6 +614,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       simulateRunData()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.findByTestId('sidebar-link-specs-page').click()
 

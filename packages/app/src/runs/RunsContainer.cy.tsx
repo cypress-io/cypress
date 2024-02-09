@@ -16,15 +16,16 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         render (gqlVal) {
           const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
+          const runIds: string[] = runs?.[0]?.id ? [runs?.[0]?.id] : [] as string[]
 
-          return <RunsContainer gql={gqlVal} runs={runs} online />
+          return <RunsContainer gql={gqlVal} runs={runs} online allRunIds={runIds} />
         },
       })
 
       const statuses = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
 
       cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
+        cy.get(`[data-cy="runCard-status-${status}"]`).should('exist')
       })
 
       cy.percySnapshot()

@@ -12,7 +12,7 @@ The following migration steps will be used during this migration:
 
 ## Automatic Migration
 
-This step is not used, since there are no spec files to rename. For this reason it's highly unlikely `cypress/integration` exists either - this is created only when the initial integration specs are scaffolded (pre 10.x behavior - we no longer scaffold thes automatically).
+This step is not used, since there are no spec files to rename. For this reason it's highly unlikely `cypress/integration` exists either - this is created only when the initial integration specs are scaffolded (pre 10.x behavior - we no longer scaffold these automatically).
 
 ## Manual Files
 

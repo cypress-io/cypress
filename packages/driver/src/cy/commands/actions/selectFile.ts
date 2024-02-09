@@ -290,20 +290,19 @@ export default (Commands, Cypress, cy, state, config) => {
         eventTarget: subject,
       })
 
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: options.$el,
-          timeout: options.timeout,
-          consoleProps () {
-            return {
-              'Target': $dom.getElements(options.$el),
-              Elements: options.$el?.length,
-            }
-          },
-        })
+      options._log = Cypress.log({
+        $el: options.$el,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return {
+            'Target': $dom.getElements(options.$el),
+            Elements: options.$el?.length,
+          }
+        },
+      })
 
-        options._log.snapshot('before', { next: 'after' })
-      }
+      options._log?.snapshot('before', { next: 'after' })
 
       if (!options.action || !ACTIONS[options.action]) {
         $errUtils.throwErrByPath('selectFile.invalid_action', {

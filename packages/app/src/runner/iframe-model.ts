@@ -21,7 +21,7 @@ export interface AutSnapshot {
   viewportWidth: number
   url: string
   body: {
-    get: () => unknown // TOOD: find out what this is, some sort of JQuery API.
+    get: () => unknown // TODO: find out what this is, some sort of JQuery API.
   }
 }
 

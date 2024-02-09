@@ -22,7 +22,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ℹ ｢wdm｣: Compiled successfully.
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -76,7 +76,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
    41 modules
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -136,7 +136,7 @@ webpack x.x.x compiled successfully in xxx ms
 ℹ ｢wdm｣: Compiled successfully.
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -192,7 +192,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 webpack x.x.x compiled successfully in xxx ms
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -590,7 +590,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1013,7 +1013,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1427,7 +1427,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 
@@ -1853,7 +1853,7 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  port.cy.jsx                                                                     (9 of 9)
 
 
-  ✓ ensures we have launched at the overriden port
+  ✓ ensures we have launched at the overridden port
 
   1 passing
 

@@ -270,7 +270,7 @@ describe('<DebugSpec/> responsive UI', () => {
       },
     }
 
-    const testResult: {[thumprint: string]: TestResults[]} = {
+    const testResult: {[thumbprint: string]: TestResults[]} = {
       'abcd': [
         {
           id: '676df87878',

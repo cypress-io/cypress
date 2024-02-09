@@ -1,6 +1,6 @@
 /// <reference path="../../../cli/types/cypress.d.ts" />
 
-import type { AllModeOptions } from '.'
+import type { AllModeOptions, TestingType } from '.'
 
 export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const
 
@@ -60,4 +60,12 @@ export type BannersState = {
 
 export type MajorVersionWelcomeDismissed = {
   [key: string]: number
+}
+
+export type BreakingErrResult = {
+  name: string
+  newName?: string
+  value?: any
+  configFile: string
+  testingType?: TestingType
 }

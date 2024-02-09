@@ -22,7 +22,7 @@ We will not require manual migration, because the user is not using the default 
 
 ## Rename supportFile
 
-Not used. `supportFile: false` is set. We woudl normally put this in your `e2e.supportFile` key. We assume a top level `supportFile` is used for E2E testing. Since this project does not have E2E configured, we just skip this step.
+Not used. `supportFile: false` is set. We would normally put this in your `e2e.supportFile` key. We assume a top level `supportFile` is used for E2E testing. Since this project does not have E2E configured, we just skip this step.
 
 ## Update Config
 

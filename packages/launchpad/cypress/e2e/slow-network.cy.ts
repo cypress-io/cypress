@@ -11,7 +11,7 @@ describe('slow network: launchpad', () => {
         return null
       })
 
-      const currentStubbbedFetch = ctx.util.fetch;
+      const currentStubbedFetch = ctx.util.fetch;
 
       (ctx.util.fetch as Sinon.SinonStub).restore()
       o.testState.pendingFetches = []
@@ -22,7 +22,7 @@ describe('slow network: launchpad', () => {
 
         let resolveTime = 60000
 
-        const result = await currentStubbbedFetch(input, init)
+        const result = await currentStubbedFetch(input, init)
 
         setTimeout(dfd.resolve, resolveTime)
         await dfd.promise

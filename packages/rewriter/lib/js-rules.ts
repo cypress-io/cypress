@@ -114,7 +114,7 @@ export const jsRules: Visitor<{}> = {
     if (path.parentPath) {
       const parentNode = path.parentPath.node
 
-      // like `identifer = 'foo'`
+      // like `identifier = 'foo'`
       const isAssignee = n.AssignmentExpression.check(parentNode) && parentNode.left === node
 
       if (isAssignee && node.name === 'location') {

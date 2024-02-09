@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "node ./scripts/clean.js",
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
-    "build": "node ./scripts/build.js",
+    "build-cli": "node ./scripts/build.js && node ./scripts/post-build.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -22,7 +22,6 @@
   "dependencies": {
     "@cypress/request": "^3.0.0",
     "@cypress/xvfb": "^1.2.4",
-    "@types/node": "^18.17.5",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
@@ -175,6 +174,22 @@
   "workspaces": {
     "nohoist": [
       "@types/*"
+    ]
+  },
+  "nx": {
+    "targets": {
+      "build-cli": {
+        "dependsOn": [
+          "prebuild"
+        ],
+        "outputs": [
+          "{projectRoot}/types",
+          "{projectRoot}/build"
+        ]
+      }
+    },
+    "implicitDependencies": [
+      "@cypress/*"
     ]
   }
 }

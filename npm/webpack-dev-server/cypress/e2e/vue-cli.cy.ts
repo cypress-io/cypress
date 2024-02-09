@@ -20,6 +20,7 @@ for (const project of PROJECTS) {
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('HelloWorld.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
       cy.get('.commands-container').within(() => {
@@ -30,6 +31,7 @@ for (const project of PROJECTS) {
 
     it('should live-reload on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('HelloWorld.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -60,6 +62,7 @@ for (const project of PROJECTS) {
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('HelloWorld.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })

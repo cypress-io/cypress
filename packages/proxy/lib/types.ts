@@ -1,7 +1,9 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
+import type { ProxyTimings } from '@packages/types'
 import type { ResourceType } from '@packages/net-stubbing'
 import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
+import type { Protocol } from 'devtools-protocol'
 
 /**
  * An incoming request to the Cypress web server.
@@ -10,12 +12,14 @@ export type CypressIncomingRequest = Request & {
   proxiedUrl: string
   abort: () => void
   requestId: string
-  browserPreRequest?: BrowserPreRequest
+  browserPreRequest?: BrowserPreRequestWithTimings
+  noPreRequestExpected?: boolean
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
   credentialsLevel?: RequestCredentialLevel
+  isFromExtraTarget: boolean
   /**
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
    */
@@ -59,7 +63,14 @@ export type BrowserPreRequest = {
   headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined
+  errorHandled?: boolean
+  initiator?: Protocol.Network.Initiator
+  documentURL: string
+  cdpRequestWillBeSentTimestamp: number
+  cdpRequestWillBeSentReceivedTimestamp: number
 }
+
+export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings
 
 /**
  * Notification that the browser has received a response for a request for which a pre-request may have been emitted.
