@@ -220,7 +220,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
