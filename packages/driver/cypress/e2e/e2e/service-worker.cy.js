@@ -1,3 +1,6 @@
+// don't run these tests in Firefox since service workers require
+// a secure context and Firefox does not consider localhost secure
+// since we set allow_hijacking_localhost to true
 describe('service workers', { browser: '!firefox' }, () => {
   afterEach(async () => {
     // unregister the service worker to ensure it does not affect other tests

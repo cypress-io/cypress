@@ -202,7 +202,9 @@ export class ServiceWorkerManager {
       return true
     }
 
-    debug('Request is not controlled by service worker: %o', browserPreRequest.url)
+    if (activatedServiceWorker) {
+      debug('Request is not controlled by service worker: %o', browserPreRequest.url)
+    }
 
     return false
   }
