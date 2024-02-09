@@ -34,9 +34,9 @@ namespace CypressConfigTests {
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: '.' } }) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: null } }) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: '.', } }) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
   Cypress.config({ testIsolation: false }) // $ExpectError
@@ -59,7 +59,7 @@ namespace CypressIsCyTests {
   Cypress.isCy(cy) // $ExpectType boolean
   Cypress.isCy(undefined) // $ExpectType boolean
 
-  const chainer = cy.wrap("foo").then(function() {
+  const chainer = cy.wrap("foo").then(function () {
     if (Cypress.isCy(chainer)) {
       chainer // $ExpectType Chainable<string>
     }
@@ -83,7 +83,7 @@ namespace CypressCommandsTests {
     // $ExpectType string
     arg
   })
-  Cypress.Commands.add('newCommand', function(arg) {
+  Cypress.Commands.add('newCommand', function (arg) {
     this // $ExpectType Context
     arg // $ExpectType string
   })
@@ -92,7 +92,7 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
+  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg: string) => {
     arg // $ExpectType string
     return
   })
@@ -269,13 +269,13 @@ namespace CypressCommandsTests {
     originalFn // $ExpectedType Chainable['newCommand']
     originalFn(arg) // $ExpectType Chainable<number>
   })
-  Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
+  Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
     this // $ExpectType Context
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
     originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
   })
-  Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
+  Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & { sensitive: boolean }>) => {
     element // $ExpectType JQueryWithSelector<HTMLElement>
     text // $ExpectType string
 
@@ -298,7 +298,7 @@ namespace CypressCommandsTests {
     options // $ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions> | undefined
   })
 
-  Cypress.Commands.addQuery('newQuery', function(arg) {
+  Cypress.Commands.addQuery('newQuery', function (arg) {
     this // $ExpectType Command
     arg // $ExpectType string
     return () => 3
@@ -344,7 +344,7 @@ namespace CypressLogsTest {
 }
 
 namespace CypressLocalStorageTest {
-  Cypress.LocalStorage.clear = function(keys) {
+  Cypress.LocalStorage.clear = function (keys) {
     keys // $ExpectType string[] | undefined
   }
 }
@@ -356,16 +356,16 @@ namespace CypressItsTests {
       s
     })
 
-  cy.wrap({foo: 'bar'}).its('foo') // $ExpectType Chainable<string>
+  cy.wrap({ foo: 'bar' }).its('foo') // $ExpectType Chainable<string>
   cy.wrap([1, 2]).its(1) // $ExpectType Chainable<number>
   cy.wrap(['foo', 'bar']).its(1) // $ExpectType Chainable<string>
-  .then((s: string) => {
-    s
-  })
-  cy.wrap({baz: { quux: '2' }}).its('baz.quux') // $ExpectType Chainable<any>
-  cy.wrap({foo: 'bar'}).its('foo', { log: true }) // $ExpectType Chainable<string>
-  cy.wrap({foo: 'bar'}).its('foo', { timeout: 100 }) // $ExpectType Chainable<string>
-  cy.wrap({foo: 'bar'}).its('foo', { log: true, timeout: 100 }) // $ExpectType Chainable<string>
+    .then((s: string) => {
+      s
+    })
+  cy.wrap({ baz: { quux: '2' } }).its('baz.quux') // $ExpectType Chainable<any>
+  cy.wrap({ foo: 'bar' }).its('foo', { log: true }) // $ExpectType Chainable<string>
+  cy.wrap({ foo: 'bar' }).its('foo', { timeout: 100 }) // $ExpectType Chainable<string>
+  cy.wrap({ foo: 'bar' }).its('foo', { log: true, timeout: 100 }) // $ExpectType Chainable<string>
 }
 
 namespace CypressInvokeTests {
@@ -382,13 +382,13 @@ namespace CypressInvokeTests {
   cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<string | number>
 
   // invoke through property path results in any
-  cy.wrap({ a: { fn: (x: number) => x * x }}).invoke('a.fn', 4) // $ExpectType Chainable<any>
+  cy.wrap({ a: { fn: (x: number) => x * x } }).invoke('a.fn', 4) // $ExpectType Chainable<any>
 
   // examples below are from previous attempt at typing `invoke`
   // (see https://github.com/cypress-io/cypress/issues/4022)
 
   // call methods on arbitrary objects with reasonable return types
-  cy.wrap({ fn: () => ({a: 1})}).invoke("fn") // $ExpectType Chainable<{ a: number; }>
+  cy.wrap({ fn: () => ({ a: 1 }) }).invoke("fn") // $ExpectType Chainable<{ a: number; }>
 
   // call methods on dom elements with reasonable return types
   cy.get('.trigger-input-range').invoke('val', 25) // $ExpectType Chainable<string | number | string[] | undefined>
@@ -474,40 +474,40 @@ describe('then', () => {
 
   it('HTMLElement', () => {
     cy.get('div')
-    .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
-      return $div[0]
-    })
-    .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
-    })
+      .then(($div) => {
+        $div // $ExpectType JQuery<HTMLDivElement>
+        return $div[0]
+      })
+      .then(($div) => {
+        $div // $ExpectType JQuery<HTMLDivElement>
+      })
 
     cy.get('div')
-    .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
-      return [$div[0]]
-    })
-    .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
-    })
+      .then(($div) => {
+        $div // $ExpectType JQuery<HTMLDivElement>
+        return [$div[0]]
+      })
+      .then(($div) => {
+        $div // $ExpectType JQuery<HTMLDivElement>
+      })
 
     cy.get('p')
-    .then(($p) => {
-      $p // $ExpectType JQuery<HTMLParagraphElement>
-      return $p[0]
-    })
-    .then({timeout: 3000}, ($p) => {
-      $p // $ExpectType JQuery<HTMLParagraphElement>
-    })
+      .then(($p) => {
+        $p // $ExpectType JQuery<HTMLParagraphElement>
+        return $p[0]
+      })
+      .then({ timeout: 3000 }, ($p) => {
+        $p // $ExpectType JQuery<HTMLParagraphElement>
+      })
   })
 
   // https://github.com/cypress-io/cypress/issues/16669
   it('any as default', () => {
     cy.get('body')
-    .then(() => ({} as any))
-    .then(v => {
-      v // $ExpectType any
-    })
+      .then(() => ({} as any))
+      .then(v => {
+        v // $ExpectType any
+      })
   })
 })
 
@@ -537,13 +537,13 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     subject // $ExpectType string
   })
 
-  cy.wrap([1, 2, 3]).each((num: number, i, array) => {
-    return new Cypress.Promise((resolve) => {
-      setTimeout(() => {
-        resolve()
-      }, num * 100)
-    })
+cy.wrap([1, 2, 3]).each((num: number, i, array) => {
+  return new Cypress.Promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, num * 100)
   })
+})
 
 cy.get('something').should('have.length', 1)
 
@@ -551,7 +551,7 @@ cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
 
-cy.get('something').as('foo', {type: 'static'})
+cy.get('something').as('foo', { type: 'static' })
 
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
@@ -755,7 +755,7 @@ namespace CypressLocationTests {
 
 // https://github.com/cypress-io/cypress/issues/17399
 namespace CypressUrlTests {
-  cy.url({decode: true}).should('contain', '사랑')
+  cy.url({ decode: true }).should('contain', '사랑')
 }
 
 namespace CypressBrowserTests {
@@ -767,11 +767,11 @@ namespace CypressBrowserTests {
   // does not error to allow for user supplied browsers
   Cypress.isBrowser('safari')// $ExpectType boolean
 
-  Cypress.isBrowser({channel: 'stable'})// $ExpectType boolean
-  Cypress.isBrowser({family: 'chromium'})// $ExpectType boolean
-  Cypress.isBrowser({name: 'chrome'})// $ExpectType boolean
+  Cypress.isBrowser({ channel: 'stable' })// $ExpectType boolean
+  Cypress.isBrowser({ family: 'chromium' })// $ExpectType boolean
+  Cypress.isBrowser({ name: 'chrome' })// $ExpectType boolean
 
-  Cypress.isBrowser({family: 'foo'}) // $ExpectError
+  Cypress.isBrowser({ family: 'foo' }) // $ExpectError
   Cypress.isBrowser() // $ExpectError
 }
 
@@ -871,18 +871,18 @@ namespace CypressTestConfigOverridesTests {
     waitForAnimations: false
   }, () => { })
   it('test', {
-    browser: {name: 'firefox'}
-  }, () => {})
+    browser: { name: 'firefox' }
+  }, () => { })
   it('test', {
-    browser: [{name: 'firefox'}, {name: 'chrome'}]
-  }, () => {})
+    browser: [{ name: 'firefox' }, { name: 'chrome' }]
+  }, () => { })
   it('test', {
     browser: 'firefox',
     keystrokeDelay: 0
-  }, () => {})
+  }, () => { })
   it('test', {
-    browser: {foo: 'bar'}, // $ExpectError
-  }, () => {})
+    browser: { foo: 'bar' }, // $ExpectError
+  }, () => { })
   it('test', {
     retries: null,
     keystrokeDelay: 0
@@ -909,50 +909,50 @@ namespace CypressTestConfigOverridesTests {
     testIsolation: false, // $ExpectError
   }, () => { })
 
-  it.skip('test', {}, () => {})
-  it.only('test', {}, () => {})
-  xit('test', {}, () => {})
+  it.skip('test', {}, () => { })
+  it.only('test', {}, () => { })
+  xit('test', {}, () => { })
 
-  specify('test', {}, () => {})
-  specify.only('test', {}, () => {})
-  specify.skip('test', {}, () => {})
-  xspecify('test', {}, () => {})
+  specify('test', {}, () => { })
+  specify.only('test', {}, () => { })
+  specify.skip('test', {}, () => { })
+  xspecify('test', {}, () => { })
 
   // set config on a per-suite basis
   describe('suite', {
-    browser: {family: 'firefox'},
+    browser: { family: 'firefox' },
     keystrokeDelay: 0
-  }, () => {})
+  }, () => { })
 
   describe('suite', {
     testIsolation: false,
-  }, () => {})
+  }, () => { })
 
-  context('suite', {}, () => {})
+  context('suite', {}, () => { })
 
   describe('suite', {
-    browser: {family: 'firefox'},
+    browser: { family: 'firefox' },
     keystrokeDelay: false // $ExpectError
     foo: 'foo' // $ExpectError
-  }, () => {})
+  }, () => { })
 
-  describe.only('suite', {}, () => {})
-  describe.skip('suite', {}, () => {})
-  xdescribe('suite', {}, () => {})
+  describe.only('suite', {}, () => { })
+  describe.skip('suite', {}, () => { })
+  xdescribe('suite', {}, () => { })
 }
 
 namespace CypressShadowTests {
   cy
-  .get('.foo')
-  .shadow()
-  .find('.bar')
-  .click()
+    .get('.foo')
+    .shadow()
+    .find('.bar')
+    .click()
 
   cy.get('.foo', { includeShadowDom: true }).click()
 
   cy
-  .get('.foo')
-  .find('.bar', {includeShadowDom: true})
+    .get('.foo')
+    .find('.bar', { includeShadowDom: true })
 }
 
 namespace CypressTaskTests {
@@ -968,17 +968,17 @@ namespace CypressTaskTests {
 }
 
 namespace CypressSessionsTests {
-  cy.session('user', () => {})
-  cy.session({ name: 'bob' }, () => {})
-  cy.session('user', () => {}, {})
-  cy.session('user', () => {}, {
-    validate: () => {}
+  cy.session('user', () => { })
+  cy.session({ name: 'bob' }, () => { })
+  cy.session('user', () => { }, {})
+  cy.session('user', () => { }, {
+    validate: () => { }
   })
 
   cy.session() // $ExpectError
   cy.session('user') // $ExpectError
   cy.session(null) // $ExpectError
-  cy.session('user', () => {}, {
+  cy.session('user', () => { }, {
     validate: { foo: true } // $ExpectError
   })
 }
@@ -1005,21 +1005,21 @@ namespace CypressKeyboardTests {
 }
 
 namespace CypressOriginTests {
-  cy.origin('example.com', () => {})
-  cy.origin('example.com', { args: {}}, (value: object) => {})
-  cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
-  cy.origin('example.com', { args: [1, 'value', true ] }, (value: Array<(number | string | boolean)>) => {})
-  cy.origin('example.com', { args : 'value'}, (value: string) => {})
-  cy.origin('example.com', { args: 1 }, (value: number) => {})
-  cy.origin('example.com', { args: true }, (value: boolean) => {})
+  cy.origin('example.com', () => { })
+  cy.origin('example.com', { args: {} }, (value: object) => { })
+  cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean }) => { })
+  cy.origin('example.com', { args: [1, 'value', true] }, (value: Array<(number | string | boolean)>) => { })
+  cy.origin('example.com', { args: 'value' }, (value: string) => { })
+  cy.origin('example.com', { args: 1 }, (value: number) => { })
+  cy.origin('example.com', { args: true }, (value: boolean) => { })
 
   cy.origin() // $ExpectError
   cy.origin('example.com') // $ExpectError
   cy.origin(true) // $ExpectError
   cy.origin('example.com', {}) // $ExpectError
   cy.origin('example.com', {}, {}) // $ExpectError
-  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
-  cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
+  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => { }) // $ExpectError
+  cy.origin('example.com', {}, (value: undefined) => { }) // $ExpectError
 }
 
 namespace CypressGetCookiesTests {
@@ -1187,11 +1187,11 @@ namespace CypressRetriesSpec {
     }
   })
 
-  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { maxRetries: 2} }) // $ExpectError
-  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { maxRetries: 2} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { maxRetries: 2 } }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { maxRetries: 2 } }) // $ExpectError
 
-  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { passesRequired: 2} }) // $ExpectError
-  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { stopIfAnyPassed: true} }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-and-pass-on-threshold", experimentalOptions: { passesRequired: 2 } }) // $ExpectError
+  Cypress.config('retries', { openMode: false, runMode: true, experimentalStrategy: "detect-flake-but-always-fail", experimentalOptions: { stopIfAnyPassed: true } }) // $ExpectError
 }
 
 namespace CypressTraversalTests {
