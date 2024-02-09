@@ -21,7 +21,7 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
-import { rewriteServiceWorker } from './util/service-worker'
+import { rewriteServiceWorker } from './util/service-worker-rewriter'
 
 export interface ResponseMiddlewareProps {
   /**

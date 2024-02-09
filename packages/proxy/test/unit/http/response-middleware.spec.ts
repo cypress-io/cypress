@@ -8,7 +8,7 @@ import { RemoteStates } from '@packages/server/lib/remote_states'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
-import * as serviceWorker from '../../../lib/http/util/service-worker'
+import * as serviceWorkerRewriter from '../../../lib/http/util/service-worker-rewriter'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -2301,7 +2301,7 @@ describe('http/response-middleware', function () {
     let rewriteServiceWorkerStub
 
     beforeEach(() => {
-      rewriteServiceWorkerStub = sinon.spy(serviceWorker, 'rewriteServiceWorker')
+      rewriteServiceWorkerStub = sinon.spy(serviceWorkerRewriter, 'rewriteServiceWorker')
     })
 
     afterEach(() => {

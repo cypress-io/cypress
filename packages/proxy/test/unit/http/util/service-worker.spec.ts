@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { ServiceWorkerManager, serviceWorkerFetchEventHandler, rewriteServiceWorker } from '../../../../lib/http/util/service-worker'
+import { ServiceWorkerManager, serviceWorkerFetchEventHandler } from '../../../../lib/http/util/service-worker'
 
 describe('lib/http/util/service-worker', () => {
   describe('ServiceWorkerManager', () => {
@@ -883,41 +883,6 @@ describe('lib/http/util/service-worker', () => {
       serviceWorkerFetchEventHandler(handler)(event)
 
       expect(handler).not.to.have.been.called
-    })
-  })
-
-  describe('rewriteServiceWorker', () => {
-    it('rewrites the service worker', () => {
-      const result = rewriteServiceWorker(Buffer.from('foo'))
-
-      const expected = `
-(function overwriteAddEventListener() {
-        const oldAddEventListener = self.addEventListener;
-        self.addEventListener = (type, listener, options) => {
-            if (type === 'fetch') {
-                const newListener = (event) => {
-                    // we want to override the respondWith method so we can track if it was called
-                    // to determine if the service worker intercepted the request
-                    const oldRespondWith = event.respondWith;
-                    let respondWithCalled = false;
-                    event.respondWith = (response) => {
-                        respondWithCalled = true;
-                        oldRespondWith.call(event, response);
-                    };
-                    const returnValue = listener(event);
-                    // @ts-expect-error
-                    // call the CDP binding to inform the backend whether or not the service worker intercepted the request
-                    self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }));
-                    return returnValue;
-                };
-                return oldAddEventListener(type, newListener, options);
-            }
-            return oldAddEventListener(type, listener, options);
-        };
-    })();
-foo`
-
-      expect(result).to.equal(expected)
     })
   })
 })
