@@ -50,8 +50,11 @@ describe('Launchpad: Setup Project', () => {
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
-    cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not Configured')
-    cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not Configured')
+    cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+    .should(e2eIsConfigured ? 'not.exist' : 'exist')
+
+    cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
+    .should(ctIsConfigured ? 'not.exist' : 'exist')
   }
 
   const verifyChooseABrowserPage = () => {
@@ -217,7 +220,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
@@ -422,7 +425,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="component"]').click()
 
