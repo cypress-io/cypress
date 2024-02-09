@@ -38,9 +38,6 @@ export function makeCypressWebpackConfig (
         majorVersion: htmlWebpackPluginVersion,
         importPath: htmlWebpackPluginImportPath,
       },
-      webpackDevServer: {
-        majorVersion: webpackDevServerMajorVersion,
-      },
     },
   } = config
 
@@ -105,24 +102,13 @@ export function makeCypressWebpackConfig (
     }
   }
 
-  if (webpackDevServerMajorVersion === 4) {
-    return {
-      ...finalConfig,
-      devServer: {
-        port: webpackDevServerPort,
-        client: {
-          overlay: false,
-        },
-      },
-    }
-  }
-
-  // @ts-ignore
   return {
     ...finalConfig,
     devServer: {
       port: webpackDevServerPort,
-      overlay: false,
+      client: {
+        overlay: false,
+      },
     },
   }
 }

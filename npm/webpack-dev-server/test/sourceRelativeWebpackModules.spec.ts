@@ -18,20 +18,10 @@ const WEBPACK_REACT: Partial<Record<ProjectDirs[number], {
   webpackDevServer: number
   htmlWebpackPlugin: number
 }>> = {
-  'webpack4_wds3-react': {
-    webpack: 4,
-    webpackDevServer: 3,
-    htmlWebpackPlugin: 4,
-  },
   'webpack4_wds4-react': {
     webpack: 4,
     webpackDevServer: 4,
     htmlWebpackPlugin: 4,
-  },
-  'webpack5_wds3-react': {
-    webpack: 5,
-    webpackDevServer: 3,
-    htmlWebpackPlugin: 5,
   },
   'webpack5_wds4-react': {
     webpack: 5,
@@ -76,7 +66,7 @@ describe('sourceDefaultWebpackDependencies', () => {
     expect(require.resolve('webpack')).to.include(CY_ROOT)
     const localWebpack = require('webpack')
 
-    const { result, projectRoot } = await sourceModulesForProject('webpack4_wds3-react')
+    const { result, projectRoot } = await sourceModulesForProject('webpack4_wds4-react')
     const projectNodeModules = fs.realpathSync(path.resolve(projectRoot, 'node_modules'))
 
     expect(localWebpack).not.to.eq(result.webpack.module)

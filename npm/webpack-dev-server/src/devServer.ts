@@ -4,15 +4,14 @@ import type WebpackDevServer from 'webpack-dev-server'
 import type { Compiler, Configuration } from 'webpack'
 
 import { createWebpackDevServer } from './createWebpackDevServer'
-import type { AddressInfo } from 'net'
 import debugLib from 'debug'
-import type { Server } from 'http'
 import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
+import { UnsupportedWebpackVersion, UnsupportedWebpackVersionUnder4 } from './errors'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
 
@@ -43,9 +42,7 @@ export type WebpackDevServerConfig = {
  * @internal
  */
 type DevServerCreateResult = {
-  version: 3
-  server: Server
-  compiler: Compiler
+  version: 1 | 2 | 3
 } | {
   version: 4
   server: WebpackDevServer
@@ -64,32 +61,11 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   return new Promise(async (resolve, reject) => {
     const result = await devServer.create(devServerConfig) as DevServerCreateResult
 
-    // @ts-expect-error
-    const { port } = result.server?.options
-
-    if (result.version === 3) {
-      const srv = result.server.listen(port || 0, '127.0.0.1', () => {
-        const port = (srv.address() as AddressInfo).port
-
-        debug('Component testing webpack server 3 started on port %s', port)
-
-        resolve({
-          port,
-          // Close is for unit testing only. We kill this child process which will handle the closing of the server
-          close: (done) => {
-            srv.close((err) => {
-              if (err) {
-                debug('closing dev server, with error', err)
-              }
-
-              debug('closed dev server')
-              done?.(err)
-            })
-          },
-        })
-      })
-
-      return
+    if (result.version < 4) {
+      throw new UnsupportedWebpackVersionUnder4(result.version)
+    } else if (result.version !== 4) {
+      // in the case a new version of WDS comes out that we do not yet support
+      throw new UnsupportedWebpackVersion(result.version)
     }
 
     result.server.start().then(() => {

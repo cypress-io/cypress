@@ -13,7 +13,7 @@ import path from 'path'
 Chai.use(SinonChai)
 
 describe('makeWebpackConfig', () => {
-  it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v3', async () => {
+  it('fails to create configu with webpack-dev-server v3 as it is unsupported', async () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
       cypressConfig: {
@@ -37,24 +37,14 @@ describe('makeWebpackConfig', () => {
       },
       devServerEvents: new EventEmitter(),
     }
-    const actual = await makeWebpackConfig({
+
+    expect(makeWebpackConfig({
       devServerConfig,
       sourceWebpackModulesResult: createModuleMatrixResult({
         webpack: 4,
         webpackDevServer: 3,
       }),
-    })
-
-    // plugins contain circular deps which cannot be serialized in a snapshot.
-    // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
-
-    // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
-    delete actual.entry
-
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
-    snapshot(actual)
+    })).to.be.rejectedWith('webpack-dev-server v3 is no longer supported by @cypress/webpack-dev-server. Please update to webpack-dev-server v4 or use an older version of @cypress/webpack-dev-server.')
   })
 
   it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v4', async () => {

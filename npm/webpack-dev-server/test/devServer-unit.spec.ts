@@ -14,7 +14,7 @@ const cypressConfig = {
 describe('devServer', function () {
   this.timeout(10 * 1000)
 
-  it('creates a new devServer webpack4, webpackDevServer3', async () => {
+  it('fails to create devServer with webpackDevServer3', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
         sourceDefaultWebpackDependencies: () => {
@@ -25,15 +25,12 @@ describe('devServer', function () {
         } },
     }) as typeof import('../src/devServer')
 
-    const result = await devServer.create({
+    expect(devServer.create({
       specs: [],
       cypressConfig,
       webpackConfig: {},
       devServerEvents: new EventEmitter(),
-    })
-
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server-3'))
-    expect(result.version).to.eq(3)
+    })).to.be.rejectedWith('webpack-dev-server v3 is no longer supported by @cypress/webpack-dev-server. Please update to webpack-dev-server v4 or use an older version of @cypress/webpack-dev-server.')
   })
 
   it('creates a new devServer webpack4, webpackDevServer4', async () => {
