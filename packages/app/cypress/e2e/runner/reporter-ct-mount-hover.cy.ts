@@ -28,6 +28,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish(undefined)
         cy.get('.collapsible-header-inner:first').click().get('.command.command-name-mount > .command-wrapper').click().then(() => {
@@ -39,6 +40,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.openProject(projectName, ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish(undefined)
         cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {

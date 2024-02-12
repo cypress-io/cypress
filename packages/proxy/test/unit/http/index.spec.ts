@@ -80,6 +80,44 @@ describe('http', function () {
       })
     })
 
+    it('creates fake pending browser pre request', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          requestId: '1234',
+          errorHandled: false,
+        }
+
+        this.res.destroyed = false
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-expect-error
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(http.addPendingBrowserPreRequest).to.be.calledOnceWith({
+          requestId: '1234-retry-1',
+          errorHandled: false,
+        })
+
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
     it('ensures not to create fake pending browser pre requests on multiple errors', function () {
       incomingRequest.callsFake(function () {
         this.req.browserPreRequest = {
@@ -106,6 +144,39 @@ describe('http', function () {
         expect(incomingResponse).to.not.be.called
         expect(http.addPendingBrowserPreRequest).to.not.be.called
         expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
+      })
+    })
+
+    it('does not create fake pending browser pre request when the response is destroyed', function () {
+      incomingRequest.callsFake(function () {
+        this.req.browserPreRequest = {
+          errorHandled: false,
+        }
+
+        this.res.destroyed = true
+
+        throw new Error('oops')
+      })
+
+      error.callsFake(function () {
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
+        this.end()
+      })
+
+      const http = new Http(httpOpts)
+
+      http.addPendingBrowserPreRequest = sinon.stub()
+
+      return http
+      // @ts-expect-error
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .then(function () {
+        expect(incomingRequest).to.be.calledOnce
+        expect(incomingResponse).to.not.be.called
+        expect(error).to.be.calledOnce
+        expect(http.addPendingBrowserPreRequest).to.not.be.called
         expect(on).to.not.be.called
         expect(off).to.be.calledThrice
       })
@@ -214,22 +285,22 @@ describe('http', function () {
       httpOpts = { config: {}, middleware: {} }
     })
 
-    it('resets preRequests when resetPreRequests is true', function () {
+    it('resets preRequests when resetBetweenSpecs is true', function () {
       const http = new Http(httpOpts)
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: true, resetBetweenSpecs: false })
+      http.reset({ resetBetweenSpecs: true })
 
       expect(http.preRequests.reset).to.be.calledOnce
     })
 
-    it('does not reset preRequests when resetPreRequests is false', function () {
+    it('does not reset preRequests when resetBetweenSpecs is false', function () {
       const http = new Http(httpOpts)
 
       http.preRequests.reset = sinon.stub()
 
-      http.reset({ resetPreRequests: false, resetBetweenSpecs: false })
+      http.reset({ resetBetweenSpecs: false })
 
       expect(http.preRequests.reset).to.not.be.called
     })
@@ -335,7 +406,7 @@ describe('http', function () {
       const addInitiatorToServiceWorkerStub = sinon.stub(http.serviceWorkerManager, 'addInitiatorToServiceWorker')
       const registration = {
         scriptURL: 'foo',
-        initiatorURL: 'bar',
+        initiatorOrigin: 'bar',
       }
 
       http.updateServiceWorkerClientSideRegistrations(registration)

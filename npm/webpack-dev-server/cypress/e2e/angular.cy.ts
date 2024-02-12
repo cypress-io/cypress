@@ -38,6 +38,7 @@ for (const project of WEBPACK_ANGULAR) {
 
           cy.startAppServer('component')
           cy.visitApp()
+          cy.specsPageIsVisible()
         })
       }
     })
@@ -49,6 +50,7 @@ for (const project of WEBPACK_ANGULAR) {
 
       it('should mount a passing test', () => {
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.contains('app.component.cy.ts').click()
         cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
@@ -62,6 +64,7 @@ for (const project of WEBPACK_ANGULAR) {
 
       it('should live-reload on src changes', () => {
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.contains('app.component.cy.ts').click()
         cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
@@ -94,6 +97,7 @@ for (const project of WEBPACK_ANGULAR) {
 
       it('should show compilation errors on src changes', () => {
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.contains('app.component.cy.ts').click()
         cy.waitForSpecToFinish({ passCount: 1 }, 60000)
@@ -126,6 +130,7 @@ for (const project of WEBPACK_ANGULAR) {
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
       it('should detect new spec', { retries: 15 }, () => {
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject(

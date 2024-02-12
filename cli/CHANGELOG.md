@@ -1,4 +1,33 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.5
+
+_Released 2/13/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
+- Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
+
+**Misc:**
+
+- Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
+
+## 13.6.4
+
+_Released 1/30/2024_
+
+**Performance:**
+
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where aborted requests may not correlate correctly. Fixes [#28734](https://github.com/cypress-io/cypress/issues/28734).
+
+**Bugfixes:**
+
+- Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#28747](https://github.com/cypress-io/cypress/issues/28747).
+
+**Misc:**
+
+- Added missing properties to the `Cypress.spec` interface for TypeScript users. Addresses [#27835](https://github.com/cypress-io/cypress/issues/27835).
+
 ## 13.6.3
 
 _Released 1/16/2024_
