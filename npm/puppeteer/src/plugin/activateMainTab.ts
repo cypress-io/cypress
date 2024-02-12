@@ -1,13 +1,17 @@
+/// <reference lib="browser">
+export const ACTIVATION_TIMEOUT = 2000
+
 export const activateMainTab = () => {
-  let timeout: NodeJS.Timeout
+  let timeout: number
   let onMessage: (ev: MessageEvent) => void
 
-  return new Promise<void>((resolve, reject) => {
+  // promise must resolve with a value for chai as promised to test resolution
+  return new Promise<boolean>((resolve, reject) => {
     onMessage = (ev) => {
       if (ev.data.message === 'cypress:extension:main:tab:activated') {
         window.removeEventListener('message', onMessage)
         clearTimeout(timeout)
-        resolve()
+        resolve(true)
       }
     }
 
@@ -17,6 +21,6 @@ export const activateMainTab = () => {
     setTimeout(() => {
       window.removeEventListener('message', onMessage)
       reject()
-    }, 2000)
+    }, ACTIVATION_TIMEOUT)
   })
 }

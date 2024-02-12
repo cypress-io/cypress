@@ -3,9 +3,9 @@ import defaultPuppeteer, { Browser, PuppeteerNode } from 'puppeteer-core'
 import { pluginError } from './util'
 import { activateMainTab } from './activateMainTab'
 
-type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
+export type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
 
-interface SetupOptions {
+export interface SetupOptions {
   onMessage: Record<string, MessageHandler>
   on: Cypress.PluginEvents
   puppeteer?: PuppeteerNode
@@ -117,7 +117,7 @@ export function setup (options: SetupOptions) {
           try {
             await page.evaluate(activateMainTab)
           } catch (e) {
-            return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled.'))
+            return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.'))
           }
         }
 

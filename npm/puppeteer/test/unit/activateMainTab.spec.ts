@@ -23,8 +23,9 @@ describe('activateMainTab', () => {
       postMessage: sinon.stub(),
     }
 
-    prevWin = global.window
     // @ts-ignore
+    prevWin = global.window
+    //@ts-ignore
     global.window = window
   })
 
@@ -42,7 +43,7 @@ describe('activateMainTab', () => {
     // @ts-ignore
     window.addEventListener.yields({ message: 'cypress:extension:main:tab:activated' })
 
-    return expect(p).to.eventually.be.true
+    expect(p).to.eventually.be.true
   })
 
   it('sends a tab activation request to the plugin, and rejects if it times out', () => {

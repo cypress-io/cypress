@@ -1,23 +1,55 @@
 import { expect, use } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import type { PuppeteerNode } from 'puppeteer-core'
+import type { PuppeteerNode, Browser, Page } from 'puppeteer-core'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-
+import { MessageHandler } from '../../src/plugin/setup'
 import { setup } from '../../src/plugin'
+import { activateMainTab } from '../../src/plugin/activateMainTab'
 
 use(chaiAsPromised)
 use(sinonChai)
 
-function getTask (on: sinon.SinonStub) {
-  return on.withArgs('task').lastCall.args[1].__cypressPuppeteer__
-}
+type StubbedMessageHandler = sinon.SinonStub<Parameters<MessageHandler>, ReturnType<MessageHandler>>
 
 describe('#setup', () => {
-  it('registers `after:browser:launch` and `task` handlers', () => {
-    const on = sinon.stub()
+  let mockBrowser: Partial<Browser>
+  let mockPuppeteer: Pick<PuppeteerNode, 'connect'>
+  let on: sinon.SinonStub
+  let onMessage: Record<string, StubbedMessageHandler>
 
-    setup({ on, onMessage: {} })
+  const testTask = 'test'
+  let testTaskHandler: StubbedMessageHandler
+
+  function getTask (on: sinon.SinonStub) {
+    return on.withArgs('task').lastCall.args[1].__cypressPuppeteer__
+  }
+
+  beforeEach(() => {
+    mockBrowser = {
+      disconnect: sinon.stub().resolves(),
+      pages: sinon.stub().resolves([]),
+    }
+
+    mockPuppeteer = {
+      connect: sinon.stub().resolves(mockBrowser),
+    }
+
+    on = sinon.stub()
+
+    testTaskHandler = sinon.stub()
+
+    onMessage = {
+      [testTask]: testTaskHandler,
+    }
+  })
+
+  afterEach(() => {
+    sinon.reset()
+  })
+
+  it('registers `after:browser:launch` and `task` handlers', () => {
+    setup({ on, onMessage })
 
     expect(on).to.be.calledWith('after:browser:launch')
     expect(on).to.be.calledWith('task')
@@ -27,135 +59,100 @@ describe('#setup', () => {
     const error = new Error('Event not registered')
 
     error.stack = '<error stack>'
-    const on = sinon.stub().throws(error)
+    on.throws(error)
 
-    expect(() => setup({ on, onMessage: {} })).to.throw('Could not set up `after:browser:launch` task. Ensure you are running Cypress >= 13.6.0. The following error was encountered:\n\n<error stack>')
+    expect(() => setup({ on, onMessage })).to.throw('Could not set up `after:browser:launch` task. Ensure you are running Cypress >= 13.6.0. The following error was encountered:\n\n<error stack>')
   })
 
   describe('running message handler', () => {
     it('connects puppeteer to browser', async () => {
-      const on = sinon.stub()
-      const puppeteer = {
-        connect: sinon.stub().resolves({
-          disconnect () {},
-        }),
-      }
-
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: sinon.stub() },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
 
-      await task({ name: 'test', args: [] })
+      await task({ name: testTask, args: [] })
 
-      expect(puppeteer.connect).to.be.calledWith({
+      expect(mockPuppeteer.connect).to.be.calledWith({
         browserWSEndpoint: 'ws://debugger',
         defaultViewport: null,
       })
     })
 
     it('calls the specified message handler with the browser and args', async () => {
-      const on = sinon.stub()
-      const browser = { disconnect () {} }
-      const puppeteer = {
-        connect: sinon.stub().resolves(browser),
-      }
-      const handler = sinon.stub()
-
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: handler },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
 
-      await task({ name: 'test', args: ['arg1', 'arg2'] })
+      await task({ name: testTask, args: ['arg1', 'arg2'] })
 
-      expect(handler).to.be.calledWith(browser, 'arg1', 'arg2')
+      expect(testTaskHandler).to.be.calledWith(mockBrowser, 'arg1', 'arg2')
     })
 
     it('disconnects the browser once the message handler is finished', async () => {
-      const on = sinon.stub()
-      const browser = { disconnect: sinon.stub() }
-      const puppeteer = {
-        connect: sinon.stub().resolves(browser),
-      }
-      const handler = sinon.stub()
-
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: handler },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
 
-      await task({ name: 'test', args: ['arg1', 'arg2'] })
+      await task({ name: testTask, args: ['arg1', 'arg2'] })
 
-      expect(browser.disconnect).to.be.called
+      expect(mockBrowser.disconnect).to.be.called
     })
 
     it('returns the result of the handler', async () => {
-      const on = sinon.stub()
-      const browser = { disconnect: sinon.stub() }
-      const puppeteer = {
-        connect: sinon.stub().resolves(browser),
-      }
-      const handler = sinon.stub().resolves('result')
+      const resolution = 'result'
+
+      onMessage[testTask].resolves(resolution)
 
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: handler },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
-      const returnValue = await task({ name: 'test', args: ['arg1', 'arg2'] })
+      const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
-      expect(returnValue).to.equal('result')
+      expect(returnValue).to.equal(resolution)
     })
 
     it('returns null if message handler returns undefined', async () => {
-      const on = sinon.stub()
-      const browser = { disconnect: sinon.stub() }
-      const puppeteer = {
-        connect: sinon.stub().resolves(browser),
-      }
-      const handler = sinon.stub().resolves(undefined)
-
+      onMessage[testTask].resolves(undefined)
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: handler },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
-      const returnValue = await task({ name: 'test', args: ['arg1', 'arg2'] })
+      const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
       expect(returnValue).to.be.null
     })
 
     it('returns error object if debugger URL reference is lost', async () => {
-      const on = sinon.stub()
-
-      setup({ on, onMessage: {
-        exists1: () => {},
-        exists2: () => {},
-      } })
+      setup({ on, onMessage })
 
       const task = getTask(on)
       const returnValue = await task({ name: 'nonexistent', args: [] })
@@ -167,12 +164,7 @@ describe('#setup', () => {
     })
 
     it('returns error object if browser is not supported', async () => {
-      const on = sinon.stub()
-
-      setup({ on, onMessage: {
-        exists1: () => {},
-        exists2: () => {},
-      } })
+      setup({ on, onMessage })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'Firefox' }, {})
 
@@ -186,36 +178,25 @@ describe('#setup', () => {
     })
 
     it('disconnects browser and returns error object if message handler errors', async () => {
-      const on = sinon.stub()
-      const browser = { disconnect: sinon.stub() }
-      const puppeteer = {
-        connect: sinon.stub().resolves(browser),
-      }
-      const handler = sinon.stub().rejects(new Error('handler error'))
-
+      testTaskHandler.rejects(new Error('handler error'))
       setup({
         on,
-        puppeteer: puppeteer as unknown as PuppeteerNode,
-        onMessage: { test: handler },
+        puppeteer: mockPuppeteer as PuppeteerNode,
+        onMessage,
       })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
       const task = getTask(on)
-      const returnValue = await task({ name: 'test', args: ['arg1', 'arg2'] })
+      const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
-      expect(browser.disconnect).to.be.called
+      expect(mockBrowser.disconnect).to.be.called
       expect(returnValue.__error__).to.be.an('object')
       expect(returnValue.__error__.message).to.equal('handler error')
     })
 
     it('returns error object if message handler with given name cannot be found', async () => {
-      const on = sinon.stub()
-
-      setup({ on, onMessage: {
-        exists1: () => {},
-        exists2: () => {},
-      } })
+      setup({ on, onMessage })
 
       on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
 
@@ -224,7 +205,7 @@ describe('#setup', () => {
 
       expect(returnValue.__error__).to.be.an('object')
       expect(returnValue.__error__.message).to.equal(
-        'Could not find message handler with the name `nonexistent`. Registered message handler names are: exists1, exists2.',
+        'Could not find message handler with the name `nonexistent`. Registered message handler names are: test.',
       )
     })
 
@@ -242,6 +223,41 @@ describe('#setup', () => {
       expect(returnValue.__error__).to.be.an('object')
       expect(returnValue.__error__.message).to.equal(
         'Message handlers must be functions, but the message handler for the name `notAFunction` was type `boolean`.',
+      )
+    })
+
+    it('evaluates activateMainTab if there is a page in the browser', async () => {
+      const mockPage = {
+        evaluate: sinon.stub<Parameters<Page['evaluate']>, ReturnType<Page['evaluate']>>(),
+      }
+
+      ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      const task = getTask(on)
+
+      await task({ name: testTask, args: [] })
+
+      expect(mockPage.evaluate).to.be.calledWith(activateMainTab)
+    })
+
+    it('returns an error object if activateMainTab eval rejects', async () => {
+      const evaluate = sinon.stub<Parameters<Page['evaluate']>, ReturnType<Page['evaluate']>>().callsFake(() => Promise.reject())
+
+      const mockPage = {
+        evaluate,
+      }
+
+      ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      const task = getTask(on)
+
+      const returnValue = await task({ name: testTask, args: [] })
+
+      expect(returnValue.__error__).to.be.an('object')
+      expect(returnValue.__error__.message).to.equal(
+        'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.',
       )
     })
   })
