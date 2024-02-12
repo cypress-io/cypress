@@ -1,23 +1,49 @@
-// don't run these tests in Firefox since service workers require
-// a secure context and Firefox does not consider localhost secure
-// since we set allow_hijacking_localhost to true
-describe('service workers', { browser: '!firefox' }, () => {
-  afterEach(async () => {
+describe('service workers', () => {
+  beforeEach(async () => {
     // unregister the service worker to ensure it does not affect other tests
     const registrations = await navigator.serviceWorker.getRegistrations()
 
-    return Promise.all(registrations.map((registration) => {
-      return registration.unregister()
-    }))
+    await Promise.all(registrations.map((registration) => registration.unregister()))
   })
 
   describe('a service worker that handles requests', () => {
-    it('supports using addEventListener', () => {
+    it('supports using addEventListener with function', () => {
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`
           self.addEventListener('fetch', function (event) {
             event.respondWith(fetch(event.request))
           })`,
+        { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+    })
+
+    it('supports using addEventListener with object', () => {
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`
+          const obj = {
+            handleEvent: function (event) {
+              event.respondWith(fetch(event.request))
+            }
+          }
+          self.addEventListener('fetch', obj)`,
+        { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+    })
+
+    it('supports using addEventListener with delayed handleEvent', () => {
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`
+          const obj = {}
+          self.addEventListener('fetch', obj)
+          obj.handleEvent = function (event) {
+            event.respondWith(fetch(event.request))
+          }`,
         { 'Content-Type': 'application/javascript' })
       })
 

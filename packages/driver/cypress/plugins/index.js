@@ -43,6 +43,15 @@ module.exports = async (on, config) => {
 
   on('file:preprocessor', wp({ webpackOptions }))
 
+  on('before:browser:launch', (browser, launchOptions) => {
+    if (browser.family === 'firefox') {
+      // set testing_localhost_is_secure_when_hijacked to true so localhost will be considered a secure context
+      launchOptions.preferences['network.proxy.testing_localhost_is_secure_when_hijacked'] = true
+    }
+
+    return launchOptions
+  })
+
   on('task', {
     'return:arg' (arg) {
       return arg

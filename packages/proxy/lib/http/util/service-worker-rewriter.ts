@@ -29,38 +29,45 @@ export const rewriteServiceWorker = (body: Buffer) => {
   }
 
   function __cypressOverwriteAddRemoveEventListener () {
-    const listeners = new WeakMap()
+    const _listeners = new WeakMap()
 
     const oldAddEventListener = self.addEventListener
 
     // Overwrite the addEventListener method so we can
     // determine if the service worker handled the request
-    self.addEventListener = (type, listener, options) => {
-      if (type === 'fetch') {
-        const newListener = __cypressCreateListenerFunction(listener)
+    self.addEventListener = (type, listener, ...args) => {
+      if (type === 'fetch' && (typeof listener === 'function' || listener?.handleEvent)) {
+        let newListener
 
-        listeners.set(listener, newListener)
+        if (typeof listener === 'function') {
+          newListener = __cypressCreateListenerFunction(listener)
+        } else {
+          newListener = __cypressCreateListenerFunction(listener.handleEvent)
+          listener.handleEvent = newListener
+        }
 
-        return oldAddEventListener(type, newListener, options)
+        _listeners.set(listener, newListener)
+
+        return oldAddEventListener(type, newListener, ...args)
       }
 
-      return oldAddEventListener(type, listener, options)
+      return oldAddEventListener(type, listener, ...args)
     }
 
     const oldRemoveEventListener = self.removeEventListener
 
     // Overwrite the removeEventListener method so we can
     // remove the listener from the map
-    self.removeEventListener = (type, listener, options) => {
-      if (type === 'fetch') {
-        const newListener = listeners.get(listener)
+    self.removeEventListener = (type, listener, ...args) => {
+      if (type === 'fetch' && (typeof listener === 'function' || listener?.handleEvent)) {
+        const newListener = _listeners.get(listener)
 
-        listeners.delete(listener)
+        _listeners.delete(listener)
 
-        return oldRemoveEventListener(type, newListener, options)
+        return oldRemoveEventListener(type, newListener, ...args)
       }
 
-      return oldRemoveEventListener(type, listener, options)
+      return oldRemoveEventListener(type, listener, ...args)
     }
   }
 
