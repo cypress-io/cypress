@@ -21,8 +21,12 @@ describe('#setup', () => {
   const testTask = 'test'
   let testTaskHandler: StubbedMessageHandler
 
-  function getTask (on: sinon.SinonStub) {
+  function getTask () {
     return on.withArgs('task').lastCall.args[1].__cypressPuppeteer__
+  }
+
+  function simulateBrowserLaunch () {
+    return on.withArgs('after:browser:launch').yield({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
   }
 
   beforeEach(() => {
@@ -72,9 +76,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
 
       await task({ name: testTask, args: [] })
 
@@ -91,9 +95,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
 
       await task({ name: testTask, args: ['arg1', 'arg2'] })
 
@@ -107,9 +111,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
 
       await task({ name: testTask, args: ['arg1', 'arg2'] })
 
@@ -127,9 +131,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
       expect(returnValue).to.equal(resolution)
@@ -143,9 +147,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
       expect(returnValue).to.be.null
@@ -154,7 +158,7 @@ describe('#setup', () => {
     it('returns error object if debugger URL reference is lost', async () => {
       setup({ on, onMessage })
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: 'nonexistent', args: [] })
 
       expect(returnValue.__error__).to.be.an('object')
@@ -166,9 +170,9 @@ describe('#setup', () => {
     it('returns error object if browser is not supported', async () => {
       setup({ on, onMessage })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'Firefox' }, {})
+      on.withArgs('after:browser:launch').yield({ family: 'Firefox' }, {})
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: 'nonexistent', args: [] })
 
       expect(returnValue.__error__).to.be.an('object')
@@ -185,9 +189,9 @@ describe('#setup', () => {
         onMessage,
       })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: testTask, args: ['arg1', 'arg2'] })
 
       expect(mockBrowser.disconnect).to.be.called
@@ -198,9 +202,9 @@ describe('#setup', () => {
     it('returns error object if message handler with given name cannot be found', async () => {
       setup({ on, onMessage })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      simulateBrowserLaunch()
 
-      const task = getTask(on)
+      const task = getTask()
       const returnValue = await task({ name: 'nonexistent', args: [] })
 
       expect(returnValue.__error__).to.be.an('object')
@@ -210,14 +214,11 @@ describe('#setup', () => {
     })
 
     it('returns error object if message handler with given name cannot be found', async () => {
-      const on = sinon.stub()
-
       // @ts-expect-error
       setup({ on, onMessage: { notAFunction: true } })
 
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
-
-      const task = getTask(on)
+      simulateBrowserLaunch()
+      const task = getTask()
       const returnValue = await task({ name: 'notAFunction', args: [] })
 
       expect(returnValue.__error__).to.be.an('object')
@@ -233,8 +234,8 @@ describe('#setup', () => {
 
       ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
       setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
-      const task = getTask(on)
+      simulateBrowserLaunch()
+      const task = getTask()
 
       await task({ name: testTask, args: [] })
 
@@ -250,8 +251,9 @@ describe('#setup', () => {
 
       ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
       setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
-      on.withArgs('after:browser:launch').lastCall.args[1]({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
-      const task = getTask(on)
+      simulateBrowserLaunch()
+
+      const task = getTask()
 
       const returnValue = await task({ name: testTask, args: [] })
 

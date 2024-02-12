@@ -5,7 +5,7 @@ import { activateMainTab } from './activateMainTab'
 
 export type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
 
-export interface SetupOptions {
+interface SetupOptions {
   onMessage: Record<string, MessageHandler>
   on: Cypress.PluginEvents
   puppeteer?: PuppeteerNode
@@ -62,7 +62,7 @@ export function setup (options: SetupOptions) {
   let debuggerUrl: string
 
   try {
-    options.on('after:browser:launch', async (browser: Cypress.Browser, options) => {
+    options.on('after:browser:launch', (browser: Cypress.Browser, options) => {
       cypressBrowser = browser
       debuggerUrl = options.webSocketDebuggerUrl
     })

@@ -19,10 +19,14 @@ describe('activateMainTab', () => {
     window = {
       addEventListener: sinon.stub(),
       removeEventListener: sinon.stub(),
-      // @ts-ignore
+
+      // @ts-ignore sinon gets confused about postMessage type declaration
       postMessage: sinon.stub(),
     }
 
+    // activateMainTab is eval'd in browser context, but the tests exec in a
+    // node context. We don't necessarily need to do this swap, but it makes the
+    // tests more portable.
     // @ts-ignore
     prevWin = global.window
     //@ts-ignore
