@@ -231,6 +231,7 @@ it('visits a basic html page', () => {
     cy.openProject('experimental-studio')
     cy.startAppServer('e2e')
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
 
     cy.waitForSpecToFinish()

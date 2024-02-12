@@ -5,7 +5,13 @@ _Released 2/13/2024 (PENDING)_
 
 **Bugfixes:**
 
-Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
+- Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
+- Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
+- Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
+
+**Misc:**
+
+- Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
 ## 13.6.4
 

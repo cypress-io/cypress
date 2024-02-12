@@ -64,17 +64,12 @@ pnpm add cypress --save-dev
 
 ![installing-cli e1693232](./assets/cypress-installation.gif)
 
-
 ## Contributing
 
 [![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/ypt4pf/develop&style=flat&logo=cypress)](https://cloud.cypress.io/projects/ypt4pf/runs)
 [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) -  `develop` branch
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
-
-## How we work
-
-At Cypress we value our community and strive to be as open and transparent with them as possible.  Check out [our guide](./cypress-prioritization-and-triage.md) on how we prioritize community issues.
 
 ## License
 

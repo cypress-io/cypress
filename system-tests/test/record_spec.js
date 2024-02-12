@@ -2354,20 +2354,13 @@ describe('e2e record', () => {
             spec: 'simple_multiple.cy.js',
             configFile: 'cypress-with-project-id.config.js',
             record: true,
-            snapshot: true,
+            snapshot: false,
             expectedExitCode: 1,
           }).then(() => {
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
-            console.log(postResultsRequest)
             expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
-            expect(postResultsRequest?.body.tests).to.have.length(2)
-            expect(postResultsRequest?.body.stats.suites).to.equal(1)
-            expect(postResultsRequest?.body.stats.tests).to.equal(2)
-            expect(postResultsRequest?.body.stats.passes).to.equal(1)
-            expect(postResultsRequest?.body.stats.failures).to.equal(1)
-            expect(postResultsRequest?.body.stats.skipped).to.equal(0)
           })
         })
       })

@@ -23,6 +23,7 @@ for (const project of WEBPACK_REACT) {
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('App.cy.jsx').click()
       cy.waitForSpecToFinish({ passCount: 2 })
     })
@@ -34,6 +35,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReact.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.get('.test-err-code-frame').should('be.visible')
@@ -53,6 +55,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.get('.test-err-code-frame').should('be.visible')
@@ -71,6 +74,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('AppCompilationError.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.contains('An uncaught error was detected outside of a test')
@@ -114,6 +118,7 @@ for (const project of WEBPACK_REACT) {
     // https://cypress-io.atlassian.net/browse/UNIFY-1697
     it('filters missing spec files from loader during pre-compilation', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       // 1. assert spec executes successfully
       cy.contains('App.cy.jsx').click()
