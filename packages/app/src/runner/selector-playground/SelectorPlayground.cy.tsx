@@ -82,13 +82,9 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-num-elements"]').contains('10 matches')
 
-    cy.percySnapshot()
-
     cy.then(() => selectorPlaygroundStore.setValidity(false))
 
     cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
-
-    cy.percySnapshot('Invalid playground selector')
   })
 
   it('focuses and copies selector text', () => {
