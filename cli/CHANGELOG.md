@@ -24,6 +24,10 @@ _Released 1/30/2024_
 
 - Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#28747](https://github.com/cypress-io/cypress/issues/28747).
 
+**Dependency Updates:**
+
+- Updated [`is-ci`](https://www.npmjs.com/package/is-ci) from `3.0.0` to `3.0.1`. Addressed in [#28933](https://github.com/cypress-io/cypress/pull/28933).
+
 **Misc:**
 
 - Added missing properties to the `Cypress.spec` interface for TypeScript users. Addresses [#27835](https://github.com/cypress-io/cypress/issues/27835).
