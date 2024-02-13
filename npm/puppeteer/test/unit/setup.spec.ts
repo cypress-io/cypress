@@ -1,11 +1,11 @@
 import { expect, use } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import type { PuppeteerNode, Browser, Page } from 'puppeteer-core'
+import type { PuppeteerNode, Browser } from 'puppeteer-core'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import { MessageHandler } from '../../src/plugin/setup'
 import { setup } from '../../src/plugin'
-import { activateMainTab } from '../../src/plugin/activateMainTab'
+import * as activateMainTabExport from '../../src/plugin/activateMainTab'
 
 use(chaiAsPromised)
 use(sinonChai)
@@ -26,13 +26,13 @@ describe('#setup', () => {
   }
 
   function simulateBrowserLaunch () {
-    return on.withArgs('after:browser:launch').yield({ family: 'chromium' }, { webSocketDebuggerUrl: 'ws://debugger' })
+    return on.withArgs('after:browser:launch').yield({ family: 'chromium', isHeaded: true }, { webSocketDebuggerUrl: 'ws://debugger' })
   }
 
   beforeEach(() => {
+    sinon.stub(activateMainTabExport, 'activateMainTab')
     mockBrowser = {
       disconnect: sinon.stub().resolves(),
-      pages: sinon.stub().resolves([]),
     }
 
     mockPuppeteer = {
@@ -50,6 +50,8 @@ describe('#setup', () => {
 
   afterEach(() => {
     sinon.reset()
+
+    ;(activateMainTabExport.activateMainTab as sinon.SinonStub).restore()
   })
 
   it('registers `after:browser:launch` and `task` handlers', () => {
@@ -227,29 +229,20 @@ describe('#setup', () => {
       )
     })
 
-    it('evaluates activateMainTab if there is a page in the browser', async () => {
-      const mockPage = {
-        evaluate: sinon.stub<Parameters<Page['evaluate']>, ReturnType<Page['evaluate']>>(),
-      }
-
-      ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
+    it('calls activateMainTab if there is a page in the browser', async () => {
+      (activateMainTabExport.activateMainTab as sinon.SinonStub).withArgs(mockBrowser).resolves()
       setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
-      simulateBrowserLaunch()
       const task = getTask()
 
+      simulateBrowserLaunch()
       await task({ name: testTask, args: [] })
 
-      expect(mockPage.evaluate).to.be.calledWith(activateMainTab)
+      expect(activateMainTabExport.activateMainTab).to.be.calledWith(mockBrowser)
     })
 
-    it('returns an error object if activateMainTab eval rejects', async () => {
-      const evaluate = sinon.stub<Parameters<Page['evaluate']>, ReturnType<Page['evaluate']>>().callsFake(() => Promise.reject())
+    it('returns an error object if activateMainTab rejects', async () => {
+      (activateMainTabExport.activateMainTab as sinon.SinonStub).withArgs(mockBrowser).rejects()
 
-      const mockPage = {
-        evaluate,
-      }
-
-      ;(mockBrowser.pages as sinon.SinonStub).resolves([mockPage])
       setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
       simulateBrowserLaunch()
 
@@ -261,6 +254,25 @@ describe('#setup', () => {
       expect(returnValue.__error__.message).to.equal(
         'Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.',
       )
+    })
+
+    it('does not try to activate main tab when the browser is headless', async () => {
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+      on.withArgs('after:browser:launch').yield({ family: 'chromium', isHeaded: false }, { webSocketDebuggerUrl: 'ws://debugger' })
+      const task = getTask()
+
+      await task({ name: testTask, args: [] })
+
+      expect(activateMainTabExport.activateMainTab).not.to.be.called
+    })
+
+    it('does not try to activate main tab when the browser is electron', async () => {
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+      on.withArgs('after:browser:launch').yield({ family: 'chromium', isHeaded: true, name: 'electron' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      const task = getTask()
+
+      await task({ name: testTask, args: [] })
+      expect(activateMainTabExport.activateMainTab).not.to.be.called
     })
   })
 

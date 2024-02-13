@@ -62,7 +62,7 @@ export function setup (options: SetupOptions) {
   let debuggerUrl: string
 
   try {
-    options.on('after:browser:launch', (browser: Cypress.Browser, options) => {
+    options.on('after:browser:launch', (browser: Cypress.Browser, options: Cypress.AfterBrowserLaunchDetails) => {
       cypressBrowser = browser
       debuggerUrl = options.webSocketDebuggerUrl
     })
@@ -111,11 +111,16 @@ export function setup (options: SetupOptions) {
       } catch (err: any) {
         error = err
       } finally {
-        const [page] = await browser.pages()
+        // - Only implemented for Chromium right now. Support for Firefox/webkit
+        //   could be added later
+        // - Electron doesn't have tabs
+        // - Focus doesn't matter for headless browsers and old headless Chrome
+        //   doesn't run the extension
+        const isHeadedChromium = cypressBrowser.isHeaded && cypressBrowser.family === 'chromium' && cypressBrowser.name !== 'electron'
 
-        if (page) {
+        if (isHeadedChromium) {
           try {
-            await page.evaluate(activateMainTab)
+            await activateMainTab(browser)
           } catch (e) {
             return messageHandlerError(pluginError('Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.'))
           }
