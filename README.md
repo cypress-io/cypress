@@ -62,8 +62,7 @@ or
 pnpm add cypress --save-dev
 ```
 
-![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
-
+![installing-cli e1693232](./assets/cypress-installation.gif)
 
 ## Contributing
 
@@ -71,10 +70,6 @@ pnpm add cypress --save-dev
 [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) -  `develop` branch
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
-
-## How we work
-
-At Cypress we value our community and strive to be as open and transparent with them as possible.  Check out [our guide](./cypress-prioritization-and-triage.md) on how we prioritize community issues.
 
 ## License
 
