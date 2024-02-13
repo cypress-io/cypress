@@ -30,44 +30,74 @@ export const rewriteServiceWorker = (body: Buffer) => {
 
   function __cypressOverwriteAddRemoveEventListener () {
     const _listeners = new WeakMap()
+    const _capturedListeners = new WeakMap()
+    const _handleEvents = new WeakMap()
+
+    const canWrapListener = (listener) => {
+      return typeof listener === 'function' || listener?.handleEvent || typeof listener === 'object'
+    }
 
     const oldAddEventListener = self.addEventListener
 
     // Overwrite the addEventListener method so we can
     // determine if the service worker handled the request
-    self.addEventListener = (type, listener, ...args) => {
-      if (type === 'fetch' && (typeof listener === 'function' || listener?.handleEvent)) {
+    self.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+      if (type === 'fetch' && canWrapListener(listener)) {
         let newListener
 
+        // If the listener is a function, we can just wrap it
+        // If the listener is an object with a handleEvent method, we can wrap that method
+        // Otherwise, we need to wrap the listener in a proxy so we can track and wrap the handleEvent function
         if (typeof listener === 'function') {
           newListener = __cypressCreateListenerFunction(listener)
-        } else {
+        } else if (listener?.handleEvent) {
           newListener = __cypressCreateListenerFunction(listener.handleEvent)
           listener.handleEvent = newListener
+        } else {
+          newListener = new Proxy(listener, {
+            get (target, key) {
+              if (key === 'handleEvent') {
+                if (!_handleEvents.has(target)) {
+                  _handleEvents.set(target, __cypressCreateListenerFunction(target.handleEvent))
+                }
+
+                return _handleEvents.get(target)
+              }
+
+              return Reflect.get(target, key)
+            },
+          })
         }
 
-        _listeners.set(listener, newListener)
+        const capture = typeof options === 'boolean' ? options : options?.capture
 
-        return oldAddEventListener(type, newListener, ...args)
+        capture ? _capturedListeners.set(listener, newListener) : _listeners.set(listener, newListener)
+
+        return oldAddEventListener(type, newListener, options)
       }
 
-      return oldAddEventListener(type, listener, ...args)
+      return oldAddEventListener(type, listener, options)
     }
 
     const oldRemoveEventListener = self.removeEventListener
 
     // Overwrite the removeEventListener method so we can
     // remove the listener from the map
-    self.removeEventListener = (type, listener, ...args) => {
-      if (type === 'fetch' && (typeof listener === 'function' || listener?.handleEvent)) {
-        const newListener = _listeners.get(listener)
+    self.removeEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
+      if (type === 'fetch' && canWrapListener(listener)) {
+        const capture = typeof options === 'boolean' ? options : options?.capture
+        const newListener = capture ? _capturedListeners.get(listener) : _listeners.get(listener)
 
-        _listeners.delete(listener)
+        capture ? _capturedListeners.delete(listener) : _listeners.delete(listener)
 
-        return oldRemoveEventListener(type, newListener, ...args)
+        if (typeof listener === 'object' && typeof listener.handleEvent === 'function') {
+          _handleEvents.delete(listener)
+        }
+
+        return oldRemoveEventListener(type, newListener, options)
       }
 
-      return oldRemoveEventListener(type, listener, ...args)
+      return oldRemoveEventListener(type, listener, options)
     }
   }
 
