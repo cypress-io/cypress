@@ -503,8 +503,7 @@ export default function (Commands, Cypress, cy, state, config) {
     if (
       !test.err
       || !screenshotConfig.screenshotOnRunFailure
-      // TO DO REVERT THIS CHANGE MADE FOR TESTING IN OPEN MODE
-      // || config('isInteractive')
+      || config('isInteractive')
       || test.err.isPending
       || !config('screenshotOnRunFailure')
     ) {
