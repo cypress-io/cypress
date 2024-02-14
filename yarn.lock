@@ -10965,7 +10965,7 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-buffer@^5.1.0, buffer@^5.2.0, buffer@^5.2.1, buffer@^5.5.0, buffer@^5.6.0, buffer@^5.7.0:
+buffer@^5.1.0, buffer@^5.2.0, buffer@^5.2.1, buffer@^5.5.0, buffer@^5.7.0, buffer@^5.7.1:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.7.1.tgz#ba62e7c13133053582197160851a8f648e99eed0"
   integrity sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==
