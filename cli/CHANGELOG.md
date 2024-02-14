@@ -12,6 +12,10 @@ _Released 2/13/2024 (PENDING)_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
+**Bugfixes:**
+
+- Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
+
 ## 13.6.4
 
 _Released 1/30/2024_
