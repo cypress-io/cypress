@@ -6,6 +6,7 @@ _Released 2/13/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
+- Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
 - Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
 
 **Dependency Updates:**
@@ -16,9 +17,9 @@ _Released 2/13/2024 (PENDING)_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
-**Bugfixes:**
+**Dependency Updates:**
 
-- Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
+- Updated buffer from `5.6.0` to `5.7.1`. Addressed in [#28934](https://github.com/cypress-io/cypress/pull/28934).
 
 ## 13.6.4
 
