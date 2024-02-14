@@ -12,6 +12,10 @@ _Released 2/13/2024 (PENDING)_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 
+**Dependency Updates:**
+
+- Updated buffer from `5.6.0` to `5.7.1`. Addressed in [#28934](https://github.com/cypress-io/cypress/pull/28934).
+
 ## 13.6.4
 
 _Released 1/30/2024_
