@@ -271,11 +271,10 @@ describe('driver/src/cy/snapshots', () => {
             expect(elementsToHighlight?.length).to.equal(1)
             const elementToHighlight = elementsToHighlight[0]
 
-            expect(elementToHighlight.selector).to.equal('#shadow-dom-input')
-            expect(elementToHighlight.frameId).to.be.undefined
-            expect(elementToHighlight.host.selector).to.equal('#element')
-            expect(elementToHighlight.host.frameId).to.equal('test-frame-id')
-            expect(elementToHighlight.host.host).to.be.undefined
+            expect(elementToHighlight.selector.length).to.equal(2)
+            expect(elementToHighlight.selector[0]).to.equal('#element')
+            expect(elementToHighlight.selector[1]).to.equal('#shadow-dom-input')
+            expect(elementToHighlight.frameId).to.equal('test-frame-id')
             expect(name).to.equal('snapshot')
             expect(timestamp).to.be.a('number')
           })
