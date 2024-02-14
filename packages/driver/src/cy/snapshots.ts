@@ -337,27 +337,52 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const snapshot: {
         name: string
         timestamp: number
-        elementsToHighlight?: Omit<SelectorNode, 'ownerDoc'>[]
+        elementsToHighlight?: {
+          selector: string | string []
+          frameId: string
+        }[]
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
         snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
-          // remove unserializable types from the selector tree that were needed to build the recursive selector
-          // structure, such as ownerDoc
-          const cleanElementSelectorTree = (el: SelectorNode | undefined): Omit<SelectorNode, 'ownerDoc'> | undefined => {
-            if (el?.ownerDoc) {
-              // @ts-expect-error
-              delete el.ownerDoc
-            }
+          // flatten selector to only include selector string values, which we can imply is a shadowRoot if other values exist in the tree
+          // this keeps the structure similar to axe-core
+          // @see https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#results-object -> target
+          const selectors: string[] | undefined = []
+          let frameId: string | undefined
+          const flattenElementSelectorTree = (el: SelectorNode | undefined): void => {
+            if (el) {
+              selectors.unshift(el?.selector)
 
-            return el?.host ? cleanElementSelectorTree(el.host) : el
+              if (el?.host) {
+                flattenElementSelectorTree(el.host)
+              } else {
+                frameId = el.frameId
+              }
+            }
           }
 
           const elToHighlight = constructElementSelectorTree(el)
 
-          cleanElementSelectorTree(elToHighlight)
+          flattenElementSelectorTree(elToHighlight)
 
-          return elToHighlight ? [elToHighlight] : []
+          let selector: string | string[] | undefined
+
+          switch (selectors.length) {
+            case 0:
+              selector = undefined
+              break
+            case 1:
+              selector = selectors[0]
+              break
+            default:
+              selector = selectors
+          }
+
+          return selector ? [{
+            selector,
+            frameId,
+          }] : []
         })
       }
 
