@@ -45,7 +45,7 @@
     "figures": "^3.2.0",
     "fs-extra": "^9.1.0",
     "getos": "^3.2.1",
-    "is-ci": "^3.0.0",
+    "is-ci": "^3.0.1",
     "is-installed-globally": "~0.4.0",
     "lazy-ass": "^1.6.0",
     "listr2": "^3.8.3",
