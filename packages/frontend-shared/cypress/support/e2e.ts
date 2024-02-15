@@ -557,7 +557,7 @@ function getAutIframe () {
   return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
 }
 
-Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop completed with undelivered notifications.'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 

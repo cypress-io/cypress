@@ -142,19 +142,8 @@ const createServerEntryPointBundle = async (buildAppDir) => {
 
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
 
-  console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
-
-  // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
-  const bytenode = await import('bytenode')
-
-  await bytenode.compileFile({
-    filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
-    output: path.join(buildAppDir, 'packages', 'server', 'index.jsc'),
-    electron: true,
-  })
-
   // Convert these inputs to a relative file path. Note that these paths are posix paths.
-  return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
+  return [...Object.keys(esbuildResult.metafile.inputs)].filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
 }
 
 const buildEntryPointAndCleanup = async (buildAppDir) => {
