@@ -118,7 +118,7 @@ export class ServiceWorkerManager {
 
     this.serviceWorkerRegistrations.forEach((registration) => {
       const activatedServiceWorker = registration.activatedServiceWorker
-      const paramlessDocumentURL = browserPreRequest.documentURL.split('?')[0]
+      const paramlessDocumentURL = browserPreRequest.documentURL?.split('?')[0]
 
       // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
       // we have an activated service worker, the request URL does not come from the service worker, and the request
@@ -130,7 +130,7 @@ export class ServiceWorkerManager {
         return
       }
 
-      const paramlessURL = browserPreRequest.url.split('?')[0]
+      const paramlessURL = browserPreRequest.url?.split('?')[0]
       const paramlessInitiatorURL = browserPreRequest.initiator?.url?.split('?')[0]
       const paramlessCallStackURL = browserPreRequest.initiator?.stack?.callFrames[0]?.url?.split('?')[0]
       const urlIsControlled = paramlessURL.startsWith(registration.scopeURL)
