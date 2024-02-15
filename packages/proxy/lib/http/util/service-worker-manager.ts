@@ -130,7 +130,7 @@ export class ServiceWorkerManager {
         return
       }
 
-      const paramlessURL = browserPreRequest.url?.split('?')[0]
+      const paramlessURL = browserPreRequest.url?.split('?')[0] || ''
       const paramlessInitiatorURL = browserPreRequest.initiator?.url?.split('?')[0]
       const paramlessCallStackURL = browserPreRequest.initiator?.stack?.callFrames[0]?.url?.split('?')[0]
       const urlIsControlled = paramlessURL.startsWith(registration.scopeURL)
