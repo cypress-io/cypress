@@ -13,6 +13,7 @@ describe('errorWarningChange subscription', () => {
     beforeEach(() => {
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
 
     describe('when the config file is saved with errors', () => {

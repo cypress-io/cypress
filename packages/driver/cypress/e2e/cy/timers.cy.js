@@ -187,9 +187,9 @@ describe('driver/src/cy/timers', () => {
           // now go ahead and run all the queued timers
           return cy.pauseTimers(false)
         })
-        .then(() => {
-          expect(win.bar).to.eq('bar')
 
+        cy.window().its('bar').should('eq', 'bar')
+        .and(() => {
           // requestAnimationFrame should have passed through
           // its high res timestamp from performance.now()
           expect(rafStub).to.be.calledWithMatch(Number)

@@ -14,17 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'cypress-io/release-automations'
           ref: 'master'
           ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
       - name: Run comment_workflow.js Script
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |

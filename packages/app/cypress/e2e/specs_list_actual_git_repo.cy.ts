@@ -9,6 +9,7 @@ describe('Spec List - Last updated with git info', () => {
       cy.openProject('cypress-in-cypress')
       cy.startAppServer('e2e')
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
   })
 

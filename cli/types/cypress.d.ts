@@ -758,7 +758,7 @@ declare namespace Cypress {
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
-      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
