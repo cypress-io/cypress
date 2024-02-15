@@ -18,6 +18,7 @@ export const rewriteServiceWorker = (body: Buffer) => {
         oldRespondWith.call(event, ...args)
       }
 
+      // call the original listener
       const returnValue = listener(event)
 
       // @ts-expect-error
@@ -49,6 +50,14 @@ export const rewriteServiceWorker = (body: Buffer) => {
     // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
     self.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
       if (type === 'fetch' && isValidListener(listener)) {
+        const capture = getCaptureValue(options)
+        const existingListener = capture ? _captureListenersMap.get(listener) : _nonCaptureListenersMap.get(listener)
+
+        // If the listener is already in the map, we don't need to wrap it again
+        if (existingListener) {
+          return oldAddEventListener(type, existingListener, options)
+        }
+
         let newListener
 
         // If the listener is a function, we can just wrap it

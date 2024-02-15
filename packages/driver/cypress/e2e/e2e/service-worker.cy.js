@@ -1,5 +1,41 @@
 describe('service workers', () => {
+  let sessionId
+
+  const getSessionId = async () => {
+    if (!sessionId) {
+      const targets = (await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets', params: {} })).targetInfos
+      const serviceWorkerTarget = targets.reverse().find((target) => target.type === 'service_worker' && target.url === 'http://localhost:3500/fixtures/service-worker.js')
+
+      ;({ sessionId } = await Cypress.automation('remote:debugger:protocol', { command: 'Target.attachToTarget', params: { targetId: serviceWorkerTarget.targetId, flatten: true } }))
+    }
+
+    return sessionId
+  }
+
+  const getEventListenersLength = async () => {
+    const sessionId = await getSessionId()
+    let result = await Cypress.automation('remote:debugger:protocol', { command: 'Runtime.evaluate', params: { expression: 'getEventListeners(self).fetch', includeCommandLineAPI: true }, sessionId })
+
+    if (result.result.type === 'undefined') return 0
+
+    result = await Cypress.automation('remote:debugger:protocol', { command: 'Runtime.getProperties', params: { objectId: result.result.objectId }, sessionId })
+
+    const length = result.result.find((prop) => prop.name === 'length').value.value
+
+    return length
+  }
+
+  const getOnFetchHandlerType = async () => {
+    const sessionId = await getSessionId()
+
+    const result = await Cypress.automation('remote:debugger:protocol', { command: 'Runtime.evaluate', params: { expression: 'self.onfetch', includeCommandLineAPI: true }, sessionId })
+
+    return result.result.type
+  }
+
   beforeEach(async () => {
+    sessionId = null
+
     // unregister the service worker to ensure it does not affect other tests
     const registrations = await navigator.serviceWorker.getRegistrations()
 
@@ -21,6 +57,9 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
     })
 
     it('supports using addEventListener with object', () => {
@@ -41,6 +80,9 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
     })
 
     it('supports using addEventListener with delayed handleEvent', () => {
@@ -60,6 +102,9 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
     })
 
     it('supports using onfetch', () => {
@@ -76,6 +121,11 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        // onfetch will add an event listener
+        expect(await getEventListenersLength()).to.equal(1)
+        expect(await getOnFetchHandlerType()).to.equal('function')
+      })
     })
   })
 
@@ -94,6 +144,9 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
     })
 
     it('supports using onfetch', () => {
@@ -110,6 +163,11 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        // onfetch will add an event listener
+        expect(await getEventListenersLength()).to.equal(1)
+        expect(await getOnFetchHandlerType()).to.equal('function')
+      })
     })
   })
 
@@ -138,6 +196,9 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
     })
 
     it('supports using onfetch', () => {
@@ -163,6 +224,11 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        // onfetch will add an event listener
+        expect(await getEventListenersLength()).to.equal(1)
+        expect(await getOnFetchHandlerType()).to.equal('function')
+      })
     })
   })
 
@@ -185,6 +251,41 @@ describe('service workers', () => {
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        // onfetch will also add an event listener
+        expect(await getEventListenersLength()).to.equal(2)
+        expect(await getOnFetchHandlerType()).to.equal('function')
+      })
+    })
+
+    it('supports other options', () => {
+      const script = () => {
+        const handler = function (event) {
+          event.respondWith(fetch(event.request))
+        }
+
+        self.addEventListener('fetch', handler)
+
+        // this one does not get added because capture is the same
+        self.addEventListener('fetch', handler, { capture: false })
+
+        // this one gets added because capture is different
+        self.addEventListener('fetch', handler, { capture: true })
+
+        // this one does not get added because capture is the same
+        self.addEventListener('fetch', handler, { once: true })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(2)
+      })
     })
   })
 })

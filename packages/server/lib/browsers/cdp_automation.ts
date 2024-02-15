@@ -492,7 +492,7 @@ export class CdpAutomation implements CDPClient {
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
-        return this.sendDebuggerCommandFn(data.command, data.params)
+        return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
       case 'take:screenshot':
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         .catch((err) => {
