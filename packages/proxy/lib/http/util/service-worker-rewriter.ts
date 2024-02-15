@@ -36,7 +36,11 @@ export const rewriteServiceWorker = (body: Buffer) => {
 
     // A listener is considered valid if it is a function, an object with a handleEvent method, or an object (the handleEvent function could be added later)
     const isValidListener = (listener: EventListenerOrEventListenerObject) => {
-      return typeof listener === 'function' || listener?.handleEvent || typeof listener === 'object'
+      return listener && (typeof listener === 'function' || listener?.handleEvent || typeof listener === 'object')
+    }
+
+    const isAborted = (options?: boolean | AddEventListenerOptions) => {
+      return typeof options === 'object' && options.signal?.aborted
     }
 
     // Get the capture value from the options
@@ -49,7 +53,7 @@ export const rewriteServiceWorker = (body: Buffer) => {
     // Overwrite the addEventListener method so we can determine if the service worker handled the request
     // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
     self.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
-      if (type === 'fetch' && isValidListener(listener)) {
+      if (type === 'fetch' && isValidListener(listener) && !isAborted(options)) {
         const capture = getCaptureValue(options)
         const existingListener = capture ? _captureListenersMap.get(listener) : _nonCaptureListenersMap.get(listener)
 

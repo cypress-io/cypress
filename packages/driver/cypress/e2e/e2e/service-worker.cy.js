@@ -42,7 +42,8 @@ describe('service workers', () => {
     await Promise.all(registrations.map((registration) => registration.unregister()))
   })
 
-  describe('a service worker that handles requests', () => {
+  // decrease the timeouts to ensure we don't hit the 2s correlation timeout
+  describe('a service worker that handles requests', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
     it('supports using addEventListener with function', () => {
       const script = () => {
         self.addEventListener('fetch', function (event) {
@@ -104,6 +105,30 @@ describe('service workers', () => {
       cy.get('#output').should('have.text', 'done')
       cy.then(async () => {
         expect(await getEventListenersLength()).to.equal(1)
+      })
+    })
+
+    it('adds both listeners when addEventListener and onfetch use the same listener', () => {
+      const script = () => {
+        const listener = function (event) {
+          event.respondWith(fetch(event.request))
+        }
+
+        self.onfetch = listener
+        self.addEventListener('fetch', listener)
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        // onfetch will add an event listener
+        expect(await getEventListenersLength()).to.equal(2)
+        expect(await getOnFetchHandlerType()).to.equal('function')
       })
     })
 
@@ -169,6 +194,23 @@ describe('service workers', () => {
         expect(await getOnFetchHandlerType()).to.equal('function')
       })
     })
+
+    it('does not add a null listener', () => {
+      const script = () => {
+        self.addEventListener('fetch', null)
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(0)
+      })
+    })
   })
 
   describe('a service worker that removes fetch handlers', () => {
@@ -230,6 +272,53 @@ describe('service workers', () => {
         expect(await getOnFetchHandlerType()).to.equal('function')
       })
     })
+
+    it('does not fail when removing a non-existent listener', () => {
+      const script = () => {
+        const listener = function (event) {
+          return
+        }
+
+        self.addEventListener('fetch', listener)
+
+        // this does not remove the listener because the listener is not the same function
+        self.removeEventListener('fetch', function (event) {
+          return
+        })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
+    })
+
+    it('does not fail when removing a null listener', () => {
+      const script = () => {
+        self.addEventListener('fetch', () => {
+          return
+        })
+
+        self.removeEventListener('fetch', null)
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
+    })
   })
 
   describe('a service worker with multiple fetch handlers', () => {
@@ -286,6 +375,46 @@ describe('service workers', () => {
       cy.then(async () => {
         expect(await getEventListenersLength()).to.equal(2)
       })
+    })
+  })
+
+  it('supports aborted listeners', () => {
+    const script = () => {
+      const alreadyAborted = new AbortController()
+
+      alreadyAborted.abort()
+
+      // this one does not get added because the signal is aborted before adding the listener
+      self.addEventListener('fetch', () => {
+        return
+      }, { signal: alreadyAborted.signal })
+
+      const notAborted = new AbortController()
+
+      // this one gets added because the signal is not aborted
+      self.addEventListener('fetch', (event) => {
+        event.respondWith(fetch(event.request))
+      }, { signal: notAborted.signal })
+
+      const aborted = new AbortController()
+
+      // this one get added but then immediately removed because the signal is aborted after adding the listener
+      self.addEventListener('fetch', (event) => {
+        event.respondWith(fetch(event.request))
+      }, { signal: aborted.signal })
+
+      aborted.abort()
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
+    cy.get('#output').should('have.text', 'done')
+    cy.then(async () => {
+      expect(await getEventListenersLength()).to.equal(1)
     })
   })
 })
