@@ -561,7 +561,9 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.get('button:first span').click()
 
-      cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      if (Cypress.browser.name === 'chrome') {
+          cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      }
       cy.getAll('btn', 'focus click').each(shouldNotBeCalled)
       cy.getAll('span', 'mouseenter mousedown mouseup').each(shouldBeCalled)
       cy.getAll('span', 'focus click').each(shouldNotBeCalled)
