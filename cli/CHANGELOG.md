@@ -7,14 +7,8 @@ _Released 2/13/2024 (PENDING)_
 
 - Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
 - Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
+- Fixed a regression introduced in [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13.6.3) where Cypress could crash when processing service worker requests through our proxy. Fixes [#28950](https://github.com/cypress-io/cypress/issues/28950).
 - Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
-
-**Dependency Updates:**
-
-- Upgraded `electron` from `25.8.4` to `27.1.3`
-- Upgraded bundled Node.js version from `18.15.0` to `18.17.0`
-- Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`
-- Updated [`is-ci`](https://www.npmjs.com/package/is-ci) from `3.0.0` to `3.0.1`. Addressed in [#28933](https://github.com/cypress-io/cypress/pull/28933).
 
 **Misc:**
 
@@ -22,7 +16,11 @@ _Released 2/13/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `electron` from `25.8.4` to `27.1.3`.
+- Upgraded bundled Node.js version from `18.15.0` to `18.17.0`.
+- Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`.
 - Updated buffer from `5.6.0` to `5.7.1`. Addressed in [#28934](https://github.com/cypress-io/cypress/pull/28934).
+- Updated [`is-ci`](https://www.npmjs.com/package/is-ci) from `3.0.0` to `3.0.1`. Addressed in [#28933](https://github.com/cypress-io/cypress/pull/28933).
 
 ## 13.6.4
 
