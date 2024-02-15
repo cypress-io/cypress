@@ -17,10 +17,6 @@ _Released 2/13/2024 (PENDING)_
 
 _Released 1/30/2024_
 
-**Bugfixes:**
-
-- Fixed an issue with capturing assets for Test Replay when service workers are registered in Cypress support files. This issue would cause styles to not render properly in Test Replay. Fixes [#28747](https://github.com/cypress-io/cypress/issues/28747).
-
 **Performance:**
 
 - Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where aborted requests may not correlate correctly. Fixes [#28734](https://github.com/cypress-io/cypress/issues/28734).
