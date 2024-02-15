@@ -19,7 +19,7 @@ _Released 2/13/2024 (PENDING)_
 - Upgraded bundled Node.js version from `18.15.0` to `18.17.0`.
 - Upgraded bundled Chromium version from `114.0.5735.289` to `118.0.5993.117`.
 - Updated buffer from `5.6.0` to `5.7.1`. Addressed in [#28934](https://github.com/cypress-io/cypress/pull/28934).
-- Updated [`duplexify`](https://www.npmjs.com/package/duplexify) from `3.0.0` to `3.0.1`. Addressed in [#28933](https://github.com/cypress-io/cypress/pull/28933).
+- Updated [`duplexify`](https://www.npmjs.com/package/duplexify) from `3.0.0` to `3.0.1`. Addressed in [#28941](https://github.com/cypress-io/cypress/pull/28941).
 - Updated [`is-ci`](https://www.npmjs.com/package/is-ci) from `3.0.0` to `3.0.1`. Addressed in [#28933](https://github.com/cypress-io/cypress/pull/28933).
 
 ## 13.6.4
