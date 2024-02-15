@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -37,7 +37,7 @@ jobs:
         working-directory: scripts/github-actions/semantic-pull-request/
       - name: Lint PR Title and Cypress Changelog Entry
         if: github.event_name == 'pull_request_target'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const verifyPullRequest = require('./scripts/github-actions/semantic-pull-request')

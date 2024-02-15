@@ -6,6 +6,7 @@ describe('App: Spec List (Component)', () => {
     cy.openProject('component-tests', ['--component'])
     cy.startAppServer('component')
     cy.visitApp()
+    cy.specsPageIsVisible()
   })
 
   it('opens spec pattern modal', () => {

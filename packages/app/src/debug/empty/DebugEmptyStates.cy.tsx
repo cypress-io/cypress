@@ -66,8 +66,7 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
 
           // ensure the promos are done transitioning before clicking on the control
           // since 2 buttons could display if both promos are easing in and out
-          cy.findByTestId('promo-action')
-          .should('not.have.class', 'ease-in')
+          cy.findAllByTestId('guide-card', { timeout: 350 }).should('not.have.class', 'ease-in')
           .and('not.have.class', 'ease-out')
 
           cy.findByTestId('promo-action-control').click()
