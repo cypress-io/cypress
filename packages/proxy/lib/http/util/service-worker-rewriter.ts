@@ -32,11 +32,12 @@ export const rewriteServiceWorker = (body: Buffer) => {
   function __cypressOverwriteAddRemoveEventListeners () {
     const _nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const _captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
-    const _handleEventsMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    const _targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    const _targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
 
-    // A listener is considered valid if it is a function, an object with a handleEvent method, or an object (the handleEvent function could be added later)
+    // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
     const isValidListener = (listener: EventListenerOrEventListenerObject) => {
-      return listener && (typeof listener === 'function' || listener?.handleEvent || typeof listener === 'object')
+      return listener && (typeof listener === 'function' || typeof listener === 'object')
     }
 
     const isAborted = (options?: boolean | AddEventListenerOptions) => {
@@ -69,22 +70,21 @@ export const rewriteServiceWorker = (body: Buffer) => {
         // Otherwise, we need to wrap the listener in a proxy so we can track and wrap the handleEvent function
         if (typeof listener === 'function') {
           newListener = __cypressWrapListener(listener)
-        } else if (listener?.handleEvent) {
-          newListener = __cypressWrapListener(listener.handleEvent)
-          listener.handleEvent = newListener
         } else {
-          // since the handleEvent function is being lazily created, we need to use a proxy to wrap it
+          // since the handleEvent function could change, we need to use a proxy to wrap it
           newListener = new Proxy(listener, {
             get (target, key) {
               if (key === 'handleEvent') {
-                const values = _handleEventsMap.get(target)
+                const wrappedHandleEvent = _targetToWrappedHandleEventMap.get(target)
+                const origHandleEvent = _targetToOrigHandleEventMap.get(target)
 
-                if (!values) {
-                  // TODO: also check if the handleEvent function has changed
-                  _handleEventsMap.set(target, __cypressWrapListener(target.handleEvent))
+                // If the handleEvent function has not been wrapped yet, or if it has changed, we need to wrap it
+                if (!wrappedHandleEvent || target.handleEvent !== origHandleEvent) {
+                  _targetToWrappedHandleEventMap.set(target, __cypressWrapListener(target.handleEvent))
+                  _targetToOrigHandleEventMap.set(target, target.handleEvent)
                 }
 
-                return _handleEventsMap.get(target)
+                return _targetToWrappedHandleEventMap.get(target)
               }
 
               return Reflect.get(target, key)
@@ -116,7 +116,8 @@ export const rewriteServiceWorker = (body: Buffer) => {
 
         // If the listener is an object with a handleEvent method, we need to remove the wrapped function
         if (typeof listener === 'object' && typeof listener.handleEvent === 'function') {
-          _handleEventsMap.delete(listener)
+          _targetToWrappedHandleEventMap.delete(listener)
+          _targetToOrigHandleEventMap.delete(listener)
         }
 
         return oldRemoveEventListener(type, newListener!, options)

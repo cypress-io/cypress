@@ -1,4 +1,4 @@
-describe('service workers', () => {
+describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
   let sessionId
 
   const getSessionId = async () => {
@@ -43,7 +43,7 @@ describe('service workers', () => {
   })
 
   // decrease the timeouts to ensure we don't hit the 2s correlation timeout
-  describe('a service worker that handles requests', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
+  describe('a service worker that handles requests', () => {
     it('supports using addEventListener with function', () => {
       const script = () => {
         self.addEventListener('fetch', function (event) {
@@ -243,6 +243,38 @@ describe('service workers', () => {
       })
     })
 
+    it('supports removing event listener on delay', () => {
+      const script = () => {
+        const handler = function (event) {
+          return new Response('Network error', {
+            status: 400,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+        }
+
+        self.addEventListener('fetch', handler)
+        // remove the listener after the current event loop
+        setTimeout(() => {
+          self.removeEventListener('fetch', handler)
+        }, 0)
+
+        self.addEventListener('fetch', function (event) {
+          return
+        })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+      cy.then(async () => {
+        expect(await getEventListenersLength()).to.equal(1)
+      })
+    })
+
     it('supports using onfetch', () => {
       const script = () => {
         self.onfetch = function (event) {
@@ -398,12 +430,42 @@ describe('service workers', () => {
 
       const aborted = new AbortController()
 
-      // this one get added but then immediately removed because the signal is aborted after adding the listener
+      // this one gets added but then immediately removed because the signal is aborted after adding the listener
       self.addEventListener('fetch', (event) => {
         event.respondWith(fetch(event.request))
       }, { signal: aborted.signal })
 
       aborted.abort()
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
+    cy.get('#output').should('have.text', 'done')
+    cy.then(async () => {
+      expect(await getEventListenersLength()).to.equal(1)
+    })
+  })
+
+  it('supports changing the handleFetch function', () => {
+    const script = () => {
+      const listener = {
+        handleFetch (event) {
+          event.respondWith(new Response('Network error', {
+            status: 400,
+            headers: { 'Content-Type': 'text/plain' },
+          }))
+        },
+      }
+
+      self.addEventListener('fetch', listener)
+
+      listener.handleFetch = function (event) {
+        event.respondWith(fetch(event.request))
+      }
     }
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
