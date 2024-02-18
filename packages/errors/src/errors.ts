@@ -136,12 +136,10 @@ export const AllCypressErrors = {
     }
 
     return errTemplate`\
-        Can't run because you've entered an invalid browser name.
-
-        Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
+        Browser: ${fmt.highlight(browser)} was not found on your system.
 
         Cypress supports the following browsers:
-        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox'])}
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
