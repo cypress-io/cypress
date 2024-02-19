@@ -79,7 +79,7 @@ export const rewriteServiceWorker = (body: Buffer) => {
                 const origHandleEvent = _targetToOrigHandleEventMap.get(target)
 
                 // If the handleEvent function has not been wrapped yet, or if it has changed, we need to wrap it
-                if (!wrappedHandleEvent || target.handleEvent !== origHandleEvent) {
+                if ((!wrappedHandleEvent && target.handleEvent) || target.handleEvent !== origHandleEvent) {
                   _targetToWrappedHandleEventMap.set(target, __cypressWrapListener(target.handleEvent))
                   _targetToOrigHandleEventMap.set(target, target.handleEvent)
                 }

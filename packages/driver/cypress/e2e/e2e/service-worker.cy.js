@@ -1,4 +1,5 @@
-describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
+// decrease the timeouts to ensure we don't hit the 2s correlation timeout
+describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000, retries: 0 }, () => {
   let sessionId
 
   const getSessionId = async () => {
@@ -42,7 +43,6 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     await Promise.all(registrations.map((registration) => registration.unregister()))
   })
 
-  // decrease the timeouts to ensure we don't hit the 2s correlation timeout
   describe('a service worker that handles requests', () => {
     it('supports using addEventListener with function', () => {
       const script = () => {
@@ -197,7 +197,15 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     it('does not add a null listener', () => {
       const script = () => {
+        // does not add the listener because it is null
         self.addEventListener('fetch', null)
+        // does not add the listener because it is undefined
+        self.addEventListener('fetch', undefined)
+
+        // adds the listener because it is a function
+        self.addEventListener('fetch', () => {
+          return
+        })
       }
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
@@ -208,7 +216,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
       cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(0)
+        expect(await getEventListenersLength()).to.equal(1)
       })
     })
   })
@@ -450,10 +458,10 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     })
   })
 
-  it('supports changing the handleFetch function', () => {
+  it('supports changing the handleEvent function', () => {
     const script = () => {
       const listener = {
-        handleFetch (event) {
+        handleEvent (event) {
           event.respondWith(new Response('Network error', {
             status: 400,
             headers: { 'Content-Type': 'text/plain' },
@@ -463,7 +471,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       self.addEventListener('fetch', listener)
 
-      listener.handleFetch = function (event) {
+      listener.handleEvent = function (event) {
         event.respondWith(fetch(event.request))
       }
     }
