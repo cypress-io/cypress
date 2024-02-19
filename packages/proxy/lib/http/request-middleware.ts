@@ -11,19 +11,21 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
 
+import debugModule from 'debug'
+
+const debug = debugModule('cypress:test')
+
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const debug = null
+// const debug = null
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
 }>
 
 const LogRequest: RequestMiddleware = function () {
-  this.debug('proxying request %o', {
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
-  })
+  debug('proxying request         %o', { url: this.req.proxiedUrl, source: this.req.headers['x-cypress-source'] })
 
   this.next()
 }
@@ -100,70 +102,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     shouldCorrelatePreRequest: shouldCorrelatePreRequests,
   })
 
-  if (!shouldCorrelatePreRequests) {
-    span?.end()
-
-    return this.next()
-  }
-
-  const onClose = () => {
-    // if we haven't matched a browser pre-request and the request has been destroyed, raise an error
-    if (this.req.destroyed) {
-      span?.end()
-      this.reqMiddlewareSpan?.end()
-
-      this.onError(new Error('request destroyed before browser pre-request was received'))
-    }
-  }
-
-  const copyResourceTypeAndNext = () => {
-    this.res.off('close', onClose)
-
-    this.req.resourceType = this.req.browserPreRequest?.resourceType
-
-    span?.setAttributes({
-      resourceType: this.req.resourceType,
-    })
-
-    span?.end()
-
-    return this.next()
-  }
-
-  if (this.req.headers['x-cypress-resolving-url']) {
-    this.debug('skipping prerequest for resolve:url')
-    delete this.req.headers['x-cypress-resolving-url']
-    const requestId = `cy.visit-${Date.now()}`
-
-    this.req.browserPreRequest = {
-      requestId,
-      method: this.req.method,
-      url: this.req.proxiedUrl,
-      // @ts-ignore
-      headers: this.req.headers,
-      resourceType: 'document',
-      originalResourceType: 'document',
-    }
-
-    this.res.on('close', () => {
-      this.socket.toDriver('request:event', 'response:received', {
-        requestId,
-        headers: this.res.getHeaders(),
-        status: this.res.statusCode,
-      })
-    })
-
-    return copyResourceTypeAndNext()
-  }
-
-  this.res.once('close', onClose)
-
-  this.debug('waiting for prerequest')
-  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
-    this.req.browserPreRequest = browserPreRequest
-    this.req.noPreRequestExpected = noPreRequestExpected
-    copyResourceTypeAndNext()
-  }))
+  return this.next()
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {

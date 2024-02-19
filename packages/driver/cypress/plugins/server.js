@@ -44,11 +44,19 @@ const createApp = (port) => {
   })
 
   app.get('/timeout', (req, res) => {
-    return Promise
-    .delay(req.query.ms || 0)
-    .then(() => {
-      return res.send('<html><body>timeout</body></html>')
-    })
+    setTimeout(() => {
+      res.header('x-cypress-source', req.headers['x-cypress-source'])
+
+      res.send('<html><body>timeout</body></html>')
+    }, req.query.ms || req.header('x-cypress-timeout') || 0)
+
+    // return Promise
+    // .delay(req.query.ms || req.header('x-cypress-timeout') || 0)
+    // .then(() => {
+    //   res.header('x-cypress-source', req.headers['x-cypress-source'])
+
+    //   return res.send('<html><body>timeout</body></html>')
+    // })
   })
 
   app.get('/redirect-timeout', (req, res) => {

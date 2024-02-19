@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script>
+    const makeRequests = () => {
+      for (let i = 0; i < 1; i++) {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', '/timeout', true)
+        xhr.setRequestHeader('x-cypress-source', 'page')
+        xhr.setRequestHeader('x-cypress-timeout', 100)
+        xhr.send()
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            if (i === 0) {
+              document.getElementById('output').innerText = 'done'
+            }
+          }
+        }
+      }
+    }
+
+    navigator.serviceWorker.register('/service-worker.js')
+    .then((registration) => {
+      const serviceWorker = registration.installing || registration.waiting
+      if (serviceWorker) {
+        const controllerChangeCalled = false
+        navigator.serviceWorker.addEventListener('controllerchange', (e) => {
+          controllerChangeCalled = true
+          makeRequests()
+        })
+
+        serviceWorker.addEventListener('statechange', (e) => {
+          if (e.target.state === 'activated' && !controllerChangeCalled) {
+            // service worker activated, reload page so it can intercept requests
+            location.reload()
+          }
+        })
+      } else {
+        makeRequests()
+      }
+    })
+  </script>
+</head>
+<body>
+  <h1>hi</h1>
+  <div id="output"></div>
+</body>
+</html>

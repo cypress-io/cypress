@@ -14,7 +14,7 @@ import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
-import type Debug from 'debug'
+import Debug from 'debug'
 import type { CookieOptions } from 'express'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
@@ -40,7 +40,9 @@ export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const debug = null
+// const debug = null
+
+const debug = Debug('cypress:test')
 
 // https://github.com/cypress-io/cypress/issues/1756
 const zlibOptions = {
@@ -158,6 +160,8 @@ const getOriginalRequestId = (requestId: string) => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
+  debug('proxying response        %o', { url: this.req.proxiedUrl, source: this.req.headers['x-cypress-source'] })
+
   this.debug('received response %o', {
     browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),

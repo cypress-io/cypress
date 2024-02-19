@@ -19,6 +19,7 @@ export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
+const debug = debugModule('cypress:test')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
@@ -206,7 +207,9 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
-    debugVerbose('received networkRequestWillBeSent %o', params)
+    if (!params.request.url.includes('__')) {
+      debug('networkRequestWillBeSent %o', { url: params.request.url, source: params.request.headers['x-cypress-source'], requestId: params.requestId, loaderId: params.loaderId, resourceType: params.type })
+    }
 
     let url = params.request.url
 
@@ -251,6 +254,10 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
+    if (!params.response.url.includes('__')) {
+      debug('responseReceived         %o', { url: params.response.url, source: params.response.headers['x-cypress-source'], requestId: params.requestId, fromServiceWorker: params.response.fromServiceWorker, resourceType: params.type })
+    }
+
     if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
       this.automation.onRequestServedFromCache?.(params.requestId)
 

@@ -8,6 +8,7 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:proxy:http:util:prerequests')
 const debugVerbose = Debug('cypress-verbose:proxy:http:util:prerequests')
+const debugTest = Debug('cypress:test')
 
 const metrics: any = {
   browserPreRequestsReceived: 0,
@@ -171,7 +172,7 @@ export class PreRequests {
         proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
       }
 
-      debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
+      debugTest('Incoming pre-request %s matches pending request. %o', key, browserPreRequest.requestId, browserPreRequest.url)
       if (!pendingRequest.timedOut) {
         clearTimeout(pendingRequest.timeout)
         pendingRequest.callback?.({
@@ -239,7 +240,7 @@ export class PreRequests {
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+      debugTest('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest.requestId, pendingPreRequest.browserPreRequest.url)
 
       callback({
         browserPreRequest: {
