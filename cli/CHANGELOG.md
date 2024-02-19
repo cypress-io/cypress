@@ -32,6 +32,7 @@ _Released 2/20/2024_
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#28774](https://github.com/cypress-io/cypress/pull/28774).
 - Changed references of LayerCI to webapp.io. Addressed in [#28874](https://github.com/cypress-io/cypress/pull/28874).
+- Improved messages around browser support. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).
 
 **Dependency Updates:**
 
