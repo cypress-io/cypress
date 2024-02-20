@@ -10,8 +10,17 @@
 // extension. sometimes that doesn't work and requires re-launching Chrome
 // and then reloading the extension via `chrome://extensions`
 
-async function activateMainTab (url) {
+async function getFromStorage (key) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(key, (storage) => {
+      resolve(storage[key])
+    })
+  })
+}
+
+async function activateMainTab () {
   try {
+    const url = await getFromStorage('mostRecentUrl')
     const tabs = await chrome.tabs.query({})
 
     const cypressTab = tabs.find((tab) => tab.url.includes(url))
@@ -35,11 +44,15 @@ async function activateMainTab (url) {
 chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener(async ({ message, url }) => {
     if (message === 'activate:main:tab') {
-      await activateMainTab(url)
+      await activateMainTab()
 
       // send an ack back to let the content script know we successfully
       // activated the main tab
       port.postMessage({ message: 'main:tab:activated' })
+    }
+
+    if (message === 'url:changed') {
+      chrome.storage.local.set({ mostRecentUrl: url })
     }
   })
 })
