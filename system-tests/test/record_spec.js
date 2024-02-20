@@ -2307,7 +2307,7 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
-            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+            const artifactReport = getRequests().find(({ url }) => url.includes(`/instances/${instanceId}/artifacts`))?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
@@ -2560,7 +2560,10 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist()
-        expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload after 8 attempts. Errors: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+        )
+
         expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })

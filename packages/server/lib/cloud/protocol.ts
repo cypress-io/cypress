@@ -323,7 +323,17 @@ export class ProtocolManager implements ProtocolManagerShape {
           }
         }
 
-        const errorMessage = await res.json().catch(() => res.statusText)
+        const errorMessage = await res.json().catch(() => {
+          const url = new URL(uploadUrl)
+
+          for (const [key, value] of url.searchParams) {
+            if (['x-amz-credential', 'x-amz-signature'].includes(key.toLowerCase())) {
+              url.searchParams.set(key, 'X'.repeat(value.length))
+            }
+          }
+
+          return `${res.status} ${res.statusText} (${url.href})`
+        })
 
         debug(`error response: %O`, errorMessage)
 
