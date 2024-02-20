@@ -333,6 +333,15 @@ export default defineConfig({
 })
 ```
 
+## Troubleshooting
+
+### Error: Cannot communicate with the Cypress Chrome extension. Ensure the extension is enabled when using the Puppeteer plugin.
+
+If you receive this error in your command log, the Puppeteer plugin was unable to communicate with the Cypress extension. This extension is necessary in order to re-activate the main Cypress tab after a Puppeteer command, when running in open mode.
+
+* Ensure this extension is enabled in the instance of Chrome that Cypress launches by visiting chrome://extensions/
+* Ensure the Cypress extension is allowed by your company's security policy by its extension id, `caljajdfkjjjdehjdoimjkkakekklcck`
+
 ## Contributing
 
 Build the TypeScript files:
