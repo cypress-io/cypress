@@ -14,10 +14,14 @@ window.addEventListener('message', ({ data, source }) => {
   // only accept messages from ourself
   if (source !== window) return
 
-  // this is the only message we're currently interested in, which tells us
-  // to activate the main tab
   if (data.message === 'cypress:extension:activate:main:tab') {
-    port.postMessage({ message: 'activate:main:tab', url: data.url })
+    port.postMessage({ message: 'activate:main:tab' })
+  }
+
+  // we need to keep track of the url that the main tab is on, so that we can
+  // activate the correct tab after a puppeteer task
+  if (data.message === 'cypress:extension:url:changed') {
+    port.postMessage({ message: 'url:changed', url: data.url })
   }
 })
 
