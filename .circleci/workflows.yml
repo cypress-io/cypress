@@ -114,7 +114,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "14.0.1"
+      xcode: "15.0.0"
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
