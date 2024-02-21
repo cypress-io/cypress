@@ -113,7 +113,7 @@ const CI_PROVIDERS = {
   'travis': 'TRAVIS',
   'wercker': isWercker,
   netlify: 'NETLIFY',
-  layerci: 'LAYERCI',
+  webappio: 'WEBAPPIO',
 }
 
 const _detectProviderName = () => {
@@ -418,15 +418,15 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
-    // https://layerci.com/docs/layerfile-reference/build-env
-    layerci: extract([
-      'LAYERCI_JOB_ID',
-      'LAYERCI_RUNNER_ID',
+    // https://docs.webapp.io/layerfile-reference/build-env
+    webappio: extract([
+      'JOB_ID',
+      'RUNNER_ID',
       'RETRY_INDEX',
-      'LAYERCI_PULL_REQUEST',
-      'LAYERCI_REPO_NAME',
-      'LAYERCI_REPO_OWNER',
-      'LAYERCI_BRANCH',
+      'PULL_REQUEST_URL',
+      'REPOSITORY_NAME',
+      'REPOSITORY_OWNER',
+      'GIT_BRANCH',
       'GIT_TAG', // short hex for commits
     ]),
   }
@@ -621,9 +621,9 @@ const _providerCommitParams = () => {
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
     },
-    layerci: {
+    webappio: {
       sha: env.GIT_COMMIT,
-      branch: env.LAYERCI_BRANCH,
+      branch: env.GIT_BRANCH,
       message: env.GIT_COMMIT_TITLE,
     },
   }
