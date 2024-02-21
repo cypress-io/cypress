@@ -154,7 +154,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
@@ -214,6 +214,7 @@ useSubscription({ query: OpenBrowserList_BrowserStatusChangeDocument })
 
 const props = defineProps<{
   gql: OpenBrowserListFragment
+  wasBrowserSetInCli: boolean | null
 }>()
 
 const emit = defineEmits<{
@@ -283,5 +284,11 @@ const browserStatus = computed(() => {
 })
 
 const testingTypeIcon = computed(() => props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2EIcon)
+
+onMounted(() => {
+  if (props.wasBrowserSetInCli && !browserStatus.value.open) {
+    emit('launch')
+  }
+})
 
 </script>

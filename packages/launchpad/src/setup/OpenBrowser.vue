@@ -9,6 +9,7 @@
     />
     <OpenBrowserList
       variant=""
+      :was-browser-set-in-cli="query.data.value.localSettings.preferences.wasBrowserSetInCLI"
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"
@@ -31,6 +32,11 @@ const { t } = useI18n()
 
 gql`
 query OpenBrowser {
+  localSettings {
+    preferences {
+      wasBrowserSetInCLI
+    }
+  }
   currentProject {
     id
     currentTestingType
