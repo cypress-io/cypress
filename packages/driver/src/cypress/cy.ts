@@ -32,7 +32,7 @@ import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
-import { handleTabActivation } from '../util/tab_activation'
+import { trackTopUrl } from '../util/trackTopUrl'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -344,7 +344,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return Cypress.backend('close:extra:targets')
     })
 
-    handleTabActivation(Cypress)
+    if (!Cypress.isCrossOriginSpecBridge) {
+      trackTopUrl()
+    }
+
     handleCrossOriginCookies(Cypress)
   }
 

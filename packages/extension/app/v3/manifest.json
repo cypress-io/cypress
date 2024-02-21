@@ -1,13 +1,9 @@
 {
   "name": "Cypress",
   "description": "Adds theme and WebExtension APIs for testing with Cypress",
-  "applications": {
-    "gecko": {
-      "id": "automation-extension-v3@cypress.io"
-    }
-  },
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage"
   ],
   "host_permissions": [
     "http://*/*",
@@ -20,7 +16,7 @@
     "48": "icons/icon_48x48.png",
     "128": "icons/icon_128x128.png"
   },
-  "browser_action": {
+  "action": {
     "default_title": "Cypress",
     "default_icon": {
       "19": "icons/icon_19x19.png",
