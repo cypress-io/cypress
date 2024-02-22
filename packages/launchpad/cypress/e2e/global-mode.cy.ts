@@ -187,6 +187,12 @@ describe('Launchpad: Global Mode', () => {
         })
       }
 
+      const waitForConfigLoad = () => {
+        cy.contains('Initializing config...').should('be.visible')
+        // ensure the config is fully loaded before clicking the breadcrumb back
+        cy.contains('Initializing config...').should('not.exist')
+      }
+
       const projectList = ['todos']
 
       setupAndValidateProjectsList(projectList)
@@ -200,6 +206,7 @@ describe('Launchpad: Global Mode', () => {
       // Component testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="component"]').click()
+      waitForConfigLoad()
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
@@ -212,6 +219,7 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="e2e"]').click()
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      waitForConfigLoad()
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
