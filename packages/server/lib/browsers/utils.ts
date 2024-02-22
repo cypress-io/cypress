@@ -345,7 +345,7 @@ function createSupportedBrowserRegex (browsers: string[]): RegExp {
   return new RegExp(pattern, 'i')
 }
 
-function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]) {
+function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]): boolean {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
   // Merge the names of knownBrowsers with names of available browsers
   // and get rid of duplicates
