@@ -28,7 +28,7 @@ export default defineConfig({
   'e2e': {
     experimentalRunAllSpecs: true,
     experimentalStudio: true,
-    baseUrl: 'http://localhost:5555',
+    baseUrl: 'http://localhost:4455',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
