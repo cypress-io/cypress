@@ -1,7 +1,7 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
+import type { BrowserLaunchOpts, FoundBrowser, Browser as KnownBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
@@ -338,11 +338,36 @@ const parseBrowserOption = (opt) => {
   }
 }
 
+// checking for browser support should ideally avoid all false negative
+function createSupportedBrowserRegex (browsers: string[]): RegExp {
+  const pattern = _.map(browsers, (browser) => `\\b${browser}\\b`).join('|')
+
+  return new RegExp(pattern, 'i')
+}
+
+function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]) {
+  const normalizedNameOrPath = nameOrPath.toLowerCase()
+  // merge the names of knownBrowsers with names of available browsers
+  const mergedBrowserNames = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'))
+  // do we want to add in additional browsers e.g. Brave, webkit, etc.?
+  const additionalBrowsers = ['webkit']
+  const allSupportedAndAvailableBrowsers = _.concat(mergedBrowserNames, additionalBrowsers)
+  const isSupportedBrowserRegex = createSupportedBrowserRegex(allSupportedAndAvailableBrowsers)
+
+  return isSupportedBrowserRegex.test(normalizedNameOrPath)
+}
+
 function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
 function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
+
+  const isSupported = isBrowserSupported(nameOrPath, launcher.knownBrowsers, browsers)
+
+  if (!isSupported) {
+    errors.throwErr('BROWSER_NOT_SUPPORTED', nameOrPath, formatBrowsersToOptions(browsers))
+  }
 
   const filter = parseBrowserOption(nameOrPath)
 
