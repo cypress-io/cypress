@@ -347,9 +347,10 @@ function createSupportedBrowserRegex (browsers: string[]): RegExp {
 
 function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]) {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
-  // merge the names of knownBrowsers with names of available browsers
+  // Merge the names of knownBrowsers with names of available browsers
+  // and get rid of duplicates
   const mergedBrowserNames = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'))
-  // do we want to add in additional browsers e.g. Brave, webkit, etc.?
+  // Do we want to add in additional browsers e.g. Brave, webkit, etc.?
   const additionalBrowsers = ['webkit']
   const allSupportedAndAvailableBrowsers = _.concat(mergedBrowserNames, additionalBrowsers)
   const isSupportedBrowserRegex = createSupportedBrowserRegex(allSupportedAndAvailableBrowsers)
