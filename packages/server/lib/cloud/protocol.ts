@@ -25,7 +25,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
-const RETRY_DELAYS = [500, 1000, 2000, 4000, 8000, 16000, 32000]
+const RETRY_DELAYS = [500, 1000]
 const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {

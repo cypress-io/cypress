@@ -2541,7 +2541,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 8 times and fails', () => {
+  describe('upload 500 - retries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2561,7 +2561,7 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol).to.exist()
         expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload after 8 attempts. Errors: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+          'Failed to upload after 3 attempts. Errors: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
         )
 
         expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
@@ -2569,8 +2569,8 @@ describe('capture-protocol api errors', () => {
     })
   })
 
-  describe('upload 500 - retries 7 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 7)
+  describe('upload 500 - retries 2 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2)
 
     let archiveFile = ''
 
