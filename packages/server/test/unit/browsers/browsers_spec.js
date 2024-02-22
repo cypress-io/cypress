@@ -97,7 +97,7 @@ describe('lib/browsers/index', () => {
       ]
 
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_SUPPORTED' })
       .then((err) => {
         return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
