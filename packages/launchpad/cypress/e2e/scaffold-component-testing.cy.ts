@@ -112,15 +112,12 @@ describe('scaffolding component testing', {
       })
 
       cy.contains('Component Testing').click()
-      cy.get(`[data-testid="select-framework"]`)
-
-      cy.get('button').should('be.visible').contains('React.js(detected)')
-
-      cy.get('button').contains('Next step').click()
+      cy.contains('button', 'React.js(detected)').should('be.visible')
+      cy.contains('button', 'Next step').click()
 
       // react-dom dependency is missing
       cy.findByTestId('dependency-react-dom').within(() => {
-        cy.get('[aria-label="pending installation"]').should('exist')
+        cy.get('[aria-label="pending installation"]')
       })
 
       // fake install
