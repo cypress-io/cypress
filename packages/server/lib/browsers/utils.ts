@@ -348,7 +348,7 @@ function createSupportedBrowserRegex (browsers: string[]): RegExp {
 function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]): boolean {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
   // Merge the names of knownBrowsers with names of available browsers
-  // and get rid of duplicates
+  // and remove duplicates
   const mergedBrowserNames = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'))
   // Do we want to add in additional browsers e.g. Brave, webkit, etc.?
   const additionalBrowsers = ['webkit']
@@ -367,7 +367,7 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   const isSupported = isBrowserSupported(nameOrPath, launcher.knownBrowsers, browsers)
 
   if (!isSupported) {
-    errors.throwErr('BROWSER_NOT_SUPPORTED', nameOrPath, formatBrowsersToOptions(browsers))
+    throwBrowserNotSupported(nameOrPath, browsers)
   }
 
   const filter = parseBrowserOption(nameOrPath)
@@ -419,6 +419,10 @@ const formatBrowsersToOptions = (browsers) => {
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+}
+
+const throwBrowserNotSupported = function (nameOrPath, browsers: FoundBrowser[] = []) {
+  return errors.throwErr('BROWSER_NOT_SUPPORTED', nameOrPath, formatBrowsersToOptions(browsers))
 }
 
 const initializeCDP = async (criClient: CriClient, automation: Automation) => {
