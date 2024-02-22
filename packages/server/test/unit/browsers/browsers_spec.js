@@ -111,7 +111,7 @@ describe('lib/browsers/index', () => {
       ]
 
       return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_SUPPORTED' })
       .then((err) => {
         return normalizeSnapshot(err.message)
       })
@@ -134,7 +134,7 @@ describe('lib/browsers/index', () => {
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system or is not supported by Cypress.`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system.`)
       })
     })
   })
@@ -155,7 +155,7 @@ describe('lib/browsers/index', () => {
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system.`)
       })
     })
 
