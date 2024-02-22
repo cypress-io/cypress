@@ -420,6 +420,7 @@
     "./node_modules/nexus/dist/typegenMetadata.js",
     "./node_modules/nexus/dist/typegenUtils.js",
     "./node_modules/nexus/dist/utils.js",
+    "./node_modules/node-fetch/lib/index.js",
     "./node_modules/node-forge/lib/aes.js",
     "./node_modules/node-forge/lib/aesCipherSuites.js",
     "./node_modules/node-forge/lib/asn1-validator.js",
@@ -3689,6 +3690,7 @@
     "./packages/data-context/node_modules/ast-types/lib/types.js",
     "./packages/data-context/node_modules/ast-types/main.js",
     "./packages/data-context/node_modules/brace-expansion/index.js",
+    "./packages/data-context/node_modules/cross-fetch/dist/node-ponyfill.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -4315,5 +4317,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d259022089e888426ee01b62b1116c69b1f34386814fb5dcd5df3699037e2be8"
+  "deferredHash": "f360d5af7ee4451d73a90d4fa6eaf259aba149a25a3f201272ab33e5d2b3160e"
 }
