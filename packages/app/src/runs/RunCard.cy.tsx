@@ -84,8 +84,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
           .and('contain', 'tag1')
           .and('contain', 'tag2')
         }
-
-        cy.percySnapshot()
       })
     })
   })

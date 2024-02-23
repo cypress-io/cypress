@@ -1088,34 +1088,34 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
-  it('layerci', () => {
+  it('webappio', () => {
     resetEnv = mockedEnv({
-      LAYERCI: 'true',
+      WEBAPPIO: 'true',
 
-      LAYERCI_JOB_ID: 'jobId',
-      LAYERCI_RUNNER_ID: 'runnerId',
+      JOB_ID: 'jobId',
+      RUNNER_ID: 'runnerId',
       RETRY_INDEX: 'retryIndex',
 
       // git info
-      LAYERCI_PULL_REQUEST: 'pullRequest',
-      LAYERCI_REPO_NAME: 'repoName',
-      LAYERCI_REPO_OWNER: 'repoOwner',
-      LAYERCI_BRANCH: 'branch',
+      PULL_REQUEST_URL: 'pullRequest',
+      REPOSITORY_NAME: 'repoName',
+      REPOSITORY_OWNER: 'repoOwner',
+      GIT_BRANCH: 'branch',
       GIT_TAG: 'tag',
       GIT_COMMIT: 'commit',
       GIT_COMMIT_TITLE: 'commitTitle',
     }, { clear: true })
 
-    expectsName('layerci')
+    expectsName('webappio')
     expectsCiParams({
-      layerciJobId: 'jobId',
-      layerciRunnerId: 'runnerId',
+      jobId: 'jobId',
+      runnerId: 'runnerId',
       retryIndex: 'retryIndex',
       gitTag: 'tag',
-      layerciBranch: 'branch',
-      layerciPullRequest: 'pullRequest',
-      layerciRepoName: 'repoName',
-      layerciRepoOwner: 'repoOwner',
+      gitBranch: 'branch',
+      pullRequestUrl: 'pullRequest',
+      repositoryName: 'repoName',
+      repositoryOwner: 'repoOwner',
     })
 
     return expectsCommitParams({

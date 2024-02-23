@@ -86,6 +86,8 @@ export type GenerationOpts = {
   minify: boolean
   supportTypeScript: boolean
   integrityCheckSource: string | undefined
+  useExistingSnapshotScript?: boolean
+  updateSnapshotScriptContents?: (contents: string) => string
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
@@ -98,6 +100,8 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     minify: false,
     supportTypeScript: false,
     integrityCheckSource: undefined,
+    useExistingSnapshotScript: false,
+    updateSnapshotScriptContents: undefined,
   }
 }
 
@@ -153,6 +157,14 @@ export class SnapshotGenerator {
    * Path where v8context bin is stored, derived from {@link GenerationOpts} snapshotBinDir
    */
   private v8ContextFile?: string
+  /**
+   * Whether to use an existing snapshot script instead of creating a new one.
+   */
+  useExistingSnapshotScript?: boolean
+  /**
+   * Function to update the contents of an existing snapshot script.
+   */
+  updateSnapshotScriptContents?: ((contents: string) => string)
 
   /**
    * Generated snapshot script, needs to be set before calling `makeSnapshot`.
@@ -186,6 +198,8 @@ export class SnapshotGenerator {
       nodeEnv,
       minify,
       integrityCheckSource,
+      useExistingSnapshotScript,
+      updateSnapshotScriptContents,
     }: GenerationOpts = Object.assign(
       getDefaultGenerationOpts(projectBaseDir),
       opts,
@@ -210,6 +224,8 @@ export class SnapshotGenerator {
     this.bundlerPath = getBundlerPath()
     this.minify = minify
     this.integrityCheckSource = integrityCheckSource
+    this.useExistingSnapshotScript = useExistingSnapshotScript
+    this.updateSnapshotScriptContents = updateSnapshotScriptContents
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
@@ -235,6 +251,19 @@ export class SnapshotGenerator {
    * Creates the snapshot script for the provided configuration
    */
   async createScript () {
+    if (this.useExistingSnapshotScript) {
+      let contents = await fs.promises.readFile(this.snapshotScriptPath, 'utf8')
+
+      if (this.updateSnapshotScriptContents) {
+        contents = this.updateSnapshotScriptContents(contents)
+      }
+
+      this.snapshotScript = Buffer.from(contents)
+      await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
+
+      return
+    }
+
     let deferred
     let norewrite
 

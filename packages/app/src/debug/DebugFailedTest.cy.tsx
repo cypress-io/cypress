@@ -186,8 +186,6 @@ describe('<DebugFailedTest/>', () => {
 
     cy.contains('...').realHover()
     cy.contains('[data-cy=tooltip-content]', 'Test content 2 > Test content 3 > Test content 4').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('conditionally renders artifacts', () => {

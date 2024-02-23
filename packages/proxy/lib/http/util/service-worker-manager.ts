@@ -167,11 +167,11 @@ export class ServiceWorkerManager {
 
     let requestPotentiallyControlledByServiceWorker = false
     let activatedServiceWorker: ServiceWorker | undefined
-    const paramlessURL = browserPreRequest.url.split('?')[0]
+    const paramlessURL = browserPreRequest.url?.split('?')[0] || ''
 
     this.serviceWorkerRegistrations.forEach((registration) => {
       activatedServiceWorker = registration.activatedServiceWorker
-      const paramlessDocumentURL = browserPreRequest.documentURL.split('?')[0]
+      const paramlessDocumentURL = browserPreRequest.documentURL?.split('?')[0] || ''
 
       // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
       // we have an activated service worker, the request URL does not come from the service worker, and the request
