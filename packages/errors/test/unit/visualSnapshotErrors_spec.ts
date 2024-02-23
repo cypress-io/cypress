@@ -349,6 +349,12 @@ describe('visual error templates', () => {
         default: ['firefox'],
       }
     },
+    BROWSER_NOT_SUPPORTED: () => {
+      return {
+        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
+        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
+      }
+    },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
         default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
