@@ -129,6 +129,60 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/28789
+      context('accepts trivial RFC 8259 compliant body objects', () => {
+        it('accepts body equal to true', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: true }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              body: true,
+              json: true,
+            })
+          })
+        })
+
+        it('accepts body equal to false', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: false }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              body: false,
+              json: true,
+            })
+          })
+        })
+
+        it('accepts (explicitly defined) null body', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: null }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
+          })
+
+          cy.request('POST', 'http://www.github.com/projects/foo', null).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
+          })
+
+          cy.request('http://www.github.com/projects/foo', null).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
+          })
+        })
+      })
+
       context('method normalization', () => {
         it('uppercases method', () => {
           cy.request('post', 'https://www.foo.com').then(function () {
