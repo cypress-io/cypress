@@ -256,7 +256,6 @@
     "./node_modules/cp-file/fs.js",
     "./node_modules/cp-file/node_modules/semver/semver.js",
     "./node_modules/cp-file/progress-emitter.js",
-    "./node_modules/cross-fetch/node_modules/node-fetch/lib/index.js",
     "./node_modules/cross-spawn-async/lib/parse.js",
     "./node_modules/cross-spawn-async/lib/resolveCommand.js",
     "./node_modules/debug/src/browser.js",
@@ -3691,7 +3690,6 @@
     "./packages/data-context/node_modules/ast-types/lib/types.js",
     "./packages/data-context/node_modules/ast-types/main.js",
     "./packages/data-context/node_modules/brace-expansion/index.js",
-    "./packages/data-context/node_modules/cross-fetch/dist/node-ponyfill.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -4318,5 +4316,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "36343347abdcd6955e6f2c0e7cf60b7f50d041d841eece41ae59773d62dae7b3"
+  "deferredHash": "56a6bc32ed2716bdaa2917aae569ad3201120f598c416f9c48d156b27581c6ae"
 }
