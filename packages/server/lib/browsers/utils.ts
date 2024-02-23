@@ -338,21 +338,27 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-// checking for browser support should ideally avoid all false negative
+/**
+ * Cast a wide net when checking for browser support - this should avoid all false negatives
+ * The regex below will match: msedge.exe, edge, edge-beta
+ */
 function createSupportedBrowserRegex (browsers: string[]): RegExp {
-  const pattern = _.map(browsers, (browser) => `\\b${browser}\\b`).join('|')
+  const pattern = _.map(browsers, (browser) => `\\b(?:ms)?${browser}\\b`).join('|')
 
   return new RegExp(pattern, 'i')
 }
 
 function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]): boolean {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
-  // Merge the names of knownBrowsers with names of available browsers
-  // and remove duplicates
-  const mergedBrowserNames = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'))
-  // Do we want to add in additional browsers e.g. Brave, webkit, etc.?
-  const additionalBrowsers = ['webkit']
-  const allSupportedAndAvailableBrowsers = _.concat(mergedBrowserNames, additionalBrowsers)
+  /**
+   * Merge the names of knownBrowsers with names of the user's available browsers,
+   * and remove duplicates. This allows us to add support for browser's like Brave and Vivaldi,
+   * if the user has added them to their cypress config. Additionally, webkit and electron aren't included
+   * in known-browsers.ts, we should add them here as supported since they're listed in
+   * the documentation for supported browsers.
+   */
+  const additionalSupportedBrowsers = ['webkit', 'electron']
+  const allSupportedAndAvailableBrowsers = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'), additionalSupportedBrowsers)
   const isSupportedBrowserRegex = createSupportedBrowserRegex(allSupportedAndAvailableBrowsers)
 
   return isSupportedBrowserRegex.test(normalizedNameOrPath)
