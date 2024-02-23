@@ -5,11 +5,11 @@ declare let self: ServiceWorkerGlobalScope & {
 }
 
 /**
- * Rewrites the service worker to listen to fetch events to determine if the service worker handled the request.
- * @param body the body of the service worker to rewrite
- * @returns the rewritten service worker
+ * Injects code into the service worker to overwrite the fetch events to determine if the service worker handled the request.
+ * @param body the body of the service worker
+ * @returns the updated service worker
  */
-export const rewriteServiceWorker = (body: Buffer) => {
+export const injectIntoServiceWorker = (body: Buffer) => {
   function __cypressOverwriteAddRemoveEventListeners () {
     let _listenerCount = 0
     const _nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()

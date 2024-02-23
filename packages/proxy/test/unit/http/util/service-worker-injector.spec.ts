@@ -1,10 +1,10 @@
 import { expect } from 'chai'
-import { rewriteServiceWorker } from '../../../../lib/http/util/service-worker-rewriter'
+import { injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
 
-describe('lib/http/util/service-worker-rewriter', () => {
-  describe('rewriteServiceWorker', () => {
-    it('rewrites the service worker', () => {
-      const result = rewriteServiceWorker(Buffer.from('foo'))
+describe('lib/http/util/service-worker-injector', () => {
+  describe('injectIntoServiceWorker', () => {
+    it('injects into the service worker', () => {
+      const result = injectIntoServiceWorker(Buffer.from('foo'))
 
       const expected = `
 let __cypressScriptEvaluated = false;

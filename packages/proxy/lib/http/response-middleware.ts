@@ -21,7 +21,7 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
-import { rewriteServiceWorker } from './util/service-worker-rewriter'
+import { injectIntoServiceWorker } from './util/service-worker-injector'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -850,7 +850,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = rewriteServiceWorker(body)
+    const updatedBody = injectIntoServiceWorker(body)
 
     const pt = new PassThrough
 

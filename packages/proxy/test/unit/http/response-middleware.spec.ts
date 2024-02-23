@@ -2298,14 +2298,14 @@ describe('http/response-middleware', function () {
   describe('MaybeInjectServiceWorker', function () {
     const { MaybeInjectServiceWorker } = ResponseMiddleware
     let ctx
-    let rewriteServiceWorkerStub
+    let injectIntoServiceWorkerStub
 
     beforeEach(() => {
-      rewriteServiceWorkerStub = sinon.spy(serviceWorkerRewriter, 'rewriteServiceWorker')
+      injectIntoServiceWorkerStub = sinon.spy(serviceWorkerRewriter, 'injectIntoServiceWorker')
     })
 
     afterEach(() => {
-      rewriteServiceWorkerStub.restore()
+      injectIntoServiceWorkerStub.restore()
     })
 
     it('does not rewrite service worker if the request does not have the service worker header', function () {
@@ -2317,7 +2317,7 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([MaybeInjectServiceWorker], ctx)
       .then(() => {
-        expect(rewriteServiceWorkerStub).not.to.be.called
+        expect(injectIntoServiceWorkerStub).not.to.be.called
       })
     })
 
@@ -2333,8 +2333,8 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([MaybeInjectServiceWorker], ctx)
       .then(() => {
-        expect(rewriteServiceWorkerStub).to.be.calledOnce
-        expect(rewriteServiceWorkerStub).to.be.calledWith('foo')
+        expect(injectIntoServiceWorkerStub).to.be.calledOnce
+        expect(injectIntoServiceWorkerStub).to.be.calledWith('foo')
       })
     })
 
