@@ -102,10 +102,10 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(options)}`
   },
-  BROWSER_NOT_SUPPORTED: (suppliedBrowserNameOrPath: string, foundBrowsersStr: string[]) => {
+  BROWSER_NOT_SUPPORTED: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null
 
-    if (suppliedBrowserNameOrPath === 'canary') {
+    if (browser === 'canary') {
       canarySuffix = errPartial`\
           ${fmt.off('\n\n')}
           Note: Since ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
@@ -116,7 +116,7 @@ export const AllCypressErrors = {
     return errTemplate`\
     Can't run because you've entered a browser that is not supported by Cypress.
 
-    Browser: ${fmt.highlight(suppliedBrowserNameOrPath)} is not supported by Cypress.
+    Browser: ${fmt.highlight(browser)} is not supported by Cypress.
 
     Cypress supports the following browsers:
     ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
