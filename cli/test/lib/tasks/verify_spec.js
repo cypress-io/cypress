@@ -278,6 +278,44 @@ context('lib/tasks/verify', () => {
     })
   })
 
+  describe('FORCE_COLOR', () => {
+    let previousForceColors
+
+    beforeEach(() => {
+      previousForceColors = process.env.FORCE_COLOR
+
+      process.env.FORCE_COLOR = true
+    })
+
+    afterEach(() => {
+      process.env.FORCE_COLOR = previousForceColors
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/28982
+    it('sets FORCE_COLOR to 0 when piping stdioOptions to to the smoke test to avoid ANSI in binary smoke test', () => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      util.exec.resolves({
+        stdout: '222',
+        stderr: '',
+      })
+
+      return verify.start()
+      .then(() => {
+        expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'],
+          sinon.match({
+            env: {
+              FORCE_COLOR: 0,
+            },
+          }))
+      })
+    })
+  })
+
   describe('with force: true', () => {
     beforeEach(() => {
       createfs({
