@@ -491,7 +491,7 @@ export = {
       onAsynchronousError: options.onError,
       onReconnect,
       fullyManageTabs: false,
-      onServiceWorkerFetch: automation.onServiceWorkerFetch,
+      onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
     })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
@@ -628,7 +628,7 @@ export = {
       onReconnect,
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
-      onServiceWorkerFetch: automation.onServiceWorkerFetch,
+      onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)

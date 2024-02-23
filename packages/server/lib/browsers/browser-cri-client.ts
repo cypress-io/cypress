@@ -7,8 +7,8 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
-import { serviceWorkerFetchEventHandler, serviceWorkerFetchEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
-import type { ServiceWorkerFetchHandler } from '@packages/proxy/lib/http/util/service-worker'
+import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -26,7 +26,7 @@ type BrowserCriClientOptions = {
   onAsynchronousError: Function
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
-  onServiceWorkerFetch: ServiceWorkerFetchHandler
+  onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
 type BrowserCriClientCreateOptions = {
@@ -37,7 +37,7 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
-  onServiceWorkerFetch: ServiceWorkerFetchHandler
+  onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
 interface ManageTabsOptions {
@@ -184,7 +184,7 @@ export class BrowserCriClient {
   private onAsynchronousError: Function
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
-  onServiceWorkerFetch: ServiceWorkerFetchHandler
+  onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -206,7 +206,7 @@ export class BrowserCriClient {
     this.onAsynchronousError = options.onAsynchronousError
     this.protocolManager = options.protocolManager
     this.fullyManageTabs = options.fullyManageTabs
-    this.onServiceWorkerFetch = options.onServiceWorkerFetch
+    this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
   }
 
   /**
@@ -221,7 +221,7 @@ export class BrowserCriClient {
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
    * @param options.port the port to which to connect
    * @param options.protocolManager the protocol manager to use with the browser cri client
-   * @param options.onServiceWorkerFetch callback for when a service worker fetch event is received
+   * @param options.onServiceWorkerClientEvent callback for when a service worker fetch event is received
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
   static async create (options: BrowserCriClientCreateOptions): Promise<BrowserCriClient> {
@@ -233,7 +233,7 @@ export class BrowserCriClient {
       onReconnect,
       port,
       protocolManager,
-      onServiceWorkerFetch,
+      onServiceWorkerClientEvent,
     } = options
 
     const host = await ensureLiveBrowser(hosts, port, browserName)
@@ -258,7 +258,7 @@ export class BrowserCriClient {
         onAsynchronousError,
         protocolManager,
         fullyManageTabs,
-        onServiceWorkerFetch,
+        onServiceWorkerClientEvent,
       })
 
       if (fullyManageTabs) {
@@ -320,14 +320,14 @@ export class BrowserCriClient {
     }
 
     try {
-      // attach a binding to the runtime so that we can listen for service worker fetch events
+      // attach a binding to the runtime so that we can listen for service worker events
       if (event.targetInfo.type === 'service_worker') {
         // @ts-expect-error - typescript doesn't know about the sessionId specific events
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}`, serviceWorkerFetchEventHandler(browserCriClient.onServiceWorkerFetch))
-        await browserClient.send('Runtime.addBinding', { name: serviceWorkerFetchEventHandlerName }, event.sessionId)
+        browserClient.on(`Runtime.bindingCalled.${event.sessionId}`, serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
+        await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {
-      debug('error adding service worker fetch event listener:', error)
+      debug('error adding service worker binding:', error)
     }
 
     if (!waitingForDebugger) {

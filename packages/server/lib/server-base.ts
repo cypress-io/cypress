@@ -41,6 +41,7 @@ import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -524,8 +525,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
   }
 
-  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
-    this.networkProxy.handleServiceWorkerFetch(event)
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.networkProxy.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {

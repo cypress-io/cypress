@@ -3,24 +3,20 @@
 <head>
   <title></title>
   <script>
-    const makeRequests = () => {
-      for (let i = 0; i < 50; i++) {
-        fetch(`/1mb?i=${i}&j=${Math.random()}`).then((response) => {
-          if (i === 49) {
-            document.getElementById('output').innerText = 'done'
-          }
-        }).catch(() => {})
-      }
+    const makeRequest = () => {
+      fetch(`/1mb?j=${Math.random()}`).then((response) => {
+        document.getElementById('output').innerText = 'done'
+      }).catch(() => {})
     }
 
     navigator.serviceWorker.register('/fixtures/service-worker.js')
     .then((registration) => {
       const serviceWorker = registration.installing || registration.waiting
       if (serviceWorker) {
-        const controllerChangeCalled = false
+        let controllerChangeCalled = false
         navigator.serviceWorker.addEventListener('controllerchange', (e) => {
           controllerChangeCalled = true
-          makeRequests()
+          makeRequest()
         })
 
         serviceWorker.addEventListener('statechange', (e) => {
@@ -30,7 +26,7 @@
           }
         })
       } else {
-        makeRequests()
+        makeRequest()
       }
     })
   </script>

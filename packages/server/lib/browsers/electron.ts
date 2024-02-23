@@ -61,7 +61,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
       onAsynchronousError: options.onError,
       onReconnect: () => {},
       fullyManageTabs: true,
-      onServiceWorkerFetch: parent.onServiceWorkerFetch,
+      onServiceWorkerClientEvent: parent.onServiceWorkerClientEvent,
     })
   }
 

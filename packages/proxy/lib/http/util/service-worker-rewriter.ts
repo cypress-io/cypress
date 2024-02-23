@@ -1,4 +1,8 @@
-/// <reference lib="dom" />
+/// <reference lib="webworker" />
+
+declare let self: ServiceWorkerGlobalScope & {
+  __cypressServiceWorkerClientEvent: (event: string) => void
+}
 
 /**
  * Rewrites the service worker to listen to fetch events to determine if the service worker handled the request.
@@ -6,40 +10,27 @@
  * @returns the rewritten service worker
  */
 export const rewriteServiceWorker = (body: Buffer) => {
-  function __cypressWrapListener (listener: Function) {
-    return (event) => {
-      // we want to override the respondWith method so we can track if it was called
-      // to determine if the service worker handled the request
-      const oldRespondWith = event.respondWith
-      let respondWithCalled = false
-
-      event.respondWith = (...args) => {
-        respondWithCalled = true
-        oldRespondWith.call(event, ...args)
-      }
-
-      // call the original listener
-      const returnValue = listener(event)
-
-      // @ts-expect-error
-      // call the CDP binding to inform the backend whether or not the service worker handled the request
-      self.__cypressServiceWorkerFetchEvent(JSON.stringify({ url: event.request.url, respondWithCalled }))
-
-      return returnValue
-    }
-  }
-
   function __cypressOverwriteAddRemoveEventListeners () {
+    let _listenerCount = 0
     const _nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const _captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const _targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
     const _targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+
+    const __cypressServiceWorkerSendHasFetchEventHandlers = () => {
+      // @ts-expect-error __cypressScriptEvaluated is declared below
+      // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
+      if (__cypressScriptEvaluated) {
+        self.__cypressServiceWorkerClientEvent(JSON.stringify({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(_listenerCount > 0 || self.onfetch) } }))
+      }
+    }
 
     // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
     const isValidListener = (listener: EventListenerOrEventListenerObject) => {
       return listener && (typeof listener === 'function' || typeof listener === 'object')
     }
 
+    // Determine if the event listener was aborted
     const isAborted = (options?: boolean | AddEventListenerOptions) => {
       return typeof options === 'object' && options.signal?.aborted
     }
@@ -47,6 +38,28 @@ export const rewriteServiceWorker = (body: Buffer) => {
     // Get the capture value from the options
     const getCaptureValue = (options?: boolean | AddEventListenerOptions) => {
       return typeof options === 'boolean' ? options : options?.capture
+    }
+
+    function __cypressWrapListener (listener: Function) {
+      return (event) => {
+        // we want to override the respondWith method so we can track if it was called
+        // to determine if the service worker handled the request
+        const oldRespondWith = event.respondWith
+        let respondWithCalled = false
+
+        event.respondWith = (...args) => {
+          respondWithCalled = true
+          oldRespondWith.call(event, ...args)
+        }
+
+        // call the original listener
+        const returnValue = listener(event)
+
+        // call the CDP binding to inform the backend whether or not the service worker handled the request
+        self.__cypressServiceWorkerClientEvent(JSON.stringify({ type: 'fetchEvent', payload: { url: event.request.url, isControlled: respondWithCalled } }))
+
+        return returnValue
+      }
     }
 
     const oldAddEventListener = self.addEventListener
@@ -66,7 +79,6 @@ export const rewriteServiceWorker = (body: Buffer) => {
         let newListener
 
         // If the listener is a function, we can just wrap it
-        // If the listener is an object with a handleEvent method, we can wrap that method
         // Otherwise, we need to wrap the listener in a proxy so we can track and wrap the handleEvent function
         if (typeof listener === 'function') {
           newListener = __cypressWrapListener(listener)
@@ -95,6 +107,9 @@ export const rewriteServiceWorker = (body: Buffer) => {
         // get the capture value so we know which map to add the listener to
         // so we can then remove the listener later if requested
         getCaptureValue(options) ? _captureListenersMap.set(listener, newListener) : _nonCaptureListenersMap.set(listener, newListener)
+        _listenerCount++
+
+        __cypressServiceWorkerSendHasFetchEventHandlers()
 
         return oldAddEventListener(type, newListener, options)
       }
@@ -113,6 +128,7 @@ export const rewriteServiceWorker = (body: Buffer) => {
         const newListener = capture ? _captureListenersMap.get(listener) : _nonCaptureListenersMap.get(listener)
 
         capture ? _captureListenersMap.delete(listener) : _nonCaptureListenersMap.delete(listener)
+        _listenerCount--
 
         // If the listener is an object with a handleEvent method, we need to remove the wrapped function
         if (typeof listener === 'object' && typeof listener.handleEvent === 'function') {
@@ -120,14 +136,14 @@ export const rewriteServiceWorker = (body: Buffer) => {
           _targetToOrigHandleEventMap.delete(listener)
         }
 
+        __cypressServiceWorkerSendHasFetchEventHandlers()
+
         return oldRemoveEventListener(type, newListener!, options)
       }
 
       return oldRemoveEventListener(type, listener, options)
     }
-  }
 
-  function __cypressOverwriteOnfetch () {
     const originalPropertyDescriptor = Object.getOwnPropertyDescriptor(
       self,
       'onfetch',
@@ -156,16 +172,24 @@ export const rewriteServiceWorker = (body: Buffer) => {
           }
 
           originalPropertyDescriptor.set?.call(this, newHandler)
+
+          __cypressServiceWorkerSendHasFetchEventHandlers()
         },
       },
     )
+
+    // listen for the activate event so we can inform the
+    // backend whether or not the service worker has a handler
+    self.addEventListener('activate', () => {
+      __cypressServiceWorkerSendHasFetchEventHandlers()
+    })
   }
 
   const updatedBody = `
-${__cypressWrapListener};
+let __cypressScriptEvaluated = false;
 (${__cypressOverwriteAddRemoveEventListeners})();
-(${__cypressOverwriteOnfetch})();
-${body}`
+${body};
+__cypressScriptEvaluated = true;`
 
   return updatedBody
 }

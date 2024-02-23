@@ -447,18 +447,21 @@ describe('http', function () {
       expect(processBrowserPreRequestStub).to.be.calledOnce
     })
 
-    it('handles service worker fetch requests', () => {
+    it('handles service worker client events', () => {
       const http = new Http(httpOpts)
-      const handleServiceWorkerFetchStub = sinon.stub(http.serviceWorkerManager, 'handleServiceWorkerFetch')
+      const handleServiceWorkerClientEventStub = sinon.stub(http.serviceWorkerManager, 'handleServiceWorkerClientEvent')
 
       const event = {
-        url: 'foo',
-        isControlled: true,
+        type: 'fetchEvent' as const,
+        payload: {
+          url: 'foo',
+          isControlled: true,
+        },
       }
 
-      http.handleServiceWorkerFetch(event)
+      http.handleServiceWorkerClientEvent(event)
 
-      expect(handleServiceWorkerFetchStub).to.be.calledWith(event)
+      expect(handleServiceWorkerClientEventStub).to.be.calledWith(event)
     })
   })
 })

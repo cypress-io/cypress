@@ -24,6 +24,7 @@ import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -356,8 +357,8 @@ export class ProjectBase extends EE {
       this.server.updateServiceWorkerClientSideRegistrations(data)
     }
 
-    const onServiceWorkerFetch = (event: { url: string, isControlled: boolean }) => {
-      this.server.handleServiceWorkerFetch(event)
+    const onServiceWorkerClientEvent = (event: ServiceWorkerClientEvent) => {
+      this.server.handleServiceWorkerClientEvent(event)
     }
 
     this._automation = new Automation({
@@ -372,7 +373,7 @@ export class ProjectBase extends EE {
       onServiceWorkerRegistrationUpdated,
       onServiceWorkerVersionUpdated,
       onServiceWorkerClientSideRegistrationUpdated,
-      onServiceWorkerFetch,
+      onServiceWorkerClientEvent,
     })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {

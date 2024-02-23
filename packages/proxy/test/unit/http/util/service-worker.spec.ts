@@ -1,12 +1,14 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { ServiceWorkerManager, serviceWorkerFetchEventHandler } from '../../../../lib/http/util/service-worker'
+import { ServiceWorkerManager, serviceWorkerClientEventHandler } from '../../../../lib/http/util/service-worker'
 
 describe('lib/http/util/service-worker', () => {
   describe('ServiceWorkerManager', () => {
     context('processBrowserPreRequest', () => {
-      it('will detect when requests are controlled by a service worker', async () => {
-        const manager = new ServiceWorkerManager()
+      let manager: ServiceWorkerManager
+
+      beforeEach(() => {
+        manager = new ServiceWorkerManager()
 
         manager.updateServiceWorkerRegistrations({
           registrations: [{
@@ -31,6 +33,15 @@ describe('lib/http/util/service-worker', () => {
           initiatorOrigin: 'http://localhost:8080/',
         })
 
+        manager.handleServiceWorkerClientEvent({
+          type: 'hasHandlersEvent',
+          payload: {
+            hasHandlers: true,
+          },
+        })
+      })
+
+      it('will detect when requests are controlled by a service worker', async () => {
         // A script request emanated from the service worker's initiator is controlled
         let result = manager.processBrowserPreRequest({
           requestId: 'id-1',
@@ -44,9 +55,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -76,9 +90,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://example.com/bar.css',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://example.com/bar.css',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -100,9 +117,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://example.com/baz.woff2',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://example.com/baz.woff2',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -195,17 +215,23 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: false,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: false,
+          },
         })
 
         expect(await result).to.be.false
 
         // A request that is not handled by the service worker 'fetch' handler is not controlled (fetch event first)
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: false,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: false,
+          },
         })
 
         expect(await manager.processBrowserPreRequest({
@@ -222,21 +248,30 @@ describe('lib/http/util/service-worker', () => {
       })
 
       it('will not detect requests when not controlled by an active service worker', async () => {
-        const manager = new ServiceWorkerManager()
-
+        // remove the current service worker
         manager.updateServiceWorkerRegistrations({
           registrations: [{
             registrationId: '1',
+            scopeURL: 'http://localhost:8080',
+            isDeleted: true,
+          }],
+        })
+
+        // add a new service worker that is not activated
+        manager.updateServiceWorkerRegistrations({
+          registrations: [{
+            registrationId: '2',
             scopeURL: 'http://localhost:8080',
             isDeleted: false,
           }],
         })
 
+        // update the service worker to be in a non-activated state
         manager.updateServiceWorkerVersions({
           versions: [{
             versionId: '1',
             runningStatus: 'running',
-            registrationId: '1',
+            registrationId: '2',
             scriptURL: 'http://localhost:8080/sw.js',
             status: 'activating',
           }],
@@ -379,31 +414,6 @@ describe('lib/http/util/service-worker', () => {
       })
 
       it('will detect when requests are controlled by a service worker and handles query parameters', async () => {
-        const manager = new ServiceWorkerManager()
-
-        manager.updateServiceWorkerRegistrations({
-          registrations: [{
-            registrationId: '1',
-            scopeURL: 'http://localhost:8080',
-            isDeleted: false,
-          }],
-        })
-
-        manager.updateServiceWorkerVersions({
-          versions: [{
-            versionId: '1',
-            runningStatus: 'running',
-            registrationId: '1',
-            scriptURL: 'http://localhost:8080/sw.js',
-            status: 'activated',
-          }],
-        })
-
-        manager.addInitiatorToServiceWorker({
-          scriptURL: 'http://localhost:8080/sw.js',
-          initiatorOrigin: 'http://localhost:8080/',
-        })
-
         // A script request emanated from the service worker's initiator is controlled
         let result = manager.processBrowserPreRequest({
           requestId: 'id-1',
@@ -417,9 +427,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -449,9 +462,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://example.com/bar.css',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://example.com/bar.css',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -473,9 +489,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://example.com/baz.woff2',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://example.com/baz.woff2',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -557,31 +576,6 @@ describe('lib/http/util/service-worker', () => {
       })
 
       it('will detect when requests are controlled by a service worker and handles re-registrations', async () => {
-        const manager = new ServiceWorkerManager()
-
-        manager.updateServiceWorkerRegistrations({
-          registrations: [{
-            registrationId: '1',
-            scopeURL: 'http://localhost:8080',
-            isDeleted: false,
-          }],
-        })
-
-        manager.updateServiceWorkerVersions({
-          versions: [{
-            versionId: '1',
-            runningStatus: 'running',
-            registrationId: '1',
-            scriptURL: 'http://localhost:8080/sw.js',
-            status: 'activated',
-          }],
-        })
-
-        manager.addInitiatorToServiceWorker({
-          scriptURL: 'http://localhost:8080/sw.js',
-          initiatorOrigin: 'http://localhost:8080/',
-        })
-
         // A script request emanated from the service worker's initiator is controlled
         let result = manager.processBrowserPreRequest({
           requestId: 'id-1',
@@ -595,9 +589,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -635,40 +632,18 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://example.com/bar.css',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://example.com/bar.css',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
       })
 
       it('will detect when requests are controlled by a service worker and handles unregistrations', async () => {
-        const manager = new ServiceWorkerManager()
-
-        manager.updateServiceWorkerRegistrations({
-          registrations: [{
-            registrationId: '1',
-            scopeURL: 'http://localhost:8080',
-            isDeleted: false,
-          }],
-        })
-
-        manager.updateServiceWorkerVersions({
-          versions: [{
-            versionId: '1',
-            runningStatus: 'running',
-            registrationId: '1',
-            scriptURL: 'http://localhost:8080/sw.js',
-            status: 'activated',
-          }],
-        })
-
-        manager.addInitiatorToServiceWorker({
-          scriptURL: 'http://localhost:8080/sw.js',
-          initiatorOrigin: 'http://localhost:8080/',
-        })
-
         // A script request emanated from the service worker's initiator is controlled
         const result = manager.processBrowserPreRequest({
           requestId: 'id-1',
@@ -682,9 +657,12 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
         expect(await result).to.be.true
@@ -724,39 +702,20 @@ describe('lib/http/util/service-worker', () => {
       })
 
       it('supports multiple fetch handler calls first', async () => {
-        const manager = new ServiceWorkerManager()
-
-        manager.updateServiceWorkerRegistrations({
-          registrations: [{
-            registrationId: '1',
-            scopeURL: 'http://localhost:8080',
-            isDeleted: false,
-          }],
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
-        manager.updateServiceWorkerVersions({
-          versions: [{
-            versionId: '1',
-            runningStatus: 'running',
-            registrationId: '1',
-            scriptURL: 'http://localhost:8080/sw.js',
-            status: 'activated',
-          }],
-        })
-
-        manager.addInitiatorToServiceWorker({
-          scriptURL: 'http://localhost:8080/sw.js',
-          initiatorOrigin: 'http://localhost:8080/',
-        })
-
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
-        })
-
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/bar.js',
-          isControlled: false,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/bar.js',
+            isControlled: false,
+          },
         })
 
         expect(await manager.processBrowserPreRequest({
@@ -785,31 +744,6 @@ describe('lib/http/util/service-worker', () => {
       })
 
       it('supports multiple browser pre-request calls first', async () => {
-        const manager = new ServiceWorkerManager()
-
-        manager.updateServiceWorkerRegistrations({
-          registrations: [{
-            registrationId: '1',
-            scopeURL: 'http://localhost:8080',
-            isDeleted: false,
-          }],
-        })
-
-        manager.updateServiceWorkerVersions({
-          versions: [{
-            versionId: '1',
-            runningStatus: 'running',
-            registrationId: '1',
-            scriptURL: 'http://localhost:8080/sw.js',
-            status: 'activated',
-          }],
-        })
-
-        manager.addInitiatorToServiceWorker({
-          scriptURL: 'http://localhost:8080/sw.js',
-          initiatorOrigin: 'http://localhost:8080/',
-        })
-
         const request1 = manager.processBrowserPreRequest({
           requestId: 'id-1',
           method: 'GET',
@@ -834,39 +768,72 @@ describe('lib/http/util/service-worker', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/foo.js',
-          isControlled: true,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            isControlled: true,
+          },
         })
 
-        manager.handleServiceWorkerFetch({
-          url: 'http://localhost:8080/bar.js',
-          isControlled: false,
+        manager.handleServiceWorkerClientEvent({
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/bar.js',
+            isControlled: false,
+          },
         })
 
         expect(await request1).to.be.true
         expect(await request2).to.be.false
       })
+
+      it('supports no client fetch handlers', async () => {
+        manager.handleServiceWorkerClientEvent({
+          type: 'hasHandlersEvent',
+          payload: {
+            hasHandlers: false,
+          },
+        })
+
+        expect(await manager.processBrowserPreRequest({
+          requestId: 'id-2',
+          method: 'GET',
+          url: 'http://localhost:8080/bar.js',
+          headers: {},
+          resourceType: 'fetch',
+          originalResourceType: undefined,
+          documentURL: 'http://localhost:8080/index.html',
+          cdpRequestWillBeSentTimestamp: 0,
+          cdpRequestWillBeSentReceivedTimestamp: 0,
+        })).to.be.false
+      })
     })
   })
 
-  describe('serviceWorkerFetchEventHandler', () => {
-    it('handles the __cypressServiceWorkerFetchEvent event', () => {
+  describe('serviceWorkerClientEventHandler', () => {
+    it('handles the __cypressServiceWorkerClientEvent event', () => {
       const handler = sinon.stub()
 
       const event = {
-        name: '__cypressServiceWorkerFetchEvent',
+        name: '__cypressServiceWorkerClientEvent',
         payload: JSON.stringify({
-          url: 'http://localhost:8080/foo.js',
-          respondWithCalled: true,
+          type: 'fetchEvent',
+          payload: {
+            url: 'http://localhost:8080/foo.js',
+            respondWithCalled: true,
+          },
         }),
       }
 
-      serviceWorkerFetchEventHandler(handler)(event)
+      serviceWorkerClientEventHandler(handler)(event)
 
       expect(handler).to.have.been.calledWith({
-        url: 'http://localhost:8080/foo.js',
-        isControlled: true,
+        type: 'fetchEvent',
+        payload: {
+          url: 'http://localhost:8080/foo.js',
+          respondWithCalled: true,
+        },
       })
     })
 
@@ -874,13 +841,13 @@ describe('lib/http/util/service-worker', () => {
       const handler = sinon.stub()
 
       const event = {
-        name: 'notServiceWorkerFetchEvent',
+        name: 'notServiceWorkerClientEvent',
         payload: JSON.stringify({
           url: 'http://localhost:8080/foo.js',
         }),
       }
 
-      serviceWorkerFetchEventHandler(handler)(event)
+      serviceWorkerClientEventHandler(handler)(event)
 
       expect(handler).not.to.have.been.called
     })

@@ -2,6 +2,7 @@ import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from './http/util/service-worker'
 
 export class NetworkProxy {
   http: Http
@@ -38,8 +39,8 @@ export class NetworkProxy {
     this.http.updateServiceWorkerClientSideRegistrations(data)
   }
 
-  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
-    this.http.handleServiceWorkerFetch(event)
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.http.handleServiceWorkerClientEvent(event)
   }
 
   handleHttpRequest (req, res) {

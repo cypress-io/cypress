@@ -34,6 +34,19 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     return result.result.type
   }
 
+  const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }) => {
+    if (Cypress.browser.family === 'firefox') {
+      cy.log('Skipping fetch handlers validation in Firefox')
+
+      return
+    }
+
+    cy.then(() => {
+      cy.wrap(getEventListenersLength()).should('equal', listenerCount)
+      if (onFetchHandlerType) cy.wrap(getOnFetchHandlerType()).should('equal', onFetchHandlerType)
+    })
+  }
+
   beforeEach(async () => {
     sessionId = null
 
@@ -58,9 +71,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
 
     it('supports using addEventListener with object', () => {
@@ -81,9 +92,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
 
     it('supports using addEventListener with delayed handleEvent', () => {
@@ -103,9 +112,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
 
     it('adds both listeners when addEventListener and onfetch use the same listener', () => {
@@ -125,11 +132,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        // onfetch will add an event listener
-        expect(await getEventListenersLength()).to.equal(2)
-        expect(await getOnFetchHandlerType()).to.equal('function')
-      })
+      // onfetch will add an event listener
+      validateFetchHandlers({ listenerCount: 2, onFetchHandlerType: 'function' })
     })
 
     it('supports using onfetch', () => {
@@ -146,11 +150,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        // onfetch will add an event listener
-        expect(await getEventListenersLength()).to.equal(1)
-        expect(await getOnFetchHandlerType()).to.equal('function')
-      })
+      // onfetch will add an event listener
+      validateFetchHandlers({ listenerCount: 1, onFetchHandlerType: 'function' })
     })
   })
 
@@ -169,9 +170,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
 
     it('supports using onfetch', () => {
@@ -188,11 +187,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        // onfetch will add an event listener
-        expect(await getEventListenersLength()).to.equal(1)
-        expect(await getOnFetchHandlerType()).to.equal('function')
-      })
+      // onfetch will add an event listener
+      validateFetchHandlers({ listenerCount: 1, onFetchHandlerType: 'function' })
     })
 
     it('does not add a null listener', () => {
@@ -215,9 +211,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
   })
 
@@ -233,10 +227,6 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
         self.addEventListener('fetch', handler)
         self.removeEventListener('fetch', handler)
-
-        self.addEventListener('fetch', function (event) {
-          return
-        })
       }
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
@@ -246,9 +236,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 0 })
     })
 
     it('supports removing event listener on delay', () => {
@@ -265,10 +253,6 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
         setTimeout(() => {
           self.removeEventListener('fetch', handler)
         }, 0)
-
-        self.addEventListener('fetch', function (event) {
-          return
-        })
       }
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
@@ -278,9 +262,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 0 })
     })
 
     it('supports using onfetch', () => {
@@ -293,10 +275,6 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
         }
 
         self.onfetch = undefined
-
-        self.onfetch = function (event) {
-          return
-        }
       }
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
@@ -306,11 +284,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        // onfetch will add an event listener
-        expect(await getEventListenersLength()).to.equal(1)
-        expect(await getOnFetchHandlerType()).to.equal('function')
-      })
+      validateFetchHandlers({ listenerCount: 0 })
     })
 
     it('does not fail when removing a non-existent listener', () => {
@@ -334,9 +308,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
 
     it('does not fail when removing a null listener', () => {
@@ -355,9 +327,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(1)
-      })
+      validateFetchHandlers({ listenerCount: 1 })
     })
   })
 
@@ -380,11 +350,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        // onfetch will also add an event listener
-        expect(await getEventListenersLength()).to.equal(2)
-        expect(await getOnFetchHandlerType()).to.equal('function')
-      })
+      // onfetch will add an event listener
+      validateFetchHandlers({ listenerCount: 2, onFetchHandlerType: 'function' })
     })
 
     it('supports other options', () => {
@@ -412,9 +379,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.visit('fixtures/service-worker.html')
       cy.get('#output').should('have.text', 'done')
-      cy.then(async () => {
-        expect(await getEventListenersLength()).to.equal(2)
-      })
+      validateFetchHandlers({ listenerCount: 2 })
     })
   })
 
@@ -453,9 +418,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.visit('fixtures/service-worker.html')
     cy.get('#output').should('have.text', 'done')
-    cy.then(async () => {
-      expect(await getEventListenersLength()).to.equal(1)
-    })
+    validateFetchHandlers({ listenerCount: 1 })
   })
 
   it('supports changing the handleEvent function', () => {
@@ -483,8 +446,83 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.visit('fixtures/service-worker.html')
     cy.get('#output').should('have.text', 'done')
-    cy.then(async () => {
-      expect(await getEventListenersLength()).to.equal(1)
+    validateFetchHandlers({ listenerCount: 1 })
+  })
+
+  it('supports changing the handleEvent function prior to adding', () => {
+    const script = () => {
+      const listener = {
+        handleEvent (event) {
+          event.respondWith(new Response('Network error', {
+            status: 400,
+            headers: { 'Content-Type': 'text/plain' },
+          }))
+        },
+      }
+
+      listener.handleEvent = function (event) {
+        event.respondWith(fetch(event.request))
+      }
+
+      self.addEventListener('fetch', listener)
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
     })
+
+    cy.visit('fixtures/service-worker.html')
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
+
+  it('succeeds when there are no listeners', () => {
+    const script = () => {}
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 0 })
+  })
+
+  it('supports caching', () => {
+    const script = () => {
+      self.addEventListener('install', function (event) {
+        event.waitUntil(
+          caches.open('v1').then(function (cache) {
+            return cache.addAll([
+              '/1mb',
+            ])
+          }),
+        )
+      })
+
+      self.addEventListener('fetch', function (event) {
+        event.respondWith(
+          caches.match(event.request).then(function (response) {
+            return response || fetch(event.request)
+          }),
+        )
+      })
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html').then(async (win) => {
+      const response = await win.fetch('/1mb')
+
+      expect(response.ok).to.be.true
+    })
+
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
   })
 })

@@ -5,7 +5,7 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
-import type { ServiceWorkerFetchHandler } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
@@ -21,7 +21,7 @@ export type AutomationOptions = {
   onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated
   onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
   onServiceWorkerClientSideRegistrationUpdated?: OnServiceWorkerClientSideRegistrationUpdated
-  onServiceWorkerFetch: ServiceWorkerFetchHandler
+  onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
 export class Automation {
@@ -37,7 +37,7 @@ export class Automation {
   public onServiceWorkerRegistrationUpdated: OnServiceWorkerRegistrationUpdated | undefined
   public onServiceWorkerVersionUpdated: OnServiceWorkerVersionUpdated | undefined
   public onServiceWorkerClientSideRegistrationUpdated: OnServiceWorkerClientSideRegistrationUpdated | undefined
-  public onServiceWorkerFetch: ServiceWorkerFetchHandler
+  public onServiceWorkerClientEvent: ServiceWorkerEventHandler
 
   constructor (options: AutomationOptions) {
     this.onBrowserPreRequest = options.onBrowserPreRequest
@@ -48,7 +48,7 @@ export class Automation {
     this.onServiceWorkerRegistrationUpdated = options.onServiceWorkerRegistrationUpdated
     this.onServiceWorkerVersionUpdated = options.onServiceWorkerVersionUpdated
     this.onServiceWorkerClientSideRegistrationUpdated = options.onServiceWorkerClientSideRegistrationUpdated
-    this.onServiceWorkerFetch = options.onServiceWorkerFetch
+    this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
 
     this.requests = {}
 

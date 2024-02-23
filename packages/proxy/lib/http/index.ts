@@ -10,6 +10,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import { ServiceWorkerManager } from './util/service-worker'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
@@ -27,7 +28,7 @@ import type { CookieJar, SerializableAutomationCookie } from '@packages/server/l
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
-import { ServiceWorkerManager } from './util/service-worker'
+import type { ServiceWorkerClientEvent } from './util/service-worker'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -498,8 +499,8 @@ export class Http {
     this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorOrigin: data.initiatorOrigin })
   }
 
-  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
-    this.serviceWorkerManager.handleServiceWorkerFetch(event)
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.serviceWorkerManager.handleServiceWorkerClientEvent(event)
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {

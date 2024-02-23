@@ -37,22 +37,27 @@ type AddInitiatorToServiceWorkerOptions = {
   initiatorOrigin: string
 }
 
-export const serviceWorkerFetchEventHandlerName = '__cypressServiceWorkerFetchEvent'
+export const serviceWorkerClientEventHandlerName = '__cypressServiceWorkerClientEvent'
 
-export type ServiceWorkerFetchHandler = (event: { url: string, isControlled: boolean }) => void
+export declare type ServiceWorkerEventsPayload = {
+  'fetchEvent': { url: string, isControlled: boolean }
+  'hasHandlersEvent': { hasHandlers: boolean }
+}
+
+type _ServiceWorkerClientEvent<T extends keyof ServiceWorkerEventsPayload> = { type: T, payload: ServiceWorkerEventsPayload[T] }
+
+export type ServiceWorkerClientEvent = _ServiceWorkerClientEvent<keyof ServiceWorkerEventsPayload>
+
+export type ServiceWorkerEventHandler = (event: ServiceWorkerClientEvent) => void
 
 /**
  * Adds and listens to the service worker fetch event CDP binding.
- * @param browserClient the browser client to add the binding to
- * @param browserCriClient the browser CRI client to add the service worker fetch event handler to
  * @param event the attached to target event
  */
-export const serviceWorkerFetchEventHandler = (handler: ServiceWorkerFetchHandler) => {
+export const serviceWorkerClientEventHandler = (handler: ServiceWorkerEventHandler) => {
   return (event) => {
-    if (event.name === serviceWorkerFetchEventHandlerName) {
-      const { url, respondWithCalled } = JSON.parse(event.payload)
-
-      handler({ url, isControlled: respondWithCalled })
+    if (event.name === serviceWorkerClientEventHandlerName) {
+      handler(JSON.parse(event.payload))
     }
   }
 }
@@ -80,6 +85,7 @@ export class ServiceWorkerManager {
   private pendingInitiators: Map<string, string> = new Map<string, string>()
   private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
   private pendingServiceWorkerFetches: Map<string, boolean[]> = new Map<string, boolean[]>()
+  private hasFetchHandlers = false
 
   /**
    * Goes through the list of service worker registrations and adds or removes them from the manager.
@@ -127,7 +133,39 @@ export class ServiceWorkerManager {
     }
   }
 
-  handleServiceWorkerFetch (event: { url: string, isControlled: boolean }) {
+  /**
+   * Handles a service worker fetch event.
+   * @param event the service worker fetch event to handle
+   */
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    debug('Handling service worker fetch event: %o', event)
+
+    switch (event.type) {
+      case 'fetchEvent':
+        this.handleServiceWorkerFetchEvent(event.payload as ServiceWorkerEventsPayload['fetchEvent'])
+        break
+      case 'hasHandlersEvent':
+        this.hasServiceWorkerFetchHandlers(event.payload as ServiceWorkerEventsPayload['hasHandlersEvent'])
+        break
+      default:
+        throw new Error(`Unknown event type: ${event.type}`)
+    }
+  }
+
+  /**
+   * Handles a service worker has fetch handlers event.
+   * @param event the service worker has fetch handlers event to handle
+   */
+  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasHandlersEvent']) {
+    debug('service worker has fetch handlers event called: %o', event)
+    this.hasFetchHandlers = event.hasHandlers
+  }
+
+  /**
+   * Handles a service worker fetch event.
+   * @param event the service worker fetch event to handle
+   */
+  private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchEvent']) {
     const promises = this.pendingPotentiallyControlledRequests.get(event.url)
 
     if (promises) {
@@ -154,7 +192,8 @@ export class ServiceWorkerManager {
   }
 
   /**
-   * Processes a browser pre-request to determine if it is controlled by a service worker. If it is, the service worker's controlled URLs are updated with the given request URL.
+   * Processes a browser pre-request to determine if it is controlled by a service worker.
+   * If it is, the service worker's controlled URLs are updated with the given request URL.
    *
    * @param browserPreRequest The browser pre-request to process.
    * @returns `true` if the request is controlled by a service worker, `false` otherwise.
@@ -209,7 +248,16 @@ export class ServiceWorkerManager {
     return false
   }
 
+  /**
+   * Determines if the given URL is controlled by a service worker.
+   * @param url the URL to check
+   * @returns a promise that resolves to `true` if the URL is controlled by a service worker, `false` otherwise.
+   */
   private isURLControlledByServiceWorker (url: string) {
+    if (!this.hasFetchHandlers) {
+      return false
+    }
+
     const fetches = this.pendingServiceWorkerFetches.get(url)
 
     if (fetches) {
