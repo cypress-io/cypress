@@ -24,7 +24,7 @@ import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
-import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string

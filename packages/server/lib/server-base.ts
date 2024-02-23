@@ -41,7 +41,7 @@ import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
-import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:server-base')
 

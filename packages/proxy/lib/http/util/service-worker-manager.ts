@@ -3,7 +3,7 @@ import pDefer from 'p-defer'
 import type { BrowserPreRequest } from '../../types'
 import type Protocol from 'devtools-protocol'
 
-const debug = Debug('cypress:proxy:service-worker')
+const debug = Debug('cypress:proxy:service-worker-manager')
 
 type ServiceWorkerRegistration = {
   registrationId: string

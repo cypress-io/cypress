@@ -5,7 +5,7 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
-import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker'
+import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
