@@ -2,7 +2,7 @@ import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 import type Protocol from 'devtools-protocol'
-import type { ServiceWorkerClientEvent } from './http/util/service-worker'
+import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 
 export class NetworkProxy {
   http: Http

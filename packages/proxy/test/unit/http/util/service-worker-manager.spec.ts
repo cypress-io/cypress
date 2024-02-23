@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { ServiceWorkerManager, serviceWorkerClientEventHandler } from '../../../../lib/http/util/service-worker'
+import { ServiceWorkerManager, serviceWorkerClientEventHandler } from '../../../../lib/http/util/service-worker-manager'
 
-describe('lib/http/util/service-worker', () => {
+describe('lib/http/util/service-worker-manager', () => {
   describe('ServiceWorkerManager', () => {
     context('processBrowserPreRequest', () => {
       let manager: ServiceWorkerManager

@@ -51,7 +51,7 @@ export type ServiceWorkerClientEvent = _ServiceWorkerClientEvent<keyof ServiceWo
 export type ServiceWorkerEventHandler = (event: ServiceWorkerClientEvent) => void
 
 /**
- * Adds and listens to the service worker fetch event CDP binding.
+ * Adds and listens to the service worker client event CDP binding.
  * @param event the attached to target event
  */
 export const serviceWorkerClientEventHandler = (handler: ServiceWorkerEventHandler) => {
@@ -79,6 +79,7 @@ export const serviceWorkerClientEventHandler = (handler: ServiceWorkerEventHandl
  *
  * 1. The document URL for the browser pre-request matches the initiator origin for the service worker.
  * 2. The request URL is within the scope of the service worker or the request URL's initiator is controlled by the service worker.
+ * 3. The fetch handler for the service worker handles the request by calling `event.respondWith`.
  */
 export class ServiceWorkerManager {
   private serviceWorkerRegistrations: Map<string, ServiceWorkerRegistration> = new Map<string, ServiceWorkerRegistration>()
@@ -153,45 +154,6 @@ export class ServiceWorkerManager {
   }
 
   /**
-   * Handles a service worker has fetch handlers event.
-   * @param event the service worker has fetch handlers event to handle
-   */
-  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasHandlersEvent']) {
-    debug('service worker has fetch handlers event called: %o', event)
-    this.hasFetchHandlers = event.hasHandlers
-  }
-
-  /**
-   * Handles a service worker fetch event.
-   * @param event the service worker fetch event to handle
-   */
-  private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchEvent']) {
-    const promises = this.pendingPotentiallyControlledRequests.get(event.url)
-
-    if (promises) {
-      debug('found pending controlled request promise: %o', event)
-
-      const currentPromiseForUrl = promises.shift()
-
-      if (promises.length === 0) {
-        this.pendingPotentiallyControlledRequests.delete(event.url)
-      }
-
-      currentPromiseForUrl?.resolve(event.isControlled)
-    } else {
-      const fetches = this.pendingServiceWorkerFetches.get(event.url)
-
-      debug('no pending controlled request promise found, adding a pending service worker fetch: %o', event)
-
-      if (fetches) {
-        fetches.push(event.isControlled)
-      } else {
-        this.pendingServiceWorkerFetches.set(event.url, [event.isControlled])
-      }
-    }
-  }
-
-  /**
    * Processes a browser pre-request to determine if it is controlled by a service worker.
    * If it is, the service worker's controlled URLs are updated with the given request URL.
    *
@@ -246,6 +208,45 @@ export class ServiceWorkerManager {
     }
 
     return false
+  }
+
+  /**
+   * Handles a service worker has fetch handlers event.
+   * @param event the service worker has fetch handlers event to handle
+   */
+  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasHandlersEvent']) {
+    debug('service worker has fetch handlers event called: %o', event)
+    this.hasFetchHandlers = event.hasHandlers
+  }
+
+  /**
+     * Handles a service worker fetch event.
+     * @param event the service worker fetch event to handle
+     */
+  private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchEvent']) {
+    const promises = this.pendingPotentiallyControlledRequests.get(event.url)
+
+    if (promises) {
+      debug('found pending controlled request promise: %o', event)
+
+      const currentPromiseForUrl = promises.shift()
+
+      if (promises.length === 0) {
+        this.pendingPotentiallyControlledRequests.delete(event.url)
+      }
+
+      currentPromiseForUrl?.resolve(event.isControlled)
+    } else {
+      const fetches = this.pendingServiceWorkerFetches.get(event.url)
+
+      debug('no pending controlled request promise found, adding a pending service worker fetch: %o', event)
+
+      if (fetches) {
+        fetches.push(event.isControlled)
+      } else {
+        this.pendingServiceWorkerFetches.set(event.url, [event.isControlled])
+      }
+    }
   }
 
   /**

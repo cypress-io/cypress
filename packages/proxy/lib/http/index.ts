@@ -10,7 +10,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
-import { ServiceWorkerManager } from './util/service-worker'
+import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
@@ -28,7 +28,7 @@ import type { CookieJar, SerializableAutomationCookie } from '@packages/server/l
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
-import type { ServiceWorkerClientEvent } from './util/service-worker'
+import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(

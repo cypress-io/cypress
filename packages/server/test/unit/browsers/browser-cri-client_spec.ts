@@ -6,7 +6,7 @@ import { stripAnsi } from '@packages/errors'
 import net from 'net'
 import { ProtocolManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
-import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker'
+import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -283,7 +283,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.on).to.be.calledWith('Runtime.bindingCalled', sinon.match.func)
+      expect(options.browserClient.on).to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
       expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
@@ -292,7 +292,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.on).not.to.be.calledWith('Runtime.bindingCalled', sinon.match.func)
+      expect(options.browserClient.on).not.to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
       expect(options.browserClient.send).not.to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
