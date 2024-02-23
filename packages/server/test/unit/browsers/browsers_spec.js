@@ -89,7 +89,35 @@ describe('lib/browsers/index', () => {
       })
     })
 
-    it('throws when no browser can be found', () => {
+    it('throws when no browser not found by name', () => {
+      const foundBrowsers = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('webkit', false, foundBrowsers))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .then((err) => {
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
+      })
+    })
+
+    it('throws when no browser not found by path', () => {
+      const foundBrowsers = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('/path/to/browser/edge', false, foundBrowsers))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_PATH' })
+      .then((err) => {
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
+      })
+    })
+
+    it('throws when browser not supported', () => {
       const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
