@@ -352,8 +352,7 @@ function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], 
   const normalizedNameOrPath = nameOrPath.toLowerCase()
   /**
    * Merge the names of knownBrowsers with names of the user's available browsers,
-   * and remove duplicates. This allows us to add support for browser's like Brave and Vivaldi,
-   * if the user has added them to their cypress config. Additionally, webkit and electron aren't included
+   * and remove duplicates. Additionally, webkit and electron aren't included
    * in known-browsers.ts, we should add them here as supported since they're listed in
    * the documentation for supported browsers.
    */
