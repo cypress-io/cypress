@@ -160,9 +160,9 @@ describe('lib/browsers/index', () => {
       .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
-        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+        expect(err).to.have.property('type').to.eq('BROWSER_NOT_SUPPORTED')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system.`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} is not supported by Cypress.`)
       })
     })
   })
@@ -181,9 +181,9 @@ describe('lib/browsers/index', () => {
       .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
-        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+        expect(err).to.have.property('type').to.eq('BROWSER_NOT_SUPPORTED')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system.`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} is not supported by Cypress.`)
       })
     })
 
