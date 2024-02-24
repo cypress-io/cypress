@@ -351,10 +351,11 @@ function createSupportedBrowserRegex (browsers: string[]): RegExp {
 function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]): boolean {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
   /**
-   * Merge the names of knownBrowsers with names of the user's available browsers,
-   * and remove duplicates. Additionally, webkit and electron aren't included
-   * in known-browsers.ts, we should add them here as supported since they're listed in
-   * the documentation for supported browsers.
+   * Merge the names of knownBrowsers with names of the user's available
+   * browsers (e.g. 'Brave' if they have added it in Cypress config),
+   * and remove duplicates. Additionally, 'webkit' and 'electron' aren't included
+   * in known-browsers.ts, we should add them here as supported
+   * since they're listed in the documentation for supported browsers.
    */
   const additionalSupportedBrowsers = ['webkit', 'electron']
   const allSupportedAndAvailableBrowsers = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'), additionalSupportedBrowsers)
@@ -570,6 +571,8 @@ export = {
   formatBrowsersToOptions,
 
   throwBrowserNotFound,
+
+  throwBrowserNotSupported,
 
   initializeCDP,
 
