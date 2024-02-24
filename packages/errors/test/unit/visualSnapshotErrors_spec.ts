@@ -358,7 +358,6 @@ describe('visual error templates', () => {
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
         default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
