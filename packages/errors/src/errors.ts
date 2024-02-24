@@ -125,16 +125,6 @@ export const AllCypressErrors = {
     ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
-    let canarySuffix: PartialErr | null = null
-
-    if (browser === 'canary') {
-      canarySuffix = errPartial`\
-          ${fmt.off('\n\n')}
-          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
-
-          See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
-    }
-
     return errTemplate`\
         Browser: ${fmt.highlight(browser)} was not found on your system.
 
@@ -144,7 +134,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
+        ${fmt.listItems(foundBrowsersStr)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
