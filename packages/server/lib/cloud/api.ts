@@ -638,6 +638,12 @@ module.exports = {
   },
 
   async getCaptureProtocolScript (url: string) {
+    const base64EncodedScript = 'BASE64_ENCODED_SCRIPT'
+
+    if (base64EncodedScript.length >= 30) {
+      return Buffer.from(base64EncodedScript, 'base64').toString()
+    }
+
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)

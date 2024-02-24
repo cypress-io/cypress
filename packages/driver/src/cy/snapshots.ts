@@ -4,7 +4,6 @@ import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
-import { finder } from '@medv/finder'
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -244,20 +243,18 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       return null
     }
 
-    const timestamp = performance.now() + performance.timeOrigin
-
     // if the protocol has been enabled, our snapshot is just the name, timestamp, and highlighted elements,
     // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
     // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
     if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
       const snapshot: {
         name: string
-        timestamp: number
+        timestamp?: number
         elementsToHighlight?: {
-          selector: string
+          elementId: string
           frameId: string
         }[]
-      } = { name, timestamp }
+      } = { name }
 
       if (isJqueryElement($elToHighlight)) {
         snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
@@ -269,20 +266,21 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
               return []
             }
 
-            // finder tries to find the shortest unique selector to an element,
-            // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
-            // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
-            // @see https://github.com/antonmedv/finder/issues/75
-            const selector = finder(el, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
-            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+            // Probably needs to happen before timestamp is created. Should we flush regardless of if there's an element?
+            elWindow.CypressProtocol.cypressFlushDomEventManager()
 
-            return [{ selector, frameId }]
+            const clientElementId = elWindow.CypressProtocol.getIdForElement(el)
+            const frameId = elWindow.CypressProtocol.getFrameId()
+
+            return [{ clientElementId, frameId }]
           } catch {
             // the element may not always be found since it's possible for the element to be removed from the DOM
             return []
           }
         })
       }
+
+      snapshot.timestamp = performance.now() + performance.timeOrigin
 
       Cypress.action('cy:protocol-snapshot')
 
@@ -321,7 +319,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
       const snapshot = {
         name,
-        timestamp,
+        timestamp: performance.now() + performance.timeOrigin,
         htmlAttrs: $htmlAttrs,
         body,
       }
