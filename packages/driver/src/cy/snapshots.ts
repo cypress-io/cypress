@@ -4,6 +4,7 @@ import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
+import { finder } from '@medv/finder'
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -269,10 +270,12 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             // Probably needs to happen before timestamp is created. Should we flush regardless of if there's an element?
             elWindow.CypressProtocol.cypressFlushDomEventManager()
 
+            // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
+            const selector = finder(el, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
             const clientElementId = elWindow.CypressProtocol.getIdForElement(el)
             const frameId = elWindow.CypressProtocol.getFrameId()
 
-            return [{ clientElementId, frameId }]
+            return [{ selector, clientElementId, frameId }]
           } catch {
             // the element may not always be found since it's possible for the element to be removed from the DOM
             return []
