@@ -5,7 +5,8 @@ _Released 2/27/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
+- Changed RequestBody type to allow for boolean and null literals to be passed as body values. Fixes [#28789](https://github.com/cypress-io/cypress/issues/28789).
+- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 ## 13.6.6
 
@@ -26,7 +27,6 @@ _Released 2/20/2024_
 - Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
 - Fixed a regression introduced in [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where Cypress could crash when processing service worker requests through our proxy. Fixes [#28950](https://github.com/cypress-io/cypress/issues/28950).
 - Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
--Fixed as bug to ensure 'its' function type excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 **Misc:**
 
