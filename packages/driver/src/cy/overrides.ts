@@ -46,6 +46,20 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
                 this.dispatchEvent(syntheticScrollEvent)
               }
             }, true)
+
+            this.shadowRoot.addEventListener('input', (event) => {
+              // with inputs inside the shadow DOM, input events still bubble to the top document. However, their
+              // event target is the actual shadow host that exists in the document, which makes sense since this is what information
+              // the document has access to view. In order to receive correct target on events, we need to create a synthetic input event to sent
+              // to protocol in order to capture correct keystrokes, radio input, selection boxes, etc
+              const syntheticInputEvent = new CustomEvent('cypress:protocol:shadow-dom:element:input', {
+                bubbles: true,
+                composed: true,
+                detail: event,
+              })
+
+              this.dispatchEvent(syntheticInputEvent)
+            }, true)
           }
 
           return returnVal
