@@ -20,52 +20,6 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
         })
       }
 
-      if (config('protocolEnabled')) {
-        const originalAttachShadow = contentWindow.HTMLElement.prototype.attachShadow
-
-        contentWindow.HTMLElement.prototype.attachShadow = function (options) {
-          const returnVal = originalAttachShadow.call(this, options)
-
-          // since scrolls on elements cannot see outside the shadowDOM, we want to attach
-          // a scroll event to the shadowRoot and propagate a synthetic event to protocol
-          if (this.shadowRoot) {
-            // shadowRoot only exists on 'open' mode shadowRoots
-            this.shadowRoot.addEventListener('scroll', (event) => {
-              const isADocument =
-                  event.target instanceof Document
-
-              // if this is a scroll on an element, we want to propagate it.
-              // otherwise, document scrolls will propagate to protocol
-              if (!isADocument) {
-                const syntheticScrollEvent = new CustomEvent('cypress:protocol:shadow-dom:element:scroll', {
-                  bubbles: true,
-                  composed: true,
-                  detail: event,
-                })
-
-                this.dispatchEvent(syntheticScrollEvent)
-              }
-            }, true)
-
-            this.shadowRoot.addEventListener('input', (event) => {
-              // with inputs inside the shadow DOM, input events still bubble to the top document. However, their
-              // event target is the actual shadow host that exists in the document, which makes sense since this is what information
-              // the document has access to view. In order to receive correct target on events, we need to create a synthetic input event to sent
-              // to protocol in order to capture correct keystrokes, radio input, selection boxes, etc
-              const syntheticInputEvent = new CustomEvent('cypress:protocol:shadow-dom:element:input', {
-                bubbles: true,
-                composed: true,
-                detail: event,
-              })
-
-              this.dispatchEvent(syntheticInputEvent)
-            }, true)
-          }
-
-          return returnVal
-        }
-      }
-
       contentWindow.HTMLElement.prototype.focus = function (focusOption) {
         return focused.interceptFocus(this, contentWindow, focusOption)
       }
