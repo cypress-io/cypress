@@ -61,13 +61,3 @@ Available browsers found on your system are:
  - firefox
  - electron
 `
-
-exports['lib/browsers/index .ensureAndGetByNameOrPath throws when browser not found by path 1'] = `
-We could not identify a known browser at the path you provided: /path/to/browser/edge
-
-Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
-
-The output from the command we ran was:
-
-Unable to find browser with path /path/to/browser/edge
-`
