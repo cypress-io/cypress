@@ -383,6 +383,74 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     })
   })
 
+  describe('multiple concurrent requests', () => {
+    it('page request sent (handled by service worker) and then service worker request', () => {
+      const script = () => {
+        self.addEventListener('fetch', function (event) {
+          const response = fetch(event.request)
+
+          // send a request from the service worker after the page request
+          if (event.request.url.includes('timeout')) {
+            fetch('/timeout').catch(() => {})
+          }
+
+          event.respondWith(response)
+        })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('/fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+    })
+
+    it('service worker request sent and then page request (handled by service worker):', () => {
+      const script = () => {
+        self.addEventListener('fetch', function (event) {
+          // send a request from the service worker before the page request
+          if (event.request.url.includes('timeout')) {
+            fetch('/timeout').catch(() => {})
+          }
+
+          const response = fetch(event.request)
+
+          event.respondWith(response)
+        })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('/fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+    })
+
+    it('page request sent (NOT handled by service worker) and then service worker request:', () => {
+      const script = () => {
+        self.addEventListener('fetch', function (event) {
+          if (event.request.url.includes('timeout')) {
+            fetch('/timeout').catch(() => {})
+          }
+
+          return
+        })
+      }
+
+      cy.intercept('/fixtures/service-worker.js', (req) => {
+        req.reply(`(${script})()`,
+          { 'Content-Type': 'application/javascript' })
+      })
+
+      cy.visit('/fixtures/service-worker.html')
+      cy.get('#output').should('have.text', 'done')
+    })
+  })
+
   it('supports aborted listeners', () => {
     const script = () => {
       const alreadyAborted = new AbortController()
@@ -521,6 +589,28 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       expect(response.ok).to.be.true
     })
+
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
+
+  it('supports clients.claim', () => {
+    const script = () => {
+      self.addEventListener('activate', (event) => {
+        event.waitUntil(self.clients.claim())
+      })
+
+      self.addEventListener('fetch', function (event) {
+        event.respondWith(fetch(event.request))
+      })
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
 
     cy.get('#output').should('have.text', 'done')
     validateFetchHandlers({ listenerCount: 1 })
