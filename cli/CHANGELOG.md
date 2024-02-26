@@ -5,7 +5,8 @@ _Released 2/27/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
+- Changed RequestBody type to allow for boolean and null literals to be passed as body values. Fixes [#28789](https://github.com/cypress-io/cypress/issues/28789).
+- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 ## 13.6.6
 
