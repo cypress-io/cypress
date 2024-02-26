@@ -1,5 +1,7 @@
 /// <reference lib="webworker" />
 
+import type { ServiceWorkerClientEvent } from './service-worker-manager'
+
 declare let self: ServiceWorkerGlobalScope & {
   __cypressServiceWorkerClientEvent: (event: string) => void
 }
@@ -10,18 +12,29 @@ declare let self: ServiceWorkerGlobalScope & {
  * @returns the updated service worker
  */
 export const injectIntoServiceWorker = (body: Buffer) => {
-  function __cypressOverwriteAddRemoveEventListeners () {
+  function __cypressInjectIntoServiceWorker () {
     let _listenerCount = 0
+    let _eventQueue: ServiceWorkerClientEvent[] = []
     const _nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const _captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const _targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
     const _targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
 
+    const sendEvent = (event: ServiceWorkerClientEvent) => {
+      // if the binding has been created, we can call it
+      // otherwise, we need to queue the event
+      if (self.__cypressServiceWorkerClientEvent) {
+        self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
+      } else {
+        _eventQueue.push(event)
+      }
+    }
+
     const __cypressServiceWorkerSendHasFetchEventHandlers = () => {
       // @ts-expect-error __cypressScriptEvaluated is declared below
       // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
       if (__cypressScriptEvaluated) {
-        self.__cypressServiceWorkerClientEvent(JSON.stringify({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(_listenerCount > 0 || self.onfetch) } }))
+        sendEvent({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(_listenerCount > 0 || self.onfetch) } })
       }
     }
 
@@ -56,7 +69,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         const returnValue = listener(event)
 
         // call the CDP binding to inform the backend whether or not the service worker handled the request
-        self.__cypressServiceWorkerClientEvent(JSON.stringify({ type: 'fetchEvent', payload: { url: event.request.url, isControlled: respondWithCalled } }))
+        sendEvent({ type: 'fetchEvent', payload: { url: event.request.url, isControlled: respondWithCalled } })
 
         return returnValue
       }
@@ -182,12 +195,28 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     // backend whether or not the service worker has a handler
     self.addEventListener('activate', () => {
       __cypressServiceWorkerSendHasFetchEventHandlers()
+
+      // if the binding has not been created yet, we need to wait for it
+      if (!self.__cypressServiceWorkerClientEvent) {
+        const timer = setInterval(() => {
+          if (self.__cypressServiceWorkerClientEvent) {
+            clearInterval(timer)
+
+            // send any events that were queued
+            _eventQueue.forEach((event) => {
+              self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
+            })
+
+            _eventQueue = []
+          }
+        }, 5)
+      }
     })
   }
 
   const updatedBody = `
 let __cypressScriptEvaluated = false;
-(${__cypressOverwriteAddRemoveEventListeners})();
+(${__cypressInjectIntoServiceWorker})();
 ${body};
 __cypressScriptEvaluated = true;`
 

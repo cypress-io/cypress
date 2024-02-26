@@ -35,8 +35,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
   }
 
   const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }) => {
-    if (Cypress.browser.family === 'firefox') {
-      cy.log('Skipping fetch handlers validation in Firefox')
+    if (Cypress.browser.family !== 'chromium') {
+      cy.log('Skipping fetch handlers validation in non-Chromium browsers')
 
       return
     }
@@ -249,7 +249,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
         }
 
         self.addEventListener('fetch', handler)
-        // remove the listener after the current event loop
+        // remove the listener after a delay
         setTimeout(() => {
           self.removeEventListener('fetch', handler)
         }, 0)
