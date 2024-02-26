@@ -257,6 +257,13 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
         }[]
       } = { name }
 
+      // TODO: Maybe use an action instead of a direct call to the protocol
+      try {
+        state('window').CypressProtocol.cypressFlushDomEventManager({ recurse: true })
+      } catch (e) {
+        // ignore
+      }
+
       if (isJqueryElement($elToHighlight)) {
         snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
           try {
@@ -267,8 +274,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
               return []
             }
 
-            // Probably needs to happen before timestamp is created. Should we flush regardless of if there's an element?
-            elWindow.CypressProtocol.cypressFlushDomEventManager()
+            // elWindow.CypressProtocol.cypressFlushDomEventManager()
 
             // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
             const selector = finder(el, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
