@@ -89,7 +89,7 @@ describe('lib/browsers/index', () => {
       })
     })
 
-    it('throws when no browser not found by name', () => {
+    it('throws when browser not found by name', () => {
       const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
@@ -103,7 +103,7 @@ describe('lib/browsers/index', () => {
       })
     })
 
-    it('throws when no browser not found by path', () => {
+    it('throws when browser not found by path', () => {
       const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
