@@ -1,4 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.6.7
+
+_Released 2/27/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
+
+## 13.6.6
+
+_Released 2/22/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where `cypress verify` was failing for `nx` users. Fixes [#28982](https://github.com/cypress-io/cypress/issues/28982).
+
 ## 13.6.5
 
 _Released 2/20/2024_
