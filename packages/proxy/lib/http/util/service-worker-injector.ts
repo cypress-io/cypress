@@ -1,9 +1,13 @@
-/// <reference lib="webworker" />
+/// <reference lib="dom" />
 
 import type { ServiceWorkerClientEvent } from './service-worker-manager'
 
-declare let self: ServiceWorkerGlobalScope & {
+// this should be of type ServiceWorkerGlobalScope, but we can't reference it here
+// because this file is imported elsewhere and the ServiceWorker lib causes
+// errors in those other packages
+declare let self: typeof globalThis & {
   __cypressServiceWorkerClientEvent: (event: string) => void
+  onfetch: (event: Event) => void
 }
 
 /**
