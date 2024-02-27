@@ -84,7 +84,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'fix/force_colors_on_verify', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
+    - equal: [ 'investigate_windows_failures', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -3459,78 +3459,78 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-    - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome
-        executor: windows
-        resource_class: windows.xlarge
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
-        requires:
-          - windows-build
+    # - run-launchpad-integration-tests-chrome:
+    #     name: windows-run-launchpad-integration-tests-chrome
+    #     executor: windows
+    #     resource_class: windows.xlarge
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+    #     requires:
+    #       - windows-build
 
-    - unit-tests:
-        name: windows-unit-tests
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
+    # - unit-tests:
+    #     name: windows-unit-tests
+    #     executor: windows
+    #     resource_class: windows.medium
+    #     requires:
+    #       - windows-build
 
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
+    # - server-unit-tests-cloud-environment:
+    #     name: windows-server-unit-tests-cloud-environment
+    #     executor: windows
+    #     resource_class: windows.medium
+    #     requires:
+    #       - windows-build
 
-    - create-build-artifacts:
-        name: windows-create-build-artifacts
-        executor: windows
-        resource_class: windows.large
-        context:
-          - test-runner:sign-windows-binary
-          - test-runner:upload
-          - test-runner:commit-status-checks
-          - test-runner:build-binary
-        requires:
-          - windows-build
+    # - create-build-artifacts:
+    #     name: windows-create-build-artifacts
+    #     executor: windows
+    #     resource_class: windows.large
+    #     context:
+    #       - test-runner:sign-windows-binary
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #       - test-runner:build-binary
+    #     requires:
+    #       - windows-build
 
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
+    # - test-binary-against-kitchensink-chrome:
+    #     name: windows-test-binary-against-kitchensink-chrome
+    #     executor: windows
+    #     requires:
+    #       - windows-create-build-artifacts
 
-    - v8-integration-tests:
-        name: windows-v8-integration-tests
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
+    # - v8-integration-tests:
+    #     name: windows-v8-integration-tests
+    #     executor: windows
+    #     resource_class: windows.medium
+    #     requires:
+    #       - windows-build
+    # - driver-integration-memory-tests:
+    #     name: windows-driver-integration-memory-tests
+    #     executor: windows
+    #     resource_class: windows.medium
+    #     requires:
+    #       - windows-build
 
 workflows:
-  linux-x64:
-    <<: *linux-x64-workflow
-    <<: *linux-x64-workflow-exclude-filters
-  linux-x64-contributor:
-    <<: *linux-x64-contributor-workflow
-    when:
-      matches:
-        pattern: /^pull\/[0-9]+/
-        value: << pipeline.git.branch >>
-  linux-arm64:
-    <<: *linux-arm64-workflow
-    <<: *linux-arm64-workflow-filters
-  darwin-x64:
-    <<: *darwin-x64-workflow
-    <<: *darwin-workflow-filters
-  darwin-arm64:
-    <<: *darwin-arm64-workflow
-    <<: *darwin-workflow-filters
+  # linux-x64:
+  #   <<: *linux-x64-workflow
+  #   <<: *linux-x64-workflow-exclude-filters
+  # linux-x64-contributor:
+  #   <<: *linux-x64-contributor-workflow
+  #   when:
+  #     matches:
+  #       pattern: /^pull\/[0-9]+/
+  #       value: << pipeline.git.branch >>
+  # linux-arm64:
+  #   <<: *linux-arm64-workflow
+  #   <<: *linux-arm64-workflow-filters
+  # darwin-x64:
+  #   <<: *darwin-x64-workflow
+  #   <<: *darwin-workflow-filters
+  # darwin-arm64:
+  #   <<: *darwin-arm64-workflow
+  #   <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
     <<: *windows-workflow-filters

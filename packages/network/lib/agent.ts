@@ -252,7 +252,10 @@ const getProxyOrTargetOverrideForUrl = (href) => {
   // like a proxy
   const targetHost = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
 
+  debug(`target host value: ${targetHost}`)
   if (targetHost && href.includes(targetHost)) {
+    debug(`proxying request!!!`)
+
     return targetHost
   }
 
