@@ -7,6 +7,10 @@ _Released 2/27/2024 (PENDING)_
 
 - Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
 
+**Dependency Updates:**
+
+- Updated signal-exit from `3.0.3` to `3,0,7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
+
 ## 13.6.6
 
 _Released 2/22/2024_
