@@ -9,7 +9,7 @@ _Released 2/27/2024 (PENDING)_
 
 **Dependency Updates:**
 
-- Updated signal-exit from `3.0.3` to `3,0,7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
+- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
 
 ## 13.6.6
 
