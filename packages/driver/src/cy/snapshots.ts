@@ -18,11 +18,10 @@ type SelectorNode = {
 }
 
 const returnShadowRootIfShadowDomNode = (node: Element): ShadowRoot | null => {
-  // The method for checking if a node is a shadowRoot is a bit wonky, but seems to be the most sound.
   // the shadowRoot object property only lives on the node context OUTSIDE the shadow DOM, meaning that
-  // node.parentNode.host.shadowRoot would work. But this is considered an instance of an Object and not
-  // a ShadowRoot, so likely checking the string serialization might be a safer choice here.
-  const isNodeShadowRoot = (n: any) => n?.toString() === '[object ShadowRoot]'
+  // node.parentNode.host.shadowRoot works. Oddly, this is considered an instance of an Object and not
+  // a ShadowRoot, so checking for the shadowRoot on the host property is likely safe.
+  const isNodeShadowRoot = (n: any) => !!n?.host?.shadowRoot
 
   let parent = node && node.parentNode
 
@@ -37,10 +36,18 @@ const returnShadowRootIfShadowDomNode = (node: Element): ShadowRoot | null => {
   return null
 }
 
+function findSelectorForElement (elem: Element, root: Document | ShadowRoot) {
+  // finder tries to find the shortest unique selector to an element,
+  // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
+  // @see https://github.com/antonmedv/finder/issues/75
+  return finder(elem, { root: root as unknown as Element, threshold: 1, maxNumberOfTries: 0 })
+}
+
 /**
+ * Builds a recursive structure of selectors in order to re-identify during Test Replay.
  *
- * @param elem - either an HTML Element or an element that lives within the ShadowDom or the Root Document
- * @returns SelectorNode if the selector can be discovered. For regular elements, this should only be one object deep, but for ShadowDom
+ * @param elem - an HTML Element that lives within the shadow DOM or the regular DOM
+ * @returns SelectorNode if the selector can be discovered. For regular elements, this should only be one object deep, but for shadow DOM
  * elements, the SelectorNode tree could be N levels deep until the root is discovered
  */
 function constructElementSelectorTree (elem: Element): SelectorNode | undefined {
@@ -52,11 +59,7 @@ function constructElementSelectorTree (elem: Element): SelectorNode | undefined 
       return undefined
     }
 
-    // finder tries to find the shortest unique selector to an element,
-    // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
-    // @ts-expect-error because 'root' can be either Document or Element but is defined as Element
-    // @see https://github.com/antonmedv/finder/issues/75
-    const selector = finder(elem, { root: ownerDoc, threshold: 1, maxNumberOfTries: 0 })
+    const selector = findSelectorForElement(elem, ownerDoc)
 
     if (!selector) {
       throw new Error('Selector not defined! Fall through to shadowDom lookup')
@@ -85,7 +88,7 @@ function constructElementSelectorTree (elem: Element): SelectorNode | undefined 
         const hostDetails = constructElementSelectorTree(shadowRoot.host)
 
         // look up our element inside the context of the ShadowRoot
-        const selectorFromShadowWorld = finder(elem, { root: shadowRoot as unknown as Element, threshold: 1, maxNumberOfTries: 0 })
+        const selectorFromShadowWorld = findSelectorForElement(elem, shadowRoot)
 
         // gives us enough information to associate the shadow element to the ShadowRoot/host to reconstruct in Test Replay
         return { selector: selectorFromShadowWorld, frameId: undefined, ownerDoc: shadowRoot, host: hostDetails }
@@ -320,6 +323,47 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     return $dom.isElement($el) && $dom.isJquery($el)
   }
 
+  const buildSelectorArray = (el: HTMLElement) => {
+    // flatten selector to only include selector string values, which we can imply is a shadowRoot if other values exist in the tree
+    // this keeps the structure similar to axe-core
+    // @see https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#results-object -> target
+    const selectors: string[] | undefined = []
+    let frameId: string | undefined
+    const flattenElementSelectorTree = (el: SelectorNode | undefined): void => {
+      if (el) {
+        selectors.unshift(el?.selector)
+
+        if (el?.host) {
+          flattenElementSelectorTree(el.host)
+        } else {
+          frameId = el.frameId
+        }
+      }
+    }
+
+    const elToHighlight = constructElementSelectorTree(el)
+
+    flattenElementSelectorTree(elToHighlight)
+
+    let selector: string | string[] | undefined
+
+    switch (selectors.length) {
+      case 0:
+        selector = undefined
+        break
+      case 1:
+        selector = selectors[0]
+        break
+      default:
+        selector = selectors
+    }
+
+    return selector ? [{
+      selector,
+      frameId,
+    }] : []
+  }
+
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
     // when using cy.origin() and in a transitionary state, state('document')
@@ -348,46 +392,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
-          // flatten selector to only include selector string values, which we can imply is a shadowRoot if other values exist in the tree
-          // this keeps the structure similar to axe-core
-          // @see https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#results-object -> target
-          const selectors: string[] | undefined = []
-          let frameId: string | undefined
-          const flattenElementSelectorTree = (el: SelectorNode | undefined): void => {
-            if (el) {
-              selectors.unshift(el?.selector)
-
-              if (el?.host) {
-                flattenElementSelectorTree(el.host)
-              } else {
-                frameId = el.frameId
-              }
-            }
-          }
-
-          const elToHighlight = constructElementSelectorTree(el)
-
-          flattenElementSelectorTree(elToHighlight)
-
-          let selector: string | string[] | undefined
-
-          switch (selectors.length) {
-            case 0:
-              selector = undefined
-              break
-            case 1:
-              selector = selectors[0]
-              break
-            default:
-              selector = selectors
-          }
-
-          return selector ? [{
-            selector,
-            frameId,
-          }] : []
-        })
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => buildSelectorArray(el))
       }
 
       Cypress.action('cy:protocol-snapshot')
