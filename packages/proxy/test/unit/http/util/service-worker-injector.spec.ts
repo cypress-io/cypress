@@ -7,7 +7,7 @@ describe('lib/http/util/service-worker-injector', () => {
       const actual = injectIntoServiceWorker(Buffer.from('foo'))
 
       const expected = `
-      let __cypressScriptEvaluated = false;
+      let __cypressIsScriptEvaluated = false;
       (function __cypressInjectIntoServiceWorker() {
               let listenerCount = 0;
               let eventQueue = [];
@@ -26,9 +26,9 @@ describe('lib/http/util/service-worker-injector', () => {
                   }
               };
               const sendHasFetchEventHandlers = () => {
-                  // @ts-expect-error __cypressScriptEvaluated is declared below
+                  // @ts-expect-error __cypressIsScriptEvaluated is declared below
                   // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
-                  if (__cypressScriptEvaluated) {
+                  if (__cypressIsScriptEvaluated) {
                       sendEvent({ type: 'hasFetchHandler', payload: { hasFetchHandler: !!(listenerCount > 0 || self.onfetch) } });
                   }
               };
@@ -173,7 +173,7 @@ describe('lib/http/util/service-worker-injector', () => {
               });
           })();
       foo;
-      __cypressScriptEvaluated = true;`
+      __cypressIsScriptEvaluated = true;`
 
       expect(actual.replace(/\s/g, '')).to.equal(expected.replace(/\s/g, ''))
     })

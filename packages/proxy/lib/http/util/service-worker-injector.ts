@@ -35,9 +35,9 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     }
 
     const sendHasFetchEventHandlers = () => {
-      // @ts-expect-error __cypressScriptEvaluated is declared below
+      // @ts-expect-error __cypressIsScriptEvaluated is declared below
       // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
-      if (__cypressScriptEvaluated) {
+      if (__cypressIsScriptEvaluated) {
         sendEvent({ type: 'hasFetchHandler', payload: { hasFetchHandler: !!(listenerCount > 0 || self.onfetch) } })
       }
     }
@@ -225,10 +225,10 @@ export const injectIntoServiceWorker = (body: Buffer) => {
   }
 
   const updatedBody = `
-let __cypressScriptEvaluated = false;
+let __cypressIsScriptEvaluated = false;
 (${__cypressInjectIntoServiceWorker})();
 ${body};
-__cypressScriptEvaluated = true;`
+__cypressIsScriptEvaluated = true;`
 
   return updatedBody
 }
