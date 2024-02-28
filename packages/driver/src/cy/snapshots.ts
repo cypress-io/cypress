@@ -18,6 +18,10 @@ type SelectorNode = {
 }
 
 const returnShadowRootIfShadowDomNode = (node: Element): ShadowRoot | null => {
+  // The method for checking if a node is a shadowRoot is a bit wonky, but seems to be the most sound.
+  // the shadowRoot object property only lives on the node context OUTSIDE the shadow DOM, meaning that
+  // node.parentNode.host.shadowRoot would work. But this is considered an instance of an Object and not
+  // a ShadowRoot, so likely checking the string serialization might be a safer choice here.
   const isNodeShadowRoot = (n: any) => n?.toString() === '[object ShadowRoot]'
 
   let parent = node && node.parentNode
