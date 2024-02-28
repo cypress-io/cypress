@@ -40,8 +40,8 @@ type AddInitiatorToServiceWorkerOptions = {
 export const serviceWorkerClientEventHandlerName = '__cypressServiceWorkerClientEvent'
 
 export declare type ServiceWorkerEventsPayload = {
-  'fetchEvent': { url: string, isControlled: boolean }
-  'hasHandlersEvent': { hasHandlers: boolean }
+  'fetchRequest': { url: string, isControlled: boolean }
+  'hasFetchHandler': { hasFetchHandler: boolean }
 }
 
 type _ServiceWorkerClientEvent<T extends keyof ServiceWorkerEventsPayload> = { type: T, payload: ServiceWorkerEventsPayload[T] }
@@ -86,7 +86,7 @@ export class ServiceWorkerManager {
   private pendingInitiators: Map<string, string> = new Map<string, string>()
   private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
   private pendingServiceWorkerFetches: Map<string, boolean[]> = new Map<string, boolean[]>()
-  private hasFetchHandlers = false
+  private hasFetchHandler = false
 
   /**
    * Goes through the list of service worker registrations and adds or removes them from the manager.
@@ -142,11 +142,11 @@ export class ServiceWorkerManager {
     debug('Handling service worker fetch event: %o', event)
 
     switch (event.type) {
-      case 'fetchEvent':
-        this.handleServiceWorkerFetchEvent(event.payload as ServiceWorkerEventsPayload['fetchEvent'])
+      case 'fetchRequest':
+        this.handleServiceWorkerFetchEvent(event.payload as ServiceWorkerEventsPayload['fetchRequest'])
         break
-      case 'hasHandlersEvent':
-        this.hasServiceWorkerFetchHandlers(event.payload as ServiceWorkerEventsPayload['hasHandlersEvent'])
+      case 'hasFetchHandler':
+        this.hasServiceWorkerFetchHandlers(event.payload as ServiceWorkerEventsPayload['hasFetchHandler'])
         break
       default:
         throw new Error(`Unknown event type: ${event.type}`)
@@ -214,16 +214,16 @@ export class ServiceWorkerManager {
    * Handles a service worker has fetch handlers event.
    * @param event the service worker has fetch handlers event to handle
    */
-  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasHandlersEvent']) {
+  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasFetchHandler']) {
     debug('service worker has fetch handlers event called: %o', event)
-    this.hasFetchHandlers = event.hasHandlers
+    this.hasFetchHandler = event.hasFetchHandler
   }
 
   /**
    * Handles a service worker fetch event.
    * @param event the service worker fetch event to handle
    */
-  private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchEvent']) {
+  private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchRequest']) {
     const promises = this.pendingPotentiallyControlledRequests.get(event.url)
 
     if (promises) {
@@ -255,7 +255,7 @@ export class ServiceWorkerManager {
    * @returns a promise that resolves to `true` if the URL is controlled by a service worker, `false` otherwise.
    */
   private isURLControlledByServiceWorker (url: string) {
-    if (!this.hasFetchHandlers) {
+    if (!this.hasFetchHandler) {
       return false
     }
 

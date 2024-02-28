@@ -34,9 +34,9 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'hasHandlersEvent',
+          type: 'hasFetchHandler',
           payload: {
-            hasHandlers: true,
+            hasFetchHandler: true,
           },
         })
       })
@@ -56,7 +56,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -91,7 +91,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://example.com/bar.css',
             isControlled: true,
@@ -118,7 +118,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://example.com/baz.woff2',
             isControlled: true,
@@ -216,7 +216,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: false,
@@ -227,7 +227,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
         // A request that is not handled by the service worker 'fetch' handler is not controlled (fetch event first)
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: false,
@@ -428,7 +428,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -463,7 +463,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://example.com/bar.css',
             isControlled: true,
@@ -490,7 +490,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://example.com/baz.woff2',
             isControlled: true,
@@ -590,7 +590,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -633,7 +633,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://example.com/bar.css',
             isControlled: true,
@@ -658,7 +658,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -703,7 +703,7 @@ describe('lib/http/util/service-worker-manager', () => {
 
       it('supports multiple fetch handler calls first', async () => {
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -711,7 +711,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/bar.js',
             isControlled: false,
@@ -769,7 +769,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
@@ -777,7 +777,7 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         manager.handleServiceWorkerClientEvent({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/bar.js',
             isControlled: false,
@@ -790,9 +790,9 @@ describe('lib/http/util/service-worker-manager', () => {
 
       it('supports no client fetch handlers', async () => {
         manager.handleServiceWorkerClientEvent({
-          type: 'hasHandlersEvent',
+          type: 'hasFetchHandler',
           payload: {
-            hasHandlers: false,
+            hasFetchHandler: false,
           },
         })
 
@@ -818,7 +818,7 @@ describe('lib/http/util/service-worker-manager', () => {
       const event = {
         name: '__cypressServiceWorkerClientEvent',
         payload: JSON.stringify({
-          type: 'fetchEvent',
+          type: 'fetchRequest',
           payload: {
             url: 'http://localhost:8080/foo.js',
             respondWithCalled: true,
@@ -829,7 +829,7 @@ describe('lib/http/util/service-worker-manager', () => {
       serviceWorkerClientEventHandler(handler)(event)
 
       expect(handler).to.have.been.calledWith({
-        type: 'fetchEvent',
+        type: 'fetchRequest',
         payload: {
           url: 'http://localhost:8080/foo.js',
           respondWithCalled: true,

@@ -452,7 +452,7 @@ describe('http', function () {
       const handleServiceWorkerClientEventStub = sinon.stub(http.serviceWorkerManager, 'handleServiceWorkerClientEvent')
 
       const event = {
-        type: 'fetchEvent' as const,
+        type: 'fetchRequest' as const,
         payload: {
           url: 'foo',
           isControlled: true,

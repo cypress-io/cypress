@@ -34,11 +34,11 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       }
     }
 
-    const __cypressServiceWorkerSendHasFetchEventHandlers = () => {
+    const sendHasFetchEventHandlers = () => {
       // @ts-expect-error __cypressScriptEvaluated is declared below
       // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
       if (__cypressScriptEvaluated) {
-        sendEvent({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(listenerCount > 0 || self.onfetch) } })
+        sendEvent({ type: 'hasFetchHandler', payload: { hasFetchHandler: !!(listenerCount > 0 || self.onfetch) } })
       }
     }
 
@@ -57,7 +57,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       return typeof options === 'boolean' ? options : options?.capture
     }
 
-    function __cypressWrapListener (listener: Function) {
+    function wrapListener (listener: Function) {
       return (event) => {
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
@@ -73,7 +73,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         const returnValue = listener(event)
 
         // call the CDP binding to inform the backend whether or not the service worker handled the request
-        sendEvent({ type: 'fetchEvent', payload: { url: event.request.url, isControlled: respondWithCalled } })
+        sendEvent({ type: 'fetchRequest', payload: { url: event.request.url, isControlled: respondWithCalled } })
 
         return returnValue
       }
@@ -98,7 +98,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         // If the listener is a function, we can just wrap it
         // Otherwise, we need to wrap the listener in a proxy so we can track and wrap the handleEvent function
         if (typeof listener === 'function') {
-          newListener = __cypressWrapListener(listener)
+          newListener = wrapListener(listener)
         } else {
           // since the handleEvent function could change, we need to use a proxy to wrap it
           newListener = new Proxy(listener, {
@@ -109,7 +109,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
 
                 // If the handleEvent function has not been wrapped yet, or if it has changed, we need to wrap it
                 if ((!wrappedHandleEvent && target.handleEvent) || target.handleEvent !== origHandleEvent) {
-                  targetToWrappedHandleEventMap.set(target, __cypressWrapListener(target.handleEvent))
+                  targetToWrappedHandleEventMap.set(target, wrapListener(target.handleEvent))
                   targetToOrigHandleEventMap.set(target, target.handleEvent)
                 }
 
@@ -129,7 +129,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         getCaptureValue(options) ? captureListenersMap.set(listener, newListener) : nonCaptureListenersMap.set(listener, newListener)
         listenerCount++
 
-        __cypressServiceWorkerSendHasFetchEventHandlers()
+        sendHasFetchEventHandlers()
 
         return result
       }
@@ -159,7 +159,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           targetToOrigHandleEventMap.delete(listener)
         }
 
-        __cypressServiceWorkerSendHasFetchEventHandlers()
+        sendHasFetchEventHandlers()
 
         return result
       }
@@ -191,12 +191,12 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           let newHandler
 
           if (value) {
-            newHandler = __cypressWrapListener(value)
+            newHandler = wrapListener(value)
           }
 
           originalPropertyDescriptor.set?.call(this, newHandler)
 
-          __cypressServiceWorkerSendHasFetchEventHandlers()
+          sendHasFetchEventHandlers()
         },
       },
     )
@@ -204,7 +204,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     // listen for the activate event so we can inform the
     // backend whether or not the service worker has a handler
     self.addEventListener('activate', () => {
-      __cypressServiceWorkerSendHasFetchEventHandlers()
+      sendHasFetchEventHandlers()
 
       // if the binding has not been created yet, we need to wait for it
       if (!self.__cypressServiceWorkerClientEvent) {
