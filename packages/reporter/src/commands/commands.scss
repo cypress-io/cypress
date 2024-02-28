@@ -138,14 +138,11 @@
   }
 
   .command-info {
-    display: -webkit-box;
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
     padding-top: 4px;
     padding-bottom: 4px;
-    -webkit-line-clamp: 50;
-    -webkit-box-orient: vertical;
     width: 100%;
 
     .command-aliases,
