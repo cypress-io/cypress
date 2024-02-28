@@ -320,6 +320,21 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
 
         await isInitialized.promise
 
+        console.log('BILL')
+        console.log('WAITING 15 seconds more to diagnose app server start!')
+
+        let resolver
+        const fifteenSecondTimeout = new Promise((resolve, reject) => {
+          resolver = resolve
+        })
+
+        setTimeout(() => {
+          resolver()
+        }, 15000)
+
+        await fifteenSecondTimeout
+        console.log(' 15 seconds reached!')
+
         if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
         await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
