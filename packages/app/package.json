@@ -8,7 +8,7 @@
     "clean": "rimraf dist && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "echo 'ok'",
-    "cypress:run-cypress-in-cypress": "cross-env DEBUG=cypress:*,-cypress:data-context:sources:*,-cypress:graphql*,-cypress-verbose:packherd:*,-cypress:server:util:process_profiler,-cypress:server:util:process_profiler,-cypress-verbose:server:util:process_profiler,-cypress:packherd:* CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
+    "cypress:run-cypress-in-cypress": "cross-env DEBUG=cypress:server*,-cypress:server:util:process_profiler CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:launch": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
