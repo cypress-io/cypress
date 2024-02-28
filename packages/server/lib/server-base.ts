@@ -248,6 +248,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.skipDomainInjectionForDomains = experimentalSkipDomainInjection
 
       const onError = (err) => {
+        console.log('SERVER ERRORED!')
+        console.log(err.message)
         // if the server bombs before starting
         // and the err no is EADDRINUSE
         // then we know to display the custom err message
