@@ -220,9 +220,9 @@ export class ServiceWorkerManager {
   }
 
   /**
-     * Handles a service worker fetch event.
-     * @param event the service worker fetch event to handle
-     */
+   * Handles a service worker fetch event.
+   * @param event the service worker fetch event to handle
+   */
   private handleServiceWorkerFetchEvent (event: ServiceWorkerEventsPayload['fetchEvent']) {
     const promises = this.pendingPotentiallyControlledRequests.get(event.url)
 

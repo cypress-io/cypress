@@ -17,12 +17,12 @@ declare let self: typeof globalThis & {
  */
 export const injectIntoServiceWorker = (body: Buffer) => {
   function __cypressInjectIntoServiceWorker () {
-    let _listenerCount = 0
-    let _eventQueue: ServiceWorkerClientEvent[] = []
-    const _nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
-    const _captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
-    const _targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
-    const _targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    let listenerCount = 0
+    let eventQueue: ServiceWorkerClientEvent[] = []
+    const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
+    const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
+    const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
+    const targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
 
     const sendEvent = (event: ServiceWorkerClientEvent) => {
       // if the binding has been created, we can call it
@@ -30,7 +30,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       if (self.__cypressServiceWorkerClientEvent) {
         self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
       } else {
-        _eventQueue.push(event)
+        eventQueue.push(event)
       }
     }
 
@@ -38,7 +38,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       // @ts-expect-error __cypressScriptEvaluated is declared below
       // if the script has been evaluated, we can call the CDP binding to inform the backend whether or not the service worker has a handler
       if (__cypressScriptEvaluated) {
-        sendEvent({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(_listenerCount > 0 || self.onfetch) } })
+        sendEvent({ type: 'hasHandlersEvent', payload: { hasHandlers: !!(listenerCount > 0 || self.onfetch) } })
       }
     }
 
@@ -86,7 +86,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     self.addEventListener = (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions) => {
       if (type === 'fetch' && isValidListener(listener) && !isAborted(options)) {
         const capture = getCaptureValue(options)
-        const existingListener = capture ? _captureListenersMap.get(listener) : _nonCaptureListenersMap.get(listener)
+        const existingListener = capture ? captureListenersMap.get(listener) : nonCaptureListenersMap.get(listener)
 
         // If the listener is already in the map, we don't need to wrap it again
         if (existingListener) {
@@ -104,16 +104,16 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           newListener = new Proxy(listener, {
             get (target, key) {
               if (key === 'handleEvent') {
-                const wrappedHandleEvent = _targetToWrappedHandleEventMap.get(target)
-                const origHandleEvent = _targetToOrigHandleEventMap.get(target)
+                const wrappedHandleEvent = targetToWrappedHandleEventMap.get(target)
+                const origHandleEvent = targetToOrigHandleEventMap.get(target)
 
                 // If the handleEvent function has not been wrapped yet, or if it has changed, we need to wrap it
                 if ((!wrappedHandleEvent && target.handleEvent) || target.handleEvent !== origHandleEvent) {
-                  _targetToWrappedHandleEventMap.set(target, __cypressWrapListener(target.handleEvent))
-                  _targetToOrigHandleEventMap.set(target, target.handleEvent)
+                  targetToWrappedHandleEventMap.set(target, __cypressWrapListener(target.handleEvent))
+                  targetToOrigHandleEventMap.set(target, target.handleEvent)
                 }
 
-                return _targetToWrappedHandleEventMap.get(target)
+                return targetToWrappedHandleEventMap.get(target)
               }
 
               return Reflect.get(target, key)
@@ -121,14 +121,17 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           })
         }
 
+        // call the original addEventListener function prior to doing any additional work since it may fail
+        const result = oldAddEventListener(type, newListener, options)
+
         // get the capture value so we know which map to add the listener to
         // so we can then remove the listener later if requested
-        getCaptureValue(options) ? _captureListenersMap.set(listener, newListener) : _nonCaptureListenersMap.set(listener, newListener)
-        _listenerCount++
+        getCaptureValue(options) ? captureListenersMap.set(listener, newListener) : nonCaptureListenersMap.set(listener, newListener)
+        listenerCount++
 
         __cypressServiceWorkerSendHasFetchEventHandlers()
 
-        return oldAddEventListener(type, newListener, options)
+        return result
       }
 
       return oldAddEventListener(type, listener, options)
@@ -142,20 +145,23 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       if (type === 'fetch' && isValidListener(listener)) {
         // get the capture value so we know which map to remove the listener from
         const capture = getCaptureValue(options)
-        const newListener = capture ? _captureListenersMap.get(listener) : _nonCaptureListenersMap.get(listener)
+        const newListener = capture ? captureListenersMap.get(listener) : nonCaptureListenersMap.get(listener)
 
-        capture ? _captureListenersMap.delete(listener) : _nonCaptureListenersMap.delete(listener)
-        _listenerCount--
+        // call the original removeEventListener function prior to doing any additional work since it may fail
+        const result = oldRemoveEventListener(type, newListener!, options)
+
+        capture ? captureListenersMap.delete(listener) : nonCaptureListenersMap.delete(listener)
+        listenerCount--
 
         // If the listener is an object with a handleEvent method, we need to remove the wrapped function
         if (typeof listener === 'object' && typeof listener.handleEvent === 'function') {
-          _targetToWrappedHandleEventMap.delete(listener)
-          _targetToOrigHandleEventMap.delete(listener)
+          targetToWrappedHandleEventMap.delete(listener)
+          targetToOrigHandleEventMap.delete(listener)
         }
 
         __cypressServiceWorkerSendHasFetchEventHandlers()
 
-        return oldRemoveEventListener(type, newListener!, options)
+        return result
       }
 
       return oldRemoveEventListener(type, listener, options)
@@ -207,11 +213,11 @@ export const injectIntoServiceWorker = (body: Buffer) => {
             clearInterval(timer)
 
             // send any events that were queued
-            _eventQueue.forEach((event) => {
+            eventQueue.forEach((event) => {
               self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
             })
 
-            _eventQueue = []
+            eventQueue = []
           }
         }, 5)
       }
