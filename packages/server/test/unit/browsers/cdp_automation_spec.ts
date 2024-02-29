@@ -465,20 +465,41 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('take:screenshot', () => {
-      it('resolves with base64 data URL', function () {
+      beforeEach(function () {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
-
-        return expect(this.onRequest('take:screenshot'))
-        .to.eventually.equal('data:image/png;base64,foo')
       })
 
-      it('rejects nicely if Page.captureScreenshot fails', function () {
-        this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+      describe('when extension comms successfully activates main tab', () => {
+        beforeEach(function () {
+          this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves()
+        })
 
-        return expect(this.onRequest('take:screenshot'))
-        .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+        it('resolves with base64 data URL', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+
+          return expect(this.onRequest('take:screenshot'))
+          .to.eventually.equal('data:image/png;base64,foo')
+        })
+
+        it('rejects nicely if Page.captureScreenshot fails', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+
+          return expect(this.onRequest('take:screenshot'))
+          .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+        })
+      })
+
+      describe('when extension comms fail', function () {
+        beforeEach(function () {
+          this.sendDebuggerCommand.withArgs('Runtime.evaluate').rejects(new Error('Unable to communicate with Cypress Extension'))
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+        })
+
+        it('brings the page to front', async function () {
+          await this.onRequest('take:screenshot')
+
+          expect(this.sendDebuggerCommand).to.have.been.calledWith('Page.bringToFront')
+        })
       })
     })
 
