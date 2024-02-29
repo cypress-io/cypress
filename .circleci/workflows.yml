@@ -3454,7 +3454,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.2xlarge
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
