@@ -10,7 +10,11 @@ _Released 2/27/2024 (PENDING)_
 
 **Misc:**
 
-- Improved messages around browser support. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).
+- Improved messaging around browser support in the terminal when attempting to run a browser that's not supported by Cypress. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).
+
+**Dependency Updates:**
+
+- Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
 
 ## 13.6.6
 
