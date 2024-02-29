@@ -13,7 +13,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   experimentalCspAllowList: false,
-  experimentalInteractiveRunEvents: true,
+  // experimentalInteractiveRunEvents: true,
   component: {
     experimentalSingleTabRunMode: true,
     viewportWidth: 800,
@@ -26,8 +26,8 @@ export default defineConfig({
     },
   },
   'e2e': {
-    experimentalRunAllSpecs: true,
-    experimentalStudio: true,
+    // experimentalRunAllSpecs: true,
+    // experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
