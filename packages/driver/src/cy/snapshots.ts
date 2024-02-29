@@ -78,12 +78,6 @@ function constructElementSelectorTree (elem: Element): SelectorNode | undefined 
       // If we have a shadow DOM element, get the frameId and unique selector of the ShadowRoot
       // see https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot
       if (shadowRoot) {
-        if (shadowRoot.mode !== 'open') {
-          // cannot see into closed shadow DOM. Cannot reconstruct for Test Replay
-          // this code should NOT be reachable
-          return undefined
-        }
-
         // Look up the details of the shadowRoot to see which element the ShadowRoot is bound to, i.e. the host.
         const hostDetails = constructElementSelectorTree(shadowRoot.host)
 
