@@ -165,8 +165,8 @@ export class CdpAutomation implements CDPClient {
   on: OnFn
   off: OffFn
   send: SendDebuggerCommand
-  private frameTree: any
-  private gettingFrameTree: any
+  private frameTree: Protocol.Page.FrameTree | undefined
+  private gettingFrameTree: Promise<void> | undefined | null
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -203,6 +203,51 @@ export class CdpAutomation implements CDPClient {
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
     return cdpAutomation
+  }
+
+  private async activateMainTab () {
+    const ActivationTimeoutMessage = 'Unable to communicate with Cypress Extension'
+
+    const sendActivationMessage = `
+      (() => {
+        if (document.defaultView !== top) { return }
+        let onMessage
+        return new Promise((res) => {
+          onMessage = (ev) => {
+            if (ev.data.message === 'cypress:extension:main:tab:activated') {
+              window.removeEventListener('message', onMessage)
+              res()
+            }
+          }
+
+          window.addEventListener('message', onMessage)
+          window.postMessage({ message: 'cypress:extension:activate:main:tab' })
+        })
+      })()`
+
+    debugVerbose('sending activation message ', sendActivationMessage)
+
+    try {
+      await Promise.race([
+        this.sendDebuggerCommandFn('Runtime.evaluate', {
+          expression: sendActivationMessage,
+          awaitPromise: true,
+        }),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(ActivationTimeoutMessage)), 2000)
+        }),
+      ])
+    } catch (e) {
+      // If rejected due to timeout, fall back to bringing the main tab to focus -
+      // this will steal window focus, so it is a last resort. If any other error
+      // was thrown, re-throw as it was unexpected.
+      if ((e as Error).message === ActivationTimeoutMessage) {
+        debugVerbose('Unable to communicate with browser extensioin - stealing focus')
+        this.sendDebuggerCommandFn('Page.bringToFront')
+      } else {
+        throw e
+      }
+    }
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -420,7 +465,7 @@ export class CdpAutomation implements CDPClient {
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
-  onRequest = (message, data) => {
+  onRequest = async (message, data) => {
     let setCookie
 
     switch (message) {
@@ -494,6 +539,14 @@ export class CdpAutomation implements CDPClient {
       case 'remote:debugger:protocol':
         return this.sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
+        debugVerbose('capturing screenshot')
+        try {
+          await this.activateMainTab()
+        } catch (e) {
+          debugVerbose('Error while attempting to activate main tab: %O', e)
+          //throw new Error('The extension could not activate the main tab before capturing the screenshot.')
+        }
+
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         .catch((err) => {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
