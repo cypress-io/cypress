@@ -10,7 +10,7 @@ _Released 2/27/2024 (PENDING)_
 
 **Misc:**
 
-- Command messages in the Cypress command logs will now truncate display at 50 lines instead of 100. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
+- Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
 
 ## 13.6.6
 
