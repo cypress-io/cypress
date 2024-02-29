@@ -12,6 +12,10 @@ _Released 2/27/2024 (PENDING)_
 
 - Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
 
+**Dependency Updates:**
+
+- Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
+
 ## 13.6.6
 
 _Released 2/22/2024_
