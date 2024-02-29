@@ -59,11 +59,9 @@ function constructElementSelectorTree (elem: Element): SelectorNode | undefined 
       return undefined
     }
 
+    // finder will return a string if it can find the selector.
+    // otherwise, an error will throw and we will fall back to shadowDom lookup.
     const selector = findSelectorForElement(elem, ownerDoc)
-
-    if (!selector) {
-      throw new Error('Selector not defined! Fall through to shadowDom lookup')
-    }
 
     const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
