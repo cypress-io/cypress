@@ -243,7 +243,7 @@ export class CdpAutomation implements CDPClient {
       // was thrown, re-throw as it was unexpected.
       if ((e as Error).message === ActivationTimeoutMessage) {
         debugVerbose('Unable to communicate with browser extensioin - stealing focus')
-        this.sendDebuggerCommandFn('Page.bringToFront')
+        await this.sendDebuggerCommandFn('Page.bringToFront')
       } else {
         throw e
       }
@@ -544,7 +544,6 @@ export class CdpAutomation implements CDPClient {
           await this.activateMainTab()
         } catch (e) {
           debugVerbose('Error while attempting to activate main tab: %O', e)
-          //throw new Error('The extension could not activate the main tab before capturing the screenshot.')
         }
 
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
