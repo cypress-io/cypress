@@ -1735,7 +1735,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
-    parallelism: 8
+    parallelism: 10
     resource_class: large
     steps:
       - run-system-tests:
