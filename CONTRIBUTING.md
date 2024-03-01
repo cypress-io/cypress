@@ -183,7 +183,6 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
- | [create-cypress-tests](./npm/create-cypress-tests)     | `@cypress/create-cypress-tests`    | Tooling to scaffold Cypress configuration and demo test files. |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -206,8 +205,9 @@ You must have the following installed on your system to contribute locally:
 
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
-- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
-  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make cmake` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements. Use Python `3.11` or lower.)
+  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+  - Note for Windows systems: when installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
 
 ### Getting Started
 
@@ -442,7 +442,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
   - Changes has user-facing impact:
     - `breaking` - A breaking change that will require a MVB
     - `dependency` - A change to a dependency that impact the user
-    - `deprecation` - A API deprecation notice for users
+    - `deprecation` - An API deprecation notice for users
     - `feat` - A new feature
     - `fix` - A bug fix or regression fix.
     - `misc` - a misc user-facing change, like a UI update which is not a fix or enhancement to how Cypress works

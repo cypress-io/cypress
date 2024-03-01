@@ -333,6 +333,36 @@ describe('src/cy/commands/querying', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body', { log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body', { log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
+        })
+      })
+
       it('logs elements length', () => {
         let buttons = cy.$$('button')
 
@@ -516,6 +546,27 @@ describe('src/cy/commands/querying', () => {
 
         cy.get('body').as('b').get('@b').then(($body) => {
           expect($body.get(0)).to.eq(body.get(0))
+        })
+      })
+
+      it('can get alias with logging off', { protocolEnabled: true }, () => {
+        const logs = []
+        let hiddenLog
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.on('_log:added', (attrs, log) => {
+          hiddenLog = log
+        })
+
+        cy.get('body').as('b').get('@b', { log: false })
+        .then(function () {
+          expect(logs.length).to.eq(1)
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
       })
 
@@ -1543,14 +1594,15 @@ space
     })
 
     describe('special characters', () => {
-      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' ')
+      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; : ~'.split(' ')
 
-      it(`finds content by string with characters`, () => {
+      it(`finds selector with characters`, () => {
+        Cypress.config({ numTestsKeptInMemory: 0 })
         _.each(specialCharacters, (char) => {
-          const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
+          const button = $(`<button id="form-field${char}:r1:">special char ${char} content</button>`).appendTo(cy.$$('body'))
 
-          cy.contains('span', char).then(($span) => {
-            expect($span.get(0)).to.eq(span.get(0))
+          cy.contains('button', char).then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
           })
         })
       })

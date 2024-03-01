@@ -2,7 +2,7 @@
   <div class="relative">
     <!-- leave-to classes are marked absolute to allow the entering component to
     animate on top of the leaving component, creating a fading animation with no thrashing -->
-    <transition
+    <transition-group
       enter-from-class="opacity-0"
       enter-active-class="transition duration-300 ease-out"
       enter-to-class="opacity-100"
@@ -18,7 +18,7 @@
         :go-forward="increment"
         :reset="reset"
       />
-    </transition>
+    </transition-group>
   </div>
 </template>
 

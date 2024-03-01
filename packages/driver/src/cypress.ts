@@ -611,11 +611,23 @@ class $Cypress {
         return this.emit('after:all:screenshots', ...args)
 
       case 'command:log:added':
+        if (args[0].hidden) {
+          this.emit('_log:added', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
+        if (args[0].hidden) {
+          this.emit('_log:changed', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         // Cypress logs will only trigger an update every 4 ms so there is a
         // chance the runner has been torn down when the update is triggered.
         this.runner?.addLog(args[0], this.config('isInteractive'))
@@ -646,6 +658,9 @@ class $Cypress {
 
       case 'cy:command:start':
         return this.emit('command:start', ...args)
+
+      case 'cy:command:start:async':
+        return this.emitThen('command:start:async', ...args)
 
       case 'cy:command:end':
         return this.emit('command:end', ...args)

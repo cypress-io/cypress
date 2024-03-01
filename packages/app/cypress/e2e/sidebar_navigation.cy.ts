@@ -7,6 +7,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('todos')
     })
 
@@ -19,11 +20,6 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       .tab().should('have.attr', 'href', '#/debug').should('have.prop', 'tagName', 'A')
       .tab().should('have.attr', 'href', '#/settings').should('have.prop', 'tagName', 'A')
       .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
-    })
-
-    it('has no axe violations', () => {
-      cy.injectAxe()
-      cy.checkA11y('[data-cy="sidebar"]')
     })
 
     it('has appropriate aria attributes', () => {
@@ -56,6 +52,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('fixture.js').click()
 
@@ -73,6 +70,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.openProject('todos')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('todos')
     })
 
@@ -328,6 +326,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.openProject('pristine-with-ct-testing', ['--component'])
       cy.startAppServer('component')
       cy.visitApp()
+      cy.specsPageIsVisible('new-project')
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {

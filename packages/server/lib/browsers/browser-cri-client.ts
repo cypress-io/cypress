@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
@@ -376,9 +377,15 @@ export class BrowserCriClient {
     // we mark extra targets with this header, so that the proxy can recognize
     // where they came from and run only the minimal middleware necessary
     extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      // headers are received as an object but need to be an array to modify them
+      const headers = _.map(params.request.headers, (value, name) => ({ name, value }))
+
       const details: Protocol.Fetch.ContinueRequestRequest = {
         requestId: params.requestId,
-        headers: [{ name: 'X-Cypress-Is-From-Extra-Target', value: 'true' }],
+        headers: [
+          ...headers,
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
       }
 
       extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
@@ -553,6 +560,10 @@ export class BrowserCriClient {
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
 
+    this.currentlyAttachedTarget.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
     if (target) {
       this.currentlyAttachedTarget = await create({
         target: target.targetId,
@@ -561,6 +572,7 @@ export class BrowserCriClient {
         port: this.port,
         protocolManager: this.protocolManager,
         fullyManageTabs: this.fullyManageTabs,
+        browserClient: this.browserClient,
       })
     } else {
       this.currentlyAttachedTarget = undefined
@@ -583,6 +595,18 @@ export class BrowserCriClient {
 
   removeExtraTargetClient (targetId: TargetId) {
     this.extraTargetClients.delete(targetId)
+  }
+
+  async closeExtraTargets () {
+    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
+      debug('Close extra target (id: %s)', targetId)
+
+      try {
+        await this.browserClient.send('Target.closeTarget', { targetId })
+      } catch (err: any) {
+        debug('Closing extra target errored: %s', err?.stack || err)
+      }
+    }))
   }
 
   /**

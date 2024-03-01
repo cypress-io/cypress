@@ -31,6 +31,7 @@ describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.findByTestId('sidebar-link-runs-page').click()
 

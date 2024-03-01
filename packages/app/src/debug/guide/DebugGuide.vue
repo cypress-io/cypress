@@ -20,14 +20,17 @@
       <GuideCard1
         v-if="step === 0"
         :action="goForward"
+        data-cy="guide-card"
       />
       <GuideCard2
         v-else-if="step === 1"
         :action="goForward"
+        data-cy="guide-card"
       />
       <GuideCard3
         v-else-if="step === 2"
         :action="reset"
+        data-cy="guide-card"
       />
     </template>
   </Promo>

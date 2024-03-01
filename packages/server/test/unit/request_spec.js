@@ -937,6 +937,64 @@ describe('lib/request', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/28789
+    context('json=true', () => {
+      beforeEach(() => {
+        nock('http://localhost:8080')
+        .matchHeader('Content-Type', 'application/json')
+        .post('/login')
+        .reply(200, '<html></html>')
+      })
+
+      it('does not modify regular JSON objects', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const body = {
+          foo: 'bar',
+        }
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body })
+        })
+      })
+
+      it('converts boolean JSON literals to strings', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body: true,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body: 'true' })
+        })
+      })
+
+      it('converts null JSON literals to \'null\'', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body: null,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body: 'null' })
+        })
+      })
+    })
+
     context('bad headers', () => {
       beforeEach(function (done) {
         this.srv = http.createServer((req, res) => {

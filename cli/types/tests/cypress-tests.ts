@@ -804,6 +804,7 @@ namespace CypressDomTests {
   Cypress.dom.stringify(el, 'foo') // $ExpectType string
   Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
+  Cypress.dom.getContainsSelector('foo', 'bar', { matchCase: true }) // $ExpectType string
   Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
   Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
   Cypress.dom.getReasonIsHidden(el) // $ExpectType string
@@ -839,6 +840,7 @@ namespace CypressDomTests {
   Cypress.dom.stringify('', 'foo') // $ExpectError
   Cypress.dom.getElements(el) // $ExpectError
   Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
+  Cypress.dom.getContainsSelector('foo', 'bar', { invalid: false }) // $ExpectError
   Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
   Cypress.dom.getWindowByElement('') // $ExpectError
   Cypress.dom.getReasonIsHidden('') // $ExpectError

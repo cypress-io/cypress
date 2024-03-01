@@ -52,6 +52,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-from-extra-target']
 
     this.onlyRunMiddleware([
+      'MaybeSetBasicAuthHeaders',
       'SendRequestOutgoing',
     ])
   }
@@ -99,13 +100,25 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     shouldCorrelatePreRequest: shouldCorrelatePreRequests,
   })
 
-  if (!this.shouldCorrelatePreRequests()) {
+  if (!shouldCorrelatePreRequests) {
     span?.end()
 
     return this.next()
   }
 
+  const onClose = () => {
+    // if we haven't matched a browser pre-request and the request has been destroyed, raise an error
+    if (this.req.destroyed) {
+      span?.end()
+      this.reqMiddlewareSpan?.end()
+
+      this.onError(new Error('request destroyed before browser pre-request was received'))
+    }
+  }
+
   const copyResourceTypeAndNext = () => {
+    this.res.off('close', onClose)
+
     this.req.resourceType = this.req.browserPreRequest?.resourceType
 
     span?.setAttributes({
@@ -142,6 +155,8 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 
     return copyResourceTypeAndNext()
   }
+
+  this.res.once('close', onClose)
 
   this.debug('waiting for prerequest')
   this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {

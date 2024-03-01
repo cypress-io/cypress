@@ -3,6 +3,7 @@ import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
+import type Protocol from 'devtools-protocol'
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
@@ -58,6 +59,12 @@ export interface LaunchArgs {
 type NullableMiddlewareHook = (() => void) | null
 
 export type OnRequestEvent = (eventName: string, data: any) => void
+
+export type OnServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => void
+
+export type OnServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => void
+
+export type OnServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorOrigin: string }) => void
 
 export interface AutomationMiddleware {
   onPush?: NullableMiddlewareHook

@@ -395,7 +395,7 @@
       "docsButton": {
         "configGuide": {
           "text": "Configuration guide",
-          "link": "https://docs.cypress.io/guides/references/configuration"
+          "link": "https://on.cypress.io/configuration"
         },
         "cloudGuide": {
           "text": "Cypress Cloud guide",
@@ -653,7 +653,7 @@
     "footer": {
       "text": "You can reconfigure the {testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.",
       "button": "Configuration guide",
-      "buttonLink": "https://docs.cypress.io/guides/references/configuration"
+      "buttonLink": "https://on.cypress.io/configuration"
     }
   },
   "runs": {
