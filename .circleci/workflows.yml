@@ -1706,6 +1706,7 @@ jobs:
 
   system-tests-node-modules-install:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - update_cached_system_tests_deps
@@ -1842,7 +1843,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
@@ -1935,7 +1936,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
