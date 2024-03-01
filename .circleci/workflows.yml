@@ -1728,6 +1728,7 @@ jobs:
   system-tests-chrome:
     <<: *defaults
     parallelism: 8
+    resource_class: large
     steps:
       - run-system-tests:
           browser: chrome
@@ -1735,6 +1736,7 @@ jobs:
   system-tests-electron:
     <<: *defaults
     parallelism: 8
+    resource_class: large
     steps:
       - run-system-tests:
           browser: electron
@@ -1742,6 +1744,7 @@ jobs:
   system-tests-firefox:
     <<: *defaults
     parallelism: 8
+    resource_class: large
     steps:
       - run-system-tests:
           browser: firefox
