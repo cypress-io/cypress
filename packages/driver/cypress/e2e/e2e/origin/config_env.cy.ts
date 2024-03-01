@@ -233,21 +233,10 @@
     })
 
     context('structuredClone()', () => {
-      it('(firefox) uses native structuredClone in firefox and does NOT serialize Error objects in config', {
-        browser: 'firefox',
-      }, function () {
-        Cypress[fnName](USED_KEYS.error, new Error('error'))
-
-        cy.origin('http://www.foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
-          const isUndefined = Cypress[fnName](USED_KEYS.error)
-
-          expect(isUndefined).to.be.undefined
-        })
-      })
-
       // NOTE: chrome 98 and above uses a native structuredClone() method, but that method CAN clone Error objects
-      it('(chromium) uses ponyfilled or native structuredClone that can serialize Error objects in config', {
-        browser: { family: 'chromium' },
+      // NOTE: firefox 114 can now serialize/clone error objects
+      it('uses ponyfilled or native structuredClone that can serialize Error objects in config', {
+        browser: '!webkit',
       }, () => {
         Cypress[fnName](USED_KEYS.error, new Error('error'))
 

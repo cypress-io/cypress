@@ -53,8 +53,6 @@ module.exports = {
         'tooling/**',
         'packages/{app,driver,frontend-shared,launchpad}/cypress/**',
         '*.test.ts',
-        // ignore in packages that don't run in the Cypress process
-        'npm/create-cypress-tests/**',
       ],
       rules: {
         'no-restricted-properties': 'off',

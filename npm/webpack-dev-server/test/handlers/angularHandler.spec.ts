@@ -194,7 +194,7 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
 const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any) => {
   const { projectRoot } = devServerConfig.cypressConfig
   let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
-  const tempDir = await getTempDir()
+  const tempDir = await getTempDir(path.basename(projectRoot))
 
   expect(tsConfigPath).to.eq(path.join(tempDir, 'tsconfig.json'))
 

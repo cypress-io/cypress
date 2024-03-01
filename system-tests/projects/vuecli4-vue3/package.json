@@ -6,5 +6,8 @@
     "@vue/cli-service": "~4.5.17",
     "@vue/compiler-sfc": "^3.0.0"
   },
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.5"
+  },
   "projectFixtureDirectory": "vue-cli"
 }

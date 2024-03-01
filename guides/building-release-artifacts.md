@@ -19,7 +19,7 @@ This guide has instructions for building both.
 Building a new npm package is two commands:
 
 1. Increment the version in the root `package.json`
-2. `yarn build --scope cypress`
+2. `yarn lerna run build-cli`
 
 The steps above:
 
@@ -38,3 +38,9 @@ You can build the Cypress binary locally by running `yarn binary-build`, then pa
 If you're on macOS and building locally, you'll need a code-signing certificate in your keychain, which you can get by following the [instructions on Apple's website](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW30). Also, you'll also most likely want to skip notarization since it requires an Apple Developer Program account - set `SKIP_NOTARIZATION=1` when building locally to do this. [More info about code signing in CI](./code-signing.md).
 
 `yarn binary-zip` can be used to zip the built binary together.
+
+### Tips
+
+If you want to speed up the time it takes to package the binary, set `V8_SNAPSHOT_DISABLE_MINIFY=1`
+
+If you are on an M1, you need to set `RESET_ADHOC_SIGNATURE=1` in order to be able to actually run the binary after packaging it.

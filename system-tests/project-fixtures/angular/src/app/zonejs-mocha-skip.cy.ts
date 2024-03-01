@@ -41,7 +41,9 @@ describe('skip', () => {
         return cy
         .contains(title)
         .parents('[data-model-state="pending"]') // Find parent row with class indicating test was skipped
-        .should('be.visible')
+        // the size of the reporter might be smaller, resulting in autoscroll in headless,
+        // meaning some of these will not be visible, hence checking for existence
+        .should('exist')
       })
     }
 

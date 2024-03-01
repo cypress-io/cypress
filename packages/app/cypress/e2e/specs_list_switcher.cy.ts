@@ -1,8 +1,40 @@
 describe('App: Spec List Testing Type Switcher', () => {
+  context('e2e unconfigured', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
+
+      cy.startAppServer('component')
+
+      cy.withCtx(async (ctx, o) => {
+        const config = await ctx.file.readFileInProject('cypress.config.js')
+        const newCypressConfig = config.replace(`e2e:`, `_e2e:`)
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
+      })
+
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.verifyCtSelected()
+    })
+
+    it('switches testing types', () => {
+      cy.findByTestId('testing-type-switch').within(() => {
+        cy.findByText('E2E').click()
+      })
+
+      cy.contains('End-to-end testing is not set up for this project')
+
+      cy.findByTestId('testing-type-setup-button').should('be.visible')
+    })
+  })
+
   context('ct unconfigured', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.openProject('cypress-in-cypress')
+
+      cy.startAppServer('e2e')
 
       cy.withCtx(async (ctx, o) => {
         const config = await ctx.file.readFileInProject('cypress.config.js')
@@ -11,9 +43,8 @@ describe('App: Spec List Testing Type Switcher', () => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
       })
 
-      cy.startAppServer('e2e')
-
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.verifyE2ESelected()
     })
 
@@ -30,44 +61,16 @@ describe('App: Spec List Testing Type Switcher', () => {
     })
   })
 
-  context('e2e unconfigured', () => {
-    beforeEach(() => {
-      cy.scaffoldProject('cypress-in-cypress')
-      cy.openProject('cypress-in-cypress')
-
-      cy.withCtx(async (ctx, o) => {
-        const config = await ctx.file.readFileInProject('cypress.config.js')
-        const newCypressConfig = config.replace(`e2e:`, `_e2e:`)
-
-        await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
-      })
-
-      cy.startAppServer('component')
-
-      cy.visitApp()
-      cy.verifyCtSelected()
-    })
-
-    it('switches testing types', () => {
-      cy.findByTestId('testing-type-switch').within(() => {
-        cy.findByText('E2E').click()
-      })
-
-      cy.contains('End-to-end testing is not set up for this project')
-
-      cy.findByTestId('testing-type-setup-button').should('be.visible')
-    })
-  })
-
   context('both testing types configured', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
 
       cy.startAppServer('component')
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.verifyCtSelected()
     })
 

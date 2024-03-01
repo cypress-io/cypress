@@ -78,27 +78,6 @@ describe('src/cy/commands/screenshot', () => {
 
     it('is noop when screenshotOnRunFailure is false', () => {
       Cypress.config('isInteractive', false)
-      cy.stub(Screenshot, 'getConfig').returns({
-        screenshotOnRunFailure: false,
-      })
-
-      cy.spy(Cypress, 'action').log(false)
-
-      const test = {
-        err: new Error,
-      }
-
-      const runnable = cy.state('runnable')
-
-      Cypress.action('runner:runnable:after:run:async', test, runnable)
-      .then(() => {
-        expect(Cypress.action).not.to.be.calledWith('test:set:state')
-        expect(Cypress.automation).not.to.be.called
-      })
-    })
-
-    it('is noop when screenshotOnRunFailure is false', () => {
-      Cypress.config('isInteractive', false)
       Cypress.config('screenshotOnRunFailure', false)
 
       cy.spy(Cypress, 'action').log(false)
@@ -1118,9 +1097,36 @@ describe('src/cy/commands/screenshot', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'screenshot') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.screenshot('bar', { log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'screenshot') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.screenshot('bar', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('screenshot')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

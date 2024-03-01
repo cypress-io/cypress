@@ -26,16 +26,25 @@ describe('Extension', () => {
   })
 
   context('.getPathToExtension', () => {
-    it('returns path to dist', () => {
+    it('returns path to dist/v2', () => {
       const result = extension.getPathToExtension()
-      const expected = path.join(cwd, 'dist')
+      const expected = path.join(cwd, 'dist', 'v2')
 
       expect(path.normalize(result)).to.eq(path.normalize(expected))
     })
 
-    it('returns path to files in dist', () => {
+    it('returns path to files in dist/v2', () => {
       const result = extension.getPathToExtension('background.js')
-      const expected = path.join(cwd, '/dist/background.js')
+      const expected = path.join(cwd, '/dist/v2/background.js')
+
+      expect(path.normalize(result)).to.eq(path.normalize(expected))
+    })
+  })
+
+  context('.getPathToV3Extension', () => {
+    it('returns path to dist/v3', () => {
+      const result = extension.getPathToV3Extension()
+      const expected = path.join(cwd, 'dist', 'v3')
 
       expect(path.normalize(result)).to.eq(path.normalize(expected))
     })
@@ -113,7 +122,7 @@ describe('Extension', () => {
 
   context('manifest', () => {
     it('has a key that resolves to the static extension ID', () => {
-      return fs.readJsonAsync(path.join(cwd, 'app/manifest.json'))
+      return fs.readJsonAsync(path.join(cwd, 'app/v2/manifest.json'))
       .then((manifest) => {
         const cmd = `echo \"${manifest.key}\" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p`
 

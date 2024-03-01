@@ -1,15 +1,15 @@
 describe('unexpected errors', { defaultCommandTimeout: 0 }, () => {
   let originalIsSpecialKeyword
-  let orignalCyExpect
+  let originalCyExpect
 
   beforeEach(() => {
     originalIsSpecialKeyword = Cypress.LocalStorage._isSpecialKeyword
-    orignalCyExpect = cy.expect
+    originalCyExpect = cy.expect
   })
 
   afterEach(() => {
     Cypress.LocalStorage._isSpecialKeyword = originalIsSpecialKeyword
-    cy.expect = orignalCyExpect
+    cy.expect = originalCyExpect
   })
 
   it('Cypress method error', () => {

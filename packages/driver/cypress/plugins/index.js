@@ -10,7 +10,6 @@ const Jimp = require('jimp')
 const webpackConfig = require('@packages/runner/webpack.config.ts')
 
 async function getWebpackOptions () {
-  process.env.NO_LIVERELOAD = '1'
   const opts = await webpackConfig.default()
 
   const webpackOptions = opts[0]

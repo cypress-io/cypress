@@ -315,7 +315,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         if (Cypress.browser.family === 'chromium') {
           expect(err.message).to.include('HTMLDivElement object could not be cloned')
         } else if (Cypress.browser.family === 'firefox') {
-          expect(err.message).to.include('The object could not be cloned')
+          expect(err.message).to.include('object could not be cloned')
         }
 
         done()

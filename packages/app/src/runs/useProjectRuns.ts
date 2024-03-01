@@ -31,6 +31,7 @@ fragment RunsContainer on Query {
       __typename
       ... on CloudProject {
         id
+        cloudProjectUrl
         runs(first: 10) {
           ...RunsContainer_RunsConnection
         }

@@ -7,6 +7,7 @@ describe('specChange subscription', () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
     cy.visitApp()
+    cy.specsPageIsVisible()
   })
 
   describe('specs list', () => {

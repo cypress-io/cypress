@@ -37,7 +37,7 @@
     "stream-http": "^3.2.0",
     "timers-browserify": "^2.0.12",
     "ts-loader": "9.4.4",
-    "tsconfig-package": "npm:tsconfig@^7.0.0",
+    "tsconfig-aliased-for-wbip": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tty-browserify": "^0.0.1",
     "url": "^0.11.1",

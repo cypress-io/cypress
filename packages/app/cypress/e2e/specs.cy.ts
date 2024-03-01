@@ -10,6 +10,7 @@ describe('App: Specs', () => {
         cy.openProject('no-specs')
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -192,7 +193,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
         })
 
         it('should not show trouble rendering alert', () => {
@@ -230,6 +233,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -301,7 +305,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.ts')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy="spec-list-file"]').contains('MyTest.cy.ts')
         })
       })
     })
@@ -327,6 +333,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -436,7 +443,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy-row]').contains('MyTest.cy.js')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy-row]').contains('MyTest.cy.js')
         })
 
         it('generates spec with file name that does not contain a known spec extension', () => {
@@ -504,6 +513,7 @@ describe('App: Specs', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
       })
 
       context('scaffold example files', () => {
@@ -537,9 +547,10 @@ describe('App: Specs', () => {
     context('project with default spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs')
+        cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         cy.findAllByTestId('card').eq(1).as('TemplateSpecCard')
       })
@@ -652,7 +663,7 @@ describe('App: Specs', () => {
     context('project with custom spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-custom-pattern')
-        cy.openProject('no-specs-custom-pattern')
+        cy.openProject('no-specs-custom-pattern', ['--component'])
 
         // set preferred editor to bypass IDE selection dialog
         cy.withCtx((ctx) => {
@@ -670,6 +681,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -775,6 +787,7 @@ describe('App: Specs', () => {
       cy.openProject('no-specs')
       cy.startAppServer('e2e')
       cy.visitApp()
+      cy.specsPageIsVisible('new-project')
 
       cy.findByRole('heading', {
         level: 1,

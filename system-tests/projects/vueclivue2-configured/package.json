@@ -17,5 +17,8 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.5"
+  }
 }

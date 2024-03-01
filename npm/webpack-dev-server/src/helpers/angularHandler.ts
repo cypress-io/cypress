@@ -47,7 +47,7 @@ export async function getProjectConfig (projectRoot: string): Promise<Cypress.An
     defaultProject = Object.keys(angularJson.projects).find((name) => angularJson.projects[name].projectType === 'application')
 
     if (!defaultProject) {
-      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://docs.cypress.io/guides/references/configuration#Options-API to see how to pass in a custom project configuration')
+      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://on.cypress.io/configuration to see how to pass in a custom project configuration')
     }
   }
 
@@ -154,15 +154,15 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     include: includePaths,
   }, null, 2)
 
-  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot)), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
 }
 
-export async function getTempDir (): Promise<string> {
-  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
+export async function getTempDir (projectName: string): Promise<string> {
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', projectName)
 
   await fs.ensureDir(cypressTempDir)
 

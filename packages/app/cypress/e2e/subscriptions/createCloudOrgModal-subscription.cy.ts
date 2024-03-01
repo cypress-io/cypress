@@ -5,14 +5,14 @@ import type { SinonStub } from 'sinon'
 describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
-    cy.openProject('component-tests')
+    cy.openProject('component-tests', ['--component'])
     cy.startAppServer('component')
   })
 
   context('Runs - Connect Org', () => {
     it('opens create Org modal after clicking Connect Project button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -31,6 +31,7 @@ describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.findByTestId('sidebar-link-runs-page').click()
 

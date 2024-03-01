@@ -350,7 +350,7 @@ export function getRunnerConfigFromWindow () {
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
- * It is bundlded via webpack and consumed like a third party module.
+ * It is bundled via webpack and consumed like a third party module.
  *
  * This only needs to happen once, prior to running the first spec.
  */

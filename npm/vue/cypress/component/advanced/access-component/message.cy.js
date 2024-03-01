@@ -47,7 +47,7 @@ describe('Message', () => {
   describe('Events', () => {
     it('calls handleClick when click on message', () => {
       // need to spy on the _original_ method before it gets
-      // passed to the Vue.extend and gets into private closuer
+      // passed to the Vue.extend and gets into private closure
       const spy = cy.spy(Message.methods, 'handleClick')
 
       createCmp({ message: 'Cat' })

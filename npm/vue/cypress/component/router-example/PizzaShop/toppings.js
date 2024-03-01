@@ -11,7 +11,7 @@ const BACON = { name: 'bacon', icon: '🥓' }
 const veggie = [CHEESE, TOMATOES, MUSHROOMS, PEPPERS, PINEAPPLE]
 const vegan = [TOMATOES, MUSHROOMS, PEPPERS, PINEAPPLE]
 const meatlover = [CHEESE, CHICKEN, STEAK, HAM, BACON]
-const hawaian = [CHEESE, PINEAPPLE, HAM]
+const hawaiian = [CHEESE, PINEAPPLE, HAM]
 
 export const ALL_TOPPINGS = [
   CHEESE,
@@ -25,4 +25,4 @@ export const ALL_TOPPINGS = [
   BACON,
 ]
 
-export const PRESETS = { veggie, vegan, meatlover, hawaian }
+export const PRESETS = { veggie, vegan, meatlover, hawaiian }

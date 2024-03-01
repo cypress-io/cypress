@@ -35,7 +35,7 @@ export function hasCtx () {
 
 /**
  * Gets the current DataContext, used in situations where it's too much work
- * to inject it deeply through the class hierearchy in legacy server code, but we
+ * to inject it deeply through the class hierarchy in legacy server code, but we
  * need to reference it anyway, and for the time being we can assume
  * there's only one for the lifecycle of the Electron app.
  */

@@ -57,5 +57,15 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{workspaceRoot}/cli/react18",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

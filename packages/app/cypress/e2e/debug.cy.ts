@@ -14,7 +14,7 @@ Cypress.on('window:before:load', (win) => {
 describe('App - Debug Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress', ['--component'])
     cy.startAppServer('component')
 
     cy.loginUser()
@@ -32,7 +32,11 @@ describe('App - Debug Page', () => {
 
       if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug' || obj.operationName === 'SideBarNavigationContainer_currentProject_cloudProject_cloudProjectBySlug') {
         if (obj.result.data) {
+          // Standard Calls
           obj.result.data.cloudProjectBySlug.runByNumber = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          // Aliased Calls
+          obj.result.data.cloudProjectBySlug.latestRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          obj.result.data.cloudProjectBySlug.selectedRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
         }
       }
 
@@ -44,6 +48,7 @@ describe('App - Debug Page', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
 
@@ -71,7 +76,7 @@ describe('App - Debug Page', () => {
     .contains('View in Cypress Cloud')
     .should('have.attr', 'href', 'https://cloud.cypress.io/projects/7p5uce/runs/2?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+App')
 
-    cy.findByTestId('debug-runNumber-PASSED').contains('#2')
+    cy.findByTestId('runNumber-status-PASSED').contains('#2')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {
@@ -121,6 +126,7 @@ describe('App - Debug Page', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
@@ -132,7 +138,7 @@ describe('App - Debug Page', () => {
 
     cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
 
-    cy.findByTestId('debug-runNumber-FAILED').contains('#136')
+    cy.findByTestId('runNumber-status-FAILED').contains('#136')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {
@@ -179,7 +185,7 @@ describe('App - Debug Page', () => {
 
       const run = options.testRun
 
-      run.totalInstanceCount = 5
+      run.totalInstanceCount = 3
       if (run.completedInstanceCount === undefined) {
         run.completedInstanceCount = 0
         run.createdAt = (new Date()).toISOString()
@@ -207,10 +213,10 @@ describe('App - Debug Page', () => {
       }
 
       if (obj.operationName === 'RelevantRunSpecsDataSource_Specs' && obj.result.data) {
-        //NOTE Figure out how to manually trigger polling instead of adjusting polling intervals
+        // NOTE Figure out how to manually trigger polling instead of adjusting polling intervals
         obj.result.data.pollingIntervals = {
           __typename: 'CloudPollingIntervals',
-          runByNumber: 1, //Increase polling interval for debugging test
+          runByNumber: 1.5, //Increase polling interval for debugging test
         }
 
         if (run.totalInstanceCount === run.completedInstanceCount) {
@@ -228,19 +234,19 @@ describe('App - Debug Page', () => {
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
 
-    cy.findByTestId('header-top').contains('chore: testing cypress')
+    cy.findByTestId('header-top').contains('chore: testing cypress').should('be.visible')
 
-    cy.findByTestId('debug-testing-progress').as('progress')
-
-    cy.get('@progress').contains('Testing in progress...')
     cy.get('[data-cy="debug-badge"]').contains('0').should('be.visible')
-    cy.get('@progress').contains('1 of 5 specs completed')
-    cy.get('@progress').contains('2 of 5 specs completed')
-    cy.get('@progress').contains('3 of 5 specs completed')
+
+    cy.get('[data-cy=debug-testing-progress]').contains('Testing in progress...')
+    cy.findByTestId('debug-testing-progress').contains('1 of 3 specs completed')
+    cy.findByTestId('debug-testing-progress').contains('2 of 3 specs completed')
+    cy.findByTestId('debug-testing-progress').contains('3 of 3 specs completed')
     cy.get('[data-cy="debug-badge"]').contains('1').should('be.visible')
 
     cy.findByTestId('spec-contents').within(() => {

@@ -15,7 +15,7 @@ describe('<RunConnectSuccessAlert />', { viewportHeight: 400 }, () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/21856
-  describe('resposive design', () => {
+  describe('responsive design', () => {
     it('small screen (width < md(768px))', () => {
       cy.mountFragment(RunsConnectSuccessAlertFragmentDoc, {
         render: (gqlVal) => {

@@ -437,9 +437,20 @@ describe('Log Serialization', () => {
 
     expect(snapshotBodyBefore.length).to.equal(1)
 
-    expect(snapshotBodyBefore[0]).to.be.instanceOf(HTMLBodyElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLBodyElement
+      expect(snapshotBodyBefore[0].constructor.name).to.equal('HTMLBodyElement')
+    } else {
+      expect(snapshotBodyBefore[0]).to.be.instanceOf(HTMLBodyElement)
+    }
+
     // verify to some degree that the reified elements above can be matched into the snapshot
-    expect(snapshotBodyBefore[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLFormElement
+      expect(snapshotBodyBefore[0].querySelector('form#button-inside-a').constructor.name).to.equal('HTMLFormElement')
+    } else {
+      expect(snapshotBodyBefore[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    }
 
     expect(snapshots[1]).to.have.property('name').that.equals('after')
     expect(snapshots[1]).to.have.property('htmlAttrs').that.deep.equals({})
@@ -449,10 +460,15 @@ describe('Log Serialization', () => {
     const snapshotBodyAfter = snapshots[1].body.get()
 
     expect(snapshotBodyAfter.length).to.equal(1)
-
-    expect(snapshotBodyAfter[0]).to.be.instanceOf(HTMLBodyElement)
-    // verify to some degree that the reified elements above can be matched into the snapshot
-    expect(snapshotBodyAfter[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLBodyElement
+      expect(snapshotBodyAfter[0].constructor.name).to.equal('HTMLBodyElement')
+      expect(snapshotBodyAfter[0].querySelector('form#button-inside-a').constructor.name).to.equal('HTMLFormElement')
+    } else {
+      expect(snapshotBodyAfter[0]).to.be.instanceOf(HTMLBodyElement)
+      // verify to some degree that the reified elements above can be matched into the snapshot
+      expect(snapshotBodyAfter[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    }
   })
 
   // purpose of these 'DOM Elements' tests is to give a very basic understanding of how DOM element serialization works in the log serializer

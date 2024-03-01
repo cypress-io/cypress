@@ -40,6 +40,9 @@ const isWindows = () => {
 const isGteNode12 = () => {
   return Number(process.versions.node.split('.')[0]) >= 12
 }
+const isGteNode18 = () => {
+  return Number(process.versions.node.split('.')[0]) >= 18
+}
 
 if (!run || !run.length) {
   return exitErr(`
@@ -83,6 +86,14 @@ if (isGteNode12()) {
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
     `--max-http-header-size=${1024 * 1024}`,
+  )
+}
+
+// allow all ciphers to test TLSv1 in Node 18+ for express hosted servers in system tests
+if (isGteNode18()) {
+  // https://github.com/nodejs/node/issues/49210
+  commandAndArguments.args.push(
+    `--tls-cipher-list=DEFAULT@SECLEVEL=0`,
   )
 }
 

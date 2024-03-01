@@ -36,7 +36,7 @@ describe('Users with Fetch', () => {
       .contains('foo')
     })
 
-    it('can inspect mocked network reaponse', () => {
+    it('can inspect mocked network response', () => {
       const users = [{ id: 1, name: 'foo' }]
 
       cy.intercept('GET', '/users?_limit=3', users).as('users')

@@ -12,11 +12,17 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "16.18.39",
+    "@types/node": "18.17.5",
+    "devtools-protocol": "0.0.927104",
     "typescript": "^4.7.4"
   },
   "files": [
     "src/*"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  }
 }

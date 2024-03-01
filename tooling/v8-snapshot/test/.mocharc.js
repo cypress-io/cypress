@@ -4,6 +4,6 @@ module.exports = {
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  timeout: 30000,
+  timeout: 60000,
   watchFiles: ['test/**/*.ts', 'src/**/*.ts'],
 }

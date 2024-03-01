@@ -16,12 +16,13 @@ for (const project of PROJECTS) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project)
+      cy.openProject(project, ['--component'])
       cy.startAppServer('component')
     })
 
     it('should mount a passing test and live-reload', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('Tutorial.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
 
@@ -51,6 +52,7 @@ for (const project of PROJECTS) {
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('Tutorial.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -73,6 +75,7 @@ for (const project of PROJECTS) {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
     it('should detect new spec', { retries: 15 }, () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx) => {
         const newSpecPath = ctx.path.join('components', 'New.cy.js')

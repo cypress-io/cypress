@@ -437,3 +437,36 @@ describe('utils', () => {
     })
   })
 })
+
+describe('plugin', () => {
+  context('excludeSpecPattern', () => {
+    it('supports an array value', () => {
+      cy.task('grep', {
+        excludeSpecPattern: ['**/test2.spec.js', '**/test3.spec.js'],
+        specPattern: '**/*.spec.js',
+        env: {
+          grepTags: 'smoke',
+          grepFilterSpecs: true,
+        },
+      }).then((config) => {
+        expect(config.specPattern.length).to.equal(1)
+        expect(config.specPattern[0]).to.contain('test1.spec.js')
+      })
+    })
+
+    it('supports a string value', () => {
+      cy.task('grep', {
+        excludeSpecPattern: '**/test2.spec.js',
+        specPattern: '**/*.spec.js',
+        env: {
+          grepTags: 'smoke',
+          grepFilterSpecs: true,
+        },
+      }).then((config) => {
+        expect(config.specPattern.length).to.equal(2)
+        expect(config.specPattern[0]).to.contain('test1.spec.js')
+        expect(config.specPattern[1]).to.contain('test3.spec.js')
+      })
+    })
+  })
+})

@@ -1831,7 +1831,7 @@ type Mutation {
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
 
   """Set the route to debug and show the specified CloudRun"""
-  showDebugForCloudRun(runNumber: Int!): Query
+  showDebugForCloudRun(runNumber: Int!): Boolean
 
   """Show system notification via Electron"""
   showSystemNotification(body: String!, title: String!): Boolean

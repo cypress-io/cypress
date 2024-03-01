@@ -6,21 +6,12 @@ describe('e2e headless spec', function () {
     expect(Cypress.browser.isHeaded).to.eq(!expectedHeadless)
   })
 
-  it('has expected HeadlessChrome useragent', function () {
-    if (Cypress.browser.family !== 'chromium' || Cypress.browser.name === 'electron') {
-      return
-    }
-
-    cy.wrap(navigator.userAgent)
-    .should(expectedHeadless ? 'contain' : 'not.contain', 'HeadlessChrome')
-  })
-
   it('has expected launch args', function () {
     if (Cypress.browser.family !== 'chromium' || Cypress.browser.name === 'electron') {
       return
     }
 
     cy.task('get:browser:args')
-    .should(expectedHeadless ? 'contain' : 'not.contain', '--headless')
+    .should(expectedHeadless ? 'contain' : 'not.contain', '--headless=new')
   })
 })

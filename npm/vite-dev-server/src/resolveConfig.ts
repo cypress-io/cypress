@@ -65,6 +65,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
 function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig {
   const {
     cypressConfig: {
+      port,
       projectRoot,
       devServerPublicPathRoute,
       supportFile,
@@ -73,6 +74,8 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     },
     specs,
   } = config
+
+  const vitePort = port ?? undefined
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list
@@ -122,6 +125,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
           vite.searchForWorkspaceRoot?.(process.cwd()),
         ],
       },
+      port: vitePort,
       host: '127.0.0.1',
       // Disable file watching and HMR when executing tests in `run` mode
       ...(isTextTerminal

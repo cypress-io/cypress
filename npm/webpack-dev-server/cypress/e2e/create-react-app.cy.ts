@@ -14,18 +14,20 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project)
+      cy.openProject(project, ['--component'])
       cy.startAppServer('component')
     })
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('App.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
     })
 
     it('should live-reload on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('App.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -52,6 +54,7 @@ for (const project of WEBPACK_REACT) {
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('App.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -70,6 +73,7 @@ for (const project of WEBPACK_REACT) {
 
     it('should detect new spec', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(

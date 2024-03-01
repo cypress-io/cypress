@@ -12,9 +12,20 @@ const dragHandleToClientX = (panel: DraggablePanel, x: number) => {
 function startAtSpecsPage (testingType: typeof testingTypes[number]) {
   cy.scaffoldProject('cypress-in-cypress')
   cy.findBrowsers()
-  cy.openProject('cypress-in-cypress')
+
+  openProject(testingType)
+
   cy.startAppServer(testingType)
   cy.visitApp()
+  cy.specsPageIsVisible()
+}
+
+function openProject (testingType: typeof testingTypes[number]) {
+  if (testingType === 'e2e') {
+    cy.openProject('cypress-in-cypress')
+  } else {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  }
 }
 
 // For Cypress-in-Cypress tests that do not vary based on testing type
@@ -103,7 +114,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      openProject(testingType)
       cy.withCtx((ctx) => {
         ctx.coreData.localSettings.preferences.reporterWidth = 800
         ctx.coreData.localSettings.preferences.specListWidth = 250
@@ -112,6 +123,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.startAppServer(testingType)
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.get('[data-cy="spec-item"]').first().click()
       // Let runner stabilize
@@ -186,10 +198,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="select-browser"]').as('selectBrowser')
 
       cy.viewport(500, 600)
-      cy.get('@selectBrowser')
-      .should('not.be.visible')
-      .scrollIntoView()
-      .should('be.visible') // with no specs list open, we should see this by scrolling
+      cy.get('@selectBrowser').scrollIntoView()
+      cy.get('@selectBrowser').should('be.visible') // with no specs list open, we should see this by scrolling
 
       dragHandleToClientX('panel2', 200).then(() => {
         cy.contains('Chrome 1').should('be.visible')
@@ -198,10 +208,9 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       .click({ force: true })
 
-      cy.get('@selectBrowser')
-      .should('not.be.visible')
-      .scrollIntoView()
-      .should('not.be.visible') // with specs list open, scrolling is not enough to see this
+      cy.get('@selectBrowser').should('not.be.visible')
+      cy.get('@selectBrowser').scrollIntoView()
+      cy.get('@selectBrowser').should('not.be.visible') // with specs list open, scrolling is not enough to see this
 
       dragHandleToClientX('panel1', 130)
       cy.get('@selectBrowser')
@@ -243,6 +252,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
 
       cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
@@ -258,6 +268,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').should('exist')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.app.browserStatus = 'open'

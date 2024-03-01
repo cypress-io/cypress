@@ -109,7 +109,7 @@ browserStatusChange () {
 ```
 
 - [API Docs](https://github.com/enisdenjo/graphql-ws/tree/master/docs)
-- [Transport layer protcol specification](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
+- [Transport layer protocol specification](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
 
 ### Testing
 

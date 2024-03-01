@@ -5,9 +5,13 @@ const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = {
   getPathToExtension (...args) {
-    args = [__dirname, '..', 'dist'].concat(args)
+    args = [__dirname, '..', 'dist', 'v2'].concat(args)
 
     return path.join.apply(path, args)
+  },
+
+  getPathToV3Extension (...args) {
+    return path.join(...[__dirname, '..', 'dist', 'v3', ...args])
   },
 
   getPathToTheme () {

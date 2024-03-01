@@ -428,7 +428,7 @@ describe('lib/screenshots', () => {
         }
       })
 
-      it('stiches together 1x DPI images', function () {
+      it('stitches together 1x DPI images', function () {
         return screenshots
         .capture(this.data1, this.dataUri('DPI-1x/1.png'))
         .then((img1) => {

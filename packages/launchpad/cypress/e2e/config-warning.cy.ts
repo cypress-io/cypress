@@ -75,31 +75,11 @@ describe('baseUrl', () => {
 describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalSingleTabRunMode: true,
-            devServer () {
-              // This test doesn't need to actually run any component tests
-              // so we create a fake dev server to make it run faster and
-              // avoid flake on CI.
-              return {
-                port: 1234,
-                close: () => {},
-              }
-            },
-          },
-        })`)
-    })
+    cy.openProject('experimentalSingleTabRunMode', ['--component', '--config-file', 'cypress-component-only.config.js'])
 
     cy.visitLaunchpad()
     cy.skipWelcome()
 
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
   })
@@ -236,9 +216,9 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0 || ^=4.0.0, found 2.0.0-beta.70')
-    .should('contain.text', 'react. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0, found 15.6.2.')
-    .should('contain.text', 'react-dom. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0 but dependency was not found.')
+    .should('contain.text', 'vite. Expected ^2.0.0 || ^3.0.0 || ^4.0.0, found 2.0.0-beta.70')
+    .should('contain.text', 'react. Expected ^16.0.0 || ^17.0.0 || ^18.0.0, found 15.6.2.')
+    .should('contain.text', 'react-dom. Expected ^16.0.0 || ^17.0.0 || ^18.0.0 but dependency was not found.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
@@ -255,7 +235,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
+    .should('contain.text', '@vue/cli-service. Expected ^4.0.0 || ^5.0.0, found 3.12.1.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 2)
@@ -279,11 +259,10 @@ describe('component testing dependency warnings', () => {
 
   it('does not show warning for project that does not require bundler to be installed', () => {
     cy.scaffoldProject('next-12')
-    cy.openProject('next-12')
+    cy.openProject('next-12', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })

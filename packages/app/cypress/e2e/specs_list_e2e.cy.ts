@@ -41,6 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
   }
 
@@ -253,17 +254,87 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
 
+      it('searches specs with "-" or "_" when search contains space', function () {
+        clearSearchAndType('accounts list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('accounts-list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches specs with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('accounts_list')
+
+        cy.findAllByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'accounts_list.spec.js')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains space', function () {
+        clearSearchAndType('a b c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "-"', function () {
+        clearSearchAndType('a-b-c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
+      it('searches folders with "-" or "_" when search contains "_"', function () {
+        clearSearchAndType('a_b_c')
+
+        cy.findAllByTestId('spec-list-directory')
+        .should('have.length', 1)
+        .and('contain', 'a-b_c')
+
+        cy.findByText('No specs matched your search:').should('not.be.visible')
+      })
+
       it('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
+
+        // wait for filter
+        cy.findAllByTestId('spec-item').should('have.length', 1)
+
         cy.contains('a', targetSpecFile).click()
+
+        // make sure we are on the spec view before clicking back to the specs list
+        cy.findByTestId('runnable-header').contains(targetSpecFile)
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
-        cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+        cy.contains('button', 'Specs').click({ force: true })
 
-        cy.get('input').should('be.visible').and('have.value', targetSpecFile)
+        // wait until specs list is visible
+        cy.findByTestId('specs-list-container').should('be.visible')
+
+        cy.get('@searchField').should('have.value', targetSpecFile)
 
         cy.findByTestId('sidebar-link-specs-page').click()
 

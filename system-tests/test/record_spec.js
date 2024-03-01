@@ -38,6 +38,11 @@ let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -2293,7 +2298,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
-        it('retrieves the capture protocol and uploads the db', function () {
+        it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2302,8 +2307,60 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol?.url).to.be.a('string')
+            expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
+          })
+        })
+      })
+
+      describe('when the tab crashes in chrome', () => {
+        enableCaptureProtocol()
+        it('posts accurate test results', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            browser: 'chrome',
+            spec: 'chrome_tab_crash*,record_pass*',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          }).then(() => {
+            const requests = getRequests()
+            const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
+
+            expect(postResultsRequest.body.exception).to.include('Chrome Renderer process just crashed')
+            expect(postResultsRequest.body.tests).to.have.length(2)
+            expect(postResultsRequest.body.stats.suites).to.equal(1)
+            expect(postResultsRequest.body.stats.tests).to.equal(2)
+            expect(postResultsRequest.body.stats.passes).to.equal(1)
+            expect(postResultsRequest.body.stats.failures).to.equal(1)
+            expect(postResultsRequest.body.stats.skipped).to.equal(0)
+          })
+        })
+      })
+
+      describe('when there is an async error thrown from config file', () => {
+        enableCaptureProtocol()
+        it('posts accurate test results', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            browser: 'chrome',
+            project: 'config-with-crashing-plugin',
+            spec: 'simple_multiple.cy.js',
+            configFile: 'cypress-with-project-id.config.js',
+            record: true,
+            snapshot: false,
+            expectedExitCode: 1,
+          }).then(() => {
+            const requests = getRequests()
+            const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
+
+            expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
           })
         })
       })
@@ -2322,7 +2379,6 @@ describe('e2e record', () => {
           })
 
           it('displays error and does not upload if db size is too large', function () {
-          // have to write the db to fs here instead of in the t
             return systemTests.exec(this, {
               key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
               configFile: 'cypress-with-project-id.config.js',
@@ -2339,6 +2395,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2364,6 +2421,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2389,6 +2447,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2458,6 +2517,11 @@ describe('e2e record', () => {
 })
 
 describe('capture-protocol api errors', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   enableCaptureProtocol()
 
   const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
@@ -2477,7 +2541,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 6 times', () => {
+  describe('upload 500 - retries 8 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2488,12 +2552,22 @@ describe('capture-protocol api errors', () => {
         spec: 'record_pass*',
         record: true,
         snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })
 
-  describe('upload 500 - retries 5 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 5)
+  describe('upload 500 - retries 7 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 7)
 
     let archiveFile = ''
 

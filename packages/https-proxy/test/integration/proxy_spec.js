@@ -188,6 +188,8 @@ describe('Proxy', () => {
 
     // https://github.com/cypress-io/cypress/issues/771
     it('generates certs and can proxy requests for HTTPS requests to IPs', function () {
+      this.timeout(5000)
+
       this.sandbox.spy(this.proxy, '_generateMissingCertificates')
       this.sandbox.spy(this.proxy, '_getServerPortForIp')
 
@@ -318,29 +320,32 @@ describe('Proxy', () => {
       })
     })
 
-    it('closes outgoing connections when client disconnects', function () {
+    it('closes outgoing connections when client disconnects', async function () {
       this.sandbox.spy(net, 'connect')
 
-      return request({
+      await request({
         strictSSL: false,
         url: 'https://localhost:8444/replace',
         proxy: 'http://localhost:3333',
         resolveWithFullResponse: true,
         forever: false,
       })
-      .then(() => {
-        // ensure the outgoing socket created for this connection was destroyed
-        expect(net.connect).calledOnce
-        const socket = net.connect.getCalls()[0].returnValue
 
+      // ensure the outgoing socket created for this connection was destroyed
+      expect(net.connect).calledOnce
+      const socket = net.connect.getCalls()[0].returnValue
+
+      // sometimes the close event happens before we can attach the listener,
+      // causing this test to flake
+      if (!socket.destroyed || !socket.readyState === 'closed') {
         return new Promise((resolve) => {
-          return socket.on('close', () => {
+          socket.on('close', () => {
             expect(socket.destroyed).to.be.true
 
             resolve()
           })
         })
-      })
+      }
     })
 
     // https://github.com/cypress-io/cypress/issues/4257

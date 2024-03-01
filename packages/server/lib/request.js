@@ -330,7 +330,7 @@ const createRetryingRequestStream = function (opts = {}) {
         // if we've already begun processing the requests
         // response, then that means we failed during transit
         // and its no longer safe to retry. all we can do now
-        // is propogate the error upwards
+        // is propagate the error upwards
         debug('received an error on request after response started %o', merge(opts, { err }))
 
         return emitError(err)
@@ -697,6 +697,11 @@ module.exports = function (options = {}) {
       // https://github.com/cypress-io/cypress/issues/322
       // either turn these both on or off
       options.followAllRedirects = options.followRedirect
+
+      // https://github.com/cypress-io/cypress/issues/28789
+      if (options.json === true) {
+        if (_.isBoolean(options.body) || _.isNull(options.body)) options.body = String(options.body)
+      }
 
       if (options.form === true) {
         // reset form to whatever body is

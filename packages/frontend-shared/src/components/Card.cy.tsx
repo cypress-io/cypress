@@ -53,16 +53,16 @@ describe('Card', { viewportHeight: 400 }, () => {
     // health check that expected icons and hover icons are present in the dom
     cy.get('svg').should('have.length', 4)
 
-    // cy.percySnapshot('both cards unfocused') TODO: Find out why focus state is not capptured in Percy.
+    // cy.percySnapshot('both cards unfocused') TODO: Find out why focus state is not captured in Percy.
 
     cy.get('@e2eTitle').should('not.be.focused')
     cy.get('@e2eTitle').focus()
     cy.get('@e2eTitle').should('be.focused')
-    // cy.percySnapshot('card-1 focused') TODO: Find out why focus state is not capptured in Percy.
+    // cy.percySnapshot('card-1 focused') TODO: Find out why focus state is not captured in Percy.
 
     cy.get('@ctTitle').focus()
     cy.get('@ctTitle').should('be.focused')
-    // cy.percySnapshot('card-2 focused') TODO: Find out why focus state is not capptured in Percy.
+    // cy.percySnapshot('card-2 focused') TODO: Find out why focus state is not captured in Percy.
 
     // clicks work on card or button
     cy.get('[data-cy="card"]').eq(0).click()

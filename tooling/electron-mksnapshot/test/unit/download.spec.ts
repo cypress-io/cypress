@@ -34,7 +34,7 @@ describe('download', () => {
 
       const file = await attemptDownload(version, false)
 
-      expect(file.startsWith(`mksnapshot-v${version}`), `downloads correcly versioned ${file}`).to.be.true
+      expect(file.startsWith(`mksnapshot-v${version}`), `downloads correctly versioned ${file}`).to.be.true
     })
   })
 })

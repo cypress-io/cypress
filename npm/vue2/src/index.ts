@@ -320,7 +320,7 @@ function failTestOnVueError (err, vm, info) {
 
 /**
  * Extract the component name from the object passed to mount
- * @param componentOptions the compoennt passed to mount
+ * @param componentOptions the component passed to mount
  * @returns name of the component
  */
 function getComponentDisplayName (componentOptions: any): string {

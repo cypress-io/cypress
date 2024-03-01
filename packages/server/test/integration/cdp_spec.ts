@@ -114,13 +114,11 @@ describe('CDP Clients', () => {
         const onAsynchronousError = reject
         const onReconnect = resolve
 
-        criClient = await CriClient.create(
-          `ws://127.0.0.1:${wsServerPort}`,
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
-          undefined,
-          undefined,
           onReconnect,
-        )
+        })
 
         criClient.onReconnectAttempt = stub
 
@@ -146,13 +144,11 @@ describe('CDP Clients', () => {
         const onAsynchronousError = resolve
         const onReconnect = reject
 
-        criClient = await CriClient.create(
-          `ws://127.0.0.1:${wsServerPort}`,
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
-          undefined,
-          undefined,
           onReconnect,
-        )
+        })
 
         criClient.onReconnectAttempt = stub
 
@@ -203,25 +199,23 @@ describe('CDP Clients', () => {
       return new Promise(async (resolve, reject) => {
         const onAsynchronousError = reject
 
-        criClient = await CriClient.create(
-          `ws://127.0.0.1:${wsServerPort}`,
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
-          undefined,
-          undefined,
           onReconnect,
-        )
+        })
 
         criClient.onReconnectAttempt = stub
 
         const send = (commands: CDPCommands[]) => {
           commands.forEach(({ command, params }) => {
-            return criClient.send(command, params)
+            criClient.send(command, params).catch(() => {})
           })
         }
 
         const on = (subscriptions: CDPSubscriptions[]) => {
           subscriptions.forEach(({ eventName, cb }) => {
-            return criClient.on(eventName, cb)
+            criClient.on(eventName, cb)
           })
         }
 
@@ -303,13 +297,11 @@ describe('CDP Clients', () => {
         const onAsynchronousError = reject
         const onReconnect = reject
 
-        criClient = await CriClient.create(
-          `ws://127.0.0.1:${wsServerPort}`,
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
-          undefined,
-          undefined,
           onReconnect,
-        )
+        })
 
         const stub = sinon.stub().onThirdCall().callsFake(async () => {
           criClient.close()

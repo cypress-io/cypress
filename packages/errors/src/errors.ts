@@ -4,8 +4,7 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { TestingType } from '@packages/types'
-import type { BreakingErrResult } from '@packages/config'
+import type { BreakingErrResult, TestingType } from '@packages/types'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
@@ -754,7 +753,7 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(validEventNames)}
 
-      Learn more at https://docs.cypress.io/api/plugins/writing-a-plugin#config
+      Learn more at https://on.cypress.io/writing-a-plugin#config
 
       ${fmt.stackTrace(err)}
     `

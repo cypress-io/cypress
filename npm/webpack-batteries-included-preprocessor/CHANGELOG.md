@@ -1,3 +1,17 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.1...@cypress/webpack-batteries-included-preprocessor-v3.0.2) (2023-08-31)
+
+
+### Bug Fixes
+
+* change how tsconfig is aliased in webpack-batteries-included-preprocessor ([#27706](https://github.com/cypress-io/cypress/issues/27706)) ([6081751](https://github.com/cypress-io/cypress/commit/6081751c411a45bb9eaf7ba200d4921acdcc2422))
+
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.0...@cypress/webpack-batteries-included-preprocessor-v3.0.1) (2023-08-29)
+
+
+### Bug Fixes
+
+* resolve process/browser to process/browser.js to resolve correctly in ESM packages where .mjs or .js files exist where process is being used and globally imported. [run ci] ([#27611](https://github.com/cypress-io/cypress/issues/27611)) ([8b5c551](https://github.com/cypress-io/cypress/commit/8b5c551890024c6389b881e081114c6f1519ba98))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.4.1...@cypress/webpack-batteries-included-preprocessor-v3.0.0) (2023-08-14)
 
 

@@ -179,13 +179,11 @@
       >
         <Button
           class="group"
-          size="lg"
+          size="40"
           @click="handleClick"
         >
           {{ t('majorVersionWelcome.actionContinue') }}
-          <template #suffix>
-            <i-cy-chevron-right_x16 class="icon-dark-white" />
-          </template>
+          <i-cy-chevron-right_x16 class="icon-dark-white ml-[8px]" />
         </Button>
         <ExternalLink
           href="https://on.cypress.io/changelog"
@@ -198,7 +196,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
@@ -227,7 +225,7 @@ const versionReleaseDates = computed(() => {
     '10': useTimeAgo(Date.UTC(2022, 5, 1)).value,
     '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
     '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
-    '13': useTimeAgo(Date.UTC(2023, 7, 30)).value,
+    '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
   }
 })
 

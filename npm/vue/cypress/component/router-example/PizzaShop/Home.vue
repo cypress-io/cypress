@@ -33,10 +33,10 @@
       🍖 Meatlover
     </router-link><br>
     <router-link
-      :to="{ name: 'order', params: { preset: 'hawaian' } }"
-      class="order-hawaian"
+      :to="{ name: 'order', params: { preset: 'hawaiian' } }"
+      class="order-hawaiian"
     >
-      🍍 Hawain
+      🍍 Hawaiian
     </router-link><br>
     <router-link
       :to="{ name: 'order', query: { cheese: true } }"

@@ -68,7 +68,11 @@ describe('lib/socket', () => {
           onSavedStateChanged: sinon.spy(),
         }
 
-        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
 
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
@@ -157,7 +161,7 @@ describe('lib/socket', () => {
             },
           }
 
-          extensionBackgroundPage = require('@packages/extension/app/background')
+          extensionBackgroundPage = require('@packages/extension/app/v2/background')
         })
 
         beforeEach(function (done) {
@@ -775,7 +779,11 @@ describe('lib/socket', () => {
         getCurrentBrowser: () => null,
       })
       .then(() => {
-        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
 
         this.server.startWebsockets(this.automation, this.cfg, {})
 

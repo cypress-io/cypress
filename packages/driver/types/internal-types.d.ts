@@ -46,6 +46,10 @@ declare namespace Cypress {
     (k: keyof ResolvedConfigOptions, v?: any): any
   }
 
+  interface TestConfigOverrides extends Cypress.TestConfigOverrides {
+    protocolEnabled?: boolean
+  }
+
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
@@ -58,6 +62,8 @@ declare namespace Cypress {
     (action: 'clear:cookies', fn: () => void)
     (action: 'cross:origin:cookies', fn: (cookies: SerializableAutomationCookie[]) => void)
     (action: 'before:stability:release', fn: () => void)
+    (action: '_log:added', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
+    (action: '_log:changed', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: 'paused', fn: (nextCommandName: string) => void)
   }
 
@@ -96,4 +102,13 @@ interface CypressRunnable extends Mocha.Runnable {
   hookName: string
   id: any
   err: any
+  // Added by Cypress to Tests in order to calculate continue conditions for retries
+  calculateTestStatus?: () => {
+    strategy: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
+    shouldAttemptsContinue: boolean
+    attempts: number
+    outerStatus: 'passed' | failed
+  }
+  // Added by Cypress to Tests in order to determine if the experimentalRetries test run passed so we can leverage in the retry logic.
+  hasAttemptPassed?: boolean
 }

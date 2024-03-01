@@ -27,8 +27,8 @@ const addTypeScriptConfig = (file, options) => {
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-package'
-  const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
+  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
+  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,

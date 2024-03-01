@@ -91,7 +91,6 @@ it('visits a basic html page', () => {
     })
 
     assertStudioHookCount(2)
-
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
         cy.get('.__cypress-studio-assertions-menu').shadow().contains('be visible').realClick()
@@ -138,19 +137,19 @@ it('visits a basic html page', () => {
       cy.get('.command-name-assert').should('have.length', 5)
 
       // (1) Assert Enabled
-      cy.get('.command-name-assert').should('contain.text', 'expect <button#increment> to be enabled')
+      cy.get('.command-name-assert').should('contain.text', 'expected <button#increment> to be enabled')
 
       // (2) Assert Visible
-      cy.get('.command-name-assert').should('contain.text', 'expect <button#increment> to be visible')
+      cy.get('.command-name-assert').should('contain.text', 'expected <button#increment> to be visible')
 
       // (3) Assert Text
-      cy.get('.command-name-assert').should('contain.text', 'expect <button#increment> to have text Increment')
+      cy.get('.command-name-assert').should('contain.text', 'expected <button#increment> to have text Increment')
 
       // (4) Assert Id
-      cy.get('.command-name-assert').should('contain.text', 'expect <button#increment> to have id increment')
+      cy.get('.command-name-assert').should('contain.text', 'expected <button#increment> to have id increment')
 
       // (5) Assert Attr
-      cy.get('.command-name-assert').should('contain.text', 'expect <button#increment> to have attr onclick with the value increment()')
+      cy.get('.command-name-assert').should('contain.text', 'expected <button#increment> to have attr onclick with the value increment()')
     })
 
     cy.get('button').contains('Save Commands').click()
@@ -232,6 +231,7 @@ it('visits a basic html page', () => {
     cy.openProject('experimental-studio')
     cy.startAppServer('e2e')
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
 
     cy.waitForSpecToFinish()

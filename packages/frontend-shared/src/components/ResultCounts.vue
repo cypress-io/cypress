@@ -11,6 +11,7 @@
         :is="result.icon"
         class="mt-px h-[12px] mr-1 w-[12px]"
         :class="result.class"
+        aria-hidden="true"
       />
       <span
         class="sr-only"

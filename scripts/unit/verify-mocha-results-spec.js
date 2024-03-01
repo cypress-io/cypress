@@ -7,6 +7,8 @@ if (process.platform !== 'win32') {
   describe('verify-mocha-results', () => {
     let cachedEnv = { ...process.env }
 
+    let fsAccessStub
+
     afterEach(() => {
       sinon.restore()
       Object.assign(process.env, cachedEnv)
@@ -19,9 +21,17 @@ if (process.platform !== 'win32') {
         Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
       }))
 
+      fsAccessStub = sinon.stub(fs, 'access').withArgs('/tmp/cypress/junit').resolves()
+
       sinon.stub(fs, 'readdir').withArgs('/tmp/cypress/junit').resolves([
         'report.xml',
       ])
+    })
+
+    it('exits normally when report directory does not exist', async () => {
+      fsAccessStub.rejects()
+
+      await verifyMochaResults()
     })
 
     it('does not fail with normal report', async () => {

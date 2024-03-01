@@ -43,7 +43,9 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     if (!cypressSocket.send) {
       cypressSocket.send = send
     }
+  }
 
+  connect () {
     // Set timeout so that the connect event is emitted after the constructor returns and the user has a chance to attach a listener
     setTimeout(() => {
       super.emit('connect')

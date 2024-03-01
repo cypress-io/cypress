@@ -1,12 +1,5 @@
 describe('authChange subscription', () => {
   beforeEach(() => {
-    cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
-
-      o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
-    }, { AUTHED_USER })
   })
 
   const AUTHED_USER = {
@@ -25,8 +18,17 @@ describe('authChange subscription', () => {
 
   describe('in app', () => {
     beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
+
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
 
     it('responds to authChange subscription for login', () => {
@@ -54,8 +56,17 @@ describe('authChange subscription', () => {
 
   describe('in app (component testing)', () => {
     beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
+
       cy.startAppServer('component')
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
 
     it('responds to authChange subscription for login', () => {
@@ -84,6 +95,11 @@ describe('authChange subscription', () => {
   describe('in launchpad', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
+
+        o.testState.logInStub = o.sinon.stub(ctx._apis.authApi, 'logIn').resolves(o.AUTHED_USER)
+      }, { AUTHED_USER })
     })
 
     it('responds to authChange subscription for login', () => {

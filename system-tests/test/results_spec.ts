@@ -46,7 +46,7 @@ describe('module api, after:spec, and after:run results', () => {
     project: 'results',
     browser: 'electron',
     outputPath,
-    expectedExitCode: 2,
+    expectedExitCode: 3,
     config: {
       retries: 2,
     },

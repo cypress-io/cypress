@@ -46,6 +46,7 @@ const getMidPoint = (el) => {
 
 const isFirefox = Cypress.isBrowser('firefox')
 const isWebKit = Cypress.isBrowser('webkit')
+const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -543,6 +544,30 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('span1', 'focus click mouseup').each(shouldNotBeCalled)
       cy.getAll('span2', 'mouseup mouseover mouseenter').each(shouldBeCalled)
       cy.getAll('span2', 'focus click mousedown').each(shouldNotBeCalled)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/28788
+    it('no click when element is disabled', () => {
+      const btn = cy.$$('button:first')
+      const span = $('<span>foooo</span>')
+
+      attachFocusListeners({ btn, span })
+      attachMouseClickListeners({ btn, span })
+      attachMouseHoverListeners({ btn, span })
+
+      btn.html('')
+      btn.attr('disabled', true)
+      btn.append(span)
+
+      cy.get('button:first span').click()
+
+      if (Cypress.browser.name === 'chrome') {
+        cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      }
+
+      cy.getAll('btn', 'focus click').each(shouldNotBeCalled)
+      cy.getAll('span', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'focus click').each(shouldNotBeCalled)
     })
 
     it('no click when new element at coords is not ancestor', () => {
@@ -1677,12 +1702,25 @@ describe('src/cy/commands/actions/click', () => {
         it('can scroll to and click elements in html with scroll-behavior: smooth', () => {
           cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
+        })
+
+        // https://github.com/cypress-io/cypress/issues/28150
+        it('can scroll to and click elements in html with scroll-behavior: smooth and overflow-y: auto', () => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('body').invoke('css', 'overflow-y', 'auto')
+          cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('html').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
 
         // https://github.com/cypress-io/cypress/issues/3200
         it('can scroll to and click elements in ancestor element with scroll-behavior: smooth', () => {
           cy.get('#dom').invoke('css', 'scrollBehavior', 'smooth')
           cy.get('#table tr:first').click()
+          // Validate that the scrollBehavior is still smooth even after the actionability fixes we do
+          cy.get('#dom').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
       })
     })
@@ -2414,6 +2452,39 @@ describe('src/cy/commands/actions/click', () => {
           this.lastLog = log
 
           this.logs.push(log)
+        })
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').click({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('click')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').click({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('click')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('click')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
       })
 
@@ -3291,8 +3362,38 @@ describe('src/cy/commands/actions/click', () => {
 
           this.logs.push(log)
         })
+      })
 
-        null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').dblclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('dblclick')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').dblclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('dblclick')
+          expect(hiddenLog.get('name'), 'log name').to.eq('dblclick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -3697,8 +3798,38 @@ describe('src/cy/commands/actions/click', () => {
 
           this.logs.push(log)
         })
+      })
 
-        null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').rightclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('rightclick')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').rightclick({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('rightclick')
+          expect(hiddenLog.get('name'), 'log name').to.eq('rightclick')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -4448,13 +4579,12 @@ describe('mouse state', () => {
       btn.on('pointerover', onAction)
 
       cy.get('#btn').click()
-      // cy.wrap(onAction).should('calledOnce')
 
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
 
       // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
       cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit ? shouldBeCalled : shouldNotBeCalled)
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit || isChromium116OrLater ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@types/node": "18.15.11",
+    "@types/node": "18.17.5",
     "@types/react": "18.0.32",
     "@types/react-dom": "18.0.11",
     "next": "13.2.4",
