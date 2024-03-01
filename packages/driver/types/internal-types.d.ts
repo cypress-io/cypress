@@ -46,6 +46,10 @@ declare namespace Cypress {
     (k: keyof ResolvedConfigOptions, v?: any): any
   }
 
+  interface TestConfigOverrides extends Cypress.TestConfigOverrides {
+    protocolEnabled?: boolean
+  }
+
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
@@ -58,6 +62,8 @@ declare namespace Cypress {
     (action: 'clear:cookies', fn: () => void)
     (action: 'cross:origin:cookies', fn: (cookies: SerializableAutomationCookie[]) => void)
     (action: 'before:stability:release', fn: () => void)
+    (action: '_log:added', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
+    (action: '_log:changed', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: 'paused', fn: (nextCommandName: string) => void)
   }
 

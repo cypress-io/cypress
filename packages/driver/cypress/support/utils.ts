@@ -77,9 +77,7 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
   const matchedLogs = Array.from(logMap.values()).filter((log: any) => {
     const props = log.get()
 
-    let consoleProps = _.isFunction(props?.consoleProps) ? props.consoleProps() : props?.consoleProps
-
-    return consoleProps.name === consolePropCommand && props.id.includes(matchingOrigin)
+    return props.name === consolePropCommand && props.id.includes(matchingOrigin)
   })
 
   // While we'd expect the incoming log order to be deterministic, in practice we've found it fairly

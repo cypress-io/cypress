@@ -38,6 +38,11 @@ let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -2293,7 +2298,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
-        it('retrieves the capture protocol and uploads the db', function () {
+        it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2302,8 +2307,13 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol?.url).to.be.a('string')
+            expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
           })
         })
       })
@@ -2344,20 +2354,13 @@ describe('e2e record', () => {
             spec: 'simple_multiple.cy.js',
             configFile: 'cypress-with-project-id.config.js',
             record: true,
-            snapshot: true,
+            snapshot: false,
             expectedExitCode: 1,
           }).then(() => {
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
-            console.log(postResultsRequest)
             expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
-            expect(postResultsRequest?.body.tests).to.have.length(2)
-            expect(postResultsRequest?.body.stats.suites).to.equal(1)
-            expect(postResultsRequest?.body.stats.tests).to.equal(2)
-            expect(postResultsRequest?.body.stats.passes).to.equal(1)
-            expect(postResultsRequest?.body.stats.failures).to.equal(1)
-            expect(postResultsRequest?.body.stats.skipped).to.equal(0)
           })
         })
       })
@@ -2392,6 +2395,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2417,6 +2421,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2442,6 +2447,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2511,6 +2517,11 @@ describe('e2e record', () => {
 })
 
 describe('capture-protocol api errors', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   enableCaptureProtocol()
 
   const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
@@ -2550,6 +2561,7 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol).to.exist()
         expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })

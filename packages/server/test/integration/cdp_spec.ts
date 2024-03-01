@@ -209,13 +209,13 @@ describe('CDP Clients', () => {
 
         const send = (commands: CDPCommands[]) => {
           commands.forEach(({ command, params }) => {
-            return criClient.send(command, params)
+            criClient.send(command, params).catch(() => {})
           })
         }
 
         const on = (subscriptions: CDPSubscriptions[]) => {
           subscriptions.forEach(({ eventName, cb }) => {
-            return criClient.on(eventName, cb)
+            criClient.on(eventName, cb)
           })
         }
 

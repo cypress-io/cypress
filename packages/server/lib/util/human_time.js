@@ -37,7 +37,7 @@ const long = (ms, alwaysIncludeSeconds = true) => {
   return msg.join(', ')
 }
 
-const short = (ms) => {
+const short = (ms, fixed = undefined) => {
   let { mins, duration } = parse(ms)
   const msg = []
 
@@ -53,7 +53,7 @@ const short = (ms) => {
     msg.push(`${secs}s`)
   } else {
     if (!mins) {
-      const millis = duration.milliseconds()
+      const millis = fixed ? duration.milliseconds().toFixed(fixed) : duration.milliseconds()
 
       if (millis) {
         msg.push(`${millis}ms`)

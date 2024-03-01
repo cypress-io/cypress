@@ -32,6 +32,7 @@ import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
+import { trackTopUrl } from '../util/trackTopUrl'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -337,6 +338,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommandAttributes) => {
       this.enqueue($Command.create(attrs))
     })
+
+    // clears out any extra tabs/windows between tests
+    Cypress.on('test:before:run:async', () => {
+      return Cypress.backend('close:extra:targets')
+    })
+
+    if (!Cypress.isCrossOriginSpecBridge) {
+      trackTopUrl()
+    }
 
     handleCrossOriginCookies(Cypress)
   }

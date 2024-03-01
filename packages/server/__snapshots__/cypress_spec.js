@@ -80,7 +80,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -118,7 +118,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -157,7 +157,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - teamfoundation
  - travis
  - netlify
- - layerci
+ - webappio
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
