@@ -1,7 +1,7 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { BrowserLaunchOpts, FoundBrowser, Browser as KnownBrowser } from '@packages/types'
+import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
@@ -338,28 +338,17 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-/**
- * Cast a wide net when checking for browser support - this should avoid all false negatives
- * The regex below will match: msedge.exe, edge, edge-beta
- */
+// Cast a wide net when checking for browser support - this should avoid all false negatives
+// The regex below will match: msedge.exe, edge, edge-beta
 function createSupportedBrowserRegex (browsers: string[]): RegExp {
   const pattern = _.map(browsers, (browser) => `\\b(?:ms)?${browser}\\b`).join('|')
 
   return new RegExp(pattern, 'i')
 }
 
-function isBrowserSupported (nameOrPath: string, knownBrowsers: KnownBrowser[], browsers: FoundBrowser[]): boolean {
+function isBrowserSupported (nameOrPath: string, combinedBrowsers: string[]): boolean {
   const normalizedNameOrPath = nameOrPath.toLowerCase()
-  /**
-   * Merge the names of knownBrowsers with names of the user's available
-   * browsers (e.g. 'Brave' if they have added it in Cypress config),
-   * and remove duplicates. Additionally, 'webkit' and 'electron' aren't included
-   * in known-browsers.ts, we should add them here as supported
-   * since they're listed in the documentation for supported browsers.
-   */
-  const additionalSupportedBrowsers = ['webkit', 'electron']
-  const allSupportedAndAvailableBrowsers = _.union(_.map(knownBrowsers, 'name'), _.map(browsers, 'name'), additionalSupportedBrowsers)
-  const isSupportedBrowserRegex = createSupportedBrowserRegex(allSupportedAndAvailableBrowsers)
+  const isSupportedBrowserRegex = createSupportedBrowserRegex(combinedBrowsers)
 
   return isSupportedBrowserRegex.test(normalizedNameOrPath)
 }
@@ -370,7 +359,13 @@ function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
-  const isSupported = isBrowserSupported(nameOrPath, launcher.knownBrowsers, browsers)
+  const combinedBrowsers = _.union(
+    _.map(launcher.knownBrowsers, 'name'),
+    _.map(browsers, 'name'),
+    [launcher.electronBrowser.name],
+    [launcher.webkitBrowser.name],
+  )
+  const isSupported = isBrowserSupported(nameOrPath, combinedBrowsers)
 
   if (!isSupported) {
     throwBrowserNotSupported(nameOrPath, browsers)

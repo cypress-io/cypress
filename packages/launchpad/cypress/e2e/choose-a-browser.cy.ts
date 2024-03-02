@@ -44,7 +44,7 @@ describe.skip('Choose a browser page', () => {
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
-      .should('contain', 'Browser: doesNotExist was not found on your system or is not supported by Cypress.')
+      .should('contain', 'Browser: doesNotExist was not found on your system.')
 
       cy.get('[data-cy="alert-body"]').within(() => {
         cy.validateExternalLink({

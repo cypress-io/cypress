@@ -12,6 +12,7 @@ _Released 2/27/2024 (PENDING)_
 
 - Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
 - Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
+
 **Misc:**
 
 - Improved messages around browser support. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).

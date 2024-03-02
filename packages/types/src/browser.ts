@@ -41,6 +41,8 @@ export type Browser = {
   profilePath?: string
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
+  /** optional browser info */
+  info?: string
   /** optional warning that will be shown in the GUI */
   warning?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
@@ -48,6 +50,8 @@ export type Browser = {
   /** if set, is called to determine if found browser is supported by Cypress */
   validator?: BrowserValidator
 }
+
+export type ElectronBrowser = Omit<Browser, 'versionRegex' | 'binary'>
 
 /**
  * Represents a real browser that exists on the user's system.
