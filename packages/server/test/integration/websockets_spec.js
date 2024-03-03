@@ -108,7 +108,7 @@ describe('Web Sockets', () => {
       })
 
       client.on('message', (data) => {
-        expect(data).to.eq('response:foo')
+        expect(data.toString()).to.eq('response:foo')
 
         return done()
       })
@@ -135,7 +135,7 @@ describe('Web Sockets', () => {
       })
 
       client.on('message', (data) => {
-        expect(data).to.eq('response:foo')
+        expect(data.toString()).to.eq('response:foo')
 
         return done()
       })
@@ -166,7 +166,7 @@ describe('Web Sockets', () => {
       })
 
       client.on('message', (data) => {
-        expect(data).to.eq('response:foo')
+        expect(data.toString()).to.eq('response:foo')
 
         return done()
       })
@@ -206,7 +206,7 @@ describe('Web Sockets', () => {
       })
 
       client.on('message', (data) => {
-        expect(data).to.eq('response:foo')
+        expect(data.toString()).to.eq('response:foo')
 
         return done()
       })

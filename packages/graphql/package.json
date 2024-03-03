@@ -30,7 +30,7 @@
     "graphql-ws": "^5.5.5",
     "nexus": "^1.2.0-next.15",
     "server-destroy": "^1.0.1",
-    "ws": "^8.5.0"
+    "ws": "8.14.1"
   },
   "devDependencies": {
     "@packages/data-context": "0.0.0-development",
