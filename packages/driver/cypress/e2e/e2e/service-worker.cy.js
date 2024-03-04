@@ -564,7 +564,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
         event.waitUntil(
           caches.open('v1').then(function (cache) {
             return cache.addAll([
-              '/1mb',
+              '/fixtures/1mb',
             ])
           }),
         )
@@ -602,6 +602,43 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       self.addEventListener('fetch', function (event) {
         event.respondWith(fetch(event.request))
+      })
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
+
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
+
+  it('supports async fetch handler', () => {
+    const script = () => {
+      self.addEventListener('fetch', async function (event) {
+        await Promise.resolve()
+        event.respondWith(fetch(event.request))
+      })
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.visit('fixtures/service-worker.html')
+
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
+
+  it('does not fail when the listener throws an error', () => {
+    const script = () => {
+      self.addEventListener('fetch', function (event) {
+        throw new Error('Error in fetch listener')
       })
     }
 

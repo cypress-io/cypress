@@ -32,6 +32,10 @@ describe('lib/http/util/service-worker-injector', () => {
                       sendEvent({ type: 'hasFetchHandler', payload: { hasFetchHandler: !!(listenerCount > 0 || self.onfetch) } });
                   }
               };
+              const sendFetchRequest = (payload) => {
+                  // call the CDP binding to inform the backend whether or not the service worker handled the request
+                  sendEvent({ type: 'fetchRequest', payload });
+              };
               // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
               const isValidListener = (listener) => {
                   return listener && (typeof listener === 'function' || typeof listener === 'object');
@@ -55,10 +59,24 @@ describe('lib/http/util/service-worker-injector', () => {
                           respondWithCalled = true;
                           oldRespondWith.call(event, ...args);
                       };
-                      // call the original listener
-                      const returnValue = listener(event);
-                      // call the CDP binding to inform the backend whether or not the service worker handled the request
-                      sendEvent({ type: 'fetchRequest', payload: { url: event.request.url, isControlled: respondWithCalled } });
+                      let returnValue;
+                      try {
+                          // call the original listener
+                          returnValue = listener.call(self, event);
+                      }
+                      catch (_a) {
+                          // if the listener throws an error, we still want to proceed with calling the binding
+                      }
+                      if (returnValue instanceof Promise) {
+                          // if the listener returns a promise, we need to wait for it to resolve
+                          // before we can determine if the service worker handled the request
+                          returnValue.then(() => {
+                              sendFetchRequest({ url: event.request.url, isControlled: respondWithCalled });
+                          });
+                      }
+                      else {
+                          sendFetchRequest({ url: event.request.url, isControlled: respondWithCalled });
+                      }
                       return returnValue;
                   };
               }

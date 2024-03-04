@@ -4,7 +4,7 @@
   <title></title>
   <script>
     const makeRequest = () => {
-      fetch(`/1mb?j=${Math.random()}`).then((response) => {
+      fetch(`/fixtures/1mb?j=${Math.random()}`).then((response) => {
         document.getElementById('output').innerText = 'done'
       }).catch(() => {})
     }

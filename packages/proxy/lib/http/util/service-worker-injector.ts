@@ -54,6 +54,11 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       }
     }
 
+    const sendFetchRequest = (payload: { url: string, isControlled: boolean }) => {
+      // call the CDP binding to inform the backend whether or not the service worker handled the request
+      sendEvent({ type: 'fetchRequest', payload })
+    }
+
     // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
     const isValidListener = (listener: EventListenerOrEventListenerObject) => {
       return listener && (typeof listener === 'function' || typeof listener === 'object')
@@ -81,11 +86,24 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           oldRespondWith.call(event, ...args)
         }
 
-        // call the original listener
-        const returnValue = listener.call(self, event)
+        let returnValue
 
-        // call the CDP binding to inform the backend whether or not the service worker handled the request
-        sendEvent({ type: 'fetchRequest', payload: { url: event.request.url, isControlled: respondWithCalled } })
+        try {
+          // call the original listener
+          returnValue = listener.call(self, event)
+        } catch {
+          // if the listener throws an error, we still want to proceed with calling the binding
+        }
+
+        if (returnValue instanceof Promise) {
+          // if the listener returns a promise, we need to wait for it to resolve
+          // before we can determine if the service worker handled the request
+          returnValue.then(() => {
+            sendFetchRequest({ url: event.request.url, isControlled: respondWithCalled })
+          })
+        } else {
+          sendFetchRequest({ url: event.request.url, isControlled: respondWithCalled })
+        }
 
         return returnValue
       }
