@@ -2,13 +2,25 @@
 
 import type { ServiceWorkerClientEvent } from './service-worker-manager'
 
-// this should be of type ServiceWorkerGlobalScope, but we can't reference it here
-// because this file is imported elsewhere and the ServiceWorker lib causes
-// errors in those other packages
-declare let self: typeof globalThis & {
+// this should be of type ServiceWorkerGlobalScope from the webworker lib,
+// but we can't reference it directly because it causes errors in other packages
+interface ServiceWorkerGlobalScope extends WorkerGlobalScope {
+  onfetch: FetchListener | null
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void
   __cypressServiceWorkerClientEvent: (event: string) => void
-  onfetch: (event: Event) => void
 }
+
+// this should be of type FetchEvent from the webworker lib,
+// but we can't reference it directly because it causes errors in other packages
+interface FetchEvent extends Event {
+  readonly request: Request
+  respondWith(r: Response | PromiseLike<Response>): void
+}
+
+type FetchListener = (this: ServiceWorkerGlobalScope, ev: FetchEvent) => any
+
+declare let self: ServiceWorkerGlobalScope
 
 /**
  * Injects code into the service worker to overwrite the fetch events to determine if the service worker handled the request.
@@ -57,7 +69,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       return typeof options === 'boolean' ? options : options?.capture
     }
 
-    function wrapListener (listener: Function) {
+    function wrapListener (listener: FetchListener): FetchListener {
       return (event) => {
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
@@ -70,7 +82,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         }
 
         // call the original listener
-        const returnValue = listener(event)
+        const returnValue = listener.call(self, event)
 
         // call the CDP binding to inform the backend whether or not the service worker handled the request
         sendEvent({ type: 'fetchRequest', payload: { url: event.request.url, isControlled: respondWithCalled } })
@@ -93,12 +105,12 @@ export const injectIntoServiceWorker = (body: Buffer) => {
           return oldAddEventListener(type, existingListener, options)
         }
 
-        let newListener
+        let newListener: EventListenerOrEventListenerObject
 
         // If the listener is a function, we can just wrap it
         // Otherwise, we need to wrap the listener in a proxy so we can track and wrap the handleEvent function
         if (typeof listener === 'function') {
-          newListener = wrapListener(listener)
+          newListener = wrapListener(listener) as EventListener
         } else {
           // since the handleEvent function could change, we need to use a proxy to wrap it
           newListener = new Proxy(listener, {
@@ -109,7 +121,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
 
                 // If the handleEvent function has not been wrapped yet, or if it has changed, we need to wrap it
                 if ((!wrappedHandleEvent && target.handleEvent) || target.handleEvent !== origHandleEvent) {
-                  targetToWrappedHandleEventMap.set(target, wrapListener(target.handleEvent))
+                  targetToWrappedHandleEventMap.set(target, wrapListener(target.handleEvent) as EventListener)
                   targetToOrigHandleEventMap.set(target, target.handleEvent)
                 }
 
@@ -187,7 +199,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         get () {
           return originalPropertyDescriptor.get?.call(this)
         },
-        set (value: (event) => void) {
+        set (value: typeof self.onfetch) {
           let newHandler
 
           if (value) {

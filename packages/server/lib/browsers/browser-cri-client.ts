@@ -322,8 +322,7 @@ export class BrowserCriClient {
     try {
       // attach a binding to the runtime so that we can listen for service worker events
       if (event.targetInfo.type === 'service_worker') {
-        // @ts-expect-error - typescript doesn't know about the sessionId specific events
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}`, serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
+        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
         await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {

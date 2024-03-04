@@ -55,7 +55,7 @@ export type ServiceWorkerEventHandler = (event: ServiceWorkerClientEvent) => voi
  * @param event the attached to target event
  */
 export const serviceWorkerClientEventHandler = (handler: ServiceWorkerEventHandler) => {
-  return (event) => {
+  return (event: { name: string, payload: string }) => {
     if (event.name === serviceWorkerClientEventHandlerName) {
       handler(JSON.parse(event.payload))
     }
