@@ -77,7 +77,6 @@
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
-    "./packages/server/node_modules/signal-exit/index.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
@@ -258,7 +257,6 @@
     "./node_modules/cp-file/fs.js",
     "./node_modules/cp-file/node_modules/semver/semver.js",
     "./node_modules/cp-file/progress-emitter.js",
-    "./node_modules/cross-fetch/node_modules/node-fetch/lib/index.js",
     "./node_modules/cross-spawn-async/lib/parse.js",
     "./node_modules/cross-spawn-async/lib/resolveCommand.js",
     "./node_modules/debug/src/browser.js",
@@ -790,7 +788,6 @@
     "./packages/server/node_modules/cross-spawn/node_modules/semver/semver.js",
     "./packages/server/node_modules/duplexify/index.js",
     "./packages/server/node_modules/execa/lib/errname.js",
-    "./packages/server/node_modules/execa/node_modules/signal-exit/signals.js",
     "./packages/server/node_modules/get-stream/buffer-stream.js",
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
@@ -834,7 +831,6 @@
     "./packages/server/node_modules/send/node_modules/debug/src/index.js",
     "./packages/server/node_modules/send/node_modules/debug/src/node.js",
     "./packages/server/node_modules/send/node_modules/mime/mime.js",
-    "./packages/server/node_modules/signal-exit/signals.js",
     "./packages/server/node_modules/supports-color/index.js",
     "./packages/server/start-cypress.js",
     "./packages/server/v8-snapshot-entry.js",
@@ -3690,7 +3686,6 @@
     "./packages/data-context/node_modules/ast-types/lib/types.js",
     "./packages/data-context/node_modules/ast-types/main.js",
     "./packages/data-context/node_modules/brace-expansion/index.js",
-    "./packages/data-context/node_modules/cross-fetch/dist/node-ponyfill.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -4195,7 +4190,6 @@
     "./packages/server/node_modules/cross-spawn/lib/util/resolveCommand.js",
     "./packages/server/node_modules/execa/index.js",
     "./packages/server/node_modules/execa/lib/stdio.js",
-    "./packages/server/node_modules/execa/node_modules/signal-exit/index.js",
     "./packages/server/node_modules/get-stream/index.js",
     "./packages/server/node_modules/glob/common.js",
     "./packages/server/node_modules/graceful-fs/clone.js",
@@ -4317,5 +4311,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "f360d5af7ee4451d73a90d4fa6eaf259aba149a25a3f201272ab33e5d2b3160e"
+  "deferredHash": "a9125c8169bd9325acd5d5d11758ac8023aa33b677b6b26b4e66698734445672"
 }

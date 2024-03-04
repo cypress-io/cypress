@@ -9463,7 +9463,7 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0, ansi-styles@^4.2.1, ansi-styles@^4.3.0:
   dependencies:
     color-convert "^2.0.1"
 
-ansi-styles@^5:
+ansi-styles@^5, ansi-styles@^5.0.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-5.2.0.tgz#07449690ad45777d1924ac2abb2fc8895dba836b"
   integrity sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==
@@ -13057,12 +13057,12 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-2.0.0.tgz#16b0e5c226eca08d937d0057293c5d168d0498fd"
-  integrity sha512-Uoqz+E5UNdmraQ/s+BtKOQ/diRacfB4vGl6mXM37nHKDJFCRo6PGV9Ooy68m5IGZQs97aclL9ALPb2GpTUcTmg==
+cypress-example-kitchensink@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-2.0.1.tgz#69196d5a22e2c404a138c9db198319185edd9c34"
+  integrity sha512-p0Pkx9PoqkmqH+moFXu9e9CzZSR7UdJzFEaMT30YKdjBANDaded2snlinlETQX2IpT7HWctj1tYXuB6jg1sMhw==
   dependencies:
-    npm-run-all "^4.1.2"
+    npm-run-all2 "^5.0.0"
     serve "14.2.1"
 
 cypress-expect@^2.5.3:
@@ -17975,9 +17975,9 @@ http-proxy-middleware@^1.0.0:
     micromatch "^4.0.2"
 
 http-proxy-middleware@^2.0.3:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/http-proxy-middleware/-/http-proxy-middleware-2.0.4.tgz#03af0f4676d172ae775cb5c33f592f40e1a4e07a"
-  integrity sha512-m/4FxX17SUvz4lJ5WPXOHDUuCwIqXLfLHs1s0uZ3oYjhoXlx9csYxaOa0ElDEJ+h8Q4iJ1s+lTMbiCa4EXIJqg==
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/http-proxy-middleware/-/http-proxy-middleware-2.0.6.tgz#e1a4dd6979572c7ab5a4e4b55095d1f32a74963f"
+  integrity sha512-ya/UeJ6HVBYxrgYotAZo1KvPWlgB48kUJLDePFeneHsVujFaW5WNj2NgWCAE//B1Dl02BIfYlpNgBy8Kf8Rjmw==
   dependencies:
     "@types/http-proxy" "^1.17.8"
     http-proxy "^1.18.1"
@@ -23104,7 +23104,20 @@ npm-registry-fetch@^14.0.0, npm-registry-fetch@^14.0.3:
     npm-package-arg "^10.0.0"
     proc-log "^3.0.0"
 
-npm-run-all@^4.1.2, npm-run-all@^4.1.5:
+npm-run-all2@^5.0.0:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-5.0.2.tgz#7dae8e11ba90be9edd05379414a01407416b336c"
+  integrity sha512-S2G6FWZ3pNWAAKm2PFSOtEAG/N+XO/kz3+9l6V91IY+Y3XFSt7Lp7DV92KCgEboEW0hRTu0vFaMe4zXDZYaOyA==
+  dependencies:
+    ansi-styles "^5.0.0"
+    cross-spawn "^7.0.3"
+    memorystream "^0.3.1"
+    minimatch "^3.0.4"
+    pidtree "^0.5.0"
+    read-pkg "^5.2.0"
+    shell-quote "^1.6.1"
+
+npm-run-all@^4.1.5:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/npm-run-all/-/npm-run-all-4.1.5.tgz#04476202a15ee0e2e214080861bff12a51d98fba"
   integrity sha512-Oo82gJDAVcaMdi3nuoKFavkIHBRVqQ1qvMb+9LHk/cF4P6B2m8aP04hGf7oL6wZ9BuGwX1onlLhpuoofSyoQDQ==
@@ -24523,6 +24536,11 @@ pidtree@^0.3.0:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/pidtree/-/pidtree-0.3.1.tgz#ef09ac2cc0533df1f3250ccf2c4d366b0d12114a"
   integrity sha512-qQbW94hLHEqCg7nhby4yRC7G2+jYHY4Rguc2bjw7Uug4GIJuu1tvf2uHaZv5Q8zdt+WKJ6qK1FOI6amaWUo5FA==
+
+pidtree@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/pidtree/-/pidtree-0.5.0.tgz#ad5fbc1de78b8a5f99d6fbdd4f6e4eee21d1aca1"
+  integrity sha512-9nxspIM7OpZuhBxPg73Zvyq7j1QMPMPsGKTqRc2XOaFQauDvoNz9fM1Wdkjmeo7l9GXOZiRs97sPkuayl39wjA==
 
 pidusage@3.0.2:
   version "3.0.2"
@@ -27366,11 +27384,6 @@ sigmund@^1.0.1, sigmund@~1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sigmund/-/sigmund-1.0.1.tgz#3ff21f198cad2175f9f3b781853fd94d0d19b590"
   integrity sha1-P/IfGYytIXX587eBhT/ZTQ0ZtZA=
-
-signal-exit@3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
-  integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
 signal-exit@3.0.7, signal-exit@^3.0.0, signal-exit@^3.0.2, signal-exit@^3.0.3, signal-exit@^3.0.7:
   version "3.0.7"
