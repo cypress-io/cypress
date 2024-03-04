@@ -681,7 +681,12 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel
+              
+              # hard coding to test app-integration tests
+              cd packages/app
+              GLOB="cypress/e2e/**/*cy.*"
+              TESTFILESEXP=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              $cmd yarn cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILESEXP
             else
               # external PR
 
