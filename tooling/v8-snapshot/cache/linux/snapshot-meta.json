@@ -77,7 +77,6 @@
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
-    "./packages/server/node_modules/signal-exit/index.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
@@ -784,7 +783,6 @@
     "./packages/server/node_modules/cross-spawn/node_modules/semver/semver.js",
     "./packages/server/node_modules/duplexify/index.js",
     "./packages/server/node_modules/execa/lib/errname.js",
-    "./packages/server/node_modules/execa/node_modules/signal-exit/signals.js",
     "./packages/server/node_modules/get-stream/buffer-stream.js",
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
@@ -828,7 +826,6 @@
     "./packages/server/node_modules/send/node_modules/debug/src/index.js",
     "./packages/server/node_modules/send/node_modules/debug/src/node.js",
     "./packages/server/node_modules/send/node_modules/mime/mime.js",
-    "./packages/server/node_modules/signal-exit/signals.js",
     "./packages/server/node_modules/supports-color/index.js",
     "./packages/server/start-cypress.js",
     "./packages/server/v8-snapshot-entry.js",
@@ -4193,7 +4190,6 @@
     "./packages/server/node_modules/cross-spawn/lib/util/resolveCommand.js",
     "./packages/server/node_modules/execa/index.js",
     "./packages/server/node_modules/execa/lib/stdio.js",
-    "./packages/server/node_modules/execa/node_modules/signal-exit/index.js",
     "./packages/server/node_modules/get-stream/index.js",
     "./packages/server/node_modules/glob/common.js",
     "./packages/server/node_modules/graceful-fs/clone.js",
@@ -4315,5 +4311,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "513ac10fb30d8db8cdf3f539f1dd78a715bc69e947f244ebf133e7fbc28c14ae"
+  "deferredHash": "da24f5340a66cbfd88e98624bf19e59e4eba7b48330f2fc0cff54075115b6076"
 }
