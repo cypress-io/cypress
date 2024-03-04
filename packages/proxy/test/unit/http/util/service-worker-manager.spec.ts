@@ -282,7 +282,7 @@ describe('lib/http/util/service-worker-manager', () => {
           initiatorOrigin: 'http://localhost:8080/',
         })
 
-        // A script request emanated from the service worker's initiator is controlled
+        // A script request emanated from the service worker's initiator is not controlled
         expect(await manager.processBrowserPreRequest({
           requestId: 'id-1',
           method: 'GET',
@@ -295,7 +295,7 @@ describe('lib/http/util/service-worker-manager', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })).to.be.false
 
-        // A script request emanated from the previous script request is controlled
+        // A script request emanated from the previous script request is not controlled
         expect(await manager.processBrowserPreRequest({
           requestId: 'id-2',
           method: 'GET',
@@ -320,7 +320,7 @@ describe('lib/http/util/service-worker-manager', () => {
           cdpRequestWillBeSentReceivedTimestamp: 0,
         })).to.be.false
 
-        // A script request emanated from the previous css is controlled
+        // A script request emanated from the previous css is not controlled
         expect(await manager.processBrowserPreRequest({
           requestId: 'id-3',
           method: 'GET',
