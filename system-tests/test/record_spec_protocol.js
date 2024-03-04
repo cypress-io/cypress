@@ -19,7 +19,7 @@ const {
 } = require('../lib/serverStub')
 const { randomBytes } = require('crypto')
 const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
-const debug = require('debug')('cypress:system-tests:record_spec')
+const debug = require('debug')('cypress:system-tests:record_spec_protocol')
 
 const { instanceId } = postRunInstanceResponse
 

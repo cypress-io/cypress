@@ -16,7 +16,7 @@ const {
   encryptBody,
   postRunResponseWithProtocolDisabled,
 } = require('../lib/serverStub')
-const debug = require('debug')('cypress:system-tests:record_spec')
+const debug = require('debug')('cypress:system-tests:record_spec_api_interactions')
 
 let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
