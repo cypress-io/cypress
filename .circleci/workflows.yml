@@ -1644,10 +1644,10 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
+      - run: circleci tests run --command "yarn test-unit --scope @packages/server" --split-by=timings
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
