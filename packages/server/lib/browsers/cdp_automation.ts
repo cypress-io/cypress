@@ -168,7 +168,7 @@ export class CdpAutomation implements CDPClient {
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
@@ -197,8 +197,8 @@ export class CdpAutomation implements CDPClient {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
@@ -210,47 +210,45 @@ export class CdpAutomation implements CDPClient {
 
     const sendActivationMessage = `
       (() => {
-        if (document.defaultView !== top) { return }
-        let onMessage
-        let timeout
-
-        return new Promise((res, rej) => {
-          onMessage = (ev) => {
+        if (document.defaultView !== top) { return Promise.resolve() }
+        return new Promise((res) => {
+          const onMessage = (ev) => {
             if (ev.data.message === 'cypress:extension:main:tab:activated') {
               window.removeEventListener('message', onMessage)
-              clearTimeout(timeout)
               res()
             }
           }
-
-          timeout = setTimeout(() => {
-            window.removeEventListener('message', onMessage)
-            rej(new Error('Unable to communicate with Cypress Extension'))
-          }, 500)
 
           window.addEventListener('message', onMessage)
           window.postMessage({ message: 'cypress:extension:activate:main:tab' })
         })
       })()`
 
-    debugVerbose('sending activation message ', sendActivationMessage)
-
-    try {
-      await this.sendDebuggerCommandFn('Runtime.evaluate', {
-        expression: sendActivationMessage,
-        awaitPromise: true,
-      })
-    } catch (e) {
-      debugVerbose('Unable to communicate with browser extension', e.message)
-      // If rejected due to timeout, fall back to bringing the main tab to focus -
-      // this will steal window focus, so it is a last resort. If any other error
-      // was thrown, re-throw as it was unexpected.
-      if ((e as Error).message === ActivationTimeoutMessage) {
-        await this.sendDebuggerCommandFn('Page.bringToFront').catch((e) => {
-          debugVerbose('Error bringing page to front:', e)
-        })
-      } else {
-        throw e
+    if (this.isHeadless) {
+      debugVerbose('Headless, so bringing page to front instead of negotiating with extension')
+      await this.sendDebuggerCommandFn('Page.bringToFront')
+    } else {
+      try {
+        debugVerbose('sending activation message ', sendActivationMessage)
+        await Promise.race([
+          this.sendDebuggerCommandFn('Runtime.evaluate', {
+            expression: sendActivationMessage,
+            awaitPromise: true,
+          }),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(ActivationTimeoutMessage)), 500)
+          }),
+        ])
+      } catch (e) {
+        debugVerbose('Error occurred while attempting to activate main tab: ', e)
+        // If rejected due to timeout, fall back to bringing the main tab to focus -
+        // this will steal window focus, so it is a last resort. If any other error
+        // was thrown, re-throw as it was unexpected.
+        if ((e as Error).message === ActivationTimeoutMessage) {
+          await this.sendDebuggerCommandFn('Page.bringToFront')
+        } else {
+          throw e
+        }
       }
     }
   }
@@ -545,10 +543,13 @@ export class CdpAutomation implements CDPClient {
         return this.sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
         debugVerbose('capturing screenshot')
-        try {
-          await this.activateMainTab()
-        } catch (e) {
-          debugVerbose('Error while attempting to activate main tab: %O', e)
+
+        if (this.focusTabOnScreenshot) {
+          try {
+            await this.activateMainTab()
+          } catch (e) {
+            debugVerbose('Error while attempting to activate main tab: %O', e)
+          }
         }
 
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })

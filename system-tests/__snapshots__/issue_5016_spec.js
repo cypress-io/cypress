@@ -1,4 +1,4 @@
-exports['e2e issue 5016 - screenshot times out after clicking target _blank fails but does not timeout taking screenshot 1'] = `
+exports['e2e issue 5016 - screenshot times out after clicking target _blank / fails but does not timeout taking screenshot'] = `
 
 ====================================================================================================
 
