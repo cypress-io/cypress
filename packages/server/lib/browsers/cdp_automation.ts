@@ -212,13 +212,21 @@ export class CdpAutomation implements CDPClient {
       (() => {
         if (document.defaultView !== top) { return }
         let onMessage
-        return new Promise((res) => {
+        let timeout
+
+        return new Promise((res, rej) => {
           onMessage = (ev) => {
             if (ev.data.message === 'cypress:extension:main:tab:activated') {
               window.removeEventListener('message', onMessage)
+              clearTimeout(timeout)
               res()
             }
           }
+
+          timeout = setTimeout(() => {
+            window.removeEventListener('message', onMessage)
+            rej(new Error('Unable to communicate with Cypress Extension'))
+          }, 500)
 
           window.addEventListener('message', onMessage)
           window.postMessage({ message: 'cypress:extension:activate:main:tab' })
@@ -228,22 +236,19 @@ export class CdpAutomation implements CDPClient {
     debugVerbose('sending activation message ', sendActivationMessage)
 
     try {
-      await Promise.race([
-        this.sendDebuggerCommandFn('Runtime.evaluate', {
-          expression: sendActivationMessage,
-          awaitPromise: true,
-        }),
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new Error(ActivationTimeoutMessage)), 2000)
-        }),
-      ])
+      await this.sendDebuggerCommandFn('Runtime.evaluate', {
+        expression: sendActivationMessage,
+        awaitPromise: true,
+      })
     } catch (e) {
+      debugVerbose('Unable to communicate with browser extension', e.message)
       // If rejected due to timeout, fall back to bringing the main tab to focus -
       // this will steal window focus, so it is a last resort. If any other error
       // was thrown, re-throw as it was unexpected.
       if ((e as Error).message === ActivationTimeoutMessage) {
-        debugVerbose('Unable to communicate with browser extensioin - stealing focus')
-        await this.sendDebuggerCommandFn('Page.bringToFront')
+        await this.sendDebuggerCommandFn('Page.bringToFront').catch((e) => {
+          debugVerbose('Error bringing page to front:', e)
+        })
       } else {
         throw e
       }
