@@ -122,7 +122,7 @@ const createApp = (port) => {
     return res.send(req.body)
   })
 
-  app.get('/1mb', (req, res) => {
+  app.get('*/1mb', (req, res) => {
     return res.type('text').send('X'.repeat(1024 * 1024))
   })
 
