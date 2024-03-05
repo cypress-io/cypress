@@ -253,7 +253,7 @@ export class CdpAutomation implements CDPClient {
     }
   }
 
-  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
 
     let url = params.request.url
@@ -287,7 +287,7 @@ export class CdpAutomation implements CDPClient {
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
-    this.automation.onBrowserPreRequest?.(browserPreRequest)
+    await this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
@@ -540,7 +540,7 @@ export class CdpAutomation implements CDPClient {
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
-        return this.sendDebuggerCommandFn(data.command, data.params)
+        return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
       case 'take:screenshot':
         debugVerbose('capturing screenshot')
 

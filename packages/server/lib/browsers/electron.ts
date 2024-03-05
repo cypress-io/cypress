@@ -54,7 +54,15 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: 'electron', onAsynchronousError: options.onError, onReconnect: () => {}, fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({
+      hosts: ['127.0.0.1'],
+      port,
+      browserName: 'electron',
+      onAsynchronousError: options.onError,
+      onReconnect: () => {},
+      fullyManageTabs: true,
+      onServiceWorkerClientEvent: parent.onServiceWorkerClientEvent,
+    })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')

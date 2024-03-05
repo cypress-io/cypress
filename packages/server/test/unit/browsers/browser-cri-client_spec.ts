@@ -6,6 +6,7 @@ import { stripAnsi } from '@packages/errors'
 import net from 'net'
 import { ProtocolManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
+import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -16,7 +17,7 @@ type GetClientParams = {
   fullyManageTabs?: boolean
 }
 
-describe('lib/browsers/cri-client', function () {
+describe('lib/browsers/browser-cri-client', function () {
   let browserCriClient: {
     BrowserCriClient: {
       create: typeof BrowserCriClient.create
@@ -30,6 +31,7 @@ describe('lib/browsers/cri-client', function () {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
+  let onServiceWorkerClientEvent: sinon.SinonStub
   let getClient: (options?: GetClientParams) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
@@ -64,7 +66,7 @@ describe('lib/browsers/cri-client', function () {
         close,
       })
 
-      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs })
+      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs, onServiceWorkerClientEvent })
     }
   })
 
@@ -101,7 +103,7 @@ describe('lib/browsers/cri-client', function () {
 
       criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
+      await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
 
       expect(criImport.Version).to.be.calledOnce
     })
@@ -112,7 +114,7 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })
+      const client = await browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })
 
       expect(client.attachToTargetUrl).to.be.instanceOf(Function)
 
@@ -124,7 +126,7 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError })).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })
@@ -137,6 +139,7 @@ describe('lib/browsers/cri-client', function () {
       options = {
         browserClient: {
           send: sinon.stub(),
+          on: sinon.stub(),
         },
         browserCriClient: {
           addExtraTargetClient: sinon.stub(),
@@ -273,6 +276,24 @@ describe('lib/browsers/cri-client', function () {
       expect(criClient.send).to.be.calledWith('Fetch.enable')
       expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
+    it('adds the service worker fetch event binding', async () => {
+      options.event.targetInfo.type = 'service_worker'
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(options.browserClient.on).to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
+      expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
+    })
+
+    it('does not add the service worker fetch event binding for non-service_worker targets', async () => {
+      options.event.targetInfo.type = 'other'
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(options.browserClient.on).not.to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
+      expect(options.browserClient.send).not.to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
     it('adds X-Cypress-Is-From-Extra-Target header to requests from extra target', async () => {
