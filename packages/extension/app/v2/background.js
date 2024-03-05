@@ -332,39 +332,16 @@ const automation = {
   lastFocusedWindow () {
     return Promise.try(() => {
       return browser.windows.getLastFocused()
-    }).catch((e) => {
     })
   },
 
-  async takeScreenshot (fn) {
-    try {
-      const win = await this.lastFocusedWindow()
-
-      try {
-        const capture = await browser.tabs.captureVisibleTab(win.id, { format: 'png' })
-
-        try {
-          fn(capture)
-        } catch (e) {
-          const err = new Error('error calling callback from takeScreenshot')
-
-          err.originalError = e
-          throw err
-        }
-      } catch (e) {
-        const err = new Error('error capturing visible tab')
-
-        err.originalError = e
-        throw err
-      }
-    } catch (e) {
-      const err = new Error('error retrieving last focused window')
-
-      err.originalError = err
-      throw err
-    }
+  takeScreenshot (fn) {
+    return this.lastFocusedWindow()
+    .then((win) => {
+      return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
+    })
+    .then(fn)
   },
-
 }
 
 module.exports = automation
