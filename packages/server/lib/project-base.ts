@@ -24,6 +24,7 @@ import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -324,8 +325,8 @@ export class ProjectBase extends EE {
       projectRoot,
     })
 
-    const onBrowserPreRequest = (browserPreRequest) => {
-      this.server.addBrowserPreRequest(browserPreRequest)
+    const onBrowserPreRequest = async (browserPreRequest) => {
+      await this.server.addBrowserPreRequest(browserPreRequest)
     }
 
     const onRequestEvent = (eventName, data) => {
@@ -356,6 +357,10 @@ export class ProjectBase extends EE {
       this.server.updateServiceWorkerClientSideRegistrations(data)
     }
 
+    const onServiceWorkerClientEvent = (event: ServiceWorkerClientEvent) => {
+      this.server.handleServiceWorkerClientEvent(event)
+    }
+
     this._automation = new Automation({
       cyNamespace: namespace,
       cookieNamespace: socketIoCookie,
@@ -368,6 +373,7 @@ export class ProjectBase extends EE {
       onServiceWorkerRegistrationUpdated,
       onServiceWorkerVersionUpdated,
       onServiceWorkerClientSideRegistrationUpdated,
+      onServiceWorkerClientEvent,
     })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
