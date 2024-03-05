@@ -17,7 +17,9 @@
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "@packages/data-context": "0.0.0-development"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.7.0",
     "@cypress-design/css": "^0.13.3",
