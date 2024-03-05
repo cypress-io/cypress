@@ -1848,7 +1848,7 @@ jobs:
         type: boolean
         default: false
     resource_class: << parameters.resource_class >>
-    parallelism: 8
+    parallelism: 16
     steps:
       - run-new-ui-tests:
           browser: chrome
