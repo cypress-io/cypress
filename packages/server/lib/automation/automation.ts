@@ -5,6 +5,9 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
+import Debug from 'debug'
+
+const debug = Debug('cypress:server:automation')
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
@@ -160,6 +163,10 @@ export class Automation {
         case 'create:download':
         case 'canceled:download':
         case 'complete:download':
+          return data
+        case 'debug':
+          debug('debug invoked %O', data)
+
           return data
         default:
           return automate(data)
