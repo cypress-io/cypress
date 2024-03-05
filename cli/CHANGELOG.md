@@ -3,6 +3,10 @@
 
 _Released 2/27/2024 (PENDING)_
 
+**Performance:**
+
+- Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+
 **Bugfixes:**
 
 - Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
