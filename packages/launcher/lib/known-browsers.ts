@@ -1,4 +1,4 @@
-import type { Browser, BrowserValidatorResult, FoundBrowser } from '@packages/types'
+import type { Browser, ElectronBrowser, BrowserValidatorResult, FoundBrowser } from '@packages/types'
 
 // Chrome started exposing CDP 1.3 in 64
 export const MIN_CHROME_VERSION = 64
@@ -25,6 +25,24 @@ export const validateMinVersion = (browser: FoundBrowser): BrowserValidatorResul
   return {
     isSupported: true,
   }
+}
+
+export const electronBrowser: ElectronBrowser = {
+  name: 'electron',
+  family: 'chromium',
+  channel: 'stable',
+  displayName: 'Electron',
+  info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+}
+
+export const webkitBrowser: Browser = {
+  name: 'webkit',
+  family: 'webkit',
+  channel: 'stable',
+  displayName: 'WebKit',
+  versionRegex: /BROWSER_VERSION = \'(?<version>[^']+)\'/gm,
+  binary: ['playwright-webkit'],
+  warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
 }
 
 /** list of the browsers we can detect and use by default */
