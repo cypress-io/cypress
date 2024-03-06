@@ -8,6 +8,10 @@ _Released 2/27/2024 (PENDING)_
 - Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
 - Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
 
+**Misc:**
+
+- Improved messaging around browser support in the terminal when attempting to run a browser that's not supported by Cypress. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).
+
 **Dependency Updates:**
 
 - Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
