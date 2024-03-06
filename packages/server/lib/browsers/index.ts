@@ -101,7 +101,7 @@ async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): 
 
   if (browser.family === 'webkit') return await import('./webkit')
 
-  return utils.throwBrowserNotFound(browser.name, browsers)
+  return utils.throwBrowserNotSupported(browser.name, browsers)
 }
 
 process.once('exit', () => kill({ isProcessExit: true }))
