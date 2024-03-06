@@ -107,11 +107,6 @@ const connect = function (host, path, extraOpts) {
     return Promise.try(() => {
       return automation[method].apply(automation, args.concat(respond))
     }).catch((err) => {
-      ws.emit('automation:push:request', 'debug', {
-        err,
-        originalError: err.originalError,
-      })
-
       return fail(id, err)
     })
   }
