@@ -102,29 +102,41 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(options)}`
   },
-  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
+  BROWSER_NOT_SUPPORTED: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null
 
     if (browser === 'canary') {
       canarySuffix = errPartial`\
           ${fmt.off('\n\n')}
-          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
+          Note: Since ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
 
           See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
     }
 
     return errTemplate`\
-        Can't run because you've entered an invalid browser name.
+        Can't run because you've entered a browser that is not supported by Cypress.
 
-        Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
+        Browser: ${fmt.highlight(browser)} is not supported by Cypress.
 
         Cypress supports the following browsers:
-        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox'])}
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
         ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
+  },
+  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
+    return errTemplate`\
+        Browser: ${fmt.highlight(browser)} was not found on your system.
+
+        Cypress supports the following browsers:
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
+
+        You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+        Available browsers found on your system are:
+        ${fmt.listItems(foundBrowsersStr)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
