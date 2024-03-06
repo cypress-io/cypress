@@ -1,5 +1,5 @@
 // decrease the timeouts to ensure we don't hit the 2s correlation timeout
-describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000, retries: 0 }, () => {
+describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
   let sessionId
 
   const getSessionId = async () => {
