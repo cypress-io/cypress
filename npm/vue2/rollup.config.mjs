@@ -29,4 +29,4 @@ const config = {
   },
 }
 
-export default createEntries({ formats: ['es', 'cjs'], input: 'src/index.ts', config, dtsOptions})
+export default createEntries({ formats: ['es', 'cjs'], input: 'src/index.ts', config, dtsOptions })
