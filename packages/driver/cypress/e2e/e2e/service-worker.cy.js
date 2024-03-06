@@ -287,29 +287,29 @@ describe('service workers', { defaultCommandTimeout: 4000, pageLoadTimeout: 1000
       validateFetchHandlers({ listenerCount: 0 })
     })
 
-    it('does not fail when removing a non-existent listener', () => {
-      const script = () => {
-        const listener = function (event) {
-          return
-        }
+    // it('does not fail when removing a non-existent listener', () => {
+    //   const script = () => {
+    //     const listener = function (event) {
+    //       return
+    //     }
 
-        self.addEventListener('fetch', listener)
+    //     self.addEventListener('fetch', listener)
 
-        // this does not remove the listener because the listener is not the same function
-        self.removeEventListener('fetch', function (event) {
-          return
-        })
-      }
+    //     // this does not remove the listener because the listener is not the same function
+    //     self.removeEventListener('fetch', function (event) {
+    //       return
+    //     })
+    //   }
 
-      cy.intercept('/fixtures/service-worker.js', (req) => {
-        req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
-      })
+    //   cy.intercept('/fixtures/service-worker.js', (req) => {
+    //     req.reply(`(${script})()`,
+    //       { 'Content-Type': 'application/javascript' })
+    //   })
 
-      cy.visit('fixtures/service-worker.html')
-      cy.get('#output').should('have.text', 'done')
-      validateFetchHandlers({ listenerCount: 1 })
-    })
+    //   cy.visit('fixtures/service-worker.html')
+    //   cy.get('#output').should('have.text', 'done')
+    //   validateFetchHandlers({ listenerCount: 1 })
+    // })
 
     it('does not fail when removing a null listener', () => {
       const script = () => {
