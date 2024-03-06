@@ -41,8 +41,8 @@ describe('uploadStream', () => {
     it(`resolves with 'OK'`, async () => {
       uploadPromise = uploadStream<string>(fileStream, destinationUrl)
       completeStream()
-      await uploadPromise
-      expect(uploadPromise).to.eventually.equal('OK')
+
+      await expect(uploadPromise).to.eventually.equal('OK')
     })
   })
 
@@ -62,8 +62,8 @@ describe('uploadStream', () => {
     it('resolves with the json decoded response', async () => {
       uploadPromise = uploadStream(fileStream, destinationUrl)
       completeStream()
-      await uploadPromise
-      expect(uploadPromise).to.eventually.deep.equal(response)
+
+      await expect(uploadPromise).to.eventually.deep.equal(response)
     })
   })
 
@@ -75,8 +75,8 @@ describe('uploadStream', () => {
     it('resolves with undefined', async () => {
       uploadPromise = uploadStream(fileStream, destinationUrl)
       completeStream()
-      await uploadPromise
-      expect(uploadPromise).to.eventually.be.undefined
+
+      await expect(uploadPromise).to.eventually.be.undefined
     })
   })
 
@@ -88,19 +88,11 @@ describe('uploadStream', () => {
     })
 
     it('rejects with an appropriate HttpError', async () => {
-      let caught = false
+      const uploadPromise = uploadStream(fileStream, destinationUrl)
 
-      try {
-        const p = uploadStream(fileStream, destinationUrl)
+      completeStream()
 
-        completeStream()
-        await p
-      } catch (e) {
-        caught = true
-        expect(e instanceof HttpError).to.be.true
-        expect((e as HttpError).status).to.eq(status)
-      }
-      expect(caught).to.be.true
+      await expect(uploadPromise).to.eventually.be.rejectedWith(HttpError, '403: Forbidden')
     })
   })
 })
