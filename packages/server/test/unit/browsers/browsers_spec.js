@@ -89,7 +89,21 @@ describe('lib/browsers/index', () => {
       })
     })
 
-    it('throws when no browser can be found', () => {
+    it('throws when browser not found by name', () => {
+      const foundBrowsers = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('webkit', false, foundBrowsers))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .then((err) => {
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
+      })
+    })
+
+    it('throws when browser not supported', () => {
       const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
@@ -97,7 +111,7 @@ describe('lib/browsers/index', () => {
       ]
 
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_SUPPORTED' })
       .then((err) => {
         return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
@@ -111,7 +125,7 @@ describe('lib/browsers/index', () => {
       ]
 
       return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_SUPPORTED' })
       .then((err) => {
         return normalizeSnapshot(err.message)
       })
@@ -132,9 +146,9 @@ describe('lib/browsers/index', () => {
       .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
-        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+        expect(err).to.have.property('type').to.eq('BROWSER_NOT_SUPPORTED')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system or is not supported by Cypress.`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} is not supported by Cypress.`)
       })
     })
   })
@@ -153,9 +167,9 @@ describe('lib/browsers/index', () => {
       .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
-        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+        expect(err).to.have.property('type').to.eq('BROWSER_NOT_SUPPORTED')
 
-        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} is not supported by Cypress.`)
       })
     })
 
