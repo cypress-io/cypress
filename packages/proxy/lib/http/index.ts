@@ -10,6 +10,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
@@ -27,7 +28,7 @@ import type { CookieJar, SerializableAutomationCookie } from '@packages/server/l
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
-import { ServiceWorkerManager } from './util/service-worker-manager'
+import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -35,7 +36,7 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
-const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
+export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
   return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
 }
 
@@ -466,8 +467,8 @@ export class Http {
     return this.buffers.set(buffer)
   }
 
-  addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    if (this.shouldIgnorePendingRequest(browserPreRequest)) {
+  async addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    if (await this.shouldIgnorePendingRequest(browserPreRequest)) {
       return
     }
 
@@ -498,6 +499,10 @@ export class Http {
     this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorOrigin: data.initiatorOrigin })
   }
 
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.serviceWorkerManager.handleServiceWorkerClientEvent(event)
+  }
+
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)
@@ -507,7 +512,7 @@ export class Http {
     this.preRequests.setPreRequestTimeout(timeout)
   }
 
-  private shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
+  private async shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
     // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
     // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
     // `service-worker` header
@@ -517,7 +522,7 @@ export class Http {
       return true
     }
 
-    if (this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
+    if (await this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
       debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
 
       return true
