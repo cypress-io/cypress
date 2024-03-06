@@ -74,19 +74,27 @@ try {
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
-    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
+    const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
+    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.match(regex) || []
 
     electronLaunchArguments.forEach((arg) => {
       // arg can be just key --disable-http-cache
       // or key value --remote-debugging-port=8315
-      // https://github.com/cypress-io/cypress/issues/7994
-      const [key, value] = arg.split('=')
+      // or key value with another value --foo=--bar=4196
+      // or key value with another multiple value --foo='--bar=4196 --baz=quux'
+      const [key, ...value] = arg.split('=')
 
       // because this is an environment variable, everything is a string
       // thus we don't have to worry about casting
       // --foo=false for example will be "--foo", "false"
-      if (value) {
-        app.commandLine.appendSwitch(key, value)
+      if (value.length) {
+        let joinedValues  = value.join("=")
+        if (joinedValues.startsWith("'") && joinedValues.endsWith("'")) {
+          joinedValues = joinedValues.slice(1, -1)
+        } else if (joinedValues.startsWith('"') && joinedValues.endsWith('"')) {
+          joinedValues = joinedValues.slice(1, -1)
+        }
+        app.commandLine.appendSwitch(key, joinedValues)
       } else {
         app.commandLine.appendSwitch(key)
       }
