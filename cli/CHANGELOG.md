@@ -51,7 +51,7 @@ _Released 3/13/2024_
 
 **Misc:**
 
-- Improved messaging around browser support in the terminal when attempting to run a browser that's not supported by Cypress. Addressed in [#28964](https://github.com/cypress-io/cypress/pull/28964).
+- Improved messaging around browser support in the terminal when attempting to run a browser that's not supported by Cypress. Addressed in [#29066](https://github.com/cypress-io/cypress/pull/29066).
 
 **Performance:**
 
