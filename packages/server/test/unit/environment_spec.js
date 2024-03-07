@@ -88,7 +88,7 @@ describe('lib/environment', () => {
 
     it('sets launch args with multiple values inside quotes', () => {
       restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: "--foo --ipsum=0 --bar=--baz=quux --lorem='--ipsum=dolor --sit=amet'",
+        ELECTRON_EXTRA_LAUNCH_ARGS: `--foo --ipsum=0 --bar=--baz=quux --lorem='--ipsum=dolor --sit=amet'`,
       })
 
       sinon.stub(app.commandLine, 'appendSwitch')

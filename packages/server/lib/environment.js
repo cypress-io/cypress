@@ -74,7 +74,7 @@ try {
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
-    const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
+    const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
     const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.match(regex) || []
 
     electronLaunchArguments.forEach((arg) => {
@@ -88,12 +88,14 @@ try {
       // thus we don't have to worry about casting
       // --foo=false for example will be "--foo", "false"
       if (value.length) {
-        let joinedValues  = value.join("=")
-        if (joinedValues.startsWith("'") && joinedValues.endsWith("'")) {
+        let joinedValues  = value.join('=')
+
+        if (joinedValues.startsWith(`'`) && joinedValues.endsWith(`'`)) {
           joinedValues = joinedValues.slice(1, -1)
         } else if (joinedValues.startsWith('"') && joinedValues.endsWith('"')) {
           joinedValues = joinedValues.slice(1, -1)
         }
+
         app.commandLine.appendSwitch(key, joinedValues)
       } else {
         app.commandLine.appendSwitch(key)
