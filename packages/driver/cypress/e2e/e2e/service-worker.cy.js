@@ -1,5 +1,5 @@
 // decrease the timeouts to ensure we don't hit the 2s correlation timeout
-describe('service workers', { defaultCommandTimeout: 4000, pageLoadTimeout: 10000 }, () => {
+describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000 }, () => {
   let sessionId
 
   const getSessionId = async () => {
@@ -602,28 +602,27 @@ describe('service workers', { defaultCommandTimeout: 4000, pageLoadTimeout: 1000
     validateFetchHandlers({ listenerCount: 1 })
   })
 
-  // TODO: skip this test since clients.claim is not supported
-  // it.skip('supports clients.claim', () => {
-  //   const script = () => {
-  //     self.addEventListener('activate', (event) => {
-  //       event.waitUntil(self.clients.claim())
-  //     })
+  it('supports clients.claim', () => {
+    const script = () => {
+      self.addEventListener('activate', (event) => {
+        event.waitUntil(self.clients.claim())
+      })
 
-  //     self.addEventListener('fetch', function (event) {
-  //       event.respondWith(fetch(event.request))
-  //     })
-  //   }
+      self.addEventListener('fetch', function (event) {
+        event.respondWith(fetch(event.request))
+      })
+    }
 
-  //   cy.intercept('/fixtures/service-worker.js', (req) => {
-  //     req.reply(`(${script})()`,
-  //       { 'Content-Type': 'application/javascript' })
-  //   })
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
 
-  //   cy.visit('fixtures/service-worker.html')
+    cy.visit('fixtures/service-worker.html')
 
-  //   cy.get('#output').should('have.text', 'done')
-  //   validateFetchHandlers({ listenerCount: 1 })
-  // })
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
 
   it('supports async fetch handler', () => {
     const script = () => {
