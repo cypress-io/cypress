@@ -35,8 +35,11 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
   }
 
   const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }) => {
-    if (Cypress.browser.family !== 'chromium') {
-      cy.log('Skipping fetch handlers validation in non-Chromium browsers')
+    // skip validation in non-Chromium and electron browsers
+    // non-Chromium browsers do not fully support the remote debugger protocol
+    // possibly remove the electron check on https://github.com/cypress-io/cypress/issues/2118 is resolved
+    if (Cypress.browser.family !== 'chromium' || Cypress.browser.name === 'electron') {
+      cy.log('Skipping fetch handlers validation in non-Chromium and electron browsers')
 
       return
     }
@@ -44,24 +47,13 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     cy.then(() => {
       cy.wrap(getEventListenersLength()).should('equal', listenerCount).then(() => {
         if (onFetchHandlerType) cy.wrap(getOnFetchHandlerType()).should('equal', onFetchHandlerType)
-
-        cy.task('log', `validateFetchHandler done ${Cypress.state('test').fullTitle()}`)
       })
     })
   }
 
   const unregisterServiceWorker = () => {
     cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
-      cy.task('log', `current registrations ${registrations.length}`)
-
-      cy.wrap(Promise.all(registrations.map((registration) => registration.unregister()))).then(() => {
-        cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
-          cy.task('log', `after unregister registrations ${registrations.length}`)
-          if (registrations.length > 0) {
-            unregisterServiceWorker()
-          }
-        })
-      })
+      cy.wrap(Promise.all(registrations.map((registration) => registration.unregister())))
     })
   }
 
@@ -610,29 +602,27 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     validateFetchHandlers({ listenerCount: 1 })
   })
 
-  // TODO: skip for now until we figure out why
-  // clients.claim causes other tests to fail in electron in CI
-  // it.skip('supports clients.claim', () => {
-  //   const script = () => {
-  //     self.addEventListener('activate', (event) => {
-  //       event.waitUntil(self.clients.claim())
-  //     })
+  it('supports clients.claim', () => {
+    const script = () => {
+      self.addEventListener('activate', (event) => {
+        event.waitUntil(self.clients.claim())
+      })
 
-  //     self.addEventListener('fetch', function (event) {
-  //       event.respondWith(fetch(event.request))
-  //     })
-  //   }
+      self.addEventListener('fetch', function (event) {
+        event.respondWith(fetch(event.request))
+      })
+    }
 
-  //   cy.intercept('/fixtures/service-worker.js', (req) => {
-  //     req.reply(`(${script})()`,
-  //       { 'Content-Type': 'application/javascript' })
-  //   })
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
 
-  //   cy.visit('fixtures/service-worker.html')
+    cy.visit('fixtures/service-worker.html')
 
-  //   cy.get('#output').should('have.text', 'done')
-  //   validateFetchHandlers({ listenerCount: 1 })
-  // })
+    cy.get('#output').should('have.text', 'done')
+    validateFetchHandlers({ listenerCount: 1 })
+  })
 
   it('supports async fetch handler', () => {
     const script = () => {
