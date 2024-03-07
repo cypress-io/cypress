@@ -44,18 +44,23 @@ describe('service workers', { defaultCommandTimeout: 4000, pageLoadTimeout: 1000
     cy.then(() => {
       cy.wrap(getEventListenersLength()).should('equal', listenerCount).then(() => {
         if (onFetchHandlerType) cy.wrap(getOnFetchHandlerType()).should('equal', onFetchHandlerType)
+
+        cy.task('log', `validateFetchHandler done ${Cypress.state('test').fullTitle()}`)
       })
     })
   }
 
-  beforeEach((done) => {
+  beforeEach(() => {
     sessionId = null
 
     // unregister the service worker to ensure it does not affect other tests
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      return Promise.all(registrations.map((registration) => registration.unregister()))
-    }).then(() => {
-      done()
+    cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
+      cy.task('log', `before registrations ${registrations}`)
+
+      cy.wrap(Promise.all(registrations.map((registration) => registration.unregister()))).then(() => {
+        cy.task('log', `before each done ${Cypress.state('test').fullTitle()}`).then(() => {
+        })
+      })
     })
   })
 
