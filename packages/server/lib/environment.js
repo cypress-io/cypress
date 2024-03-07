@@ -88,7 +88,7 @@ try {
       // thus we don't have to worry about casting
       // --foo=false for example will be "--foo", "false"
       if (value.length) {
-        let joinedValues  = value.join('=')
+        let joinedValues = value.join('=')
 
         if (joinedValues.startsWith(`'`) && joinedValues.endsWith(`'`)) {
           joinedValues = joinedValues.slice(1, -1)
