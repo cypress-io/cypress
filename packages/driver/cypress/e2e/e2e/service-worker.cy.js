@@ -34,6 +34,10 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     return result.result.type
   }
 
+  const detachFromTarget = async () => {
+    await Cypress.automation('remote:debugger:protocol', { command: 'Target.detachFromTarget', params: { sessionId } })
+  }
+
   const validateFetchHandlers = ({ listenerCount, onFetchHandlerType }) => {
     // skip validation in non-Chromium and electron browsers
     // non-Chromium browsers do not fully support the remote debugger protocol
@@ -47,6 +51,8 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     cy.then(() => {
       cy.wrap(getEventListenersLength()).should('equal', listenerCount).then(() => {
         if (onFetchHandlerType) cy.wrap(getOnFetchHandlerType()).should('equal', onFetchHandlerType)
+      }).then(() => {
+        cy.wrap(detachFromTarget())
       })
     })
   }
