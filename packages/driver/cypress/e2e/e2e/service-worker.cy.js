@@ -50,18 +50,26 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     })
   }
 
+  const unregisterServiceWorker = () => {
+    cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
+      cy.task('log', `current registrations ${registrations.length}`)
+
+      cy.wrap(Promise.all(registrations.map((registration) => registration.unregister()))).then(() => {
+        cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
+          cy.task('log', `after unregister registrations ${registrations.length}`)
+          if (registrations.length > 0) {
+            unregisterServiceWorker()
+          }
+        })
+      })
+    })
+  }
+
   beforeEach(() => {
     sessionId = null
 
     // unregister the service worker to ensure it does not affect other tests
-    cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
-      cy.task('log', `before registrations ${registrations}`)
-
-      cy.wrap(Promise.all(registrations.map((registration) => registration.unregister()))).then(() => {
-        cy.task('log', `before each done ${Cypress.state('test').fullTitle()}`).then(() => {
-        })
-      })
-    })
+    unregisterServiceWorker()
   })
 
   describe('a service worker that handles requests', () => {
