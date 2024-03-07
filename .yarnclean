@@ -8,7 +8,7 @@ powered-test
 docs
 doc
 # yaml package has a `doc` folder that we need
-!yaml/**/doc/*
+!**/yaml/dist/**/doc
 website
 images
 assets
