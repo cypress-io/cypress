@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.7
 
-_Released 2/27/2024 (PENDING)_
+_Released 3/12/2024 (PENDING)_
 
 **Performance:**
 
@@ -15,8 +15,9 @@ _Released 2/27/2024 (PENDING)_
 
 **Dependency Updates:**
 
-- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
+- Updated jimp from `0.14.0` to `0.22.12`. Addressed in [#29055](https://github.com/cypress-io/cypress/pull/29055).
 - Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
+- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
 
 ## 13.6.6
 
