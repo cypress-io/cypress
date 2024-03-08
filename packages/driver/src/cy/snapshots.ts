@@ -260,7 +260,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).slice(0, 50).flatMap((el: HTMLElement) => {
           try {
             const ownerDoc = el.ownerDocument
             const elWindow = ownerDoc.defaultView
