@@ -59,7 +59,7 @@ namespace CypressIsCyTests {
   Cypress.isCy(cy) // $ExpectType boolean
   Cypress.isCy(undefined) // $ExpectType boolean
 
-  const chainer = cy.wrap("foo").then(function () {
+  const chainer = cy.wrap("foo").then(function() {
     if (Cypress.isCy(chainer)) {
       chainer // $ExpectType Chainable<string>
     }
@@ -83,7 +83,7 @@ namespace CypressCommandsTests {
     // $ExpectType string
     arg
   })
-  Cypress.Commands.add('newCommand', function (arg) {
+  Cypress.Commands.add('newCommand', function(arg) {
     this // $ExpectType Context
     arg // $ExpectType string
   })
@@ -269,7 +269,7 @@ namespace CypressCommandsTests {
     originalFn // $ExpectedType Chainable['newCommand']
     originalFn(arg) // $ExpectType Chainable<number>
   })
-  Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
+  Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
     this // $ExpectType Context
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
@@ -298,7 +298,7 @@ namespace CypressCommandsTests {
     options // $ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions> | undefined
   })
 
-  Cypress.Commands.addQuery('newQuery', function (arg) {
+  Cypress.Commands.addQuery('newQuery', function(arg) {
     this // $ExpectType Command
     arg // $ExpectType string
     return () => 3
@@ -344,7 +344,7 @@ namespace CypressLogsTest {
 }
 
 namespace CypressLocalStorageTest {
-  Cypress.LocalStorage.clear = function (keys) {
+  Cypress.LocalStorage.clear = function(keys) {
     keys // $ExpectType string[] | undefined
   }
 }
