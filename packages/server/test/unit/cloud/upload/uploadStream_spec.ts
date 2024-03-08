@@ -6,7 +6,7 @@ import chaiAsPromised from 'chai-as-promised'
 import { uploadStream, HttpError } from '../../../../lib/cloud/upload/uploadStream'
 import { Readable } from 'stream'
 import { ReadableStream } from 'stream/web'
-import { StreamActivityMonitor, StreamStalled, StreamStartFailed } from '../../../../lib/cloud/upload/StreamActivityMonitor'
+import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
 
 chai.use(chaiAsPromised).use(sinonChai)
 
@@ -103,6 +103,52 @@ describe('uploadStream', () => {
     })
   })
 
+  describe('when fetch resolves with a retryable http status code 3 times', () => {
+    const callCount = 3
+
+    ;[408, 429, 502, 503, 504].forEach((status) => {
+      it(`makes a total of ${callCount} calls for HTTP ${status} and eventually rejects`, async () => {
+        let count = 0
+
+        const inc = () => count++
+
+        mockUpload().reply(status, inc)
+        mockUpload().reply(status, inc)
+        mockUpload().reply(status, inc)
+
+        const uploadPromise = uploadStream(filePath, fileSize, destinationUrl)
+
+        execSimpleStream()
+
+        await expect(uploadPromise).to.eventually.be.rejectedWith(HttpError)
+        expect(count).to.eq(callCount)
+      })
+    })
+  })
+
+  describe('when fetch resolves with a retryable status code 2x, and then a 200', () => {
+    const callCount = 3
+
+    ;[408, 429, 502, 503, 504].forEach((status) => {
+      it(`makes a total of ${callCount} requests after HTTP ${status} and eventually resolves`, async () => {
+        let count = 0
+
+        const inc = () => count++
+
+        mockUpload().reply(status, inc)
+        mockUpload().reply(status, inc)
+        mockUpload().reply(200, inc)
+
+        const uploadPromise = uploadStream(filePath, fileSize, destinationUrl)
+
+        execSimpleStream()
+
+        await expect(uploadPromise).to.be.fulfilled
+        expect(count).to.eq(callCount)
+      })
+    })
+  })
+
   describe('when passed a timeout controller', () => {
     let activityMonitor: StreamActivityMonitor
     const maxStartDwellTime = 1000
@@ -127,25 +173,25 @@ describe('uploadStream', () => {
 
     describe('and the timeout monitor\'s signal aborts with a StreamStartTimedOut error', () => {
       beforeEach(() => {
-        abortController.abort(new StreamStartFailed(maxStartDwellTime))
+        abortController.abort(new StreamStartTimedOutError(maxStartDwellTime))
       })
 
       it('rejects with a StreamStartFailed error', async () => {
         const uploadPromise = uploadStream(filePath, fileSize, destinationUrl, activityMonitor)
 
-        await expect(uploadPromise).to.be.rejectedWith(StreamStartFailed)
+        await expect(uploadPromise).to.be.rejectedWith(StreamStartTimedOutError)
       })
     })
 
     describe('and the timeout monitor\'s signal aborts with a StreamStalled error', () => {
       beforeEach(() => {
-        abortController.abort(new StreamStalled(maxActivityDwellTime))
+        abortController.abort(new StreamStalledError(maxActivityDwellTime))
       })
 
       it('rejects with a StreamStalled error', async () => {
         const uploadPromise = uploadStream(filePath, fileSize, destinationUrl, activityMonitor)
 
-        await expect(uploadPromise).to.be.rejectedWith(StreamStalled)
+        await expect(uploadPromise).to.be.rejectedWith(StreamStalledError)
       })
     })
   })

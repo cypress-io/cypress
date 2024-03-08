@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { StreamActivityMonitor, StreamStalled, StreamStartFailed } from '../../../../lib/cloud/upload/StreamActivityMonitor'
+import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
 
 chai.use(chaiAsPromised)
 
@@ -49,14 +49,14 @@ describe('StreamTimeoutController', () => {
     it('signals an abort if no initial activity happens within maxStartDwellTime', async () => {
       await clock.tickAsync(maxStartDwellTime + 1)
       expect(monitor.getController().signal.aborted).to.be.true
-      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStartFailed)
+      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStartTimedOutError)
     })
 
     it('signals an abort if activity fails to happen after maxActivityDwellTime', async () => {
       streamController.enqueue('some data')
       await clock.tickAsync(maxActivityDwellTime + 1)
       expect(monitor.getController().signal.aborted).to.be.true
-      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStalled)
+      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStalledError)
     })
 
     it('does not signal an abort if initial activity happens within maxStartDwellTime', async () => {

@@ -1,17 +1,17 @@
-export class StreamStartFailed extends Error {
+export class StreamStartTimedOutError extends Error {
   constructor (maxStartDwellTime: number) {
     super(`Source stream failed to begin sending data after ${maxStartDwellTime}ms`)
   }
 }
 
-export class StreamStalled extends Error {
+export class StreamStalledError extends Error {
   constructor (maxActivityDwellTime: number) {
     super(`Stream stalled: no activity detected in the previous ${maxActivityDwellTime}ms`)
   }
 }
 
 export class StreamActivityMonitor {
-  private activityMonitor: TransformStream | undefined
+  private streamMonitor: TransformStream | undefined
   private startTimeout: NodeJS.Timeout | undefined
   private activityTimeout: NodeJS.Timeout | undefined
   private controller: AbortController
@@ -24,19 +24,12 @@ export class StreamActivityMonitor {
     return this.controller
   }
 
-  private markActivityInterval () {
-    clearTimeout(this.activityTimeout)
-    this.activityTimeout = setTimeout(() => {
-      this.controller?.abort(new StreamStalled(this.maxActivityDwellTime))
-    }, this.maxActivityDwellTime)
-  }
-
   public monitor<T> (stream: ReadableStream<T>): ReadableStream<T> {
-    if (this.activityMonitor) {
-      throw new Error('Cannot re-use a StreamTimeoutController: create a new one.')
+    if (this.streamMonitor || this.startTimeout || this.activityTimeout) {
+      this.reset()
     }
 
-    this.activityMonitor = new TransformStream<T, T>({
+    this.streamMonitor = new TransformStream<T, T>({
       transform: (chunk, controller) => {
         controller.enqueue(chunk)
         clearTimeout(this.startTimeout)
@@ -45,9 +38,27 @@ export class StreamActivityMonitor {
     })
 
     this.startTimeout = setTimeout(() => {
-      this.controller?.abort(new StreamStartFailed(this.maxStartDwellTime))
+      this.controller?.abort(new StreamStartTimedOutError(this.maxStartDwellTime))
     }, this.maxStartDwellTime)
 
-    return stream.pipeThrough<T>(this.activityMonitor)
+    return stream.pipeThrough<T>(this.streamMonitor)
+  }
+
+  private reset () {
+    clearTimeout(this.startTimeout)
+    clearTimeout(this.activityTimeout)
+
+    this.streamMonitor = undefined
+    this.startTimeout = undefined
+    this.activityTimeout = undefined
+
+    this.controller = new AbortController()
+  }
+
+  private markActivityInterval () {
+    clearTimeout(this.activityTimeout)
+    this.activityTimeout = setTimeout(() => {
+      this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime))
+    }, this.maxActivityDwellTime)
   }
 }

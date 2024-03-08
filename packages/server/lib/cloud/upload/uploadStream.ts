@@ -1,10 +1,9 @@
-import fetch from 'cross-fetch'
+import crossFetch from 'cross-fetch'
+import fetchCreator from 'fetch-retry-ts'
 import fs from 'fs'
 import { Readable } from 'stream'
 import type { StreamActivityMonitor } from './StreamActivityMonitor'
-
 import Debug from 'debug'
-
 const debug = Debug('cypress:server:cloud:uploadStream')
 
 export class HttpError extends Error {
@@ -17,16 +16,33 @@ export class HttpError extends Error {
   }
 }
 
-// specifically for uploading to s3 at this point, no response type templating necessary
-// note this takes a ReadableStream (e.g., webstream) - it must be converted from a Node
-// Readable via Readable.toWeb(fs.getReadStream('/path/to/file'))
-export const uploadStream = (filePath: string, fileSize: number, destinationUrl: string, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
-  const fileStream = fs.createReadStream(filePath)
-  const readableFileStream = Readable.toWeb(fileStream) as ReadableStream<ArrayBufferView>
+export const uploadStream = async (filePath: string, fileSize: number, destinationUrl: string, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
+  // In order to .pipeThrough the activity montior from the file stream to the fetch body,
+  // the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
+  // Since ReadStream's data type isn't typed, .toWeb defaults to 'any', which causes issues
+  // with node-fetch's `body` type definition. coercing this to ReadableStream<ArrayBufferView>
+  // seems to work just fine.
+  const readableFileStream = Readable.toWeb(fs.createReadStream(filePath)) as ReadableStream<ArrayBufferView>
   const abortController = timeoutMonitor?.getController()
+
+  const fetch = fetchCreator(crossFetch, {
+    retries: 2,
+    retryDelay: (count) => count * 500,
+    // system network errors, and:
+    // * 408 Request Timeout
+    // * 429 Too Many Requests (S3 can return this)
+    // * 502 Bad Gateway
+    // * 503 Service Unavailable
+    // * 504 Gateway Timeout
+    // Other http status codes are not valid for automatic retries.
+    retryOn: [408, 429, 502, 503, 504],
+  })
 
   return new Promise(async (resolve, reject) => {
     debug(`${destinationUrl}: PUT ${fileSize}`)
+
+    readableFileStream
+
     try {
       const response = await fetch(destinationUrl, {
         method: 'PUT',
