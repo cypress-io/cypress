@@ -181,6 +181,7 @@ export class DataContext {
   @cached
   get cloud () {
     return new CloudDataSource({
+      // @ts-ignore
       fetch: (...args) => this.util.fetch(...args),
       getUser: () => this.coreData.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),

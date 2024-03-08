@@ -16,7 +16,7 @@
     "types": [
       "cypress",
       "./support",
-      "./node_modules/@types/node"
+      "node"
     ]
   },
   "include": [
