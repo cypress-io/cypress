@@ -3,8 +3,13 @@
 
 _Released 2/27/2024 (PENDING)_
 
+**Performance:**
+
+- Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+
 **Bugfixes:**
 
+- Changed screenshot capture behavior in Chromium to activate the main Cypress tab before capturing. This prevents screenshot capture from timing out in certain situations. Fixed in [#29038](https://github.com/cypress-io/cypress/pull/29038). Fixes [#5016](https://github.com/cypress-io/cypress/issues/5016)
 - Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
 - Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
 
