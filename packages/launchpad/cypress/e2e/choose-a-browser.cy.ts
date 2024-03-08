@@ -1,7 +1,6 @@
 import type { FoundBrowser } from '@packages/types'
 
-// TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
-describe.skip('Choose a browser page', () => {
+describe('Choose a browser page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
@@ -15,8 +14,7 @@ describe.skip('Choose a browser page', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
-    it('preselects browser that is provided through the command line', { retries: 15 }, () => {
+    it('preselects browser that is provided through the command line', () => {
       cy.withCtx((ctx, o) => {
         // stub launching project since we have `--browser --testingType --project` here
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
@@ -25,6 +23,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -40,6 +39,7 @@ describe.skip('Choose a browser page', () => {
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
@@ -63,13 +63,15 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]').as('AlertBody')
       .should('contain', `We could not identify a known browser at the path you provided: ${path}`)
-      .validateExternalLink({
+
+      cy.validateExternalLink({
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
 
@@ -96,6 +98,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -112,6 +115,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -164,6 +168,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -188,6 +193,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -205,6 +211,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
@@ -217,11 +224,11 @@ describe.skip('Choose a browser page', () => {
       cy.wait('@closeBrowser')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23220
     it('performs mutation to focus open browser when focus button is pressed', { retries: 15 }, () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
@@ -262,6 +269,7 @@ describe.skip('Choose a browser page', () => {
       })
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -270,11 +278,11 @@ describe.skip('Choose a browser page', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
     it('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', { retries: 15 }, () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -306,6 +314,7 @@ describe.skip('Choose a browser page', () => {
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -314,7 +323,7 @@ describe.skip('Choose a browser page', () => {
       })
 
       cy.get('h1').should('contain', 'Welcome to Cypress!')
-      cy.contains('[data-cy-testingtype="e2e"]', 'Not configured')
+      cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -327,7 +336,7 @@ describe.skip('Choose a browser page', () => {
       })
 
       cy.get('h1').should('contain', 'Welcome to Cypress!')
-      cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not configured')
+      cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not Configured')
     })
   })
 
@@ -343,6 +352,7 @@ describe.skip('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
