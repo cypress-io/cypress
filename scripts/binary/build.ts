@@ -168,7 +168,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     meta.distDir('**', 'image-q', 'demo'),
     meta.distDir('**', 'gifwrap', 'test'),
     meta.distDir('**', 'pixelmatch', 'test'),
-    meta.distDir('**', '@jimp', 'tiff', 'test'),
     meta.distDir('**', '@cypress', 'icons', '**/*.{ai,eps}'),
     meta.distDir('**', 'esprima', 'test'),
     meta.distDir('**', 'bmp-js', 'test'),

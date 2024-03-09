@@ -80,7 +80,7 @@
     "is-ci": "^3.0.1",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
-    "jimp": "0.14.0",
+    "jimp": "0.22.12",
     "jose": "^4.15.5",
     "jsonlint": "1.6.3",
     "launch-editor": "2.3.0",
