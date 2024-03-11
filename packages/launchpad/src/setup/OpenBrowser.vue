@@ -11,6 +11,7 @@
       variant=""
       :was-browser-set-in-cli="query.data.value.localSettings.preferences.wasBrowserSetInCLI"
       :gql="query.data.value.currentProject"
+      :launch-if-browser-set-in-cli="launchIfBrowserSetInCli"
       @navigated-back="backFn"
       @launch="launch"
       @close-browser="closeBrowserFn"
@@ -35,6 +36,7 @@ query OpenBrowser {
   localSettings {
     preferences {
       wasBrowserSetInCLI
+      isValidBrowser
     }
   }
   currentProject {
@@ -110,6 +112,17 @@ const launch = async () => {
 
     launching.value = false
   }
+}
+
+const launchIfBrowserSetInCli = async () => {
+  const isValidBrowser = query.data.value?.localSettings.preferences.isValidBrowser
+  const wasBrowserSetInCli = query.data.value?.localSettings.preferences.wasBrowserSetInCLI
+
+  if (wasBrowserSetInCli && isValidBrowser) {
+    await launch()
+  }
+
+  return
 }
 
 const backFn = () => {
