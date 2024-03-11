@@ -465,20 +465,78 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('take:screenshot', () => {
-      it('resolves with base64 data URL', function () {
+      beforeEach(function () {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
-
-        return expect(this.onRequest('take:screenshot'))
-        .to.eventually.equal('data:image/png;base64,foo')
       })
 
-      it('rejects nicely if Page.captureScreenshot fails', function () {
-        this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+      describe('when tab focus behavior default (disabled)', function () {
+        it('resolves with base64 data URL', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
-        return expect(this.onRequest('take:screenshot'))
-        .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+          return expect(this.onRequest('take:screenshot'))
+          .to.eventually.equal('data:image/png;base64,foo')
+        })
+
+        it('rejects nicely if Page.captureScreenshot fails', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+
+          return expect(this.onRequest('take:screenshot'))
+          .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+        })
+      })
+
+      describe('when tab focus behavior is enabled', function () {
+        let requireTabFocus
+        let isHeadless
+
+        beforeEach(() => {
+          requireTabFocus = true
+        })
+
+        describe('when headless', () => {
+          beforeEach(() => {
+            isHeadless = true
+          })
+
+          it('does not try to comm with extension, simply brings page to front', async function () {
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+
+            expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            expect(this.sendDebuggerCommand).not.to.be.calledWith('Runtime.evaluate')
+            expect(this.sendDebuggerCommand).to.be.calledWith('Page.bringToFront')
+          })
+        })
+
+        describe('when not headless', () => {
+          beforeEach(async function () {
+            isHeadless = false
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+          })
+
+          describe('and the extension activates the tab', function () {
+            beforeEach(function () {
+              this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves()
+              this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+            })
+
+            it('captures the screenshot', function () {
+              expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            })
+          })
+
+          describe('and the extension fails to activate the tab', function () {
+            beforeEach(function () {
+              this.sendDebuggerCommand.withArgs('Runtime.evaluate').rejects(new Error('Unable to communicate with Cypress Extension'))
+              this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
+            })
+
+            it('captures the screenshot', function () {
+              expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            })
+          })
+        })
       })
     })
 
