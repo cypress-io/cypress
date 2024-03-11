@@ -5,7 +5,7 @@ _Released 3/12/2024 (PENDING)_
 
 **Features:**
 
-- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#typescript-changes). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
+- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
 
 **Performance:**
 
