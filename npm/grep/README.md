@@ -80,7 +80,7 @@ yarn add -D @cypress/grep
 **required:** load this module from the [support file](https://on.cypress.io/writing-and-organizing-tests#Support-file) or at the top of the spec file if not using the support file. You import the registration function and then call it:
 
 ```js
-// cypress/support/index.js
+// cypress/support/e2e.js
 // load and register the grep feature using "require" function
 // https://github.com/cypress-io/cypress/tree/develop/npm/grep
 const registerCypressGrep = require('@cypress/grep')
