@@ -167,7 +167,7 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)', customDirectory: 'without-fixtures' })
   })
 
-  // NOTE: Skipping this test because it is flaky
+  // TODO: Fix flaky test
   it.skip('generates valid config file for pristine project without cypress installed', () => {
     cy.intercept('mutation-ScaffoldedFiles_completeSetup').as('mutationScaffoldedFiles')
     cy.intercept('query-MainLaunchpadQuery').as('mainLaunchpadQuery')

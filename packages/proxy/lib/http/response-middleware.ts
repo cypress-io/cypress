@@ -9,7 +9,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '.'
+import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -21,6 +21,7 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
+import { injectIntoServiceWorker } from './util/service-worker-injector'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -832,6 +833,38 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeInjectServiceWorker: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:inject:service:worker', parentSpan: this.resMiddlewareSpan, isVerbose })
+  const hasHeader = hasServiceWorkerHeader(this.req.headers)
+
+  span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
+
+  if (!hasHeader) {
+    span?.end()
+
+    return this.next()
+  }
+
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.setEncoding('utf8')
+
+  this.incomingResStream.pipe(concatStream(async (body) => {
+    const updatedBody = injectIntoServiceWorker(body)
+
+    const pt = new PassThrough
+
+    pt.write(updatedBody)
+    pt.end()
+
+    this.incomingResStream = pt
+
+    this.next()
+  })).on('error', this.onError).once('close', () => {
+    span?.end()
+  })
+}
+
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
@@ -909,6 +942,7 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
+  MaybeInjectServiceWorker,
   GzipBody,
   SendResponseBodyToClient,
 }

@@ -196,7 +196,6 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     path.join(buildAppDir, '**', '@babel', '**', 'esm'),
     path.join(buildAppDir, '**', 'ramda', 'es'),
     path.join(buildAppDir, '**', 'jimp', 'es'),
-    path.join(buildAppDir, '**', '@jimp', '**', 'es'),
     path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
@@ -210,8 +209,6 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     path.join(buildAppDir, '**', '*.d.ts'),
     path.join(buildAppDir, '**', 'ajv', 'lib', '**', '*.ts'),
     path.join(buildAppDir, '**', '*.flow'),
-    // Example files are not needed
-    path.join(buildAppDir, '**', 'jimp', 'browser', 'examples'),
     // Documentation files are not needed
     path.join(buildAppDir, '**', 'JSV', 'jsdoc-toolkit'),
     path.join(buildAppDir, '**', 'JSV', 'docs'),
