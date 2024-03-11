@@ -177,6 +177,12 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         const capture = getCaptureValue(options)
         const newListener = capture ? captureListenersMap.get(listener) : nonCaptureListenersMap.get(listener)
 
+        // If the listener is not in the map, we don't need to remove it
+        // and we can just call the original removeEventListener function
+        if (!newListener) {
+          return oldRemoveEventListener(type, listener, options)
+        }
+
         // call the original removeEventListener function prior to doing any additional work since it may fail
         const result = oldRemoveEventListener(type, newListener!, options)
 
