@@ -68,7 +68,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -135,7 +136,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -202,7 +204,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -269,7 +272,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -336,7 +340,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -403,7 +408,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -470,7 +476,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -537,7 +544,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -604,7 +612,8 @@ exports['e2e events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000
+      "_slow": 10000,
+      "timestamp": "Any.Number"
     }
   ],
   "preAfterTest": [
@@ -5156,7 +5165,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -5185,7 +5195,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -5214,7 +5225,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -5243,7 +5255,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     }
   ],
   "preAfterTest": [
@@ -6883,7 +6896,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -6912,7 +6926,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -6941,7 +6956,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     },
     {
       "_testConfig": {
@@ -6970,7 +6986,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 250,
+      "timestamp": "Any.Number"
     }
   ],
   "preAfterTest": [

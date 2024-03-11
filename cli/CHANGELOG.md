@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.6.7
 
-_Released 2/27/2024 (PENDING)_
+_Released 3/12/2024 (PENDING)_
 
 **Performance:**
 
@@ -9,17 +9,20 @@ _Released 2/27/2024 (PENDING)_
 
 **Bugfixes:**
 
+- Changed screenshot capture behavior in Chromium to activate the main Cypress tab before capturing. This prevents screenshot capture from timing out in certain situations. Fixed in [#29038](https://github.com/cypress-io/cypress/pull/29038). Fixes [#5016](https://github.com/cypress-io/cypress/issues/5016)
 - Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
 - Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
 
 **Misc:**
 
 - Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
+- Capture the `beforeTest` timestamp inside the browser for the purposes of accurately determining test start for Test Replay. Addressed in [#29061](https://github.com/cypress-io/cypress/pull/29061).
 
 **Dependency Updates:**
 
-- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
+- Updated jimp from `0.14.0` to `0.22.12`. Addressed in [#29055](https://github.com/cypress-io/cypress/pull/29055).
 - Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
+- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
 
 ## 13.6.6
 
