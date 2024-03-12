@@ -3,6 +3,10 @@
 
 _Released 3/12/2024 (PENDING)_
 
+**Features:**
+
+- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
+
 **Performance:**
 
 - Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
