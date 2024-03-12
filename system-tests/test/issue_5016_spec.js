@@ -8,6 +8,14 @@ describe('e2e issue 5016 - screenshot times out after clicking target _blank', f
     sanitizeScreenshotDimensions: true,
     snapshot: true,
     expectedExitCode: 1,
-    browser: '!webkit',
+    browser: 'chrome',
+  })
+
+  systemTests.it('fails but does not timeout taking screenshot', {
+    project: 'config-screenshot-on-failure-enabled',
+    sanitizeScreenshotDimensions: true,
+    snapshot: true,
+    expectedExitCode: 1,
+    browser: 'electron',
   })
 })
