@@ -14,9 +14,17 @@ exports['e2e events'] = `
       "inTransaction": false,
       "readonly": false,
       "memory": false
+    },
+    {
+      "name": "/path/to/name",
+      "open": true,
+      "inTransaction": false,
+      "readonly": false,
+      "memory": false
     }
   ],
   "afterSpec": [
+    true,
     true,
     true
   ],
@@ -609,6 +617,66 @@ exports['e2e events'] = `
         "column": 4,
         "whitespace": "    ",
         "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:63:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:60:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:12)\\n    at eval (<anonymous>)"
+      },
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000,
+      "timestamp": "Any.Number"
+    },
+    {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {},
+        "applied": "complete"
+      },
+      "id": "r3",
+      "order": 1,
+      "title": "has protocol events with shadow DOM selectors",
+      "pending": false,
+      "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('exist');\\n  }",
+      "type": "test",
+      "wallClockStartedAt": "Any.ISODate",
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+        "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 2,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+      },
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000,
+      "timestamp": "Any.Number"
+    },
+    {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {},
+        "applied": "complete"
+      },
+      "id": "r4",
+      "order": 2,
+      "title": "does not have cypress errors when visiting closed shadow roots",
+      "pending": false,
+      "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom-closed.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('not.exist');\\n  }",
+      "type": "test",
+      "wallClockStartedAt": "Any.ISODate",
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+        "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 7,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -1393,6 +1461,104 @@ exports['e2e events'] = `
         "_slow": 10000
       },
       "options": {}
+    },
+    {
+      "test": {
+        "_cypressTestStatusInfo": {
+          "strategy": "detect-flake-and-pass-on-threshold",
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
+        "_testConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {},
+          "applied": "complete"
+        },
+        "id": "r3",
+        "order": 1,
+        "title": "has protocol events with shadow DOM selectors",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('exist');\\n  }",
+        "type": "test",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
+        "timings": {
+          "lifecycle": "Any.Number",
+          "test": {
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+          "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+          "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 2,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {
+        "nextTestHasTestIsolationOn": true
+      }
+    },
+    {
+      "test": {
+        "_cypressTestStatusInfo": {
+          "strategy": "detect-flake-and-pass-on-threshold",
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
+        "_testConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {},
+          "applied": "complete"
+        },
+        "id": "r4",
+        "order": 2,
+        "title": "does not have cypress errors when visiting closed shadow roots",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom-closed.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('not.exist');\\n  }",
+        "type": "test",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
+        "timings": {
+          "lifecycle": "Any.Number",
+          "test": {
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+          "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+          "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 7,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {}
     }
   ],
   "afterTest": [
@@ -2135,6 +2301,98 @@ exports['e2e events'] = `
         "column": 4,
         "whitespace": "    ",
         "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:63:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:60:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:12)\\n    at eval (<anonymous>)"
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000
+    },
+    {
+      "_cypressTestStatusInfo": {
+        "strategy": "detect-flake-and-pass-on-threshold",
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {},
+        "applied": "complete"
+      },
+      "id": "r3",
+      "order": 1,
+      "title": "has protocol events with shadow DOM selectors",
+      "state": "passed",
+      "pending": false,
+      "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('exist');\\n  }",
+      "type": "test",
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
+      "timings": {
+        "lifecycle": "Any.Number",
+        "test": {
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
+        }
+      },
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+        "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 2,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000
+    },
+    {
+      "_cypressTestStatusInfo": {
+        "strategy": "detect-flake-and-pass-on-threshold",
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {},
+        "applied": "complete"
+      },
+      "id": "r4",
+      "order": 2,
+      "title": "does not have cypress errors when visiting closed shadow roots",
+      "state": "passed",
+      "pending": false,
+      "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom-closed.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('not.exist');\\n  }",
+      "type": "test",
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
+      "timings": {
+        "lifecycle": "Any.Number",
+        "test": {
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
+        }
+      },
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+        "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 7,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2949,9 +3207,113 @@ exports['e2e events'] = `
       ],
       "runtimeConfig": {},
       "totalUnfilteredTests": 0
+    },
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "pending": false,
+      "type": "suite",
+      "file": "cypress/e2e/shadow-dom.cy.js",
+      "retries": -1,
+      "_slow": 10000,
+      "hooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "id": "r2",
+          "title": "protocol events w/ shadow DOM",
+          "root": false,
+          "pending": false,
+          "type": "suite",
+          "file": null,
+          "invocationDetails": {
+            "function": "eval",
+            "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+            "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+            "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 1,
+            "column": 0,
+            "whitespace": "    ",
+            "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+          },
+          "retries": -1,
+          "_slow": 10000,
+          "hooks": [],
+          "tests": [
+            {
+              "id": "r3",
+              "title": "has protocol events with shadow DOM selectors",
+              "pending": false,
+              "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('exist');\\n  }",
+              "type": "test",
+              "file": null,
+              "invocationDetails": {
+                "function": "Suite.eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+                "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 2,
+                "column": 2,
+                "whitespace": "    ",
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+              },
+              "currentRetry": 0,
+              "retries": -1,
+              "_slow": 10000,
+              "hooks": [],
+              "_testConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "_titlePath": [
+                "protocol events w/ shadow DOM",
+                "has protocol events with shadow DOM selectors"
+              ]
+            },
+            {
+              "id": "r4",
+              "title": "does not have cypress errors when visiting closed shadow roots",
+              "pending": false,
+              "body": "() => {\\n    cy.visit('cypress/fixtures/shadow-dom-closed.html');\\n    cy.get('#in-shadow', {\\n      includeShadowDom: true\\n    }).should('not.exist');\\n  }",
+              "type": "test",
+              "file": null,
+              "invocationDetails": {
+                "function": "Suite.eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/shadow-dom.cy.js",
+                "relativeFile": "cypress/e2e/shadow-dom.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 7,
+                "column": 2,
+                "whitespace": "    ",
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+              },
+              "currentRetry": 0,
+              "retries": -1,
+              "_slow": 10000,
+              "hooks": [],
+              "_testConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "_titlePath": [
+                "protocol events w/ shadow DOM",
+                "does not have cypress errors when visiting closed shadow roots"
+              ]
+            }
+          ],
+          "suites": []
+        }
+      ],
+      "runtimeConfig": {},
+      "totalUnfilteredTests": 0
     }
   ],
   "connectToBrowser": [
+    true,
     true,
     true
   ],
@@ -3717,6 +4079,123 @@ exports['e2e events'] = `
       "createdAtTimestamp": "Any.Number",
       "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-1",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "cypress/fixtures/shadow-dom.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r3",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "#in-shadow",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-3",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **<div#in-shadow>** to exist in the DOM",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r3",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom.html",
+      "visible": true,
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "cypress/fixtures/shadow-dom-closed.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "#in-shadow",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom-closed.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-6",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **#in-shadow** not to exist in the DOM",
+      "name": "assert",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom-closed.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     }
   ],
   "commandLogChanged": [
@@ -3756,6 +4235,30 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number"
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-1",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "cypress/fixtures/shadow-dom.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/shadow-dom.html",
       "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
@@ -4085,6 +4588,41 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
+      "id": "log-http://localhost:2121-2",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "#in-shadow",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom.html",
+      "visible": true,
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "elementsToHighlight": [
+            {
+              "selector": [
+                "#shadow-root",
+                "#in-shadow"
+              ]
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
+      "highlightAttr": "data-cypress-el"
+    },
+    {
       "id": "log-http://localhost:2121-20",
       "event": false,
       "hookId": "r8",
@@ -4385,6 +4923,41 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
+      "id": "log-http://localhost:2121-3",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **<div#in-shadow>** to exist in the DOM",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom.html",
+      "visible": true,
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "elementsToHighlight": [
+            {
+              "selector": [
+                "#shadow-root",
+                "#in-shadow"
+              ]
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
+      "highlightAttr": "data-cypress-el"
+    },
+    {
       "id": "log-http://localhost:2121-30",
       "event": false,
       "hookId": "r11",
@@ -4655,6 +5228,30 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
+      "id": "log-http://localhost:2121-4",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "cypress/fixtures/shadow-dom-closed.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/shadow-dom-closed.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number"
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
       "id": "log-http://localhost:2121-5",
       "event": false,
       "hookId": "r4",
@@ -4680,6 +5277,33 @@ exports['e2e events'] = `
               "selector": "#text-target"
             }
           ]
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "#in-shadow",
+      "name": "get",
+      "numElements": 0,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom-closed.html",
+      "visible": true,
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number"
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4717,6 +5341,30 @@ exports['e2e events'] = `
       "createdAtTimestamp": "Any.Number",
       "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-6",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **#in-shadow** not to exist in the DOM",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom-closed.html",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number"
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-7",
@@ -5031,9 +5679,57 @@ exports['e2e events'] = `
     {
       "url": "",
       "timestamp": "Any.Number"
+    },
+    {
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom.html",
+      "timestamp": "Any.Number"
+    },
+    {
+      "url": "",
+      "timestamp": "Any.Number"
+    },
+    {
+      "url": "http://localhost:2121/cypress/fixtures/shadow-dom-closed.html",
+      "timestamp": "Any.Number"
+    },
+    {
+      "url": "",
+      "timestamp": "Any.Number"
     }
   ],
   "pageLoading": [
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
     {
       "loading": true,
       "timestamp": "Any.Number"

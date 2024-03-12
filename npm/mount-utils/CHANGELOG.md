@@ -1,3 +1,10 @@
+# [@cypress/mount-utils-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v4.0.0...@cypress/mount-utils-v4.1.0) (2024-03-12)
+
+
+### Features
+
+* supported type of vue@2.7+ ([#28818](https://github.com/cypress-io/cypress/issues/28818)) ([854a649](https://github.com/cypress-io/cypress/commit/854a6497be2315881b8ad9c92674d3c29a76d581))
+
 # [@cypress/mount-utils-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v3.0.0...@cypress/mount-utils-v4.0.0) (2022-12-02)
 
 
