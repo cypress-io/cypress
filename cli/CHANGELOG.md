@@ -1,7 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.6.7
+## 13.7.0
 
 _Released 3/12/2024 (PENDING)_
+
+**Features:**
+
+- Added shadow DOM snapshot support within Test Replay in order to highlight elements correctly within the Cypress reporter. Addressed in [#28823](https://github.com/cypress-io/cypress/pull/28823).
+- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
 
 **Performance:**
 
