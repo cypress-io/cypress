@@ -581,7 +581,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('pnpm add -D react-scripts react-dom react')
     })
 
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452

@@ -31,7 +31,7 @@ export class WizardDataSource {
   async installDependenciesCommand () {
     const commands = {
       'npm': 'npm install -D',
-      'pnpm': 'pnpm install -D',
+      'pnpm': 'pnpm add -D',
       'yarn': 'yarn add -D',
     } as const
 
