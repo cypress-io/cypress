@@ -65,7 +65,6 @@ _Released 3/13/2024_
 - Changed Component Testing scaffolding instruction to `pnpm add` to add framework dependencies when a project uses pnpm as package manager. Addresses [#29052](https://github.com/cypress-io/cypress/issues/29052).
 - Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
 - Capture the `beforeTest` timestamp inside the browser for the purposes of accurately determining test start for Test Replay. Addressed in [#29061](https://github.com/cypress-io/cypress/pull/29061).
-- Improved messaging around browser support in the terminal when attempting to run a browser that's not supported by Cypress. Addressed in [#29066](https://github.com/cypress-io/cypress/pull/29066).
 
 **Dependency Updates:**
 
