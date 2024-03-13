@@ -2,6 +2,7 @@ import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 
 export class NetworkProxy {
   http: Http
@@ -10,8 +11,8 @@ export class NetworkProxy {
     this.http = new Http(opts)
   }
 
-  addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
-    this.http.addPendingBrowserPreRequest(preRequest)
+  async addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
+    await this.http.addPendingBrowserPreRequest(preRequest)
   }
 
   removePendingBrowserPreRequest (requestId: string) {
@@ -36,6 +37,10 @@ export class NetworkProxy {
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.http.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.http.handleServiceWorkerClientEvent(event)
   }
 
   handleHttpRequest (req, res) {

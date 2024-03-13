@@ -79,12 +79,17 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
   Cypress.primaryOriginCommunicator.on('viewport:changed', viewportChangedHandler)
 
   Cypress.on('test:before:run:async', async (attributes) => {
+    const timestamp = performance.now() + performance.timeOrigin
+
     attachCypressProtocolInfo({
       type: 'test:before:run:async',
-      timestamp: performance.now() + performance.timeOrigin,
+      timestamp,
     })
 
-    await Cypress.backend('protocol:test:before:run:async', attributes)
+    await Cypress.backend('protocol:test:before:run:async', {
+      ...attributes,
+      timestamp,
+    })
   })
 
   Cypress.on('url:changed', (url) => {
