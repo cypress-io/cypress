@@ -165,6 +165,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Build `@packages/example` with `yarn workspace @packages/example build`
     - Inspect the contents of `./packages/example/build` before deploying, and ensure it looks correct
     - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
+    - Check the deployed site at `https://example.cypress.io` to ensure the new changes deployed correctly.
 
 17. Once the release is complete, create a Github tag off of the release commit which bumped the version:
     ```shell
