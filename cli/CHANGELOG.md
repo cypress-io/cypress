@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.1
+
+_Released 3/26/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue blurring shadow dom elements. Fixed in [#29125](https://github.com/cypress-io/cypress/pull/29125).
+
 ## 13.7.0
 
 _Released 3/12/2024 (PENDING)_
