@@ -81,7 +81,7 @@
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
     "jimp": "0.22.12",
-    "jose": "^4.11.2",
+    "jose": "^4.15.5",
     "jsonlint": "1.6.3",
     "launch-editor": "2.3.0",
     "lazy-ass": "1.6.0",
