@@ -51,6 +51,7 @@ export const LocalSettingsPreferences = objectType({
     })
 
     t.int('globalLaunchCount', {
+      description: 'A launch count to keep track of launchProject calls from projectActions',
       resolve: (_source, _args, ctx) => ctx.actions.project.launchCount,
     })
 
