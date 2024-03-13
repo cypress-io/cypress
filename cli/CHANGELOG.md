@@ -1,7 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.6.7
+## 13.7.0
 
-_Released 3/12/2024 (PENDING)_
+_Released 3/13/2024_
+
+**Features:**
+
+- Added shadow DOM snapshot support within Test Replay in order to highlight elements correctly within the Cypress reporter. Addressed in [#28823](https://github.com/cypress-io/cypress/pull/28823).
+- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
+- Adds additional context to error messages displayed when Test Replay artifacts fail to upload. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
 
 **Features:**
 
@@ -12,7 +18,8 @@ Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Performance:**
 
-- Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Fixed a performance regression from [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Reduces the number of attempts to retry failed Test Replay artifact uploads from 8 to 3, to reduce time spent on artifact upload attempts that will not succeed. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
 
 **Bugfixes:**
 
@@ -22,7 +29,9 @@ Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Misc:**
 
-- Captures the `beforeTest` timestamp inside the browser for the purposes of accurately determining test start for Test Replay. Addressed in [#29061](https://github.com/cypress-io/cypress/pull/29061).
+- Changed Component Testing scaffolding instruction to `pnpm add` to add framework dependencies when a project uses pnpm as package manager. Addresses [#29052](https://github.com/cypress-io/cypress/issues/29052).
+- Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
+- Capture the `beforeTest` timestamp inside the browser for the purposes of accurately determining test start for Test Replay. Addressed in [#29061](https://github.com/cypress-io/cypress/pull/29061).
 
 **Dependency Updates:**
 
