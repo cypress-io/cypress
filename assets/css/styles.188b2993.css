@@ -1,0 +1,335 @@
+body {
+  padding-top: 0;
+  font-family: 'Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h4 {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 22px;
+}
+
+code {
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+pre {
+  font-size: 13px;
+  border: 0;
+  padding: 16px;
+  background: #f7f7f7;
+  border-radius: 3px;
+  box-shadow: 0 0 0 0 #fff;
+  word-break: normal;
+  word-wrap: normal;
+}
+
+table {
+  background-color: #fff;
+}
+
+pre code {
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  padding: 0;
+}
+
+canvas {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.well {
+  margin-top: 75px;
+  margin-bottom: 0;
+  border: 0;
+  box-shadow: 0 0 0 #fff;
+  -webkit-box-shadow: 0 0 0 #fff;
+}
+
+/* Just like well, but for second row, with just a single line of text */
+.well-1-line {
+  margin-top: 2em;
+}
+
+.placeholder {
+  width: 100px;
+  height: 100px;
+  background: #69f;
+}
+
+/*---------nav----------*/
+
+.navbar {
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.navbar-inverse .navbar-brand {
+  color: #fff;
+}
+
+/*---------banner----------*/
+
+.banner {
+  background-color: #00bf88;
+  color: #fff;
+  padding: 25px 0 35px;
+}
+
+.banner p,
+.banner-alt p {
+  font-size: 18px;
+}
+
+.banner a {
+  color: #fff;
+  border-bottom: 1px dashed #fff;
+}
+
+.banner-alt {
+  background-color: #eef1f4;
+  color: #6b707c;
+  padding: 25px 0 35px;
+}
+
+.banner-alt h2 {
+  color: #555;
+}
+
+.home-list {
+  list-style: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 35px 0;
+  padding-left: 0;
+  line-height: 28px;
+}
+
+li.header {
+  font-weight: bold;
+  list-style: none;
+}
+
+.home-list > li {
+  margin-top: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.home-list > li:last-child {
+  border-bottom: 0;
+}
+
+.home-list > li > ul {
+  list-style: none;
+  padding-left: 0px;
+}
+
+.home-list > li > ul > li {
+  font-size: 16px;
+  color: #666;
+}
+
+.home-list > li > ul > li > a {
+  font-weight: normal;
+}
+
+.content-container {
+  margin-top: 35px;
+}
+
+#query-form {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.action-focus.focus {
+  border: 5px solid orange;
+}
+
+.action-blur.error {
+  border: 5px solid red;
+}
+
+.action-div, .rightclick-action-div {
+  cursor: pointer;
+}
+
+.action-opacity {
+  position: relative;
+  margin-top: 50px;
+}
+
+.action-opacity .opacity-cover {
+  text-align: center;
+  line-height: 50px;
+  color: #333;
+  font-weight: bold;
+  font-size: 25px;
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 235px;
+  height: 60px;
+  background-color: red;
+  opacity: 0.7;
+  box-shadow: 0 2px 7px #000;
+}
+
+.utlity-jquery li.active {
+  background-color: #0068a2;
+  color: white;
+}
+
+.network-btn,
+.network-post,
+.network-put {
+  margin-bottom: 20px;
+}
+
+#scroll-horizontal,
+#scroll-vertical,
+#scroll-both,
+#scrollable-horizontal,
+#scrollable-vertical,
+#scrollable-both {
+  background-color: #ddd;
+  border: 1px solid #777;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+#scrollable-horizontal ul,
+#scrollable-vertical ul,
+#scrollable-both ul {
+  padding: 0;
+  overflow: auto;
+}
+
+#scrollable-horizontal ul > li,
+#scrollable-vertical ul > li,
+#scrollable-both ul > li {
+  list-style: none;
+  margin: 20px;
+  float: left;
+}
+
+#scrollable-horizontal ul > li {
+  display: inline-block;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+/*
+
+code highlight styling
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  color: #333;
+  background: #f7f7f7;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #999;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #1d75b3;
+  font-weight: normal;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #0086b3;
+  font-weight: normal;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #183691;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #900;
+  font-weight: normal;
+}
+
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #458;
+  font-weight: normal;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #009926;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #990073;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0086b3;
+}
+
+.hljs-meta {
+  color: #999;
+  font-weight: normal;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.hljs-emphasis {
+  font-style: normal;
+}
+
+.hljs-strong {
+  font-weight: normal;
+}
