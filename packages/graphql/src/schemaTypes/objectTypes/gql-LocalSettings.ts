@@ -50,6 +50,10 @@ export const LocalSettingsPreferences = objectType({
       },
     })
 
+    t.int('globalLaunchCount', {
+      resolve: (_source, _args, ctx) => ctx.actions.project.launchCount,
+    })
+
     t.boolean('debugSlideshowComplete')
     t.boolean('desktopNotificationsEnabled')
     t.dateTime('dismissNotificationBannerUntil')
