@@ -22,7 +22,7 @@
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
-import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument, OpenBrowser_LocalSettingsDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref, onMounted } from 'vue'
@@ -31,12 +31,6 @@ const { t } = useI18n()
 
 gql`
 query OpenBrowser {
-  localSettings {
-    preferences {
-      wasBrowserSetInCLI
-      isValidBrowser
-    }
-  }
   currentProject {
     id
     currentTestingType
@@ -48,7 +42,20 @@ query OpenBrowser {
 }
 `
 
+gql`
+query OpenBrowser_LocalSettings {
+  localSettings {
+    preferences {
+      wasBrowserSetInCLI
+      isValidBrowser
+      globalLaunchCount
+    }
+  }
+}
+`
+
 const query = useQuery({ query: OpenBrowserDocument })
+const lsQuery = useQuery({ query: OpenBrowser_LocalSettingsDocument, requestPolicy: 'network-only' })
 
 gql`
 mutation OpenBrowser_ClearTestingType {
@@ -113,10 +120,12 @@ const launch = async () => {
 }
 
 const launchIfBrowserSetInCli = async () => {
-  const isValidBrowser = query.data.value?.localSettings.preferences.isValidBrowser
-  const wasBrowserSetInCli = query.data.value?.localSettings.preferences.wasBrowserSetInCLI
+  await lsQuery
+  const isValidBrowser = lsQuery.data.value?.localSettings.preferences.isValidBrowser
+  const wasBrowserSetInCli = lsQuery.data.value?.localSettings.preferences.wasBrowserSetInCLI
+  const globalLaunchCount = lsQuery.data.value?.localSettings.preferences.globalLaunchCount
 
-  if (wasBrowserSetInCli && isValidBrowser) {
+  if (wasBrowserSetInCli && isValidBrowser && (globalLaunchCount === 0)) {
     await launch()
   }
 
