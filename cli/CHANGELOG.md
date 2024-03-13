@@ -9,16 +9,18 @@ _Released 3/26/2024 (PENDING)_
 
 ## 13.7.0
 
-_Released 3/12/2024 (PENDING)_
+_Released 3/13/2024_
 
 **Features:**
 
 - Added shadow DOM snapshot support within Test Replay in order to highlight elements correctly within the Cypress reporter. Addressed in [#28823](https://github.com/cypress-io/cypress/pull/28823).
 - Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
+- Adds additional context to error messages displayed when Test Replay artifacts fail to upload. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
 
 **Performance:**
 
-- Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Fixed a performance regression from [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Reduces the number of attempts to retry failed Test Replay artifact uploads from 8 to 3, to reduce time spent on artifact upload attempts that will not succeed. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
 
 **Bugfixes:**
 
