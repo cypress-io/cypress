@@ -9,9 +9,7 @@
     />
     <OpenBrowserList
       variant=""
-      :was-browser-set-in-cli="query.data.value.localSettings.preferences.wasBrowserSetInCLI"
       :gql="query.data.value.currentProject"
-      :launch-if-browser-set-in-cli="launchIfBrowserSetInCli"
       @navigated-back="backFn"
       @launch="launch"
       @close-browser="closeBrowserFn"
@@ -145,6 +143,7 @@ const setFocusToActiveBrowserWindow = () => {
 
 onMounted(() => {
   resetLatestVersionTelemetry.executeMutation({})
+  launchIfBrowserSetInCli()
 })
 
 </script>
