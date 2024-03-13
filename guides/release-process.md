@@ -91,7 +91,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 3. Create a Release PR -
    Bump, submit, get approvals on, and merge a new PR. This PR should:
     - Bump the Cypress `version` in [`package.json`](package.json)
-    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
+    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, and `yarn` to ensure the lockfile is up to date.
     - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 
 4. Once the `develop` branch is passing in CI and you have confirmed the `cypress-bot` has commented on the commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
@@ -162,6 +162,9 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 15. Merge the documentation PR from step 11 and the new docker image PR created in step 12 to release the image.
 
 16. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
+    - Build `@packages/example` with `yarn workspace @packages/example build`
+    - Inspect the contents of `./packages/example/build` before deploying, and ensure it looks correct
+    - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
 
 17. Once the release is complete, create a Github tag off of the release commit which bumped the version:
     ```shell
