@@ -3059,10 +3059,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.2.tgz#cdca8da74f20e5b2926a06b4d2b91ebbe444694e"
   integrity sha512-5GPLRFLKFz6sn/Nh44s7aWpj18LQBmIh086wbVhGk4RlM29C9iDk3xobAy4WNJbAdLXZsutOT7BtkiRRlEfwtw==
 
-"@cypress/unique-selector@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.0.5.tgz#1ce7889dd9ffe47e8b39d31da3a6b7e9a0c9c93d"
-  integrity sha512-WS1M1arFAcl2v+A4OHT4ZPAXQgoQuVwM4quyZZQUmJsshXZqbTFyT918WQujC6yikOddZgiVGk46CIBGoCMnow==
+"@cypress/unique-selector@0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.4.4.tgz#5e14be46ba5d7a4dad8eda07c0fd431a99227d83"
+  integrity sha512-hAvSShXUzIRpYDJNIC/OoQA/8stGcYGG2surkY/pMVElqWmAcfccjOWYbuii/ktP8zqUcPzxWKWCuFauJYWEfQ==
   dependencies:
     css.escape "^1.5.1"
 
@@ -19435,7 +19435,7 @@ jiti@^1.18.2:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.18.2.tgz#80c3ef3d486ebf2450d9335122b32d121f2a83cd"
   integrity sha512-QAdOptna2NYiSSpv0O/BwoHBSmz4YhpzJHyi+fnMRTXFjp7B8i/YG5Z8IfusxB1ufjcD2Sre1F3R+nX3fvy7gg==
 
-jose@^4.11.2:
+jose@^4.15.5:
   version "4.15.5"
   resolved "https://registry.yarnpkg.com/jose/-/jose-4.15.5.tgz#6475d0f467ecd3c630a1b5dadd2735a7288df706"
   integrity sha512-jc7BFxgKPKi94uOvEmzlSWFFe2+vASyXaKUpdQKatWAESU2MWjDfFf0fdfc83CDKcA5QecabZeNLyfhe3yKNkg==
