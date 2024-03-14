@@ -7,6 +7,10 @@ _Released 3/26/2024 (PENDING)_
 
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27240).
 
+**Dependency Updates:**
+
+- Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
+
 ## 13.7.0
 
 _Released 3/13/2024_
