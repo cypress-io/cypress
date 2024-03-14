@@ -2254,7 +2254,6 @@
     "./node_modules/jose/dist/node/cjs/lib/decrypt_key_management.js",
     "./node_modules/jose/dist/node/cjs/lib/encrypt_key_management.js",
     "./node_modules/jose/dist/node/cjs/lib/epoch.js",
-    "./node_modules/jose/dist/node/cjs/lib/format_pem.js",
     "./node_modules/jose/dist/node/cjs/lib/invalid_key_input.js",
     "./node_modules/jose/dist/node/cjs/lib/is_disjoint.js",
     "./node_modules/jose/dist/node/cjs/lib/is_object.js",
@@ -2275,7 +2274,6 @@
     "./node_modules/jose/dist/node/cjs/runtime/dsa_digest.js",
     "./node_modules/jose/dist/node/cjs/runtime/ecdhes.js",
     "./node_modules/jose/dist/node/cjs/runtime/encrypt.js",
-    "./node_modules/jose/dist/node/cjs/runtime/env.js",
     "./node_modules/jose/dist/node/cjs/runtime/fetch_jwks.js",
     "./node_modules/jose/dist/node/cjs/runtime/flags.js",
     "./node_modules/jose/dist/node/cjs/runtime/generate.js",
@@ -2287,12 +2285,14 @@
     "./node_modules/jose/dist/node/cjs/runtime/pbes2kw.js",
     "./node_modules/jose/dist/node/cjs/runtime/random.js",
     "./node_modules/jose/dist/node/cjs/runtime/rsaes.js",
+    "./node_modules/jose/dist/node/cjs/runtime/runtime.js",
     "./node_modules/jose/dist/node/cjs/runtime/timing_safe_equal.js",
     "./node_modules/jose/dist/node/cjs/runtime/zlib.js",
     "./node_modules/jose/dist/node/cjs/util/base64url.js",
     "./node_modules/jose/dist/node/cjs/util/decode_jwt.js",
     "./node_modules/jose/dist/node/cjs/util/decode_protected_header.js",
     "./node_modules/jose/dist/node/cjs/util/errors.js",
+    "./node_modules/jose/dist/node/cjs/util/runtime.js",
     "./node_modules/js-tokens/index.js",
     "./node_modules/jsesc/jsesc.js",
     "./node_modules/json-schema/lib/validate.js",
@@ -4317,5 +4317,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c399087290198c5fb55fbdc2bad73ce9c7be4139875424b3e76fc8f928e8966b"
+  "deferredHash": "bc2bd545c295dcaaaee830a354dcc4231149abbcc75f489699f5e955124738b3"
 }
