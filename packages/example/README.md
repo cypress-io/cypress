@@ -39,6 +39,8 @@ This copies the `cypress/e2e` and files from [`cypress-example-kitchensink`](htt
 
 ## Deploying
 
+This command deploys directly to production! Before executing it, ensure everything looks correct in the `./build` directory.
+
 ```bash
 yarn workspace @packages/example deploy
 ```
