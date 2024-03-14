@@ -1,4 +1,4 @@
-const { parserOpts, releaseRules } = require('./scripts/semantic-commits/change-categories')
+const { parserOpts, releaseRules } = require('./tooling/changelog/src/semantic-commits/change-categories')
 
 module.exports = {
   plugins: [

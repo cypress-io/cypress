@@ -5,14 +5,14 @@ const { Octokit } = require('@octokit/core')
 const debugLib = require('debug')
 
 const { getCurrentReleaseData } = require('./get-current-release-data')
-const { getNextVersionForBinary } = require('../get-next-version')
+const { getNextVersionForBinary } = require('../../../../scripts/get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 const debug = debugLib('scripts:semantic-commits:get-binary-release-data')
 
 const ensureAuth = () => {
-  if (!process.env.GH_TOKEN) {
-    throw new Error('The GH_TOKEN env is not set.')
-  }
+  // if (!process.env.GH_TOKEN) {
+  //   throw new Error('The GH_TOKEN env is not set.')
+  // }
 }
 
 /**
@@ -94,6 +94,30 @@ const fetchPullRequest = async (octokit, pullNumber) => {
   }
 }
 
+const fetchPullRequestFiles = async (octokit, pullNumber) => {
+  try {
+    const { data: pullRequestFiles } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', {
+      owner: 'cypress-io',
+      repo: 'cypress',
+      pull_number: pullNumber,
+    })
+
+    return pullRequestFiles
+  } catch (err) {
+    console.log(`Error while fetching PR #${pullNumber} files:`, err)
+
+    const { rateLimitHit, retryAfter } = parseRateLimit(err)
+
+    if (rateLimitHit) {
+      console.log(`Rate limit hit - Retry fetching PR #${pullNumber} after ${retryAfter}ms`)
+
+      return Bluebird.delay(retryAfter).then(() => fetchPullRequest(octokit, pullNumber))
+    }
+
+    throw err
+  }
+}
+
 /**
  * Get the next release version given the semantic commits in the git history. Then using the commit history,
  * determine which files have changed, list of PRs merged and issues resolved since the latest tag was
@@ -117,6 +141,15 @@ const getReleaseData = async (latestReleaseInfo) => {
   semanticCommits = _.uniqBy(semanticCommits, (commit) => commit.header)
 
   const changedFiles = await getChangedFilesSinceLastRelease(latestReleaseInfo)
+  const binaryFiles = changedFiles.filter((filename) => {
+    return /^(cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md' && !filename.includes('cli/changesets')
+  })
+
+  if (binaryFiles.length === 0) {
+    console.log('Does not contain changes that impacts the next Cypress release. No need to create the changelog.')
+
+    process.exit(0)
+  }
 
   const issuesInRelease = []
   const prsInRelease = []
@@ -143,10 +176,13 @@ const getReleaseData = async (latestReleaseInfo) => {
 
     for (const [idx, ref] of refs.entries()) {
       let pullRequest
+      let pullRequestFiles
 
       try {
         pullRequest = await fetchPullRequest(octokit, ref.issue)
         debug(`Pull request #${ref.issue} found!`)
+
+        pullRequestFiles = await fetchPullRequestFiles(octokit, ref.issue)
       } catch (err) {
         debug(`Error while fetching PR #${ ref.issue}:`, err)
         // If we have tried to fetch all other references and all of them failed,
@@ -164,10 +200,14 @@ const getReleaseData = async (latestReleaseInfo) => {
       }
 
       const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
+      const changesetFilenames = pullRequestFiles.filter((file) => {
+        return file.status === 'added' && file.filename.includes('cli/changesets/')
+      }).map((file) => file.filename)
 
       commits.push({
         commitMessage: semanticResult.header,
         semanticType,
+        changesetFilenames,
         prNumber: ref.issue,
         associatedIssues,
       })
@@ -183,14 +223,17 @@ const getReleaseData = async (latestReleaseInfo) => {
     }
   }))
 
+  console.log('')
   console.log('Next release version is', nextVersion)
 
+  console.log('')
   console.log(`${prsInRelease.length} pull requests have merged since ${latestReleaseInfo.version} was released.`)
 
   prsInRelease.forEach((link) => {
     console.log('  -', link)
   })
 
+  console.log('')
   console.log(`${issuesInRelease.length} issues addressed since ${latestReleaseInfo.version} was released.`)
 
   issuesInRelease.forEach((link) => {
