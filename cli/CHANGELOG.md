@@ -7,6 +7,10 @@ _Released 3/26/2024 (PENDING)_
 
 - Fixed an issue blurring shadow dom elements. Fixed in [#29125](https://github.com/cypress-io/cypress/pull/29125).
 
+**Dependency Updates:**
+
+- Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
+
 ## 13.7.0
 
 _Released 3/13/2024_
