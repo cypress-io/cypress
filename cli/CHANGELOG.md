@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.1
+
+_Released 3/26/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
+
 ## 13.7.0
 
 _Released 3/13/2024_
