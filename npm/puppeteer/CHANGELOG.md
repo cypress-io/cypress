@@ -1,3 +1,12 @@
+# [@cypress/puppeteer-v0.1.3](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.2...@cypress/puppeteer-v0.1.3) (2024-02-20)
+
+
+### Bug Fixes
+
+* move main tab activation to puppeteer plugin ([#28898](https://github.com/cypress-io/cypress/issues/28898)) ([ed2fc13](https://github.com/cypress-io/cypress/commit/ed2fc1394623f08097d180747712c557d867ee86))
+
+# [@cypress/puppeteer-v0.1.2](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.1...@cypress/puppeteer-v0.1.2) (2023-12-26)
+
 # [@cypress/puppeteer-v0.1.1](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.0...@cypress/puppeteer-v0.1.1) (2023-11-29)
 
 

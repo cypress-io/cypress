@@ -10,7 +10,6 @@ const Jimp = require('jimp')
 const webpackConfig = require('@packages/runner/webpack.config.ts')
 
 async function getWebpackOptions () {
-  process.env.NO_LIVERELOAD = '1'
   const opts = await webpackConfig.default()
 
   const webpackOptions = opts[0]
@@ -42,6 +41,15 @@ module.exports = async (on, config) => {
   const webpackOptions = await getWebpackOptions()
 
   on('file:preprocessor', wp({ webpackOptions }))
+
+  on('before:browser:launch', (browser, launchOptions) => {
+    if (browser.family === 'firefox') {
+      // set testing_localhost_is_secure_when_hijacked to true so localhost will be considered a secure context
+      launchOptions.preferences['network.proxy.testing_localhost_is_secure_when_hijacked'] = true
+    }
+
+    return launchOptions
+  })
 
   on('task', {
     'return:arg' (arg) {

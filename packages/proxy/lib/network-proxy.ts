@@ -1,6 +1,8 @@
 import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
+import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 
 export class NetworkProxy {
   http: Http
@@ -9,16 +11,36 @@ export class NetworkProxy {
     this.http = new Http(opts)
   }
 
-  addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
-    this.http.addPendingBrowserPreRequest(preRequest)
+  async addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
+    await this.http.addPendingBrowserPreRequest(preRequest)
   }
 
   removePendingBrowserPreRequest (requestId: string) {
     this.http.removePendingBrowserPreRequest(requestId)
   }
 
+  getPendingBrowserPreRequests () {
+    return this.http.getPendingBrowserPreRequests()
+  }
+
   addPendingUrlWithoutPreRequest (url: string) {
     this.http.addPendingUrlWithoutPreRequest(url)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.http.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.http.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
+    this.http.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.http.handleServiceWorkerClientEvent(event)
   }
 
   handleHttpRequest (req, res) {
@@ -46,8 +68,8 @@ export class NetworkProxy {
     this.http.setBuffer(buffer)
   }
 
-  reset () {
-    this.http.reset()
+  reset (options: { resetBetweenSpecs: boolean } = { resetBetweenSpecs: false }) {
+    this.http.reset(options)
   }
 
   setProtocolManager (protocolManager) {

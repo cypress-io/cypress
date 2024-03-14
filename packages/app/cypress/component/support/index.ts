@@ -18,7 +18,6 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 
 // Import commands.js using ES2015 syntax:
 
-import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
@@ -49,5 +48,5 @@ registerMountFn({ plugins: [() => createRouter(), () => pinia] })
 
 installCustomPercyCommand()
 
-Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop completed with undelivered notifications.'))
 Cypress.Commands.add('tabUntil', tabUntil)
