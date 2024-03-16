@@ -185,6 +185,10 @@ _Released 11/21/2023_
 
 - Upgraded [`chrome-remote-interface`](https://www.npmjs.com/package/chrome-remote-interface) from `0.31.3` to `0.33.0` to increase the max payload from 100MB to 256MB. Addressed in [#27998](https://github.com/cypress-io/cypress/pull/27998).
 
+**Bugfixes:**
+
+- Fixed not using agent in the first preflight request. Fixed in [#28340](https://github.com/cypress-io/cypress/pull/28340).
+
 ## 13.5.1
 
 _Released 11/14/2023_
