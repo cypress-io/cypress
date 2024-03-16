@@ -10,6 +10,7 @@ import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
 import type { Emissions, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
+import { testAttemptFinished } from './test_attempts'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -983,6 +984,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
   _runner._shouldBufferSuiteEnd = false
   _runner._onTestAfterRun = []
+  _runner._onTestAttemptFinished = testAttemptFinished
 
   _runner.on('suite end', (suite) => {
     const handleSuiteEnd = () => {

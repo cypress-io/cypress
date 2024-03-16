@@ -36,7 +36,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           })
 
           // This will differ per strategy
-          // the snapshots for 'detect-flake-and-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
+          // the snapshots for 'detect-flake-but-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
           // for each project:
           // 'detect-flake-and-pass-on-threshold': will run a total of 6 times and fail 6 times, config is satisfied, the test fails, and the suite is skipped
           // 'detect-flake-but-always-fail': will run a total of 10 times and fail 10 times, config is satisfied, the test fails, and the suite is skipped
@@ -71,7 +71,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
           })
 
           // This will differ per strategy
-          // the snapshots for 'detect-flake-and-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
+          // the snapshots for 'detect-flake-but-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
           // for each project:
           // 'detect-flake-and-pass-on-threshold': will run a total of 6 times and fail 6 times, config is satisfied, the test fails, and the suite is skipped
           // 'detect-flake-but-always-fail': will run a total of 10 times and fail 10 times, config is satisfied, the test fails, and the suite is skipped
@@ -94,7 +94,7 @@ describe('experimental retries: runner tests', { defaultCommandTimeout: 7500 }, 
 
       describe('mocha grep', () => {
         // This will differ per strategy
-        // the snapshots for 'detect-flake-and-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
+        // the snapshots for 'detect-flake-but-always-fail' configurations should almost be identical, regardless of experimentalOptions configuration.
         // for each project:
         // 'detect-flake-and-pass-on-threshold': will run a total of 6 times and fail 6 times, config is satisfied, the test fails, but the suite is NOT skipped
         // 'detect-flake-but-always-fail': will run a total of 10 times and fail 10 times, config is satisfied, the test fails, but the suite is NOT skipped
