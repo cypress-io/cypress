@@ -2343,7 +2343,7 @@ export default {
 
         We failed looking for this file at the path:
 
-        ${obj.path}
+        ${decodeURIComponent(obj.path)}
 
         The internal Cypress web server responded with:
 
