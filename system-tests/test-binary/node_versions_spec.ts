@@ -33,7 +33,7 @@ describe('binary node versions', () => {
 
 describe('type: module', () => {
   [
-    'cypress/base:18.6.0',
+    'cypress/base:18.15.0',
     'cypress/base:20.5.0',
   ].forEach((dockerImage) => {
     systemTests.it(`can run in ${dockerImage}`, {

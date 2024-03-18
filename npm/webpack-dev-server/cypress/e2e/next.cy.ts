@@ -20,12 +20,14 @@ for (const project of WEBPACK_REACT) {
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('index.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
     })
 
     it('should live-reload on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('index.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -56,6 +58,7 @@ for (const project of WEBPACK_REACT) {
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.contains('index.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
@@ -78,6 +81,7 @@ for (const project of WEBPACK_REACT) {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
     it('should detect new spec', { retries: 15 }, () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx) => {
         const newTestPath = ctx.path.join('pages', 'New.cy.js')
@@ -96,6 +100,7 @@ for (const project of WEBPACK_REACT) {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
     it('should allow import of global styles in support file', { retries: 15 }, () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('styles.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })
     })

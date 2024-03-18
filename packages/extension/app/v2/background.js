@@ -337,7 +337,6 @@ const automation = {
     })
     .then(fn)
   },
-
 }
 
 module.exports = automation

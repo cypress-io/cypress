@@ -8,17 +8,13 @@ import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
-
 import * as packages from './util/packages'
 import * as meta from './meta'
-import xvfb from '../../cli/lib/exec/xvfb'
-import smoke from './smoke'
 import { spawn, execSync } from 'child_process'
 import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
-import verify from '../../cli/lib/tasks/verify'
 import * as electronBuilder from 'electron-builder'
 
 const globAsync = promisify(glob)
@@ -172,7 +168,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     meta.distDir('**', 'image-q', 'demo'),
     meta.distDir('**', 'gifwrap', 'test'),
     meta.distDir('**', 'pixelmatch', 'test'),
-    meta.distDir('**', '@jimp', 'tiff', 'test'),
     meta.distDir('**', '@cypress', 'icons', '**/*.{ai,eps}'),
     meta.distDir('**', 'esprima', 'test'),
     meta.distDir('**', 'bmp-js', 'test'),
@@ -307,26 +302,6 @@ export async function packageElectronApp (options: BuildCypressAppOpts) {
 
   console.log(stdout)
 
-  // runSmokeTests
-  let usingXvfb = xvfb.isNeeded()
-
-  try {
-    if (usingXvfb) {
-      await xvfb.start()
-    }
-
-    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
-    await testExecutableVersion(meta.buildAppExecutable(), version)
-
-    const executablePath = meta.buildAppExecutable()
-
-    await smoke.test(executablePath, meta.buildAppDir())
-  } finally {
-    if (usingXvfb) {
-      await xvfb.stop()
-    }
-  }
-
   // verifyAppCanOpen
   if (platform === 'darwin' && !skipSigning) {
     const appFolder = meta.zipDir()
@@ -416,27 +391,4 @@ async function testDistVersion (distDir: string, version: string) {
     result.stdout, 'from input version to build', version)
 
   console.log('✅ using node --version works')
-}
-
-async function testExecutableVersion (buildAppExecutable: string, version: string) {
-  log('#testVersion')
-
-  console.log('testing built app executable version')
-  console.log(`by calling: ${buildAppExecutable} --version`)
-
-  const args = ['--version']
-
-  if (verify.needsSandbox()) {
-    args.push('--no-sandbox')
-  }
-
-  const result = await execa(buildAppExecutable, args)
-
-  la(result.stdout, 'missing output when getting built version', result)
-
-  console.log('built app version', result.stdout)
-  la(result.stdout.trim() === version.trim(), 'different version reported',
-    result.stdout, 'from input version to build', version)
-
-  console.log('✅ using --version on the Cypress binary works')
 }

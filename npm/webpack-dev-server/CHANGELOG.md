@@ -1,3 +1,14 @@
+# [@cypress/webpack-dev-server-v3.7.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.3...@cypress/webpack-dev-server-v3.7.4) (2024-01-30)
+
+
+### Bug Fixes
+
+* optimize reduce addCypressToWebpackEslintRulesInPlace ([#27819](https://github.com/cypress-io/cypress/issues/27819)) ([43792e7](https://github.com/cypress-io/cypress/commit/43792e7583651318ea4653fce914a16b9fd5ae48))
+
+# [@cypress/webpack-dev-server-v3.7.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.2...@cypress/webpack-dev-server-v3.7.3) (2024-01-12)
+
+# [@cypress/webpack-dev-server-v3.7.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.1...@cypress/webpack-dev-server-v3.7.2) (2023-12-26)
+
 # [@cypress/webpack-dev-server-v3.7.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.0...@cypress/webpack-dev-server-v3.7.1) (2023-11-22)
 
 

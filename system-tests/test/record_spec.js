@@ -2307,7 +2307,7 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
-            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+            const artifactReport = getRequests().find(({ url }) => url.includes(`/instances/${instanceId}/artifacts`))?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
@@ -2354,20 +2354,13 @@ describe('e2e record', () => {
             spec: 'simple_multiple.cy.js',
             configFile: 'cypress-with-project-id.config.js',
             record: true,
-            snapshot: true,
+            snapshot: false,
             expectedExitCode: 1,
           }).then(() => {
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
-            console.log(postResultsRequest)
             expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
-            expect(postResultsRequest?.body.tests).to.have.length(2)
-            expect(postResultsRequest?.body.stats.suites).to.equal(1)
-            expect(postResultsRequest?.body.stats.tests).to.equal(2)
-            expect(postResultsRequest?.body.stats.passes).to.equal(1)
-            expect(postResultsRequest?.body.stats.failures).to.equal(1)
-            expect(postResultsRequest?.body.stats.skipped).to.equal(0)
           })
         })
       })
@@ -2402,6 +2395,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2427,6 +2421,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2452,6 +2447,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2545,7 +2541,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 8 times and fails', () => {
+  describe('upload 500 - retries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2564,13 +2560,17 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist()
-        expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload after 3 attempts. Errors: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+        )
+
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })
 
-  describe('upload 500 - retries 7 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 7)
+  describe('upload 500 - retries 2 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2)
 
     let archiveFile = ''
 

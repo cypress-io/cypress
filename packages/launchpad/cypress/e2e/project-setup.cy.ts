@@ -50,8 +50,11 @@ describe('Launchpad: Setup Project', () => {
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
-    cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not Configured')
-    cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not Configured')
+    cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+    .should(e2eIsConfigured ? 'not.exist' : 'exist')
+
+    cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
+    .should(ctIsConfigured ? 'not.exist' : 'exist')
   }
 
   const verifyChooseABrowserPage = () => {
@@ -217,7 +220,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
@@ -422,7 +425,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="component"]').click()
 
@@ -578,7 +581,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('pnpm add -D react-scripts react-dom react')
     })
 
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
@@ -615,7 +618,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()
@@ -670,8 +673,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
-    it.skip('takes the user to first step of ct setup when switching from app', () => {
+    it('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })

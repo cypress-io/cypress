@@ -26,20 +26,19 @@ export default (Commands, Cypress, cy) => {
       // to just create a synchronous submit function
       const form = options.$el.get(0)
 
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: options.$el,
-          timeout: options.timeout,
-          consoleProps () {
-            return {
-              'Applied To': $dom.getElements(options.$el),
-              Elements: options.$el.length,
-            }
-          },
-        })
+      options._log = Cypress.log({
+        $el: options.$el,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return {
+            'Applied To': $dom.getElements(options.$el),
+            Elements: options.$el.length,
+          }
+        },
+      })
 
-        options._log!.snapshot('before', { next: 'after' })
-      }
+      options._log?.snapshot('before', { next: 'after' })
 
       if (!options.$el.is('form')) {
         const node = $dom.stringify(options.$el)

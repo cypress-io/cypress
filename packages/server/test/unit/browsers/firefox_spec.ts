@@ -573,6 +573,10 @@ describe('lib/browsers/firefox', () => {
           connected: false,
         }
 
+        const automationStub = {
+          onServiceWorkerClientEvent: sinon.stub(),
+        }
+
         const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
 
         browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
@@ -580,17 +584,17 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, null, null)
+        const actual = await firefoxUtil.setupRemote(port, automationStub, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
-        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null })
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null, onServiceWorkerClientEvent: automationStub.onServiceWorkerClientEvent })
         expect(CdpAutomation.create).to.be.calledWith(
           criClientStub.send,
           criClientStub.on,
           criClientStub.off,
           browserCriClient.resetBrowserTargets,
-          null,
+          automationStub,
         )
       })
     })

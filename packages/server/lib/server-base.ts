@@ -40,6 +40,8 @@ import statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
+import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -472,7 +474,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset()
+      this.networkProxy.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
@@ -491,12 +493,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
     this.networkProxy.removePendingBrowserPreRequest(requestId)
+  }
+
+  getBrowserPreRequests () {
+    return this._networkProxy?.getPendingBrowserPreRequests()
   }
 
   emitRequestEvent (eventName, data) {
@@ -505,6 +511,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
     this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
+    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.networkProxy.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -617,7 +639,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset()
+    this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 

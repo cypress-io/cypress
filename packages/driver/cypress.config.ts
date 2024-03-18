@@ -22,6 +22,15 @@ export default defineConfig({
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
+      on('task', {
+        log (message) {
+          // eslint-disable-next-line no-console
+          console.log(message)
+
+          return null
+        },
+      })
+
       return require('./cypress/plugins')(on, config)
     },
     baseUrl: 'http://localhost:3500',

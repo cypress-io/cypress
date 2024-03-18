@@ -21,6 +21,7 @@
     "puppeteer-core": "^21.2.1"
   },
   "devDependencies": {
+    "@types/node": "^18.17.5",
     "chai-as-promised": "^7.1.1",
     "chokidar": "^3.5.3",
     "express": "4.17.3",
@@ -29,7 +30,7 @@
     "semantic-release": "19.0.3",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "4.7.4"
   },
   "peerDependencies": {

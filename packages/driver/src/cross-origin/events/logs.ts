@@ -8,5 +8,7 @@ export const handleLogs = (Cypress: Cypress.Cypress) => {
   }
 
   Cypress.on('log:added', onLogAdded)
+  Cypress.on('_log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
+  Cypress.on('_log:changed', onLogChanged)
 }

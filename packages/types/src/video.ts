@@ -25,7 +25,7 @@ export type BrowserVideoController = {
   /**
    * A function that resolves once the video is fully captured and flushed to disk.
    */
-  endVideoCapture: () => Promise<void>
+  endVideoCapture: (waitForMoreFrames: boolean) => Promise<void>
   /**
    * Timestamp of when the video capture started - used for chapter timestamps.
    */

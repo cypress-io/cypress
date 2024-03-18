@@ -325,7 +325,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
 
   automation.use(cdpAutomation)
 
@@ -484,7 +484,15 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: browser.displayName, onAsynchronousError: options.onError, onReconnect, fullyManageTabs: false })
+    const browserCriClient = await BrowserCriClient.create({
+      hosts: ['127.0.0.1'],
+      port,
+      browserName: browser.displayName,
+      onAsynchronousError: options.onError,
+      onReconnect,
+      fullyManageTabs: false,
+      onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
+    })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
@@ -535,9 +543,10 @@ export = {
     await options['onInitializeNewBrowserTab']?.()
 
     await Promise.all([
+      pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation),
     ])
 
     await this._navigateUsingCRI(pageCriClient, url)
@@ -619,6 +628,7 @@ export = {
       onReconnect,
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
+      onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
