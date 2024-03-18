@@ -1,6 +1,7 @@
 import crossFetch from 'cross-fetch'
 import fetchCreator from 'fetch-retry-ts'
 import fs from 'fs'
+import fsAsync from 'fs/promises'
 import { Readable } from 'stream'
 import type { StreamActivityMonitor } from './StreamActivityMonitor'
 import Debug from 'debug'
@@ -16,7 +17,25 @@ export class HttpError extends Error {
   }
 }
 
-export const uploadStream = async (filePath: string, fileSize: number, destinationUrl: string, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
+// expected to be passed into uploadStream: nock + delay is very difficult to
+// use fake timers for, as the callback to generate a nock response (expectedly)
+// executes before any retry is attempted, and there is no wait to "await" that
+// retry hook to advance fake timers. If a method of using fake timers with nock
+// is known, this can be refactored to simplify the uploadStream signature and
+// bake the geometricRetry logic into the args passed to fetchCreator.
+// without passing in a noop delay in the tests, or some way of advancing sinon's
+// clock, the tests for uploadStream would take too long to execute.
+export const geometricRetry = (n) => {
+  return (n + 1) * 500
+}
+
+export const uploadStream = async (filePath: string, destinationUrl: string, maxSize: number, retryDelay: (number) => number, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
+  const { size } = await fsAsync.stat(filePath)
+
+  if (size > maxSize) {
+    throw new Error(`Spec recording too large: db is ${size} bytes, limit is ${maxSize} bytes`)
+  }
+
   // In order to .pipeThrough the activity montior from the file stream to the fetch body,
   // the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
   // Since ReadStream's data type isn't typed, .toWeb defaults to 'any', which causes issues
@@ -27,7 +46,7 @@ export const uploadStream = async (filePath: string, fileSize: number, destinati
 
   const fetch = fetchCreator(crossFetch, {
     retries: 2,
-    retryDelay: (count) => count * 500,
+    retryDelay,
     // system network errors, and:
     // * 408 Request Timeout
     // * 429 Too Many Requests (S3 can return this)
@@ -39,7 +58,7 @@ export const uploadStream = async (filePath: string, fileSize: number, destinati
   })
 
   return new Promise(async (resolve, reject) => {
-    debug(`${destinationUrl}: PUT ${fileSize}`)
+    debug(`${destinationUrl}: PUT ${size}`)
 
     readableFileStream
 
@@ -47,7 +66,9 @@ export const uploadStream = async (filePath: string, fileSize: number, destinati
       const response = await fetch(destinationUrl, {
         method: 'PUT',
         headers: {
-          'content-length': String(fileSize),
+          'content-length': String(size),
+          'content-type': 'application/x-tar',
+          'accept': 'application/json',
         },
         body: timeoutMonitor ? timeoutMonitor.monitor(readableFileStream) : readableFileStream,
         ...(abortController && { signal: abortController.signal }),
