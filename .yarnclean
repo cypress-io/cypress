@@ -14,8 +14,9 @@ images
 assets
 !mochawesome-report-generator/dist/assets
 
-# Do NOT clean out assets from cypress-example-kitchensink to avoid broken deployments
-!cypress-example-kitchensink/**/assets/*
+# Do NOT clean out app assets from cypress-example-kitchensink to avoid broken deployments
+# Needed for https://example.cypress.io/
+!cypress-example-kitchensink/app/assets
 
 # examples
 example
