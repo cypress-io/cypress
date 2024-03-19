@@ -14,14 +14,14 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
-import { getText } from '../util/status_code'
-import * as enc from './encryption'
-import getEnvInformationForProjectRoot from './environment'
+import { getText } from '../../util/status_code'
+import * as enc from '../encryption'
+import getEnvInformationForProjectRoot from '../environment'
 
 import type { OptionsWithUrl } from 'request-promise'
-import { fs } from '../util/fs'
-import ProtocolManager from './protocol'
-import type { ProjectBase } from '../project-base'
+import { fs } from '../../util/fs'
+import ProtocolManager from '../protocol'
+import type { ProjectBase } from '../../project-base'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')

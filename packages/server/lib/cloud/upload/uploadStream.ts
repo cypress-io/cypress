@@ -1,10 +1,12 @@
 import crossFetch from 'cross-fetch'
 import fetchCreator from 'fetch-retry-ts'
-import fs from 'fs'
-import fsAsync from 'fs/promises'
+import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
 import type { StreamActivityMonitor } from './StreamActivityMonitor'
 import Debug from 'debug'
+
+import { agent } from '@packages/network'
+
 const debug = Debug('cypress:server:cloud:uploadStream')
 
 export class HttpError extends Error {
@@ -29,22 +31,16 @@ export const geometricRetry = (n) => {
   return (n + 1) * 500
 }
 
-export const uploadStream = async (filePath: string, destinationUrl: string, maxSize: number, retryDelay: (number) => number, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
-  const { size } = await fsAsync.stat(filePath)
-
-  if (size > maxSize) {
-    throw new Error(`Spec recording too large: db is ${size} bytes, limit is ${maxSize} bytes`)
-  }
-
+export const uploadStream = async (fileStream: ReadStream, destinationUrl: string, fileSize: number, retryDelay: (number) => number, timeoutMonitor?: StreamActivityMonitor): Promise<void> => {
   // In order to .pipeThrough the activity montior from the file stream to the fetch body,
   // the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
   // Since ReadStream's data type isn't typed, .toWeb defaults to 'any', which causes issues
   // with node-fetch's `body` type definition. coercing this to ReadableStream<ArrayBufferView>
   // seems to work just fine.
-  const readableFileStream = Readable.toWeb(fs.createReadStream(filePath)) as ReadableStream<ArrayBufferView>
+  const readableFileStream = Readable.toWeb(fileStream) as ReadableStream<ArrayBufferView>
   const abortController = timeoutMonitor?.getController()
 
-  const fetch = fetchCreator(crossFetch, {
+  const retryableFetch = fetchCreator(crossFetch as typeof crossFetch, {
     retries: 2,
     retryDelay,
     // system network errors, and:
@@ -58,15 +54,18 @@ export const uploadStream = async (filePath: string, destinationUrl: string, max
   })
 
   return new Promise(async (resolve, reject) => {
-    debug(`${destinationUrl}: PUT ${size}`)
+    debug(`${destinationUrl}: PUT ${fileSize}`)
 
     readableFileStream
 
     try {
-      const response = await fetch(destinationUrl, {
+      const response = await retryableFetch(destinationUrl, {
+        // ts thinks this is a browser fetch, but it is a node-fetch
+        // @ts-ignore
+        agent,
         method: 'PUT',
         headers: {
-          'content-length': String(size),
+          'content-length': String(fileSize),
           'content-type': 'application/x-tar',
           'accept': 'application/json',
         },

@@ -1,5 +1,4 @@
-import fs, { ReadStream } from 'fs'
-import fsPromises from 'fs/promises'
+import { ReadStream } from 'fs'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
@@ -28,12 +27,10 @@ describe('uploadStream', () => {
   let uploadPromise: Promise<any>
   let scope: nock.Scope
   let fileSize: number
+  let fsReadStream: ReadStream
   let fileStreamController: ReadableStreamDefaultController
   let fileContents: string
-  let filePath: string
   let fileReadableStream: ReadableStream
-  let invalidPath: string
-  let maxSize: number
 
   function noopRetry (n: number): number {
     return n
@@ -57,9 +54,6 @@ describe('uploadStream', () => {
   beforeEach(() => {
     fileContents = 'lorem ipsum dolor set'
     fileSize = fileContents.length
-    maxSize = fileSize + 1
-    filePath = '/some/file/path'
-    invalidPath = '/some/invalid/path'
 
     fileReadableStream = new ReadableStream({
       start (controller) {
@@ -67,44 +61,9 @@ describe('uploadStream', () => {
       },
     })
 
-    sinon.stub(fs, 'createReadStream').callsFake((path) => {
-      expect(path).to.equal(filePath)
+    fsReadStream = sinon.createStubInstance(ReadStream)
 
-      return sinon.createStubInstance(ReadStream)
-    })
-
-    const statStub = sinon.stub(fsPromises, 'stat')
-
-    statStub.withArgs(filePath)
-    // this resolves with a partial Stat
-    // @ts-ignore
-    .callsFake((path) => {
-      return Promise.resolve({
-        size: fileSize,
-      })
-    })
-
-    statStub.withArgs(invalidPath)
-    .callsFake((path) => {
-      const e = new Error(`ENOENT: no such file or directory, stat ${path}`)
-
-      // no way to instantiate system errors like ENOENT in TS -
-      // there is no exported system error interface
-      // @ts-ignore
-      e.errno = -2
-      // @ts-ignore
-      e.code = 'ENOENT'
-      // @ts-ignore
-      e.syscall = 'stat'
-      // @ts-ignore
-      e.path = path
-
-      return Promise.reject(e)
-    })
-
-    sinon.stub(Readable, 'toWeb').callsFake((readStream: Readable) => {
-      expect(readStream).to.be.an.instanceOf(ReadStream)
-
+    sinon.stub(Readable, 'toWeb').withArgs(fsReadStream).callsFake(() => {
       return fileReadableStream
     })
 
@@ -117,23 +76,7 @@ describe('uploadStream', () => {
   afterEach(() => {
     nock.cleanAll()
 
-    ;(fs.createReadStream as sinon.SinonStub).restore()
-
     ;(Readable.toWeb as sinon.SinonStub).restore()
-
-    ;(fsPromises.stat as sinon.SinonStub).restore()
-  })
-
-  it('re-throws system errors when encountered from fs.stat', () => {
-    return expect(
-      uploadStream(invalidPath, destinationUrl, maxSize, noopRetry),
-    ).to.be.rejectedWith('ENOENT: no such file or directory, stat /some/invalid/path')
-  })
-
-  it('throws an error when file contents are larger than the specified max size', () => {
-    return expect(
-      uploadStream(filePath, destinationUrl, fileContents.length - 1, noopRetry),
-    ).to.be.rejectedWith(`Spec recording too large: db is ${fileContents.length} bytes, limit is ${fileContents.length - 1} bytes`)
   })
 
   describe('when fetch resolves with a 200 OK', () => {
@@ -142,7 +85,7 @@ describe('uploadStream', () => {
     })
 
     it(`resolves`, async () => {
-      uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry)
+      uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
       execSimpleStream()
 
       await expect(uploadPromise).to.be.fulfilled
@@ -157,7 +100,7 @@ describe('uploadStream', () => {
     })
 
     it('rejects with an appropriate HttpError', async () => {
-      const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry)
+      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
 
       execSimpleStream()
 
@@ -183,7 +126,7 @@ describe('uploadStream', () => {
 
         mockUpload().times(4).reply(status, inc)
 
-        const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry)
+        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
 
         execSimpleStream()
 
@@ -205,7 +148,7 @@ describe('uploadStream', () => {
           mockUpload().reply(status, inc)
           mockUpload().reply(200, inc)
 
-          const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry)
+          const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
 
           execSimpleStream()
           await expect(uploadPromise).to.be.fulfilled
@@ -230,7 +173,7 @@ describe('uploadStream', () => {
 
     it('pipes the readstream through the timeout controller monitoring method', async () => {
       mockUpload().reply(200)
-      const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry, activityMonitor)
+      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
 
       execSimpleStream()
       await expect(uploadPromise).to.be.fulfilled
@@ -243,7 +186,7 @@ describe('uploadStream', () => {
       })
 
       it('rejects with a StreamStartFailed error', async () => {
-        const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry, activityMonitor)
+        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
 
         await expect(uploadPromise).to.be.rejectedWith(StreamStartTimedOutError)
       })
@@ -255,7 +198,7 @@ describe('uploadStream', () => {
       })
 
       it('rejects with a StreamStalled error', async () => {
-        const uploadPromise = uploadStream(filePath, destinationUrl, maxSize, noopRetry, activityMonitor)
+        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
 
         await expect(uploadPromise).to.be.rejectedWith(StreamStalledError)
       })

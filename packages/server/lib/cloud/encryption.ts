@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { TextEncoder, promisify } from 'util'
 import { generalDecrypt, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
-import type { CypressRequestOptions } from './api'
+import type { CypressRequestOptions } from './api/api'
 import { deflateRaw as deflateRawCb } from 'zlib'
 
 const deflateRaw = promisify(deflateRawCb)
