@@ -287,8 +287,26 @@ const automation = {
   resetBrowserTabsForNextTest (fn) {
     return Promise.try(() => {
       return browser.windows.getCurrent({ populate: true })
-    }).then((windowInfo) => {
-      return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))
+    }).then(async (windowInfo) => {
+      let newTabId = null
+
+      try {
+        // credit to https://stackoverflow.com/questions/7000190/detect-all-firefox-versions-in-js
+        // eslint-disable-next-line no-undef
+        const match = window.navigator.userAgent.match(/Firefox\/([0-9]+)\./)
+        const version = match ? parseInt(match[1]) : 0
+
+        // in versions of Firefox 124 and up, firefox no longer creates a new tab for us when we close all tabs in the browser.
+        // to keep change minimal and backwards compatible, we are creating an 'about:blank' tab here to keep the behavior consistent.
+        if (version >= 124) {
+          const newAboutBlankTab = await browser.tabs.create({ url: 'about:blank', active: false })
+
+          newTabId = newAboutBlankTab.id
+        }
+      // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id).filter((tab) => tab.id !== newTabId))
     }).then(fn)
   },
 
