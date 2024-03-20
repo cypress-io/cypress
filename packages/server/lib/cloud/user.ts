@@ -1,4 +1,4 @@
-const api = require('./api')
+const api = require('./api/api')
 const cache = require('../cache')
 
 import type { CachedUser } from '@packages/types'

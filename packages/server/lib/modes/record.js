@@ -12,7 +12,7 @@ const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../cloud/api')
+const api = require('../cloud/api/api')
 const exception = require('../cloud/exception')
 const upload = require('../cloud/upload')
 
@@ -190,8 +190,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
         return {
           ...artifact,
-          fileSize: archiveInfo.fileSize,
-          payload: archiveInfo.stream,
+          ...archiveInfo,
         }
       } catch (err) {
         debug('failed to prepare protocol artifact', {

@@ -60,7 +60,11 @@ const {
 } = sinon
 
 sinon.useFakeTimers = function (...args) {
-  sinon._clock = useFakeTimers.apply(sinon, args)
+  const clock = useFakeTimers.apply(sinon, args)
+
+  sinon._clock = clock
+
+  return clock
 }
 
 sinon.restore = function (...args) {

@@ -3,9 +3,10 @@ import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
+
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/StreamActivityMonitor'
-import { HttpError } from '../../../../lib/cloud/upload/uploadStream'
+import { HttpError, uploadStream } from '../../../../lib/cloud/upload/uploadStream'
 
 chai.use(chaiAsPromised).use(sinonChai)
 
@@ -18,7 +19,7 @@ describe('putProtocolArtifact', () => {
   let destinationUrl
 
   let statStub: sinon.SinonStub
-  let uploadStreamStub: sinon.SinonStub
+  let uploadStreamStub: sinon.SinonStub<Parameters<typeof uploadStream>, ReturnType<typeof uploadStream>>
   let geometricRetryStub: sinon.SinonStub
 
   let putProtocolArtifact: (artifactPath: string, maxFileSize: number, destinationUrl: string) => Promise<void>
@@ -39,7 +40,7 @@ describe('putProtocolArtifact', () => {
 
     geometricRetryStub = sinon.stub()
 
-    uploadStreamStub = sinon.stub()
+    uploadStreamStub = sinon.stub<Parameters<typeof uploadStream>, ReturnType<typeof uploadStream>>()
 
     // these paths need to be what `putProtocolArtifact` used to import them
     mockery.registerMock('../upload/uploadStream', {
@@ -75,7 +76,7 @@ describe('putProtocolArtifact', () => {
       invalidPath = '/some/invalid/path'
 
       statStub.withArgs(invalidPath).callsFake((path) => {
-        const e = new Error(`ENOENT: no such file or directory, stat ${path}`)
+        const e = new Error(`ENOENT: no such file or directory, stat '${path}'`)
 
         // no way to instantiate system errors like ENOENT in TS -
         // there is no exported system error interface
@@ -93,7 +94,7 @@ describe('putProtocolArtifact', () => {
     })
 
     it('rejects with a file does not exist error', () => {
-      return expect(putProtocolArtifact(invalidPath, maxFileSize, destinationUrl)).to.be.rejectedWith('ENOENT: no such file or directory, stat /some/invalid/path')
+      return expect(putProtocolArtifact(invalidPath, maxFileSize, destinationUrl)).to.be.rejectedWith(`ENOENT: no such file or directory, stat '/some/invalid/path'`)
     })
   })
 
@@ -118,9 +119,10 @@ describe('putProtocolArtifact', () => {
         uploadStreamStub.withArgs(
           mockReadStream,
           destinationUrl,
-          fileSize,
-          geometricRetryStub,
-          mockStreamMonitor,
+          fileSize, {
+            retryDelay: geometricRetryStub,
+            activityMonitor: mockStreamMonitor,
+          },
         ).resolves()
 
         return expect(putProtocolArtifact(filePath, maxFileSize, destinationUrl)).to.be.fulfilled
@@ -136,9 +138,10 @@ describe('putProtocolArtifact', () => {
         uploadStreamStub.withArgs(
           mockReadStream,
           destinationUrl,
-          fileSize,
-          geometricRetryStub,
-          mockStreamMonitor,
+          fileSize, {
+            retryDelay: geometricRetryStub,
+            activityMonitor: mockStreamMonitor,
+          },
         ).rejects(networkError)
       })
 

@@ -17,8 +17,9 @@ export const putProtocolArtifact = async (artifactPath: string, maxFileSize: num
   await uploadStream(
     fileStream,
     destinationUrl,
-    size,
-    geometricRetry,
-    activityMonitor,
+    size, {
+      retryDelay: geometricRetry,
+      activityMonitor,
+    },
   )
 }

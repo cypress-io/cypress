@@ -9,9 +9,9 @@ const RequestErrors = require('@cypress/request-promise/errors')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 
-const machineId = require('./machine_id')
-const errors = require('../errors')
-const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
+const machineId = require('../machine_id')
+const errors = require('../../errors')
+const { apiUrl, apiRoutes, makeRoutes } = require('../routes')
 
 import Bluebird from 'bluebird'
 import { getText } from '../../util/status_code'
