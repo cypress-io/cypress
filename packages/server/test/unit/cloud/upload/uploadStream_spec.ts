@@ -1,3 +1,5 @@
+/// <reference lib="es2021" />
+
 import { ReadStream } from 'fs'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
@@ -31,10 +33,6 @@ describe('uploadStream', () => {
   let fileStreamController: ReadableStreamDefaultController
   let fileContents: string
   let fileReadableStream: ReadableStream
-
-  function noopRetry (n: number): number {
-    return n
-  }
 
   function execSimpleStream () {
     fileStreamController.enqueue(fileContents)
@@ -85,7 +83,7 @@ describe('uploadStream', () => {
     })
 
     it(`resolves`, async () => {
-      uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
+      uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize)
       execSimpleStream()
 
       await expect(uploadPromise).to.be.fulfilled
@@ -100,7 +98,7 @@ describe('uploadStream', () => {
     })
 
     it('rejects with an appropriate HttpError', async () => {
-      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
+      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize)
 
       execSimpleStream()
 
@@ -112,26 +110,59 @@ describe('uploadStream', () => {
     describe('when fetch resolves with a retryable http status code 3 times', () => {
       const callCount = 3
 
-      /*
-    ;[408, 429, 502, 503, 504].forEach((status) => {
-      */
-      const status = 408
+      let retryDelay
 
-      it(`makes a total of ${callCount} calls for HTTP ${status} and eventually rejects`, async () => {
-        let count = 0
+      beforeEach(() => {
+        retryDelay = sinon.stub().returns((n: number) => {
+          return n
+        })
+      })
 
-        const inc = () => {
-          count++
+      ;[408, 429, 502, 503, 504].forEach((status) => {
+        it(`makes a total of ${callCount} calls for HTTP ${status} and eventually rejects`, async () => {
+          let count = 0
+
+          const inc = () => {
+            count++
+          }
+
+          mockUpload().times(4).reply(status, inc)
+
+          const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, {
+            retryDelay,
+          })
+
+          execSimpleStream()
+
+          await expect(uploadPromise).to.eventually.be.rejectedWith(AggregateError)
+          expect(retryDelay).to.have.been.called
+          expect(count).to.eq(callCount)
+        })
+      })
+
+      it('throws an aggregate error containing all of the errors encountered', async () => {
+        let uploadPromise
+
+        mockUpload().reply(503)
+        mockUpload().reply(408)
+        mockUpload().reply(502)
+
+        let error: AggregateError | undefined
+
+        try {
+          uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize)
+
+          execSimpleStream()
+          await uploadPromise
+        } catch (e) {
+          error = e
         }
 
-        mockUpload().times(4).reply(status, inc)
-
-        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
-
-        execSimpleStream()
-
-        await expect(uploadPromise).to.eventually.be.rejectedWith(HttpError)
-        expect(count).to.eq(callCount)
+        expect(error).not.be.undefined
+        expect(error?.message).to.eq('3 errors encountered during upload')
+        expect(error?.errors[0]?.message).to.eq('503: Service Unavailable')
+        expect(error?.errors[1]?.message).to.eq('408: Request Timeout')
+        expect(error?.errors[2]?.message).to.eq('502: Bad Gateway')
       })
     })
 
@@ -148,7 +179,7 @@ describe('uploadStream', () => {
           mockUpload().reply(status, inc)
           mockUpload().reply(200, inc)
 
-          const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry)
+          const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize)
 
           execSimpleStream()
           await expect(uploadPromise).to.be.fulfilled
@@ -173,7 +204,9 @@ describe('uploadStream', () => {
 
     it('pipes the readstream through the timeout controller monitoring method', async () => {
       mockUpload().reply(200)
-      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
+      const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, {
+        activityMonitor,
+      })
 
       execSimpleStream()
       await expect(uploadPromise).to.be.fulfilled
@@ -186,7 +219,9 @@ describe('uploadStream', () => {
       })
 
       it('rejects with a StreamStartFailed error', async () => {
-        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
+        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, {
+          activityMonitor,
+        })
 
         await expect(uploadPromise).to.be.rejectedWith(StreamStartTimedOutError)
       })
@@ -198,7 +233,9 @@ describe('uploadStream', () => {
       })
 
       it('rejects with a StreamStalled error', async () => {
-        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, noopRetry, activityMonitor)
+        const uploadPromise = uploadStream(fsReadStream, destinationUrl, fileSize, {
+          activityMonitor,
+        })
 
         await expect(uploadPromise).to.be.rejectedWith(StreamStalledError)
       })
