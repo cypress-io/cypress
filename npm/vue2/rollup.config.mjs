@@ -2,6 +2,10 @@ import { createEntries } from '@cypress/mount-utils/create-rollup-entry.mjs'
 import json from '@rollup/plugin-json'
 import replace from '@rollup/plugin-replace'
 
+const dtsOptions = {
+  respectExternal: false,
+}
+
 const config = {
   external: [
     'vue',
@@ -25,4 +29,4 @@ const config = {
   },
 }
 
-export default createEntries({ formats: ['es', 'cjs'], input: 'src/index.ts', config })
+export default createEntries({ formats: ['es', 'cjs'], input: 'src/index.ts', config, dtsOptions })

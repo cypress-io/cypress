@@ -32,7 +32,7 @@ postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 
 // mocked here rather than attempting to intercept and mock an s3 req
-export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
+export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/?x-amz-credential=1234abcd&x-amz-signature=1a2b3c-4d5e6f'
 
 let protocolStub: {
   value: string

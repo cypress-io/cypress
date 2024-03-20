@@ -41,6 +41,7 @@ import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -492,8 +493,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
@@ -522,6 +523,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
     this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.networkProxy.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
