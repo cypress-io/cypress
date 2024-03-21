@@ -79,10 +79,6 @@ sinon.restore = function (...args) {
   return restore.apply(sinon, args)
 }
 
-mockery.enable({
-  warnOnUnregistered: false,
-})
-
 // stub out the entire electron object for our stub
 // we must use an absolute path here because of the way mockery internally loads this
 // module - meaning the first time electron is required it'll use this path string
@@ -96,10 +92,18 @@ mockery.registerSubstitute(
 mockery.registerMock('original-fs', {})
 
 before(function () {
+  mockery.enable({
+    warnOnUnregistered: false,
+  })
+
   if (hasOnly) {
     this.test.parent._onlyTests = [true]
   }
 })
+
+after((() => {
+  mockery.disable()
+}))
 
 // appData.ensure()
 

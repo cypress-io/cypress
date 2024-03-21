@@ -1,9 +1,5 @@
-import sinon from 'sinon'
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
+require('../../../spec_helper')
 import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
-
-chai.use(chaiAsPromised)
 
 describe('StreamTimeoutController', () => {
   const maxStartDwellTime = 1000
