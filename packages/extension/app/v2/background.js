@@ -1,3 +1,4 @@
+/* global window */
 const get = require('lodash/get')
 const map = require('lodash/map')
 const pick = require('lodash/pick')
@@ -292,7 +293,6 @@ const automation = {
 
       try {
         // credit to https://stackoverflow.com/questions/7000190/detect-all-firefox-versions-in-js
-        // eslint-disable-next-line no-undef
         const match = window.navigator.userAgent.match(/Firefox\/([0-9]+)\./)
         const version = match ? parseInt(match[1]) : 0
 
