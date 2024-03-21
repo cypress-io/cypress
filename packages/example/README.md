@@ -25,7 +25,7 @@ When a commit is merged into `master`, a new version of the [`cypress-example-ki
 
 2. Run `yarn` and `yarn workspace @packages/example build` to build the app and spec files.
 
-3. Create a new pull-request following this repo's [pull request instructions](CONTRIBUTING.md#pull-requests).
+3. Create a new pull-request following this repo's [pull request instructions](../../CONTRIBUTING.md#pull-requests).
 
 ## Building
 
@@ -38,6 +38,8 @@ yarn workspace @packages/example build
 This copies the `cypress/e2e` and files from [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink), modifies them to point to `https://example.cypress.io` and creates the `example` tests.
 
 ## Deploying
+
+This command deploys directly to production! Before executing it, ensure everything looks correct in the `./build` directory.
 
 ```bash
 yarn workspace @packages/example deploy
