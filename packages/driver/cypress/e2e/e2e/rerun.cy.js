@@ -8,7 +8,7 @@ if (window.top.runCount == null) {
   window.top.runCount = 0
 }
 
-// The reruns spec in the driver has some weird reloading that occurs. It triggers a simulation of 
+// This spec in the driver has some weird reloading that occurs. It triggers a simulation of 
 // essentially reloading the page in run mode and that effectively wipes away some state that we 
 // need for protocol. Rather than trying to handle this edge case in a complicated one-off fashion, 
 // just ensure that the protocol events fire for this one spec.
