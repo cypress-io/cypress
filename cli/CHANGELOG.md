@@ -1,7 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.7.1
 
-_Released 3/26/2024 (PENDING)_
+_Released 3/21/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up. Fixes [#29172](https://github.com/cypress-io/cypress/issues/29172).
+- Fixed an issue blurring shadow dom elements. Fixed in [#29125](https://github.com/cypress-io/cypress/pull/29125).
 
 **Features:**
 

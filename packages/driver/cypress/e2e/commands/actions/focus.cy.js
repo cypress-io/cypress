@@ -202,6 +202,19 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
+    it('can focus element in nested shadow dom', () => {
+      const onFocus = cy.stub()
+
+      cy.visit('/fixtures/shadow-dom.html')
+      cy.get('.shadow-5 + input', { includeShadowDom: true }).as('shadow-input').then(($el) => {
+        $el.on('focus', onFocus)
+      })
+
+      cy.get('@shadow-input').focus().then(() => {
+        expect(onFocus).to.be.calledOnce
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
@@ -673,12 +686,25 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    it('can focus svg elements', () => {
+    it('can blur svg elements', () => {
       const onBlur = cy.stub()
 
       cy.$$('[data-cy=rect]').blur(onBlur)
 
       cy.get('[data-cy=rect]').focus().blur().then(() => {
+        expect(onBlur).to.be.calledOnce
+      })
+    })
+
+    it('can blur element in nested shadow dom', () => {
+      const onBlur = cy.stub()
+
+      cy.visit('/fixtures/shadow-dom.html')
+      cy.get('.shadow-5 + input', { includeShadowDom: true }).as('shadow-input').then(($el) => {
+        $el.on('blur', onBlur).get(0).focus()
+      })
+
+      cy.get('@shadow-input').blur().then(() => {
         expect(onBlur).to.be.calledOnce
       })
     })

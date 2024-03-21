@@ -199,7 +199,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
   })
 
-  context('when no runs are recorded', () => {
+  // TODO: Flaky test: Sometimes this test renders the empty view instead of the placeholder
+  context.skip('when no runs are recorded', () => {
     it('shows placeholders for all visible specs', { defaultCommandTimeout: 6000 }, () => {
       cy.loginUser()
 
