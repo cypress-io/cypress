@@ -8,6 +8,32 @@ if (window.top.runCount == null) {
   window.top.runCount = 0
 }
 
+const getCypressProtocolElement = () => {
+  let cypressProtocolElement = window.top.document.getElementById('__cypress-protocol')
+
+  // If element does not exist, create it
+  if (!cypressProtocolElement) {
+    cypressProtocolElement = document.createElement('div')
+    cypressProtocolElement.id = '__cypress-protocol'
+    cypressProtocolElement.style.display = 'none'
+    window.top.document.body.appendChild(cypressProtocolElement)
+  }
+
+  return cypressProtocolElement
+}
+
+const attachCypressProtocolTestAfterRun = () => {
+  const cypressProtocolElement = getCypressProtocolElement()
+
+  cypressProtocolElement.dataset.cypressProtocolTestAfterRun = JSON.stringify({
+    timestamp: performance.now() + performance.timeOrigin,
+  })
+}
+
+Cypress.prependListener('test:after:run:async', () => {
+  attachCypressProtocolTestAfterRun()
+})
+
 const isTextTerminal = Cypress.config('isTextTerminal')
 
 describe('rerun state bugs', () => {
