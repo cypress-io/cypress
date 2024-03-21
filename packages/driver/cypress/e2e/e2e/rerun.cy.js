@@ -10,7 +10,10 @@ if (window.top.runCount == null) {
 
 const isTextTerminal = Cypress.config('isTextTerminal')
 
-describe('rerun state bugs', () => {
+// TODO: UNSKIP this for chromium browsers. @see https://github.com/cypress-io/cypress/issues/29181
+describe('rerun state bugs', { browser: {
+  family: '!chromium',
+} }, () => {
   // NOTE: there's probably other ways to cause a re-run
   // event more programatically (like firing it through Cypress)
   // but we get the hashchange coverage for free on this.
