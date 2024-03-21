@@ -700,7 +700,8 @@ commands:
                 # reporter-ct-vite.errors.cy.ts
                 # reporter-ct-webpack.errors.cy.ts
                 TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --key $CYPRESS_RECORD_KEY --spec $TESTFILES
+                # Do NOT record on windows packages/app due to encryption issues
+                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
               else
                 $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
               fi
