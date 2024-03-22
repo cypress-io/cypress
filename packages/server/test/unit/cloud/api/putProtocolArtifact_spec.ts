@@ -1,4 +1,5 @@
 import mockery from 'mockery'
+import { enable as enableMockery, mockElectron } from '../../../mockery_helper'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
@@ -23,6 +24,19 @@ describe('putProtocolArtifact', () => {
   let geometricRetryStub: sinon.SinonStub
 
   let putProtocolArtifact: (artifactPath: string, maxFileSize: number, destinationUrl: string) => Promise<void>
+
+  before(() => {
+    if (global.mockery) {
+      global.mockery.disable()
+    }
+  })
+
+  after(() => {
+    if (global.mockery) {
+      enableMockery(global.mockery)
+      mockElectron(global.mockery)
+    }
+  })
 
   beforeEach(() => {
     mockery.enable({ useCleanCache: true })
