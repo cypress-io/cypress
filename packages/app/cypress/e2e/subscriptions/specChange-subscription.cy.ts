@@ -445,7 +445,7 @@ e2e: {
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
       .should('contain', '3 matches')
 
-      // Regession for https://github.com/cypress-io/cypress/issues/27103
+      // Regression for https://github.com/cypress-io/cypress/issues/27103
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
