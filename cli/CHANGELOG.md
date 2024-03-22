@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.7.2
 
-_Released xx/xx/xxxx (PENDING)_
+_Released 04/04/2024 (PENDING)_
 
 **Bugfixes:**
 - Fixed launching with a null browser value. Fixes [#22732](https://github.com/cypress-io/cypress/issues/22732).
