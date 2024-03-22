@@ -261,6 +261,15 @@ describe('lib/cypress', () => {
   })
 
   context('error handling', function () {
+    it('exits if browser cannot be parsed', function () {
+      return cypress.start(['--browser', ''])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse config error', stripAnsi(err.message))
+      })
+    })
+
     it('exits if config cannot be parsed', function () {
       return cypress.start(['--config', 'xyz'])
       .then(() => {

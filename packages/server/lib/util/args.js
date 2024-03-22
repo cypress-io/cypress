@@ -412,7 +412,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag, testingType, autoCancelAfterFailures } = options
+    const { browser, env, config, reporterOptions, outputPath, tag, testingType, autoCancelAfterFailures } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -424,6 +424,10 @@ module.exports = {
     // https://github.com/cypress-io/cypress/issues/14571
     if (typeof options.key !== 'string') {
       delete options.key
+    }
+
+    if (typeof browser !== 'string' || browser == null) {
+      return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'browser', browser, 'browser must be a string or path to executable')
     }
 
     if (spec) {
