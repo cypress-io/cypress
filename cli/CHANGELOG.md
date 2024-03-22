@@ -4,6 +4,7 @@
 _Released 04/04/2024 (PENDING)_
 
 **Bugfixes:**
+
 - Fixed launching with a null browser value. Fixes [#22732](https://github.com/cypress-io/cypress/issues/22732).
 
 ## 13.7.1
