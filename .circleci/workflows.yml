@@ -673,7 +673,6 @@ commands:
             fi
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
-            echo $IS_WINDOWS_APP_INTEGRATION_TEST
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               if [[ <<parameters.package>> == 'app' && <<parameters.type>> == 'e2e' ]]; then
@@ -692,13 +691,6 @@ commands:
               if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
                 echo "on windows running app-integration tests. Skipping flaky tests"
                 # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                # skip these in windows
-
-                # retries.experimentalRetries.mochaEvents.cy.ts
-                # reporter.command_errors.cy.ts
-                # ct-framework-errors.cy.ts
-                # reporter-ct-vite.errors.cy.ts
-                # reporter-ct-webpack.errors.cy.ts
                 TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
                 # Do NOT record on windows packages/app due to encryption issues
                 $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
@@ -734,12 +726,6 @@ commands:
               if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
                 echo "on windows running app-integration tests. Skipping flaky tests"
                 # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                # TODO: skip these in windows
-                # retries.experimentalRetries.mochaEvents.cy.ts
-                # reporter.command_errors.cy.ts
-                # ct-framework-errors.cy.ts
-                # reporter-ct-vite.errors.cy.ts
-                # reporter-ct-webpack.errors.cy.ts
                 TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               fi
 
@@ -3494,78 +3480,78 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-    # - run-launchpad-integration-tests-chrome:
-    #     name: windows-run-launchpad-integration-tests-chrome
-    #     executor: windows
-    #     resource_class: windows.xlarge
-    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
-    #     requires:
-    #       - windows-build
+    - run-launchpad-integration-tests-chrome:
+        name: windows-run-launchpad-integration-tests-chrome
+        executor: windows
+        resource_class: windows.xlarge
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        requires:
+          - windows-build
 
-    # - unit-tests:
-    #     name: windows-unit-tests
-    #     executor: windows
-    #     resource_class: windows.medium
-    #     requires:
-    #       - windows-build
+    - unit-tests:
+        name: windows-unit-tests
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
 
-    # - server-unit-tests-cloud-environment:
-    #     name: windows-server-unit-tests-cloud-environment
-    #     executor: windows
-    #     resource_class: windows.medium
-    #     requires:
-    #       - windows-build
+    - server-unit-tests-cloud-environment:
+        name: windows-server-unit-tests-cloud-environment
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
 
-    # - create-build-artifacts:
-    #     name: windows-create-build-artifacts
-    #     executor: windows
-    #     resource_class: windows.large
-    #     context:
-    #       - test-runner:sign-windows-binary
-    #       - test-runner:upload
-    #       - test-runner:commit-status-checks
-    #       - test-runner:build-binary
-    #     requires:
-    #       - windows-build
+    - create-build-artifacts:
+        name: windows-create-build-artifacts
+        executor: windows
+        resource_class: windows.large
+        context:
+          - test-runner:sign-windows-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+          - test-runner:build-binary
+        requires:
+          - windows-build
 
-    # - test-binary-against-kitchensink-chrome:
-    #     name: windows-test-binary-against-kitchensink-chrome
-    #     executor: windows
-    #     requires:
-    #       - windows-create-build-artifacts
+    - test-binary-against-kitchensink-chrome:
+        name: windows-test-binary-against-kitchensink-chrome
+        executor: windows
+        requires:
+          - windows-create-build-artifacts
 
-    # - v8-integration-tests:
-    #     name: windows-v8-integration-tests
-    #     executor: windows
-    #     resource_class: windows.medium
-    #     requires:
-    #       - windows-build
-    # - driver-integration-memory-tests:
-    #     name: windows-driver-integration-memory-tests
-    #     executor: windows
-    #     resource_class: windows.medium
-    #     requires:
-    #       - windows-build
+    - v8-integration-tests:
+        name: windows-v8-integration-tests
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
+    - driver-integration-memory-tests:
+        name: windows-driver-integration-memory-tests
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
 
 workflows:
-  # linux-x64:
-  #   <<: *linux-x64-workflow
-  #   <<: *linux-x64-workflow-exclude-filters
-  # linux-x64-contributor:
-  #   <<: *linux-x64-contributor-workflow
-  #   when:
-  #     matches:
-  #       pattern: /^pull\/[0-9]+/
-  #       value: << pipeline.git.branch >>
-  # linux-arm64:
-  #   <<: *linux-arm64-workflow
-  #   <<: *linux-arm64-workflow-filters
-  # darwin-x64:
-  #   <<: *darwin-x64-workflow
-  #   <<: *darwin-workflow-filters
-  # darwin-arm64:
-  #   <<: *darwin-arm64-workflow
-  #   <<: *darwin-workflow-filters
+  linux-x64:
+    <<: *linux-x64-workflow
+    <<: *linux-x64-workflow-exclude-filters
+  linux-x64-contributor:
+    <<: *linux-x64-contributor-workflow
+    when:
+      matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
+  linux-arm64:
+    <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+    <<: *darwin-workflow-filters
+  darwin-arm64:
+    <<: *darwin-arm64-workflow
+    <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
     <<: *windows-workflow-filters
