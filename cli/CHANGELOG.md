@@ -4,7 +4,7 @@
 _Released 3/21/2024_
 
 **Bugfixes:**
-
+- Fixed launching with a null browser value. Fixes [#22732](https://github.com/cypress-io/cypress/issues/22732).
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up. Fixes [#29172](https://github.com/cypress-io/cypress/issues/29172).
 - Fixed an issue blurring shadow dom elements. Fixed in [#29125](https://github.com/cypress-io/cypress/pull/29125).
 
