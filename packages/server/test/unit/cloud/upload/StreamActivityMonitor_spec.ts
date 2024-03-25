@@ -1,5 +1,7 @@
-require('../../../spec_helper')
+const { sinon, expect } = require('../../../spec_helper')
+
 import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
+import { Readable, Writable } from 'stream'
 
 describe('StreamTimeoutController', () => {
   const maxStartDwellTime = 1000
@@ -7,8 +9,9 @@ describe('StreamTimeoutController', () => {
 
   let monitor: StreamActivityMonitor
   let clock: sinon.SinonFakeTimers
-  let fakeStream: ReadableStream<string>
-  let streamSink: WritableStream<string>
+  let fakeWebReadableStream: ReadableStream<string>
+  let fakeNodeReadableStream: Readable
+  let streamSink: Writable
   let streamController: ReadableStreamDefaultController<string>
 
   let writtenValues: string
@@ -18,19 +21,23 @@ describe('StreamTimeoutController', () => {
     monitor = new StreamActivityMonitor(maxStartDwellTime, maxActivityDwellTime)
     clock = sinon.useFakeTimers()
 
-    fakeStream = new ReadableStream<string>({
+    // oddly, it's easier to asynchronously emit data from a ReadableStream than
+    // it is to asynchronously emit data from a Readable, so to test this we are
+    // converting a ReadableStream to a Writable
+    fakeWebReadableStream = new ReadableStream<string>({
       start (controller) {
         streamController = controller
       },
     })
 
-    streamSink = new WritableStream({
-      write (chunk) {
-        writtenValues += chunk
+    // @ts-ignore
+    fakeNodeReadableStream = Readable.fromWeb(fakeWebReadableStream)
 
-        return Promise.resolve()
-      },
-    })
+    streamSink = new Writable()
+    streamSink._write = (chunk, _, callback) => {
+      writtenValues += chunk
+      callback()
+    }
   })
 
   afterEach(() => {
@@ -39,7 +46,7 @@ describe('StreamTimeoutController', () => {
 
   describe('when monitoring a stream', () => {
     beforeEach(() => {
-      monitor.monitor(fakeStream).pipeTo(streamSink)
+      monitor.monitor(fakeNodeReadableStream).pipe(streamSink)
     })
 
     it('signals an abort if no initial activity happens within maxStartDwellTime', async () => {
@@ -75,7 +82,7 @@ describe('StreamTimeoutController', () => {
 
       streamController.enqueue(value)
       streamController.enqueue(value)
-      await clock.nextAsync()
+      await clock.tickAsync(maxActivityDwellTime)
       expect(writtenValues).to.equal(value + value)
     })
   })

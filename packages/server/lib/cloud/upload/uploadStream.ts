@@ -1,7 +1,6 @@
 import crossFetch from 'cross-fetch'
 import fetchCreator from 'fetch-retry-ts'
 import type { ReadStream } from 'fs'
-import { Readable } from 'stream'
 import type { StreamActivityMonitor } from './StreamActivityMonitor'
 import Debug from 'debug'
 
@@ -31,16 +30,17 @@ export const geometricRetry = (n) => {
   return (n + 1) * 500
 }
 
+const identity = <T>(arg: T) => arg
+
 type UploadStreamOptions = {
   retryDelay?: (count: number) => number
   activityMonitor?: StreamActivityMonitor
 }
 
-const identity = (n: number) => n
-
 export const uploadStream = async (fileStream: ReadStream, destinationUrl: string, fileSize: number, options?: UploadStreamOptions): Promise<void> => {
   const retryDelay = options?.retryDelay ?? identity
   const timeoutMonitor = options?.activityMonitor ?? undefined
+
   /**
    * To support more robust error messages from the server than statusText, we attempt to
    * retrieve response.json(). This is async, so a list of error promises is stored here
@@ -67,7 +67,6 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
    * with node-fetch's `body` type definition. coercing this to ReadableStream<ArrayBufferView>
    * seems to work just fine.
    */
-  const readableFileStream = Readable.toWeb(fileStream) as ReadableStream<ArrayBufferView>
   const abortController = timeoutMonitor?.getController()
 
   debug('PUT %s: %d byte file upload initiated', destinationUrl, fileSize)
@@ -118,13 +117,8 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
   return new Promise(async (resolve, reject) => {
     debug(`${destinationUrl}: PUT ${fileSize}`)
-
-    readableFileStream
-
     try {
       const response = await retryableFetch(destinationUrl, {
-        // ts thinks this is a browser fetch, but it is a node-fetch
-        // @ts-ignore
         agent,
         method: 'PUT',
         headers: {
@@ -132,7 +126,10 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
           'content-type': 'application/x-tar',
           'accept': 'application/json',
         },
-        body: timeoutMonitor ? timeoutMonitor.monitor(readableFileStream) : readableFileStream,
+        // ts thinks this is a web fetch, which only expects ReadableStreams.
+        // But, this is a node fetch, which supports ReadStreams.
+        // @ts-expect-error
+        body: timeoutMonitor ? timeoutMonitor.monitor(fileStream) : fileStream,
         ...(abortController && { signal: abortController.signal }),
       })
 

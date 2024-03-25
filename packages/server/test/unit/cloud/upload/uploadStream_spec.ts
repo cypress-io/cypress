@@ -1,13 +1,12 @@
 /// <reference lib="es2021" />
 
-import { ReadStream } from 'fs'
+import fs, { ReadStream } from 'fs'
+import { Readable } from 'stream'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
 import { uploadStream, geometricRetry, HttpError } from '../../../../lib/cloud/upload/uploadStream'
-import { Readable } from 'stream'
-import { ReadableStream } from 'stream/web'
 import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
 
 chai.use(chaiAsPromised).use(sinonChai)
@@ -30,13 +29,11 @@ describe('uploadStream', () => {
   let scope: nock.Scope
   let fileSize: number
   let fsReadStream: ReadStream
-  let fileStreamController: ReadableStreamDefaultController
   let fileContents: string
-  let fileReadableStream: ReadableStream
 
   function execSimpleStream () {
-    fileStreamController.enqueue(fileContents)
-    fileStreamController.close()
+    fsReadStream.push(fileContents)
+    fsReadStream.push(null)
   }
 
   function mockUpload () {
@@ -53,16 +50,9 @@ describe('uploadStream', () => {
     fileContents = 'lorem ipsum dolor set'
     fileSize = fileContents.length
 
-    fileReadableStream = new ReadableStream({
-      start (controller) {
-        fileStreamController = controller
-      },
-    })
-
-    fsReadStream = sinon.createStubInstance(ReadStream)
-
-    sinon.stub(Readable, 'toWeb').withArgs(fsReadStream).callsFake(() => {
-      return fileReadableStream
+    fsReadStream = new Readable() as ReadStream
+    sinon.stub(fs, 'createReadStream').callsFake(() => {
+      return fsReadStream
     })
 
     destinationDomain = 'http://somedomain.test:80'
@@ -72,9 +62,8 @@ describe('uploadStream', () => {
   })
 
   afterEach(() => {
+    (fs.createReadStream as sinon.SinonStub).restore()
     nock.cleanAll()
-
-    ;(Readable.toWeb as sinon.SinonStub).restore()
   })
 
   describe('when fetch resolves with a 200 OK', () => {
@@ -210,7 +199,7 @@ describe('uploadStream', () => {
 
       execSimpleStream()
       await expect(uploadPromise).to.be.fulfilled
-      expect(activityMonitor.monitor).to.be.calledWith(fileReadableStream)
+      expect(activityMonitor.monitor).to.be.calledWith(fsReadStream)
     })
 
     describe('and the timeout monitor\'s signal aborts with a StreamStartTimedOut error', () => {

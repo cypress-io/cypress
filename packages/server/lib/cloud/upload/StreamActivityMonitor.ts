@@ -1,3 +1,9 @@
+import Debug from 'debug'
+import { Transform, Readable } from 'stream'
+
+const debug = Debug('cypress:server:cloud:stream-activity-monitor')
+const debugVerbose = Debug('cypress-verbose:server:cloud:stream-activity-monitor')
+
 export class StreamStartTimedOutError extends Error {
   constructor (maxStartDwellTime: number) {
     super(`Source stream failed to begin sending data after ${maxStartDwellTime}ms`)
@@ -11,7 +17,7 @@ export class StreamStalledError extends Error {
 }
 
 export class StreamActivityMonitor {
-  private streamMonitor: TransformStream | undefined
+  private streamMonitor: Transform | undefined
   private startTimeout: NodeJS.Timeout | undefined
   private activityTimeout: NodeJS.Timeout | undefined
   private controller: AbortController
@@ -24,16 +30,19 @@ export class StreamActivityMonitor {
     return this.controller
   }
 
-  public monitor<T> (stream: ReadableStream<T>): ReadableStream<T> {
+  public monitor (stream: Readable): Readable {
+    debug('monitoring stream')
     if (this.streamMonitor || this.startTimeout || this.activityTimeout) {
       this.reset()
     }
 
-    this.streamMonitor = new TransformStream<T, T>({
-      transform: (chunk, controller) => {
-        controller.enqueue(chunk)
+    this.streamMonitor = new Transform({
+      transform: (chunk, _, callback) => {
+        debugVerbose('Received chunk from File ReadableStream; Enqueing to network: ', chunk.length)
+
         clearTimeout(this.startTimeout)
         this.markActivityInterval()
+        callback(null, chunk)
       },
     })
 
@@ -41,10 +50,11 @@ export class StreamActivityMonitor {
       this.controller?.abort(new StreamStartTimedOutError(this.maxStartDwellTime))
     }, this.maxStartDwellTime)
 
-    return stream.pipeThrough<T>(this.streamMonitor)
+    return stream.pipe(this.streamMonitor)
   }
 
   private reset () {
+    debug('Resetting Stream Activity Monitor')
     clearTimeout(this.startTimeout)
     clearTimeout(this.activityTimeout)
 
@@ -56,6 +66,7 @@ export class StreamActivityMonitor {
   }
 
   private markActivityInterval () {
+    debug('marking activity interval')
     clearTimeout(this.activityTimeout)
     this.activityTimeout = setTimeout(() => {
       this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime))
