@@ -1030,6 +1030,10 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
+      - run:
+          name: Install yarn if not already installed
+          command: |
+            yarn --version || npm i -g yarn
       - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
           pull_request_id: <<parameters.pull_request_id>>
