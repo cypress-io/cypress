@@ -426,8 +426,10 @@ module.exports = {
       delete options.key
     }
 
-    if (typeof browser !== 'string' || browser == null) {
-      return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'browser', browser, 'browser must be a string or path to executable')
+    if (browser) {
+      if (typeof browser !== 'string' || browser == null) {
+        return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'browser', browser, 'browser must be a string or path to executable')
+      }
     }
 
     if (spec) {
