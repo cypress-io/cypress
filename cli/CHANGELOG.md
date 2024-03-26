@@ -5,7 +5,7 @@ _Released 4/2/2024 (PENDING)_
 
 **Performance:**
 
-- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890)
+- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890). Addressed in [#29174](https://github.com/cypress-io/cypress/pull/29174)
 
 **Bugfixes:**
 
