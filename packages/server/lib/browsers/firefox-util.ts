@@ -105,8 +105,10 @@ const attachToTabMemory = Bluebird.method((tab) => {
 })
 
 async function connectMarionetteToNewTab () {
-  // When firefox closes its last tab, it keeps a blank tab open. This will be the only handle
-  // So we will connect to it and navigate it to about:blank to set it up for CDP connection
+  // Firefox keeps a blank tab open in versions of Firefox 123 and lower when the last tab is closed.
+  // For versions 124 and above, a new tab is not created, so @packages/extension creates one for us.
+  // Since the tab is always available on our behalf,
+  // we can connect to it here and navigate it to about:blank to set it up for CDP connection
   const handles = await sendMarionette({
     name: 'WebDriver:GetWindowHandles',
   })
