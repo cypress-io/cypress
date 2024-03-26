@@ -3,20 +3,22 @@ import fetchCreator from 'fetch-retry-ts'
 import type { ReadStream } from 'fs'
 import type { StreamActivityMonitor } from './StreamActivityMonitor'
 import Debug from 'debug'
-
+import { HttpError } from '../api/HttpError'
 import { agent } from '@packages/network'
 
 const debug = Debug('cypress:server:cloud:uploadStream')
-
-export class HttpError extends Error {
-  constructor (
-    public readonly status: number,
-    public readonly statusText: string,
-    public readonly url: string,
-  ) {
-    super(`${status}: ${statusText}`)
-  }
-}
+const debugVerbose = Debug('cypress-verbose:server:cloud:uploadStream')
+/**
+ * These are retryable status codes. Other status codes are not valid for automatic
+ * retries.
+ *   - 408 Request Timeout
+ *   - 429 Too Many Requests (S3 can return this)
+ *   - 502 Bad Gateway
+ *   - 503 Service Unavailable
+ *   - 504 Gateway Timeout
+ * other http status codes are not valid for automatic retries.
+ */
+const RETRYABLE_STATUS_CODES = [408, 429, 502, 503, 504]
 
 // expected to be passed into uploadStream: nock + delay is very difficult to
 // use fake timers for, as the callback to generate a nock response (expectedly)
@@ -38,6 +40,7 @@ type UploadStreamOptions = {
 }
 
 export const uploadStream = async (fileStream: ReadStream, destinationUrl: string, fileSize: number, options?: UploadStreamOptions): Promise<void> => {
+  debug(`Uploading file stream (${fileSize} bytes) to ${destinationUrl}`)
   const retryDelay = options?.retryDelay ?? identity
   const timeoutMonitor = options?.activityMonitor ?? undefined
 
@@ -48,18 +51,6 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
    * ts-fetch-retry's retryOn fn does not support returning a promise.
    */
   const errorPromises: Promise<Error>[] = []
-
-  /**
-   * these are retryable status codes. other status codes are not valid for automatic
-   * retries.
-   *   - 408 Request Timeout
-   *   - 429 Too Many Requests (S3 can return this)
-   *   - 502 Bad Gateway
-   *   - 503 Service Unavailable
-   *   - 504 Gateway Timeout
-   * other http status codes are not valid for automatic retries.
-   */
-  const retryOnErrorCodes = [408, 429, 502, 503, 504]
   /**
    * In order to .pipeThrough the activity montior from the file stream to the fetch body,
    * the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
@@ -76,15 +67,13 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
     retryDelay,
 
     retryOn: (attempt, retries, error, response) => {
+      debugVerbose('PUT %s Response: %O', destinationUrl, response)
+      debugVerbose('PUT %s Error: %O', destinationUrl, error)
       // Record all HTTP errors encountered
       if (response?.status && response?.status >= 400) {
         errorPromises.push(new Promise(async (resolve, reject) => {
           try {
-            const statusText = await response.json().catch(() => {
-              return response.statusText
-            })
-
-            resolve(new HttpError(response.status, statusText, destinationUrl))
+            resolve(HttpError.fromResponse(response))
           } catch (e) {
             resolve(e)
           }
@@ -98,7 +87,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
       const isUnderRetryLimit = attempt < retries
       const isNetworkError = !!error
-      const isRetryableHttpError = (!!response?.status && retryOnErrorCodes.includes(response.status))
+      const isRetryableHttpError = (!!response?.status && RETRYABLE_STATUS_CODES.includes(response.status))
 
       debug('checking if should retry: %s %O', destinationUrl, {
         attempt,
