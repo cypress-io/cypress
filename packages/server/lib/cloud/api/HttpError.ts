@@ -1,4 +1,4 @@
-const sensitiveKeys = ['x-amz-credential', 'x-amz-signature', 'Signature', 'AWSAccessKeyId']
+const SENSITIVE_KEYS = Object.freeze(['x-amz-credential', 'x-amz-signature', 'Signature', 'AWSAccessKeyId'])
 const scrubUrl = (url: string, sensitiveKeys: string[]): string => {
   const parsedUrl = new URL(url)
 
