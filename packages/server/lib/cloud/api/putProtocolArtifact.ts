@@ -1,10 +1,13 @@
 import fsAsync from 'fs/promises'
 import fs from 'fs'
-
+import Debug from 'debug'
 import { uploadStream, geometricRetry } from '../upload/uploadStream'
 import { StreamActivityMonitor } from '../upload/StreamActivityMonitor'
 
+const debug = Debug('cypress:server:cloud:api:protocol-artifact')
+
 export const putProtocolArtifact = async (artifactPath: string, maxFileSize: number, destinationUrl: string) => {
+  debug(`Atttempting to upload Test Replay archive from ${artifactPath} to ${destinationUrl})`)
   const { size } = await fsAsync.stat(artifactPath)
 
   if (size > maxFileSize) {
