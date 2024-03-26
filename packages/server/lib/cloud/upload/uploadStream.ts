@@ -52,7 +52,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
    */
   const errorPromises: Promise<Error>[] = []
   /**
-   * In order to .pipeThrough the activity montior from the file stream to the fetch body,
+   * In order to .pipeThrough the activity monitor from the file stream to the fetch body,
    * the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
    * Since ReadStream's data type isn't typed, .toWeb defaults to 'any', which causes issues
    * with node-fetch's `body` type definition. coercing this to ReadableStream<ArrayBufferView>
