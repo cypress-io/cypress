@@ -373,12 +373,8 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     if (key === 'protocol') {
       let { error, errorStack, allErrors } = report
 
-      debug('reducing uploadResuls: %O', report)
       if (allErrors) {
-        error = allErrors.length > 1 ?
-          `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}` :
-          `Failed to upload Test Replay: ${allErrors[0]}`
-
+        error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
         errorStack = allErrors.map((error) => error.stack).join(', ')
       } else if (error) {
         error = `Failed to upload Test Replay: ${error}`

@@ -291,9 +291,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      const res = await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
-
-      debug(res)
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
 
       return {
         fileSize,
