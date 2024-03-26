@@ -3,6 +3,10 @@
 
 _Released 4/2/2024 (PENDING)_
 
+**Performance:**
+
+- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890)
+
 **Bugfixes:**
 
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
