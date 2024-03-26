@@ -6,7 +6,8 @@ import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
-import { uploadStream, geometricRetry, HttpError } from '../../../../lib/cloud/upload/uploadStream'
+import { uploadStream, geometricRetry } from '../../../../lib/cloud/upload/uploadStream'
+import { HttpError } from '../../../../lib/cloud/api/HttpError'
 import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
 
 chai.use(chaiAsPromised).use(sinonChai)
@@ -55,7 +56,7 @@ describe('uploadStream', () => {
       return fsReadStream
     })
 
-    destinationDomain = 'http://somedomain.test:80'
+    destinationDomain = 'http://somedomain.test'
     destinationPath = '/upload'
     destinationUrl = `${destinationDomain}${destinationPath}`
     scope = nock(destinationDomain)
@@ -91,7 +92,15 @@ describe('uploadStream', () => {
 
       execSimpleStream()
 
-      await expect(uploadPromise).to.eventually.be.rejectedWith(HttpError, '403: Forbidden')
+      let err: Error | undefined
+
+      try {
+        await uploadPromise
+      } catch (e) {
+        err = e
+      }
+      expect(err).to.be.instanceOf(HttpError)
+      expect(err?.message).to.eq(`403 Forbidden (${destinationUrl})`)
     })
   })
 
@@ -149,9 +158,9 @@ describe('uploadStream', () => {
 
         expect(error).not.be.undefined
         expect(error?.message).to.eq('3 errors encountered during upload')
-        expect(error?.errors[0]?.message).to.eq('503: Service Unavailable')
-        expect(error?.errors[1]?.message).to.eq('408: Request Timeout')
-        expect(error?.errors[2]?.message).to.eq('502: Bad Gateway')
+        expect(error?.errors[0]?.message).to.eq(`503 Service Unavailable (${destinationUrl})`)
+        expect(error?.errors[1]?.message).to.eq(`408 Request Timeout (${destinationUrl})`)
+        expect(error?.errors[2]?.message).to.eq(`502 Bad Gateway (${destinationUrl})`)
       })
     })
 

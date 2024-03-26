@@ -7,7 +7,8 @@ import chaiAsPromised from 'chai-as-promised'
 
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/StreamActivityMonitor'
-import { HttpError, uploadStream } from '../../../../lib/cloud/upload/uploadStream'
+import { uploadStream } from '../../../../lib/cloud/upload/uploadStream'
+import { HttpError } from '../../../../lib/cloud/api/HttpError'
 
 chai.use(chaiAsPromised).use(sinonChai)
 
@@ -39,8 +40,10 @@ describe('putProtocolArtifact', () => {
   })
 
   beforeEach(() => {
-    mockery.enable({ useCleanCache: true })
-    mockery.registerAllowables(['../../../../lib/cloud/api/putProtocolArtifact', 'tslib'])
+    mockery.enable({
+      useCleanCache: true,
+      warnOnUnregistered: false,
+    })
 
     maxFileSize = 20000
     filePath = '/some/file/path'
@@ -144,10 +147,13 @@ describe('putProtocolArtifact', () => {
     })
 
     describe('and uploadStream rejects', () => {
-      let networkError: HttpError
+      let httpErr: HttpError
+      let res: Response
 
       beforeEach(() => {
-        networkError = new HttpError(403, 'Forbidden', destinationUrl)
+        res = sinon.createStubInstance(Response)
+
+        httpErr = new HttpError(`403 Forbidden (${destinationUrl})`, res)
 
         uploadStreamStub.withArgs(
           mockReadStream,
@@ -156,11 +162,18 @@ describe('putProtocolArtifact', () => {
             retryDelay: geometricRetryStub,
             activityMonitor: mockStreamMonitor,
           },
-        ).rejects(networkError)
+        ).rejects(httpErr)
       })
 
-      it('rethrows', () => {
-        return expect(putProtocolArtifact(filePath, maxFileSize, destinationUrl)).to.be.rejectedWith('403: Forbidden')
+      it('rethrows', async () => {
+        let error: Error | undefined
+
+        try {
+          await putProtocolArtifact(filePath, maxFileSize, destinationUrl)
+        } catch (e) {
+          error = e
+        }
+        expect(error).to.eq(httpErr)
       })
     })
   })
