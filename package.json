@@ -271,7 +271,7 @@
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
     "**/sharp": "0.29.3",
-    "**/socket.io-parser": "4.0.5",
+    "**/socket.io-parser": "4.2.4",
     "**/ua-parser-js": "0.7.33",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "browserify-sign": "4.2.2",
