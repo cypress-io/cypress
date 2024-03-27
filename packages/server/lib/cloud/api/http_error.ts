@@ -26,7 +26,7 @@ export class HttpError extends Error {
     }))
 
     return new HttpError(
-      `${status} ${statusText} (${scrubUrl(response.url, sensitiveKeys)})`,
+      `${status} ${statusText} (${scrubUrl(response.url, SENSITIVE_KEYS)})`,
       response,
     )
   }
