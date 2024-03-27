@@ -159,7 +159,8 @@ const validateNumScreenshots = (numScreenshots: number, automationOptions: Autom
 
 const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: AutomationOptions) => {
   const scrollAndTake = ({ y, clip, afterScroll }: Scroll, index) => {
-    win.scrollTo(0, y)
+    document.querySelector('.aut-panel').scrollTo(0, y)
+
     if (afterScroll) {
       clip = afterScroll()
     }
@@ -188,9 +189,11 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
-  const docHeight = $(doc).height() as number
+  // this should equal Cypress.state('viewportHeight')
+  const autHeight = $(doc).height() as number
+  // browser's viewport height available to render content
   const viewportHeight = getViewportHeight(state)
-  const numScreenshots = Math.ceil(docHeight / viewportHeight)
+  const numScreenshots = Math.ceil(autHeight / viewportHeight)
 
   validateNumScreenshots(numScreenshots, automationOptions)
 
@@ -199,7 +202,7 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
     let clip
 
     if ((index + 1) === numScreenshots) {
-      const heightLeft = docHeight - (viewportHeight * index)
+      const heightLeft = autHeight - (viewportHeight * index)
 
       clip = {
         x: automationOptions.clip.x,
@@ -282,7 +285,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
       }
 
       if ((index + 1) === numScreenshots) {
-        const overlap = ((numScreenshots - 1) * viewportHeight) + elPosition.fromElViewport.top
+        const overlap = (index * viewportHeight) + elPosition.fromElViewport.top
         const heightLeft = elPosition.fromElViewport.bottom - overlap
 
         return {
@@ -404,6 +407,8 @@ const takeScreenshot = (
   }
 
   const after = ($body: JQuery<HTMLBodyElement>) => {
+    // return // uncomment to debug screenshot rendering when isAppScreenshot
+
     // could fail if iframe is cross-origin, so fail gracefully
     try {
       if (disableTimersAndAnimations) {
