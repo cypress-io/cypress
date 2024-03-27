@@ -10,7 +10,9 @@ const debug = Debug('cypress:server:cloud:uploadStream')
 const debugVerbose = Debug('cypress-verbose:server:cloud:uploadStream')
 /**
  * These are retryable status codes. Other status codes are not valid for automatic
- * retries.
+ * retries: they indicate some issue with the client making the request, or that
+ * the server can never fulfill the request. Some of these status codes should only
+ * be retried if the request is idempotent, but I think it's fine for S3 for now.
  *   - 408 Request Timeout
  *   - 429 Too Many Requests (S3 can return this)
  *   - 502 Bad Gateway
@@ -71,13 +73,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
       debugVerbose('PUT %s Error: %O', destinationUrl, error)
       // Record all HTTP errors encountered
       if (response?.status && response?.status >= 400) {
-        errorPromises.push(new Promise(async (resolve, reject) => {
-          try {
-            resolve(HttpError.fromResponse(response))
-          } catch (e) {
-            resolve(e)
-          }
-        }))
+        errorPromises.push(HttpError.fromResponse(response))
       }
 
       // Record network errors

@@ -26,6 +26,20 @@ describe('putProtocolArtifact', () => {
 
   let putProtocolArtifact: (artifactPath: string, maxFileSize: number, destinationUrl: string) => Promise<void>
 
+  /**
+   * global.mockery is defined the first time `test/spec_helper.js` is required by any spec.
+   * unfortunately, the only way to fully reset a mocked dependency with mockery is to
+   * disable it in an `afterEach` (see the afterEach hook of this describe).
+   * because global mockery is enabled once for the entire spec run, this kind of post-spec
+   * state reset fails in dramatic ways, often in specs unrelated to this spec.
+   *
+   * To get around this suite-wide failure condition, this spec disables the global mockery
+   * once before running any of its tests, and re-enables it after it finishes. This is kind
+   * of an inverse of setting/clearing state before/after tests: we're cleaing global state,
+   * and then re-setting global state. The alternative to be able to use mockery in this spec
+   * was to refactor all other specs to not rely on spec_helper. Some specs rely on spec_helper
+   * only implicitly, though, so the scope of that refactor is difficult to determine.
+   */
   before(() => {
     if (global.mockery) {
       global.mockery.disable()
