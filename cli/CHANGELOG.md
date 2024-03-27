@@ -19,7 +19,7 @@ _Released 3/21/2024_
 
 **Bugfixes:**
 
-- Fixed a hang in the test runner where Cypress would run indefinitely in record mode when CDP disconnects during the middle of a test. Fixes [#29209].
+- Fixed a hang in the test runner where Cypress would run indefinitely in record mode when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
 
 **Dependency Updates:**
 
