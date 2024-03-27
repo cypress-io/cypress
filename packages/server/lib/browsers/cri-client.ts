@@ -209,7 +209,10 @@ export const create = async ({
       onReconnect(client)
     }
 
-    protocolManager?.cdpReconnect()
+    // When CDP disconnects, it will automatically reconnect and re-apply various subscriptions
+    // (e.g. DOM.enable, Network.enable, etc.). However, we need to restart tracking DOM mutations
+    // from scratch. We do this by capturing a brand new full snapshot of the DOM.
+    await protocolManager?.cdpReconnect()
   }
 
   const retryReconnect = async () => {
