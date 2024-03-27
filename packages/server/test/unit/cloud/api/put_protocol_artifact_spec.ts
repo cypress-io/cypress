@@ -28,7 +28,7 @@ describe('putProtocolArtifact', () => {
 
   /**
    * global.mockery is defined the first time `test/spec_helper.js` is required by any spec.
-   * unfortunately, the only way to fully reset a mocked dependency with mockery is to
+   * Unfortunately, the only way to fully reset a mocked dependency with mockery is to
    * disable it in an `afterEach` (see the afterEach hook of this describe).
    * because global mockery is enabled once for the entire spec run, this kind of post-spec
    * state reset fails in dramatic ways, often in specs unrelated to this spec.
