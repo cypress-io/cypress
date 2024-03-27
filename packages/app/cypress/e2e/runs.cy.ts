@@ -311,8 +311,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Create Project', () => {
-    // TODO: fix flaky test
-    it.skip('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
+    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
@@ -342,6 +341,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('#projectName').should('have.value', 'launchpad')
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).scrollIntoView().should('be.visible')
 
