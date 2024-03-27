@@ -208,6 +208,8 @@ export const create = async ({
     if (onReconnect) {
       onReconnect(client)
     }
+
+    protocolManager?.cdpReconnect()
   }
 
   const retryReconnect = async () => {
