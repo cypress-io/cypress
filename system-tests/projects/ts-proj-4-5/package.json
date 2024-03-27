@@ -3,6 +3,6 @@
   "version": "0.0.0-test",
   "private": true,
   "dependencies": {
-    "typescript": "4.5.2"
+    "typescript": "4.9.5"
   }
 }
