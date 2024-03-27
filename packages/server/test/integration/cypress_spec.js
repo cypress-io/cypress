@@ -664,7 +664,7 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.idsPath}`, '--browser=foo'])
       .then(() => {
-        this.expectExitWithErr('BROWSER_NOT_FOUND_BY_NAME')
+        this.expectExitWithErr('BROWSER_NOT_SUPPORTED')
 
         // get all the error args
         const argsSet = errors.log.args
@@ -672,7 +672,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && stripAnsi(arg.message).includes(
-              `Browser: foo was not found on your system or is not supported by Cypress.`,
+              `Browser: foo is not supported by Cypress.`,
             )
           })
         })

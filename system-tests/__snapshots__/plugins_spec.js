@@ -1,7 +1,5 @@
 exports['e2e plugins can filter browsers from config 1'] = `
-Can't run because you've entered an invalid browser name.
-
-Browser: chrome was not found on your system or is not supported by Cypress.
+Browser: chrome was not found on your system.
 
 Cypress supports the following browsers:
  - electron
@@ -10,6 +8,7 @@ Cypress supports the following browsers:
  - chrome:canary
  - edge
  - firefox
+ - webkit
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 

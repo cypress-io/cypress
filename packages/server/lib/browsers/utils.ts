@@ -338,11 +338,38 @@ const parseBrowserOption = (opt) => {
   }
 }
 
+// Cast a wide net when checking for browser support - this should avoid all false negatives
+// The regex below will match: msedge.exe, edge, edge-beta
+function createSupportedBrowserRegex (browsers: string[]): RegExp {
+  const pattern = _.map(browsers, (browser) => `\\b(?:ms)?${browser}\\b`).join('|')
+
+  return new RegExp(pattern, 'i')
+}
+
+function isBrowserSupported (nameOrPath: string, combinedBrowsers: string[]): boolean {
+  const normalizedNameOrPath = nameOrPath.toLowerCase()
+  const isSupportedBrowserRegex = createSupportedBrowserRegex(combinedBrowsers)
+
+  return isSupportedBrowserRegex.test(normalizedNameOrPath)
+}
+
 function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
 function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
+
+  const combinedBrowsers = _.union(
+    _.map(launcher.knownBrowsers, 'name'),
+    _.map(browsers, 'name'),
+    [launcher.electronBrowser.name],
+    [launcher.webkitBrowser.name],
+  )
+  const isSupported = isBrowserSupported(nameOrPath, combinedBrowsers)
+
+  if (!isSupported) {
+    throwBrowserNotSupported(nameOrPath, browsers)
+  }
 
   const filter = parseBrowserOption(nameOrPath)
 
@@ -393,6 +420,10 @@ const formatBrowsersToOptions = (browsers) => {
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+}
+
+const throwBrowserNotSupported = function (nameOrPath, browsers: FoundBrowser[] = []) {
+  return errors.throwErr('BROWSER_NOT_SUPPORTED', nameOrPath, formatBrowsersToOptions(browsers))
 }
 
 const initializeCDP = async (criClient: CriClient, automation: Automation) => {
@@ -535,6 +566,8 @@ export = {
   formatBrowsersToOptions,
 
   throwBrowserNotFound,
+
+  throwBrowserNotSupported,
 
   initializeCDP,
 
