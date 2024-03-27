@@ -380,6 +380,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
+  async cdpReconnect () {
+    await this.invokeAsync('cdpReconnect', { isEssential: true })
+  }
+
   async reportNonFatalErrors (context?: {
     osName: string
     projectSlug: string
