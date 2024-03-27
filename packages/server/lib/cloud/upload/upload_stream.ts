@@ -1,9 +1,9 @@
 import crossFetch from 'cross-fetch'
 import fetchCreator from 'fetch-retry-ts'
 import type { ReadStream } from 'fs'
-import type { StreamActivityMonitor } from './StreamActivityMonitor'
+import type { StreamActivityMonitor } from './stream_activity_monitor'
 import Debug from 'debug'
-import { HttpError } from '../api/HttpError'
+import { HttpError } from '../api/http_error'
 import { agent } from '@packages/network'
 
 const debug = Debug('cypress:server:cloud:uploadStream')

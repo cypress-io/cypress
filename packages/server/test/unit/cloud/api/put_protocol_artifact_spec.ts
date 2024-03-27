@@ -6,9 +6,9 @@ import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
 
 import { ReadStream } from 'fs'
-import { StreamActivityMonitor } from '../../../../lib/cloud/upload/StreamActivityMonitor'
-import { uploadStream } from '../../../../lib/cloud/upload/uploadStream'
-import { HttpError } from '../../../../lib/cloud/api/HttpError'
+import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
+import { uploadStream } from '../../../../lib/cloud/upload/upload_stream'
+import { HttpError } from '../../../../lib/cloud/api/http_error'
 
 chai.use(chaiAsPromised).use(sinonChai)
 

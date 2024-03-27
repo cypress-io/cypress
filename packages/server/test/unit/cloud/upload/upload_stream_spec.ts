@@ -6,9 +6,9 @@ import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
-import { uploadStream, geometricRetry } from '../../../../lib/cloud/upload/uploadStream'
-import { HttpError } from '../../../../lib/cloud/api/HttpError'
-import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/StreamActivityMonitor'
+import { uploadStream, geometricRetry } from '../../../../lib/cloud/upload/upload_stream'
+import { HttpError } from '../../../../lib/cloud/api/http_error'
+import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/stream_activity_monitor'
 
 chai.use(chaiAsPromised).use(sinonChai)
 

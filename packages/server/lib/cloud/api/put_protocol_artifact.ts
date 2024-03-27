@@ -1,8 +1,8 @@
 import fsAsync from 'fs/promises'
 import fs from 'fs'
 import Debug from 'debug'
-import { uploadStream, geometricRetry } from '../upload/uploadStream'
-import { StreamActivityMonitor } from '../upload/StreamActivityMonitor'
+import { uploadStream, geometricRetry } from '../upload/upload_stream'
+import { StreamActivityMonitor } from '../upload/stream_activity_monitor'
 
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 

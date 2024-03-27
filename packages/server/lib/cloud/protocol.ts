@@ -12,7 +12,7 @@ import { agent } from '@packages/network'
 import pkg from '@packages/root'
 
 import env from '../util/env'
-import { putProtocolArtifact } from './api/putProtocolArtifact'
+import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
