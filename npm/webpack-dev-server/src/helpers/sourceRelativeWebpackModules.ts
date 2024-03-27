@@ -30,7 +30,7 @@ export interface SourcedWebpackDevServer extends SourcedDependency {
   module: {
     new (...args: unknown[]): unknown
   }
-  majorVersion: 3 | 4
+  majorVersion: 3 | 4 | 5
 }
 
 export interface SourcedHtmlWebpackPlugin extends SourcedDependency {
@@ -208,7 +208,7 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, framewor
   webpackDevServer.importPath = path.dirname(webpackDevServerJsonPath)
   webpackDevServer.packageJson = require(webpackDevServerJsonPath)
   webpackDevServer.module = require(webpackDevServer.importPath)
-  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [3, 4])
+  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [3, 4, 5])
 
   debug('WebpackDevServer: Successfully sourced webpack-dev-server - %o', webpackDevServer)
 
