@@ -74,7 +74,7 @@ export type ProtocolErrorReport = {
 
 export type CaptureArtifact = {
   uploadUrl: string
-  fileSize: number
+  fileSize: number | bigint
   filePath: string
 }
 
@@ -90,7 +90,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>
-  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number | bigint, success: boolean, error?: string } | void>
 }
 
 type Response = {
