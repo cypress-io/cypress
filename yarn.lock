@@ -2812,10 +2812,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@cypress-design/constants-button@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.3.tgz#6a3e14bbd0cf6d6c51763f3cc3b286dadc407a77"
-  integrity sha512-0ZBn1DvctrlypkXmclp9L8jwtaXKKBs2goPh43TgYoDNcX/IrNnmn1K/ivRcEN3Zq00qlz7Jgwv7fIxD/w8beg==
+"@cypress-design/constants-button@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.4.tgz#4a71d12586154b81ec4861617c011b2db9ea0188"
+  integrity sha512-pPqIWpm2sb6yj0KJjFDwdZ6olspWGwHksVWawXhDpNtEC/OmvVBxso77IxWEjvDqtaCOmtVV6wpwSycspzMAaA==
 
 "@cypress-design/constants-statusicon@^0.2.0":
   version "0.2.0"
@@ -2863,12 +2863,12 @@
   dependencies:
     "@cypress-design/css" "^0.15.1"
 
-"@cypress-design/vue-button@^0.11.6":
-  version "0.11.6"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.6.tgz#57f6a9f03034e1c84f311a1fef2ecb5cf3f50c80"
-  integrity sha512-tERjqnX07SV9haaq83eOJ35wJ9bW8c1xv6arVxT+mJIPqDAMeob60uUrXDY3m7xRTKNr7PjP1/gcKuuPELR/NQ==
+"@cypress-design/vue-button@^0.11.7":
+  version "0.11.7"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.11.7.tgz#ff6d2d98ed75e2125650b0de5066894591fb1303"
+  integrity sha512-BYsSV41uel/V+P1kBlOxvvpxU2fGj1KFGSsQ82PPfajTR+PYxnTdq4hDfCyOCi+CSYc1OfaRw4QdAn+3SxuDlg==
   dependencies:
-    "@cypress-design/constants-button" "^0.1.3"
+    "@cypress-design/constants-button" "^0.1.4"
 
 "@cypress-design/vue-icon@^0.25.0":
   version "0.25.0"
