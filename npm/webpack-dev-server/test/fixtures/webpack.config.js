@@ -1,11 +1,11 @@
 class FromWebpackConfigFile {
-  apply() {
+  apply () {
 
   }
 }
 
 module.exports = {
   plugins: [
-    new FromWebpackConfigFile()
-  ]
+    new FromWebpackConfigFile(),
+  ],
 }
