@@ -3,6 +3,10 @@
 
 _Released 3/26/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed a hang in the test runner where Cypress would run indefinitely in record mode when CDP disconnects during the middle of a test. Fixes [#29209].
+
 **Dependency Updates:**
 
 - Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
