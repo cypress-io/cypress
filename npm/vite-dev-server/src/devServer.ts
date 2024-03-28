@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import type { UserConfig } from 'vite'
+import type { InlineConfig, UserConfig, ViteDevServer } from 'vite'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
@@ -19,26 +19,30 @@ export type ViteDevServerConfig = {
   viteConfig?: ConfigHandler // Derived from the user's vite config
 }
 
-export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
+export async function devServer (config: ViteDevServerConfig): Promise<Partial<Cypress.ResolvedDevServerConfig> & { server: ViteDevServer }> {
   // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = getVite(config)
+  const viteConfig = await createViteDevServerConfig(config, vite)
 
   debug('Creating Vite Server')
-  const server = await devServer.create(config, vite)
+  const server = await devServer.create(viteConfig, vite)
 
   debug('Vite server created')
 
-  await server.listen()
-  const { port } = server.config.server
+  if (!viteConfig.server?.middlewareMode) {
+    await server.listen()
+    const { port } = server.config.server
 
-  if (!port) {
-    throw new Error('Missing vite dev server port.')
+    if (!port) {
+      throw new Error('Missing vite dev server port.')
+    }
+
+    debug('Successfully launched the vite server on port', port)
   }
 
-  debug('Successfully launched the vite server on port', port)
-
   return {
-    port,
+    server,
+    port: server.config.server.port,
     // Close is for unit testing only. We kill this child process which will handle the closing of the server
     close (cb) {
       return server.close().then(() => cb?.()).catch(cb)
@@ -46,11 +50,9 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
+devServer.create = async function createDevServer (viteConfig: InlineConfig, vite: Vite) {
   try {
-    const config = await createViteDevServerConfig(devServerConfig, vite)
-
-    return await vite.createServer(config)
+    return await vite.createServer(viteConfig)
   } catch (err) {
     if (err instanceof Error) {
       throw err
