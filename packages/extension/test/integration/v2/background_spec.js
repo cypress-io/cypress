@@ -848,15 +848,20 @@ describe('app/background', () => {
       beforeEach(() => {
         sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
         sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
+        sinon.stub(browser.tabs, 'create').withArgs({ url: 'about:blank', active: false }).resolves({
+          id: 'new-tab',
+        })
       })
 
-      it('closes the tabs in the current browser window', function (done) {
+      // @see https://github.com/cypress-io/cypress/issues/29172 for Firefox versions 124 and up
+      it('closes the tabs in the current browser window and creates a new "about:blank" tab', function (done) {
         this.socket.on('automation:response', (id, obj) => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
 
           expect(browser.windows.getCurrent).to.be.called
-          expect(browser.tabs.remove).to.be.called
+          expect(browser.tabs.remove).to.be.calledWith(['1', '2', '3'])
+          expect(browser.tabs.create).to.be.calledWith({ url: 'about:blank', active: false })
 
           done()
         })
