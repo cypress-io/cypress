@@ -22,14 +22,16 @@ const debugVerbose = Debug('cypress-verbose:server:cloud:uploadStream')
  */
 const RETRYABLE_STATUS_CODES = [408, 429, 502, 503, 504]
 
-// expected to be passed into uploadStream: nock + delay is very difficult to
-// use fake timers for, as the callback to generate a nock response (expectedly)
-// executes before any retry is attempted, and there is no wait to "await" that
-// retry hook to advance fake timers. If a method of using fake timers with nock
-// is known, this can be refactored to simplify the uploadStream signature and
-// bake the geometricRetry logic into the args passed to fetchCreator.
-// without passing in a noop delay in the tests, or some way of advancing sinon's
-// clock, the tests for uploadStream would take too long to execute.
+/**
+ * expected to be passed into uploadStream: nock + delay is very difficult to
+ * use fake timers for, as the callback to generate a nock response (expectedly)
+ * executes before any retry is attempted, and there is no wait to "await" that
+ * retry hook to advance fake timers. If a method of using fake timers with nock
+ * is known, this can be refactored to simplify the uploadStream signature and
+ * bake the geometricRetry logic into the args passed to fetchCreator.
+ * without passing in a noop delay in the tests, or some way of advancing sinon's
+ * clock, the tests for uploadStream would take too long to execute.
+ */
 export const geometricRetry = (n) => {
   return (n + 1) * 500
 }
@@ -53,13 +55,6 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
    * ts-fetch-retry's retryOn fn does not support returning a promise.
    */
   const errorPromises: Promise<Error>[] = []
-  /**
-   * In order to .pipeThrough the activity monitor from the file stream to the fetch body,
-   * the original file ReadStream must be converted to a ReadableStream, which is WHATWG spec.
-   * Since ReadStream's data type isn't typed, .toWeb defaults to 'any', which causes issues
-   * with node-fetch's `body` type definition. coercing this to ReadableStream<ArrayBufferView>
-   * seems to work just fine.
-   */
   const abortController = timeoutMonitor?.getController()
 
   debug('PUT %s: %d byte file upload initiated', destinationUrl, fileSize)
