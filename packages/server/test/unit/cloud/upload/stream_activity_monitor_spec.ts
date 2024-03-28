@@ -73,6 +73,7 @@ describe('StreamTimeoutController', () => {
       streamController.enqueue('some data')
       await clock.tickAsync(maxActivityDwellTime - 10)
       streamController.enqueue('some more data')
+      await clock.tickAsync(maxActivityDwellTime - 10)
       expect(monitor.getController().signal.aborted).not.to.be.true
       expect(monitor.getController().signal.reason).to.be.undefined
     })
