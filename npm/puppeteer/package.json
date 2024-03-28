@@ -24,7 +24,7 @@
     "@types/node": "^18.17.5",
     "chai-as-promised": "^7.1.1",
     "chokidar": "^3.5.3",
-    "express": "4.17.3",
+    "express": "4.19.2",
     "mocha": "^9.2.2",
     "rimraf": "^5.0.1",
     "semantic-release": "19.0.3",
