@@ -39,6 +39,42 @@ export default defineConfig({
 })
 ```
 
+Middleware mode:
+
+```ts
+import express from 'express';
+import { devServer } from '@cypress/vite-dev-server'
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  component: {
+    async devServer(devServerConfig) {
+      const app = express();
+
+      const vite = await devServer({
+        ...devServerConfig,
+        framework: 'react',
+        viteConfig: {
+          ...require('./vite.config.js'),
+          server: { middlewareMode: true }
+        }
+      });
+
+      app.use(vite.server.middlewares);
+      app.use(express.static('demos'));
+
+      const server = await app.listen(9000);
+      console.log(`Dev server listening on port 9000`);
+
+      return {
+        port: 9000,
+        close: () => server.close()
+      }
+    }
+  }
+})
+```
+
 ## Architecture
 
 There should be a single publicly-exported entrypoint for the module, `devServer`, all other types and functions should be considered internal/implementation details, and types stripped from the output.
