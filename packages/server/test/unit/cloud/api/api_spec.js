@@ -3,20 +3,20 @@ const jose = require('jose')
 const base64Url = require('base64url')
 const stealthyRequire = require('stealthy-require')
 
-require('../../spec_helper')
+require('../../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const encryption = require('../../../lib/cloud/encryption')
+const encryption = require('../../../../lib/cloud/encryption')
 
 const {
   agent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
-const api = require('../../../lib/cloud/api')
-const cache = require('../../../lib/cache')
-const errors = require('../../../lib/errors')
-const machineId = require('../../../lib/cloud/machine_id')
+const api = require('../../../../lib/cloud/api')
+const cache = require('../../../../lib/cache')
+const errors = require('../../../../lib/errors')
+const machineId = require('../../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
@@ -237,9 +237,9 @@ describe('lib/cloud/api', () => {
 
       if (!prodApi) {
         prodApi = stealthyRequire(require.cache, () => {
-          return require('../../../lib/cloud/api')
+          return require('../../../../lib/cloud/api')
         }, () => {
-          require('../../../lib/cloud/encryption')
+          require('../../../../lib/cloud/encryption')
         }, module)
       }
     })
