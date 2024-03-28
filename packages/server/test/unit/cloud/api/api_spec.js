@@ -13,7 +13,7 @@ const {
   agent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
-const api = require('../../../../lib/cloud/api/api')
+const api = require('../../../../lib/cloud/api')
 const cache = require('../../../../lib/cache')
 const errors = require('../../../../lib/errors')
 const machineId = require('../../../../lib/cloud/machine_id')
@@ -237,7 +237,7 @@ describe('lib/cloud/api', () => {
 
       if (!prodApi) {
         prodApi = stealthyRequire(require.cache, () => {
-          return require('../../../../lib/cloud/api/api')
+          return require('../../../../lib/cloud/api')
         }, () => {
           require('../../../../lib/cloud/encryption')
         }, module)

@@ -755,7 +755,7 @@
     "./packages/server/lib/browsers/firefox.ts",
     "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.js",
-    "./packages/server/lib/cloud/api/api.ts",
+    "./packages/server/lib/cloud/api/index.ts",
     "./packages/server/lib/cloud/auth.ts",
     "./packages/server/lib/cloud/routes.ts",
     "./packages/server/lib/cloud/upload.ts",

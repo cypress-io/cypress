@@ -12,7 +12,7 @@ const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../cloud/api/api')
+const api = require('../cloud/api')
 const exception = require('../cloud/exception')
 const upload = require('../cloud/upload')
 
