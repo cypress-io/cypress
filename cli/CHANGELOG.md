@@ -3,6 +3,13 @@
 
 _Released 4/2/2024 (PENDING)_
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name-or-path>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
