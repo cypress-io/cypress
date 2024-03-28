@@ -54,7 +54,7 @@ module.exports = {
       const token = random.id(64)
 
       const srv = http.createServer(httpUtils.lenientOptions, (req, res) => {
-        return onRequest(req, res, token, fileServerFolder)
+        return onRequest(req, res, token, encodeURIComponent(fileServerFolder))
       })
 
       allowDestroy(srv)
