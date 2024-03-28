@@ -73,14 +73,14 @@ describe('putProtocolArtifact', () => {
 
     uploadStreamStub = sinon.stub<Parameters<typeof uploadStream>, ReturnType<typeof uploadStream>>()
 
-    // these paths need to be what `putProtocolArtifact` used to import them
-    mockery.registerMock('../upload/uploadStream', {
+    // these paths need to be what `put_protocol_artifact` used to import them
+    mockery.registerMock('../upload/upload_stream', {
       geometricRetry: geometricRetryStub,
       uploadStream: uploadStreamStub,
     })
 
     mockStreamMonitor = sinon.createStubInstance(StreamActivityMonitor)
-    mockery.registerMock('../upload/StreamActivityMonitor', {
+    mockery.registerMock('../upload/stream_activity_monitor', {
       StreamActivityMonitor: sinon.stub().callsFake(() => {
         return mockStreamMonitor
       }),
@@ -92,7 +92,7 @@ describe('putProtocolArtifact', () => {
       stat: statStub,
     })
 
-    putProtocolArtifact = require('../../../../lib/cloud/api/putProtocolArtifact').putProtocolArtifact
+    putProtocolArtifact = require('../../../../lib/cloud/api/put_protocol_artifact').putProtocolArtifact
   })
 
   afterEach(() => {
