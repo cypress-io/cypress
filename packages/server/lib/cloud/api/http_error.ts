@@ -1,5 +1,5 @@
 const SENSITIVE_KEYS = Object.freeze(['x-amz-credential', 'x-amz-signature', 'Signature', 'AWSAccessKeyId'])
-const scrubUrl = (url: string, sensitiveKeys: string[]): string => {
+const scrubUrl = (url: string, sensitiveKeys: readonly string[]): string => {
   const parsedUrl = new URL(url)
 
   for (const [key, value] of parsedUrl.searchParams) {
