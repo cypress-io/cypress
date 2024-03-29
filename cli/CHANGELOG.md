@@ -7,6 +7,7 @@ _Released 4/2/2024 (PENDING)_
 
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
+- Fixed an issue When there are special characters in our test folder path, sometimes the folder path is not parsed correctly.Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
 
 ## 13.7.1
 
@@ -20,10 +21,6 @@ _Released 3/21/2024_
 **Dependency Updates:**
 
 - Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
-
-**Bugfixes:**
-
-- Fixed an issue When there are special characters in our test folder path, sometimes the folder path is not parsed correctly.Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
 
 ## 13.7.0
 
