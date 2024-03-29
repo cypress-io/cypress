@@ -128,13 +128,14 @@ expect(stub).to.be.called</code></pre>
         <div class="col-xs-7">
           <h4 id="clock"><a href="https://on.cypress.io/clock">cy.clock()</a></h4>
           <p>To control time in the browser, use the <a href="https://on.cypress.io/clock"><code>cy.clock()</code></a> command.</p>
-          <pre><code class="javascript">// create the date in UTC so its always the same
+          <pre><code class="javascript">// create the date in UTC so it's always the same
 // no matter what local timezone the browser is running in
 const now = new Date(Date.UTC(2017, 2, 14)).getTime()
 
 cy.clock(now)
 cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
 cy.get('#clock-div').click()
+cy.get('#clock-div')
   .should('have.text', '1489449600')</code></pre>
         </div>
         <div class="col-xs-5">
@@ -150,16 +151,18 @@ cy.get('#clock-div').click()
         <div class="col-xs-7">
           <h4 id="tick"><a href="https://on.cypress.io/tick">cy.tick()</a></h4>
           <p>To move time in the browser, use the <a href="https://on.cypress.io/tick"><code>cy.tick()</code></a> command.</p>
-          <pre><code class="javascript">// create the date in UTC so its always the same
+          <pre><code class="javascript">// create the date in UTC so it's always the same
 // no matter what local timezone the browser is running in
 const now = new Date(Date.UTC(2017, 2, 14)).getTime()
 
 cy.clock(now)
 cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
 cy.get('#tick-div').click()
+cy.get('#tick-div')
   .should('have.text', '1489449600')
 cy.tick(10000) // 10 seconds passed
 cy.get('#tick-div').click()
+cy.get('#tick-div')
   .should('have.text', '1489449610')</code></pre>
         </div>
         <div class="col-xs-5">
