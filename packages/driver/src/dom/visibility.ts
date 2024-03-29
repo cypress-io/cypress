@@ -196,7 +196,7 @@ const elHasDisplayInline = ($el) => {
 const elHasOverflowHidden = function ($el: JQuery<HTMLElement>) {
   let styles = getComputedStyle($el[0])
 
-  if (styles.getPropertyValue('grid')) {
+  if (styles.getPropertyValue('grid')) { //we ignore hidden when grid used
     return false
   }
 
