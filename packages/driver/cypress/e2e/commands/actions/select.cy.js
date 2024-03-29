@@ -51,6 +51,22 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('can select by value when value contains a quotation mark', () => {
+      cy.$$('select[name=maps] option:nth-child(3)').attr('value', '"test"')
+
+      cy.get('select[name=maps]').select('"test"').then(($select) => {
+        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
+    it('can select by index when value contains a quotation mark', () => {
+      cy.$$('select[name=maps] option:nth-child(3)').attr('value', '"test"')
+
+      cy.get('select[name=maps]').select(2).then(($select) => {
+        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
     it('can handle index when all values are identical', () => {
       cy.$$('select[name=maps] option').attr('value', 'foo')
 
