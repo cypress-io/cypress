@@ -352,9 +352,6 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
         return true
       }
     }
-    // else {
-    //   return false
-    // }
   }
 
   return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
