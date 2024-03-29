@@ -308,6 +308,7 @@ export class ProtocolManager implements ProtocolManagerShape {
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
+          isUploadError: true,
         })
 
         throw e

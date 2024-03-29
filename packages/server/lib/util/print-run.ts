@@ -607,6 +607,15 @@ export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T,
   process.stdout.write('\n')
 }
 
+export const printSkippedArtifact = (label: string, message: string = 'Nothing to upload', error?: string) => {
+  process.stdout.write(`  - ${label} - ${message} `)
+  if (error) {
+    process.stdout.write(`- ${error}`)
+  }
+
+  process.stdout.write('\n')
+}
+
 type ArtifactUploadResultLike = {
   pathToFile?: string
   key: string

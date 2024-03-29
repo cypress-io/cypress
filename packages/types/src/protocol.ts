@@ -49,6 +49,7 @@ export interface ProtocolError {
   captureMethod: ProtocolCaptureMethod
   fatal?: boolean
   runnableId?: string
+  isUploadError?: boolean
 }
 
 type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {

@@ -25,6 +25,8 @@ export = {
         if (authToken) {
           return api.postLogout(authToken)
         }
+
+        return undefined
       })
     })
   },

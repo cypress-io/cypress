@@ -1,8 +1,11 @@
 import fs from 'fs/promises'
+import Debug from 'debug'
 import { sendFile } from '../upload/send_file'
 import { performance } from 'perf_hooks'
 import type { BaseArtifact, ArtifactUploadResult } from './types'
 import { Artifact } from './artifact'
+
+const debug = Debug('cypress:server:cloud:artifacts:screenshot')
 
 export class ScreenshotArtifact extends Artifact implements BaseArtifact {
   public readonly reportKey = 'screenshots'
@@ -19,11 +22,13 @@ export class ScreenshotArtifact extends Artifact implements BaseArtifact {
   ): Promise<ScreenshotArtifact>[] {
     return screenshotUploadUrls.reduce((acc: Promise<ScreenshotArtifact>[], { screenshotId, uploadUrl }) => {
       const correlatedFilePath = screenshotFiles.find((pathPair) => {
-        pathPair.screenshotId === screenshotId
+        return pathPair.screenshotId === screenshotId
       })?.path
 
+      debug('correlated filepath: %s', correlatedFilePath)
+
       return correlatedFilePath ?
-        acc.concat(ScreenshotArtifact.create(uploadUrl, correlatedFilePath)) :
+        acc.concat(ScreenshotArtifact.create(correlatedFilePath, uploadUrl)) :
         acc
     }, [])
   }

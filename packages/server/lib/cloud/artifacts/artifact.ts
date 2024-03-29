@@ -1,8 +1,12 @@
 import Debug from 'debug'
 
-import { ArtifactUploadResult } from './types'
+import type { ArtifactUploadResult } from './types'
 
 const debug = Debug('cypress:server:cloud:artifact')
+
+const isAggregateError = (err: any): err is AggregateError => {
+  return !!err.errors
+}
 
 export abstract class Artifact {
   public abstract reportKey: 'protocol' | 'screenshots' | 'video'
@@ -42,7 +46,7 @@ export abstract class Artifact {
 
   protected composeFailureResult<T extends Error> (err: T, uploadDuration: number): ArtifactUploadResult {
     debug('upload failed %O', err)
-    const errorReport = err instanceof AggregateError ? {
+    const errorReport = isAggregateError(err) ? {
       error: err.errors[err.errors.length - 1].message,
       errorStack: err.errors[err.errors.length - 1].stack,
       allErrors: err.errors,

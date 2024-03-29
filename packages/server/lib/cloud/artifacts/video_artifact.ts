@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import { performance } from 'perf_hooks'
 import { sendFile } from '../upload/send_file'
-import { BaseArtifact, ArtifactUploadResult } from './types'
+import type { BaseArtifact, ArtifactUploadResult } from './types'
 import { Artifact } from './artifact'
 
 export class VideoArtifact extends Artifact implements BaseArtifact {

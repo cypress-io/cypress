@@ -3,20 +3,21 @@ import Debug from 'debug'
 import type ProtocolManager from '../protocol'
 import api from '../api/api'
 import terminal from '../../util/terminal'
-import { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } from '../../util/print-run'
+import { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput, printSkippedArtifact } from '../../util/print-run'
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api/api'
 import * as errors from '../../errors'
 import exception from '../exception'
 import { ScreenshotArtifact } from './screenshot_artifact'
 import { VideoArtifact } from './video_artifact'
 import { ProtocolArtifact } from './protocol_artifact'
-import {
-  BaseArtifact, PreparedArtifact, ArtifactUploadResult,
+import type {
+  BaseArtifact, ArtifactUploadResult,
 } from './types'
+import type { ProtocolError } from '@packages/types'
 
-const debug = Debug('cypress:server:cloud:artifact:upload')
+const debug = Debug('cypress:server:cloud:artifacts')
 
-const logUploadManifest = (artifacts: PreparedArtifact[]) => {
+const logUploadManifest = (artifacts: BaseArtifact[], protocolCaptureMeta: UploadArtifactOptions['protocolCaptureMeta'], protocolFatalError?: ProtocolError) => {
   const labels = {
     'video': 'Video',
     'screenshots': 'Screenshot',
@@ -32,16 +33,55 @@ const logUploadManifest = (artifacts: PreparedArtifact[]) => {
   // eslint-disable-next-line no-console
   console.log('')
 
-  artifacts.forEach((artifact) => {
-    printPendingArtifactUpload(artifact, labels)
-  })
+  const video = artifacts.find(({ reportKey }) => reportKey === 'video')
+  const screenshots = artifacts.filter(({ reportKey }) => reportKey === 'screenshots')
+  const protocol = artifacts.find(({ reportKey }) => reportKey === 'protocol')
+
+  if (video) {
+    printPendingArtifactUpload(video, labels)
+  } else {
+    printSkippedArtifact('Video')
+  }
+
+  if (screenshots.length) {
+    screenshots.forEach(((screenshot) => {
+      printPendingArtifactUpload(screenshot, labels)
+    }))
+  } else {
+    printSkippedArtifact('Screenshot')
+  }
+
+  // if protocolFatalError exists here, there is not a protocol artifact to attempt to upload
+  if (protocolFatalError) {
+    printSkippedArtifact('Test Replay', 'Failed Capturing', protocolFatalError.error.message)
+  } else if (protocol) {
+    if (!protocolFatalError) {
+      printPendingArtifactUpload(protocol, labels)
+    }
+  } else if (protocolCaptureMeta.disabledMessage) {
+    printSkippedArtifact('Test Replay', 'Nothing to upload', protocolCaptureMeta.disabledMessage)
+  }
 }
 
-const logUploadResults = (results: ArtifactUploadResult[]) => {
+const logUploadResults = (results: ArtifactUploadResult[], protocolFatalError: ProtocolError | undefined) => {
   const labels = {
     'video': 'Video',
     'screenshots': 'Screenshot',
     'protocol': 'Test Replay',
+  }
+
+  debug('trimming upload results? %O', protocolFatalError)
+
+  // if protocol did not attempt an upload due to a fatal error, there will still be an upload result - this is
+  // so we can report the failure properly to instance/artifacts. But, we do not want to display it here.
+  const trimmedResults = protocolFatalError && protocolFatalError.captureMethod !== 'uploadCaptureArtifact' ?
+    results.filter(((result) => {
+      return result.key !== 'protocol'
+    })) :
+    results
+
+  if (!trimmedResults.length) {
+    return
   }
 
   // eslint-disable-next-line no-console
@@ -54,7 +94,7 @@ const logUploadResults = (results: ArtifactUploadResult[]) => {
   // eslint-disable-next-line no-console
   console.log('')
 
-  results.forEach(({ key, skipped, ...report }, i, { length }) => {
+  trimmedResults.forEach(({ key, ...report }, i, { length }) => {
     printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
   })
 }
@@ -129,6 +169,8 @@ const extractArtifactsFromOptions = async ({
   }
   // TODO: what if video artifact creation throws?
 
+  debug('found screenshots upload urls: %o', screenshotUploadUrls)
+  debug('found screenshot filenames: %o', screenshots)
   if (screenshotUploadUrls?.length && screenshots?.length) {
     const screenshotArtifacts = await Promise.all(ScreenshotArtifact.createBatch(screenshotUploadUrls, screenshots))
 
@@ -138,21 +180,20 @@ const extractArtifactsFromOptions = async ({
     })
   }
 
-  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
   const protocolFilePath = protocolManager?.getArchivePath()
 
   const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
 
+  debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
   if (protocolManager && protocolFilePath && protocolUploadUrl) {
     artifacts.push(await ProtocolArtifact.create(protocolFilePath, protocolUploadUrl, protocolManager))
-    // TODO: what if protocol artifact creation fails?
   }
 
   return artifacts
 }
 
 export const uploadArtifacts = async (options: UploadArtifactOptions) => {
-  const { protocolManager, quiet, runId, instanceId, spec, platform, projectId } = options
+  const { protocolManager, protocolCaptureMeta, quiet, runId, instanceId, spec, platform, projectId } = options
 
   const priority = {
     'video': 0,
@@ -167,7 +208,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   let uploadReport: UpdateInstanceArtifactsPayload
 
   if (!quiet) {
-    logUploadManifest(artifacts)
+    logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
   }
 
   debug('preparing to upload artifacts: %O', artifacts)
@@ -186,7 +227,22 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       }
     })
 
-    logUploadResults(uploadResults)
+    /**
+     * upload report *stdout* is skipped for *some* fatal protocol runs, but we still
+     * want them reported to cloud.
+     */
+
+    if (!quiet && uploadResults.length) {
+      logUploadResults(uploadResults, protocolManager?.getFatalError())
+    }
+
+    const protocolFatalError = protocolManager.getFatalError()
+
+    if (!uploadResults.find((result: ArtifactUploadResult) => {
+      return result.key === 'protocol'
+    }) && protocolFatalError) {
+      uploadResults.push(await ProtocolArtifact.errorReportFromOptions(options))
+    }
 
     uploadReport = uploadResults.reduce(toUploadReportPayload, { video: undefined, screenshots: [], protocol: undefined })
   } catch (err) {

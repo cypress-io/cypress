@@ -6,7 +6,7 @@ export const sendFile = (filePath: string, uploadUrl: string) => {
   .readFileAsync(filePath)
   .then((buf) => {
     return rp({
-      uploadUrl,
+      url: uploadUrl,
       method: 'PUT',
       body: buf,
     })

@@ -23,7 +23,7 @@ const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 
-const uploadArtifacts = require('../cloud/artifacts/upload_artifacts')
+const { uploadArtifacts } = require('../cloud/artifacts/upload_artifacts')
 
 // dont yell about any errors either
 const runningInternalTests = () => {

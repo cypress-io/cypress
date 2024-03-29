@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import { performance } from 'perf_hooks'
-import type { BaseArtifact } from './types'
+import type { BaseArtifact, ArtifactUploadResult } from './types'
 import type { ProtocolManager } from '../protocol'
 import { Artifact } from './artifact'
 
@@ -13,6 +13,11 @@ export class ProtocolArtifact extends Artifact implements BaseArtifact {
 
   public async upload () {
     const startTime = performance.now()
+    const fatalCaptureError = this.protocolManager.getFatalError()
+
+    if (fatalCaptureError) {
+      return this.composeFailureResult(fatalCaptureError.error, performance.now() - startTime)
+    }
 
     this.debug('upload starting')
     try {
@@ -33,5 +38,32 @@ export class ProtocolArtifact extends Artifact implements BaseArtifact {
     const { size: fileSize } = await fs.stat(filePath)
 
     return new ProtocolArtifact(filePath, uploadUrl, fileSize, protocolManager)
+  }
+
+  static async errorReportFromOptions ({
+    protocolManager,
+    protocolCaptureMeta,
+    captureUploadUrl,
+  }: {
+    protocolManager?: ProtocolManager
+    protocolCaptureMeta?: { url?: string, disabledMessage?: string }
+    captureUploadUrl?: string
+  }): Promise<ArtifactUploadResult> {
+    const url = captureUploadUrl || protocolCaptureMeta?.url
+    const pathToFile = protocolManager?.getArchivePath()
+    const fileSize = pathToFile ? (await fs.stat(pathToFile))?.size : 0
+
+    const fatalError = protocolManager?.getFatalError()
+
+    return {
+      key: 'protocol',
+      url: url ?? 'UNKNOWN',
+      pathToFile: pathToFile ?? 'UNKNOWN',
+      fileSize,
+      success: false,
+      error: fatalError?.error.message || 'UNKNOWN',
+      errorStack: fatalError?.error.stack || 'UNKNOWN',
+      uploadDuration: -1,
+    }
   }
 }
