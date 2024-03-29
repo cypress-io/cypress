@@ -74,7 +74,7 @@ export type ProtocolErrorReport = {
 export type CaptureArtifact = {
   uploadUrl: string
   fileSize: number
-  payload: Readable
+  filePath: string
 }
 
 export type ProtocolManagerOptions = {
