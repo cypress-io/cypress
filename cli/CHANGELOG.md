@@ -3,11 +3,16 @@
 
 _Released 4/2/2024 (PENDING)_
 
+**Performance:**
+
+- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890). Addressed in [#29174](https://github.com/cypress-io/cypress/pull/29174)
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
-- Fixed an issue When there are special characters in our test folder path, sometimes the folder path is not parsed correctly.Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+- Fixed an issue when there are special characters in a test folder path where the folder path is sometimes not parsed correctly. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+- Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
 
 ## 13.7.1
 
