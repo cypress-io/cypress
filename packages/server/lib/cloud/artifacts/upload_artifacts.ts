@@ -77,29 +77,39 @@ const extractArtifactsFromOptions = async ({
 >): Promise<IArtifact[]> => {
   const artifacts: IArtifact[] = []
 
-  if (videoUploadUrl && video) {
-    artifacts.push(await VideoArtifact.create(video, videoUploadUrl))
+  try {
+    if (videoUploadUrl && video) {
+      artifacts.push(await VideoArtifact.create(video, videoUploadUrl))
+    }
+  } catch (e) {
+    debug('Error creating video artifact: %O', e)
   }
-  // TODO: what if video artifact creation throws?
 
-  debug('found screenshots upload urls: %o', screenshotUploadUrls)
+  debug('screenshot metadata: %O', { screenshotUploadUrls, screenshots })
   debug('found screenshot filenames: %o', screenshots)
-  if (screenshotUploadUrls?.length && screenshots?.length) {
-    const screenshotArtifacts = await Promise.all(ScreenshotArtifact.createBatch(screenshotUploadUrls, screenshots))
+  try {
+    if (screenshotUploadUrls?.length && screenshots?.length) {
+      const screenshotArtifacts = await Promise.all(ScreenshotArtifact.createBatch(screenshotUploadUrls, screenshots))
 
-    // TODO:  what if screenshot artifact creation throws?
-    screenshotArtifacts.forEach((artifact) => {
-      artifacts.push(artifact)
-    })
+      screenshotArtifacts.forEach((artifact) => {
+        artifacts.push(artifact)
+      })
+    }
+  } catch (e) {
+    debug('Error creating screenshot artifacts: %O', e)
   }
 
-  const protocolFilePath = protocolManager?.getArchivePath()
+  try {
+    const protocolFilePath = protocolManager?.getArchivePath()
 
-  const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
+    const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
 
-  debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
-  if (protocolManager && protocolFilePath && protocolUploadUrl) {
-    artifacts.push(await ProtocolArtifact.create(protocolFilePath, protocolUploadUrl, protocolManager))
+    debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
+    if (protocolManager && protocolFilePath && protocolUploadUrl) {
+      artifacts.push(await ProtocolArtifact.create(protocolFilePath, protocolUploadUrl, protocolManager))
+    }
+  } catch (e) {
+    debug('Error creating protocol artifact: %O', e)
   }
 
   return artifacts
@@ -133,7 +143,6 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   }
 
   try {
-    //uploadReport = await uploadArtifactBatch(artifacts, quiet)
     const uploadResults = await Promise.all(artifacts.map((artifact) => artifact.upload())).finally(() => {
       if (stopUploadActivityOutput) {
         stopUploadActivityOutput()
