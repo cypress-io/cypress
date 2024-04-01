@@ -106,7 +106,8 @@ const DEFAULT_ARGS = [
 
   // Disable manual option and popup prompt of Chrome translation
   // https://github.com/cypress-io/cypress/issues/28225
-  '--disable-features=Translate',
+  // + Force the deprecation of upload events
+  '--disable-features=Translate,DeprecateUnloadByUserAndOrigin',
 
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
@@ -130,6 +131,9 @@ const DEFAULT_ARGS = [
 
   // enable precise memory info so performance.memory returns more accurate values
   '--enable-precise-memory-info',
+
+  // Force the deprecation of upload events
+  `--enable-features=PermissionsPolicyUnload,DeprecateUnload`,
 ]
 
 let browserCriClient: BrowserCriClient | undefined
