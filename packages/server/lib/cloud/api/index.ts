@@ -277,7 +277,7 @@ type CreateRunResponse = {
 
 export type ArtifactMetadata = {
   url: string
-  fileSize: number | bigint
+  fileSize?: number | bigint
   uploadDuration?: number
   success: boolean
   error?: string

@@ -1,10 +1,9 @@
 import fs from 'fs/promises'
 import { performance } from 'perf_hooks'
-import type { BaseArtifact, ArtifactUploadResult } from './types'
 import type { ProtocolManager } from '../protocol'
-import { Artifact } from './artifact'
+import { Artifact, IArtifact, ArtifactUploadResult } from './artifact'
 
-export class ProtocolArtifact extends Artifact implements BaseArtifact {
+export class ProtocolArtifact extends Artifact implements IArtifact {
   public readonly reportKey = 'protocol'
 
   constructor (public readonly filePath: string, public readonly uploadUrl: string, fileSize: number | bigint, private protocolManager: ProtocolManager) {
@@ -63,7 +62,6 @@ export class ProtocolArtifact extends Artifact implements BaseArtifact {
       success: false,
       error: fatalError?.error.message || 'UNKNOWN',
       errorStack: fatalError?.error.stack || 'UNKNOWN',
-      uploadDuration: -1,
     }
   }
 }

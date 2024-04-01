@@ -5,12 +5,10 @@ import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
 import * as errors from '../../errors'
 import exception from '../exception'
+import { IArtifact, ArtifactUploadResult } from './artifact'
 import { ScreenshotArtifact } from './screenshot_artifact'
 import { VideoArtifact } from './video_artifact'
 import { ProtocolArtifact } from './protocol_artifact'
-import type {
-  BaseArtifact, ArtifactUploadResult,
-} from './types'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
@@ -18,7 +16,7 @@ const toUploadReportPayload = (acc: {
   screenshots: ArtifactMetadata[]
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
-}, { key, skipped, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
+}, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
   if (key === 'protocol') {
     let { error, errorStack, allErrors } = report
 
@@ -29,7 +27,7 @@ const toUploadReportPayload = (acc: {
       error = `Failed to upload Test Replay: ${error}`
     }
 
-    return skipped && !report.error ? acc : {
+    return !report.error ? acc : {
       ...acc,
       protocol: {
         ...report,
@@ -39,7 +37,7 @@ const toUploadReportPayload = (acc: {
     }
   }
 
-  return skipped ? acc : {
+  return {
     ...acc,
     [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
   }
@@ -76,8 +74,8 @@ const extractArtifactsFromOptions = async ({
   'video' | 'videoUploadUrl' |
   'screenshots' | 'screenshotUploadUrls' |
   'captureUploadUrl' | 'protocolManager' | 'protocolCaptureMeta'
->): Promise<BaseArtifact[]> => {
-  const artifacts: BaseArtifact[] = []
+>): Promise<IArtifact[]> => {
+  const artifacts: IArtifact[] = []
 
   if (videoUploadUrl && video) {
     artifacts.push(await VideoArtifact.create(video, videoUploadUrl))

@@ -573,29 +573,8 @@ const formatFileSize = (bytes: number) => {
   return prettyBytes(bytes)
 }
 
-type ArtifactLike = {
-  reportKey: 'protocol' | 'screenshots' | 'video'
-  filePath?: string
-  fileSize?: number | BigInt
-  message?: string
-  skip?: boolean
-  error?: string
-}
-
-export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
+export const printPendingArtifactUpload = <T extends BaseArtifact> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
   process.stdout.write(`  - ${labels[artifact.reportKey]} `)
-
-  if (artifact.skip) {
-    if (artifact.reportKey === 'protocol' && artifact.error) {
-      process.stdout.write(`- Failed Capturing - ${artifact.error}`)
-    } else {
-      process.stdout.write('- Nothing to upload ')
-    }
-  }
-
-  if (artifact.reportKey === 'protocol' && artifact.message) {
-    process.stdout.write(`- ${artifact.message}`)
-  }
 
   if (artifact.fileSize) {
     process.stdout.write(`- ${formatFileSize(Number(artifact.fileSize))}`)
@@ -666,25 +645,11 @@ export const logUploadManifest = (artifacts: BaseArtifact[], protocolCaptureMeta
   }
 }
 
-type ArtifactUploadResultLike = {
-  pathToFile?: string
-  key: string
-  fileSize?: number | BigInt
-  success: boolean
-  error?: string | Error
-  skipped?: boolean
-  uploadDuration?: number
-}
-
-export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike> (artifactUploadResult: T, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
-  const { pathToFile, key, fileSize, success, error, skipped, uploadDuration } = artifactUploadResult
-
+export const printCompletedArtifactUpload = ({ pathToFile, key, fileSize, success, error, uploadDuration }: ArtifactUploadResult, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
   process.stdout.write(`  - ${labels[key]} `)
 
   if (success) {
     process.stdout.write(`- Done Uploading ${formatFileSize(Number(fileSize))}`)
-  } else if (skipped) {
-    process.stdout.write(`- Nothing to Upload`)
   } else {
     process.stdout.write(`- Failed Uploading`)
   }

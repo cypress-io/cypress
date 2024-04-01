@@ -1,10 +1,9 @@
 import fs from 'fs/promises'
 import { performance } from 'perf_hooks'
 import { sendFile } from '../upload/send_file'
-import type { BaseArtifact, ArtifactUploadResult } from './types'
-import { Artifact } from './artifact'
+import { Artifact, IArtifact, ArtifactUploadResult } from './artifact'
 
-export class VideoArtifact extends Artifact implements BaseArtifact {
+export class VideoArtifact extends Artifact implements IArtifact {
   public readonly reportKey = 'video'
   static async create (filePath: string, uploadUrl: string): Promise<VideoArtifact> {
     const { size: fileSize } = await fs.stat(filePath)

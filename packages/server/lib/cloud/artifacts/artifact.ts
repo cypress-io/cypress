@@ -1,11 +1,33 @@
 import Debug from 'debug'
 
-import type { ArtifactUploadResult } from './types'
-
 const debug = Debug('cypress:server:cloud:artifact')
 
 const isAggregateError = (err: any): err is AggregateError => {
   return !!err.errors
+}
+
+export interface IArtifact {
+  reportKey: 'video' | 'screenshots' | 'protocol'
+  uploadUrl: string
+  filePath: string
+  fileSize: number | bigint
+  upload: () => Promise<ArtifactUploadResult>
+}
+
+export interface ArtifactUploadResult {
+  success: boolean
+  error?: Error | string
+  url: string
+  pathToFile: string
+  fileSize?: number | bigint
+  key: IArtifact['reportKey']
+  errorStack?: string
+  allErrors?: Error[]
+  specAccess?: {
+    offset: number
+    size: number
+  }
+  uploadDuration?: number
 }
 
 export abstract class Artifact {

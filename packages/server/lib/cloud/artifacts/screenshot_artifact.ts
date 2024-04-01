@@ -2,12 +2,11 @@ import fs from 'fs/promises'
 import Debug from 'debug'
 import { sendFile } from '../upload/send_file'
 import { performance } from 'perf_hooks'
-import type { BaseArtifact, ArtifactUploadResult } from './types'
-import { Artifact } from './artifact'
+import { Artifact, IArtifact, ArtifactUploadResult } from './artifact'
 
 const debug = Debug('cypress:server:cloud:artifacts:screenshot')
 
-export class ScreenshotArtifact extends Artifact implements BaseArtifact {
+export class ScreenshotArtifact extends Artifact implements IArtifact {
   public readonly reportKey = 'screenshots'
 
   public static async create (filePath, uploadUrl): Promise<ScreenshotArtifact> {
