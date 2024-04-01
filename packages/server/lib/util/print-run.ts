@@ -600,7 +600,7 @@ export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T,
     process.stdout.write(`- ${formatFileSize(Number(artifact.fileSize))}`)
   }
 
-  if (artifact.filePath) {
+  if (artifact.filePath && artifact.reportKey !== 'protocol') {
     process.stdout.write(` ${formatPath(artifact.filePath, undefined, 'cyan')}`)
   }
 
