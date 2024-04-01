@@ -27,7 +27,9 @@ const toUploadReportPayload = (acc: {
       error = `Failed to upload Test Replay: ${error}`
     }
 
-    return !report.error ? acc : {
+    debug('protocol report %O', report)
+
+    return {
       ...acc,
       protocol: {
         ...report,
