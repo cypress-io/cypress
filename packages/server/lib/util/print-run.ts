@@ -17,7 +17,7 @@ import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import type { Table } from 'cli-table3'
 import type { CypressRunResult } from '../modes/results'
-import type { BaseArtifact, ArtifactUploadResult } from '../cloud/artifacts/types'
+import type { IArtifact, ArtifactUploadResult } from '../cloud/artifacts/artifact'
 
 type Screenshot = {
   width: number
@@ -573,7 +573,7 @@ const formatFileSize = (bytes: number) => {
   return prettyBytes(bytes)
 }
 
-export const printPendingArtifactUpload = <T extends BaseArtifact> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
+export const printPendingArtifactUpload = (artifact: IArtifact, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
   process.stdout.write(`  - ${labels[artifact.reportKey]} `)
 
   if (artifact.fileSize) {
@@ -596,7 +596,7 @@ export const printSkippedArtifact = (label: string, message: string = 'Nothing t
   process.stdout.write('\n')
 }
 
-export const logUploadManifest = (artifacts: BaseArtifact[], protocolCaptureMeta: {
+export const logUploadManifest = (artifacts: IArtifact[], protocolCaptureMeta: {
   url?: string
   disabledMessage?: string
 }, protocolFatalError?: ProtocolError) => {
