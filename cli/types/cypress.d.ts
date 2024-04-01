@@ -593,7 +593,7 @@ declare namespace Cypress {
        * Add a custom parent command
        * @see https://on.cypress.io/api/commands#Parent-Commands
        */
-       add<T extends keyof Chainable>(name: T, options: CommandOptions & { prevSubject: false }, fn: CommandFn<T>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & { prevSubject: false }, fn: CommandFn<T>): void
 
       /**
        * Add a custom child command
