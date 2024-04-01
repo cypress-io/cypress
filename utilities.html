@@ -88,10 +88,9 @@
           <p>To call a jQuery method, use the <a href="https://on.cypress.io/$"><code>Cypress.$</code></a> command.</p>
           <pre><code class="javascript">let $li = Cypress.$('.utility-jquery li:first')
 
-cy.wrap($li)
-  .should('not.have.class', 'active')
-  .click()
-  .should('have.class', 'active')</code></pre>
+cy.wrap($li).should('not.have.class', 'active')
+cy.wrap($li).click()
+cy.wrap($li).should('have.class', 'active')</code></pre>
         </div>
         <div class="col-xs-5">
           <div class="well">
@@ -115,21 +114,23 @@ cy.wrap($li)
         <div class="col-xs-7">
           <h4 id="Blob"><a href="https://on.cypress.io/blob">Cypress.Blob</a></h4>
           <p>To work with blobs, convert strings, and other utility functions, use the <a href="https://on.cypress.io/blob"><code>Cypress.Blob</code></a> library.</p>
-          <pre><code class="javascript">cy.get('.utility-blob').then(($div) =>
-// https://github.com/nolanlawson/blob-util#imgSrcToDataURL
-// get the dataUrl string for the javascript-logo
-  Cypress.Blob.imgSrcToDataURL('https://example.cypress.io/assets/img/javascript-logo.png', undefined, 'anonymous')
+          <pre><code class="javascript">cy.get('.utility-blob').then(($div) => {
+  // https://github.com/nolanlawson/blob-util#imgSrcToDataURL
+  // get the dataUrl string for the javascript-logo
+  return Cypress.Blob.imgSrcToDataURL('https://example.cypress.io/assets/img/javascript-logo.png', undefined, 'anonymous')
   .then((dataUrl) => {
     // create an <img> element and set its src to the dataUrl
     let img = Cypress.$('<img />', { src: dataUrl })
+
     // need to explicitly return cy here since we are initially returning
     // the Cypress.Blob.imgSrcToDataURL promise to our test
     // append the image
     $div.append(img)
 
     cy.get('.utility-blob img').click()
-      .should('have.attr', 'src', dataUrl)
-  }))</code></pre>
+    cy.get('.utility-blob img').should('have.attr', 'src', dataUrl)
+  })
+})</code></pre>
         </div>
         <div class="col-xs-5">
           <div class="well">

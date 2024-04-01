@@ -188,7 +188,7 @@ cy.get('#clearCookie .set-a-cookie').click()
 cy.getCookie('token').should('have.property', 'value', '123ABC')
 
 // cy.clearCookies() yields null
-cy.clearCookie('token').should('be.null')
+cy.clearCookie('token')
 
 cy.getCookie('token').should('be.null')</code></pre>
         </div>
