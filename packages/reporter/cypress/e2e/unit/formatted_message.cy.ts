@@ -85,6 +85,13 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('expected <strong>&lt;button#increment&gt;</strong> to be enabled')
     })
+
+    it('renders the custom message properly with the assertition message', () => {
+      const specialMessage = 'My Custom Message: expected **abcdef** to equal **abcdef**'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('My Custom Message: expected <strong>abcdef</strong> to equal <strong>abcdef</strong>')
+    })
   })
 
   describe('when command that accepts url', () => {
