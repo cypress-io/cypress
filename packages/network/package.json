@@ -33,7 +33,7 @@
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@types/concat-stream": "1.6.0",
-    "express": "4.17.3",
+    "express": "4.19.2",
     "mocha": "6.2.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
