@@ -43,7 +43,7 @@ export abstract class Artifact {
   protected debug (formatter: string = '', ...args: (string | object | number)[]) {
     if (!debug.enabled) return
 
-    debug(`%s: %s -> %$s (%dB) ${formatter}`, this.reportKey, this.filePath, this.uploadUrl, this.fileSize, ...args)
+    debug(`%s: %s -> %s (%dB) ${formatter}`, this.reportKey, this.filePath, this.uploadUrl, this.fileSize, ...args)
   }
 
   private commonResultFields (): Pick<ArtifactUploadResult, 'url' | 'pathToFile' | 'fileSize' | 'key'> {
