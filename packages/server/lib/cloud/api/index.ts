@@ -312,7 +312,7 @@ let recordRoutes = apiRoutes
 // Potential todos: Refactor to named exports, refactor away from `this.` in exports,
 // move individual exports to their own files & convert this to barrelfile
 
-module.exports = {
+export default {
   rp,
 
   // For internal testing

@@ -12,11 +12,12 @@ import env from './env'
 import terminal from './terminal'
 import { getIsCi } from './ci_provider'
 import * as experiments from '../experiments'
-import type { SpecFile } from '@packages/types'
+import type { SpecFile, ProtocolError } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import type { Table } from 'cli-table3'
 import type { CypressRunResult } from '../modes/results'
+import type { BaseArtifact, ArtifactUploadResult } from '../cloud/artifacts/types'
 
 type Screenshot = {
   width: number
@@ -616,6 +617,55 @@ export const printSkippedArtifact = (label: string, message: string = 'Nothing t
   process.stdout.write('\n')
 }
 
+export const logUploadManifest = (artifacts: BaseArtifact[], protocolCaptureMeta: {
+  url?: string
+  disabledMessage?: string
+}, protocolFatalError?: ProtocolError) => {
+  const labels = {
+    'video': 'Video',
+    'screenshots': 'Screenshot',
+    'protocol': 'Test Replay',
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('')
+  terminal.header('Uploading Cloud Artifacts', {
+    color: ['blue'],
+  })
+
+  // eslint-disable-next-line no-console
+  console.log('')
+
+  const video = artifacts.find(({ reportKey }) => reportKey === 'video')
+  const screenshots = artifacts.filter(({ reportKey }) => reportKey === 'screenshots')
+  const protocol = artifacts.find(({ reportKey }) => reportKey === 'protocol')
+
+  if (video) {
+    printPendingArtifactUpload(video, labels)
+  } else {
+    printSkippedArtifact('Video')
+  }
+
+  if (screenshots.length) {
+    screenshots.forEach(((screenshot) => {
+      printPendingArtifactUpload(screenshot, labels)
+    }))
+  } else {
+    printSkippedArtifact('Screenshot')
+  }
+
+  // if protocolFatalError exists here, there is not a protocol artifact to attempt to upload
+  if (protocolFatalError) {
+    printSkippedArtifact('Test Replay', 'Failed Capturing', protocolFatalError.error.message)
+  } else if (protocol) {
+    if (!protocolFatalError) {
+      printPendingArtifactUpload(protocol, labels)
+    }
+  } else if (protocolCaptureMeta.disabledMessage) {
+    printSkippedArtifact('Test Replay', 'Nothing to upload', protocolCaptureMeta.disabledMessage)
+  }
+}
+
 type ArtifactUploadResultLike = {
   pathToFile?: string
   key: string
@@ -656,6 +706,40 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   }
 
   process.stdout.write('\n')
+}
+
+export const logUploadResults = (results: ArtifactUploadResult[], protocolFatalError: ProtocolError | undefined) => {
+  const labels = {
+    'video': 'Video',
+    'screenshots': 'Screenshot',
+    'protocol': 'Test Replay',
+  }
+
+  // if protocol did not attempt an upload due to a fatal error, there will still be an upload result - this is
+  // so we can report the failure properly to instance/artifacts. But, we do not want to display it here.
+  const trimmedResults = protocolFatalError && protocolFatalError.captureMethod !== 'uploadCaptureArtifact' ?
+    results.filter(((result) => {
+      return result.key !== 'protocol'
+    })) :
+    results
+
+  if (!trimmedResults.length) {
+    return
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('')
+
+  terminal.header('Uploaded Cloud Artifacts', {
+    color: ['blue'],
+  })
+
+  // eslint-disable-next-line no-console
+  console.log('')
+
+  trimmedResults.forEach(({ key, ...report }, i, { length }) => {
+    printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+  })
 }
 
 const UPLOAD_ACTIVITY_INTERVAL = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') === 'undefined' ? 15000 : env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL')

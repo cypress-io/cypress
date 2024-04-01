@@ -1,9 +1,7 @@
-import chalk from 'chalk'
 import Debug from 'debug'
 import type ProtocolManager from '../protocol'
-import * as api from '../api'
-import terminal from '../../util/terminal'
-import { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput, printSkippedArtifact } from '../../util/print-run'
+import api from '../api'
+import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '../../util/print-run'
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
 import * as errors from '../../errors'
 import exception from '../exception'
@@ -13,91 +11,8 @@ import { ProtocolArtifact } from './protocol_artifact'
 import type {
   BaseArtifact, ArtifactUploadResult,
 } from './types'
-import type { ProtocolError } from '@packages/types'
 
 const debug = Debug('cypress:server:cloud:artifacts')
-
-const logUploadManifest = (artifacts: BaseArtifact[], protocolCaptureMeta: UploadArtifactOptions['protocolCaptureMeta'], protocolFatalError?: ProtocolError) => {
-  const labels = {
-    'video': 'Video',
-    'screenshots': 'Screenshot',
-    'protocol': 'Test Replay',
-  }
-
-  // eslint-disable-next-line no-console
-  console.log('')
-  terminal.header('Uploading Cloud Artifacts', {
-    color: ['blue'],
-  })
-
-  // eslint-disable-next-line no-console
-  console.log('')
-
-  const video = artifacts.find(({ reportKey }) => reportKey === 'video')
-  const screenshots = artifacts.filter(({ reportKey }) => reportKey === 'screenshots')
-  const protocol = artifacts.find(({ reportKey }) => reportKey === 'protocol')
-
-  if (video) {
-    printPendingArtifactUpload(video, labels)
-  } else {
-    printSkippedArtifact('Video')
-  }
-
-  if (screenshots.length) {
-    screenshots.forEach(((screenshot) => {
-      printPendingArtifactUpload(screenshot, labels)
-    }))
-  } else {
-    printSkippedArtifact('Screenshot')
-  }
-
-  // if protocolFatalError exists here, there is not a protocol artifact to attempt to upload
-  if (protocolFatalError) {
-    printSkippedArtifact('Test Replay', 'Failed Capturing', protocolFatalError.error.message)
-  } else if (protocol) {
-    if (!protocolFatalError) {
-      printPendingArtifactUpload(protocol, labels)
-    }
-  } else if (protocolCaptureMeta.disabledMessage) {
-    printSkippedArtifact('Test Replay', 'Nothing to upload', protocolCaptureMeta.disabledMessage)
-  }
-}
-
-const logUploadResults = (results: ArtifactUploadResult[], protocolFatalError: ProtocolError | undefined) => {
-  const labels = {
-    'video': 'Video',
-    'screenshots': 'Screenshot',
-    'protocol': 'Test Replay',
-  }
-
-  debug('trimming upload results? %O', protocolFatalError)
-
-  // if protocol did not attempt an upload due to a fatal error, there will still be an upload result - this is
-  // so we can report the failure properly to instance/artifacts. But, we do not want to display it here.
-  const trimmedResults = protocolFatalError && protocolFatalError.captureMethod !== 'uploadCaptureArtifact' ?
-    results.filter(((result) => {
-      return result.key !== 'protocol'
-    })) :
-    results
-
-  if (!trimmedResults.length) {
-    return
-  }
-
-  // eslint-disable-next-line no-console
-  console.log('')
-
-  terminal.header('Uploaded Cloud Artifacts', {
-    color: ['blue'],
-  })
-
-  // eslint-disable-next-line no-console
-  console.log('')
-
-  trimmedResults.forEach(({ key, ...report }, i, { length }) => {
-    printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
-  })
-}
 
 const toUploadReportPayload = (acc: {
   screenshots: ArtifactMetadata[]

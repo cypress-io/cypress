@@ -11,7 +11,7 @@ const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../cloud/api')
+const api = require('../cloud/api').default
 const exception = require('../cloud/exception')
 
 const errors = require('../errors')
