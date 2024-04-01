@@ -58,6 +58,7 @@ export interface CypressRequestOptions extends OptionsWithUrl {
   cacheable?: boolean
 }
 
+// TODO: migrate to fetch from @cypress/request
 const rp = request.defaults((params: CypressRequestOptions, callback) => {
   let resp
 
@@ -308,7 +309,10 @@ let preflightResult = {
 
 let recordRoutes = apiRoutes
 
-export default {
+// Potential todos: Refactor to named exports, refactor away from `this.` in exports,
+// move individual exports to their own files & convert this to barrelfile
+
+module.exports = {
   rp,
 
   // For internal testing
