@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.3
+
+_Released 4/16/2024 (PENDING)_
+
+**Misc:**
+
+- Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
+
 ## 13.7.2
 
 _Released 4/2/2024_
