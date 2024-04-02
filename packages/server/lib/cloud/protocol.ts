@@ -280,7 +280,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact): Promise<{
     success: boolean
     fileSize: number | bigint
-    specAccess?: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+    specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
   } | undefined> {
     if (!this._protocol || !filePath || !this._db) {
       debug('not uploading due to one of the following being falsy: %O', {
@@ -300,7 +300,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return {
         fileSize,
         success: true,
-        specAccess: this._protocol?.getDbMetadata(),
+        specAccess: this._protocol.getDbMetadata(),
       }
     } catch (e) {
       if (CAPTURE_ERRORS) {

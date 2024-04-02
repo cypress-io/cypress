@@ -1,67 +1,61 @@
 import fs from 'fs/promises'
-import { performance } from 'perf_hooks'
 import type { ProtocolManager } from '../protocol'
-import { Artifact, IArtifact, ArtifactUploadResult } from './artifact'
+import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact } from './artifact'
 
-export class ProtocolArtifact extends Artifact implements IArtifact {
-  public readonly reportKey = 'protocol'
-
-  constructor (public readonly filePath: string, public readonly uploadUrl: string, fileSize: number | bigint, private protocolManager: ProtocolManager) {
-    super(filePath, uploadUrl, fileSize)
+interface ProtocolUploadStrategyResult {
+  success: boolean
+  fileSize: number | bigint
+  specAccess: {
+    offset: number
+    size: number
   }
+}
 
-  public async upload () {
-    const startTime = performance.now()
-    const fatalCaptureError = this.protocolManager.getFatalError()
+const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
+  const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | {}>> =
+    async (filePath, uploadUrl, fileSize) => {
+      const fatalError = protocolManager.getFatalError()
 
-    if (fatalCaptureError) {
-      return this.composeFailureResult(fatalCaptureError.error, performance.now() - startTime)
+      if (fatalError) {
+        throw fatalError.error
+      }
+
+      const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, fileSize, filePath })
+
+      return res ?? {}
     }
 
-    this.debug('upload starting')
-    try {
-      const res = await this.protocolManager.uploadCaptureArtifact(this)
+  return strategy
+}
 
-      /**
-     * uploadCaptureArtifact has gating on executing the upload based on some internal
-     * values, so res can be undefined - this parameter having to be defaulted to {}
-     * is a code smell that can be resolved by fixing protocolmanager
-     */
-      return this.composeSuccessResult(res ?? {}, performance.now() - startTime)
-    } catch (e) {
-      return this.composeFailureResult(e, performance.now() - startTime)
-    }
-  }
+export const createProtocolArtifact = async (filePath: string, uploadUrl: string, protocolManager: ProtocolManager): Promise<IArtifact> => {
+  const { size } = await fs.stat(filePath)
 
-  static async create (filePath: string, uploadUrl: string, protocolManager: ProtocolManager): Promise<ProtocolArtifact> {
-    const { size: fileSize } = await fs.stat(filePath)
+  return new Artifact('protocol', filePath, uploadUrl, size, createProtocolUploadStrategy(protocolManager))
+}
 
-    return new ProtocolArtifact(filePath, uploadUrl, fileSize, protocolManager)
-  }
+export const composeProtocolErrorReportFromOptions = async ({
+  protocolManager,
+  protocolCaptureMeta,
+  captureUploadUrl,
+}: {
+  protocolManager?: ProtocolManager
+  protocolCaptureMeta?: { url?: string, disabledMessage?: string }
+  captureUploadUrl?: string
+}): Promise<ArtifactUploadResult> => {
+  const url = captureUploadUrl || protocolCaptureMeta?.url
+  const pathToFile = protocolManager?.getArchivePath()
+  const fileSize = pathToFile ? (await fs.stat(pathToFile))?.size : 0
 
-  static async errorReportFromOptions ({
-    protocolManager,
-    protocolCaptureMeta,
-    captureUploadUrl,
-  }: {
-    protocolManager?: ProtocolManager
-    protocolCaptureMeta?: { url?: string, disabledMessage?: string }
-    captureUploadUrl?: string
-  }): Promise<ArtifactUploadResult> {
-    const url = captureUploadUrl || protocolCaptureMeta?.url
-    const pathToFile = protocolManager?.getArchivePath()
-    const fileSize = pathToFile ? (await fs.stat(pathToFile))?.size : 0
+  const fatalError = protocolManager?.getFatalError()
 
-    const fatalError = protocolManager?.getFatalError()
-
-    return {
-      key: 'protocol',
-      url: url ?? 'UNKNOWN',
-      pathToFile: pathToFile ?? 'UNKNOWN',
-      fileSize,
-      success: false,
-      error: fatalError?.error.message || 'UNKNOWN',
-      errorStack: fatalError?.error.stack || 'UNKNOWN',
-    }
+  return {
+    key: 'protocol',
+    url: url ?? 'UNKNOWN',
+    pathToFile: pathToFile ?? 'UNKNOWN',
+    fileSize,
+    success: false,
+    error: fatalError?.error.message || 'UNKNOWN',
+    errorStack: fatalError?.error.stack || 'UNKNOWN',
   }
 }

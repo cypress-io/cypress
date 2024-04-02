@@ -5,10 +5,10 @@ import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
 import * as errors from '../../errors'
 import exception from '../exception'
-import { IArtifact, ArtifactUploadResult } from './artifact'
-import { ScreenshotArtifact } from './screenshot_artifact'
-import { VideoArtifact } from './video_artifact'
-import { ProtocolArtifact } from './protocol_artifact'
+import type { IArtifact, ArtifactUploadResult } from './artifact'
+import { createScreenshotArtifactBatch } from './screenshot_artifact'
+import { createVideoArtifact } from './video_artifact'
+import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
@@ -79,26 +79,22 @@ const extractArtifactsFromOptions = async ({
 >): Promise<IArtifact[]> => {
   const artifacts: IArtifact[] = []
 
-  try {
-    if (videoUploadUrl && video) {
-      artifacts.push(await VideoArtifact.create(video, videoUploadUrl))
+  if (videoUploadUrl && video) {
+    try {
+      artifacts.push(await createVideoArtifact(video, videoUploadUrl))
+    } catch (e) {
+      debug('Error creating video artifact: %O', e)
     }
-  } catch (e) {
-    debug('Error creating video artifact: %O', e)
   }
 
   debug('screenshot metadata: %O', { screenshotUploadUrls, screenshots })
   debug('found screenshot filenames: %o', screenshots)
-  try {
-    if (screenshotUploadUrls?.length && screenshots?.length) {
-      const screenshotArtifacts = await Promise.all(ScreenshotArtifact.createBatch(screenshotUploadUrls, screenshots))
+  if (screenshots?.length && screenshotUploadUrls?.length) {
+    const screenshotArtifacts = await createScreenshotArtifactBatch(screenshotUploadUrls, screenshots)
 
-      screenshotArtifacts.forEach((artifact) => {
-        artifacts.push(artifact)
-      })
-    }
-  } catch (e) {
-    debug('Error creating screenshot artifacts: %O', e)
+    screenshotArtifacts.forEach((screenshot) => {
+      artifacts.push(screenshot)
+    })
   }
 
   try {
@@ -108,7 +104,7 @@ const extractArtifactsFromOptions = async ({
 
     debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
     if (protocolManager && protocolFilePath && protocolUploadUrl) {
-      artifacts.push(await ProtocolArtifact.create(protocolFilePath, protocolUploadUrl, protocolManager))
+      artifacts.push(await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager))
     }
   } catch (e) {
     debug('Error creating protocol artifact: %O', e)
@@ -165,7 +161,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === 'protocol'
     }) && protocolFatalError) {
-      uploadResults.push(await ProtocolArtifact.errorReportFromOptions(options))
+      uploadResults.push(await composeProtocolErrorReportFromOptions(options))
     }
 
     uploadReport = uploadResults.reduce(toUploadReportPayload, { video: undefined, screenshots: [], protocol: undefined })

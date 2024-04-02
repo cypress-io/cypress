@@ -1,4 +1,5 @@
 import Debug from 'debug'
+import { performance } from 'perf_hooks'
 
 const debug = Debug('cypress:server:cloud:artifact')
 
@@ -30,17 +31,37 @@ export interface ArtifactUploadResult {
   uploadDuration?: number
 }
 
-export abstract class Artifact {
-  public abstract reportKey: 'protocol' | 'screenshots' | 'video'
+export type ArtifactUploadStrategy<T> = (filePath: string, uploadUrl: string, fileSize: number | bigint) => T
 
+export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadResponse extends Promise<any> = Promise<{}>> {
   constructor (
+    public reportKey: 'protocol' | 'screenshots' | 'video',
     public readonly filePath: string,
     public readonly uploadUrl: string,
     public readonly fileSize: number | bigint,
+    private uploadStrategy: T,
   ) {
   }
 
-  protected debug (formatter: string = '', ...args: (string | object | number)[]) {
+  public async upload (): Promise<ArtifactUploadResult> {
+    const startTime = performance.now()
+
+    this.debug('upload starting')
+
+    try {
+      const response = await this.uploadStrategy(this.filePath, this.uploadUrl, this.fileSize)
+
+      this.debug('upload succeeded: %O', response)
+
+      return this.composeSuccessResult(response ?? {}, performance.now() - startTime)
+    } catch (e) {
+      this.debug('upload failed: %O', e)
+
+      return this.composeFailureResult(e, performance.now() - startTime)
+    }
+  }
+
+  private debug (formatter: string = '', ...args: (string | object | number)[]) {
     if (!debug.enabled) return
 
     debug(`%s: %s -> %s (%dB) ${formatter}`, this.reportKey, this.filePath, this.uploadUrl, this.fileSize, ...args)
@@ -56,8 +77,6 @@ export abstract class Artifact {
   }
 
   protected composeSuccessResult<T extends Object = {}> (response: T, uploadDuration: number): ArtifactUploadResult {
-    this.debug('upload success')
-
     return {
       ...response,
       ...this.commonResultFields(),
@@ -67,7 +86,6 @@ export abstract class Artifact {
   }
 
   protected composeFailureResult<T extends Error> (err: T, uploadDuration: number): ArtifactUploadResult {
-    debug('upload failed %O', err)
     const errorReport = isAggregateError(err) ? {
       error: err.errors[err.errors.length - 1].message,
       errorStack: err.errors[err.errors.length - 1].stack,

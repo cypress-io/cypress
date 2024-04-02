@@ -1,47 +1,44 @@
 import fs from 'fs/promises'
 import Debug from 'debug'
-import { sendFile } from '../upload/send_file'
-import { performance } from 'perf_hooks'
-import { Artifact, IArtifact, ArtifactUploadResult } from './artifact'
+import { Artifact, IArtifact } from './artifact'
+import { fileUploadStrategy } from './file_upload_strategy'
 
 const debug = Debug('cypress:server:cloud:artifacts:screenshot')
 
-export class ScreenshotArtifact extends Artifact implements IArtifact {
-  public readonly reportKey = 'screenshots'
+const createScreenshotArtifact = async (filePath: string, uploadUrl: string): Promise<IArtifact | undefined> => {
+  try {
+    const { size } = await fs.stat(filePath)
 
-  public static async create (filePath, uploadUrl): Promise<ScreenshotArtifact> {
-    const { size: fileSize } = await fs.stat(filePath)
+    return new Artifact('screenshots', filePath, uploadUrl, size, fileUploadStrategy)
+  } catch (e) {
+    debug('Error creating screenshot artifact: %O', e)
 
-    return new ScreenshotArtifact(filePath, uploadUrl, fileSize)
+    return
   }
+}
 
-  public static createBatch (
-    screenshotUploadUrls: {screenshotId: string, uploadUrl: string}[],
-    screenshotFiles: {screenshotId: string, path: string}[],
-  ): Promise<ScreenshotArtifact>[] {
-    return screenshotUploadUrls.reduce((acc: Promise<ScreenshotArtifact>[], { screenshotId, uploadUrl }) => {
-      const correlatedFilePath = screenshotFiles.find((pathPair) => {
-        return pathPair.screenshotId === screenshotId
-      })?.path
+export const createScreenshotArtifactBatch = (
+  screenshotUploadUrls: {screenshotId: string, uploadUrl: string}[],
+  screenshotFiles: {screenshotId: string, path: string}[],
+): Promise<IArtifact[]> => {
+  const correlatedPaths = screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
+    const correlatedFilePath = screenshotFiles.find((pathPair) => {
+      return pathPair.screenshotId === screenshotId
+    })?.path
 
-      debug('correlated filepath: %s', correlatedFilePath)
+    return correlatedFilePath ? {
+      filePath: correlatedFilePath,
+      uploadUrl,
+    } : undefined
+  }).filter((pair): pair is { filePath: string, uploadUrl: string } => {
+    return !!pair
+  })
 
-      return correlatedFilePath ?
-        acc.concat(ScreenshotArtifact.create(correlatedFilePath, uploadUrl)) :
-        acc
-    }, [])
-  }
-
-  public async upload (): Promise<ArtifactUploadResult> {
-    const startTime = performance.now()
-
-    this.debug('upload starting')
-    try {
-      const res = await sendFile(this.filePath, this.uploadUrl)
-
-      return this.composeSuccessResult(res, performance.now() - startTime)
-    } catch (e) {
-      return this.composeFailureResult(e, performance.now() - startTime)
-    }
-  }
+  return Promise.all(correlatedPaths.map(({ filePath, uploadUrl }) => {
+    return createScreenshotArtifact(filePath, uploadUrl)
+  })).then((artifacts) => {
+    return artifacts.filter((artifact): artifact is IArtifact => {
+      return !!artifact
+    })
+  })
 }
