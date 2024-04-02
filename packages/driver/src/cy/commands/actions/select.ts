@@ -128,7 +128,7 @@ export default (Commands, Cypress, cy) => {
             values.push(value)
 
             // https://github.com/cypress-io/cypress/issues/24739
-            if (options.$el.find(`option[value="${value}"]`).length > 1) {
+            if (options.$el.find(`option[value="${value.replace(/"/g, '\\\"')}"]`).length > 1) {
               notAllUniqueValues = true
             }
           }
