@@ -15,6 +15,10 @@ _Released 4/2/2024 (PENDING)_
 - Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
 - Fixed a bug where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167)
 
+**Dependency Updates:**
+
+- Updated express from `4.17.3` to `4.19.2`. Addressed in [#29211](https://github.com/cypress-io/cypress/pull/29211).
+
 ## 13.7.1
 
 _Released 3/21/2024_

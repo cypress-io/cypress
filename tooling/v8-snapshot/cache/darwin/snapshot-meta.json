@@ -752,6 +752,7 @@
     "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.js",
     "./packages/server/lib/cloud/api/index.ts",
+    "./packages/server/lib/cloud/api/put_protocol_artifact.ts",
     "./packages/server/lib/cloud/auth.ts",
     "./packages/server/lib/cloud/routes.ts",
     "./packages/server/lib/cloud/upload.ts",
@@ -1867,6 +1868,7 @@
     "./node_modules/fast-glob/out/utils/stream.js",
     "./node_modules/fast-glob/out/utils/string.js",
     "./node_modules/fastq/queue.js",
+    "./node_modules/fetch-retry-ts/dist/index.js",
     "./node_modules/fill-range/index.js",
     "./node_modules/finalhandler/index.js",
     "./node_modules/finalhandler/node_modules/debug/src/debug.js",
@@ -4064,10 +4066,13 @@
     "./packages/server/lib/browsers/protocol.ts",
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
+    "./packages/server/lib/cloud/api/http_error.ts",
     "./packages/server/lib/cloud/encryption.ts",
     "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/machine_id.js",
     "./packages/server/lib/cloud/protocol.ts",
+    "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
+    "./packages/server/lib/cloud/upload/upload_stream.ts",
     "./packages/server/lib/cohorts.ts",
     "./packages/server/lib/config.ts",
     "./packages/server/lib/controllers/client.js",
@@ -4318,5 +4323,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "19d942f2dc5e92bec7cbf53d697de6876ceae896f8e5edb0bfa9e4ac80ad6d10"
+  "deferredHash": "9b108f7ef060bb73b8ad1daea7f0450c39d0e7efa5d9921bd2868406ea5fdbb0"
 }
