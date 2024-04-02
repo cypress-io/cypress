@@ -526,7 +526,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   }
 
   if (elHasNoClientWidthOrHeight($el)) {
-    return `This element \`${node}\` is not visible because it has an client width and height of: \`${width} x ${height}\` pixels.`
+    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   const transformResult = $transform.detectVisibility($el)
@@ -544,7 +544,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     width = elClientWidth($parent)
     height = elClientHeight($parent)
 
-    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an client width and height of: \`${width} x ${height}\` pixels.`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   // nested else --___________--
