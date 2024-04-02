@@ -529,15 +529,55 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+  CLOUD_CANNOT_CONFIRM_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while confirming the upload of artifacts.
+        Warning: We encountered an error while confirming the upload of the Test Replay recording for this spec.
 
         These results will not display artifacts.
 
         This error will not affect or change the exit code.
 
         ${fmt.highlightSecondary(apiErr)}`
+  },
+  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
+    return errTemplate`\
+        Warning: we encountered an error while initializing the Test Replay recording for this spec.
+        
+        These results will not display Test Replay recordings.
+        
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while recording Test Replay data for this spec.
+        
+        These results will not display Test Replay recordings.
+        
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error, url: string, status: number, statusText: string) => {
+    return errTemplate`\
+        Warning: We encountered an error while uploading the Test Replay recording for this spec.
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.url(url)} responded with HTTP ${fmt.stringify(status)}: ${fmt.highlightSecondary(statusText)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error, url: string) => {
+    return errTemplate`\
+        Warning: We encountered a network error while uploading the Test Replay recording for this spec. Please verify your network configuration for accessing ${fmt.url(url)}
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.highlightSecondary(error)}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
