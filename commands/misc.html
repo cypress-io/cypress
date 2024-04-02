@@ -70,6 +70,43 @@
   <div class="container content-container">
     <div id="misc">
       <div class="row">
+        <div class="col-xs-7">
+          <h4 id="end"><a href="https://on.cypress.io/end">.end()</a></h4>
+          <p>To end the command chain, use the <a href="https://on.cypress.io/end"><code>.end()</code></a> command.</p>
+          <pre><code class="javascript">// cy.end is useful when you want to end a chain of commands
+// and force Cypress to re-query from the root element
+cy.get('.misc-table').within(() => {
+  // ends the current chain and yields null
+  cy.contains('Cheryl').click().end()
+
+  // queries the entire table again
+  cy.contains('Charles').click()
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <table class="table table-bordered misc-table">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>User: Cheryl</td>
+                </tr>
+                <tr>
+                  <td>User: Charles</td>
+                </tr>
+                <tr>
+                  <td>User: Darryl</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
         <div class="col-xs-12">
           <h4 id="exec"><a href="https://on.cypress.io/exec">cy.exec()</a></h4>
           <p>To execute a system command, use the <a href="https://on.cypress.io/exec"><code>cy.exec()</code></a> command.</p>
