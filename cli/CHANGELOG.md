@@ -9,7 +9,7 @@ _Released 4/16/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed launch args with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
+- Fixed and issue where cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
 
 
 ## 13.7.2
