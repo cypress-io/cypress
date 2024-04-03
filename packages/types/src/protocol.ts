@@ -18,6 +18,7 @@ export interface CDPClient {
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolCommon {
+  cdpReconnect (): Promise<void>
   addRunnables (runnables: any): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
@@ -74,7 +75,7 @@ export type ProtocolErrorReport = {
 export type CaptureArtifact = {
   uploadUrl: string
   fileSize: number
-  payload: Readable
+  filePath: string
 }
 
 export type ProtocolManagerOptions = {

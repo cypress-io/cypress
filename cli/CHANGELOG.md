@@ -1,22 +1,81 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.6.7
+## 13.7.3
 
-_Released 2/27/2024 (PENDING)_
+_Released 4/16/2024 (PENDING)_
 
-**Performance:**
+**Misc:**
 
-- Fixed a performance regression from [`13.6.4`](https://docs.cypress.io/guides/references/changelog#13-6-4) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 
 **Bugfixes:**
 
-- Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
-- Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
 - Fixed launch args with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
+
+
+## 13.7.2
+
+_Released 4/2/2024_
+
+**Performance:**
+
+- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890). Addressed in [#29174](https://github.com/cypress-io/cypress/pull/29174)
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
+- Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
+- Fixed a hang where Cypress would run indefinitely while recording to the cloud when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
+- Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
 
 **Dependency Updates:**
 
-- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
+- Updated express from `4.17.3` to `4.19.2`. Addressed in [#29211](https://github.com/cypress-io/cypress/pull/29211).
+
+## 13.7.1
+
+_Released 3/21/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up. Fixes [#29172](https://github.com/cypress-io/cypress/issues/29172).
+- Fixed an issue blurring shadow dom elements. Fixed in [#29125](https://github.com/cypress-io/cypress/pull/29125).
+
+**Dependency Updates:**
+
+- Updated jose from `4.11.2` to `4.15.5`. Addressed in [#29086](https://github.com/cypress-io/cypress/pull/29086).
+
+## 13.7.0
+
+_Released 3/13/2024_
+
+**Features:**
+
+- Added shadow DOM snapshot support within Test Replay in order to highlight elements correctly within the Cypress reporter. Addressed in [#28823](https://github.com/cypress-io/cypress/pull/28823).
+- Added TypeScript support for [Vue 2.7+](https://github.com/vuejs/vue/blob/main/CHANGELOG.md#270-2022-07-01). Addresses [#28591](https://github.com/cypress-io/cypress/issues/28591).
+- Adds additional context to error messages displayed when Test Replay artifacts fail to upload. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
+
+**Performance:**
+
+- Fixed a performance regression from [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Reduces the number of attempts to retry failed Test Replay artifact uploads from 8 to 3, to reduce time spent on artifact upload attempts that will not succeed. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
+
+**Bugfixes:**
+
+- Changed screenshot capture behavior in Chromium to activate the main Cypress tab before capturing. This prevents screenshot capture from timing out in certain situations. Fixed in [#29038](https://github.com/cypress-io/cypress/pull/29038). Fixes [#5016](https://github.com/cypress-io/cypress/issues/5016)
+- Fixed an issue where `.click()` commands on children of disabled elements would still produce "click" events -- even without `{ force: true }`. Fixes [#28788](https://github.com/cypress-io/cypress/issues/28788).
+- Changed RequestBody type to allow for boolean and null literals to be passed as body values. [#28789](https://github.com/cypress-io/cypress/issues/28789)
+
+**Misc:**
+
+- Changed Component Testing scaffolding instruction to `pnpm add` to add framework dependencies when a project uses pnpm as package manager. Addresses [#29052](https://github.com/cypress-io/cypress/issues/29052).
+- Command messages in the Cypress command logs will now truncate display at 100 lines instead of 50. Fixes [#29023](https://github.com/cypress-io/cypress/issues/29023).
+- Capture the `beforeTest` timestamp inside the browser for the purposes of accurately determining test start for Test Replay. Addressed in [#29061](https://github.com/cypress-io/cypress/pull/29061).
+
+**Dependency Updates:**
+
+- Updated jimp from `0.14.0` to `0.22.12`. Addressed in [#29055](https://github.com/cypress-io/cypress/pull/29055).
 - Updated http-proxy-middleware from `2.0.4` to `2.0.6`. Addressed in [#28902](https://github.com/cypress-io/cypress/pull/28902).
+- Updated signal-exit from `3.0.3` to `3.0.7`. Addressed in [#28979](https://github.com/cypress-io/cypress/pull/28979).
 
 ## 13.6.6
 
