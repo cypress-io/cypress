@@ -47,6 +47,15 @@ type ChromePreferences = {
 const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
+const disabledFeatures = [
+  // Disable manual option and popup prompt of Chrome translation
+  // https://github.com/cypress-io/cypress/issues/28225
+  'Translate',
+  // Disables "Enhanced ad privacy in Chrome" dialog
+  // https://github.com/cypress-io/cypress/issues/29199
+  'PrivacySandboxSettings4',
+]
+
 // Common Chrome Flags for Automation
 // https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
 const DEFAULT_ARGS = [
@@ -104,9 +113,7 @@ const DEFAULT_ARGS = [
   `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
-  // Disable manual option and popup prompt of Chrome translation
-  // https://github.com/cypress-io/cypress/issues/28225
-  '--disable-features=Translate',
+  `--disable-features=${disabledFeatures.join(',')}`,
 
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
