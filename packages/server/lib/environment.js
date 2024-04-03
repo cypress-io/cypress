@@ -93,8 +93,8 @@ try {
       if (value.length) {
         let joinedValues = value.join('=')
 
-       // check if the arg is wrapped in " or ' (unicode)
-       const isWrappedInQuotes = !!['\u0022', '\u0027'].find(((charAsUnicode) => joinedValues.startsWith(charAsUnicode) && joinedValues.endsWith(charAsUnicode)))
+        // check if the arg is wrapped in " or ' (unicode)
+        const isWrappedInQuotes = !!['\u0022', '\u0027'].find(((charAsUnicode) => joinedValues.startsWith(charAsUnicode) && joinedValues.endsWith(charAsUnicode)))
 
         if (isWrappedInQuotes) {
           joinedValues = joinedValues.slice(1, -1)
