@@ -190,8 +190,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
         return {
           ...artifact,
-          fileSize: archiveInfo.fileSize,
-          payload: archiveInfo.stream,
+          ...archiveInfo,
         }
       } catch (err) {
         debug('failed to prepare protocol artifact', {
@@ -375,8 +374,10 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       let { error, errorStack, allErrors } = report
 
       if (allErrors) {
-        error = `Failed to upload after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
+        error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
         errorStack = allErrors.map((error) => error.stack).join(', ')
+      } else if (error) {
+        error = `Failed to upload Test Replay: ${error}`
       }
 
       return skipped && !report.error ? acc : {

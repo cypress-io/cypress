@@ -1024,23 +1024,6 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     checkOutcome()
   })
 
-  // TODO: Do we need to consider this case?
-  it.skip('completes journey for migration-e2e-defaults-no-specs', () => {
-    startMigrationFor('migration-e2e-defaults-no-specs')
-    // no specs, nothing to rename?
-    cy.get(renameAutoStep).should('not.exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
-    renameSupport()
-    migrateAndVerifyConfig()
-    checkOutcome()
-  })
-
   it('completes journey for migration-e2e-plugins-implicit-index-js', () => {
     startMigrationFor('migration-e2e-plugins-implicit-index-js')
     // no specs, nothing to rename?
