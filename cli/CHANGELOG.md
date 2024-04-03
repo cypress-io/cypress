@@ -1,11 +1,30 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.3
+
+_Released 4/16/2024 (PENDING)_
+
+**Misc:**
+
+- Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
+
 ## 13.7.2
 
-_Released 4/2/2024 (PENDING)_
+_Released 4/2/2024_
+
+**Performance:**
+
+- Improvements to Test Replay upload resiliency. Fixes [#28890](https://github.com/cypress-io/cypress/issues/28890). Addressed in [#29174](https://github.com/cypress-io/cypress/pull/29174)
 
 **Bugfixes:**
 
+- Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
+- Fixed a hang where Cypress would run indefinitely while recording to the cloud when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
+- Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
+
+**Dependency Updates:**
+
+- Updated express from `4.17.3` to `4.19.2`. Addressed in [#29211](https://github.com/cypress-io/cypress/pull/29211).
 
 ## 13.7.1
 

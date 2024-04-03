@@ -8,12 +8,47 @@ if (window.top.runCount == null) {
   window.top.runCount = 0
 }
 
+// This spec in the driver has some weird reloading that occurs. It triggers a simulation of
+// essentially reloading the page in run mode and that effectively wipes away some state that we
+// need for protocol. Rather than trying to handle this edge case in a complicated one-off fashion,
+// just ensure that the protocol events fire for this one spec.
+if (Cypress.config('browser').family === 'chromium') {
+  // Copied from:
+  // https://github.com/cypress-io/cypress-services/blob/825abbabaaa0a8ecf78e2ad543493a85a01a939f/packages/app-capture-protocol/src/cypress-events/track-cypress-events.ts#L17-L30
+  const getCypressProtocolElement = () => {
+    let cypressProtocolElement = window.top.document.getElementById('__cypress-protocol')
+
+    // If element does not exist, create it
+    if (!cypressProtocolElement) {
+      cypressProtocolElement = document.createElement('div')
+      cypressProtocolElement.id = '__cypress-protocol'
+      cypressProtocolElement.style.display = 'none'
+      window.top.document.body.appendChild(cypressProtocolElement)
+    }
+
+    return cypressProtocolElement
+  }
+
+  // Copied from:
+  // https://github.com/cypress-io/cypress-services/blob/825abbabaaa0a8ecf78e2ad543493a85a01a939f/packages/app-capture-protocol/src/cypress-events/track-cypress-events.ts#L38-L44
+  const attachCypressProtocolTestAfterRun = () => {
+    const cypressProtocolElement = getCypressProtocolElement()
+
+    cypressProtocolElement.dataset.cypressProtocolTestAfterRun = JSON.stringify({
+      timestamp: performance.now() + performance.timeOrigin,
+    })
+  }
+
+  // Copied from:
+  // https://github.com/cypress-io/cypress-services/blob/825abbabaaa0a8ecf78e2ad543493a85a01a939f/packages/app-capture-protocol/src/cypress-events/track-cypress-events.ts#L110-L112
+  Cypress.prependListener('test:after:run:async', () => {
+    attachCypressProtocolTestAfterRun()
+  })
+}
+
 const isTextTerminal = Cypress.config('isTextTerminal')
 
-// TODO: UNSKIP this for chromium browsers. @see https://github.com/cypress-io/cypress/issues/29181
-describe('rerun state bugs', { browser: {
-  family: '!chromium',
-} }, () => {
+describe('rerun state bugs', () => {
   // NOTE: there's probably other ways to cause a re-run
   // event more programatically (like firing it through Cypress)
   // but we get the hashchange coverage for free on this.

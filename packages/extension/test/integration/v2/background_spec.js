@@ -853,42 +853,20 @@ describe('app/background', () => {
         })
       })
 
-      it('closes the tabs in the current browser window', function (done) {
+      // @see https://github.com/cypress-io/cypress/issues/29172 for Firefox versions 124 and up
+      it('closes the tabs in the current browser window and creates a new "about:blank" tab', function (done) {
         this.socket.on('automation:response', (id, obj) => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
 
           expect(browser.windows.getCurrent).to.be.called
-          expect(browser.tabs.remove).to.be.called
-          expect(browser.tabs.create).not.to.be.called
+          expect(browser.tabs.remove).to.be.calledWith(['1', '2', '3'])
+          expect(browser.tabs.create).to.be.calledWith({ url: 'about:blank', active: false })
 
           done()
         })
 
         this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
-      })
-
-      // @see https://github.com/cypress-io/cypress/issues/29172
-      describe('firefox 124 and up', () => {
-        beforeEach(() => {
-          global.window.navigator = {
-            userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0',
-          }
-        })
-
-        it('creates a new "about:blank" tab and closes the other tabs in the current browser window', function (done) {
-          this.socket.on('automation:response', (id, obj) => {
-            expect(id).to.eq(123)
-            expect(obj.response).to.be.undefined
-
-            expect(browser.windows.getCurrent).to.be.called
-            expect(browser.tabs.remove).to.be.calledWith(['1', '2', '3'])
-            expect(browser.tabs.create).to.be.calledWith({ url: 'about:blank', active: false })
-            done()
-          })
-
-          this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
-        })
       })
     })
   })
