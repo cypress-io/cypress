@@ -74,6 +74,9 @@ try {
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
+    // regex will be used to convert ELECTRON_EXTRA_LAUNCH_ARGS into an array, for example
+    // input: 'foo --ipsum=0 --bar=--baz=quux --lorem="--ipsum=dolor --sit=amet"'
+    // output: ['foo', '--ipsum=0', '--bar=--baz=quux', '--lorem="--ipsum=dolor --sit=amet"']
     const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
     const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.match(regex) || []
 
