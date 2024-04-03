@@ -7,6 +7,10 @@ _Released 4/16/2024 (PENDING)_
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 
+**Bugfixes:**
+
+- Fixed an issue where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167)
+
 ## 13.7.2
 
 _Released 4/2/2024_
@@ -21,7 +25,6 @@ _Released 4/2/2024_
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
 - Fixed a hang where Cypress would run indefinitely while recording to the cloud when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
 - Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
-- Fixed a bug where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167)
 
 **Dependency Updates:**
 
