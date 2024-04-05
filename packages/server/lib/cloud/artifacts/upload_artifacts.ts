@@ -148,7 +148,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     })
 
     if (!quiet && uploadResults.length) {
-      logUploadResults(uploadResults, protocolManager.getFatalError())
+      logUploadResults(uploadResults, protocolManager?.getFatalError())
     }
 
     const protocolFatalError = protocolManager?.getFatalError()
