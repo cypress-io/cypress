@@ -4,6 +4,7 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const debugVerbose = require('debug')('cypress-verbose:cli')
 
 const util = require('../util')
 const state = require('../tasks/state')
@@ -257,6 +258,8 @@ module.exports = {
 
             // bail if this is warning line garbage
             if (isGarbageLineWarning(str)) {
+              debugVerbose(str)
+
               return
             }
 
