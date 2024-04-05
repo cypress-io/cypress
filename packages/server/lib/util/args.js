@@ -234,6 +234,9 @@ const parseSpecArgv = (pattern) => {
     ]
   }
 
+  // Escape parentheses.
+  pattern = pattern.replace(/[()]/g, '\\$&')
+
   /**
    * Sanitizes a path's leftover commas.
    *
