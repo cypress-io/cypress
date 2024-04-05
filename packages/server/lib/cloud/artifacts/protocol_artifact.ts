@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import type { ProtocolManager } from '../protocol'
-import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact } from './artifact'
+import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact, ArtifactKinds } from './artifact'
 
 interface ProtocolUploadStrategyResult {
   success: boolean
@@ -50,7 +50,7 @@ export const composeProtocolErrorReportFromOptions = async ({
   const fatalError = protocolManager?.getFatalError()
 
   return {
-    key: 'protocol',
+    key: ArtifactKinds.PROTOCOL,
     url: url ?? 'UNKNOWN',
     pathToFile: pathToFile ?? 'UNKNOWN',
     fileSize,

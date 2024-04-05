@@ -5,7 +5,7 @@ import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
 import * as errors from '../../errors'
 import exception from '../exception'
-import type { IArtifact, ArtifactUploadResult } from './artifact'
+import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
@@ -17,7 +17,7 @@ const toUploadReportPayload = (acc: {
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
 }, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
-  if (key === 'protocol') {
+  if (key === ArtifactKinds.PROTOCOL) {
     let { error, errorStack, allErrors } = report
 
     if (allErrors) {
@@ -117,9 +117,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   const { protocolManager, protocolCaptureMeta, quiet, runId, instanceId, spec, platform, projectId } = options
 
   const priority = {
-    'video': 0,
-    'screenshots': 1,
-    'protocol': 2,
+    [ArtifactKinds.VIDEO]: 0,
+    [ArtifactKinds.SCREENSHOTS]: 1,
+    [ArtifactKinds.PROTOCOL]: 2,
   }
 
   const artifacts = (await extractArtifactsFromOptions(options)).sort((a, b) => {
@@ -158,7 +158,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
      * but we still want to report them to updateInstanceArtifacts
      */
     if (!uploadResults.find((result: ArtifactUploadResult) => {
-      return result.key === 'protocol'
+      return result.key === ArtifactKinds.PROTOCOL
     }) && protocolFatalError) {
       uploadResults.push(await composeProtocolErrorReportFromOptions(options))
     }

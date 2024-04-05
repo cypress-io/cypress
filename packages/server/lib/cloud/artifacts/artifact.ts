@@ -7,8 +7,16 @@ const isAggregateError = (err: any): err is AggregateError => {
   return !!err.errors
 }
 
+export const ArtifactKinds = Object.freeze({
+  VIDEO: 'video',
+  SCREENSHOTS: 'screenshots',
+  PROTOCOL: 'protocol',
+})
+
+type ArtifactKind = typeof ArtifactKinds[keyof typeof ArtifactKinds]
+
 export interface IArtifact {
-  reportKey: 'video' | 'screenshots' | 'protocol'
+  reportKey: ArtifactKind
   uploadUrl: string
   filePath: string
   fileSize: number | bigint
@@ -21,7 +29,7 @@ export interface ArtifactUploadResult {
   url: string
   pathToFile: string
   fileSize?: number | bigint
-  key: IArtifact['reportKey']
+  key: ArtifactKind
   errorStack?: string
   allErrors?: Error[]
   specAccess?: {
@@ -35,7 +43,7 @@ export type ArtifactUploadStrategy<T> = (filePath: string, uploadUrl: string, fi
 
 export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadResponse extends Promise<any> = Promise<{}>> {
   constructor (
-    public reportKey: 'protocol' | 'screenshots' | 'video',
+    public reportKey: ArtifactKind,
     public readonly filePath: string,
     public readonly uploadUrl: string,
     public readonly fileSize: number | bigint,

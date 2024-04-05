@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import Debug from 'debug'
-import { Artifact, IArtifact } from './artifact'
+import { Artifact, IArtifact, ArtifactKinds } from './artifact'
 import { fileUploadStrategy } from './file_upload_strategy'
 
 const debug = Debug('cypress:server:cloud:artifacts:screenshot')
@@ -9,7 +9,7 @@ const createScreenshotArtifact = async (filePath: string, uploadUrl: string): Pr
   try {
     const { size } = await fs.stat(filePath)
 
-    return new Artifact('screenshots', filePath, uploadUrl, size, fileUploadStrategy)
+    return new Artifact(ArtifactKinds.SCREENSHOTS, filePath, uploadUrl, size, fileUploadStrategy)
   } catch (e) {
     debug('Error creating screenshot artifact: %O', e)
 
