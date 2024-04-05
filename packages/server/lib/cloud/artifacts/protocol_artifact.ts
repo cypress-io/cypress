@@ -40,10 +40,10 @@ export const composeProtocolErrorReportFromOptions = async ({
   captureUploadUrl,
 }: {
   protocolManager?: ProtocolManager
-  protocolCaptureMeta?: { url?: string, disabledMessage?: string }
+  protocolCaptureMeta: { url?: string, disabledMessage?: string }
   captureUploadUrl?: string
 }): Promise<ArtifactUploadResult> => {
-  const url = captureUploadUrl || protocolCaptureMeta?.url
+  const url = captureUploadUrl || protocolCaptureMeta.url
   const pathToFile = protocolManager?.getArchivePath()
   const fileSize = pathToFile ? (await fs.stat(pathToFile))?.size : 0
 

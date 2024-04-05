@@ -46,7 +46,7 @@ const toUploadReportPayload = (acc: {
 }
 
 type UploadArtifactOptions = {
-  protocolManager: ProtocolManager
+  protocolManager?: ProtocolManager
   videoUploadUrl?: string
   video?: string // filepath to the video artifact
   screenshots?: {
@@ -147,17 +147,16 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       }
     })
 
-    /**
-     * upload report *stdout* is skipped for *some* fatal protocol runs, but we still
-     * want them reported to cloud.
-     */
-
     if (!quiet && uploadResults.length) {
       logUploadResults(uploadResults, protocolManager.getFatalError())
     }
 
-    const protocolFatalError = protocolManager.getFatalError()
+    const protocolFatalError = protocolManager?.getFatalError()
 
+    /**
+     * Protocol instances with fatal errors prior to uploading will not have an uploadResult,
+     * but we still want to report them to updateInstanceArtifacts
+     */
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === 'protocol'
     }) && protocolFatalError) {
