@@ -138,6 +138,10 @@ export class ProjectActions {
     return this.globalLaunchCount
   }
 
+  set launchCount (count) {
+    this.globalLaunchCount = count
+  }
+
   openDirectoryInIDE (projectPath: string) {
     this.ctx.debug(`opening ${projectPath} in ${this.ctx.coreData.localSettings.preferences.preferredEditorBinary}`)
 
