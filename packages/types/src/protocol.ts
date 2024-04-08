@@ -41,7 +41,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
-export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb'
+export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN'
 
 export interface ProtocolError {
   args?: any
