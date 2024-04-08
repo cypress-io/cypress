@@ -1,9 +1,4 @@
-// TODO: re-enable when capture completes dom transition
-// getCounters is changed when setAttribute and setAttribute
-// are called, are necessary for certain capture code to work.
-// once dom transition is complete, that capture code will no
-// longer rely on setAttribute/getAttribute.
-describe.skip('issue 1244', () => {
+describe('issue 1244', () => {
   beforeEach(() => {
     cy.visit('/fixtures/issue-1244.html').then(() => {
       cy.on('window:before:unload', (e) => {
@@ -11,7 +6,13 @@ describe.skip('issue 1244', () => {
 
         // not all pages that get unloaded during this spec have getCounters()
         if (win.location.href.includes('issue-1244.html')) {
-          expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+          // TODO: re-enable when capture completes dom transition
+          // getCounters is changed when setAttribute and setAttribute
+          // are called, are necessary for certain capture code to work.
+          // once dom transition is complete, that capture code will no
+          // longer rely on setAttribute/getAttribute.
+
+          // expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
         }
       })
     })
