@@ -104,6 +104,53 @@ describe('makeWebpackConfig', () => {
     snapshot(actual)
   })
 
+  it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v5', async () => {
+    const devServerConfig: WebpackDevServerConfig = {
+      specs: [],
+      cypressConfig: {
+        isTextTerminal: false,
+        projectRoot: '.',
+        supportFile: '/support.js',
+        devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
+      } as Cypress.PluginConfigOptions,
+      webpackConfig: {
+        output: {
+          publicPath: '/this-will-be-ignored',
+        },
+        devServer: {
+          magicHtml: true,
+          client: {
+            progress: false,
+            overlay: true, // This will be overridden by makeWebpackConfig.ts
+          },
+        },
+        optimization: {
+          emitOnErrors: false, // This will be overridden by makeWebpackConfig.ts
+        },
+        devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
+      },
+      devServerEvents: new EventEmitter(),
+    }
+    const actual = await makeWebpackConfig({
+      devServerConfig,
+      sourceWebpackModulesResult: createModuleMatrixResult({
+        webpack: 5,
+        webpackDevServer: 5,
+      }),
+    })
+
+    // plugins contain circular deps which cannot be serialized in a snapshot.
+    // instead just compare the name and order of the plugins.
+    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
+
+    // these will include paths from the user's local file system, so we should not include them the snapshot
+    delete actual.output.path
+    delete actual.entry
+
+    expect(actual.output.publicPath).to.eq('/test-public-path/')
+    snapshot(actual)
+  })
+
   it('removes entrypoint from merged webpackConfig', async () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
@@ -119,8 +166,8 @@ describe('makeWebpackConfig', () => {
     const actual = await makeWebpackConfig({
       devServerConfig,
       sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
-        webpackDevServer: 4,
+        webpack: 5,
+        webpackDevServer: 5,
       }),
     })
 
@@ -143,8 +190,8 @@ describe('makeWebpackConfig', () => {
     const actual = await makeWebpackConfig({
       devServerConfig,
       sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
-        webpackDevServer: 4,
+        webpack: 5,
+        webpackDevServer: 5,
       }),
     })
 
@@ -199,7 +246,7 @@ describe('makeWebpackConfig', () => {
         devServerConfig,
         sourceWebpackModulesResult: createModuleMatrixResult({
           webpack: 5,
-          webpackDevServer: 4,
+          webpackDevServer: 5,
         }),
       })
 
@@ -235,8 +282,8 @@ describe('makeWebpackConfig', () => {
       const actual = await makeWebpackConfig({
         devServerConfig,
         sourceWebpackModulesResult: createModuleMatrixResult({
-          webpack: 4,
-          webpackDevServer: 4,
+          webpack: 5,
+          webpackDevServer: 5,
         }),
       })
 
@@ -272,7 +319,7 @@ describe('makeWebpackConfig', () => {
       beforeEach(() => {
         sourceWebpackModulesResult = createModuleMatrixResult({
           webpack: 4,
-          webpackDevServer: 4,
+          webpackDevServer: 3,
         })
       })
 

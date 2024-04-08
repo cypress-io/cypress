@@ -54,7 +54,7 @@ describe('devServer', function () {
       devServerEvents: new EventEmitter(),
     })
 
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
+    expect(result.server).to.be.instanceOf(require('webpack-dev-server-4'))
     expect(result.version).to.eq(4)
   })
 
@@ -76,7 +76,29 @@ describe('devServer', function () {
       devServerEvents: new EventEmitter(),
     })
 
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
+    expect(result.server).to.be.instanceOf(require('webpack-dev-server-4'))
     expect(result.version).to.eq(4)
+  })
+
+  it('creates a new devServer webpack5, webpackDevServer5', async () => {
+    const { devServer } = proxyquire('../src/devServer', {
+      './helpers/sourceRelativeWebpackModules': {
+        sourceDefaultWebpackDependencies: () => {
+          return createModuleMatrixResult({
+            webpack: 5,
+            webpackDevServer: 5,
+          })
+        } },
+    }) as typeof import('../src/devServer')
+
+    const result = await devServer.create({
+      specs: [],
+      cypressConfig,
+      webpackConfig: {},
+      devServerEvents: new EventEmitter(),
+    })
+
+    expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
+    expect(result.version).to.eq(5)
   })
 })
