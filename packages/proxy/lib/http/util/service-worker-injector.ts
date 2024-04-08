@@ -2,63 +2,9 @@
 
 import type { ServiceWorkerClientEvent } from './service-worker-manager'
 
-type FrameType = 'auxiliary' | 'nested' | 'none' | 'top-level'
-
-/**
- * The Client interface represents an executable context such as a Worker, or a SharedWorker. Window clients are represented by the more-specific WindowClient. You can get Client/WindowClient objects from methods such as Clients.matchAll() and Clients.get().
- *
- * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client)
- */
-interface Client {
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client/frameType) */
-  readonly frameType: FrameType
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client/id) */
-  readonly id: string
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client/type) */
-  readonly type: ClientTypes
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client/url) */
-  readonly url: string
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Client/postMessage) */
-  postMessage(message: any, transfer: Transferable[]): void
-  postMessage(message: any, options?: StructuredSerializeOptions): void
-}
-
-/**
- * This ServiceWorker API interface represents the scope of a service worker client that is a document in a browser context, controlled by an active worker. The service worker client independently selects and uses a service worker for its own loading and sub-resources.
- *
- * [MDN Reference](https://developer.mozilla.org/docs/Web/API/WindowClient)
- */
-interface WindowClient extends Client {
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/WindowClient/focused) */
-  readonly focused: boolean
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/WindowClient/visibilityState) */
-  readonly visibilityState: DocumentVisibilityState
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/WindowClient/focus) */
-  focus(): Promise<WindowClient>
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/WindowClient/navigate) */
-  navigate(url: string | URL): Promise<WindowClient | null>
-}
-
-/**
- * Provides access to Client objects. Access it via self.clients within a service worker.
- *
- * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Clients)
- */
-interface Clients {
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Clients/claim) */
-  claim(): Promise<void>
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Clients/get) */
-  get(id: string): Promise<Client | undefined>
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Clients/matchAll) */
-  matchAll<T extends ClientQueryOptions>(options?: T): Promise<ReadonlyArray<T['type'] extends 'window' ? WindowClient : Client>>
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Clients/openWindow) */
-  openWindow(url: string | URL): Promise<WindowClient | null>
-}
-
 // this should be of type ServiceWorkerGlobalScope from the webworker lib,
 // but we can't reference it directly because it causes errors in other packages
 interface ServiceWorkerGlobalScope extends WorkerGlobalScope {
-  clients: Clients
   registration: ServiceWorkerRegistration
   onfetch: FetchListener | null
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
@@ -88,6 +34,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
   function __cypressInjectIntoServiceWorker () {
     let listenerCount = 0
     let eventQueue: ServiceWorkerClientEventWithoutScope[] = []
+    let isHandlingRequestsSent = false
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
@@ -116,11 +63,9 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       sendEvent({ type: 'fetchRequest', payload })
     }
 
-    const sendClientsUpdated = async () => {
-      const clients = (await self.clients.matchAll()).map(({ frameType, id, type, url }) => ({ frameType, id, type, url }))
-
-      // call the CDP binding to inform the backend that the clients have been updated
-      sendEvent({ type: 'clientsUpdated', payload: { clients } })
+    const sendStartHandlingRequests = async () => {
+      // call the CDP binding to inform the backend that the service worker is now handling requests
+      sendEvent({ type: 'startHandlingRequests', payload: undefined })
     }
 
     // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
@@ -140,6 +85,13 @@ export const injectIntoServiceWorker = (body: Buffer) => {
 
     function wrapListener (listener: FetchListener): FetchListener {
       return (event) => {
+        // if this is the first time the listener is called,
+        // we need to inform the backend that the service worker is now handling requests
+        if (!isHandlingRequestsSent) {
+          sendStartHandlingRequests()
+          isHandlingRequestsSent = true
+        }
+
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
         const oldRespondWith = event.respondWith
@@ -301,19 +253,10 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       },
     )
 
-    const oldClientsClaim = self.clients.claim
-
-    self.clients.claim = async () => {
-      await oldClientsClaim.call(self.clients)
-
-      await sendClientsUpdated()
-    }
-
     // listen for the activate event so we can inform the
     // backend whether or not the service worker has a handler
-    self.addEventListener('activate', async () => {
+    self.addEventListener('activate', () => {
       sendHasFetchEventHandlers()
-      await sendClientsUpdated()
 
       // if the binding has not been created yet, we need to wait for it
       if (!self.__cypressServiceWorkerClientEvent) {
