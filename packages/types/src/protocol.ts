@@ -52,6 +52,10 @@ export interface ProtocolError {
   isUploadError?: boolean
 }
 
+export const isProtocolInitializationError = (error: ProtocolError) => {
+  return ['setupProtocol', 'beforeSpec', 'getCaptureProtocolScript'].includes(error.captureMethod)
+}
+
 type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {
   message: string
   name: string

@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import type ProtocolManager from '../protocol'
+import { isProtocolInitializationError } from '@packages/types'
 import api from '../api'
 import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '../../util/print-run'
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
@@ -103,7 +104,7 @@ const extractArtifactsFromOptions = async ({
     const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
 
     debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
-    if (protocolManager && protocolFilePath && protocolUploadUrl) {
+    if (protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()) {
       artifacts.push(await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager))
     }
   } catch (e) {
@@ -122,11 +123,21 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     [ArtifactKinds.PROTOCOL]: 2,
   }
 
+  const protocolFatalError = protocolManager.getFatalError()
+
+  if (protocolFatalError) {
+    if (isProtocolInitializationError(protocolFatalError)) {
+      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', protocolFatalError.error)
+    } else {
+      errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', protocolFatalError.error)
+    }
+  }
+
   const artifacts = (await extractArtifactsFromOptions(options)).sort((a, b) => {
     return priority[a.reportKey] - priority[b.reportKey]
   })
 
-  let uploadReport: UpdateInstanceArtifactsPayload
+  let uploadReport: UpdateInstanceArtifactsPayload = { video: undefined, screenshots: [], protocol: undefined }
 
   if (!quiet) {
     logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
@@ -153,10 +164,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
 
     const protocolFatalError = protocolManager?.getFatalError()
 
-    /**
-     * Protocol instances with fatal errors prior to uploading will not have an uploadResult,
-     * but we still want to report them to updateInstanceArtifacts
-     */
+    // there are no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
+    // during initialization or capture. however, we still want to report this failure with the rest of the upload
+    // results, so we extract what the upload failure report should be from the options passed to this fn
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === ArtifactKinds.PROTOCOL
     }) && protocolFatalError) {
@@ -167,7 +177,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   } catch (err) {
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
-    return exception.create(err)
+    await exception.create(err)
   }
 
   debug('checking for protocol errors', protocolManager?.hasErrors())
@@ -195,7 +205,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       stack: err.stack,
     })
 
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
+    errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS_PROTOCOL', err)
 
     if (err.statusCode !== 503) {
       return exception.create(err)

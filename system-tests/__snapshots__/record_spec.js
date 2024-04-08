@@ -3119,6 +3119,15 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
+Warning: we encountered an error while initializing the Test Replay recording for this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: Error instantiating Protocol Capture
+      [stack trace lines]
+
 
   (Uploading Cloud Artifacts)
 
@@ -3202,6 +3211,15 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
+Warning: we encountered an error while initializing the Test Replay recording for this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: Error in beforeSpec
+      [stack trace lines]
+
 
   (Uploading Cloud Artifacts)
 
@@ -3284,6 +3302,15 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+Warning: We encountered an error while recording Test Replay data for this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: error in beforeTest
+      [stack trace lines]
 
 
   (Uploading Cloud Artifacts)
@@ -3457,6 +3484,15 @@ We will retry 1 more time in X second(s)...
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+Warning: we encountered an error while initializing the Test Replay recording for this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: Error downloading capture code: 500 - "500 - Internal Server Error"
+      [stack trace lines]
 
 
   (Uploading Cloud Artifacts)

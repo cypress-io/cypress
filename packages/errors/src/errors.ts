@@ -547,7 +547,7 @@ export const AllCypressErrors = {
         
         This error will not affect or change the exit code.
         
-        ${fmt.highlightSecondary(error)}`
+        ${fmt.stackTrace(error)}`
   },
   CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
     return errTemplate`\
@@ -557,7 +557,7 @@ export const AllCypressErrors = {
         
         This error will not affect or change the exit code.
         
-        ${fmt.highlightSecondary(error)}`
+        ${fmt.stackTrace(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error, url: string, status: number, statusText: string) => {
     return errTemplate`\
