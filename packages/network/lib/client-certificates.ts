@@ -1,11 +1,10 @@
 import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
-import Forge from 'node-forge'
 import fs from 'fs-extra'
 import { clientCertificateStore } from './agent'
 
-const { pki, asn1, pkcs12, util } = Forge
+const { pki, asn1, pkcs12, util } = require('node-forge')
 
 const debug = debugModule('cypress:network:client-certificates')
 
