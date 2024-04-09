@@ -54,7 +54,7 @@ const isMacOSElectronWebSwapCGLLayerWarning = /^objc\[\d+\]: Class WebSwapCGLLay
  * Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
  */
 
-const isHostVulkanDriverWarning = /^Warning: (?:Layer VK_LAYER_MESA_device_select|loader_scanned_icd_add:(?:.*)(?:libvulkan_intel|libvulkan_lvp|libvulkan_radeon)(?:.*)LDP_DRIVER_7\)$)/
+const isHostVulkanDriverWarning = /^Warning:.+(#LDP_DRIVER_7|VK_LAYER_MESA_device_select).+/
 
 /**
  * Electron logs benign warnings about Vulkan when run in docker containers whose host does not have a GPU. This is coming from the primary
@@ -69,9 +69,11 @@ const isHostVulkanDriverWarning = /^Warning: (?:Layer VK_LAYER_MESA_device_selec
  *     at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
  */
 
-const isContainerVulkanDriverWarning = /^(?:Warning: vkCreateInstance(\: Found no drivers!| failed with VK_ERROR_INCOMPATIBLE_DRIVER)$|\s*at (?:CheckVkSuccessImpl|CreateVkInstance|Initialize|Create|operator)(?:.*)(?:VulkanError|BackendVk))/
+const isContainerVulkanDriverWarning = /^Warning: vkCreateInstance/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning]
+const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Initialize|Create|operator).+(VulkanError|BackendVk).cpp/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
