@@ -44,7 +44,9 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       // if the binding has been created, we can call it
       // otherwise, we need to queue the event
       if (self.__cypressServiceWorkerClientEvent) {
-        self.__cypressServiceWorkerClientEvent(JSON.stringify({ ...event, scope: self.registration.scope }))
+        const payload = Object.assign({}, event, { scope: self.registration.scope })
+
+        self.__cypressServiceWorkerClientEvent(JSON.stringify(payload))
       } else {
         eventQueue.push(event)
       }

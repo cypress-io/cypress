@@ -142,14 +142,14 @@ export class ServiceWorkerManager {
    * @param event the service worker fetch event to handle
    */
   handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
-    debug('Handling service worker fetch event: %o', event)
+    debug('Handling service worker event: %o', event)
 
     switch (event.type) {
       case 'fetchRequest':
         this.handleServiceWorkerFetchEvent(event.payload as ServiceWorkerEventsPayload['fetchRequest'])
         break
       case 'hasFetchHandler':
-        this.hasServiceWorkerFetchHandlers(event.payload as ServiceWorkerEventsPayload['hasFetchHandler'], event.scope)
+        this.handleHasServiceWorkerFetchHandlersEvent(event.payload as ServiceWorkerEventsPayload['hasFetchHandler'], event.scope)
         break
       case 'startHandlingRequests':
         this.handleStartHandlingRequestsEvent(event.payload as ServiceWorkerEventsPayload['startHandlingRequests'], event.scope)
@@ -188,7 +188,7 @@ export class ServiceWorkerManager {
         activatedServiceWorker.scriptURL === paramlessDocumentURL ||
         !activatedServiceWorker.initiatorOrigin ||
         !paramlessDocumentURL.startsWith(activatedServiceWorker.initiatorOrigin)) {
-        debug('Service worker not activated or request URL is from the service worker, skipping: %o', { registration, browserPreRequest })
+        debug('Service worker not activated/handling requests, or the request is directly from the service worker, skipping: %o', { registration, browserPreRequest })
 
         return
       }
@@ -234,7 +234,7 @@ export class ServiceWorkerManager {
    * Handles a service worker has fetch handlers event.
    * @param event the service worker has fetch handlers event to handle
    */
-  private hasServiceWorkerFetchHandlers (event: ServiceWorkerEventsPayload['hasFetchHandler'], scope: string) {
+  private handleHasServiceWorkerFetchHandlersEvent (event: ServiceWorkerEventsPayload['hasFetchHandler'], scope: string) {
     debug('service worker has fetch handlers event called: %o', { event, scope })
 
     const registration = this.getRegistrationForScope(scope)
