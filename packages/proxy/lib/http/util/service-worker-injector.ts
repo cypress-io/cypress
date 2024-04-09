@@ -6,6 +6,9 @@ import type { ServiceWorkerClientEvent } from './service-worker-manager'
 // but we can't reference it directly because it causes errors in other packages
 interface ServiceWorkerGlobalScope extends WorkerGlobalScope {
   registration: ServiceWorkerRegistration
+  clients: {
+    claim: () => Promise<void>
+  }
   onfetch: FetchListener | null
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void
@@ -254,6 +257,15 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         },
       },
     )
+
+    const oldClientsClaim = self.clients.claim
+
+    // Overwrite the clients.claim method so we can inform the backend that the service worker is now handling requests
+    self.clients.claim = async () => {
+      sendStartHandlingRequests()
+
+      await oldClientsClaim.call(self.clients)
+    }
 
     // listen for the activate event so we can inform the
     // backend whether or not the service worker has a handler

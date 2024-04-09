@@ -429,6 +429,8 @@ export class ProjectBase extends EE {
             previousResults: reporterInstance?.results() || {},
           })
         } else if (event === 'end') {
+          debugVerbose('browserPreRequests at the end: %O', this.server.getBrowserPreRequests())
+
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
