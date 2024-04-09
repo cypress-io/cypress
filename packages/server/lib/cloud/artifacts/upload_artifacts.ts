@@ -129,7 +129,14 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
    * sometimes, protocolManager initializes both without an archive path and without recording an internal
    * fatal error. Test Replay initialization should be refactored in order to capture this state more appropriately.
    */
-  if (!protocolManager.getArchivePath() && !protocolFatalError && !protocolCaptureMeta.disabledMessage) {
+  debug({
+    archivePath: protocolManager?.getArchivePath(),
+    protocolManager: !!protocolManager,
+    protocolFatalError,
+    protocolCaptureMeta,
+  })
+
+  if (protocolManager && (!protocolManager.getArchivePath() && !protocolFatalError && !protocolCaptureMeta.disabledMessage && protocolCaptureMeta.url)) {
     protocolManager.addFatalError('UNKNOWN', new Error('Unable to determine Test Replay archive location'))
     errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', new Error('Unable to determine Test Replay archive location'))
   }

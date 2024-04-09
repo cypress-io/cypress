@@ -3307,6 +3307,11 @@ Warning: We encountered an error while recording Test Replay data for this spec.
 
 These results will not display Test Replay recordings.
 
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that /var/folders/g4/15yxjhzs4bd01m_s6cscgxfw0000gq/T/cypress/protocol is writable.
+
 This error will not affect or change the exit code.
 
 Error: error in beforeTest

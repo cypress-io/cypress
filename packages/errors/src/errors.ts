@@ -1,4 +1,5 @@
 import AU from 'ansi_up'
+import os from 'os'
 /* eslint-disable no-console */
 import chalk from 'chalk'
 import _ from 'lodash'
@@ -554,9 +555,14 @@ export const AllCypressErrors = {
         Warning: We encountered an error while recording Test Replay data for this spec.
         
         These results will not display Test Replay recordings.
-        
+
+        This can happen for many reasons. If this problem persists:
+
+        - Try increasing the available disk space.
+        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is writable.
+
         This error will not affect or change the exit code.
-        
+
         ${fmt.stackTrace(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error, url: string, status: number, statusText: string) => {
