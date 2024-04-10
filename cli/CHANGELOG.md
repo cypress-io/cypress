@@ -7,6 +7,11 @@ _Released 4/16/2024 (PENDING)_
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 
+**Bugfixes:**
+
+- Fixed and issue where cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
+
+
 ## 13.7.2
 
 _Released 4/2/2024_
