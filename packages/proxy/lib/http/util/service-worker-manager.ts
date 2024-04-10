@@ -168,6 +168,8 @@ export class ServiceWorkerManager {
    */
   async processBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     if (browserPreRequest.initiator?.type === 'preload') {
+      debug('skipping preload request: %o', browserPreRequest)
+
       return false
     }
 
@@ -178,6 +180,18 @@ export class ServiceWorkerManager {
     this.serviceWorkerRegistrations.forEach((registration) => {
       activatedServiceWorker = registration.activatedServiceWorker
       const paramlessDocumentURL = browserPreRequest.documentURL?.split('?')[0] || ''
+
+      // if the service worker is active and the request is for the document URL,
+      // we can assume that the service worker is controlling the document
+      // and update the registration to reflect that
+      if (!registration.isHandlingRequests &&
+        activatedServiceWorker?.initiatorOrigin &&
+        browserPreRequest.documentURL === browserPreRequest.url &&
+        browserPreRequest.url.startsWith(registration.scopeURL) &&
+        browserPreRequest.documentURL.startsWith(activatedServiceWorker.initiatorOrigin)) {
+        registration.isHandlingRequests = true
+        debug('received request for the document of an activated service worker, updating registration to handle requests: %o', { registration, browserPreRequest })
+      }
 
       // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
       // we have an activated service worker, the request URL does not come from the service worker, and the request
@@ -285,8 +299,8 @@ export class ServiceWorkerManager {
     const registration = this.getRegistrationForScope(scope)
 
     if (registration) {
-      debug('service worker is handling fetch requests: %o', registration)
       registration.isHandlingRequests = true
+      debug('service worker is handling fetch requests: %o', registration)
     } else {
       debug('could not find service worker registration for scope: %s', scope)
     }
