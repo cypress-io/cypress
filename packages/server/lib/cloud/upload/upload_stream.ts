@@ -74,10 +74,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
       // Record network errors
       if (error) {
-        const nwError = new NetworkError(error, destinationUrl)
-
-        debug('network error: ', nwError, NetworkError.isNetworkError(nwError))
-        errorPromises.push(Promise.resolve(nwError))
+        errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
       }
 
       const isUnderRetryLimit = attempt < retries
