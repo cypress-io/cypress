@@ -6,7 +6,14 @@ describe('issue 1244', () => {
 
         // not all pages that get unloaded during this spec have getCounters()
         if (win.location.href.includes('issue-1244.html')) {
-          expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+          // TODO: re-enable when capture completes dom transition.
+          // getCounters is changed when setAttribute/getAttribute
+          // is called which is necessary for certain capture code to work.
+          // once dom transition is complete, that capture code will no
+          // longer rely on setAttribute/getAttribute.
+          // see: https://github.com/cypress-io/cypress-services/issues/7725
+
+          // expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
         }
       })
     })
