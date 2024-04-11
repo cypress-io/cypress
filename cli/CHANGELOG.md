@@ -1,6 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.8.0
 
+_Released 4/23/2024 (PENDING)_
+
+**Features:**
+
+- Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
+
+## 13.7.3
+
 _Released 4/11/2024_
 
 **Bugfixes:**
@@ -8,9 +16,6 @@ _Released 4/11/2024_
 - Fixed an issue where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167).
 - Fixed and issue where Cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
 
-**Features:**
-
-- Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
 
 **Misc:**
 
