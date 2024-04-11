@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Debug from 'debug'
 import type ProtocolManager from '../protocol'
 import { isProtocolInitializationError } from '@packages/types'
@@ -18,8 +19,10 @@ const toUploadReportPayload = (acc: {
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
 }, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
+  const reportWithoutOriginalError = _.omit(report, 'originalError')
+
   if (key === ArtifactKinds.PROTOCOL) {
-    let { error, errorStack, allErrors } = report
+    let { error, errorStack, allErrors } = reportWithoutOriginalError
 
     if (allErrors) {
       error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
@@ -28,12 +31,12 @@ const toUploadReportPayload = (acc: {
       error = `Failed to upload Test Replay: ${error}`
     }
 
-    debug('protocol report %O', report)
+    debug('protocol report %O', reportWithoutOriginalError)
 
     return {
       ...acc,
       protocol: {
-        ...report,
+        ...reportWithoutOriginalError,
         error,
         errorStack,
       },
@@ -42,7 +45,7 @@ const toUploadReportPayload = (acc: {
 
   return {
     ...acc,
-    [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
+    [key]: (key === 'screenshots') ? [...acc.screenshots, reportWithoutOriginalError] : reportWithoutOriginalError,
   }
 }
 
@@ -103,9 +106,23 @@ const extractArtifactsFromOptions = async ({
 
     const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
 
-    debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
-    if (protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()) {
-      artifacts.push(await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager))
+    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()
+
+    debug('should add protocol artifact? %o, %o, %O', {
+      protocolFilePath,
+      protocolUploadUrl,
+      protocolManager: !!protocolManager,
+      fatalError: protocolManager?.hasFatalError(),
+      shouldAddProtocolArtifact,
+    })
+
+    if (shouldAddProtocolArtifact) {
+      const protocolArtifact = await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager)
+
+      debug(protocolArtifact)
+      if (protocolArtifact) {
+        artifacts.push(protocolArtifact)
+      }
     }
   } catch (e) {
     debug('Error creating protocol artifact: %O', e)
@@ -186,11 +203,13 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === ArtifactKinds.PROTOCOL
     }) && protocolFatalError) {
+      debug('composing error report from options')
       uploadResults.push(await composeProtocolErrorReportFromOptions(options))
     }
 
     uploadReport = uploadResults.reduce(toUploadReportPayload, { video: undefined, screenshots: [], protocol: undefined })
   } catch (err) {
+    debug('primary try/catch failure, ', err.stack)
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     await exception.create(err)

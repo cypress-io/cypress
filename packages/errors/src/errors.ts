@@ -559,31 +559,52 @@ export const AllCypressErrors = {
         This can happen for many reasons. If this problem persists:
 
         - Try increasing the available disk space.
-        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is writable.
+        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
 
         This error will not affect or change the exit code.
 
         ${fmt.stackTrace(error)}`
   },
-  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error, url: string, status: number, statusText: string) => {
+  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
     return errTemplate`\
-        Warning: We encountered an error while uploading the Test Replay recording for this spec.
+        Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
 
         These results will not display Test Replay recordings.
 
         This error will not affect or change the exit code.
 
-        ${fmt.url(url)} responded with HTTP ${fmt.stringify(status)}: ${fmt.highlightSecondary(statusText)}`
+        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}`
   },
-  CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error, url: string) => {
+  CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error & { url: string }) => {
     return errTemplate`\
-        Warning: We encountered a network error while uploading the Test Replay recording for this spec. Please verify your network configuration for accessing ${fmt.url(url)}
+        Warning: We encountered a network error while uploading the Test Replay recording for this spec.
+        
+        Please verify your network configuration for accessing ${fmt.url(error.url)}
 
         These results will not display Test Replay recordings.
 
         This error will not affect or change the exit code.
 
         ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
+    errors: (Error & { kind?: string })[]
+  }) => {
+    const hasNetworkErrors = error.errors.find((err) => {
+      return err.kind === 'NetworkError'
+    })
+
+    return errTemplate`\
+        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+
+        We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times. ${fmt.stringify(
+      hasNetworkErrors ? 'Some or all of the errors encountered are system-level network errors. Please verify your network configuration.' : '',
+    )}
+
+        The following errors were encountered:
+
+        ${fmt.listItems(error.errors.map((err) => err.message))}
+    `
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\

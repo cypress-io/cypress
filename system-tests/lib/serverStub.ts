@@ -14,6 +14,7 @@ import systemTests from './system-tests'
 
 let CAPTURE_PROTOCOL_ENABLED = false
 let CAPTURE_PROTOCOL_MESSAGE: string | undefined
+let CAPTURE_PROTOCOL_UPLOAD_ENABLED = true
 
 import {
   TEST_PRIVATE,
@@ -94,7 +95,11 @@ const sendUploadUrls = function (req, res) {
   json.screenshotUploadUrls = screenshotUploadUrls
 
   if (CAPTURE_PROTOCOL_ENABLED) {
-    json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+    if (CAPTURE_PROTOCOL_UPLOAD_ENABLED) {
+      json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+    } else {
+      json.captureUploadUrl = `http://fake.test/url`
+    }
   }
 
   return res.json(json)
@@ -452,6 +457,16 @@ export const disableCaptureProtocolWithMessage = (message: string) => {
 
   afterEach(() => {
     CAPTURE_PROTOCOL_MESSAGE = undefined
+  })
+}
+
+export const disableCaptureProtocolUploadUrl = () => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_UPLOAD_ENABLED = false
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = true
   })
 }
 

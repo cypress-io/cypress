@@ -37,6 +37,7 @@ export interface ArtifactUploadResult {
     size: number
   }
   uploadDuration?: number
+  originalError?: Error
 }
 
 export type ArtifactUploadStrategy<T> = (filePath: string, uploadUrl: string, fileSize: number | bigint) => T
@@ -65,6 +66,11 @@ export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadRe
     } catch (e) {
       this.debug('upload failed: %O', e)
 
+      /*
+      if (this.onError) {
+        this.onError(e)
+      }
+*/
       return this.composeFailureResult(e, performance.now() - startTime)
     }
   }
@@ -108,6 +114,7 @@ export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadRe
       ...this.commonResultFields(),
       success: false,
       uploadDuration,
+      originalError: err,
     }
   }
 }

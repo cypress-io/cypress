@@ -4,6 +4,7 @@ import type { ReadStream } from 'fs'
 import type { StreamActivityMonitor } from './stream_activity_monitor'
 import Debug from 'debug'
 import { HttpError } from '../api/http_error'
+import { NetworkError } from '../api/network_error'
 import { agent } from '@packages/network'
 
 const debug = Debug('cypress:server:cloud:uploadStream')
@@ -73,11 +74,14 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
       // Record network errors
       if (error) {
-        errorPromises.push(Promise.resolve(error))
+        const nwError = new NetworkError(error, destinationUrl)
+
+        debug('network error: ', nwError, NetworkError.isNetworkError(nwError))
+        errorPromises.push(Promise.resolve(nwError))
       }
 
       const isUnderRetryLimit = attempt < retries
-      const isNetworkError = !!error
+      const isRequestError = !!error
       const isRetryableHttpError = (!!response?.status && RETRYABLE_STATUS_CODES.includes(response.status))
 
       debug('checking if should retry: %s %O', destinationUrl, {
@@ -90,7 +94,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
       return (
         isUnderRetryLimit && // retries param is ignored if retryOn is a fn, so have to impl
-        (isNetworkError || isRetryableHttpError)
+        (isRequestError || isRetryableHttpError)
       )
     },
   })
@@ -129,10 +133,19 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
         resolve()
       }
     } catch (e) {
-      const error = abortController?.signal.reason ?? e
+      const signalError = abortController?.signal.reason
 
-      debug('PUT %s: %s', destinationUrl, error)
-      reject(error)
+      const errors = await Promise.all(errorPromises)
+
+      if (signalError && !errors.includes(signalError)) {
+        errors.push(signalError)
+      }
+
+      if (errors.length > 1) {
+        reject(new AggregateError(errors, `${errors.length} errors encountered during upload`))
+      } else {
+        reject(errors[0])
+      }
     }
   })
 }

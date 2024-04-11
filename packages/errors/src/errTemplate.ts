@@ -95,6 +95,10 @@ class Format {
       return `${this.val.name}: ${this.val.message}`
     }
 
+    if (this.val && (this.config?.stringify) && typeof this.val === 'string') {
+      return this.val
+    }
+
     if (this.val && (this.config?.stringify || typeof this.val === 'object' || Array.isArray(this.val))) {
       return JSON.stringify(this.val, null, 2)
     }

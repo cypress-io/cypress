@@ -11,6 +11,7 @@ import newlines from './newlines'
 import env from './env'
 import terminal from './terminal'
 import { getIsCi } from './ci_provider'
+import * as errors from '../errors'
 import * as experiments from '../experiments'
 import type { SpecFile, ProtocolError } from '@packages/types'
 import type { Cfg } from '../project-base'
@@ -18,6 +19,8 @@ import type { Browser } from '../browsers/types'
 import type { Table } from 'cli-table3'
 import type { CypressRunResult } from '../modes/results'
 import type { IArtifact, ArtifactUploadResult } from '../cloud/artifacts/artifact'
+import { HttpError } from '../cloud/api/http_error'
+import { NetworkError } from '../cloud/api/network_error'
 
 type Screenshot = {
   width: number
@@ -705,6 +708,23 @@ export const logUploadResults = (results: ArtifactUploadResult[], protocolFatalE
   trimmedResults.forEach(({ key, ...report }, i, { length }) => {
     printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
   })
+
+  const protocolUploadError = trimmedResults.find(({ key, originalError }) => {
+    return key === 'protocol' && originalError
+  })?.originalError
+
+  if (protocolUploadError) {
+    if ((protocolUploadError as AggregateError).errors) {
+      console.log('')
+      errors.warning('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', protocolUploadError as AggregateError)
+    } else if (HttpError.isHttpError(protocolUploadError)) {
+      console.log('')
+      errors.warning('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', protocolUploadError)
+    } else if (NetworkError.isNetworkError(protocolUploadError)) {
+      console.log('')
+      errors.warning('CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE', protocolUploadError)
+    }
+  }
 }
 
 const UPLOAD_ACTIVITY_INTERVAL = typeof env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL') === 'undefined' ? 15000 : env.get('CYPRESS_UPLOAD_ACTIVITY_INTERVAL')
