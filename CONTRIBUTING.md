@@ -206,8 +206,28 @@ You must have the following installed on your system to contribute locally:
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements. Use Python `3.11` or lower.)
-  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
-  - Note for Windows systems: when installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
+
+#### Debian/Ubuntu
+
+`sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+`python` is pre-installed on Debian-based systems including Ubuntu.
+The Python versions shipped with Ubuntu versions `20.04`, `23.10` and `22.04` are compatible with Cypress requirements.
+
+Only on Ubuntu `24.04` install Python `3.11` by executing the following command:
+
+```shell
+ sudo apt install python3.11
+```
+
+Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
+
+```shell
+export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
+```
+
+#### Windows
+
+When installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
 
 ### Getting Started
 
