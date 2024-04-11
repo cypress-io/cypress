@@ -12,7 +12,7 @@ describe('component testing issue 25568', function () {
 
   it(`executes all component tests and exits properly`, function () {
     return systemTests.exec(this, {
-      project: 'vite-simple',
+      project: 'vite4-simple',
       testingType: 'component',
       browser: 'electron',
     })

@@ -1,6 +1,6 @@
 import Chai, { expect } from 'chai'
 import { EventEmitter } from 'events'
-import * as vite from 'vite'
+import * as vite from 'vite-4'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'
 import sinon from 'sinon'
@@ -27,17 +27,17 @@ describe('resolveConfig', function () {
 
   context('config resolution', () => {
     it('with <project-root>/vite.config.js', async () => {
-      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+      const projectRoot = await scaffoldSystemTestProject('vite4-inspect')
       const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-      expect(viteConfig.configFile).to.contain('vite-inspect')
+      expect(viteConfig.configFile).to.contain('vite4-inspect')
       expect(viteConfig.plugins.map((p: any) => p.name)).to.have.members(['cypress:main', 'cypress:sourcemap'])
     })
 
     it('with component.devServer.viteConfig provided', async () => {
-      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+      const projectRoot = await scaffoldSystemTestProject('vite4-inspect')
       const inlineViteConfig = { base: '/will-be-overwritten', server: { port: 99999 } }
       const viteDevServerConfig = { ...getViteDevServerConfig(projectRoot), viteConfig: inlineViteConfig }
 
@@ -59,7 +59,7 @@ describe('resolveConfig', function () {
         }
       })
 
-      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+      const projectRoot = await scaffoldSystemTestProject('vite4-inspect')
       const viteDevServerConfig = {
         ...getViteDevServerConfig(projectRoot),
         viteConfig: viteConfigFn,
@@ -76,7 +76,7 @@ describe('resolveConfig', function () {
     let viteDevServerConfig: ViteDevServerConfig
 
     beforeEach(async () => {
-      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+      const projectRoot = await scaffoldSystemTestProject('vite4-inspect')
 
       viteDevServerConfig = getViteDevServerConfig(projectRoot)
     })
