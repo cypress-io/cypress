@@ -51,10 +51,25 @@ We then merge the sourced config with the user's vite config, and layer on our o
 
 ## Compatibility
 
-| @cypress/vite-dev-server | cypress |
-| ------------------------ | ------- |
-| <= v2                    | <= v9   |
-| >= v3                    | >= v10  |
+| @cypress/vite-dev-server | cypress         |
+| ------------------------ | --------------- |
+| <= v2                    | <= v9           |
+| v3, v4                   | >=v10 <=13.10.0 |
+| v5                       | >= v13.10.0     |
+
+#### `devServerPublicPathRoute` for Vite v5
+
+If using Vite version 5, setting `devServerPublicPathRoute` to `''` is needed if directly referencing public path url assets in components under test. This can be configured within the `component` namespace below:
+
+```ts
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  component: {
+    devServerPublicPathRoute: ''
+  }
+})
+```
 
 ## License
 
