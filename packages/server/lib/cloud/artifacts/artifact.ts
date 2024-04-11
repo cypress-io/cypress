@@ -66,11 +66,6 @@ export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadRe
     } catch (e) {
       this.debug('upload failed: %O', e)
 
-      /*
-      if (this.onError) {
-        this.onError(e)
-      }
-*/
       return this.composeFailureResult(e, performance.now() - startTime)
     }
   }
