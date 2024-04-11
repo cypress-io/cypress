@@ -5,7 +5,7 @@ _Released 4/16/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where Cypress not detect visible elements with width or height in rem as visible [#29172](https://github.com/cypress-io/cypress/issues/29093). Fixed in [#29224](https://github.com/cypress-io/cypress/pull/29224).
+- Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
 
 ## 13.7.3
 
