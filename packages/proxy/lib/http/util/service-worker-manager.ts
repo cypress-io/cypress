@@ -186,6 +186,7 @@ export class ServiceWorkerManager {
       // and update the registration to reflect that
       if (!registration.isHandlingRequests &&
         activatedServiceWorker?.initiatorOrigin &&
+        browserPreRequest.originalResourceType === 'Document' &&
         browserPreRequest.documentURL === browserPreRequest.url &&
         browserPreRequest.url.startsWith(registration.scopeURL) &&
         browserPreRequest.documentURL.startsWith(activatedServiceWorker.initiatorOrigin)) {
