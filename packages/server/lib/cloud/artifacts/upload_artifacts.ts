@@ -140,7 +140,10 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     [ArtifactKinds.PROTOCOL]: 2,
   }
 
-  const protocolFatalError = protocolManager.getFatalError()
+  // Checking protocol fatal errors here, because if there is no fatal error
+  // but protocol is enabled and there is no archive path, we want to detect
+  // and establish a fatal error
+  const preArtifactExtractionFatalError = protocolManager.getFatalError()
 
   /**
    * sometimes, protocolManager initializes both without an archive path and without recording an internal
@@ -149,21 +152,12 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   debug({
     archivePath: protocolManager?.getArchivePath(),
     protocolManager: !!protocolManager,
-    protocolFatalError,
+    preArtifactExtractionFatalError,
     protocolCaptureMeta,
   })
 
-  if (protocolManager && (!protocolManager.getArchivePath() && !protocolFatalError && !protocolCaptureMeta.disabledMessage && protocolCaptureMeta.url)) {
+  if (protocolManager && (!protocolManager.getArchivePath() && !preArtifactExtractionFatalError && !protocolCaptureMeta.disabledMessage && protocolCaptureMeta.url)) {
     protocolManager.addFatalError('UNKNOWN', new Error('Unable to determine Test Replay archive location'))
-    errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', new Error('Unable to determine Test Replay archive location'))
-  }
-
-  if (protocolFatalError) {
-    if (isProtocolInitializationError(protocolFatalError)) {
-      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', protocolFatalError.error)
-    } else {
-      errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', protocolFatalError.error)
-    }
   }
 
   const artifacts = (await extractArtifactsFromOptions(options)).sort((a, b) => {
@@ -172,7 +166,23 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
 
   let uploadReport: UpdateInstanceArtifactsPayload = { video: undefined, screenshots: [], protocol: undefined }
 
+  const postArtifactExtractionFatalError = protocolManager.getFatalError()
+
+  if (postArtifactExtractionFatalError) {
+    if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
+      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
+    } else {
+      errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
+    }
+  }
+
   if (!quiet) {
+    debug('logging upload manifest: %O', {
+      artifacts,
+      protocolCaptureMeta,
+      fatalProtocolError: protocolManager?.getFatalError(),
+    })
+
     logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
   }
 

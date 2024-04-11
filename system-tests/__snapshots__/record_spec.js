@@ -3310,7 +3310,7 @@ These results will not display Test Replay recordings.
 This can happen for many reasons. If this problem persists:
 
 - Try increasing the available disk space.
-- Ensure that /var/folders/g4/15yxjhzs4bd01m_s6cscgxfw0000gq/T/cypress/protocol is both readable and writable.
+- Ensure that /os/tmpdir/cypress/protocol is both readable and writable.
 
 This error will not affect or change the exit code.
 
@@ -4032,12 +4032,26 @@ exports['e2e record capture-protocol enabled protocol runtime errors db is unrea
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
+Warning: We encountered an error while recording Test Replay data for this spec.
+
+These results will not display Test Replay recordings.
+
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that /os/tmpdir/cypress/protocol is both readable and writable.
+
+This error will not affect or change the exit code.
+
+Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
+      [stack trace lines]
+
 
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Capturing - File not found: /var/folders/g4/15yxjhzs4bd01m_s6cscgxfw0000gq/T/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
+  - Test Replay - Failed Capturing - File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
 
   Uploading Cloud Artifacts: . . . . .
 
