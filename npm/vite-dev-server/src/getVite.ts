@@ -3,12 +3,14 @@ import type { ViteDevServerConfig } from './devServer'
 
 const debug = debugFn('cypress:vite-dev-server:getVite')
 
-export type Vite = typeof import('vite')
+export type ViteV4 = typeof import('vite-4')
+
+export type ViteV5 = typeof import('vite-5')
 
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather
 // use the version the user has installed
-export function getVite (config: ViteDevServerConfig): Vite {
+export function getVite (config: ViteDevServerConfig): ViteV4 {
   try {
     const viteImportPath = require.resolve('vite', { paths: [config.cypressConfig.projectRoot] })
 

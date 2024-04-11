@@ -1,6 +1,6 @@
 import debugFn from 'debug'
-import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
-import type { Vite } from '../getVite'
+import type { ModuleNode as ModuleNodeV4, Plugin as PluginV4, ViteDevServer as ViteDevServerV4 } from 'vite-4'
+import type { ViteV4 } from '../getVite'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
@@ -26,8 +26,8 @@ function getSpecsPathsSet (specs: Spec[]) {
 
 export const Cypress = (
   options: ViteDevServerConfig,
-  vite: Vite,
-): Plugin => {
+  vite: ViteV4,
+): PluginV4 => {
   let base = '/'
 
   const projectRoot = options.cypressConfig.projectRoot
@@ -91,7 +91,7 @@ export const Cypress = (
 
       return newHtml
     },
-    configureServer: async (server: ViteDevServer) => {
+    configureServer: async (server: ViteDevServerV4) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {
         let transformedIndexHtml = await server.transformIndexHtml(base, '')
         const viteImport = `<script type="module" src="${options.cypressConfig.devServerPublicPathRoute}/@vite/client"></script>`
@@ -167,8 +167,8 @@ export const Cypress = (
  * @param alreadyExploredFiles set of files that have already been looked at and should be avoided in case of circular dependency
  * @returns a set of ModuleMode that import directly the current modules
  */
-function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<string>): Set<ModuleNode> {
-  const allImporters = new Set<ModuleNode>()
+function getImporters (modules: Set<ModuleNodeV4>, alreadyExploredFiles: Set<string>): Set<ModuleNodeV4> {
+  const allImporters = new Set<ModuleNodeV4>()
 
   modules.forEach((m) => {
     if (m.file && !alreadyExploredFiles.has(m.file)) {

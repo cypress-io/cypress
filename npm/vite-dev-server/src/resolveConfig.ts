@@ -4,21 +4,21 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import type { InlineConfig } from 'vite'
+import type { InlineConfig as InlineConfigV4 } from 'vite-4'
 import path from 'path'
 import semverGte from 'semver/functions/gte'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressSourcemap } from './plugins/index'
-import type { Vite } from './getVite'
+import type { ViteV4 } from './getVite'
 import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: ViteV4): Promise<InlineConfigV4> => {
   const { viteConfig: inlineViteConfig, cypressConfig: { projectRoot } } = config
-  let resolvedOverrides: InlineConfig = {}
+  let resolvedOverrides: InlineConfigV4 = {}
 
   if (inlineViteConfig) {
     debug(`Received a custom viteConfig`, inlineViteConfig)
@@ -62,7 +62,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   return finalConfig
 }
 
-function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig {
+function makeCypressViteConfig (config: ViteDevServerConfig, vite: ViteV4): InlineConfigV4 {
   const {
     cypressConfig: {
       port,
@@ -87,7 +87,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
   // of Vite may be older and we want to use it if it's there
   type Vite_4_1_Config = { optimizeDeps: { esbuildOptions: { incremental?: boolean } } }
 
-  const viteConfig: InlineConfig & Vite_4_1_Config = {
+  const viteConfig: InlineConfigV4 & Vite_4_1_Config = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {

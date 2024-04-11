@@ -1,13 +1,13 @@
 import debugFn from 'debug'
-import type { UserConfig } from 'vite'
-import { getVite, Vite } from './getVite'
+import type { UserConfig as UserConfigV4 } from 'vite-4'
+import { getVite, ViteV4 } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
 const ALL_FRAMEWORKS = ['react', 'vue'] as const
 
-type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
+type ConfigHandlerV4 = UserConfigV4 | (() => UserConfigV4 | Promise<UserConfigV4>)
 
 export type ViteDevServerConfig = {
   specs: Cypress.Spec[]
@@ -16,7 +16,7 @@ export type ViteDevServerConfig = {
   onConfigNotFound?: (devServer: 'vite', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
-  viteConfig?: ConfigHandler // Derived from the user's vite config
+  viteConfig?: ConfigHandlerV4 // Derived from the user's vite config
 }
 
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
@@ -46,7 +46,7 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
+devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: ViteV4) {
   try {
     const config = await createViteDevServerConfig(devServerConfig, vite)
 
