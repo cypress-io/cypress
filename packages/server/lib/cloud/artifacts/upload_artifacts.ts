@@ -250,7 +250,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       stack: err.stack,
     })
 
-    errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS_PROTOCOL', err)
+    // eslint-disable-next-line no-console
+    console.log('')
+    errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS', err)
 
     if (err.statusCode !== 503) {
       return exception.create(err)

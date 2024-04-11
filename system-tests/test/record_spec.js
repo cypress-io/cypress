@@ -1529,6 +1529,44 @@ describe('e2e record', () => {
       })
     })
 
+    describe('update instance artifacts', () => {
+      const routes = createRoutes({
+        putArtifacts: {
+          res (_, res) {
+            return res.sendStatus(500)
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('warns but proceeds', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            `POST /runs/${runId}/instances`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
+            'PUT /screenshots/1.png',
+            `PUT /instances/${instanceId}/artifacts`,
+            `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
+          ])
+        })
+      })
+    })
+
     describe('api retries on error', () => {
       let count = 0
 
