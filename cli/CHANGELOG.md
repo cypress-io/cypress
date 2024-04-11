@@ -7,7 +7,7 @@ _Released 4/16/2024 (PENDING)_
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 
-**Bugfixes**
+**Bugfixes:**
 
  - Specs with () in the filename will no longer fail to load and now behave as any other spec. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509)
 
