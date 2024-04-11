@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.7.3
+## 13.8.0
 
 _Released 4/16/2024 (PENDING)_
+
+**Features:**
+
+- Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
 
 **Misc:**
 
