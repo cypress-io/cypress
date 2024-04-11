@@ -530,9 +530,9 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_CANNOT_CONFIRM_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+  CLOUD_CANNOT_CONFIRM_ARTIFACTS: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while confirming the upload of the Test Replay recording for this spec.
+        Warning: We encountered an error while confirming the upload of artifacts for this spec.
 
         These results will not display artifacts.
 
