@@ -7,6 +7,7 @@ _Released 4/16/2024 (PENDING)_
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 - Suppresses benign warnings that reference Vulkan on GPU-less hosts. Addresses [#29085](https://github.com/cypress-io/cypress/issues/29085). Addressed in [#29278](https://github.com/cypress-io/cypress/pull/29278).
+- Capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
 
 **Bugfixes:**
 
