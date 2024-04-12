@@ -13,8 +13,8 @@ _Released 4/11/2024_
 
 **Bugfixes:**
 
-- Fixed an issue where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167)
-- Fixed and issue where cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
+- Fixed an issue where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167).
+- Fixed and issue where Cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
 
 **Misc:**
 
