@@ -72,7 +72,7 @@ context('lib/browsers/cdp_automation', () => {
       this.automation = {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
-        onRequestServedFromCache: sinon.stub(),
+        onRemoveBrowserPreRequest: sinon.stub(),
         onRequestFailed: sinon.stub(),
         onServiceWorkerRegistrationUpdated: sinon.stub(),
         onServiceWorkerVersionUpdated: sinon.stub(),
@@ -262,7 +262,7 @@ context('lib/browsers/cdp_automation', () => {
         .withArgs('Network.requestServedFromCache')
         .yield(browserRequestServedFromCache)
 
-        expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
+        expect(this.automation.onRemoveBrowserPreRequest).to.have.been.calledWith(browserRequestServedFromCache.requestId)
       })
     })
 

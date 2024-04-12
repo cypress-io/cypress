@@ -118,6 +118,7 @@ export class PreRequests {
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
+  pendingPreRequestsToRemove: Set<string> = new Set()
 
   constructor (
     requestTimeout = 2000,
@@ -144,6 +145,8 @@ export class PreRequests {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
+          this.pendingPreRequestsToRemove.delete(browserPreRequest.requestId)
+
           return false
         }
 
@@ -156,8 +159,22 @@ export class PreRequests {
     }, this.sweepInterval)
   }
 
+  checkAndRemovePendingPreRequest (requestId: string) {
+    return this.pendingPreRequestsToRemove.delete(requestId)
+  }
+
   addPending (browserPreRequest: BrowserPreRequest) {
     const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
+
+    // if we have a pending request to remove, we should remove it now and return
+    // since we don't want to add this pre-request to the pending list,
+    // this typically happens when we receive a cached response while executing
+    // the async function to add the pre-request
+    if (this.checkAndRemovePendingPreRequest(browserPreRequest.requestId)) {
+      debugVerbose('Received previous request to remove pre-request %s, skipping adding', browserPreRequest.requestId)
+
+      return
+    }
 
     metrics.browserPreRequestsReceived++
     const pendingRequest = this.pendingRequests.shift(key)
@@ -195,7 +212,7 @@ export class PreRequests {
       return
     }
 
-    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
+    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest.requestId)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
       cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
@@ -225,9 +242,27 @@ export class PreRequests {
   }
 
   removePendingPreRequest (requestId: string) {
+    let removed = false
+
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
-      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
+      const matches = (browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId.startsWith(`${requestId}-`)) ||
+        (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId === requestId)
+
+      if (matches && !removed) {
+        removed = true
+      }
+
+      return !matches
     })
+
+    if (!removed) {
+      debugVerbose('No pre-request found to remove, adding to pending list: %s', requestId)
+      this.pendingPreRequestsToRemove.add(requestId)
+    } else {
+      debugVerbose('Removed pre-request %s', requestId)
+    }
+
+    return removed
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
@@ -239,7 +274,7 @@ export class PreRequests {
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest.requestId)
 
       callback({
         browserPreRequest: {

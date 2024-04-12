@@ -333,7 +333,7 @@ export class ProjectBase extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    const onRequestServedFromCache = (requestId: string) => {
+    const onRemoveBrowserPreRequest = (requestId: string) => {
       this.server.removeBrowserPreRequest(requestId)
     }
 
@@ -367,7 +367,7 @@ export class ProjectBase extends EE {
       screenshotsFolder,
       onBrowserPreRequest,
       onRequestEvent,
-      onRequestServedFromCache,
+      onRemoveBrowserPreRequest,
       onRequestFailed,
       onDownloadLinkClicked,
       onServiceWorkerRegistrationUpdated,

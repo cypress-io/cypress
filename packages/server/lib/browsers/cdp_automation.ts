@@ -167,6 +167,7 @@ export class CdpAutomation implements CDPClient {
   send: SendDebuggerCommand
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
+  private cachedDataUrlRequestIds: Set<string> = new Set()
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -265,7 +266,8 @@ export class CdpAutomation implements CDPClient {
     // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
     // Example data url: "data:font/woff;base64,<base64 encoded string>"
     if (url.startsWith('data:')) {
-      debugVerbose('skipping `data:` url %s', url)
+      debugVerbose('skipping data: url %s', url)
+      this.cachedDataUrlRequestIds.add(params.requestId)
 
       return
     }
@@ -291,7 +293,18 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
-    this.automation.onRequestServedFromCache?.(params.requestId)
+    debugVerbose('received onRequestServedFromCache %o', params)
+
+    // Filter out "data:" urls; they don't have a stored browserPreRequest
+    // since they're not actually fetched
+    if (this.cachedDataUrlRequestIds.has(params.requestId)) {
+      this.cachedDataUrlRequestIds.delete(params.requestId)
+      debugVerbose('skipping data: request %s', params.requestId)
+
+      return
+    }
+
+    this.automation.onRemoveBrowserPreRequest?.(params.requestId)
   }
 
   private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
@@ -300,7 +313,7 @@ export class CdpAutomation implements CDPClient {
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
     if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
-      this.automation.onRequestServedFromCache?.(params.requestId)
+      this.automation.onRemoveBrowserPreRequest?.(params.requestId)
 
       return
     }

@@ -44,7 +44,7 @@ export const serviceWorkerClientEventHandlerName = '__cypressServiceWorkerClient
 export declare type ServiceWorkerEventsPayload = {
   'fetchRequest': { url: string, isControlled: boolean }
   'hasFetchHandler': { hasFetchHandler: boolean }
-  'startHandlingRequests': undefined
+  'startHandlingRequests': { clientUrls: string[] } | void
 }
 
 type _ServiceWorkerClientEvent<T extends keyof ServiceWorkerEventsPayload> = { type: T, scope: string, payload: ServiceWorkerEventsPayload[T] }
@@ -87,6 +87,7 @@ export const serviceWorkerClientEventHandler = (handler: ServiceWorkerEventHandl
 export class ServiceWorkerManager {
   private serviceWorkerRegistrations: Map<string, ServiceWorkerRegistration> = new Map<string, ServiceWorkerRegistration>()
   private pendingInitiators: Map<string, string> = new Map<string, string>()
+  private pendingControlledUrls: Map<string, string[]> = new Map<string, string[]>()
   private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
   private pendingServiceWorkerFetches: Map<string, boolean[]> = new Map<string, boolean[]>()
 
@@ -160,6 +161,23 @@ export class ServiceWorkerManager {
   }
 
   /**
+   * Determines if the given stack is controlled by a service worker.
+   * @param stack the stack to check
+   * @param controlledURLs the set of controlled URLs for the service worker
+   * @param scopeURL the scope URL for the service worker registration
+   * @returns `true` if the stack is controlled by the service worker, `false` otherwise.
+   */
+  private isInitiatorStackControlledByServiceWorker (stack: Protocol.Runtime.StackTrace | undefined, controlledURLs: Set<string>, scopeURL: string) {
+    debug('Checking if initiator stack is controlled by service worker: %o', { callFrames: stack?.callFrames, controlledURLs })
+
+    return stack?.callFrames?.some((callFrame) => {
+      const callFrameUrl = callFrame.url?.split('?')[0]
+
+      return controlledURLs?.has(callFrameUrl) || callFrameUrl?.startsWith(scopeURL)
+    }) ?? false
+  }
+
+  /**
    * Processes a browser pre-request to determine if it is controlled by a service worker.
    * If it is, the service worker's controlled URLs are updated with the given request URL.
    *
@@ -209,12 +227,12 @@ export class ServiceWorkerManager {
       }
 
       const paramlessInitiatorURL = browserPreRequest.initiator?.url?.split('?')[0]
-      const paramlessCallStackURL = browserPreRequest.initiator?.stack?.callFrames[0]?.url?.split('?')[0]
       const urlIsControlled = paramlessURL.startsWith(registration.scopeURL)
       const initiatorUrlIsControlled = paramlessInitiatorURL && activatedServiceWorker.controlledURLs?.has(paramlessInitiatorURL)
-      const topStackUrlIsControlled = paramlessCallStackURL && activatedServiceWorker.controlledURLs?.has(paramlessCallStackURL)
 
-      if (urlIsControlled || initiatorUrlIsControlled || topStackUrlIsControlled) {
+      debug('Checking if request is potentially controlled by service worker: %o', { registration, browserPreRequest })
+
+      if (urlIsControlled || initiatorUrlIsControlled || this.isInitiatorStackControlledByServiceWorker(browserPreRequest.initiator?.stack, activatedServiceWorker.controlledURLs, registration.scopeURL)) {
         requestPotentiallyControlledByServiceWorker = true
       }
     })
@@ -235,7 +253,7 @@ export class ServiceWorkerManager {
         debug('Request is not controlled by service worker: %o', browserPreRequest.url)
       }
 
-      debug('Request is not controlled by service worker: %o', browserPreRequest.url)
+      debug('Request is not controlled by service worker: %o', { browserPreRequest, requestPotentiallyControlledByServiceWorker })
     }
 
     return false
@@ -250,12 +268,13 @@ export class ServiceWorkerManager {
    * @param event the service worker has fetch handlers event to handle
    */
   private handleHasServiceWorkerFetchHandlersEvent (event: ServiceWorkerEventsPayload['hasFetchHandler'], scope: string) {
-    debug('service worker has fetch handlers event called: %o', { event, scope })
-
     const registration = this.getRegistrationForScope(scope)
 
     if (registration) {
       registration.hasFetchHandler = event.hasFetchHandler
+      debug('service worker has fetch handlers: %o', registration)
+    } else {
+      debug('could not find service worker registration for scope: %s', scope)
     }
   }
 
@@ -301,6 +320,15 @@ export class ServiceWorkerManager {
 
     if (registration) {
       registration.isHandlingRequests = true
+
+      if (event?.clientUrls) {
+        if (registration.activatedServiceWorker) {
+          event.clientUrls.forEach((url) => registration.activatedServiceWorker!.controlledURLs.add(url))
+        } else {
+          this.pendingControlledUrls.set(registration.scopeURL, event.clientUrls)
+        }
+      }
+
       debug('service worker is handling fetch requests: %o', registration)
     } else {
       debug('could not find service worker registration for scope: %s', scope)
@@ -382,15 +410,17 @@ export class ServiceWorkerManager {
 
     if (registration) {
       const initiatorOrigin = this.pendingInitiators.get(scriptURL)
+      const controlledUrls = this.pendingControlledUrls.get(registration.scopeURL)
 
       registration.activatedServiceWorker = {
         registrationId,
         scriptURL,
-        controlledURLs: registration.activatedServiceWorker?.controlledURLs || new Set<string>(),
+        controlledURLs: registration.activatedServiceWorker?.controlledURLs || new Set(controlledUrls) || new Set<string>(),
         initiatorOrigin: initiatorOrigin || registration.activatedServiceWorker?.initiatorOrigin,
       }
 
       this.pendingInitiators.delete(scriptURL)
+      this.pendingControlledUrls.delete(registration.scopeURL)
     } else {
       debug('Could not find service worker registration for registration ID %s', registrationId)
     }
