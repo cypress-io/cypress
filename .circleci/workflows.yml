@@ -446,8 +446,10 @@ commands:
           command: yarn versions
       - unless:
           condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: [ *windows-executor, << parameters.executor >> ]
+            or:
+              # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+              - equal: [ *windows-executor, << parameters.executor >> ]
+              - equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
             - run:
                 name: Stop .only
