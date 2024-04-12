@@ -938,6 +938,7 @@ describe('lib/util/ci_provider', () => {
       semaphoreGitBranch: 'show-semaphore-v2-266',
       semaphoreGitWorkingBranch: 'show-semaphore-v2-266',
       semaphoreGitDir: 'cypress-example-kitchensink',
+      semaphoreGitPrNumber: '1',
       semaphoreGitRef: 'refs/heads/show-semaphore-v2-266',
       semaphoreGitRefType: 'branch',
       semaphoreGitRepoSlug: 'cypress-io/cypress-example-kitchensink',
