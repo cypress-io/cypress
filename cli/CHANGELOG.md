@@ -1,9 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.8.0
 
+_Released 4/23/2024 (PENDING)_
+
 **Features:**
 
-- Added more descriptive error messages when Test Replay fails to record or upload. Addresses (#29022)[https://github.com/cypress-io/cypress/issues/29022]
+- Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022)
 
 ## 13.7.3
 
