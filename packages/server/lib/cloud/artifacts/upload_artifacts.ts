@@ -11,6 +11,8 @@ import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
+import { HttpError } from '../api/http_error'
+import { NetworkError } from '../api/network_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
@@ -205,14 +207,32 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       logUploadResults(uploadResults, protocolManager?.getFatalError())
     }
 
-    const protocolFatalError = protocolManager?.getFatalError()
+    const postUploadProtocolFatalError = protocolManager?.getFatalError()
+
+    if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
+      const error = postUploadProtocolFatalError.error
+
+      if ((error as AggregateError).errors) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', postUploadProtocolFatalError.error as AggregateError)
+      } else if (HttpError.isHttpError(error)) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
+      } else if (NetworkError.isNetworkError(error)) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE', error)
+      }
+    }
 
     // there are no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
     // during initialization or capture. however, we still want to report this failure with the rest of the upload
     // results, so we extract what the upload failure report should be from the options passed to this fn
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === ArtifactKinds.PROTOCOL
-    }) && protocolFatalError) {
+    }) && postUploadProtocolFatalError) {
       debug('composing error report from options')
       uploadResults.push(await composeProtocolErrorReportFromOptions(options))
     }
