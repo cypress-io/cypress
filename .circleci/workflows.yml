@@ -3366,46 +3366,46 @@ darwin-x64-workflow: &darwin-x64-workflow
         resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
 
-    - build:
-        name: darwin-x64-build
-        context: test-runner:env-canary
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-node-modules-install
+    # - build:
+    #     name: darwin-x64-build
+    #     context: test-runner:env-canary
+    #     executor: darwin-amd64
+    #     resource_class: cypress-io/intel-macstadium
+    #     requires:
+    #       - darwin-x64-node-modules-install
 
-    - create-build-artifacts:
-        name: darwin-x64-create-build-artifacts
-        context:
-          - test-runner:sign-mac-binary
-          - test-runner:upload
-          - test-runner:commit-status-checks
-          - test-runner:build-binary
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
+    # - create-build-artifacts:
+    #     name: darwin-x64-create-build-artifacts
+    #     context:
+    #       - test-runner:sign-mac-binary
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #       - test-runner:build-binary
+    #     executor: darwin-amd64
+    #     resource_class: cypress-io/intel-macstadium
+    #     requires:
+    #       - darwin-x64-build
 
-    - v8-integration-tests:
-        name: darwin-x64-v8-integration-tests
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
+    # - v8-integration-tests:
+    #     name: darwin-x64-v8-integration-tests
+    #     executor: darwin-amd64
+    #     resource_class: cypress-io/intel-macstadium
+    #     requires:
+    #       - darwin-x64-build
 
-    - driver-integration-memory-tests:
-        name: darwin-x64-driver-integration-memory-tests
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
+    # - driver-integration-memory-tests:
+    #     name: darwin-x64-driver-integration-memory-tests
+    #     executor: darwin-amd64
+    #     resource_class: cypress-io/intel-macstadium
+    #     requires:
+    #       - darwin-x64-build
   
-    - server-unit-tests-cloud-environment:
-        name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
+    # - server-unit-tests-cloud-environment:
+    #     name: darwin-x64-driver-server-unit-tests-cloud-environment
+    #     executor: darwin-amd64
+    #     resource_class: cypress-io/intel-macstadium
+    #     requires:
+    #       - darwin-x64-build
 
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
