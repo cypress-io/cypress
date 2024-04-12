@@ -16,7 +16,7 @@ _Released 4/11/2024_
 
 **Bugfixes:**
 
- - Specs with () in the filename will no longer fail to load and now behave as any other spec. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509)
+ - Specs with () in the filename will no longer fail to load and now behave as any other spec when run with the `--spec` argument via `cypress run`. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509)
 
 ## 13.7.2
 
