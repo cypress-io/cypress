@@ -338,6 +338,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     return false
   }
 
+  //fix for 28638
+  if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
+    return false
+  }
+
   if (canClipContent($el, $ancestor)) {
     const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
     const elProps = el.getBoundingClientRect()
