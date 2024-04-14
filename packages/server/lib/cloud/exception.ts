@@ -1,7 +1,7 @@
 import _ from 'lodash'
 const Promise = require('bluebird')
 const pkg = require('@packages/root')
-const api = require('./api')
+const api = require('./api').default
 const user = require('./user')
 const system = require('../util/system')
 
