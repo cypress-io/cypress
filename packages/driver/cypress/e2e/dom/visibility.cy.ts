@@ -258,7 +258,7 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentNoWidthHeightOverflowAuto = add(`\
 <div style='width: 0; height: 0px; overflow: auto;'>
-  <span>parent no size, overflow: auto</span>
+  <span id='parentNoWidthAndHeight' >parent no size, overflow: auto</span>
 </div>`)
 
       this.$parentWithWidthHeightNoOverflow = add(`\
@@ -733,8 +733,8 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is hidden if parent has overflow: hidden and no width', function () {
-        expect(this.$parentNoWidth.find('span')).to.be.hidden
-        expect(this.$parentNoWidth.find('span')).to.not.be.visible
+        expect(this.$parentNoWidth.find('#parentNoWidth')).to.be.hidden
+        expect(this.$parentNoWidth.find('#parentNoWidth')).to.not.be.visible
       })
 
       it('is hidden if parent has overflow: hidden and no height', function () {

@@ -133,8 +133,8 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   const el = $el[0]
   const style = getComputedStyle(el)
   const transform = style.getPropertyValue('transform')
-  const width = elClientWidth($el)
-  const height = elClientHeight($el)
+  const width = elOffsetWidth($el)
+  const height = elOffsetHeight($el)
   const overflowHidden = elHasOverflowHidden($el)
 
   return isZeroLengthAndTransformNone(width, height, transform) ||
@@ -157,16 +157,24 @@ const isZeroLengthAndOverflowHidden = (width, height, overflowHidden) => {
     (height <= 0 && overflowHidden)
 }
 
+const elHasNoClientWidthOrHeight = ($el) => {
+  return (elClientWidth($el) <= 0) || (elClientHeight($el) <= 0)
+}
+
+const elOffsetWidth = ($el) => {
+  return $el[0].offsetWidth
+}
+
 const elClientWidth = ($el) => {
   return $el[0].getBoundingClientRect().width
 }
 
-const elClientHeight = ($el) => {
-  return $el[0].getBoundingClientRect().height
+const elOffsetHeight = ($el) => {
+  return $el[0].offsetHeight
 }
 
-const elHasNoClientWidthOrHeight = ($el) => {
-  return (elClientWidth($el) <= 0) || (elClientHeight($el) <= 0)
+const elClientHeight = ($el) => {
+  return $el[0].getBoundingClientRect().height
 }
 
 const elHasVisibilityHiddenOrCollapse = ($el) => {
@@ -183,6 +191,10 @@ const elHasVisibilityCollapse = ($el) => {
 
 const elHasOpacityZero = ($el) => {
   return $el.css('opacity') === '0'
+}
+
+const elHasBlockStyle = ($el) => {
+  return $el.css('display') === 'block' || $el.css('display') === 'inline-block'
 }
 
 const elHasDisplayNone = ($el) => {
@@ -327,30 +339,28 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
   }
 
   if (canClipContent($el, $ancestor)) {
-    if ($el[0] instanceof DOMRect && $ancestor[0] instanceof DOMRect) {
-      const elProp = $el.getBoundingClientRect()
-      const ancestorProp = $ancestor[0].getBoundingClientRect()
+    const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
+    const elProps = el.getBoundingClientRect()
+    const ancestorProps = $jquery.isJquery($ancestor) ? $ancestor[0].getBoundingClientRect() : $ancestor.get(0).getBoundingClientRect()
 
-      if (elHasPositionAbsolute($el) && (ancestorProp.width === 0 || ancestorProp.height === 0)) {
-        return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
-      }
+    if ((elHasPositionAbsolute($el) || elHasBlockStyle($el)) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+      return elIsOutOfBoundsOfAncestorsOverflow(el, getParent($ancestor))
+    }
 
-      // target el is out of bounds
-      if (
-        // target el is to the right of the ancestor's visible area
-        (elProp.left >= (ancestorProp.width + ancestorProp.left)) ||
+    if (
+      // target el is to the right of the ancestor's visible area
+      (elProps.left >= (ancestorProps.width + ancestorProps.left)) ||
 
-        // target el is to the left of the ancestor's visible area
-        ((elProp.left + elProp.width) <= ancestorProp.left) ||
+      // target el is to the left of the ancestor's visible area
+      ((elProps.left + elProps.width) <= ancestorProps.left) ||
 
-        // target el is under the ancestor's visible area
-        (elProp.top >= (ancestorProp.height + ancestorProp.top)) ||
+      // target el is under the ancestor's visible area
+      (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
 
-        // target el is above the ancestor's visible area
-        ((elProp.top + elProp.height) <= ancestorProp.top)
-      ) {
-        return true
-      }
+      // target el is above the ancestor's visible area
+      ((elProps.top + elProps.height) <= ancestorProps.top)
+    ) {
+      return true
     }
   }
 
@@ -541,8 +551,8 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    width = elClientWidth($parent)
-    height = elClientHeight($parent)
+    width = elOffsetWidth($parent)
+    height = elOffsetHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
