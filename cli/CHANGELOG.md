@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.7.4 
+_Released 4/21/2024 (PENDING)_
+
+**Bugfixes**
+
+- Fixed an issue where timeout throw was not happening when user provided invalid timeout value. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
+
 ## 13.7.3
 
 _Released 4/11/2024_

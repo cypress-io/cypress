@@ -142,12 +142,20 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
+  function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}) {
+    if (_.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+      $errUtils.throwErr(new Error(`contains invalid timeout - ${options.timeout}`))
+    }
+  }
+
   Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
       })
     }
+
+    validateTimeoutFromOpts(userOptions)
 
     const log = userOptions._log || Cypress.log({
       message: selector,
@@ -252,6 +260,8 @@ export default (Commands, Cypress, cy, state) => {
     if (_.isBlank(text)) {
       $errUtils.throwErrByPath('contains.empty_string')
     }
+
+    validateTimeoutFromOpts(userOptions)
 
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
@@ -360,6 +370,8 @@ export default (Commands, Cypress, cy, state) => {
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
+
+    validateTimeoutFromOpts(userOptions)
 
     this.set('timeout', userOptions.timeout)
     this.set('onFail', (err) => {

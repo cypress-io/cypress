@@ -18,6 +18,64 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    describe('should throw when timeout is not a number', () => {
+      it('timeout passed as plain object {}', (done) => {
+        cy.get('#some-el', { timeout: {} })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('contains invalid timeout - [object Object]')
+          done()
+        })
+      })
+
+      it('timeout passed as some string', (done) => {
+        cy.get('#some-el', { timeout: 'abc' })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('contains invalid timeout - abc')
+          done()
+        })
+      })
+
+      it('timeout passed as null', (done) => {
+        cy.get('#some-el', { timeout: null })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('contains invalid timeout - null')
+          done()
+        })
+      })
+
+      it('timeout passed as NaN', (done) => {
+        cy.get('#some-el', { timeout: NaN })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('contains invalid timeout - NaN')
+          done()
+        })
+      })
+
+      it('timeout passed as Boolean', (done) => {
+        cy.get('#some-el', { timeout: false })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('contains invalid timeout - false')
+          done()
+        })
+      })
+
+      it('timeout passed as array', (done) => {
+        cy.get('#some-el', { timeout: [] })
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(`contains invalid timeout - ${[]}`)
+          done()
+        })
+      })
+    })
+
+    it('should timeout when element can\'t be found', (done) => {
+      cy.get('#some-el', { timeout: 100 })
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('Timed out retrying after 100ms')
+        done()
+      })
+    })
+
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
