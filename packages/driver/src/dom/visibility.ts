@@ -348,17 +348,17 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     }
 
     if (
-    // target el is to the right of the ancestor's visible area
+      // target el is to the right of the ancestor's visible area
       (elProps.left >= (ancestorProps.width + ancestorProps.left)) ||
 
-        // target el is to the left of the ancestor's visible area
-        ((elProps.left + elProps.width) <= ancestorProps.left) ||
+      // target el is to the left of the ancestor's visible area
+      ((elProps.left + elProps.width) <= ancestorProps.left) ||
 
-        // target el is under the ancestor's visible area
-        (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
+      // target el is under the ancestor's visible area
+      (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
 
-        // target el is above the ancestor's visible area
-        ((elProps.top + elProps.height) <= ancestorProps.top)
+      // target el is above the ancestor's visible area
+      ((elProps.top + elProps.height) <= ancestorProps.top)
     ) {
       return true
     }
