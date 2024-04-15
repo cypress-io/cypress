@@ -5,7 +5,11 @@ _Released 4/16/2024 (PENDING)_
 
 **Bugfixes:**
 
- - Specs with () in the filename will no longer fail to load and now behave as any other spec when run with the `--spec` argument via `cypress run`. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509)
+ - Specs with () in the filename will no longer fail to load and now behave as any other spec when run with the `--spec` argument via `cypress run`. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509).
+ 
+**Misc:**
+
+- We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
 
 ## 13.7.3
 
