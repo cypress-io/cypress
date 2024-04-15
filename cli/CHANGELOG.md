@@ -3,6 +3,14 @@
 
 _Released 4/16/2024 (PENDING)_
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name-or-path>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
+
 **Misc:**
 
 - We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
