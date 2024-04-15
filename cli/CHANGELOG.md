@@ -12,7 +12,7 @@ _Released 4/11/2024_
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
 - Suppresses benign warnings that reference Vulkan on GPU-less hosts. Addresses [#29085](https://github.com/cypress-io/cypress/issues/29085). Addressed in [#29278](https://github.com/cypress-io/cypress/pull/29278).
-
+- Add the option to ignore chrome preferences when launching the browser. Fixes [#29330](https://github.com/cypress-io/cypress/issues/29330)
 ## 13.7.2
 
 _Released 4/2/2024_

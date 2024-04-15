@@ -146,6 +146,12 @@ let browserCriClient: BrowserCriClient | undefined
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    debug('ignoring chrome preferences...')
+
+    return Bluebird.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
+  }
+
   debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
 
   return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
