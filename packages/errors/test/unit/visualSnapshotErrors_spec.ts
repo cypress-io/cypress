@@ -637,7 +637,7 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: () => {
+    CLOUD_CANNOT_CONFIRM_ARTIFACTS: () => {
       return {
         default: [makeErr()],
       }
@@ -647,6 +647,66 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { status: number, statusText: string, url: string } = makeErr()
+
+      err.status = 500
+      err.statusText = 'Internal Server Error'
+      err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { url: string } = makeErr()
+
+      err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
+      // @ts-expect-error
+      const aggregateError: Error & { errors: any[] } = makeErr()
+      // @ts-expect-error
+      const aggregateErrorWithNetworkError: Error & { errors: any[] } = makeErr()
+
+      const errOne = makeErr()
+      const errTwo = makeErr()
+
+      aggregateError.errors = [errOne, errTwo]
+
+      // @ts-expect-error
+      const errNetworkErr: Error & { kind: string, url: string } = makeErr()
+
+      errNetworkErr.kind = 'NetworkError'
+      errNetworkErr.url = 'http://some/url'
+      errNetworkErr.message = 'ECONNRESET'
+      aggregateErrorWithNetworkError.errors = [errOne, errNetworkErr]
+
+      return {
+        default: [aggregateError],
+        withNetworkError: [aggregateErrorWithNetworkError],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
