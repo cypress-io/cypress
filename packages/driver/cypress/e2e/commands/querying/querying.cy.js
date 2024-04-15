@@ -19,50 +19,58 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('should throw when timeout is not a number', () => {
+      const options = { timeout: {} }
+      const getErrMsgForTimeout = (timeout) => `\`cy.get()\` only accepts a \`number\` for its \`timeout\` option. You passed: \`${timeout}\``
+
       it('timeout passed as plain object {}', (done) => {
-        cy.get('#some-el', { timeout: {} })
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('contains invalid timeout - [object Object]')
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })
 
       it('timeout passed as some string', (done) => {
-        cy.get('#some-el', { timeout: 'abc' })
+        options.timeout = 'abc'
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('contains invalid timeout - abc')
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })
 
       it('timeout passed as null', (done) => {
-        cy.get('#some-el', { timeout: null })
+        options.timeout = null
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('contains invalid timeout - null')
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })
 
       it('timeout passed as NaN', (done) => {
-        cy.get('#some-el', { timeout: NaN })
+        options.timeout = NaN
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('contains invalid timeout - NaN')
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })
 
       it('timeout passed as Boolean', (done) => {
-        cy.get('#some-el', { timeout: false })
+        options.timeout = false
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('contains invalid timeout - false')
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })
 
       it('timeout passed as array', (done) => {
-        cy.get('#some-el', { timeout: [] })
+        options.timeout = []
+        cy.get('#some-el', options)
         cy.on('fail', (err) => {
-          expect(err.message).to.eq(`contains invalid timeout - ${[]}`)
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
           done()
         })
       })

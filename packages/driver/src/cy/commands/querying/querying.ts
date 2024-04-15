@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { isEmpty } from 'lodash'
 
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
@@ -15,6 +15,8 @@ type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withi
 
 type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
 type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
+
+type QueryCommandOptions = 'get' | 'contains' | 'shadow' | ''
 
 function getAlias (selector, log, cy) {
   const alias = selector.slice(1)
@@ -142,9 +144,11 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}) {
-    if (_.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
-      $errUtils.throwErr(new Error(`contains invalid timeout - ${options.timeout}`))
+  function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
+    if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+      $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
+        args: { timeout: options.timeout },
+      })
     }
   }
 
@@ -155,7 +159,7 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    validateTimeoutFromOpts(userOptions)
+    validateTimeoutFromOpts(userOptions, 'get')
 
     const log = userOptions._log || Cypress.log({
       message: selector,
@@ -261,7 +265,7 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    validateTimeoutFromOpts(userOptions)
+    validateTimeoutFromOpts(userOptions, 'contains')
 
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
@@ -371,7 +375,7 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({}),
     })
 
-    validateTimeoutFromOpts(userOptions)
+    validateTimeoutFromOpts(userOptions, 'shadow')
 
     this.set('timeout', userOptions.timeout)
     this.set('onFail', (err) => {
