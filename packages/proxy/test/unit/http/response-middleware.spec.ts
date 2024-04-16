@@ -127,7 +127,7 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(ctx.res.set).to.be.calledWith(headers)
 
-        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+        expect(ctx['onlyRunMiddleware']).to.be.calledWith([
           'AttachPlainTextStreamFn',
           'PatchExpressSetHeader',
           'MaybeSendRedirectToClient',
@@ -144,7 +144,7 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
-        expect(ctx.onlyRunMiddleware).not.to.be.called
+        expect(ctx['onlyRunMiddleware']).not.to.be.called
       })
     })
   })
