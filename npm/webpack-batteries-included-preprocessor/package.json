@@ -5,7 +5,7 @@
   "private": false,
   "scripts": {
     "test": "mocha test/**/*.spec.* --timeout 4000",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "lint": "eslint --ext .js,.json, ."
   },
   "dependencies": {
     "@babel/core": "^7.22.9",

@@ -63,9 +63,6 @@ module.exports = {
   rules: {
     'no-duplicate-imports': 'off',
     'import/no-duplicates': 'off',
-    '@typescript-eslint/no-duplicate-imports': [
-      'error',
-    ],
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',
