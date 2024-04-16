@@ -74,19 +74,33 @@ try {
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
-    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
+    // regex will be used to convert ELECTRON_EXTRA_LAUNCH_ARGS into an array, for example
+    // input: 'foo --ipsum=0 --bar=--baz=quux --lorem="--ipsum=dolor --sit=amet"'
+    // output: ['foo', '--ipsum=0', '--bar=--baz=quux', '--lorem="--ipsum=dolor --sit=amet"']
+    const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
+    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.match(regex) || []
 
     electronLaunchArguments.forEach((arg) => {
       // arg can be just key --disable-http-cache
       // or key value --remote-debugging-port=8315
-      // https://github.com/cypress-io/cypress/issues/7994
-      const [key, value] = arg.split('=')
+      // or key value with another value --foo=--bar=4196
+      // or key value with another multiple value --foo='--bar=4196 --baz=quux'
+      const [key, ...value] = arg.split('=')
 
       // because this is an environment variable, everything is a string
       // thus we don't have to worry about casting
       // --foo=false for example will be "--foo", "false"
-      if (value) {
-        app.commandLine.appendSwitch(key, value)
+      if (value.length) {
+        let joinedValues = value.join('=')
+
+        // check if the arg is wrapped in " or ' (unicode)
+        const isWrappedInQuotes = !!['\u0022', '\u0027'].find(((charAsUnicode) => joinedValues.startsWith(charAsUnicode) && joinedValues.endsWith(charAsUnicode)))
+
+        if (isWrappedInQuotes) {
+          joinedValues = joinedValues.slice(1, -1)
+        }
+
+        app.commandLine.appendSwitch(key, joinedValues)
       } else {
         app.commandLine.appendSwitch(key)
       }

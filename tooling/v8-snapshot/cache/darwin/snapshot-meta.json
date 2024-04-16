@@ -752,9 +752,12 @@
     "./packages/server/lib/cache.js",
     "./packages/server/lib/cloud/api/index.ts",
     "./packages/server/lib/cloud/api/put_protocol_artifact.ts",
+    "./packages/server/lib/cloud/artifacts/protocol_artifact.ts",
+    "./packages/server/lib/cloud/artifacts/screenshot_artifact.ts",
+    "./packages/server/lib/cloud/artifacts/video_artifact.ts",
     "./packages/server/lib/cloud/auth.ts",
     "./packages/server/lib/cloud/routes.ts",
-    "./packages/server/lib/cloud/upload.ts",
+    "./packages/server/lib/cloud/upload/send_file.ts",
     "./packages/server/lib/cloud/user.ts",
     "./packages/server/lib/cypress.js",
     "./packages/server/lib/environment.js",
@@ -4081,6 +4084,9 @@
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
     "./packages/server/lib/cloud/api/http_error.ts",
+    "./packages/server/lib/cloud/artifacts/artifact.ts",
+    "./packages/server/lib/cloud/artifacts/file_upload_strategy.ts",
+    "./packages/server/lib/cloud/artifacts/upload_artifacts.ts",
     "./packages/server/lib/cloud/encryption.ts",
     "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/machine_id.js",
@@ -4340,5 +4346,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "6bdf166fa4004db0defe2268a9161c705b5cd8f0bc2b8428e5620fe77aa67531"
+  "deferredHash": "ce87acfb4746797260125a1a730fce2f773b95daaad4ed37bd765aaf4974de18"
 }

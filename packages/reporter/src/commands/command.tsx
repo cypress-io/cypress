@@ -35,7 +35,7 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // 'expected **<span>** to exist in the DOM'
 // `expected **glob*glob** to contain *****`
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
-const assertionRegex = /expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
+const assertionRegex = /.*expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -43,7 +43,7 @@ const assertionRegex = /expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
 export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  // the command message is formatted as 'expected <actual> to {assertion} <expected>'
+  // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'
   const assertionArray = message.match(assertionRegex)
 
   const expectedActualArray = () => {
