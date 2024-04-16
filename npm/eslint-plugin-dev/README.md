@@ -28,13 +28,9 @@ eslint-plugin-json-format
 @typescript-eslint/eslint-plugin
 eslint-plugin-mocha
 
-# if you have coffeescript files
-@fellow/eslint-plugin-coffee
-babel-eslint
-
 # if you have react/jsx files
 eslint-plugin-react
-babel-eslint
+@babel/eslint-parser
 ```
 
 2) add the following to your root level `.eslintrc.json`:
@@ -112,7 +108,7 @@ React and JSX-specific configuration and rules.
 
 **requires you to install the following `devDependencies`**:
 ```sh
-babel-eslint
+@babel/eslint-parser
 eslint-plugin-react
 ```
 
