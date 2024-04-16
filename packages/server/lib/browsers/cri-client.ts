@@ -16,7 +16,7 @@ const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
 const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
 
-const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
+const WEBSOCKET_NOT_OPEN_RE = /^WebSocket (?:connection closed|is (?:not open|already in CLOSING or CLOSED state))/
 
 type QueuedMessages = {
   enableCommands: EnableCommand[]
