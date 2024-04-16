@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-        - 'cacie/dep/electron-27'
+        - 'cacie/fix/websocket-closed'
         - 'feat/protocol_shadow_dom_support'
         - 'publish-binary'
         - 'em/circle2'
@@ -43,7 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
     - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
     - equal: [ 'chore/move_off_circle_to_macstadium_amd64', << pipeline.git.branch >> ]
     - matches:
@@ -56,7 +56,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
     - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
     - equal: [ 'chore/move_off_circle_to_macstadium_amd64', << pipeline.git.branch >> ]
     - matches:
