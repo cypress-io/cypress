@@ -167,7 +167,7 @@ export class PreRequests {
     const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
 
     // if we have a pending request to remove, we should remove it now and return
-    // since we don't want to add this pre-request to the pending list,
+    // since we don't want to proceed with this pre-request anymore. In practice,
     // this typically happens when we receive a cached response while executing
     // the async function to add the pre-request
     if (this.checkAndRemovePendingPreRequest(browserPreRequest.requestId)) {
@@ -212,7 +212,7 @@ export class PreRequests {
       return
     }
 
-    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest.requestId)
+    debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
       cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
@@ -255,6 +255,9 @@ export class PreRequests {
       return !matches
     })
 
+    // if we didn't find a pre-request to remove, add it to the pending list so we can remove it later,
+    // this typically happens when we receive a cached response while executing
+    // the async function to add the pre-request
     if (!removed) {
       debugVerbose('No pre-request found to remove, adding to pending list: %s', requestId)
       this.pendingPreRequestsToRemove.add(requestId)
@@ -274,7 +277,7 @@ export class PreRequests {
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest.requestId)
+      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest)
 
       callback({
         browserPreRequest: {

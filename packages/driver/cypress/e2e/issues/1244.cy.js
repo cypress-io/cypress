@@ -6,16 +6,16 @@ describe('issue 1244', () => {
 
         // not all pages that get unloaded during this spec have getCounters()
         if (win.location.href.includes('issue-1244.html')) {
-          // expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+          expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
         }
       })
     })
   })
 
-  for (const [el, target, action] of [['button', 'form', 'submit']]) {
+  for (const [el, target, action] of [['button', 'form', 'submit'], ['a', 'a', 'click']]) {
     // <form> submit, <a> click
     // TODO(webkit): fix+unskip for webkit release, or make skip more specific (only 4 of these generated tests fail in webkit)
-    describe(`<${target}> ${action}`, { browser: '!webkit', retries: 0 }, () => {
+    describe(`<${target}> ${action}`, { browser: '!webkit' }, () => {
       it('correctly redirects when target=_top with target.target =', () => {
         cy.get(`${el}.setTarget`).click()
         cy.get('#dom').should('contain', 'DOM')
