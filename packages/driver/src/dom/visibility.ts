@@ -65,7 +65,7 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   }
 
   // in Cypress-land we consider the element hidden if
-  // either its offsetHeight or offsetWidth is 0 because
+  // either its clientHeight or clientWidth is 0 because
   // it is impossible for the user to interact with this element
   if (elHasNoEffectiveWidthOrHeight($el)) {
     // https://github.com/cypress-io/cypress/issues/6183
@@ -121,7 +121,7 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
-  // elOffsetWidth:
+  // elClientWidth:
   // If the element is hidden (for example, by setting style.display
   // on the element or one of its ancestors to "none"), then 0 is returned.
 
@@ -146,7 +146,7 @@ const isZeroLengthAndTransformNone = (width, height, transform) => {
   // From https://github.com/cypress-io/cypress/issues/5974,
   // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
   // it is visible even with `height: 0` or `width: 0`.
-  // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
+  // That's why we're checking `transform === 'none'` together with elClientWidth/Height.
 
   return (width <= 0 && transform === 'none') ||
   (height <= 0 && transform === 'none')
@@ -168,14 +168,6 @@ const elClientHeight = ($el) => {
 const elClientWidth = ($el) => {
   return $el[0].getBoundingClientRect().width
 }
-
-// const elOffsetWidth = ($el) => {
-//   return $el[0].offsetWidth
-// }
-
-// const elOffsetHeight = ($el) => {
-//   return $el[0].offsetHeight
-// }
 
 const elHasVisibilityHiddenOrCollapse = ($el) => {
   return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
@@ -376,7 +368,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
 const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // walk up to each parent until we reach the body
   // if any parent has opacity: 0
-  // or has an effective offsetHeight of 0
+  // or has an effective clientHeight of 0
   // and its set overflow: hidden then our child element
   // is effectively hidden
   // -----UNLESS------
