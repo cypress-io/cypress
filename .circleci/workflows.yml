@@ -101,11 +101,8 @@ executors:
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-  mac:
-    macos:
-      # Executor should have Node >= required version
-      xcode: "14.0.1"
-    resource_class: macos.x86.medium.gen2
+  darwin-amd64:
+    machine: true
     environment:
       PLATFORM: darwin
 
@@ -2254,6 +2251,7 @@ jobs:
       resource_class:
         type: string
         default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
@@ -3356,15 +3354,15 @@ darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-x64-build
         context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
 
@@ -3375,33 +3373,29 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
-
-    - test-kitchensink:
-        name: darwin-x64-test-kitchensink
-        executor: mac
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+  
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
