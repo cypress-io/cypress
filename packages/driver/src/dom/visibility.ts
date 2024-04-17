@@ -65,7 +65,7 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   }
 
   // in Cypress-land we consider the element hidden if
-  // either its offsetHeight or offsetWidth is 0 because
+  // either its clientHeight or clientWidth is 0 because
   // it is impossible for the user to interact with this element
   if (elHasNoEffectiveWidthOrHeight($el)) {
     // https://github.com/cypress-io/cypress/issues/6183
@@ -121,7 +121,7 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
-  // elOffsetWidth:
+  // elClientWidth:
   // If the element is hidden (for example, by setting style.display
   // on the element or one of its ancestors to "none"), then 0 is returned.
 
@@ -133,52 +133,48 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   const el = $el[0]
   const style = getComputedStyle(el)
   const transform = style.getPropertyValue('transform')
-  const width = elOffsetWidth($el)
-  const height = elOffsetHeight($el)
+  const width = elClientWidth($el)
+  const height = elClientHeight($el)
   const overflowHidden = elHasOverflowHidden($el)
 
   return isZeroLengthAndTransformNone(width, height, transform) ||
-    isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
-    (el.getClientRects().length <= 0)
+  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
+  (el.getClientRects().length <= 0)
 }
 
 const isZeroLengthAndTransformNone = (width, height, transform) => {
   // From https://github.com/cypress-io/cypress/issues/5974,
   // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
   // it is visible even with `height: 0` or `width: 0`.
-  // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
+  // That's why we're checking `transform === 'none'` together with elClientWidth/Height.
 
   return (width <= 0 && transform === 'none') ||
-    (height <= 0 && transform === 'none')
+  (height <= 0 && transform === 'none')
 }
 
 const isZeroLengthAndOverflowHidden = (width, height, overflowHidden) => {
   return (width <= 0 && overflowHidden) ||
-    (height <= 0 && overflowHidden)
+  (height <= 0 && overflowHidden)
 }
 
 const elHasNoClientWidthOrHeight = ($el) => {
   return (elClientWidth($el) <= 0) || (elClientHeight($el) <= 0)
 }
 
-const elOffsetWidth = ($el) => {
-  return $el[0].offsetWidth
+const elClientHeight = ($el) => {
+  return $el[0].getBoundingClientRect().height
 }
 
 const elClientWidth = ($el) => {
   return $el[0].getBoundingClientRect().width
 }
 
-const elOffsetHeight = ($el) => {
-  return $el[0].offsetHeight
-}
-
-const elClientHeight = ($el) => {
-  return $el[0].getBoundingClientRect().height
-}
-
 const elHasVisibilityHiddenOrCollapse = ($el) => {
   return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
+}
+
+const elHasVisibilityVisible = ($el) => {
+  return $el.css('visibility') === 'visible'
 }
 
 const elHasVisibilityHidden = ($el) => {
@@ -208,13 +204,9 @@ const elHasDisplayInline = ($el) => {
 const elHasOverflowHidden = function ($el: JQuery<HTMLElement>) {
   let styles = getComputedStyle($el[0])
 
-  if (styles.getPropertyValue('grid')) { //we ignore hidden when grid used
-    return false
-  }
-
   if (styles.getPropertyValue('overflow') === 'hidden'
-    || styles.getPropertyValue('overflow-y') === 'hidden'
-    || styles.getPropertyValue('overflow-x') === 'hidden') {
+      || styles.getPropertyValue('overflow-y') === 'hidden'
+      || styles.getPropertyValue('overflow-x') === 'hidden') {
     return true
   }
 
@@ -231,8 +223,8 @@ const elHasPositionAbsolute = ($el) => {
 
 const elHasClippableOverflow = function ($el) {
   return OVERFLOW_PROPS.includes($el.css('overflow')) ||
-    OVERFLOW_PROPS.includes($el.css('overflow-y')) ||
-    OVERFLOW_PROPS.includes($el.css('overflow-x'))
+          OVERFLOW_PROPS.includes($el.css('overflow-y')) ||
+            OVERFLOW_PROPS.includes($el.css('overflow-x'))
 }
 
 const canClipContent = function ($el, $ancestor) {
@@ -338,6 +330,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     return false
   }
 
+  //fix for 28638
+  if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
+    return false
+  }
+
   if (canClipContent($el, $ancestor)) {
     const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
     const elProps = el.getBoundingClientRect()
@@ -347,6 +344,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
       return elIsOutOfBoundsOfAncestorsOverflow(el, getParent($ancestor))
     }
 
+    // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
       (elProps.left >= (ancestorProps.width + ancestorProps.left)) ||
@@ -370,7 +368,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
 const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // walk up to each parent until we reach the body
   // if any parent has opacity: 0
-  // or has an effective offsetHeight of 0
+  // or has an effective clientHeight of 0
   // and its set overflow: hidden then our child element
   // is effectively hidden
   // -----UNLESS------
@@ -398,11 +396,15 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
   }
 
+  if (elHasVisibilityVisible($parent)) {
+    return false
+  }
+
   // continue to recursively walk up the chain until we reach body or html
   return elIsHiddenByAncestors($parent, checkOpacity, $origEl)
 }
 
-const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
+const parentHasNoClientWidthOrHeightAndOverflowHidden = function ($el) {
   // if we've walked all the way up to body or html then return false
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return false
@@ -414,7 +416,7 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   }
 
   // continue walking
-  return parentHasNoOffsetWidthOrHeightAndOverflowHidden(getParent($el))
+  return parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))
 }
 
 const parentHasDisplayNone = function ($el) {
@@ -535,24 +537,24 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`opacity: 0\``
   }
 
-  if (elHasNoClientWidthOrHeight($el)) {
-    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
-  }
-
   const transformResult = $transform.detectVisibility($el)
 
   if (transformResult === 'transformed') {
     return `This element \`${node}\` is not visible because it is hidden by transform.`
   }
 
+  if (elHasNoClientWidthOrHeight($el)) {
+    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
+  }
+
   if (transformResult === 'backface') {
     return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
-  if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden(getParent($el))) {
+  if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    width = elOffsetWidth($parent)
-    height = elOffsetHeight($parent)
+    width = elClientWidth($parent)
+    height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
