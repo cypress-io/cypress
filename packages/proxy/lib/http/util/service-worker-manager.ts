@@ -44,7 +44,7 @@ export const serviceWorkerClientEventHandlerName = '__cypressServiceWorkerClient
 export declare type ServiceWorkerEventsPayload = {
   'fetchRequest': { url: string, isControlled: boolean }
   'hasFetchHandler': { hasFetchHandler: boolean }
-  'startHandlingRequests': { clientUrls: string[] } | void
+  'clientsClaimed': { clientUrls: string[] }
 }
 
 type _ServiceWorkerClientEvent<T extends keyof ServiceWorkerEventsPayload> = { type: T, scope: string, payload: ServiceWorkerEventsPayload[T] }
@@ -152,8 +152,8 @@ export class ServiceWorkerManager {
       case 'hasFetchHandler':
         this.handleHasServiceWorkerFetchHandlersEvent(event.payload as ServiceWorkerEventsPayload['hasFetchHandler'], event.scope)
         break
-      case 'startHandlingRequests':
-        this.handleStartHandlingRequestsEvent(event.payload as ServiceWorkerEventsPayload['startHandlingRequests'], event.scope)
+      case 'clientsClaimed':
+        this.handleClientsClaimedEvent(event.payload as ServiceWorkerEventsPayload['clientsClaimed'], event.scope)
         break
       default:
         debug('Unknown event type: %o', event)
@@ -266,6 +266,7 @@ export class ServiceWorkerManager {
   /**
    * Handles a service worker has fetch handlers event.
    * @param event the service worker has fetch handlers event to handle
+   * @param scope the scope of the service worker registration
    */
   private handleHasServiceWorkerFetchHandlersEvent (event: ServiceWorkerEventsPayload['hasFetchHandler'], scope: string) {
     const registration = this.getRegistrationForScope(scope)
@@ -315,21 +316,24 @@ export class ServiceWorkerManager {
     }
   }
 
-  private handleStartHandlingRequestsEvent (event: ServiceWorkerEventsPayload['startHandlingRequests'], scope: string) {
+  /**
+   * Handles a clients claimed event.
+   * @param event the clients claimed event to handle
+   * @param scope the scope of the service worker registration
+   */
+  private handleClientsClaimedEvent (event: ServiceWorkerEventsPayload['clientsClaimed'], scope: string) {
     const registration = this.getRegistrationForScope(scope)
 
     if (registration) {
       registration.isHandlingRequests = true
 
-      if (event?.clientUrls) {
-        if (registration.activatedServiceWorker) {
-          event.clientUrls.forEach((url) => registration.activatedServiceWorker!.controlledURLs.add(url))
-        } else {
-          this.pendingControlledUrls.set(registration.scopeURL, event.clientUrls)
-        }
+      if (registration.activatedServiceWorker) {
+        event.clientUrls.forEach((url) => registration.activatedServiceWorker?.controlledURLs.add(url))
+      } else {
+        this.pendingControlledUrls.set(registration.scopeURL, event.clientUrls)
       }
 
-      debug('service worker is handling fetch requests: %o', registration)
+      debug('clients claimed on service worker registration: %o', registration)
     } else {
       debug('could not find service worker registration for scope: %s', scope)
     }

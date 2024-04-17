@@ -86,6 +86,15 @@ describe('lib/http/util/service-worker-manager', () => {
           payload: {
             hasFetchHandler: true,
           },
+          scope: 'http://localhost:8080',
+        })
+
+        manager.handleServiceWorkerClientEvent({
+          type: 'clientsClaimed',
+          payload: {
+            clientUrls: ['http://localhost:8080/index.html'],
+          },
+          scope: 'http://localhost:8080',
         })
       })
 
@@ -101,6 +110,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -117,6 +127,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://example.com/bar.css',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -133,6 +144,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://example.com/baz.woff2',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -172,6 +184,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: false,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.false
@@ -183,6 +196,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: false,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await manager.processBrowserPreRequest(createBrowserPreRequest({
@@ -281,6 +295,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -298,6 +313,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://example.com/bar.css',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -315,6 +331,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://example.com/baz.woff2',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -360,6 +377,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -384,6 +402,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://example.com/bar.css',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -401,6 +420,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await result).to.be.true
@@ -427,6 +447,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         manager.handleServiceWorkerClientEvent({
@@ -435,6 +456,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/bar.js',
             isControlled: false,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await manager.processBrowserPreRequest(createBrowserPreRequest({
@@ -461,6 +483,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/foo.js',
             isControlled: true,
           },
+          scope: 'http://localhost:8080',
         })
 
         manager.handleServiceWorkerClientEvent({
@@ -469,6 +492,7 @@ describe('lib/http/util/service-worker-manager', () => {
             url: 'http://localhost:8080/bar.js',
             isControlled: false,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await request1).to.be.true
@@ -481,6 +505,7 @@ describe('lib/http/util/service-worker-manager', () => {
           payload: {
             hasFetchHandler: false,
           },
+          scope: 'http://localhost:8080',
         })
 
         expect(await manager.processBrowserPreRequest(createBrowserPreRequest({

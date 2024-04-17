@@ -43,7 +43,6 @@ declare let self: ServiceWorkerGlobalScope
 export const injectIntoServiceWorker = (body: Buffer) => {
   function __cypressInjectIntoServiceWorker () {
     let listenerCount = 0
-    let isHandlingRequestsSent = false
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
@@ -68,9 +67,9 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       sendEvent({ type: 'fetchRequest', payload })
     }
 
-    const sendStartHandlingRequests = async (payload: { clientUrls: string[] } | void) => {
+    const sendClientsClaimed = async (payload: { clientUrls: string[] }) => {
       // call the CDP binding to inform the backend that the service worker is now handling requests
-      sendEvent({ type: 'startHandlingRequests', payload })
+      sendEvent({ type: 'clientsClaimed', payload })
     }
 
     // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
@@ -90,13 +89,6 @@ export const injectIntoServiceWorker = (body: Buffer) => {
 
     function wrapListener (listener: FetchListener): FetchListener {
       return (event) => {
-        // if this is the first time the listener is called,
-        // we need to inform the backend that the service worker is now handling requests
-        if (!isHandlingRequestsSent) {
-          sendStartHandlingRequests()
-          isHandlingRequestsSent = true
-        }
-
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
         const oldRespondWith = event.respondWith
@@ -265,8 +257,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       const clients = await self.clients.matchAll()
       const clientUrls = clients.map((client) => client.url)
 
-      sendStartHandlingRequests({ clientUrls })
-      isHandlingRequestsSent = true
+      sendClientsClaimed({ clientUrls })
     }
 
     // During the install phase, we need to wait for the binding to be created
