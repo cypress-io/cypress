@@ -3,6 +3,10 @@
 
 _Released 4/16/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue when there are special characters in a test folder path where the folder path is sometimes not parsed correctly. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+
 **Misc:**
 
 - We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
@@ -33,7 +37,6 @@ _Released 4/2/2024_
 
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up when a custom user agent was provided. Fixes [#29190](https://github.com/cypress-io/cypress/issues/29190).
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
-- Fixed an issue when there are special characters in a test folder path where the folder path is sometimes not parsed correctly. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
 - Fixed a hang where Cypress would run indefinitely while recording to the cloud when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
 - Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
 
