@@ -6,6 +6,7 @@ _Released 4/16/2024 (PENDING)_
 **Misc:**
 
 - We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
+- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 ## 13.7.3
 
@@ -35,7 +36,6 @@ _Released 4/2/2024_
 - Fixed a bug where fields using arrays in `cypress.config` are not correctly processed. Fixes [#27103](https://github.com/cypress-io/cypress/issues/27103). Fixed in [#27312](https://github.com/cypress-io/cypress/pull/27312).
 - Fixed a hang where Cypress would run indefinitely while recording to the cloud when CDP disconnects during the middle of a test. Fixes [#29209](https://github.com/cypress-io/cypress/issues/29209).
 - Fixed a bug where option values containing quotation marks could not be selected. Fixes [#29213](https://github.com/cypress-io/cypress/issues/29213)
-- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 **Dependency Updates:**
 
