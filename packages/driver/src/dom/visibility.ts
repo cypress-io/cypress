@@ -181,6 +181,10 @@ const elHasVisibilityHiddenOrCollapse = ($el) => {
   return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
 }
 
+const elHasVisibilityVisible = ($el) => {
+  return $el.css('visibility') === 'visible'
+}
+
 const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
@@ -207,10 +211,6 @@ const elHasDisplayInline = ($el) => {
 
 const elHasOverflowHidden = function ($el: JQuery<HTMLElement>) {
   let styles = getComputedStyle($el[0])
-
-  // if (styles.getPropertyValue('visibility')==='visible') { //we ignore hidden when el visible
-  //   return false
-  // }
 
   if (styles.getPropertyValue('overflow') === 'hidden'
       || styles.getPropertyValue('overflow-y') === 'hidden'
@@ -402,6 +402,10 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+  }
+
+  if (elHasVisibilityVisible($parent)) {
+    return false
   }
 
   // continue to recursively walk up the chain until we reach body or html
