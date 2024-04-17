@@ -14,6 +14,7 @@
       const serviceWorker = registration.installing || registration.waiting
       if (serviceWorker) {
         let controllerChangeCalled = false
+        // called when clients.claim() is called in the service worker
         navigator.serviceWorker.addEventListener('controllerchange', (e) => {
           controllerChangeCalled = true
           makeRequest()
@@ -21,8 +22,14 @@
 
         serviceWorker.addEventListener('statechange', (e) => {
           if (e.target.state === 'activated' && !controllerChangeCalled) {
-            // service worker activated, reload page so it can intercept requests
-            location.reload()
+            // service worker activated, either skip reloading the page
+            // so we can test when an activated service worker is not intercepting requests
+            // or reload page so it can intercept requests
+            if (location.search.includes('skipReload')) {
+              makeRequest()
+            } else {
+              location.reload()
+            }
           }
         })
       } else {
