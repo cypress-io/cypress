@@ -44,7 +44,7 @@ babel-eslint
     "@cypress/dev"
   ],
   "extends": [
-    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/general"
   ]
 }
 ```
