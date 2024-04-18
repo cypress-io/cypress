@@ -42,7 +42,8 @@
     "ts-node": "^10.9.2",
     "webpack": "npm:webpack@^5",
     "webpack-4": "npm:webpack@^4",
-    "webpack-dev-server-3": "npm:webpack-dev-server@^3"
+    "webpack-dev-server-3": "npm:webpack-dev-server@^3",
+    "webpack-dev-server-5": "npm:webpack-dev-server@^5"
   },
   "files": [
     "dist"
