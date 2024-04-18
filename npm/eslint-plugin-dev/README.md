@@ -20,6 +20,8 @@ npm install --save-dev @cypress/eslint-plugin-dev
 
 ## Usage
 
+> ⚠️ Currently does **not** support ESLint version 8+
+
 1) install the following `devDependencies`:
 ```sh
 @cypress/eslint-plugin-dev
@@ -44,7 +46,7 @@ babel-eslint
     "@cypress/dev"
   ],
   "extends": [
-    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/general"
   ]
 }
 ```

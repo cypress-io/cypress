@@ -45,7 +45,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -57,7 +57,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
-    - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
     - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -84,7 +84,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
     - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'chore/reduce_windows_flake', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -111,11 +111,8 @@ executors:
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-  mac:
-    macos:
-      # Executor should have Node >= required version
-      xcode: "14.0.1"
-    resource_class: macos.x86.medium.gen2
+  darwin-amd64:
+    machine: true
     environment:
       PLATFORM: darwin
 
@@ -154,7 +151,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "feat/protocol_shadow_dom_support" && "$CIRCLE_BRANCH" != "cacie/dep/electron-27" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "feat/protocol_shadow_dom_support" && "$CIRCLE_BRANCH" != "feat/support_wds5" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -2262,6 +2259,7 @@ jobs:
       resource_class:
         type: string
         default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
@@ -3364,15 +3362,15 @@ darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-x64-build
         context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
 
@@ -3383,33 +3381,29 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
-
-    - test-kitchensink:
-        name: darwin-x64-test-kitchensink
-        executor: mac
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+  
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
