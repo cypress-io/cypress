@@ -163,9 +163,11 @@ context('lib/browsers/cdp_automation', () => {
       it('ignore events with data urls', function () {
         this.onFn
         .withArgs('Network.requestWillBeSent')
-        .yield({ request: { url: 'data:font;base64' } })
+        .yield({ requestId: '0', request: { url: 'data:font;base64' } })
 
         expect(this.automation.onBrowserPreRequest).to.not.be.called
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.true
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 1)
       })
     })
 
@@ -253,7 +255,7 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('.onRequestServedFromCache', function () {
-      it('triggers onRequestServedFromCache', function () {
+      it('triggers onRemoveBrowserPreRequest', function () {
         const browserRequestServedFromCache = {
           requestId: '0',
         }
@@ -263,6 +265,23 @@ context('lib/browsers/cdp_automation', () => {
         .yield(browserRequestServedFromCache)
 
         expect(this.automation.onRemoveBrowserPreRequest).to.have.been.calledWith(browserRequestServedFromCache.requestId)
+      })
+
+      it('ignores cached data url request ids', function () {
+        this.onFn
+        .withArgs('Network.requestWillBeSent')
+        .yield({ requestId: '0', request: { url: 'data:font;base64' } })
+
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.true
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 1)
+
+        this.onFn
+        .withArgs('Network.requestServedFromCache')
+        .yield({ requestId: '0' })
+
+        expect(this.automation.onRemoveBrowserPreRequest).to.not.have.been.called
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.false
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 0)
       })
     })
 

@@ -116,9 +116,9 @@ export class PreRequests {
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+  pendingPreRequestsToRemove: Set<string> = new Set()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
-  pendingPreRequestsToRemove: Set<string> = new Set()
 
   constructor (
     requestTimeout = 2000,
@@ -277,7 +277,7 @@ export class PreRequests {
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
-      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest.browserPreRequest)
+      ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
 
       callback({
         browserPreRequest: {

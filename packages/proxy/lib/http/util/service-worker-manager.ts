@@ -177,6 +177,12 @@ export class ServiceWorkerManager {
     }) ?? false
   }
 
+  private shouldControlDocumentRequest (registration: ServiceWorkerRegistration, browserPreRequest: BrowserPreRequest) {
+    return browserPreRequest.originalResourceType === 'Document' &&
+      browserPreRequest.documentURL === browserPreRequest.url &&
+      browserPreRequest.url.startsWith(registration.scopeURL)
+  }
+
   /**
    * Processes a browser pre-request to determine if it is controlled by a service worker.
    * If it is, the service worker's controlled URLs are updated with the given request URL.
@@ -202,18 +208,13 @@ export class ServiceWorkerManager {
       // if the service worker is active and the request is for the document URL,
       // we can assume that the service worker is controlling the document
       // and update the registration to reflect that
-      if (!registration.isHandlingRequests &&
-        activatedServiceWorker?.initiatorOrigin &&
-        browserPreRequest.originalResourceType === 'Document' &&
-        browserPreRequest.documentURL === browserPreRequest.url &&
-        browserPreRequest.url.startsWith(registration.scopeURL) &&
-        browserPreRequest.documentURL.startsWith(activatedServiceWorker.initiatorOrigin)) {
+      if (!registration.isHandlingRequests && this.shouldControlDocumentRequest(registration, browserPreRequest)) {
         registration.isHandlingRequests = true
         debug('received request for the document of an activated service worker, updating registration to handle requests: %o', { registration, browserPreRequest })
       }
 
       // We are determining here if a request is controlled by a service worker. A request is controlled by a service worker if
-      // we have an activated service worker, the request URL does not come from the service worker, and the request
+      // we have an activated service worker that is handling request, the request URL does not come from the service worker, and the request
       // originates from the same origin as the service worker or from a script that is also controlled by the service worker.
       if (!activatedServiceWorker ||
         !registration.hasFetchHandler ||
