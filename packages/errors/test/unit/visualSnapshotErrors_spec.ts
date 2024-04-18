@@ -8,6 +8,7 @@ import path from 'path'
 import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 import { convertHtmlToImage } from '../support/utils'
+import os from 'os'
 
 // For importing the files below
 process.env.CYPRESS_INTERNAL_ENV = 'test'
@@ -67,6 +68,7 @@ const sanitize = (str: string) => {
   return str
   .split(lineAndColNumsRe).join('')
   .split(cypressRootPath).join('cypress')
+  .split(os.tmpdir()).join('/os/tmpdir')
 }
 
 const snapshotAndTestErrorConsole = async function (errorFileName: string) {
