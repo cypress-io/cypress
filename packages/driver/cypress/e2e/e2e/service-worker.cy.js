@@ -667,7 +667,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     validateFetchHandlers({ listenerCount: 1 })
   })
 
-  it('supports a service worker is that activated but not handling fetch events', () => {
+  it('supports a service worker that is activated but not handling fetch events', () => {
     const script = () => {
       self.addEventListener('fetch', function (event) {
         event.respondWith(fetch(event.request))
