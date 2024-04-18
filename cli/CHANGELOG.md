@@ -6,6 +6,11 @@ _Released 4/21/2024 (PENDING)_
 **Features:**
 
 - Add the option to ignore chrome preferences when launching the browser. Addressed in [#29332](https://github.com/cypress-io/cypress/pull/29332).
+
+- **Misc:**
+
+- We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
+
 ## 13.7.3
 
 _Released 4/11/2024_
