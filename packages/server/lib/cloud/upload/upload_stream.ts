@@ -68,17 +68,21 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
       debugVerbose('PUT %s Response: %O', destinationUrl, response)
       debugVerbose('PUT %s Error: %O', destinationUrl, error)
       // Record all HTTP errors encountered
-      if (response?.status && response?.status >= 400) {
+      const isHttpError = response?.status && response?.status >= 400
+      const isNetworkError = error && !timeoutMonitor?.getController().signal.reason
+
+      if (isHttpError) {
         errorPromises.push(HttpError.fromResponse(response))
+      } else if (isNetworkError) {
+        errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
       }
 
       // Record network errors
-      if (error) {
+      if (error && !timeoutMonitor?.getController().signal.reason) {
         errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
       }
 
       const isUnderRetryLimit = attempt < retries
-      const isRequestError = !!error
       const isRetryableHttpError = (!!response?.status && RETRYABLE_STATUS_CODES.includes(response.status))
 
       debug('checking if should retry: %s %O', destinationUrl, {
@@ -91,7 +95,7 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
 
       return (
         isUnderRetryLimit && // retries param is ignored if retryOn is a fn, so have to impl
-        (isRequestError || isRetryableHttpError)
+        (isNetworkError || isRetryableHttpError)
       )
     },
   })
