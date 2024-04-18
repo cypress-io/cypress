@@ -36,11 +36,50 @@
     </head>
     <body><pre><span style="color:#e05561">Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561">We attempted to upload the Test Replay recording <span style="color:#de73ff">2<span style="color:#e05561"> times. <span style="color:#de73ff">&quot;Some or all of the errors encountered are system-level network errors. Please verify your network configuration.&quot;<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">We attempted to upload the Test Replay recording <span style="color:#de73ff">3<span style="color:#e05561"> times.<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561">The following errors were encountered:<span style="color:#e6e6e6">
+<span style="color:#e05561">Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to <span style="color:#de73ff">http://some/url<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">In addition to the stack trace provided, <span style="color:#de73ff">2<span style="color:#e05561"> errors were encountered. Stack traces for these errors are omitted for brevity:<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">fail whale<span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">ECONNRESET<span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">fail whale<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#c062de"><span style="color:#e6e6e6">
+<span style="color:#c062de">Error: http://some/url: ECONNRESET<span style="color:#e6e6e6">
+<span style="color:#c062de">    at CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR (cypress/packages/errors/test/unit/visualSnapshotErrors_spec.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at testVisualError (cypress/packages/errors/test/unit/visualSnapshotErrors_spec.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at cypress/node_modules/lodash/lodash.js<span style="color:#e6e6e6">
+<span style="color:#c062de">    at baseForOwn (cypress/node_modules/lodash/lodash.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at cypress/node_modules/lodash/lodash.js<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Function.forEach (cypress/node_modules/lodash/lodash.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at testVisualErrors (cypress/packages/errors/test/unit/visualSnapshotErrors_spec.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Suite.&lt;anonymous&gt; (cypress/packages/errors/test/unit/visualSnapshotErrors_spec.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.create (cypress/packages/errors/node_modules/mocha/lib/interfaces/common.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at context.describe.context.context (cypress/packages/errors/node_modules/mocha/lib/interfaces/bdd.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.&lt;anonymous&gt; (cypress/packages/errors/test/unit/visualSnapshotErrors_spec.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module._compile (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module.m._compile (cypress/node_modules/ts-node/src/index.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module._extensions..js (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.require.extensions.&lt;computed&gt; (cypress/node_modules/ts-node/src/index.ts)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module.load (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Function.Module._load (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module.require (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at require (node:internal/modules/cjs/helpers)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at cypress/packages/errors/node_modules/mocha/lib/mocha.js<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Array.forEach (&lt;anonymous&gt;)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Mocha.loadFiles (cypress/packages/errors/node_modules/mocha/lib/mocha.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Mocha.run (cypress/packages/errors/node_modules/mocha/lib/mocha.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.exports.singleRun (cypress/packages/errors/node_modules/mocha/lib/cli/run-helpers.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at exports.runMocha (cypress/packages/errors/node_modules/mocha/lib/cli/run-helpers.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.exports.handler (cypress/packages/errors/node_modules/mocha/lib/cli/run.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.runCommand (cypress/packages/errors/node_modules/yargs/lib/command.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.parseArgs [as _parseArgs] (cypress/packages/errors/node_modules/yargs/yargs.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.parse (cypress/packages/errors/node_modules/yargs/yargs.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.exports.main (cypress/packages/errors/node_modules/mocha/lib/cli/cli.js)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.&lt;anonymous&gt; (cypress/packages/errors/node_modules/mocha/bin/mocha)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module._compile (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Object.Module._extensions..js (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Module.load (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Function.Module._load (node:internal/modules/cjs/loader)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main)<span style="color:#e6e6e6">
+<span style="color:#c062de">    at node:internal/main/run_main_module<span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
 </pre></body></html>

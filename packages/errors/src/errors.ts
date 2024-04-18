@@ -588,22 +588,36 @@ export const AllCypressErrors = {
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
-    errors: (Error & { kind?: string })[]
+    errors: (Error & { kind?: 'NetworkError' | 'HttpError', url: string })[]
   }) => {
-    const hasNetworkErrors = error.errors.find((err) => {
+    if (error.errors.length === 1) {
+      if (error.errors[0]?.kind === 'NetworkError') {
+        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(error.errors[0])
+      }
+
+      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string})
+    }
+
+    let networkErr = error.errors.find((err) => {
       return err.kind === 'NetworkError'
     })
+    const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
+
+    const [firstErr, ...furtherErrs] = error.errors
+
+    const fmtRest = furtherErrs.length > 0 ? errPartial`${fmt.off('\n\n')}In addition to the stack trace provided, ${fmt.stringify(furtherErrs.length)} error${fmt.off(furtherErrs.length > 1 ? 's were' : ' was')} encountered. Stack traces for these errors are omitted for brevity:
+${fmt.listItems(furtherErrs.map(({ message }: Error) => message))}` : null
 
     return errTemplate`\
         Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
-        We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times. ${fmt.stringify(
-      hasNetworkErrors ? 'Some or all of the errors encountered are system-level network errors. Please verify your network configuration.' : '',
-    )}
+        We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times.
 
-        The following errors were encountered:
+        ${recommendation}
 
-        ${fmt.listItems(error.errors.map((err) => err.message))}
+        ${fmtRest}
+
+        ${firstErr ? fmt.stackTrace(firstErr) : null}
     `
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {

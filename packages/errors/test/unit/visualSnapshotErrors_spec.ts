@@ -693,16 +693,16 @@ describe('visual error templates', () => {
 
       const errOne = makeErr()
       const errTwo = makeErr()
+      const errThree = makeErr()
 
-      aggregateError.errors = [errOne, errTwo]
+      aggregateError.errors = [errOne, errTwo, errThree]
 
       // @ts-expect-error
-      const errNetworkErr: Error & { kind: string, url: string } = makeErr()
+      const errNetworkErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
 
       errNetworkErr.kind = 'NetworkError'
       errNetworkErr.url = 'http://some/url'
-      errNetworkErr.message = 'ECONNRESET'
-      aggregateErrorWithNetworkError.errors = [errOne, errNetworkErr]
+      aggregateErrorWithNetworkError.errors = [errNetworkErr, errTwo, errThree]
 
       return {
         default: [aggregateError],
