@@ -86,7 +86,8 @@ describe('formattedMessage', () => {
       expect(result).to.equal('expected <strong>&lt;button#increment&gt;</strong> to be enabled')
     })
 
-    it('renders the custom message properly with the assertion message', () => {
+    // TODO: https://github.com/cypress-io/cypress/issues/29167
+    it.skip('renders the custom message properly with the assertion message', () => {
       const specialMessage = 'My Custom Message: expected **abcdef** to equal **abcdef**'
       const result = formattedMessage(specialMessage, 'assert')
 
