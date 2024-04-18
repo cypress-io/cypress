@@ -145,7 +145,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   // Checking protocol fatal errors here, because if there is no fatal error
   // but protocol is enabled and there is no archive path, we want to detect
   // and establish a fatal error
-  const preArtifactExtractionFatalError = protocolManager.getFatalError()
+  const preArtifactExtractionFatalError = protocolManager?.getFatalError()
 
   /**
    * sometimes, protocolManager initializes both without an archive path and without recording an internal
@@ -168,7 +168,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
 
   let uploadReport: UpdateInstanceArtifactsPayload = { video: undefined, screenshots: [], protocol: undefined }
 
-  const postArtifactExtractionFatalError = protocolManager.getFatalError()
+  const postArtifactExtractionFatalError = protocolManager?.getFatalError()
 
   if (postArtifactExtractionFatalError) {
     if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
