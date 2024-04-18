@@ -7,6 +7,10 @@ _Released 4/23/2024 (PENDING)_
 
 - Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
 
+**Bugfixes:**
+
+- We fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
+
 **Misc:**
 
 - We now capture the [Semaphore](https://semaphoreci.com/) CI provider's environment variable [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
