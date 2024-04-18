@@ -9,7 +9,7 @@ _Released 4/23/2024 (PENDING)_
 
 **Bugfixes:**
 
-- We reverted a fix that was introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. This means assertions with custom messages are no longer displaying properly again. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
+- We fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
 
 **Misc:**
 
