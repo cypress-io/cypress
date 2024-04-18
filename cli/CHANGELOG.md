@@ -4,7 +4,8 @@
 _Released 4/16/2024 (PENDING)_
 
 **Performance:**
-- Fixed a performance issue with activated service workers that aren't handling requests could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
+
+- Fixed a performance issue with activated service workers that aren't controlling clients which could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
 
 **Misc:**
 
