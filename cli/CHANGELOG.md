@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.9.0
+
+_Released 4/23/2024 (PENDING)_
+
+**Features:**
+
+- Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).s
+
 ## 13.8.0
 
 _Released 4/18/2024_
@@ -6,7 +14,6 @@ _Released 4/18/2024_
 **Features:**
 
 - Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
-- Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022)
 
 **Bugfixes:**
 
