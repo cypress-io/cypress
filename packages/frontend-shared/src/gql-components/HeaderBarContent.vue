@@ -20,7 +20,7 @@
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
-        <nav>
+        <div>
           <ol>
             <li
               v-if="props.gql.isGlobalMode"
@@ -85,7 +85,7 @@
               </template>
             </template>
           </ol>
-        </nav>
+        </div>
       </div>
       <nav
         class="flex gap-6"
