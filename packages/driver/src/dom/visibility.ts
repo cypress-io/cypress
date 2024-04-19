@@ -330,13 +330,14 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
   }
 
   if (canClipContent($el, $ancestor)) {
-    const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
-    const elProps = el.getBoundingClientRect()
-    const ancestorProps = $jquery.isJquery($ancestor) ? $ancestor[0].getBoundingClientRect() : $ancestor.get(0).getBoundingClientRect()
+    const ancestorProps = $ancestor.get(0).getBoundingClientRect()
 
     if ((elHasPositionAbsolute($el) || elHasBlockStyle($el)) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
-      return elIsOutOfBoundsOfAncestorsOverflow(el, getParent($ancestor))
+      return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
     }
+
+    const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
+    const elProps = el.getBoundingClientRect()
 
     // target el is out of bounds
     if (
