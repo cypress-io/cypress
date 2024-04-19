@@ -201,16 +201,10 @@ const elHasDisplayInline = ($el) => {
   return $el.css('display') === 'inline'
 }
 
-const elHasOverflowHidden = function ($el: JQuery<HTMLElement>) {
-  let styles = getComputedStyle($el[0])
+const elHasOverflowHidden = function ($el) {
+  const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
-  if (styles.getPropertyValue('overflow') === 'hidden'
-      || styles.getPropertyValue('overflow-y') === 'hidden'
-      || styles.getPropertyValue('overflow-x') === 'hidden') {
-    return true
-  }
-
-  return false
+  return cssOverflow.includes('hidden')
 }
 
 const elHasPositionRelative = ($el) => {
