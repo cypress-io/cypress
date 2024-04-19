@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.8.1
+
+_Released <RELEASE_DATE> (PENDING)_
+
+**Misc:**
+
+- Allow HiDPI Screen running wayland to use cypress window/browser by adding `--ozone-platform=auto` flag to the electron's runtime argument. This change addresses #20891
+
 ## 13.8.0
 
 _Released 4/18/2024_
