@@ -310,7 +310,7 @@ const originalModuleLoad = (Module as ModuleClass)._load
 function sourceNextWebpackDeps (devServerConfig: WebpackDevServerConfig) {
   const framework = sourceFramework(devServerConfig)!
   const webpack = sourceNextWebpack(devServerConfig, framework)
-  const webpackDevServer = sourceWebpackDevServer(devServerConfig, framework)
+  const webpackDevServer = sourceWebpackDevServer(devServerConfig, webpack.majorVersion, framework)
   const htmlWebpackPlugin = sourceHtmlWebpackPlugin(devServerConfig, framework, webpack)
 
   return {
