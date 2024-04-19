@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.8.1
+
+_Released 4/23/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
+
 ## 13.8.0
 
-_Released 4/23/2024 (PENDING)_
+_Released 4/18/2024_
 
 **Features:**
 
@@ -9,7 +17,7 @@ _Released 4/23/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
+- We fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
 
 **Misc:**
 
