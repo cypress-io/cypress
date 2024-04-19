@@ -13,13 +13,14 @@
       <div
         v-else
         class="flex font-medium text-gray-700 items-center children:leading-[24px]"
+        role="banner"
       >
         <img
           class="h-[32px] mr-[18px] w-[32px]"
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
-        <nav>
+        <nav role="navigation">
           <ol>
             <li
               v-if="props.gql.isGlobalMode"
