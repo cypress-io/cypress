@@ -1,5 +1,6 @@
 import debugFn from 'debug'
 import picomatch from 'picomatch'
+import isValidPath from 'is-valid-path'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
@@ -124,6 +125,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
       (match, importVars: string, importTarget: string) => {
         // Strip quotes & semicolons
         const sanitizedImportTarget = importTarget.replace(/["';]/gi, '').trim()
+
+        if (isValidPath(sanitizedImportTarget)) {
+          debug(`🚫 Invalid import target (${sanitizedImportTarget}), ignoring`)
+
+          return match
+        }
 
         if (isImportOnIgnoreList(sanitizedImportTarget)) {
           debug(`⏭️ Import ${sanitizedImportTarget} matches ignoreImportList, ignoring`)
