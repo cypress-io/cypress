@@ -11,10 +11,13 @@ import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_auto
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
-const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send:[-->]')
+const debugVerboseSend = debugModule(`${debugVerbose.namespace}:send:[-->]`)
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
-const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
+const debugVerboseReceive = debugModule(`${debugVerbose.namespace}:recv:[<--]`)
+// debug using cypress-verbose:server:browsers:cri-client:err:*
+const debugVerboseLifecycle = debugModule(`${debugVerbose.namespace}:ws`)
 
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket (?:connection closed|is (?:not open|already in CLOSING or CLOSED state))/
 
@@ -136,6 +139,20 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
       return send.call(cri._ws, data, callback)
     }
   }
+
+  if (debugVerboseLifecycle.enabled) {
+    cri._ws.addEventListener('open', (event) => {
+      debugVerboseLifecycle(`[OPEN] %o`, event)
+    })
+
+    cri._ws.addEventListener('close', (event) => {
+      debugVerboseLifecycle(`[CLOSE] %o`, event)
+    })
+
+    cri._ws.addEventListener('error', (event) => {
+      debugVerboseLifecycle(`[ERROR] %o`, event)
+    })
+  }
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
@@ -167,6 +184,7 @@ export const create = async ({
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
   let crashed = false // has this crashed?
+  let reconnection: Promise<void> | undefined = undefined
 
   let cri: CDPClient
   let client: CriClient
@@ -195,8 +213,25 @@ export const create = async ({
 
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
-    await Promise.all(enableCommands.map(({ command, params, sessionId }) => {
-      return cri.send(command, params, sessionId)
+    await Promise.all(enableCommands.map(async ({ command, params, sessionId }) => {
+      // these commands may have been enqueued, so we need to resolve those promises and remove
+      // them from the queue when we send here
+      const isInFlightCommand = (candidate: EnqueuedCommand) => {
+        return candidate.command === command && candidate.params === params && candidate.sessionId === sessionId
+      }
+      const enqueued = enqueuedCommands.find(isInFlightCommand)
+
+      try {
+        const response = await cri.send(command, params, sessionId)
+
+        enqueued?.p.resolve(response)
+      } catch (e) {
+        enqueued?.p.reject(e)
+      } finally {
+        enqueuedCommands = enqueuedCommands.filter((candidate) => {
+          return !isInFlightCommand(candidate)
+        })
+      }
     }))
 
     enqueuedCommands.forEach((cmd) => {
@@ -216,13 +251,23 @@ export const create = async ({
   }
 
   const retryReconnect = async () => {
+    if (reconnection) {
+      debug('reconnection in progress; not starting new process, returning promise for in-flight reconnection attempt')
+
+      return reconnection
+    }
+
     debug('disconnected, starting retries to reconnect... %o', { closed, target })
 
     const retry = async (retryIndex = 0) => {
       retryIndex++
 
       try {
-        return await reconnect(retryIndex)
+        const attempt = await reconnect(retryIndex)
+
+        reconnection = undefined
+
+        return attempt
       } catch (err) {
         if (closed) {
           debug('could not reconnect because client is closed %o', { closed, target })
@@ -244,11 +289,14 @@ export const create = async ({
 
         // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
         cdpError.isFatalApiErr = true
+        reconnection = undefined
         onAsynchronousError(cdpError)
       }
     }
 
-    return retry()
+    reconnection = retry()
+
+    return reconnection
   }
 
   const connect = async () => {
@@ -358,6 +406,7 @@ export const create = async ({
       // Keep track of '*.enable' commands so they can be resent when
       // reconnecting
       if (command.endsWith('.enable') || ['Runtime.addBinding', 'Target.setDiscoverTargets'].includes(command)) {
+        debug('registering enable command', command)
         const obj: EnableCommand = {
           command,
         }
@@ -377,15 +426,17 @@ export const create = async ({
         try {
           return await cri.send(command, params, sessionId)
         } catch (err) {
+          debug('Encountered error on send %o', { command, params, sessionId, err })
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The
           // socket disconnects and we need to recreate the socket and
           // connection
           if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+            debug('error classified as not WEBSOCKET_NOT_OPEN_RE, rethrowing')
             throw err
           }
 
-          debug('encountered closed websocket on send %o', { command, params, sessionId, err })
+          debug('error classified as WEBSOCKET_NOT_OPEN_RE; enqueuing and attempting to reconnect')
 
           const p = enqueue() as Promise<any>
 
