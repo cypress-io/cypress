@@ -20,7 +20,7 @@
         />
       </template>
     </MajorVersionWelcome>
-    <div
+    <main
       v-else
       class="px-[24px] pt-[86px] pb-[24px]"
       role="main"
@@ -84,7 +84,7 @@
         </template>
         <OpenBrowser v-else />
       </template>
-    </div>
+    </main>
     <CloudViewerAndProject />
     <LoginConnectModals />
   </template>
