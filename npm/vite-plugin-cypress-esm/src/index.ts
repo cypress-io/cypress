@@ -3,7 +3,7 @@ import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
-const debug = debugFn('cypress:vite-plugin-mock-esm')
+const debug = debugFn('cypress:vite-plugin-cypress-esm')
 
 const MODULE_IMPORTER_IDENTIFIER = '__cypressModule'
 const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
