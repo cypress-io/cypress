@@ -67,7 +67,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       sendEvent({ type: 'fetchRequest', payload })
     }
 
-    const sendClientsClaimed = async (payload: { clientUrls: string[] }) => {
+    const sendClientsClaimed = (payload: { clientUrls: string[] }) => {
       // call the CDP binding to inform the backend that the service worker is now handling requests
       sendEvent({ type: 'clientsClaimed', payload })
     }

@@ -2342,7 +2342,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('rewrites the service worker', async function () {
+    it('rewrites the service worker in chromium based browsers', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
