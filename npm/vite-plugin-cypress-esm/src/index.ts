@@ -71,24 +71,21 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
   /**
    * If a given import target (path) is explicitly ignored then bypass our custom mapping on it
    *
-   * @param importTarget
+   * @param sanitizedImportTarget
    * @returns
    */
-  const isImportOnIgnoreList = (importTarget: string) => {
-    return ignoreImportMatcher(importTarget)
+  const isImportOnIgnoreList = (sanitizedImportTarget: string) => {
+    return ignoreImportMatcher(sanitizedImportTarget)
   }
 
   /**
    * If an import target is for a non-JS asset then we don't want to map it
    * This is typically a dynamically-imported image or data asset
    *
-   * @param importTarget
+   * @param sanitizedImportTarget
    * @returns
    */
-  const isNonJsTarget = (importTarget: string) => {
-    // Strip quotes & semicolons
-    const sanitizedImportTarget = importTarget.replace(/["';]/gi, '').trim()
-
+  const isNonJsTarget = (sanitizedImportTarget: string) => {
     // Exclude common extensions for:
     //   - Images
     //   - Text/Data/Markup/Markdown files
@@ -125,16 +122,19 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     return code.replace(
       importRegex,
       (match, importVars: string, importTarget: string) => {
-        if (isImportOnIgnoreList(importTarget)) {
-          debug(`⏭️ Import ${importTarget} matches ignoreImportList, ignoring`)
+        // Strip quotes & semicolons
+        const sanitizedImportTarget = importTarget.replace(/["';]/gi, '').trim()
+
+        if (isImportOnIgnoreList(sanitizedImportTarget)) {
+          debug(`⏭️ Import ${sanitizedImportTarget} matches ignoreImportList, ignoring`)
 
           return match
         }
 
-        debug(`Mapping import ${counter + 1} (${importTarget}) in module ${moduleId}`)
+        debug(`Mapping import ${counter + 1} (${sanitizedImportTarget}) in module ${moduleId}`)
 
-        if (isNonJsTarget(importTarget)) {
-          debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
+        if (isNonJsTarget(sanitizedImportTarget)) {
+          debug(`Import ${sanitizedImportTarget} appears to be an asset and will not be re-mapped`)
 
           return match
         }
