@@ -20,7 +20,7 @@
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
-        <nav role="navigation">
+        <nav>
           <ol>
             <li
               v-if="props.gql.isGlobalMode"
@@ -87,7 +87,10 @@
           </ol>
         </nav>
       </div>
-      <div class="flex gap-6">
+      <nav
+        class="flex gap-6"
+        role="navigation"
+      >
         <TopNav
           :gql="props.gql"
           :show-browsers="props.showBrowsers"
@@ -153,7 +156,7 @@
             <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
-      </div>
+      </nav>
     </div>
   </div>
 </template>
