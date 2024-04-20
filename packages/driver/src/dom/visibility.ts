@@ -129,16 +129,22 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // For HTML <area> elements, SVG elements that do not render anything themselves,
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
-
   const el = $el[0]
-  const style = getComputedStyle(el)
-  const transform = style.getPropertyValue('transform')
+  let transform
+
+  if ($el[0].style.transform) {
+    const style = getComputedStyle(el)
+
+    transform = style.getPropertyValue('transform')
+  } else {
+    transform = 'none'
+  }
+
   const width = elClientWidth($el)
   const height = elClientHeight($el)
-  const overflowHidden = elHasOverflowHidden($el)
 
   return isZeroLengthAndTransformNone(width, height, transform) ||
-  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
+  isZeroLengthAndOverflowHidden(width, height, elHasOverflowHidden($el)) ||
   (el.getClientRects().length <= 0)
 }
 
