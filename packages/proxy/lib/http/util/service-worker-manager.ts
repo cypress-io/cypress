@@ -197,6 +197,12 @@ export class ServiceWorkerManager {
       return false
     }
 
+    if (browserPreRequest.hasRedirectResponse) {
+      debug('skipping request with redirect response: %o', browserPreRequest)
+
+      return false
+    }
+
     let requestPotentiallyControlledByServiceWorker = false
     let activatedServiceWorker: ServiceWorker | undefined
     const paramlessURL = browserPreRequest.url?.split('?')[0] || ''
@@ -242,19 +248,17 @@ export class ServiceWorkerManager {
 
     if (activatedServiceWorker) {
       if (requestPotentiallyControlledByServiceWorker) {
-        isControlled = await this.isURLControlledByServiceWorker(browserPreRequest.url)
+        isControlled = await this.isURLControlledByServiceWorker(browserPreRequest)
 
         if (isControlled) {
-          debug('Request is controlled by service worker: %o', browserPreRequest.url)
+          debug('Request is controlled by service worker: %o', { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
           activatedServiceWorker.controlledURLs.add(paramlessURL)
 
           return true
         }
-
-        debug('Request is not controlled by service worker: %o', browserPreRequest.url)
       }
 
-      debug('Request is not controlled by service worker: %o', { browserPreRequest, requestPotentiallyControlledByServiceWorker })
+      debug('Request is not controlled by service worker: %o', { url: browserPreRequest.url, requestId: browserPreRequest.requestId, requestPotentiallyControlledByServiceWorker })
     }
 
     return false
@@ -345,13 +349,14 @@ export class ServiceWorkerManager {
    * @param url the URL to check
    * @returns a promise that resolves to `true` if the URL is controlled by a service worker, `false` otherwise.
    */
-  private isURLControlledByServiceWorker (url: string) {
+  private isURLControlledByServiceWorker (browserPreRequest: BrowserPreRequest) {
+    const url = browserPreRequest.url
     const fetches = this.pendingServiceWorkerFetches.get(url)
 
     if (fetches) {
       const isControlled = fetches.shift()
 
-      debug('found pending service worker fetch: %o', { url, isControlled })
+      debug('found pending service worker fetch: %o', { url, isControlled, requestId: browserPreRequest.requestId })
 
       if (fetches.length === 0) {
         this.pendingServiceWorkerFetches.delete(url)
@@ -370,7 +375,7 @@ export class ServiceWorkerManager {
     const deferred = pDefer<boolean>()
 
     promises.push(deferred)
-    debug('adding pending controlled request promise: %s', url)
+    debug('adding pending controlled request promise: %o', { url, requestId: browserPreRequest.requestId })
 
     return deferred.promise
   }

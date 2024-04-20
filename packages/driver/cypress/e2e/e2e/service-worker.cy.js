@@ -684,4 +684,33 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     cy.get('#output').should('have.text', 'done')
     validateFetchHandlers({ listenerCount: 1 })
   })
+
+  it('supports a redirected request', () => {
+    const script = () => {
+      self.addEventListener('fetch', function (event) {
+        return
+      })
+    }
+
+    cy.intercept('/fixtures/service-worker.js', (req) => {
+      req.reply(`(${script})()`,
+        { 'Content-Type': 'application/javascript' })
+    })
+
+    cy.intercept('/fixtures/1mb*', (req) => {
+      req.reply({
+        statusCode: 302,
+        headers: {
+          location: '/fixtures/redirected',
+        },
+      })
+    })
+
+    cy.intercept('/fixtures/redirected', (req) => {
+      req.reply('redirected')
+    })
+
+    cy.visit('fixtures/service-worker.html')
+    cy.get('#output').should('have.text', 'done')
+  })
 })

@@ -3,8 +3,8 @@ import sinon from 'sinon'
 import { ServiceWorkerManager, serviceWorkerClientEventHandler } from '../../../../lib/http/util/service-worker-manager'
 
 const createBrowserPreRequest = (
-  { url, initiatorUrl, callFrameUrl, documentUrl, isPreload, originalResourceType }:
-  { url: string, initiatorUrl?: string, documentUrl?: string, callFrameUrl?: string, isPreload?: boolean, originalResourceType?: string },
+  { url, initiatorUrl, callFrameUrl, documentUrl, isPreload, originalResourceType, hasRedirectResponse }:
+  { url: string, initiatorUrl?: string, documentUrl?: string, callFrameUrl?: string, isPreload?: boolean, originalResourceType?: string, hasRedirectResponse?: boolean },
 ) => {
   return {
     requestId: 'id-1',
@@ -13,6 +13,7 @@ const createBrowserPreRequest = (
     headers: {},
     resourceType: 'fetch' as const,
     originalResourceType: originalResourceType || 'Fetch' as const,
+    hasRedirectResponse: hasRedirectResponse || false,
     ...(isPreload
       ? {
         initiator: {
@@ -531,6 +532,13 @@ describe('lib/http/util/service-worker-manager', () => {
           })
 
           expect(await result).to.be.true
+        })
+
+        it('supports a redirected request', async () => {
+          expect(await manager.processBrowserPreRequest(createBrowserPreRequest({
+            url: 'http://localhost:8080/foo.js',
+            hasRedirectResponse: true,
+          }))).to.be.false
         })
       })
 

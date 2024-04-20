@@ -283,6 +283,7 @@ export class CdpAutomation implements CDPClient {
       originalResourceType: params.type,
       initiator: params.initiator,
       documentURL: params.documentURL,
+      hasRedirectResponse: params.redirectResponse != null,
       // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
       // normalize to milliseconds to be comparable to everything else we're gathering
       cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
