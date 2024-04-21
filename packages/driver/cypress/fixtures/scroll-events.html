@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Colorful Boxes</title>
+    <style>
+      .box {
+        width: 500px;
+        height: 500px;
+        color: white;
+        overflow-y: scroll;
+      }
+      .nested-box {
+        width: 200px;
+        height: 200px;
+        font-size: 50px;
+      }
+      #first {
+        background-color: red;
+      }
+      #second {
+        background-color: green;
+      }
+      #third {
+        background-color: blue;
+      }
+      .nested-box-1 {
+        background-color: purple;
+      }
+      .nested-box-2 {
+        background-color: yellow;
+      }
+      .nested-box-3 {
+        background-color: pink;
+      }
+      .nested-box-4 {
+        background-color: orange;
+      }
+      .nested-box-5 {
+        background-color: cyan;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="first" class="box"></div>
+    <div id="second" class="box">
+      <!-- Nested boxes inside the second box -->
+      <div class="nested-box nested-box-1"></div>
+      <div class="nested-box nested-box-2"></div>
+      <div class="nested-box nested-box-3"></div>
+      <div class="nested-box nested-box-4"></div>
+      <div class="nested-box nested-box-5"></div>
+    </div>
+    <div id="third" class="box"></div>
+
+    <!-- helps track what step of the scrip we are on -->
+    <div id="stage">mount</div>
+    <div id="number-of-scrolls">0</div>
+
+    <script>
+      window.addEventListener('scroll', (event) => {
+        const numberOfScrolls = document.getElementById('number-of-scrolls')
+        numberOfScrolls.innerText = parseInt(numberOfScrolls.innerText) + 1
+      }, true)
+      window.onload = function () {
+        const stageEl = document.getElementById('stage')
+        setTimeout(() => {
+          const thirdEl = document.getElementById('third')
+          thirdEl.scrollIntoView()
+          thirdEl.style.marginTop = '400px'
+          stageEl.innerText = 'stage:1'
+          console.log('stage:1')
+
+          setTimeout(() => {
+            const secondEl = document.getElementById('second')
+            secondEl.scrollIntoView()
+            secondEl.style.marginTop = '400px'
+            stageEl.innerText = 'stage:2'
+            console.log('stage:2')
+
+            setTimeout(() => {
+              // Select the middle nested box
+              const middleNestedBox = secondEl.children[2]
+              middleNestedBox.scrollIntoView()
+              middleNestedBox.style.marginTop = '100px'
+              stageEl.innerText = 'stage:3'
+              console.log('stage:3')
+
+              setTimeout(() => {
+                middleNestedBox.innerText = 'done'
+                console.log('done')
+              }, 500)
+            }, 500)
+          }, 500)
+        }, 500)
+      }
+    </script>
+  </body>
+</html>
