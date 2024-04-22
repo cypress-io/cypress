@@ -4,6 +4,7 @@ export class NetworkError extends Error {
   public readonly kind = NetworkErrorKind
   constructor (
     public readonly originalError: Error,
+    public readonly url: string,
   ) {
     super(originalError.message)
   }
