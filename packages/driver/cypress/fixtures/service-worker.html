@@ -24,7 +24,7 @@
           if (e.target.state === 'activated' && !controllerChangeCalled) {
             // service worker activated, either skip reloading the page
             // so we can test when an activated service worker is not intercepting requests
-            // or reload page so it can intercept requests
+            // or reload the page so it can intercept requests
             if (location.search.includes('skipReload')) {
               makeRequest()
             } else {
