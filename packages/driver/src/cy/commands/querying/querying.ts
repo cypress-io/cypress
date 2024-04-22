@@ -265,7 +265,7 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    validateTimeoutFromOpts(userOptions)
+    validateTimeoutFromOpts(userOptions, 'contains')
 
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
@@ -375,7 +375,7 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({}),
     })
 
-    validateTimeoutFromOpts(userOptions)
+    validateTimeoutFromOpts(userOptions, 'shadow')
 
     this.set('timeout', userOptions.timeout)
     this.set('onFail', (err) => {
