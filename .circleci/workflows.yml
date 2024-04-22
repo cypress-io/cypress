@@ -30,9 +30,8 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'cacie/fix/websocket-closed'
-        - 'feat/protocol_shadow_dom_support'
+        - 'app-mem-mng-flag'
         - 'publish-binary'
-        - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -44,8 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
-    - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
-    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
+    - equal: [ 'app-mem-mng-flag', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -57,8 +55,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
-    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
-    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
+    - equal: [ 'app-mem-mng-flag', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -82,9 +79,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
-    - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
+    - equal: [ 'app-mem-mng-flag', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -672,9 +667,6 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ -v MAIN_RECORD_KEY ]]; then
-              if [[ <<parameters.package>> == 'app' && <<parameters.type>> == 'e2e' ]]; then
-                export DEBUG=cypress:*
-              fi
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
@@ -1860,7 +1852,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
