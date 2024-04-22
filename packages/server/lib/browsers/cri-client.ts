@@ -19,6 +19,14 @@ const debugVerboseReceive = debugModule(`${debugVerbose.namespace}:recv:[<--]`)
 // debug using cypress-verbose:server:browsers:cri-client:err:*
 const debugVerboseLifecycle = debugModule(`${debugVerbose.namespace}:ws`)
 
+/**
+ * There are three error messages we can encounter which should not be re-thrown, but
+ * should trigger a reconnection attempt if one is not in progress, and enqueue the
+ * command that errored. This regex is used in client.send to check for:
+ * - WebSocket connection closed
+ * - WebSocket not open
+ * - WebSocket already in CLOSING or CLOSED state
+ */
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket (?:connection closed|is (?:not open|already in CLOSING or CLOSED state))/
 
 type QueuedMessages = {
