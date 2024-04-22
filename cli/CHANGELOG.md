@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.8.1
+
+_Released 4/23/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated zod from `3.20.3` to `3.22.5`. Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+
 ## 13.8.0
 
 _Released 4/18/2024_
