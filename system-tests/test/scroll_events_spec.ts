@@ -8,7 +8,6 @@ describe('scroll events', () => {
     project: 'e2e',
     spec: 'scroll-events.cy.js',
     runnerUi: true,
-    headed: true,
   })
 
   it('validates that scrolls can be listened to - no runner UI', {
@@ -16,6 +15,5 @@ describe('scroll events', () => {
     project: 'e2e',
     spec: 'scroll-events.cy.js',
     runnerUi: false,
-    headed: true,
   })
 })
