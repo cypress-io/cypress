@@ -3598,13 +3598,16 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
 
 Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
-We attempted to upload the Test Replay recording 3 times. Some or all of the errors encountered are system-level network errors. Please verify your network configuration.
+We attempted to upload the Test Replay recording 3 times.
 
-The following errors were encountered:
+Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to undefined
 
+In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
- - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
+
+Error: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
+      [stack trace lines]
 
 
 ====================================================================================================
@@ -3953,13 +3956,14 @@ exports['capture-protocol api errors upload 503 - tries 3 times and fails contin
 
 Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
-We attempted to upload the Test Replay recording 3 times. 
+We attempted to upload the Test Replay recording 3 times.
 
-The following errors were encountered:
+In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
+ - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
+ - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
 
- - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
- - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
- - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
+Error: 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
+      [stack trace lines]
 
 
 ====================================================================================================
@@ -4145,13 +4149,16 @@ exports['capture-protocol api errors upload network error retries 3 times, warns
 
 Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
-We attempted to upload the Test Replay recording 3 times. Some or all of the errors encountered are system-level network errors. Please verify your network configuration.
+We attempted to upload the Test Replay recording 3 times.
 
-The following errors were encountered:
+Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to undefined
 
+In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
- - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
+
+Error: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
+      [stack trace lines]
 
 
 ====================================================================================================

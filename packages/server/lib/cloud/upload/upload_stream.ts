@@ -77,11 +77,6 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
         errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
       }
 
-      // Record network errors
-      if (error && !timeoutMonitor?.getController().signal.reason) {
-        errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
-      }
-
       const isUnderRetryLimit = attempt < retries
       const isRetryableHttpError = (!!response?.status && RETRYABLE_STATUS_CODES.includes(response.status))
 
@@ -134,10 +129,13 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
         resolve()
       }
     } catch (e) {
+      debug('error on upload:', e)
       const signalError = abortController?.signal.reason
 
       const errors = await Promise.all(errorPromises)
 
+      debug('errors on upload:')
+      errors.forEach((e) => debug(e))
       if (signalError && !errors.includes(signalError)) {
         errors.push(signalError)
       }
