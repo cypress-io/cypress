@@ -66,7 +66,7 @@ export type BrowserPreRequest = {
   errorHandled?: boolean
   initiator?: Protocol.Network.Initiator
   documentURL: string
-  hasRedirectResponse: boolean
+  hasRedirectResponse?: boolean
   cdpRequestWillBeSentTimestamp: number
   cdpRequestWillBeSentReceivedTimestamp: number
 }
