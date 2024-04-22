@@ -143,15 +143,15 @@ function getAlias (selector, log, cy) {
   }
 }
 
-export default (Commands, Cypress, cy, state) => {
-  function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
-    if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
-      $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
-        args: { timeout: options.timeout },
-      })
-    }
+function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+    $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
+      args: { timeout: options.timeout },
+    })
   }
+}
 
+export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
