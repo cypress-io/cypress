@@ -130,6 +130,17 @@ describe('lib/browsers/cri-client', function () {
 
           expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
         })
+
+        it(`when socket is closed mid send ('WebSocket connection closed' variant)`, async function () {
+          const err = new Error('WebSocket connection closed')
+
+          send.onFirstCall().rejects(err)
+          const client = await getClient()
+
+          await client.close()
+
+          expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
+        })
       })
     })
   })
