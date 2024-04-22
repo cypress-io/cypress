@@ -7,6 +7,10 @@ _Released 4/23/2024 (PENDING)_
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).s
 
+**Dependency Updates:**
+
+- Updated zod from `3.20.3` to `3.22.5`. Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+
 ## 13.8.0
 
 _Released 4/18/2024_
