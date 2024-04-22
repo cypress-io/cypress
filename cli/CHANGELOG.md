@@ -3,7 +3,7 @@
 
 _Released 4/23/2024 (PENDING)_
 
-**Bufixes:**
+**Bugfixes:**
 
 - Fixes a bug introduced in [`13.6.0`](https://docs.cypress.io/guides/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1 even when the test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
 
