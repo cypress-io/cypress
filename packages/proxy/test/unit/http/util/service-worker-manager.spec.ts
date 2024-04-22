@@ -563,7 +563,7 @@ describe('lib/http/util/service-worker-manager', () => {
           expect(serviceWorker?.controlledURLs).to.include('http://localhost:8080/foo.js')
         })
 
-        it('will add client urls to the pending list until the service worker is activated', async () => {
+        it('will add client urls to the pending list until the service worker is activated', () => {
           // remove the current service worker
           manager.updateServiceWorkerRegistrations({
             registrations: [{
