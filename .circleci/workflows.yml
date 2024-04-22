@@ -81,7 +81,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/dep/electron-27', << pipeline.git.branch >> ]
+    - equal: [ 'cacie/fix/websocket-closed', << pipeline.git.branch >> ]
     - equal: [ 'feat/protocol_shadow_dom_support', << pipeline.git.branch >> ]
     - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
     - equal: [ 'feat/support_wds5', << pipeline.git.branch >> ]
