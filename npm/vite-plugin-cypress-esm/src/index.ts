@@ -169,7 +169,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
             // support `import { foo as bar } from 'module'` syntax, converting to `const { foo: bar } ...`
             decl = decl.replace(/(?<!\*) as /g, ': ')
 
-            return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}#${importTarget.replace(/['"`]/ig, '')}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+            return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}#${importTarget}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
           })
           .join('')
 
