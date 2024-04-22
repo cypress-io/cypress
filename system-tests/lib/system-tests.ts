@@ -248,6 +248,7 @@ type ExecOptions = {
    * Run Cypress with a custom user node version.
    */
   userNodeVersion?: string
+  runnerUi: boolean
 }
 
 type Server = {
@@ -788,6 +789,10 @@ const systemTests = {
 
     if (options.userNodeVersion) {
       args.push(`--userNodeVersion=${options.userNodeVersion}`)
+    }
+
+    if (options.runnerUi !== undefined) {
+      args.push(options.runnerUi ? '--runner-ui' : '--no-runner-ui')
     }
 
     return args
