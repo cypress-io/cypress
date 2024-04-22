@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.8.1
+
+_Released 4/23/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
+
 ## 13.8.0
 
 _Released 4/18/2024_
@@ -10,10 +18,6 @@ _Released 4/18/2024_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
-
-**Bugfixes:**
-
-- Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
 
 **Misc:**
 
