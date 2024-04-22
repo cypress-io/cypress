@@ -7,6 +7,10 @@ _Released 4/23/2024 (PENDING)_
 
 - Fixed a performance issue with activated service workers that aren't controlling clients which could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
 
+**Dependency Updates:**
+
+- Updated zod from `3.20.3` to `3.22.5`. Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+
 ## 13.8.0
 
 _Released 4/18/2024_

@@ -662,9 +662,6 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ -v MAIN_RECORD_KEY ]]; then
-              if [[ <<parameters.package>> == 'app' && <<parameters.type>> == 'e2e' ]]; then
-                export DEBUG=cypress:*
-              fi
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
@@ -1850,7 +1847,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
