@@ -116,7 +116,7 @@ export class PreRequests {
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
-  pendingPreRequestsToRemove: Set<string> = new Set()
+  pendingPreRequestsToRemove: Map<string, number> = new Map()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
 
@@ -151,6 +151,12 @@ export class PreRequests {
         }
 
         return true
+      })
+
+      this.pendingPreRequestsToRemove.forEach((timestamp, requestId) => {
+        if (timestamp + this.sweepInterval < now) {
+          this.pendingPreRequestsToRemove.delete(requestId)
+        }
       })
 
       this.pendingUrlsWithoutPreRequests.removeMatching(({ timestamp }) => {
@@ -260,7 +266,7 @@ export class PreRequests {
     // the async function to add the pre-request
     if (!removed) {
       debugVerbose('No pre-request found to remove, adding to pending list: %s', requestId)
-      this.pendingPreRequestsToRemove.add(requestId)
+      this.pendingPreRequestsToRemove.set(requestId, Date.now())
     } else {
       debugVerbose('Removed pre-request %s', requestId)
     }
@@ -360,6 +366,6 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
-    this.pendingPreRequestsToRemove = new Set<string>()
+    this.pendingPreRequestsToRemove = new Map()
   }
 }

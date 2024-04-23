@@ -336,10 +336,6 @@ export class ProjectBase extends EE {
       this.server.removeBrowserPreRequest(requestId)
     }
 
-    const onRequestFailed = (requestId: string) => {
-      this.server.removeBrowserPreRequest(requestId)
-    }
-
     const onDownloadLinkClicked = (downloadUrl: string) => {
       this.server.addPendingUrlWithoutPreRequest(downloadUrl)
     }
@@ -367,7 +363,6 @@ export class ProjectBase extends EE {
       onBrowserPreRequest,
       onRequestEvent,
       onRemoveBrowserPreRequest,
-      onRequestFailed,
       onDownloadLinkClicked,
       onServiceWorkerRegistrationUpdated,
       onServiceWorkerVersionUpdated,

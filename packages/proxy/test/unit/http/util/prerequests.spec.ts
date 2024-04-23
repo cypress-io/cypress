@@ -189,6 +189,9 @@ describe('http/util/prerequests', () => {
     preRequests = new PreRequests(10, 200)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin } as BrowserPreRequest)
     preRequests.addPendingUrlWithoutPreRequest('bar')
+    preRequests.removePendingPreRequest('12345')
+
+    expectPendingCounts(0, 1, 1, 1)
 
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request

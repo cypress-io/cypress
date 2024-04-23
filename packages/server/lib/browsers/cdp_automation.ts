@@ -309,7 +309,7 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
-    this.automation.onRequestFailed?.(params.requestId)
+    this.automation.onRemoveBrowserPreRequest?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

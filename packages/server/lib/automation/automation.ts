@@ -16,7 +16,6 @@ export type AutomationOptions = {
   onBrowserPreRequest?: OnBrowserPreRequest
   onRequestEvent?: OnRequestEvent
   onRemoveBrowserPreRequest?: (requestId: string) => void
-  onRequestFailed?: (requestId: string) => void
   onDownloadLinkClicked?: (downloadUrl: string) => void
   onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated
   onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
@@ -32,7 +31,6 @@ export class Automation {
   public onBrowserPreRequest: OnBrowserPreRequest | undefined
   public onRequestEvent: OnRequestEvent | undefined
   public onRemoveBrowserPreRequest: ((requestId: string) => void) | undefined
-  public onRequestFailed: ((requestId: string) => void) | undefined
   public onDownloadLinkClicked: ((downloadUrl: string) => void) | undefined
   public onServiceWorkerRegistrationUpdated: OnServiceWorkerRegistrationUpdated | undefined
   public onServiceWorkerVersionUpdated: OnServiceWorkerVersionUpdated | undefined
@@ -43,7 +41,6 @@ export class Automation {
     this.onBrowserPreRequest = options.onBrowserPreRequest
     this.onRequestEvent = options.onRequestEvent
     this.onRemoveBrowserPreRequest = options.onRemoveBrowserPreRequest
-    this.onRequestFailed = options.onRequestFailed
     this.onDownloadLinkClicked = options.onDownloadLinkClicked
     this.onServiceWorkerRegistrationUpdated = options.onServiceWorkerRegistrationUpdated
     this.onServiceWorkerVersionUpdated = options.onServiceWorkerVersionUpdated

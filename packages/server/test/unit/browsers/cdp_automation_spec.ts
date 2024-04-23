@@ -73,7 +73,6 @@ context('lib/browsers/cdp_automation', () => {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
         onRemoveBrowserPreRequest: sinon.stub(),
-        onRequestFailed: sinon.stub(),
         onServiceWorkerRegistrationUpdated: sinon.stub(),
         onServiceWorkerVersionUpdated: sinon.stub(),
       }
@@ -286,7 +285,7 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('.onRequestFailed', function () {
-      it('triggers onRequestFailed', function () {
+      it('triggers onRemoveBrowserPreRequest', function () {
         const browserRequestFailed = {
           requestId: '0',
         }
@@ -295,7 +294,7 @@ context('lib/browsers/cdp_automation', () => {
         .withArgs('Network.loadingFailed')
         .yield(browserRequestFailed)
 
-        expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
+        expect(this.automation.onRemoveBrowserPreRequest).to.have.been.calledWith(browserRequestFailed.requestId)
       })
     })
 
