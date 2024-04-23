@@ -24,6 +24,5 @@
     "index.js",
     "index.d.ts"
   ],
-  "license": "MIT",
-  "author": "Brian Mann"
+  "license": "MIT"
 }

@@ -457,6 +457,7 @@ describe('http', function () {
           url: 'foo',
           isControlled: true,
         },
+        scope: 'foo',
       }
 
       http.handleServiceWorkerClientEvent(event)
