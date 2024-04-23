@@ -248,7 +248,11 @@ export class ServiceWorkerManager {
 
     if (activatedServiceWorker) {
       if (requestPotentiallyControlledByServiceWorker) {
-        isControlled = await this.isURLControlledByServiceWorker(browserPreRequest)
+        try {
+          isControlled = await this.isURLControlledByServiceWorker(browserPreRequest)
+        } catch (e) {
+          debug('timed out checking if pre-request is controlled by service worker: %o', { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
+        }
 
         if (isControlled) {
           debug('Request is controlled by service worker: %o', { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
@@ -377,7 +381,14 @@ export class ServiceWorkerManager {
     promises.push(deferred)
     debug('adding pending controlled request promise: %o', { url, requestId: browserPreRequest.requestId })
 
-    return deferred.promise
+    let timer
+    // race the deferred promise with a timeout to prevent the pre-request from hanging indefinitely
+    const racingPromises = Promise.race([
+      deferred.promise,
+      new Promise<boolean>((_resolve, reject) => timer = setTimeout(reject, 250)),
+    ]).finally(() => clearTimeout(timer))
+
+    return racingPromises
   }
 
   /**

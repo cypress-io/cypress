@@ -540,6 +540,12 @@ describe('lib/http/util/service-worker-manager', () => {
             hasRedirectResponse: true,
           }))).to.be.false
         })
+
+        it('supports a pre-request that times out when it does not receive a fetch event', async () => {
+          expect(await manager.processBrowserPreRequest(createBrowserPreRequest({
+            url: 'http://localhost:8080/foo.js',
+          }))).to.be.false
+        })
       })
 
       context('without any controlled urls', () => {
