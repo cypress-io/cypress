@@ -133,16 +133,13 @@ export interface OpenServerOptions {
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
-  exit?: boolean
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
-  protocolManager?: ProtocolManagerShape
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
-  private _protocolManager?: ProtocolManagerShape
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
@@ -214,8 +211,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
-    this._protocolManager = protocolManager
-
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
   }
@@ -329,8 +324,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     shouldCorrelatePreRequests,
     testingType,
     SocketCtor,
-    exit,
-    protocolManager,
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
@@ -356,6 +349,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates: this._remoteStates,
       resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       shouldCorrelatePreRequests,
+      getCurrentBrowser,
     })
 
     if (config.experimentalSourceRewriting) {
@@ -443,7 +437,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests, getCurrentBrowser }) {
     const getFileServerToken = () => {
       return this._fileServer?.token
     }
@@ -461,6 +455,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       request: this.request,
       serverBus: this._eventBus,
       resourceTypeAndCredentialManager,
+      getCurrentBrowser,
     })
   }
 
