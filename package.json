@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.7.3",
+  "version": "13.8.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -159,7 +159,7 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-vue": "7.18.0",
     "execa": "4.0.0",
-    "filesize": "4.1.2",
+    "filesize": "10.1.1",
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",
     "glob": "7.1.6",
