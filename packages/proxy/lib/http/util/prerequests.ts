@@ -360,5 +360,6 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+    this.pendingPreRequestsToRemove = new Set<string>()
   }
 }
