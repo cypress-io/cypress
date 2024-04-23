@@ -1481,6 +1481,7 @@
     "./node_modules/any-base/src/converter.js",
     "./node_modules/anymatch/index.js",
     "./node_modules/arg/index.js",
+    "./node_modules/array-flatten/array-flatten.js",
     "./node_modules/array-union/index.js",
     "./node_modules/asn1/lib/ber/errors.js",
     "./node_modules/asn1/lib/ber/index.js",
@@ -1827,7 +1828,6 @@
     "./node_modules/express/lib/router/layer.js",
     "./node_modules/express/lib/utils.js",
     "./node_modules/express/lib/view.js",
-    "./node_modules/express/node_modules/array-flatten/array-flatten.js",
     "./node_modules/express/node_modules/body-parser/lib/read.js",
     "./node_modules/express/node_modules/body-parser/lib/types/json.js",
     "./node_modules/express/node_modules/body-parser/lib/types/raw.js",
@@ -2316,12 +2316,6 @@
     "./node_modules/json5/lib/util.js",
     "./node_modules/jsonlint/lib/jsonlint.js",
     "./node_modules/jsprim/lib/jsprim.js",
-    "./node_modules/launch-editor/editor-info/linux.js",
-    "./node_modules/launch-editor/editor-info/osx.js",
-    "./node_modules/launch-editor/editor-info/windows.js",
-    "./node_modules/launch-editor/get-args.js",
-    "./node_modules/launch-editor/guess.js",
-    "./node_modules/launch-editor/index.js",
     "./node_modules/lazy-ass/index.js",
     "./node_modules/load-bmfont/index.js",
     "./node_modules/load-bmfont/lib/is-binary.js",
@@ -3738,6 +3732,12 @@
     "./packages/data-context/node_modules/fs-extra/lib/util/stat.js",
     "./packages/data-context/node_modules/fs-extra/lib/util/utimes.js",
     "./packages/data-context/node_modules/get-stream/index.js",
+    "./packages/data-context/node_modules/launch-editor/editor-info/linux.js",
+    "./packages/data-context/node_modules/launch-editor/editor-info/osx.js",
+    "./packages/data-context/node_modules/launch-editor/editor-info/windows.js",
+    "./packages/data-context/node_modules/launch-editor/get-args.js",
+    "./packages/data-context/node_modules/launch-editor/guess.js",
+    "./packages/data-context/node_modules/launch-editor/index.js",
     "./packages/data-context/node_modules/micromatch/index.js",
     "./packages/data-context/node_modules/path-key/index.js",
     "./packages/data-context/node_modules/prettier/doc.js",
@@ -4345,5 +4345,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ce87acfb4746797260125a1a730fce2f773b95daaad4ed37bd765aaf4974de18"
+  "deferredHash": "e625eef73bed7b4c8017acf64806ff6e7765ffa5f5295e21c7e76dbedbbbe883"
 }
