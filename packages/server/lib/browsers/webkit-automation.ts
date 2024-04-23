@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp_automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
@@ -212,7 +211,6 @@ export class WebKitAutomation {
   }
 
   private handleRequestEvents () {
-    // emit preRequest to proxy
     this.page.on('request', (request) => {
       // ignore socket.io events
       // TODO: use config.socketIoRoute here instead
@@ -222,22 +220,6 @@ export class WebKitAutomation {
       const requestId = String(requestIdCounter++)
 
       requestIdMap.set(request, requestId)
-
-      const browserPreRequest = {
-        requestId,
-        method: request.method(),
-        url: request.url(),
-        // TODO: await request.allHeaders() causes this to not resolve in time
-        headers: request.headers(),
-        resourceType: normalizeResourceType(request.resourceType()),
-        originalResourceType: request.resourceType(),
-        documentURL: request.frame().url(),
-        cdpRequestWillBeSentTimestamp: request.timing().requestStart,
-        cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
-      }
-
-      debug('received request %o', { browserPreRequest })
-      this.automation.onBrowserPreRequest?.(browserPreRequest)
     })
 
     this.page.on('requestfinished', async (request) => {
@@ -255,6 +237,7 @@ export class WebKitAutomation {
 
       debug('received requestfinished %o', { responseReceived })
 
+      // TODO: (correlation) is this needed if we are doing this in the response middleware?
       this.automation.onRequestEvent?.('response:received', responseReceived)
     })
   }

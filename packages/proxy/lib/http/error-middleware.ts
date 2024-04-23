@@ -27,12 +27,10 @@ const LogError: ErrorMiddleware = function () {
 }
 
 const SendToDriver: ErrorMiddleware = function () {
-  if (this.req.browserPreRequest) {
-    this.socket.toDriver('request:event', 'request:error', {
-      requestId: this.req.browserPreRequest.requestId,
-      error: errors.cloneErr(this.error),
-    })
-  }
+  this.socket.toDriver('request:event', 'request:error', {
+    requestId: this.req.requestId,
+    error: errors.cloneErr(this.error),
+  })
 
   this.next()
 }

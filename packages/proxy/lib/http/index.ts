@@ -9,15 +9,12 @@ import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
-import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
-  BrowserPreRequest,
 } from '@packages/proxy'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
@@ -27,17 +24,11 @@ import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
-import type Protocol from 'devtools-protocol'
-import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
     Math.floor(Math.random() * 0xFFFFFF),
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
-}
-
-export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
 }
 
 export const isVerboseTelemetry = true
@@ -66,16 +57,11 @@ type HttpMiddlewareCtx<T> = {
   handleHttpRequestSpan?: Span
   reqMiddlewareSpan?: Span
   resMiddlewareSpan?: Span
-  shouldCorrelatePreRequests: () => boolean
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
-  pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
-  addPendingUrlWithoutPreRequest: (url: string) => void
-  removePendingRequest: (pendingRequest: PendingRequest) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
@@ -90,7 +76,6 @@ export const defaultMiddleware = {
 
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
-  shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
@@ -252,26 +237,14 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   return runMiddlewareStack()
 }
 
-function getUniqueRequestId (requestId: string) {
-  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
-
-  if (match) {
-    return `${match[1]}-retry-${Number(match[2]) + 1}`
-  }
-
-  return `${requestId}-retry-1`
-}
-
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
-  shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
-  preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
@@ -280,13 +253,11 @@ export class Http {
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
-  serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
     this.config = opts.config
-    this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -314,7 +285,6 @@ export class Http {
       handleHttpRequestSpan,
       buffers: this.buffers,
       config: this.config,
-      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
@@ -339,56 +309,11 @@ export class Http {
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
-      getPreRequest: (cb) => {
-        // The initial request that loads the service worker does not always get sent to CDP. Thus, we need to explicitly ignore it. We determine
-        // it's the service worker request via the `service-worker` header
-        if (hasServiceWorkerHeader(req.headers)) {
-          ctx.debug('Ignoring service worker script since we are not guaranteed to receive it', req.proxiedUrl)
-
-          cb({
-            noPreRequestExpected: true,
-          })
-
-          return
-        }
-
-        return this.preRequests.get(ctx.req, ctx.debug, cb)
-      },
-      addPendingUrlWithoutPreRequest: (url) => {
-        this.preRequests.addPendingUrlWithoutPreRequest(url)
-      },
-      removePendingRequest: (pendingRequest: PendingRequest) => {
-        this.preRequests.removePendingRequest(pendingRequest)
-      },
       protocolManager: this.protocolManager,
     }
 
     const onError = (error: Error): Promise<void> => {
-      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
-
-      if (pendingRequest) {
-        delete ctx.pendingRequest
-        ctx.removePendingRequest(pendingRequest)
-      }
-
       ctx.error = error
-
-      // if there is a pre-request and the error has not been handled and the response has not been destroyed
-      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
-      //
-      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
-      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
-        ctx.req.browserPreRequest.errorHandled = true
-        const preRequest = {
-          ...ctx.req.browserPreRequest,
-          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
-          errorHandled: false,
-        }
-
-        ctx.debug('Re-using pre-request data %o', preRequest)
-        this.addPendingBrowserPreRequest(preRequest)
-      }
 
       return _runStage(HttpStages.Error, ctx, onError)
     }
@@ -453,81 +378,16 @@ export class Http {
     }
   }
 
-  reset (options: { resetBetweenSpecs: boolean }) {
+  reset () {
     this.buffers.reset()
     this.setAUTUrl(undefined)
-
-    if (options.resetBetweenSpecs) {
-      this.preRequests.reset()
-      this.serviceWorkerManager = new ServiceWorkerManager()
-    }
   }
 
   setBuffer (buffer) {
     return this.buffers.set(buffer)
   }
 
-  async addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    if (await this.shouldIgnorePendingRequest(browserPreRequest)) {
-      return
-    }
-
-    this.preRequests.addPending(browserPreRequest)
-  }
-
-  removePendingBrowserPreRequest (requestId: string) {
-    this.preRequests.removePendingPreRequest(requestId)
-  }
-
-  getPendingBrowserPreRequests () {
-    return this.preRequests.pendingPreRequests
-  }
-
-  addPendingUrlWithoutPreRequest (url: string) {
-    this.preRequests.addPendingUrlWithoutPreRequest(url)
-  }
-
-  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    this.serviceWorkerManager.updateServiceWorkerRegistrations(data)
-  }
-
-  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    this.serviceWorkerManager.updateServiceWorkerVersions(data)
-  }
-
-  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
-    this.serviceWorkerManager.addInitiatorToServiceWorker({ scriptURL: data.scriptURL, initiatorOrigin: data.initiatorOrigin })
-  }
-
-  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
-    this.serviceWorkerManager.handleServiceWorkerClientEvent(event)
-  }
-
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
-    this.preRequests.setProtocolManager(protocolManager)
-  }
-
-  setPreRequestTimeout (timeout: number) {
-    this.preRequests.setPreRequestTimeout(timeout)
-  }
-
-  private async shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
-    // The initial request that loads the service worker does not always get sent to CDP. If it does, we want it to not clog up either the prerequests
-    // or pending requests. Thus, we need to explicitly ignore it here and in `get`. We determine it's the service worker request via the
-    // `service-worker` header
-    if (hasServiceWorkerHeader(browserPreRequest.headers)) {
-      debugVerbose('Ignoring service worker script since we are not guaranteed to receive it: %o', browserPreRequest)
-
-      return true
-    }
-
-    if (await this.serviceWorkerManager.processBrowserPreRequest(browserPreRequest)) {
-      debugVerbose('Not correlating request since it is fully controlled by the service worker and the correlation will happen within the service worker: %o', browserPreRequest)
-
-      return true
-    }
-
-    return false
   }
 }

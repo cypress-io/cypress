@@ -6,9 +6,7 @@ import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
-import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { ProtocolManagerShape } from '@packages/types'
-import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -26,7 +24,6 @@ type BrowserCriClientOptions = {
   onAsynchronousError: Function
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
-  onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
 type BrowserCriClientCreateOptions = {
@@ -37,7 +34,6 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
-  onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
 interface ManageTabsOptions {
@@ -184,7 +180,6 @@ export class BrowserCriClient {
   private onAsynchronousError: Function
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
-  onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
@@ -206,7 +201,6 @@ export class BrowserCriClient {
     this.onAsynchronousError = options.onAsynchronousError
     this.protocolManager = options.protocolManager
     this.fullyManageTabs = options.fullyManageTabs
-    this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
   }
 
   /**
@@ -233,7 +227,6 @@ export class BrowserCriClient {
       onReconnect,
       port,
       protocolManager,
-      onServiceWorkerClientEvent,
     } = options
 
     const host = await ensureLiveBrowser(hosts, port, browserName)
@@ -258,7 +251,6 @@ export class BrowserCriClient {
         onAsynchronousError,
         protocolManager,
         fullyManageTabs,
-        onServiceWorkerClientEvent,
       })
 
       if (fullyManageTabs) {
@@ -317,16 +309,6 @@ export class BrowserCriClient {
       // it's possible that the target was closed before we could enable
       // network and continue, in that case, just ignore
       debug('error running Network.enable:', error)
-    }
-
-    try {
-      // attach a binding to the runtime so that we can listen for service worker events
-      if (event.targetInfo.type === 'service_worker') {
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
-        await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
-      }
-    } catch (error) {
-      debug('error adding service worker binding:', error)
     }
 
     if (!waitingForDebugger) {

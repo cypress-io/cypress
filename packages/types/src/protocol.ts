@@ -2,7 +2,6 @@ import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
-import type { ProxyTimings } from './proxy'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -102,7 +101,6 @@ type Response = {
 export type ResponseEndedWithEmptyBodyOptions = {
   requestId: string
   isCached: boolean
-  timings: ProxyTimings
 }
 
 export type ResponseStreamOptions = {
@@ -111,10 +109,8 @@ export type ResponseStreamOptions = {
   isAlreadyGunzipped: boolean
   responseStream: Readable
   res: Response
-  timings: ProxyTimings
 }
 
 export type ResponseStreamTimedOutOptions = {
   requestId: string
-  timings: ProxyTimings
 }

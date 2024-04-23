@@ -7,9 +7,8 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
-import { performance } from 'perf_hooks'
 
-import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { ResourceType } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
@@ -169,12 +168,7 @@ export class CdpAutomation implements CDPClient {
   private gettingFrameTree: Promise<void> | undefined | null
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
-    onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
-    onFn('Network.loadingFailed', this.onRequestFailed)
-    onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
-    onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
     this.on = onFn
     this.off = offFn
@@ -253,73 +247,10 @@ export class CdpAutomation implements CDPClient {
     }
   }
 
-  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
-    debugVerbose('received networkRequestWillBeSent %o', params)
-
-    let url = params.request.url
-
-    // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
-    if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
-
-    // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
-    // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
-    // Example data url: "data:font/woff;base64,<base64 encoded string>"
-    if (url.startsWith('data:')) {
-      debugVerbose('skipping `data:` url %s', url)
-
-      return
-    }
-
-    // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
-    // Firefox lacks support for urlFragment and initiator, two nice-to-haves
-    const browserPreRequest: BrowserPreRequest = {
-      requestId: params.requestId,
-      method: params.request.method,
-      url,
-      headers: params.request.headers,
-      resourceType: normalizeResourceType(params.type),
-      originalResourceType: params.type,
-      initiator: params.initiator,
-      documentURL: params.documentURL,
-      // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
-      // normalize to milliseconds to be comparable to everything else we're gathering
-      cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
-      cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
-    }
-
-    await this.automation.onBrowserPreRequest?.(browserPreRequest)
-  }
-
-  private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
-    this.automation.onRequestServedFromCache?.(params.requestId)
-  }
-
-  private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
-    this.automation.onRequestFailed?.(params.requestId)
-  }
-
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
     if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
       this.automation.onRequestServedFromCache?.(params.requestId)
-
-      return
     }
-
-    const browserResponseReceived: BrowserResponseReceived = {
-      requestId: params.requestId,
-      status: params.response.status,
-      headers: params.response.headers,
-    }
-
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
-  }
-
-  private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
-    this.automation.onServiceWorkerRegistrationUpdated?.(params)
-  }
-
-  private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
-    this.automation.onServiceWorkerVersionUpdated?.(params)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
@@ -382,31 +313,30 @@ export class CdpAutomation implements CDPClient {
     })
   }
 
-  private _continueRequest = (client, params, header?) => {
+  private _continueRequest = (client, params, headers?) => {
     const details: Protocol.Fetch.ContinueRequestRequest = {
       requestId: params.requestId,
     }
 
-    if (header) {
-    // headers are received as an object but need to be an array
-    // to modify them
+    if (headers && headers.length) {
+      // headers are received as an object but need to be an array to modify them
       const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
 
       details.headers = [
         ...currentHeaders,
-        header,
+        ...headers,
       ]
     }
 
     debugVerbose('continueRequest: %o', details)
 
     client.send('Fetch.continueRequest', details).catch((err) => {
-    // swallow this error so it doesn't crash Cypress.
-    // an "Invalid InterceptionId" error can randomly happen in the driver tests
-    // when testing the redirection loop limit, when a redirect request happens
-    // to be sent after the test has moved on. this shouldn't crash Cypress, in
-    // any case, and likely wouldn't happen for standard user tests, since they
-    // will properly fail and not move on like the driver tests
+      // swallow this error so it doesn't crash Cypress.
+      // an "Invalid InterceptionId" error can randomly happen in the driver tests
+      // when testing the redirection loop limit, when a redirect request happens
+      // to be sent after the test has moved on. this shouldn't crash Cypress, in
+      // any case, and likely wouldn't happen for standard user tests, since they
+      // will properly fail and not move on like the driver tests
       debugVerbose('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
     })
   }
@@ -436,25 +366,45 @@ export class CdpAutomation implements CDPClient {
   _handlePausedRequests = async (client: CriClient) => {
     // NOTE: only supported in chromium based browsers
     await client.send('Fetch.enable', {
-      // only enable request pausing for documents to determine the AUT iframe
+      // enable request pausing for documents to determine the AUT iframe
+      // and for XHR and Fetch requests to add a header to mark them as such
+      // TODO: (correlation) - we can't hardcode this to just documents, XHRs, and Fetches
+      // because the user could intercept any type of request (e.g. images, scripts, etc.)
       patterns: [{
         resourceType: 'Document',
+      }, {
+        resourceType: 'XHR',
+      }, {
+        resourceType: 'Fetch',
       }],
     })
 
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-      if (await this._isAUTFrame(params.frameId)) {
+      const addedHeaders: {
+        name: string
+        value: string
+      }[] = []
+
+      if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
+        debugVerbose('add X-Cypress-Is-XHR-Or-Fetch header to: %s', params.request.url)
+        addedHeaders.push({
+          name: 'X-Cypress-Is-XHR-Or-Fetch',
+          value: params.resourceType.toLowerCase(),
+        })
+      }
+
+      if (params.resourceType !== 'Document' && await this._isAUTFrame(params.frameId)) {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
-        return this._continueRequest(client, params, {
+        addedHeaders.push({
           name: 'X-Cypress-Is-AUT-Frame',
           value: 'true',
         })
       }
 
-      return this._continueRequest(client, params)
+      return this._continueRequest(client, params, addedHeaders)
     })
   }
 

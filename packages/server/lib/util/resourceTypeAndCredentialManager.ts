@@ -39,7 +39,6 @@ class ResourceTypeAndCredentialManagerClass {
     }
 
     // if value is undefined for any reason, apply defaults and assume xhr if no optionalResourceType
-    // optionalResourceType should be provided by the prerequest resourceType, so at least we have a fallback that is more accurate
     if (value === undefined) {
       value = {
         resourceType: optionalResourceType || 'xhr',

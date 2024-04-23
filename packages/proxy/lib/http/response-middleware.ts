@@ -9,19 +9,18 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
-import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
+import { isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import type { BrowserResponseReceived, CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
-import { injectIntoServiceWorker } from './util/service-worker-injector'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -146,21 +145,8 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
-const requestIdRegEx = /^(.*)-retry-([\d]+)$/
-const getOriginalRequestId = (requestId: string) => {
-  let originalRequestId = requestId
-  const match = requestIdRegEx.exec(requestId)
-
-  if (match) {
-    [, originalRequestId] = match
-  }
-
-  return originalRequestId
-}
-
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
-    browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
   })
@@ -619,7 +605,6 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      resourceType: this.req.resourceType,
       credentialLevel: this.req.credentialsLevel,
     },
   })
@@ -682,11 +667,6 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
     return this.next()
   }
 
-  // If we're redirecting from a request that doesn't expect to have a preRequest (e.g. download links), we need to treat the redirected url as such as well.
-  if (this.req.noPreRequestExpected) {
-    this.addPendingUrlWithoutPreRequest(newUrl)
-  }
-
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
@@ -716,19 +696,10 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
-
+    if (this.protocolManager) {
       this.protocolManager.responseEndedWithEmptyBody({
-        requestId,
+        requestId: this.req.requestId,
         isCached: this.incomingRes.statusCode === 304,
-        timings: {
-          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
-          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
-        },
       })
     }
 
@@ -833,42 +804,9 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeInjectServiceWorker: ResponseMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'maybe:inject:service:worker', parentSpan: this.resMiddlewareSpan, isVerbose })
-  const hasHeader = hasServiceWorkerHeader(this.req.headers)
-
-  span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
-
-  if (!hasHeader) {
-    span?.end()
-
-    return this.next()
-  }
-
-  this.makeResStreamPlainText()
-
-  this.incomingResStream.setEncoding('utf8')
-
-  this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body)
-
-    const pt = new PassThrough
-
-    pt.write(updatedBody)
-    pt.end()
-
-    this.incomingResStream = pt
-
-    this.next()
-  })).on('error', this.onError).once('close', () => {
-    span?.end()
-  })
-}
-
 const GzipBody: ResponseMiddleware = async function () {
-  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    const preRequest = this.req.browserPreRequest
-    const requestId = getOriginalRequestId(preRequest.requestId)
+  if (this.protocolManager) {
+    const requestId = this.req.requestId
 
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
 
@@ -878,13 +816,6 @@ const GzipBody: ResponseMiddleware = async function () {
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
       res: this.res,
-      timings: {
-        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: preRequest.cdpLagDuration,
-        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-      },
     })
 
     if (resultingStream) {
@@ -908,6 +839,49 @@ const GzipBody: ResponseMiddleware = async function () {
     })
   }
 
+  this.next()
+}
+
+function shouldLog (req: CypressIncomingRequest) {
+  // 1. Any matching `cy.intercept()` should cause `req` to be logged by default, unless `log: false` is passed explicitly.
+  if (req.matchingRoutes?.length) {
+    const lastMatchingRoute = req.matchingRoutes[0]
+
+    if (!lastMatchingRoute.staticResponse) {
+      // No StaticResponse is set, therefore the request must be logged.
+      return true
+    }
+
+    if (lastMatchingRoute.staticResponse.log !== undefined) {
+      return Boolean(lastMatchingRoute.staticResponse.log)
+    }
+  }
+
+  // 2. Otherwise, only log if it is an XHR or fetch.
+  // return req.resourceType === 'fetch' || req.resourceType === 'xhr'
+  return true
+}
+
+const SendProxyLog: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'send:to:driver', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+  const shouldLogReq = shouldLog(this.req)
+
+  if (shouldLogReq) {
+    const browserResponseReceived: BrowserResponseReceived = {
+      requestId: this.req.requestId,
+      status: this.incomingRes.statusCode,
+      headers: this.incomingRes.headers,
+    }
+
+    this.socket.toDriver('request:event', 'response:received', browserResponseReceived)
+  }
+
+  span?.setAttributes({
+    shouldLogReq,
+  })
+
+  span?.end()
   this.next()
 }
 
@@ -942,7 +916,7 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
-  MaybeInjectServiceWorker,
   GzipBody,
+  SendProxyLog,
   SendResponseBodyToClient,
 }
