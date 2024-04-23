@@ -178,7 +178,7 @@ export class ServiceWorkerManager {
   }
 
   private shouldControlDocumentRequest (registration: ServiceWorkerRegistration, browserPreRequest: BrowserPreRequest) {
-    return browserPreRequest.originalResourceType === 'Document' &&
+    return browserPreRequest.originalResourceType?.toLowerCase() === 'document' &&
       browserPreRequest.documentURL === browserPreRequest.url &&
       browserPreRequest.url.startsWith(registration.scopeURL)
   }
