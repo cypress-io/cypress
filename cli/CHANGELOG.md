@@ -10,6 +10,7 @@ _Released 4/23/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`13.6.0`](https://docs.cypress.io/guides/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1, even when a test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
+- Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
 
 **Dependency Updates:**
 
