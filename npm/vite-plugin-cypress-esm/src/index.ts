@@ -134,7 +134,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
         debug(`Mapping import ${counter + 1} (${importTarget}) in module ${moduleId}`)
 
         if (isNonJsTarget(importTarget)) {
-          debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
+          debug(`🎨 Import ${importTarget} appears to be an asset, ignoring`)
 
           return match
         }
@@ -209,6 +209,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     return code.replace(
       RE,
       (match, importVars: string, importTarget: string) => {
+        if (isImportOnIgnoreList(importTarget)) {
+          debug(`⏭️ Import ${importTarget} matches ignoreImportList, ignoring`)
+
+          return match
+        }
+
         if (isNonJsTarget(importTarget)) {
           debug(`🎨 Import ${importTarget} appears to be an asset, ignoring`)
 
