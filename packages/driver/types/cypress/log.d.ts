@@ -51,7 +51,6 @@ declare namespace Cypress {
   interface InternalLogConfig {
     alias?: string
     aliasType?: 'agent' | 'route' | 'primitive' | 'dom' | undefined
-    browserPreRequest?: any
     callCount?: number
     chainerId?: string
     commandName?: string

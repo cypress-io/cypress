@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import type { Interception, Route } from '@packages/net-stubbing/lib/types'
-import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
+import type { BrowserResponseReceived, CypressIncomingRequest, RequestError } from '@packages/proxy/lib/types'
 import $errUtils from './error_utils'
 import Debug from 'debug'
 
@@ -60,12 +60,13 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
 
   return {
     ...getDynamicRequestLogConfig(req),
-    displayName: req.preRequest.resourceType,
+    // TODO: (correlation) - figure out resourceType
+    // displayName: req.request.resourceType,
     name: 'request',
     type: 'parent',
     event: true,
-    url: req.preRequest.url,
-    method: req.preRequest.method,
+    url: req.request.url,
+    method: req.request.method,
     timeout: 0,
     message: '', // set to empty string so that we don't inherit the default message
     consoleProps: () => req.consoleProps,
@@ -75,7 +76,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
           return 'pending'
         }
 
-        if (req.responseReceived.status >= 200 && req.responseReceived.status <= 299) {
+        if (req.responseReceived.status && req.responseReceived.status >= 200 && req.responseReceived.status <= 299) {
           return 'successful'
         }
 
@@ -83,9 +84,9 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
       }
 
       const message = _.compact([
-        req.preRequest.method,
+        req.request.method,
         req.responseReceived && req.responseReceived.status,
-        getDisplayUrl(req.preRequest.url),
+        getDisplayUrl(req.request.url),
       ]).join(' ')
 
       return {
@@ -114,8 +115,8 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
 
 class ProxyRequest {
   log?: Cypress.Log
-  preRequest: BrowserPreRequest
   responseReceived?: BrowserResponseReceived
+  request: CypressIncomingRequest
   error?: Error
   route?: any
   stack?: string
@@ -132,15 +133,16 @@ class ProxyRequest {
   // @see https://github.com/cypress-io/cypress/issues/17656
   readonly consoleProps: any
 
-  constructor (preRequest: BrowserPreRequest, opts?: Partial<ProxyRequest>) {
-    this.preRequest = preRequest
+  constructor (request: CypressIncomingRequest, opts?: Partial<ProxyRequest>) {
+    this.request = request
     opts && _.assign(this, opts)
 
     // high-level request information
     this.consoleProps = {
-      'Resource Type': preRequest.resourceType,
-      Method: preRequest.method,
-      URL: preRequest.url,
+      // TODO: (correlation) - figure out resourceType
+      // 'Resource Type': request.resourceType,
+      Method: request.method,
+      URL: request.url,
     }
 
     this.updateConsoleProps()
@@ -179,7 +181,7 @@ class ProxyRequest {
     ['Response Status Code', 'Response Headers', 'Response Body', 'Request Headers', 'Request Body'].forEach((k) => delete consoleProps[k])
 
     // details on request
-    consoleProps['Request Headers'] = this.preRequest.headers
+    consoleProps['Request Headers'] = this.request.headers
 
     const reqBody = _.chain(this.interceptions).last().get('interception.request.body').value()
 
@@ -241,7 +243,7 @@ export default class ProxyLogging {
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
   logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+    const proxyRequest = _.find(this.proxyRequests, ({ request }) => request.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
       // request was never logged
@@ -259,7 +261,7 @@ export default class ProxyLogging {
   }
 
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
+    const proxyRequest = _.find(this.proxyRequests, ({ request }) => request.requestId === responseReceived.requestId)
 
     if (!proxyRequest) {
       return debug('unmatched responseReceived event %o', responseReceived)
@@ -278,7 +280,7 @@ export default class ProxyLogging {
   }
 
   private updateRequestWithError (error: RequestError): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
+    const proxyRequest = _.find(this.proxyRequests, ({ request }) => request.requestId === error.requestId)
 
     if (!proxyRequest) {
       return debug('unmatched error event %o', error)
@@ -292,12 +294,12 @@ export default class ProxyLogging {
   /**
    * Create a Cypress.Log for an incoming proxy request.
    */
-  private logIncomingRequest (browserPreRequest: BrowserPreRequest): void {
-    this.createProxyRequestLog(browserPreRequest)
+  private logIncomingRequest (request: CypressIncomingRequest): void {
+    this.createProxyRequestLog(request)
   }
 
-  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
-    const proxyRequest = new ProxyRequest(preRequest)
+  private createProxyRequestLog (request: CypressIncomingRequest): ProxyRequest {
+    const proxyRequest = new ProxyRequest(request)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
     // TODO: Figure out what is causing the race condition here
