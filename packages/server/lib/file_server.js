@@ -34,7 +34,7 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
   // %20 with white space
   const file = decodeURI(url.parse(path.join(...args)).pathname)
 
-  res.setHeader('x-cypress-file-path', file)
+  res.setHeader('x-cypress-file-path', encodeURIComponent(file))
 
   return send(req, url.parse(req.url).pathname, {
     root: path.resolve(fileServerFolder),
@@ -54,7 +54,7 @@ module.exports = {
       const token = random.id(64)
 
       const srv = http.createServer(httpUtils.lenientOptions, (req, res) => {
-        return onRequest(req, res, token, encodeURIComponent(fileServerFolder))
+        return onRequest(req, res, token, fileServerFolder)
       })
 
       allowDestroy(srv)
