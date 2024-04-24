@@ -227,7 +227,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       }
     }
 
-    // there are no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
+    // there is no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
     // during initialization or capture. however, we still want to report this failure with the rest of the upload
     // results, so we extract what the upload failure report should be from the options passed to this fn
     if (!uploadResults.find((result: ArtifactUploadResult) => {
