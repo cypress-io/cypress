@@ -593,13 +593,13 @@ declare namespace Cypress {
        * Add a custom parent command
        * @see https://on.cypress.io/api/commands#Parent-Commands
        */
-      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & { prevSubject: false }, fn: CommandFn<T>): void
 
       /**
        * Add a custom child command
        * @see https://on.cypress.io/api/commands#Child-Commands
        */
-      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
+      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & { prevSubject: true }, fn: CommandFnWithSubject<T, S>): void
 
       /**
        * Add a custom child or dual command
@@ -627,7 +627,7 @@ declare namespace Cypress {
        * Add one or more custom parent commands
        * @see https://on.cypress.io/api/commands#Parent-Commands
        */
-      addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+      addAll<T extends keyof Chainable>(options: CommandOptions & { prevSubject: false }, fns: CommandFns): void
 
       /**
        * Add one or more custom child commands
@@ -822,7 +822,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
+    action: <T = (any[] | void) >(action: string, ...args: any[]) => T
 
     /**
      * Load files
@@ -834,8 +834,8 @@ declare namespace Cypress {
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
-      R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
-        Chainable<S>
+    R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
+    Chainable<S>
 
   /**
    * Chainable interface for non-array Subjects
@@ -950,7 +950,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearallcookies
      */
-     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
      * Get local storage for all origins.
@@ -983,7 +983,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearallsessionstorage
      */
-     clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
+    clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
 
     /**
      * Clear data in local storage for the current origin.
@@ -1518,7 +1518,7 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K, options?: Partial<Loggable & Timeoutable>): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Partial<Loggable & Timeoutable>): Chainable<NonNullable<Subject[K]>>
     its(propertyPath: string, options?: Partial<Loggable & Timeoutable>): Chainable
 
     /**
@@ -2542,8 +2542,8 @@ declare namespace Cypress {
 
   type ChainableMethods<Subject = any> = {
     [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
-      ? Chainable<Subject>[P]
-      : never
+    ? Chainable<Subject>[P]
+    : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -3244,7 +3244,7 @@ declare namespace Cypress {
     /**
      * Hosts mappings to IP addresses.
      */
-    hosts: null | {[key: string]: string}
+    hosts: null | { [key: string]: string }
     /**
      * Whether Cypress was launched via 'cypress open' (interactive mode)
      */
@@ -3519,7 +3519,7 @@ declare namespace Cypress {
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type ConfigHandler<T> = T
-  | (() => T | Promise<T>)
+    | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
@@ -3561,7 +3561,7 @@ declare namespace Cypress {
     /**
      * Hosts mappings to IP addresses.
      */
-    hosts?: null | {[key: string]: string}
+    hosts?: null | { [key: string]: string }
   }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
@@ -3759,7 +3759,7 @@ declare namespace Cypress {
     validate?: SessionOptions['validate']
   }
 
-  interface ServerSessionData extends Omit<SessionData, 'setup' |'validate'> {
+  interface ServerSessionData extends Omit<SessionData, 'setup' | 'validate'> {
     setup: string
     validate?: string
   }
@@ -6406,15 +6406,15 @@ declare namespace Cypress {
   }
 
   type TypedArray =
-  | Int8Array
-  | Uint8Array
-  | Uint8ClampedArray
-  | Int16Array
-  | Uint16Array
-  | Int32Array
-  | Uint32Array
-  | Float32Array
-  | Float64Array
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
 
   type FileReference = string | BufferType | FileReferenceObject | TypedArray
   interface FileReferenceObject {
