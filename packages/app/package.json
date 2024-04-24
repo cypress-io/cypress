@@ -52,7 +52,7 @@
     "disparity": "^3.0.0",
     "engine.io-client": "3.5.2",
     "faker": "5.5.3",
-    "fuzzysort": "^1.1.4",
+    "fuzzysort": "^2.0.4",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "human-interval": "1.0.0",

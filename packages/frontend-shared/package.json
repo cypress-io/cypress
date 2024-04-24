@@ -54,7 +54,7 @@
     "fake-uuid": "^1.0.0",
     "faker": "5.5.3",
     "floating-vue": "2.0.0-beta.17",
-    "fuzzysort": "^1.1.4",
+    "fuzzysort": "^2.0.4",
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",
     "graphql-tag": "^2.12.5",
