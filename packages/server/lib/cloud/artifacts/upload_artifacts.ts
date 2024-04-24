@@ -110,7 +110,7 @@ const extractArtifactsFromOptions = async ({
 
     const shouldAddProtocolArtifact = protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()
 
-    debug('should add protocol artifact? %o, %o, %O', {
+    debug('should add protocol artifact? %o', {
       protocolFilePath,
       protocolUploadUrl,
       protocolManager: !!protocolManager,
