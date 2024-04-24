@@ -4050,7 +4050,6 @@ This error will not affect or change the exit code.
 Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
       [stack trace lines]
 
-
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
