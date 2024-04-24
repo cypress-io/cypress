@@ -259,6 +259,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return this._errors.filter((e) => !e.fatal)
   }
 
+  getArchivePath (): string | undefined {
+    return this._archivePath
+  }
+
   async getArchiveInfo (): Promise<{ filePath: string, fileSize: number } | void> {
     const archivePath = this._archivePath
 
@@ -275,9 +279,9 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact): Promise<{
     success: boolean
-    fileSize: number
-    specAccess?: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
-  } | void> {
+    fileSize: number | bigint
+    specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+  } | undefined> {
     if (!this._protocol || !filePath || !this._db) {
       debug('not uploading due to one of the following being falsy: %O', {
         _protocol: !!this._protocol,
@@ -296,7 +300,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return {
         fileSize,
         success: true,
-        specAccess: this._protocol?.getDbMetadata(),
+        specAccess: this._protocol.getDbMetadata(),
       }
     } catch (e) {
       if (CAPTURE_ERRORS) {
@@ -304,10 +308,13 @@ export class ProtocolManager implements ProtocolManagerShape {
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
+          isUploadError: true,
         })
 
         throw e
       }
+
+      return
     } finally {
       if (DELETE_DB) {
         await fs.unlink(filePath).catch((e) => {

@@ -127,7 +127,7 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(ctx.res.set).to.be.calledWith(headers)
 
-        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+        expect(ctx['onlyRunMiddleware']).to.be.calledWith([
           'AttachPlainTextStreamFn',
           'PatchExpressSetHeader',
           'MaybeSendRedirectToClient',
@@ -144,7 +144,7 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
-        expect(ctx.onlyRunMiddleware).not.to.be.called
+        expect(ctx['onlyRunMiddleware']).not.to.be.called
       })
     })
   })
@@ -2308,7 +2308,7 @@ describe('http/response-middleware', function () {
       injectIntoServiceWorkerStub.restore()
     })
 
-    it('does not rewrite service worker if the request does not have the service worker header', function () {
+    it('does not rewrite the service worker if the request does not have the service worker header', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/not-service-worker.js',
@@ -2321,7 +2321,28 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('rewrites the service worker', async function () {
+    it('does not rewrite the service worker if the browser is non-chromium', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        getCurrentBrowser: () => {
+          return {
+            family: 'firefox',
+          }
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(injectIntoServiceWorkerStub).not.to.be.called
+      })
+    })
+
+    it('rewrites the service worker in chromium based browsers', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
@@ -2367,6 +2388,11 @@ describe('http/response-middleware', function () {
         },
         onError (error) {
           throw error
+        },
+        getCurrentBrowser: () => {
+          return {
+            family: 'chromium',
+          }
         },
         ..._.omit(props, 'incomingRes', 'res', 'req'),
       }

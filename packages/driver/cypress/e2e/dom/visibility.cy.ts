@@ -247,7 +247,7 @@ describe('src/cypress/dom/visibility', () => {
       this.$parentNoWidth = add(`\
 <div style='width: 0; height: 100px; overflow: hidden;'>
   <div style='height: 500px; width: 500px;'>
-    <span>parent width: 0</span>
+    <span id='parentNoWidth' >parent width: 0</span>
   </div>
 </div>`)
 

@@ -46,7 +46,8 @@ describe('capture-protocol', () => {
           expect(parsedProtocolEvents.multipleNetworkRequestEventsForSameRequestId).to.be.false
           expect(parsedProtocolEvents.correlatedUrls).to.eql({
             'http://localhost:3131/index.html': ['frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/example.json': ['frame id'],
+            // Only correlations occur in the service worker for this asset
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/example.json': ['no frame id'],
             // Only correlations occur in the service worker for this asset
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load.js': ['frame id'],
