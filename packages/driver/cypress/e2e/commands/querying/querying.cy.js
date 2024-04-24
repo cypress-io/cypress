@@ -18,6 +18,72 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    describe('should throw when timeout is not a number', () => {
+      const options = { timeout: {} }
+      const getErrMsgForTimeout = (timeout) => `\`cy.get()\` only accepts a \`number\` for its \`timeout\` option. You passed: \`${timeout}\``
+
+      it('timeout passed as plain object {}', (done) => {
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as some string', (done) => {
+        options.timeout = 'abc'
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as null', (done) => {
+        options.timeout = null
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as NaN', (done) => {
+        options.timeout = NaN
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as Boolean', (done) => {
+        options.timeout = false
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as array', (done) => {
+        options.timeout = []
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+    })
+
+    it('should timeout when element can\'t be found', (done) => {
+      cy.get('#some-el', { timeout: 100 })
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('Timed out retrying after 100ms')
+        done()
+      })
+    })
+
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 

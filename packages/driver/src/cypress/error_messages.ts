@@ -300,6 +300,10 @@ export default {
       message: `You passed a regular expression with the case-insensitive (_i_) flag and \`{ matchCase: true }\` to ${cmd('contains')}. Those options conflict with each other, so please choose one or the other.`,
       docsUrl: 'https://on.cypress.io/contains',
     },
+    invalid_option_timeout: {
+      message: `${cmd('contains')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
+      docsUrl: 'https://on.cypress.io/contains',
+    },
   },
 
   cookies: {
@@ -571,6 +575,10 @@ export default {
     },
     invalid_options: {
       message: `${cmd('get')} only accepts an options object for its second argument. You passed {{options}}`,
+      docsUrl: 'https://on.cypress.io/get',
+    },
+    invalid_option_timeout: {
+      message: `${cmd('get')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
       docsUrl: 'https://on.cypress.io/get',
     },
   },
@@ -1871,6 +1879,10 @@ export default {
   shadow: {
     no_shadow_root: {
       message: 'Expected the subject to host a shadow root, but never found it.',
+      docsUrl: 'https://on.cypress.io/shadow',
+    },
+    invalid_option_timeout: {
+      message: `${cmd('shadow')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
       docsUrl: 'https://on.cypress.io/shadow',
     },
   },
