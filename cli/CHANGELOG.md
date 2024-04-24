@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.8.1
 
-_Released 4/23/2024 (PENDING)_
+_Released 4/23/2024_
+
+**Performance:**
+
+- Fixed a performance issue with activated service workers that aren't controlling clients which could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
 
 **Bugfixes:**
 
@@ -9,6 +13,9 @@ _Released 4/23/2024 (PENDING)_
 - Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
 - Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
 
+**Misc:**
+
+- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
 
 **Dependency Updates:**
 

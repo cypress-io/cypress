@@ -839,7 +839,8 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 
   span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
 
-  if (!hasHeader) {
+  // skip if we don't have the header or we're not in chromium
+  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium') {
     span?.end()
 
     return this.next()

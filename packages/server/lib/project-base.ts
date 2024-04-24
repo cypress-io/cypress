@@ -156,7 +156,6 @@ export class ProjectBase extends EE {
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
-      exit: this.options.args?.exit,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
@@ -333,11 +332,7 @@ export class ProjectBase extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    const onRequestServedFromCache = (requestId: string) => {
-      this.server.removeBrowserPreRequest(requestId)
-    }
-
-    const onRequestFailed = (requestId: string) => {
+    const onRemoveBrowserPreRequest = (requestId: string) => {
       this.server.removeBrowserPreRequest(requestId)
     }
 
@@ -367,8 +362,7 @@ export class ProjectBase extends EE {
       screenshotsFolder,
       onBrowserPreRequest,
       onRequestEvent,
-      onRequestServedFromCache,
-      onRequestFailed,
+      onRemoveBrowserPreRequest,
       onDownloadLinkClicked,
       onServiceWorkerRegistrationUpdated,
       onServiceWorkerVersionUpdated,
@@ -429,6 +423,8 @@ export class ProjectBase extends EE {
             previousResults: reporterInstance?.results() || {},
           })
         } else if (event === 'end') {
+          debugVerbose('browserPreRequests at the end: %O', this.server.getBrowserPreRequests())
+
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
