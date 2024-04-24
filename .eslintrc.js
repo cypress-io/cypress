@@ -59,6 +59,10 @@ module.exports = {
         'no-restricted-syntax': 'off',
       },
     },
+    {
+      files: ['*.json'],
+      extends: 'plugin:@cypress/dev/general',
+    },
   ],
   rules: {
     'no-duplicate-imports': 'off',

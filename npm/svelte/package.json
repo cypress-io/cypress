@@ -7,8 +7,8 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "check-ts": "tsc --noEmit"
+    "check-ts": "tsc --noEmit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
