@@ -61,6 +61,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
       CYPRESS_INTERNAL_NEXUS_CODEGEN: 'true',
       TS_NODE_CACHE: 'false',
     },
+    ...process.platform === 'win32' ? { shell: true } : {},
   })
 
   out.stderr.on('data', (data) => {
