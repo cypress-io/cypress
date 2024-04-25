@@ -3961,7 +3961,7 @@ describe('Routes', () => {
       it('sets x-cypress-file-path headers', function () {
         return this.rp(`${this.proxy}/assets/app.css`)
         .then((res) => {
-          expect(res.headers).to.have.property('x-cypress-file-path', `${Fixtures.projectPath('no-server')}/dev/assets/app.css`)
+          expect(res.headers).to.have.property('x-cypress-file-path', encodeURIComponent(`${Fixtures.projectPath('no-server')}/dev/assets/app.css`))
         })
       })
 
