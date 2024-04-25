@@ -33,6 +33,14 @@ This cache should be maintained and updated over time. Rather than having this m
 
 ## Troubleshooting
 
+**Local Development**
+
+If you're running into problems locally, either with generating the snapshot or at runtime, a good first step is to clean everything and start from scratch. This command will accomplish that (note that it will delete any new unstaged files, so if you want to keep them, either stash them or stage them):
+
+```
+git clean -fxd && yarn
+```
+
 **Generation**
 
 If the build v8 snapshot command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run the [Update V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action against your branch to generate the snapshots for you on all platforms. You can choose to commit directly to your branch or alternatively issue a PR to your branch.
