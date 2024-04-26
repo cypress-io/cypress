@@ -59,13 +59,14 @@ module.exports = {
         'no-restricted-syntax': 'off',
       },
     },
+    {
+      files: ['*.json'],
+      extends: 'plugin:@cypress/dev/general',
+    },
   ],
   rules: {
     'no-duplicate-imports': 'off',
-    'import/no-duplicates': 'off',
-    '@typescript-eslint/no-duplicate-imports': [
-      'error',
-    ],
+    'import/no-duplicates': 'error',
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',
