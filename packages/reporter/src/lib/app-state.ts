@@ -32,7 +32,7 @@ class AppState {
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable studioActive = defaults.studioActive
 
-  isStopped = false;
+  isStopped = false
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
 
