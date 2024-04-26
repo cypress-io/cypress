@@ -345,6 +345,27 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    const origin = new URL(this.req.proxiedUrl).origin
+
+    if (process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS && process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS === origin) {
+      // For cypress-in-cypress tests exclusively, we need to bucket all origin-agent-cluster requests
+      // from HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS to include Origin-Agent-Cluster=false. This has to due with changed
+      // behavior starting in Chrome 119. The new behavior works like the following:
+      //     If a page did not request an origin-keyed agent cluster, chrome will place it in one
+      //     anyway because a previous request went through without the Origin-Agent-Cluster=false header set.
+      //     At time of writing, documentation detailing this behavior has not been found.
+
+      // To work around this, any request that matches the origin of HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      // should set the Origin-Agent-Cluster=false header to avoid origin-keyed agent clusters for
+      this.res.setHeader('Origin-Agent-Cluster', '?0')
+    }
+  }
+
+  this.next()
+}
+
 const SetInjectionLevel: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'set:injection:level', parentSpan: this.resMiddlewareSpan, isVerbose })
 
@@ -933,6 +954,7 @@ export default {
   InterceptResponse,
   PatchExpressSetHeader,
   OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
+  MaybeSetOriginAgentClusterHeader, // NOTE: only used in cypress-in-cypress testing. this is otherwise a no-op
   SetInjectionLevel,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
