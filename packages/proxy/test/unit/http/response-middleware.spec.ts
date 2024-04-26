@@ -471,7 +471,7 @@ describe('http/response-middleware', function () {
       }
     })
 
-    this.afterEach(function () {
+    afterEach(function () {
       beforeEach(function () {
         process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
         process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
