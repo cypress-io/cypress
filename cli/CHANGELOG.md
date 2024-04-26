@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.8.2
+
+_Released 4/27/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
+
 ## 13.8.1
 
 _Released 4/23/2024_

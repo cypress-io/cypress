@@ -22,6 +22,7 @@ import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
 import { injectIntoServiceWorker } from './util/service-worker-injector'
+import { validateHeaderName } from 'http'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -306,7 +307,26 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'connection',
   ])
 
-  this.res.set(headers)
+  this.debug('The headers are %o', headers)
+
+  // Filter for invalid headers
+  const filteredHeaders = Object.fromEntries(
+    Object.entries(headers).filter(([key, value]) => {
+      try {
+        validateHeaderName(key)
+
+        return true
+      } catch (err) {
+        this.debug('Warning: Found header with the invalid name \'%s\', taking it off the response', key)
+
+        return false
+      }
+    }),
+  )
+
+  this.res.set(filteredHeaders)
+
+  this.debug('the new response headers are %o', this.res.getHeaderNames())
 
   span?.setAttributes({
     experimentalCspAllowList: this.config.experimentalCspAllowList,
