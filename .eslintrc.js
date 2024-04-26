@@ -66,7 +66,7 @@ module.exports = {
   ],
   rules: {
     'no-duplicate-imports': 'off',
-    'import/no-duplicates': 'off',
+    'import/no-duplicates': 'error',
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',

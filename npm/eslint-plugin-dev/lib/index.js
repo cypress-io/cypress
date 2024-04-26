@@ -247,6 +247,7 @@ module.exports = {
           parser: '@typescript-eslint/parser',
           plugins: [
             '@typescript-eslint',
+            'import',
           ],
           rules: {
             'no-undef': 'off',
@@ -254,7 +255,7 @@ module.exports = {
             'indent': 'off',
             'no-useless-constructor': 'off',
             'no-duplicate-imports': 'off',
-            'import/no-duplicates': 'off',
+            'import/no-duplicates': 'error',
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
