@@ -11,7 +11,7 @@ jobs:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: develop
     # Prevent from running this workflow on forks
-    if: github.repository == 'cypres-io/cypress'
+    if: github.repository == 'cypress-io/cypress'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
