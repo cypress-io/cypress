@@ -12,6 +12,8 @@ import { agent } from '@packages/network'
 import pkg from '@packages/root'
 
 import env from '../util/env'
+import { putProtocolArtifact } from './api/put_protocol_artifact'
+
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 
@@ -23,9 +25,6 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-// Timeout for upload
-const TWO_MINUTES = 120000
-const RETRY_DELAYS = [500, 1000]
 const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {
@@ -49,13 +48,6 @@ const requireScript = (script: string) => {
   module.children.splice(module.children.indexOf(mod), 1)
 
   return mod.exports
-}
-
-class CypressRetryableError extends Error {
-  constructor (message: string) {
-    super(message)
-    this.name = 'CypressRetryableError'
-  }
 }
 
 export class ProtocolManager implements ProtocolManagerShape {
@@ -267,7 +259,11 @@ export class ProtocolManager implements ProtocolManagerShape {
     return this._errors.filter((e) => !e.fatal)
   }
 
-  async getArchiveInfo (): Promise<{ stream: Readable, fileSize: number } | void> {
+  getArchivePath (): string | undefined {
+    return this._archivePath
+  }
+
+  async getArchiveInfo (): Promise<{ filePath: string, fileSize: number } | void> {
     const archivePath = this._archivePath
 
     debug('reading archive from', archivePath)
@@ -276,108 +272,60 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
 
     return {
-      stream: fs.createReadStream(archivePath),
+      filePath: archivePath,
       fileSize: (await fs.stat(archivePath)).size,
     }
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
-    const archivePath = this._archivePath
+  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact): Promise<{
+    success: boolean
+    fileSize: number | bigint
+    specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+  } | undefined> {
+    if (!this._protocol || !filePath || !this._db) {
+      debug('not uploading due to one of the following being falsy: %O', {
+        _protocol: !!this._protocol,
+        archivePath: !!filePath,
+        _db: !!this._db,
+      })
 
-    if (!this._protocol || !archivePath || !this._db) {
       return
     }
 
-    debug(`uploading %s to %s with a file size of %s`, archivePath, uploadUrl, fileSize)
-
-    const retryRequest = async (retryCount: number, errors: Error[]) => {
-      try {
-        if (fileSize > dbSizeLimit()) {
-          throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
-        }
-
-        const controller = new AbortController()
-
-        setTimeout(() => {
-          controller.abort()
-        }, timeout ?? TWO_MINUTES)
-
-        const res = await fetch(uploadUrl, {
-          agent,
-          method: 'PUT',
-          // @ts-expect-error - this is supported
-          body: payload,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-tar',
-            'Content-Length': `${fileSize}`,
-          },
-          signal: controller.signal,
-        })
-
-        if (res.ok) {
-          return {
-            fileSize,
-            success: true,
-            specAccess: this._protocol?.getDbMetadata(),
-          }
-        }
-
-        const errorMessage = await res.json().catch(() => {
-          const url = new URL(uploadUrl)
-
-          for (const [key, value] of url.searchParams) {
-            if (['x-amz-credential', 'x-amz-signature'].includes(key.toLowerCase())) {
-              url.searchParams.set(key, 'X'.repeat(value.length))
-            }
-          }
-
-          return `${res.status} ${res.statusText} (${url.href})`
-        })
-
-        debug(`error response: %O`, errorMessage)
-
-        if (res.status >= 500 && res.status < 600) {
-          throw new CypressRetryableError(errorMessage)
-        }
-
-        throw new Error(errorMessage)
-      } catch (e) {
-        // Only retry errors that are network related (e.g. connection reset or timeouts)
-        if (['FetchError', 'AbortError', 'CypressRetryableError'].includes(e.name)) {
-          if (retryCount < RETRY_DELAYS.length) {
-            debug(`retrying upload %o`, { retryCount })
-            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
-
-            return await retryRequest(retryCount + 1, [...errors, e])
-          }
-        }
-
-        const totalErrors = [...errors, e]
-
-        throw new AggregateError(totalErrors, e.message)
-      }
-    }
+    debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      return await retryRequest(0, [])
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
+
+      return {
+        fileSize,
+        success: true,
+        specAccess: this._protocol.getDbMetadata(),
+      }
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
+          isUploadError: true,
         })
+
+        throw e
       }
 
-      throw e
+      return
     } finally {
-      await (
-        DELETE_DB ? fs.unlink(archivePath).catch((e) => {
-          debug(`Error unlinking db %o`, e)
-        }) : Promise.resolve()
-      )
+      if (DELETE_DB) {
+        await fs.unlink(filePath).catch((e) => {
+          debug('Error unlinking db %o', e)
+        })
+      }
     }
+  }
+
+  async cdpReconnect () {
+    await this.invokeAsync('cdpReconnect', { isEssential: true })
   }
 
   async reportNonFatalErrors (context?: {

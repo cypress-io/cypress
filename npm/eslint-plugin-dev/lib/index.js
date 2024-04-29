@@ -239,25 +239,6 @@ module.exports = {
           },
         },
         {
-          files: '*.coffee',
-          parser: '@fellow/eslint-plugin-coffee',
-          parserOptions: {
-            parser: 'babel-eslint',
-            sourceType: 'module',
-            ecmaVersion: 2018,
-          },
-          plugins: [
-            '@fellow/eslint-plugin-coffee',
-          ],
-          rules: {
-            ...Object.assign({}, ...Object.keys(baseRules).map((key) => ({ [key]: 'off' }))),
-            '@fellow/coffee/coffeescript-error': [
-              'error',
-              {},
-            ],
-          },
-        },
-        {
           files: [
             '*.ts',
             '*.tsx',
@@ -266,6 +247,7 @@ module.exports = {
           parser: '@typescript-eslint/parser',
           plugins: [
             '@typescript-eslint',
+            'import',
           ],
           rules: {
             'no-undef': 'off',
@@ -273,10 +255,7 @@ module.exports = {
             'indent': 'off',
             'no-useless-constructor': 'off',
             'no-duplicate-imports': 'off',
-            'import/no-duplicates': 'off',
-            '@typescript-eslint/no-duplicate-imports': [
-              'error',
-            ],
+            'import/no-duplicates': 'error',
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
@@ -344,10 +323,11 @@ module.exports = {
       env: {
         browser: true,
       },
-      parser: 'babel-eslint',
+      parser: '@babel/eslint-parser',
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
+        requireConfigFile: false,
         ecmaFeatures: {
           jsx: true,
           legacyDecorators: true,

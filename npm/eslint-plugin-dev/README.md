@@ -20,6 +20,12 @@ npm install --save-dev @cypress/eslint-plugin-dev
 
 ## Usage
 
+> ⚠️ Currently does **not** support ESLint version 9
+
+For Eslint 8, use version 6.x.x
+
+For Eslint 7 and below, use version 5.x.x
+
 1) install the following `devDependencies`:
 ```sh
 @cypress/eslint-plugin-dev
@@ -28,13 +34,9 @@ eslint-plugin-json-format
 @typescript-eslint/eslint-plugin
 eslint-plugin-mocha
 
-# if you have coffeescript files
-@fellow/eslint-plugin-coffee
-babel-eslint
-
 # if you have react/jsx files
 eslint-plugin-react
-babel-eslint
+@babel/eslint-parser
 ```
 
 2) add the following to your root level `.eslintrc.json`:
@@ -44,7 +46,7 @@ babel-eslint
     "@cypress/dev"
   ],
   "extends": [
-    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/general"
   ]
 }
 ```
@@ -112,7 +114,7 @@ React and JSX-specific configuration and rules.
 
 **requires you to install the following `devDependencies`**:
 ```sh
-babel-eslint
+@babel/eslint-parser
 eslint-plugin-react
 ```
 

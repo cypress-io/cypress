@@ -9,19 +9,19 @@ const RequestErrors = require('@cypress/request-promise/errors')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 
-const machineId = require('./machine_id')
-const errors = require('../errors')
-const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
+const machineId = require('../machine_id')
+const errors = require('../../errors')
+const { apiUrl, apiRoutes, makeRoutes } = require('../routes')
 
 import Bluebird from 'bluebird'
-import { getText } from '../util/status_code'
-import * as enc from './encryption'
-import getEnvInformationForProjectRoot from './environment'
+import { getText } from '../../util/status_code'
+import * as enc from '../encryption'
+import getEnvInformationForProjectRoot from '../environment'
 
 import type { OptionsWithUrl } from 'request-promise'
-import { fs } from '../util/fs'
-import ProtocolManager from './protocol'
-import type { ProjectBase } from '../project-base'
+import { fs } from '../../util/fs'
+import ProtocolManager from '../protocol'
+import type { ProjectBase } from '../../project-base'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -58,6 +58,7 @@ export interface CypressRequestOptions extends OptionsWithUrl {
   cacheable?: boolean
 }
 
+// TODO: migrate to fetch from @cypress/request
 const rp = request.defaults((params: CypressRequestOptions, callback) => {
   let resp
 
@@ -274,22 +275,23 @@ type CreateRunResponse = {
   } | undefined
 }
 
-type ArtifactMetadata = {
+export type ArtifactMetadata = {
   url: string
-  fileSize?: number
+  fileSize?: number | bigint
   uploadDuration?: number
   success: boolean
   error?: string
+  errorStack?: string
 }
 
-type ProtocolMetadata = ArtifactMetadata & {
+export type ProtocolMetadata = ArtifactMetadata & {
   specAccess?: {
-    size: bigint
-    offset: bigint
+    size: number
+    offset: number
   }
 }
 
-type UpdateInstanceArtifactsPayload = {
+export type UpdateInstanceArtifactsPayload = {
   screenshots: ArtifactMetadata[]
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
@@ -298,7 +300,7 @@ type UpdateInstanceArtifactsPayload = {
 type UpdateInstanceArtifactsOptions = {
   runId: string
   instanceId: string
-  timeout: number | undefined
+  timeout?: number
 }
 
 let preflightResult = {
@@ -307,7 +309,10 @@ let preflightResult = {
 
 let recordRoutes = apiRoutes
 
-module.exports = {
+// Potential todos: Refactor to named exports, refactor away from `this.` in exports,
+// move individual exports to their own files & convert this to barrelfile
+
+export default {
   rp,
 
   // For internal testing
@@ -400,8 +405,10 @@ module.exports = {
       let script
 
       try {
-        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+        const protocolUrl = captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
+        if (protocolUrl) {
+          script = await this.getCaptureProtocolScript(protocolUrl)
         }
       } catch (e) {
         debugProtocol('Error downloading capture code', e)
