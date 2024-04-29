@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core'
   </div>`,
 })
 export class ErrorsComponent {
-  @Input() throwError!: boolean;
+  @Input() throwError!: boolean
 
   syncError () {
     throw new Error('sync error')

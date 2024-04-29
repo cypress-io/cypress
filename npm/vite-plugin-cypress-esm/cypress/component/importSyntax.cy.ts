@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-/* eslint-disable @typescript-eslint/no-duplicate-imports */
+/* eslint-disable import/no-duplicates */
 import defaultExport1 from './fixtures/kitchenSink'
 import * as name1 from './fixtures/kitchenSink'
 import { export1 } from './fixtures/kitchenSink'

@@ -1,5 +1,5 @@
 const path = require('path')
-const CLIEngine = require('eslint').CLIEngine
+const eslint = require('eslint')
 const plugin = require('..')
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
@@ -7,50 +7,47 @@ const { expect } = require('chai')
 
 const ruleName = 'no-return-before'
 const pluginName = '__plugin__'
+const ESLint = eslint.ESLint
 
-function execute (file, options = {}) {
-  const opts = _.defaultsDeep(options, {
+async function execute (file, options = {}) {
+  const defaultConfig = {
     fix: true,
-    config: {
+    ignore: false,
+    useEslintrc: false,
+    baseConfig: {
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
       },
+      rules: {
+        [`${pluginName}/${ruleName}`]: ['error'],
+      },
+      plugins: [pluginName],
     },
-  })
-
-  const cli = new CLIEngine({
-    parserOptions: {
-      ecmaVersion: 2018,
-      sourceType: 'module',
+    plugins: {
+      [pluginName]: plugin,
     },
-    rules: {
-      [`${pluginName}/${ruleName}`]: ['error'],
-    },
-    ...opts,
-    ignore: false,
-    useEslintrc: false,
-    plugins: [pluginName],
+  }
+  const opts = _.defaultsDeep(options, defaultConfig)
 
-  })
+  const cli = new ESLint(opts)
 
-  cli.addPlugin(pluginName, plugin)
-  const results = cli.executeOnFiles([path.join(__dirname, file)]).results[0]
+  const results = await cli.lintFiles([path.join(__dirname, file)])
 
-  return results
+  return results[0]
 }
 
 describe(ruleName, () => {
   it('pass', async () => {
     const filename = './fixtures/no-return-before-pass.js'
-    const result = execute(filename)
+    const result = await execute(filename)
 
     expect(result.errorCount).equal(0)
   })
 
   it('fail', async () => {
     const filename = './fixtures/no-return-before-fail.js'
-    const result = execute(filename, {
+    const result = await execute(filename, {
       fix: false,
     })
 
@@ -60,7 +57,7 @@ describe(ruleName, () => {
 
   it('fix fail', async () => {
     const filename = './fixtures/no-return-before-fail.js'
-    const result = execute(filename)
+    const result = await execute(filename)
 
     expect(result.output).equal(`${stripIndent`
     describe('outer', ()=>{
@@ -79,14 +76,16 @@ describe(ruleName, () => {
   describe('config', () => {
     it('config [tokens]', async () => {
       const filename = './fixtures/no-return-before-fail.js'
-      const result = execute(filename, {
+      const result = await execute(filename, {
         fix: false,
-        rules: {
-          [`${pluginName}/${ruleName}`]: [
-            'error', {
-              tokens: ['someFn'],
-            },
-          ],
+        baseConfig: {
+          rules: {
+            [`${pluginName}/${ruleName}`]: [
+              'error', {
+                tokens: ['someFn'],
+              },
+            ],
+          },
         },
       })
 
