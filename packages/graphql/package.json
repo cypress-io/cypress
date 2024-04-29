@@ -5,17 +5,17 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "nexus-build": "ts-node ./scripts/nexus-build.ts",
     "build": "graphql-codegen --config graphql-codegen.yml",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean-deps": "rimraf node_modules",
     "clean": "rimraf './{src,test}/**/*.js'",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
-    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "nexus-build": "ts-node ./scripts/nexus-build.ts",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "@graphql-tools/delegate": "8.2.1",

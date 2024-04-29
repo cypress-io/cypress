@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.8.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.4...@cypress/webpack-dev-server-v3.8.0) (2024-04-18)
+
+
+### Features
+
+* support webpack-dev-server v5 in @cypress/webpack-dev-server ([#29306](https://github.com/cypress-io/cypress/issues/29306)) ([d7e9d60](https://github.com/cypress-io/cypress/commit/d7e9d6068c6ab01ab58f9959ea7ad6a361087764))
+
 # [@cypress/webpack-dev-server-v3.7.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.3...@cypress/webpack-dev-server-v3.7.4) (2024-01-30)
 
 

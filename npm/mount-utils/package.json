@@ -7,8 +7,8 @@
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
-    "watch": "tsc -w",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "lint": "eslint --ext .js,.ts,.json, .",
+    "watch": "tsc -w"
   },
   "dependencies": {},
   "devDependencies": {
