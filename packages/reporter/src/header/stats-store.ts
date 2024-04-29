@@ -23,7 +23,7 @@ class StatsStore {
   @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
-  private _interval?: IntervalID;
+  private _interval?: IntervalID
 
   @computed get duration () {
     if (!this._startTime) return 0
