@@ -36,11 +36,11 @@ export class ParsedUrl {
     this.pathMatcher = new minimatch.Minimatch(this.path ?? '')
   }
 
-  path: string | undefined;
-  host: string;
-  port: number | undefined;
-  hostMatcher: minimatch.IMinimatch;
-  pathMatcher: minimatch.IMinimatch;
+  path: string | undefined
+  host: string
+  port: number | undefined
+  hostMatcher: minimatch.IMinimatch
+  pathMatcher: minimatch.IMinimatch
 }
 
 export class UrlMatcher {
@@ -77,11 +77,11 @@ export class UrlClientCertificates {
     this.pathnameLength = new URL(url).pathname.length
     this.clientCertificates = new ClientCertificates()
   }
-  clientCertificates: ClientCertificates;
-  url: string;
-  subjects: string;
-  pathnameLength: number;
-  matchRule: ParsedUrl | undefined;
+  clientCertificates: ClientCertificates
+  url: string
+  subjects: string
+  pathnameLength: number
+  matchRule: ParsedUrl | undefined
 
   addSubject (subject: string) {
     if (!this.subjects) {
@@ -97,10 +97,10 @@ export class UrlClientCertificates {
  * at https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options
  */
 export class ClientCertificates {
-  ca: Buffer[] = [];
-  cert: Buffer[] = [];
-  key: PemKey[] = [];
-  pfx: PfxCertificate[] = [];
+  ca: Buffer[] = []
+  cert: Buffer[] = []
+  key: PemKey[] = []
+  pfx: PfxCertificate[] = []
 }
 
 export class PemKey {
@@ -109,8 +109,8 @@ export class PemKey {
     this.passphrase = passphrase
   }
 
-  pem: Buffer;
-  passphrase: string | undefined;
+  pem: Buffer
+  passphrase: string | undefined
 }
 
 export class PfxCertificate {
@@ -119,12 +119,12 @@ export class PfxCertificate {
     this.passphrase = passphrase
   }
 
-  buf: Buffer;
-  passphrase: string | undefined;
+  buf: Buffer
+  passphrase: string | undefined
 }
 
 export class ClientCertificateStore {
-  private _urlClientCertificates: UrlClientCertificates[] = [];
+  private _urlClientCertificates: UrlClientCertificates[] = []
 
   addClientCertificatesForUrl (cert: UrlClientCertificates) {
     debug(

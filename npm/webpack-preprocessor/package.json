@@ -6,7 +6,9 @@
   "main": "dist",
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
     "deps": "deps-ok && dependency-check --no-dev .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -15,9 +17,7 @@
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "check-ts": "tsc --noEmit",
-    "watch": "rimraf dist && tsc --watch",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
     "bluebird": "3.7.1",

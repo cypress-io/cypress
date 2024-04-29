@@ -7,14 +7,14 @@
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
-    "dev": "tsc --watch",
     "clean": "rimraf dist",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
-    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
+    "dev": "tsc --watch",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
     "find-up": "6.3.0",
