@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.8.2
+## 13.9.0
 
 _Released 5/7/2024 (PENDING)_
+
+**Features:**
+
+- Add the option to ignore chrome preferences when launching the browser. Addressed in [#29332](https://github.com/cypress-io/cypress/pull/29332).
 
 **Dependency Updates:**
 
