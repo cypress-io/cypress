@@ -7,6 +7,13 @@ _Released 5/7/2024 (PENDING)_
 
 - Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name-or-path>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
 ## 13.8.1
 
 _Released 4/23/2024_
@@ -39,14 +46,6 @@ _Released 4/18/2024_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
-
-**Features:**
-
-- Running the command `cypress open --browser <browser-name-or-path>`will
-launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003).
-Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
-
 
 **Misc:**
 
