@@ -26,6 +26,7 @@ export default class Attempt {
   @observable _testOuterStatus?: TestState = undefined
   @observable _invocationCount: number = 0
   @observable invocationDetails?: FileDetails
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @observable hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,

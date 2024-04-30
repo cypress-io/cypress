@@ -8,7 +8,7 @@ import { CounterService } from './counter.service'
   </button>`,
 })
 export class CounterComponent {
-  count$ = this.counterService.count$;
+  count$ = this.counterService.count$
 
   constructor (private counterService: CounterService) {}
 

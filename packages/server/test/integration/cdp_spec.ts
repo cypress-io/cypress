@@ -2,12 +2,13 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 import Debug from 'debug'
 import _ from 'lodash'
-import { Server as WebSocketServer } from 'ws'
+import WebSocket from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
 import * as CriClient from '../../lib/browsers/cri-client'
 import { expect, nock } from '../spec_helper'
 
-import type { SinonStub } from 'sinon'
+import sinon from 'sinon'
+
 // import Bluebird from 'bluebird'
 
 const debug = Debug('cypress:server:tests')
@@ -29,14 +30,14 @@ type OnWSConnection = (wsClient: WebSocket) => void
 describe('CDP Clients', () => {
   require('mocha-banner').register()
 
-  let wsSrv: WebSocketServer
+  let wsSrv: WebSocket.Server
   let criClient: CriClient.CriClient
   let messages: object[]
-  let onMessage: SinonStub
+  let onMessage: sinon.SinonStub
 
-  const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocketServer> => {
+  const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
     return new Promise((resolve, reject) => {
-      const srv = new WebSocketServer({
+      const srv = new WebSocket.Server({
         port: wsServerPort,
       })
 
@@ -209,7 +210,7 @@ describe('CDP Clients', () => {
 
         const send = (commands: CDPCommands[]) => {
           commands.forEach(({ command, params }) => {
-            criClient.send(command, params).catch(() => {})
+            criClient.send(command, params)
           })
         }
 
@@ -319,7 +320,7 @@ describe('CDP Clients', () => {
       })
       .then((stub) => {
         expect(criClient.closed).to.be.true
-        expect((stub as SinonStub).callCount).to.be.eq(3)
+        expect((stub as sinon.SinonStub).callCount).to.be.eq(3)
       })
     })
   })

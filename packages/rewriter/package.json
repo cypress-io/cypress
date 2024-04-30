@@ -4,13 +4,13 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "build-test": "yarn build-prod --noEmit",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "ast-types": "0.13.3",
