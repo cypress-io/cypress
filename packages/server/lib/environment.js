@@ -45,6 +45,7 @@ try {
   } = require('electron')
 
   DEFAULT_ELECTRON_FLAGS.forEach(({ name, value }) => {
+    debug('appending default switches for electron: %O', DEFAULT_ELECTRON_FLAGS)
     value ? app.commandLine.appendSwitch(name) : app.commandLine.appendSwitch(name, value)
   })
 
