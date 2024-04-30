@@ -16,7 +16,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
       job_name: process.env.CIRCLE_JOB,
       triggered_workflow_id: process.env.CIRCLE_WORKFLOW_ID,
       triggered_job_url: process.env.CIRCLE_BUILD_URL,
-      branch: process.env.CIRCLE_BRANCH,
+      branch: 'ryanm/chore/bump-electron',
       should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
       binary_version: nextVersion,
     },
