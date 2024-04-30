@@ -3119,7 +3119,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec.
+Warning: we encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3211,7 +3211,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec.
+Warning: we encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3303,7 +3303,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while recording Test Replay data for this spec.
+Warning: We encountered an error while recording Test Replay data for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3490,7 +3490,7 @@ We will retry 1 more time in X second(s)...
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec.
+Warning: we encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -4036,7 +4036,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors db is unrea
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while recording Test Replay data for this spec.
+Warning: We encountered an error while recording Test Replay data for this spec. 
 
 These results will not display Test Replay recordings.
 

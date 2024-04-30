@@ -542,17 +542,15 @@ export const AllCypressErrors = {
   },
   CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
     return errTemplate`\
-        Warning: we encountered an error while initializing the Test Replay recording for this spec.
+        Warning: we encountered an error while initializing the Test Replay recording for this spec. ${fmt.stackTrace(error)}
         
         These results will not display Test Replay recordings.
         
-        This error will not affect or change the exit code.
-        
-        ${fmt.stackTrace(error)}`
+        This error will not affect or change the exit code.`
   },
   CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while recording Test Replay data for this spec.
+        Warning: We encountered an error while recording Test Replay data for this spec. ${fmt.stackTrace(error)}
         
         These results will not display Test Replay recordings.
 
@@ -561,9 +559,7 @@ export const AllCypressErrors = {
         - Try increasing the available disk space.
         - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
 
-        This error will not affect or change the exit code.
-
-        ${fmt.stackTrace(error)}`
+        This error will not affect or change the exit code.`
   },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
     return errTemplate`\
