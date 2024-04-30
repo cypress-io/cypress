@@ -542,7 +542,7 @@ export const AllCypressErrors = {
   },
   CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
     return errTemplate`\
-        Warning: we encountered an error while initializing the Test Replay recording for this spec. ${fmt.stackTrace(error)}
+        Warning: We encountered an error while initializing the Test Replay recording for this spec. ${fmt.stackTrace(error)}
         
         These results will not display Test Replay recordings.
         
@@ -605,15 +605,13 @@ export const AllCypressErrors = {
 ${fmt.listItems(furtherErrs.map(({ message }: Error) => message))}` : null
 
     return errTemplate`\
-        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. ${firstErr ? fmt.stackTrace(firstErr) : null}
 
         We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times.
 
         ${recommendation}
 
-        ${fmtRest}
-
-        ${firstErr ? fmt.stackTrace(firstErr) : null}`
+        ${fmtRest}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\

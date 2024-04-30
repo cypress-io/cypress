@@ -3119,7 +3119,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3211,7 +3211,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3490,7 +3490,7 @@ We will retry 1 more time in X second(s)...
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: we encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec. 
 
 These results will not display Test Replay recordings.
 
@@ -3596,7 +3596,7 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
 
 We attempted to upload the Test Replay recording 3 times.
 
@@ -3954,7 +3954,7 @@ exports['capture-protocol api errors upload 503 - tries 3 times and fails contin
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
 
 We attempted to upload the Test Replay recording 3 times.
 
@@ -4147,7 +4147,7 @@ exports['capture-protocol api errors upload network error retries 3 times, warns
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
 
 We attempted to upload the Test Replay recording 3 times.
 
