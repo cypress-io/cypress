@@ -3600,7 +3600,7 @@ Warning: We encountered multiple errors while uploading the Test Replay recordin
 
 We attempted to upload the Test Replay recording 3 times.
 
-Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to undefined
+Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to http://fake.test/url
 
 In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
@@ -4050,6 +4050,7 @@ This error will not affect or change the exit code.
 Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
       [stack trace lines]
 
+
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
@@ -4150,7 +4151,7 @@ Warning: We encountered multiple errors while uploading the Test Replay recordin
 
 We attempted to upload the Test Replay recording 3 times.
 
-Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to undefined
+Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to http://fake.test/url
 
 In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test

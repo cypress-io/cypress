@@ -617,8 +617,7 @@ ${fmt.listItems(furtherErrs.map(({ message }: Error) => message))}` : null
 
         ${fmtRest}
 
-        ${firstErr ? fmt.stackTrace(firstErr) : null}
-    `
+        ${firstErr ? fmt.stackTrace(firstErr) : null}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
