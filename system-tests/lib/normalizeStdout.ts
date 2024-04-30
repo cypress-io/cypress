@@ -12,7 +12,7 @@ export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Ca
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
-const whiteSpaceBetweenNewlines = /\n\s+\n/
+
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
@@ -97,13 +97,7 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
   return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
-    let post = parts[0]
-
-    if (browserName === 'firefox') {
-      post = post.replace(whiteSpaceBetweenNewlines, '\n')
-    }
-
-    return `\n      [stack trace lines]${post}`
+    return `\n      [stack trace lines]\n\n`
   })
 }
 
