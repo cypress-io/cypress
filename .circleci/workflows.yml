@@ -1412,6 +1412,7 @@ jobs:
 
   check-ts:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1716,6 +1717,7 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1723,6 +1725,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1730,6 +1733,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1737,6 +1741,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1811,6 +1816,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
       percy:
         type: boolean
         default: false
@@ -1844,6 +1852,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
+    resource_class: medium+
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -1851,6 +1860,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1859,6 +1869,7 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1873,7 +1884,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: large
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1896,6 +1907,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 3
     steps:
       - restore_cached_workspace
@@ -1921,6 +1933,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 2
     steps:
       - restore_cached_workspace
@@ -2191,7 +2204,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2290,6 +2303,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -3426,7 +3440,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
@@ -3440,7 +3454,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3448,7 +3462,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
