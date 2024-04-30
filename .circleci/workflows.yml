@@ -74,7 +74,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'bump-electron-27.3.10', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_internal_browser_images', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -83,7 +83,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome118-ff115
+      - image: cypress/browsers-internal:node18.17.1-chrome124-ff125
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -93,7 +93,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome118-ff115
+      - image: cypress/browsers-internal:node18.17.1-chrome124-ff125
         user: node
     environment:
       PLATFORM: linux
@@ -653,11 +653,6 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' && '<<parameters.package>>' == 'app' && '<<parameters.type>>' == 'e2e' ]]; then
-              IS_WINDOWS_APP_INTEGRATION_TEST=true
-            else
-              IS_WINDOWS_APP_INTEGRATION_TEST=false
-            fi
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
@@ -665,22 +660,14 @@ commands:
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
-              if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
-                echo "on windows running app-integration tests. Skipping flaky tests"
-                # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-                # Do NOT record on windows packages/app due to encryption issues
-                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
-              else
-                DEBUG=<<parameters.debug>> \
-                CYPRESS_CONFIG_ENV=production \
-                CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-                PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-                PERCY_ENABLE=${PERCY_TOKEN:-0} \
-                PERCY_PARALLEL_TOTAL=-1 \
-                CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
-              fi
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_CONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
 
@@ -700,12 +687,6 @@ commands:
 
               # To run the `yarn` command, we need to walk out of the package folder.
               cd ../..
-
-              if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
-                echo "on windows running app-integration tests. Skipping flaky tests"
-                # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-              fi
 
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
@@ -1813,7 +1794,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
