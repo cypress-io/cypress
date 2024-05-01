@@ -19,6 +19,8 @@ import type { Table } from 'cli-table3'
 import type { CypressRunResult } from '../modes/results'
 import type { IArtifact, ArtifactUploadResult } from '../cloud/artifacts/artifact'
 
+import { ArtifactKinds } from '../cloud/artifacts/artifact'
+
 type Screenshot = {
   width: number
   height: number
@@ -601,9 +603,9 @@ export const logUploadManifest = (artifacts: IArtifact[], protocolCaptureMeta: {
   disabledMessage?: string
 }, protocolFatalError?: ProtocolError) => {
   const labels = {
-    'video': 'Video',
-    'screenshots': 'Screenshot',
-    'protocol': 'Test Replay',
+    [ArtifactKinds.VIDEO]: 'Video',
+    [ArtifactKinds.SCREENSHOTS]: 'Screenshot',
+    [ArtifactKinds.PROTOCOL]: 'Test Replay',
   }
 
   // eslint-disable-next-line no-console
@@ -615,9 +617,9 @@ export const logUploadManifest = (artifacts: IArtifact[], protocolCaptureMeta: {
   // eslint-disable-next-line no-console
   console.log('')
 
-  const video = artifacts.find(({ reportKey }) => reportKey === 'video')
-  const screenshots = artifacts.filter(({ reportKey }) => reportKey === 'screenshots')
-  const protocol = artifacts.find(({ reportKey }) => reportKey === 'protocol')
+  const video = artifacts.find(({ reportKey }) => reportKey === ArtifactKinds.VIDEO)
+  const screenshots = artifacts.filter(({ reportKey }) => reportKey === ArtifactKinds.SCREENSHOTS)
+  const protocol = artifacts.find(({ reportKey }) => reportKey === ArtifactKinds.PROTOCOL)
 
   if (video) {
     printPendingArtifactUpload(video, labels)
@@ -674,22 +676,14 @@ export const printCompletedArtifactUpload = ({ pathToFile, key, fileSize, succes
 }
 
 export const logUploadResults = (results: ArtifactUploadResult[], protocolFatalError: ProtocolError | undefined) => {
-  const labels = {
-    'video': 'Video',
-    'screenshots': 'Screenshot',
-    'protocol': 'Test Replay',
+  if (!results.length) {
+    return
   }
 
-  // if protocol did not attempt an upload due to a fatal error, there will still be an upload result - this is
-  // so we can report the failure properly to instance/artifacts. But, we do not want to display it here.
-  const trimmedResults = protocolFatalError && protocolFatalError.captureMethod !== 'uploadCaptureArtifact' ?
-    results.filter(((result) => {
-      return result.key !== 'protocol'
-    })) :
-    results
-
-  if (!trimmedResults.length) {
-    return
+  const labels = {
+    [ArtifactKinds.VIDEO]: 'Video',
+    [ArtifactKinds.SCREENSHOTS]: 'Screenshot',
+    [ArtifactKinds.PROTOCOL]: 'Test Replay',
   }
 
   // eslint-disable-next-line no-console
@@ -702,7 +696,7 @@ export const logUploadResults = (results: ArtifactUploadResult[], protocolFatalE
   // eslint-disable-next-line no-console
   console.log('')
 
-  trimmedResults.forEach(({ key, ...report }, i, { length }) => {
+  results.forEach(({ key, ...report }, i, { length }) => {
     printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
   })
 }
