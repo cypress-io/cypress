@@ -99,6 +99,10 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
     let post = parts[0]
 
+    console.log('POST:')
+    console.log(`"${post}"`)
+    console.log('/POST')
+
     if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
