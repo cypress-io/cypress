@@ -1,7 +1,9 @@
-const formatChromeFlags = require(`../../../lib/util/chromium_flags`)
-const formatElectronFlags = require(`../../../lib/util/chromium_flags`)
+require('../../spec_helper')
 
-describe('lib/util/app_data', () => {
+const { formatChromeFlags } = require(`../../../lib/util/chromium_flags`)
+const { formatElectronFlags } = require(`../../../lib/util/chromium_flags`)
+
+describe('lib/util/chromium_flags', () => {
   context('#formatChromeFlags', () => {
     it('formats flags with --', () => {
       const flags = ['one', 'two', 'three']
