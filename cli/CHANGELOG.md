@@ -7,6 +7,10 @@ _Released 5/7/2024 (PENDING)_
 
 - Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
 
+**Dependency Updates:**
+
+- Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+
 ## 13.8.1
 
 _Released 4/23/2024_

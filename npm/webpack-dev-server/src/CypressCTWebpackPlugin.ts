@@ -69,7 +69,7 @@ export class CypressCTWebpackPlugin {
       supportFile: this.supportFile,
       indexHtmlFile: this.indexHtmlFile,
     }
-  };
+  }
 
   private beforeCompile = async (compilationParams: object, callback: Function) => {
     if (!this.compilation) {
@@ -142,7 +142,7 @@ export class CypressCTWebpackPlugin {
       // Webpack 4
       compilation.hooks.normalModuleLoader.tap('CypressCTPlugin', this.addLoaderContext)
     }
-  };
+  }
 
   /**
    * The plugin's entrypoint, called once by webpack when the compiler is initialized.
