@@ -542,15 +542,17 @@ export const AllCypressErrors = {
   },
   CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while initializing the Test Replay recording for this spec. ${fmt.stackTrace(error)}
+        Warning: We encountered an error while initializing the Test Replay recording for this spec.
         
         These results will not display Test Replay recordings.
         
-        This error will not affect or change the exit code.`
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while recording Test Replay data for this spec. ${fmt.stackTrace(error)}
+        Warning: We encountered an error while recording Test Replay data for this spec.
         
         These results will not display Test Replay recordings.
 
@@ -559,7 +561,9 @@ export const AllCypressErrors = {
         - Try increasing the available disk space.
         - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
 
-        This error will not affect or change the exit code.`
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
     return errTemplate`\
@@ -599,19 +603,14 @@ export const AllCypressErrors = {
     })
     const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
 
-    const [firstErr, ...furtherErrs] = error.errors
-
-    const fmtRest = furtherErrs.length > 0 ? errPartial`${fmt.off('\n\n')}In addition to the stack trace provided, ${fmt.stringify(furtherErrs.length)} error${fmt.off(furtherErrs.length > 1 ? 's were' : ' was')} encountered. Stack traces for these errors are omitted for brevity:
-${fmt.listItems(furtherErrs.map(({ message }: Error) => message))}` : null
-
     return errTemplate`\
-        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. ${firstErr ? fmt.stackTrace(firstErr) : null}
+        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
         We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times.
 
         ${recommendation}
 
-        ${fmtRest}`
+        ${fmt.listItems(error.errors.map((error) => error.message))}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\

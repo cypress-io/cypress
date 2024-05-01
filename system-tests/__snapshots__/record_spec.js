@@ -299,7 +299,7 @@ exports['e2e record passing passes 2'] = [
       {
         'clientId': 'r3',
         'state': 'failed',
-        'displayError': 'Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]\n\n',
+        'displayError': 'Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]',
         'attempts': [
           {
             'state': 'failed',
@@ -475,7 +475,7 @@ exports['e2e record passing passes 2'] = [
       {
         'clientId': 'r2',
         'state': 'failed',
-        'displayError': 'Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]\n\n',
+        'displayError': 'Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]',
         'attempts': [
           {
             'state': 'failed',
@@ -3119,15 +3119,13 @@ exports['e2e record capture-protocol enabled protocol runtime errors error initi
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
 These results will not display Test Replay recordings.
 
 This error will not affect or change the exit code.
 
 Error: Error instantiating Protocol Capture
-      [stack trace lines]
-
 
   (Uploading Cloud Artifacts)
 
@@ -3211,15 +3209,13 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
 These results will not display Test Replay recordings.
 
 This error will not affect or change the exit code.
 
 Error: Error in beforeSpec
-      [stack trace lines]
-
 
   (Uploading Cloud Artifacts)
 
@@ -3303,7 +3299,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while recording Test Replay data for this spec. 
+Warning: We encountered an error while recording Test Replay data for this spec.
 
 These results will not display Test Replay recordings.
 
@@ -3315,8 +3311,6 @@ This can happen for many reasons. If this problem persists:
 This error will not affect or change the exit code.
 
 Error: error in beforeTest
-      [stack trace lines]
-
 
   (Uploading Cloud Artifacts)
 
@@ -3490,15 +3484,13 @@ We will retry 1 more time in X second(s)...
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while initializing the Test Replay recording for this spec. 
+Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
 These results will not display Test Replay recordings.
 
 This error will not affect or change the exit code.
 
 Error: Error downloading capture code: 500 - "500 - Internal Server Error"
-      [stack trace lines]
-
 
   (Uploading Cloud Artifacts)
 
@@ -3596,19 +3588,15 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
 We attempted to upload the Test Replay recording 3 times.
 
 Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to http://fake.test/url
 
-In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
-
-Error: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
-      [stack trace lines]
-
+ - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
 ====================================================================================================
 
@@ -3954,17 +3942,13 @@ exports['capture-protocol api errors upload 503 - tries 3 times and fails contin
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
 We attempted to upload the Test Replay recording 3 times.
 
-In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
  - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
-
-Error: 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
-      [stack trace lines]
-
+ - 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)
 
 ====================================================================================================
 
@@ -4036,7 +4020,7 @@ exports['e2e record capture-protocol enabled protocol runtime errors db is unrea
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-Warning: We encountered an error while recording Test Replay data for this spec. 
+Warning: We encountered an error while recording Test Replay data for this spec.
 
 These results will not display Test Replay recordings.
 
@@ -4048,8 +4032,6 @@ This can happen for many reasons. If this problem persists:
 This error will not affect or change the exit code.
 
 Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
-      [stack trace lines]
-
 
   (Uploading Cloud Artifacts)
 
@@ -4147,19 +4129,15 @@ exports['capture-protocol api errors upload network error retries 3 times, warns
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
-Warning: We encountered multiple errors while uploading the Test Replay recording for this spec. 
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
 We attempted to upload the Test Replay recording 3 times.
 
 Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to http://fake.test/url
 
-In addition to the stack trace provided, 2 errors were encountered. Stack traces for these errors are omitted for brevity:
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
  - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
-
-Error: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
-      [stack trace lines]
-
+ - request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test
 
 ====================================================================================================
 
