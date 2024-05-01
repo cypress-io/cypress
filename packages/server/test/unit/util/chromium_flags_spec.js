@@ -1,7 +1,6 @@
 require('../../spec_helper')
 
-const { formatChromeFlags } = require(`../../../lib/util/chromium_flags`)
-const { formatElectronFlags } = require(`../../../lib/util/chromium_flags`)
+const { formatChromeFlags, formatElectronFlags } = require(`../../../lib/util/chromium_flags`)
 
 describe('lib/util/chromium_flags', () => {
   context('#formatChromeFlags', () => {
