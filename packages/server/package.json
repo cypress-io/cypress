@@ -75,7 +75,7 @@
     "getos": "3.2.1",
     "glob": "7.1.3",
     "graceful-fs": "4.2.9",
-    "http-proxy": "https://github.com/cypress-io/node-http-proxy.git#9322b4b69b34f13a6f3874e660a35df3305179c6",
+    "http-proxy": "https://github.com/cardil/node-http-proxy.git#eec6ed5f0d65d34faf8bf90a1727764ebc334e81",
     "human-interval": "1.0.0",
     "image-size": "0.8.3",
     "is-ci": "^3.0.1",
