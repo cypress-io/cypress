@@ -8,6 +8,7 @@ import path from 'path'
 import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 import { convertHtmlToImage } from '../support/utils'
+import os from 'os'
 
 // For importing the files below
 process.env.CYPRESS_INTERNAL_ENV = 'test'
@@ -67,6 +68,7 @@ const sanitize = (str: string) => {
   return str
   .split(lineAndColNumsRe).join('')
   .split(cypressRootPath).join('cypress')
+  .split(os.tmpdir()).join('/os/tmpdir')
 }
 
 const snapshotAndTestErrorConsole = async function (errorFileName: string) {
@@ -637,7 +639,7 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: () => {
+    CLOUD_CANNOT_CONFIRM_ARTIFACTS: () => {
       return {
         default: [makeErr()],
       }
@@ -647,6 +649,66 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { status: number, statusText: string, url: string } = makeErr()
+
+      err.status = 500
+      err.statusText = 'Internal Server Error'
+      err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { url: string } = makeErr()
+
+      err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
+      // @ts-expect-error
+      const aggregateError: Error & { errors: any[] } = makeErr()
+      // @ts-expect-error
+      const aggregateErrorWithNetworkError: Error & { errors: any[] } = makeErr()
+
+      const errOne = makeErr()
+      const errTwo = makeErr()
+      const errThree = makeErr()
+
+      aggregateError.errors = [errOne, errTwo, errThree]
+
+      // @ts-expect-error
+      const errNetworkErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
+
+      errNetworkErr.kind = 'NetworkError'
+      errNetworkErr.url = 'http://some/url'
+      aggregateErrorWithNetworkError.errors = [errNetworkErr, errTwo, errThree]
+
+      return {
+        default: [aggregateError],
+        withNetworkError: [aggregateErrorWithNetworkError],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
