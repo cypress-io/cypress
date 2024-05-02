@@ -213,10 +213,12 @@ You must have the following installed on your system to contribute locally:
 `python` is pre-installed on Debian-based systems including Ubuntu.
 The Python versions shipped with Ubuntu versions `20.04`, `23.10` and `22.04` are compatible with Cypress requirements.
 
-Only on Ubuntu `24.04` install Python `3.11` by executing the following command:
+Only on Ubuntu `24.04` install Python `3.11` by executing the following commands:
 
 ```shell
- sudo apt install python3.11
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.11
 ```
 
 Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
