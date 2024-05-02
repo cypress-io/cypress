@@ -41,7 +41,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
-export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb'
+export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact'
 
 export interface ProtocolError {
   args?: any
@@ -50,6 +50,10 @@ export interface ProtocolError {
   fatal?: boolean
   runnableId?: string
   isUploadError?: boolean
+}
+
+export const isProtocolInitializationError = (error: ProtocolError) => {
+  return ['setupProtocol', 'beforeSpec', 'getCaptureProtocolScript'].includes(error.captureMethod)
 }
 
 type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {
