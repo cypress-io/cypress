@@ -345,6 +345,28 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    const origin = new URL(this.req.proxiedUrl).origin
+
+    if (process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS && process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS === origin) {
+      // For cypress-in-cypress tests exclusively, we need to bucket all origin-agent-cluster requests
+      // from HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS to include Origin-Agent-Cluster=false. This has to do with changed
+      // behavior starting in Chrome 119. The new behavior works like the following:
+      //    - If the first page from an origin does not set the header,
+      //      then no other pages from that origin will be origin-keyed, even if those other pages do set the header.
+      //    - If the first page from an origin sets the header and is made origin-keyed,
+      //      then all other pages from that origin will be origin-keyed whether they ask for it or not.
+      // To work around this, any request that matches the origin of HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      // should set the Origin-Agent-Cluster=false header to avoid origin-keyed agent clusters.
+      // @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin-Agent-Cluster for more details.
+      this.res.setHeader('Origin-Agent-Cluster', '?0')
+    }
+  }
+
+  this.next()
+}
+
 const SetInjectionLevel: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'set:injection:level', parentSpan: this.resMiddlewareSpan, isVerbose })
 
@@ -933,6 +955,7 @@ export default {
   InterceptResponse,
   PatchExpressSetHeader,
   OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
+  MaybeSetOriginAgentClusterHeader, // NOTE: only used in cypress-in-cypress testing. this is otherwise a no-op
   SetInjectionLevel,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
