@@ -8,7 +8,7 @@ index 567ff5d..c7e2bd9 100644
  
 -		const send = (options.protocol === 'https:' ? https : http).request;
 +		const isHttps = options.protocol === 'https:';
-+		options.defaultPort = opts.defaultPort || (isHttps ? 443 : 80);
++		options.defaultPort = (isHttps ? 443 : 80);
 +		const send = (isHttps ? https : http).request;
  		const signal = request.signal;
  
