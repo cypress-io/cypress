@@ -225,6 +225,8 @@ Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
 export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
 ```
 
+For Ubuntu `24.04` refer also to the [Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section [Unprivileged user namespace restrictions](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890#unprivileged-user-namespace-restrictions-15) and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` and you try to run Cypress on this version of Ubuntu after building Cypress from source.
+
 #### Windows
 
 When installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
