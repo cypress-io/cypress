@@ -1,5 +1,6 @@
 import Fixtures from './fixtures'
 import _ from 'lodash'
+import os from 'os'
 
 export const e2ePath = Fixtures.projectPath('e2e')
 
@@ -98,6 +99,10 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
     let post = parts[0]
 
+    console.log('POST:')
+    console.log(`"${post}"`)
+    console.log('/POST')
+
     if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
@@ -115,6 +120,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
+  // temp dir may change from run to run, normalize it to a fake dir
+  .split(os.tmpdir()).join('/os/tmpdir')
 
   // unless normalization is explicitly turned off then
   // always normalize the stdout replacing the browser text
