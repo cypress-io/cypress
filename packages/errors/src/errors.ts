@@ -1,4 +1,5 @@
 import AU from 'ansi_up'
+import os from 'os'
 /* eslint-disable no-console */
 import chalk from 'chalk'
 import _ from 'lodash'
@@ -529,15 +530,87 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+  CLOUD_CANNOT_CONFIRM_ARTIFACTS: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while confirming the upload of artifacts.
+        Warning: We encountered an error while confirming the upload of artifacts for this spec.
 
         These results will not display artifacts.
 
         This error will not affect or change the exit code.
 
         ${fmt.highlightSecondary(apiErr)}`
+  },
+  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while initializing the Test Replay recording for this spec.
+        
+        These results will not display Test Replay recordings.
+        
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while recording Test Replay data for this spec.
+        
+        These results will not display Test Replay recordings.
+
+        This can happen for many reasons. If this problem persists:
+
+        - Try increasing the available disk space.
+        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
+
+        This error will not affect or change the exit code.
+        
+        ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
+    return errTemplate`\
+        Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error & { url: string }) => {
+    return errTemplate`\
+        Warning: We encountered a network error while uploading the Test Replay recording for this spec.
+        
+        Please verify your network configuration for accessing ${fmt.url(error.url)}
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.highlightSecondary(error)}`
+  },
+  CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
+    errors: (Error & { kind?: 'NetworkError' | 'HttpError', url: string })[]
+  }) => {
+    if (error.errors.length === 1) {
+      if (error.errors[0]?.kind === 'NetworkError') {
+        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(error.errors[0])
+      }
+
+      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string})
+    }
+
+    let networkErr = error.errors.find((err) => {
+      return err.kind === 'NetworkError'
+    })
+    const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
+
+    return errTemplate`\
+        Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
+
+        We attempted to upload the Test Replay recording ${fmt.stringify(error.errors.length)} times.
+
+        ${recommendation}
+
+        ${fmt.listItems(error.errors.map((error) => error.message))}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\

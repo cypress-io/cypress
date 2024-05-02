@@ -1,6 +1,9 @@
 import fs from 'fs/promises'
+import { existsSync } from 'fs'
 import type { ProtocolManager } from '../protocol'
 import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact, ArtifactKinds } from './artifact'
+import Debug from 'debug'
+const debug = Debug('cypress:server:cloud:artifacts:protocol')
 
 interface ProtocolUploadStrategyResult {
   success: boolean
@@ -28,10 +31,21 @@ const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
   return strategy
 }
 
-export const createProtocolArtifact = async (filePath: string, uploadUrl: string, protocolManager: ProtocolManager): Promise<IArtifact> => {
-  const { size } = await fs.stat(filePath)
+export const createProtocolArtifact = async (filePath: string, uploadUrl: string, protocolManager: ProtocolManager): Promise<IArtifact | undefined> => {
+  let size: number | undefined
 
-  return new Artifact('protocol', filePath, uploadUrl, size, createProtocolUploadStrategy(protocolManager))
+  debug('statting file path', filePath)
+  try {
+    const stat = await fs.stat(filePath)
+
+    debug('file stat', stat)
+    size = stat.size
+  } catch (e) {
+    debug('failed to stat protocol artifact filepath: ', e)
+    protocolManager.addFatalError('uploadCaptureArtifact', new Error(`File not found: ${filePath}`))
+  }
+
+  return size !== undefined ? new Artifact('protocol', filePath, uploadUrl, size, createProtocolUploadStrategy(protocolManager)) : undefined
 }
 
 export const composeProtocolErrorReportFromOptions = async ({
@@ -45,9 +59,11 @@ export const composeProtocolErrorReportFromOptions = async ({
 }): Promise<ArtifactUploadResult> => {
   const url = captureUploadUrl || protocolCaptureMeta.url
   const pathToFile = protocolManager?.getArchivePath()
-  const fileSize = pathToFile ? (await fs.stat(pathToFile))?.size : 0
+  const fileSize = pathToFile && existsSync(pathToFile) ? (await fs.stat(pathToFile))?.size : 0
 
   const fatalError = protocolManager?.getFatalError()
+
+  debug('fatalError via composeProtocolErrorReport', fatalError)
 
   return {
     key: ArtifactKinds.PROTOCOL,
