@@ -6,7 +6,7 @@ describe('AutomationDisconnected', () => {
     cy.mount(<AutomationDisconnected />)
 
     cy.findByTestId('collapsible').should('be.visible')
-    cy.contains('h3', 'The Cypress extension has disconnected.')
+    cy.contains('h2', 'The Cypress extension has disconnected.')
     cy.contains('p', 'Cypress cannot run tests without this extension.')
     cy.get('a').contains('Read more about browser management').should('have.attr', 'href', 'https://on.cypress.io/launching-browsers')
 

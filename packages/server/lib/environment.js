@@ -1,4 +1,5 @@
 require('./util/fs')
+const DEFAULT_ELECTRON_FLAGS = require('./util/chromium_flags').DEFAULT_ELECTRON_FLAGS
 
 const os = require('os')
 
@@ -43,31 +44,10 @@ try {
     app,
   } = require('electron')
 
-  app.commandLine.appendSwitch('disable-renderer-backgrounding', true)
-  app.commandLine.appendSwitch('ignore-certificate-errors', true)
-
-  // These flags are for webcam/WebRTC testing
-  // https://github.com/cypress-io/cypress/issues/2704
-  app.commandLine.appendSwitch('use-fake-ui-for-media-stream')
-  app.commandLine.appendSwitch('use-fake-device-for-media-stream')
-
-  // https://github.com/cypress-io/cypress/issues/2376
-  app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
-
-  // allows webSecurity: false to work as expected in webPreferences
-  // https://github.com/electron/electron/issues/18214
-  app.commandLine.appendSwitch('disable-site-isolation-trials')
-
-  // prevent electron from using /dev/shm, which can cause crashes in Docker
-  // https://github.com/cypress-io/cypress/issues/15814
-  app.commandLine.appendSwitch('disable-dev-shm-usage')
-
-  // prevent navigation throttling when navigating in the browser rapid fire
-  // https://github.com/cypress-io/cypress/pull/20271
-  app.commandLine.appendSwitch('disable-ipc-flooding-protection')
-
-  // ensure we get the most accurate memory usage
-  app.commandLine.appendSwitch('enable-precise-memory-info')
+  debug('appending default switches for electron: %O', DEFAULT_ELECTRON_FLAGS)
+  DEFAULT_ELECTRON_FLAGS.forEach(({ name, value }) => {
+    value ? app.commandLine.appendSwitch(name, value) : app.commandLine.appendSwitch(name)
+  })
 
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
