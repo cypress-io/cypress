@@ -193,8 +193,14 @@ const makeErrFromObj = (obj: any) => {
     return new Error(obj)
   }
 
-  if (_.isObject(obj)) {
-    const err2 = new Error((obj as any).message)
+  if (_.isObject(obj) && _.isString((obj as any).message) && _.isString((obj as any).name)) {
+    obj = obj as {
+      message: string
+      name: string
+      stack?: string
+    }
+
+    const err2 = new Error(obj.message)
 
     err2.name = (obj as any).name
     err2.stack = (obj as any).stack
@@ -208,7 +214,7 @@ const makeErrFromObj = (obj: any) => {
     return err2
   }
 
-  // handle the error gracefully in the case a promise is rejected with undefined
+  // handle all other errors gracefully (e.g. a promise is rejected with undefined)
   return new Error(`An unknown error has occurred: ${obj}`)
 }
 
