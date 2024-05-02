@@ -35,7 +35,8 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // 'expected **<span>** to exist in the DOM'
 // `expected **glob*glob** to contain *****`
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
-const assertionRegex = /.*expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
+// `Custom message expected **<span>** to exist in the DOM`
+const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -43,34 +44,33 @@ const assertionRegex = /.*expected | to[^\*]+| not[^\*]+| with[^\*]+|, but[^\*]+
 export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
+  // if the command has url args, don't format those chars like __ and ~~
+  if (name === 'visit' || name === 'request' || name === 'origin') {
+    return message
+  }
+
   // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'
   const assertionArray = message.match(assertionRegex)
 
-  const expectedActualArray = () => {
+  if (name === 'assert' && assertionArray) {
+    const expectedActualArray = () => {
     // get the expected and actual values of assertions
-    const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
+      const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
 
-    // replace outside double asterisks with strong tags
-    return splitTrim.map((s) => {
+      // replace outside double asterisks with strong tags
+      return splitTrim.map((s) => {
       // we want to escape HTML chars so that they display
       // correctly in the command log: <p> -> &lt;p&gt;
-      const HTMLEscapedString = mdOnlyHTML.renderInline(s)
+        const HTMLEscapedString = mdOnlyHTML.renderInline(s)
 
-      return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
-    })
-  }
-
-  if (name === 'assert' && assertionArray) {
+        return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
+      })
+    }
     // for assertions print the exact text so that characters like _ and *
     // are not escaped in the assertion display when comparing values
     const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
 
     return result.join('')
-  }
-
-  // if the command has url args, don't format those chars like __ and ~~
-  if (name === 'visit' || name === 'request' || name === 'origin') {
-    return message
   }
 
   // format markdown for everything else
