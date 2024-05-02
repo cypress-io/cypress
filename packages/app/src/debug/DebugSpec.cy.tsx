@@ -493,7 +493,7 @@ describe('Run Failures button', () => {
     ))
 
     cy.findByTestId('run-failures')
-    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('have.attr', 'aria-disabled', 'true')
     .should('not.have.attr', 'href')
 
     cy.findByTestId('run-failures').realHover()
@@ -517,7 +517,7 @@ describe('Run Failures button', () => {
     ))
 
     cy.findByTestId('run-failures')
-    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('have.attr', 'aria-disabled', 'true')
     .should('not.have.attr', 'href')
 
     cy.findByTestId('run-failures').realHover()
