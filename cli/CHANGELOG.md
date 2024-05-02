@@ -7,6 +7,10 @@ _Released 5/7/2024 (PENDING)_
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
 
+**Bugfixes:**
+
+- We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
+
 **Dependency Updates:**
 
 - Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29431](https://github.com/cypress-io/cypress/pull/29431).
