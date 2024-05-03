@@ -7,7 +7,7 @@ _Released 5/7/2024 (PENDING)_
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
 
-**Bugfixes**
+**Bugfixes:**
 
 - Fixed an issue where Cypress was unable to search for files using digits. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
