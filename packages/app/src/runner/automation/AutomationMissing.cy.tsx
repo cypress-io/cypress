@@ -15,7 +15,7 @@ describe('AutomationMissing', () => {
     })
 
     cy.findByTestId('collapsible').should('be.visible')
-    cy.contains('h3', 'The Cypress extension is missing.')
+    cy.contains('h2', 'The Cypress extension is missing.')
     cy.contains('p', 'Cypress cannot run tests without this extension. Please choose another browser.')
     cy.findByTestId('external').contains('Read more about browser management').should('have.attr', 'href', 'https://on.cypress.io/launching-browsers')
 

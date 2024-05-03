@@ -94,6 +94,7 @@
               </template>
               <pre
                 data-testid="error-header"
+                tabindex="0"
                 class="bg-white rounded font-light border border-red-200 p-[16px] overflow-auto"
                 v-html="baseError.errorStack"
               />

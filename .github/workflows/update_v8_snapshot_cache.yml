@@ -8,6 +8,23 @@ on:
   push:
     branches:
       - 'release/**'
+    paths-ignore:
+      - .husky/**
+      - .vscode/**
+      - .eslintrc.js
+      - .gitattributes
+      - .gitignore
+      - .percy.yml
+      - .prettierignore
+      - .releaserc.js
+      - .yarnclean
+      - CHANGELOG.md
+      - CODE_OF_CONDUCT.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - README.md
+      - ROADMAP.md
+      - SECURITY.md
   workflow_dispatch:
     inputs:
       branch:

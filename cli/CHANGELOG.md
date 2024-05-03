@@ -10,10 +10,15 @@ _Released 5/7/2024 (PENDING)_
 **Bugfixes**
 
 - Fixed an issue where Cypress was unable to search for files using digits. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
+
+**Misc:**
+
+- Improved accessibility of the Cypress App in some areas. Addressed in [#29322](https://github.com/cypress-io/cypress/pull/29322).
 
 **Dependency Updates:**
 
-- Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+- Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29431](https://github.com/cypress-io/cypress/pull/29431).
 
 ## 13.8.1
 
