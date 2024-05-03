@@ -89,13 +89,20 @@ export type ProtocolManagerOptions = {
   mountVersion?: number
 }
 
+type UploadCaptureArtifactResult = {
+  success: boolean
+  fileSize: number | bigint
+  afterSpecDuration?: number
+  specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>
-  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number | bigint, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, captureErrorsOverride?: boolean): Promise<UploadCaptureArtifactResult | void>
 }
 
 type Response = {

@@ -1,10 +1,12 @@
-import { proxyquire } from '../../spec_helper'
+import { proxyquire, sinon } from '../../spec_helper'
 import path from 'path'
 import os from 'os'
 import type { AppCaptureProtocolInterface, ProtocolManagerShape } from '@packages/types'
 import { expect } from 'chai'
 import { EventEmitter } from 'stream'
 import esbuild from 'esbuild'
+import fs from 'fs-extra'
+import type { SinonStub } from 'sinon'
 
 class TestClient extends EventEmitter {
   send: sinon.SinonStub = sinon.stub()
@@ -12,9 +14,11 @@ class TestClient extends EventEmitter {
 
 const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
+const mockPutProtocolArtifact = sinon.stub()
 
-const { ProtocolManager } = proxyquire('../lib/cloud/protocol', {
+const { ProtocolManager, DB_SIZE_LIMIT } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
+  './api/put_protocol_artifact': { putProtocolArtifact: mockPutProtocolArtifact },
 }) as typeof import('@packages/server/lib/cloud/protocol')
 
 const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
@@ -119,12 +123,14 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  it('should be able to clean up after a spec', async () => {
-    sinon.stub(protocol, 'afterSpec')
+  describe('.afterSpec', () => {
+    it('invokes the protocol manager afterSpec fn', async () => {
+      sinon.stub(protocol, 'afterSpec')
 
-    await protocolManager.afterSpec()
+      await protocolManager.afterSpec()
 
-    expect(protocol.afterSpec).to.be.called
+      expect(protocol.afterSpec).to.be.called
+    })
   })
 
   it('should be able to handle pre-after test', async () => {
@@ -288,5 +294,110 @@ describe('lib/cloud/protocol', () => {
     protocolManager.resetTest(testId)
 
     expect(protocol.resetTest).to.be.calledWith(testId)
+  })
+
+  describe('.uploadCaptureArtifact()', () => {
+    let filePath: string
+    let fileSize: number
+    let uploadUrl: string
+    let expectedAfterSpecDuration: number
+    let offset: number
+    let size: number
+    let instanceId: string
+    let clock
+
+    describe('when protocol is initialized, and spec has finished', () => {
+      beforeEach(async () => {
+        filePath = '/foo/bar'
+        fileSize = 1000
+        uploadUrl = 'http://fake.test/upload_url'
+        offset = 10
+        size = 100
+        instanceId = 'abc123'
+
+        sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
+        sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
+        protocolManager.beforeSpec({ instanceId })
+
+        expectedAfterSpecDuration = 225
+
+        clock = sinon.useFakeTimers()
+        sinon.stub(performance, 'timeOrigin').value(0)
+        sinon.stub(protocol, 'afterSpec').callsFake(async () => {
+          await clock.tickAsync(expectedAfterSpecDuration)
+
+          return Promise.resolve()
+        })
+
+        await protocolManager.afterSpec()
+      })
+
+      afterEach(() => {
+        clock.restore()
+      })
+
+      describe('when upload succeeds', () => {
+        beforeEach(() => {
+          mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).resolves()
+        })
+
+        it('unlinks the db & returns fileSize, afterSpecDuration, success=true, and the db metadata', async () => {
+          const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+
+          expect(res).not.to.be.undefined
+          expect(res).to.include({
+            fileSize,
+            success: true,
+            afterSpecDuration: expectedAfterSpecDuration,
+          })
+
+          // @ts-ignore
+          expect(res?.specAccess.offset).to.eq(offset)
+          // @ts-ignore
+          expect(res?.specAccess.size).to.eq(size)
+
+          expect(fs.unlink).to.have.been.called
+        })
+      })
+
+      describe('when upload fails', () => {
+        let err
+
+        beforeEach(() => {
+          err = new Error()
+
+          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).rejects(err)
+        })
+
+        describe('and CAPTURE_ERRORs is enabled', () => {
+          it('unlinks the db & rethrows the error', async () => {
+            let threw = false
+
+            try {
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize }, true)
+            } catch (e) {
+              threw = true
+              expect(e).to.eq(err)
+            }
+            expect(threw).to.be.true
+            expect(fs.unlink).to.be.called
+          })
+        })
+
+        describe('and CAPTURE_ERRORS is not enabled', () => {
+          it('unlinks the db and does not rethrow', async () => {
+            let threw = false
+
+            try {
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize }, false)
+            } catch (e) {
+              threw = true
+            }
+            expect(threw).to.be.false
+            expect(fs.unlink).to.be.called
+          })
+        })
+      })
+    })
   })
 })
