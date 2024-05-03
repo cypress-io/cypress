@@ -146,6 +146,12 @@ let browserCriClient: BrowserCriClient | undefined
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  /**
+   * By returning empty objects here, the user is indicating that they do not want
+   * Chrome preferences read. If they do not provide preferences via config,
+   * this effectively prevents Cypress from writing to the Chrome preferences files.
+   * See: _writeChromePreferences
+   */
   if (process.env.IGNORE_CHROME_PREFERENCES) {
     debug('ignoring chrome preferences...')
 
@@ -598,13 +604,16 @@ export = {
       launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
     }
 
+    const p = _disableRestorePagesPrompt(userDir)
+
+    debug(p)
+    await p
     const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
         options,
       ),
       _removeRootExtension(),
-      _disableRestorePagesPrompt(userDir),
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
       _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),

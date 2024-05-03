@@ -192,6 +192,37 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    context('when IGNORE_CHROME_PREFERENCES env is set', () => {
+      let oldPref
+      let writeJson
+
+      beforeEach(function () {
+        oldPref = process.env.IGNORE_CHROME_PREFERENCES
+        process.env.IGNORE_CHROME_PREFERENCES = true
+        this.readJson.rejects({ code: 'ENOENT' })
+        writeJson = sinon.stub(fs, 'outputJson').resolves()
+      })
+
+      afterEach(() => {
+        process.env.IGNORE_CHROME_PREFERENCES = oldPref
+        writeJson.restore()
+      })
+
+      it('does not write preferences', async function () {
+        chrome._writeExtension.restore()
+        utils.getProfileDir.restore()
+
+        await chrome.open({
+          isHeadless: true,
+          isHeaded: false,
+          name: 'chromium',
+          channel: 'stable',
+        }, 'http://', openOpts, this.automation)
+
+        expect(writeJson).not.to.be.called
+      })
+    })
+
     it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
       plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
