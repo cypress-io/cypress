@@ -7,6 +7,11 @@ _Released 5/7/2024 (PENDING)_
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
 
+- Running the command `cypress open --browser <browser-name-or-path>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
 **Bugfixes:**
 
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
@@ -18,13 +23,6 @@ _Released 5/7/2024 (PENDING)_
 **Dependency Updates:**
 
 - Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29431](https://github.com/cypress-io/cypress/pull/29431).
-
-**Features:**
-
-- Running the command `cypress open --browser <browser-name-or-path>`will
-launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003).
-Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 ## 13.8.1
 
