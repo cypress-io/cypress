@@ -1952,8 +1952,7 @@ describe('Routes', () => {
 
           expect(setCookie[0]).to.eq('userId=123; Path=/')
 
-          expect(setCookie[1]).to.eq('__cypress.initial=; Domain=localhost; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
-        })
+          expect(setCookie[1]).to.eq('__cypress.initial=; Domain=localhost; Path=/; Expires=Wed, 01 Jan 2070 00:00:00 GMT')        })
       })
 
       it('appends cookies on redirects', function () {

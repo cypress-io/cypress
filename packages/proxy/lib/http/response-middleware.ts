@@ -116,7 +116,7 @@ function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: 
   if (!v) {
     v = ''
 
-    opts.expires = new Date(0)
+    opts.expires = new Date('2070-01-01')
   }
 
   return res.cookie(k, v, opts)
