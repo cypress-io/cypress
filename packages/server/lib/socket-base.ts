@@ -41,7 +41,7 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
-  private _sendResetBrowserTabsForNextTestMessage
+  private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
@@ -281,8 +281,8 @@ export class SocketBase {
           })
         })
 
-        this._sendResetBrowserTabsForNextTestMessage = async (shouldKeepTabOpen: boolean) => {
-          await automationRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen })
+        this._sendResetBrowserTabsForNextSpecMessage = async (shouldKeepTabOpen: boolean) => {
+          await automationRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen })
         }
 
         this._sendResetBrowserStateMessage = async () => {
@@ -616,9 +616,9 @@ export class SocketBase {
     })
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    if (this._sendResetBrowserTabsForNextTestMessage) {
-      await this._sendResetBrowserTabsForNextTestMessage(shouldKeepTabOpen)
+  async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
+    if (this._sendResetBrowserTabsForNextSpecMessage) {
+      await this._sendResetBrowserTabsForNextSpecMessage(shouldKeepTabOpen)
     }
   }
 

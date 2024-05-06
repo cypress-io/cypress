@@ -1,5 +1,7 @@
+import _ from 'lodash'
 import Debug from 'debug'
 import type ProtocolManager from '../protocol'
+import { isProtocolInitializationError } from '@packages/types'
 import api from '../api'
 import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '../../util/print-run'
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
@@ -9,6 +11,8 @@ import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
+import { HttpError } from '../api/http_error'
+import { NetworkError } from '../api/network_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
@@ -17,8 +21,10 @@ const toUploadReportPayload = (acc: {
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
 }, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
+  const reportWithoutOriginalError = _.omit(report, 'originalError')
+
   if (key === ArtifactKinds.PROTOCOL) {
-    let { error, errorStack, allErrors } = report
+    let { error, errorStack, allErrors } = reportWithoutOriginalError
 
     if (allErrors) {
       error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
@@ -27,12 +33,12 @@ const toUploadReportPayload = (acc: {
       error = `Failed to upload Test Replay: ${error}`
     }
 
-    debug('protocol report %O', report)
+    debug('protocol report %O', reportWithoutOriginalError)
 
     return {
       ...acc,
       protocol: {
-        ...report,
+        ...reportWithoutOriginalError,
         error,
         errorStack,
       },
@@ -41,7 +47,7 @@ const toUploadReportPayload = (acc: {
 
   return {
     ...acc,
-    [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
+    [key]: (key === 'screenshots') ? [...acc.screenshots, reportWithoutOriginalError] : reportWithoutOriginalError,
   }
 }
 
@@ -102,9 +108,23 @@ const extractArtifactsFromOptions = async ({
 
     const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
 
-    debug('should add protocol artifact? %o, %o, %O', protocolFilePath, protocolUploadUrl, protocolManager)
-    if (protocolManager && protocolFilePath && protocolUploadUrl) {
-      artifacts.push(await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager))
+    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()
+
+    debug('should add protocol artifact? %o', {
+      protocolFilePath,
+      protocolUploadUrl,
+      protocolManager: !!protocolManager,
+      fatalError: protocolManager?.hasFatalError(),
+      shouldAddProtocolArtifact,
+    })
+
+    if (shouldAddProtocolArtifact) {
+      const protocolArtifact = await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager)
+
+      debug(protocolArtifact)
+      if (protocolArtifact) {
+        artifacts.push(protocolArtifact)
+      }
     }
   } catch (e) {
     debug('Error creating protocol artifact: %O', e)
@@ -122,13 +142,49 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     [ArtifactKinds.PROTOCOL]: 2,
   }
 
+  // Checking protocol fatal errors here, because if there is no fatal error
+  // but protocol is enabled and there is no archive path, we want to detect
+  // and establish a fatal error
+  const preArtifactExtractionFatalError = protocolManager?.getFatalError()
+
+  /**
+   * sometimes, protocolManager initializes both without an archive path and without recording an internal
+   * fatal error. Test Replay initialization should be refactored in order to capture this state more appropriately.
+   */
+  debug({
+    archivePath: protocolManager?.getArchivePath(),
+    protocolManager: !!protocolManager,
+    preArtifactExtractionFatalError,
+    protocolCaptureMeta,
+  })
+
+  if (protocolManager && (!protocolManager.getArchivePath() && !preArtifactExtractionFatalError && !protocolCaptureMeta.disabledMessage && protocolCaptureMeta.url)) {
+    protocolManager.addFatalError('UNKNOWN', new Error('Unable to determine Test Replay archive location'))
+  }
+
   const artifacts = (await extractArtifactsFromOptions(options)).sort((a, b) => {
     return priority[a.reportKey] - priority[b.reportKey]
   })
 
-  let uploadReport: UpdateInstanceArtifactsPayload
+  let uploadReport: UpdateInstanceArtifactsPayload = { video: undefined, screenshots: [], protocol: undefined }
+
+  const postArtifactExtractionFatalError = protocolManager?.getFatalError()
+
+  if (postArtifactExtractionFatalError) {
+    if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
+      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
+    } else {
+      errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
+    }
+  }
 
   if (!quiet) {
+    debug('logging upload manifest: %O', {
+      artifacts,
+      protocolCaptureMeta,
+      fatalProtocolError: protocolManager?.getFatalError(),
+    })
+
     logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
   }
 
@@ -151,23 +207,42 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       logUploadResults(uploadResults, protocolManager?.getFatalError())
     }
 
-    const protocolFatalError = protocolManager?.getFatalError()
+    const postUploadProtocolFatalError = protocolManager?.getFatalError()
 
-    /**
-     * Protocol instances with fatal errors prior to uploading will not have an uploadResult,
-     * but we still want to report them to updateInstanceArtifacts
-     */
+    if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
+      const error = postUploadProtocolFatalError.error
+
+      if ((error as AggregateError).errors) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', postUploadProtocolFatalError.error as AggregateError)
+      } else if (HttpError.isHttpError(error)) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
+      } else if (NetworkError.isNetworkError(error)) {
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.warning('CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE', error)
+      }
+    }
+
+    // there is no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
+    // during initialization or capture. however, we still want to report this failure with the rest of the upload
+    // results, so we extract what the upload failure report should be from the options passed to this fn
     if (!uploadResults.find((result: ArtifactUploadResult) => {
       return result.key === ArtifactKinds.PROTOCOL
-    }) && protocolFatalError) {
+    }) && postUploadProtocolFatalError) {
+      debug('composing error report from options')
       uploadResults.push(await composeProtocolErrorReportFromOptions(options))
     }
 
     uploadReport = uploadResults.reduce(toUploadReportPayload, { video: undefined, screenshots: [], protocol: undefined })
   } catch (err) {
+    debug('primary try/catch failure, ', err.stack)
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
-    return exception.create(err)
+    await exception.create(err)
   }
 
   debug('checking for protocol errors', protocolManager?.hasErrors())
@@ -195,7 +270,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       stack: err.stack,
     })
 
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
+    // eslint-disable-next-line no-console
+    console.log('')
+    errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS', err)
 
     if (err.statusCode !== 503) {
       return exception.create(err)

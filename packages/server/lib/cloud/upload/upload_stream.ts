@@ -4,6 +4,7 @@ import type { ReadStream } from 'fs'
 import type { StreamActivityMonitor } from './stream_activity_monitor'
 import Debug from 'debug'
 import { HttpError } from '../api/http_error'
+import { NetworkError } from '../api/network_error'
 import { agent } from '@packages/network'
 
 const debug = Debug('cypress:server:cloud:uploadStream')
@@ -67,17 +68,16 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
       debugVerbose('PUT %s Response: %O', destinationUrl, response)
       debugVerbose('PUT %s Error: %O', destinationUrl, error)
       // Record all HTTP errors encountered
-      if (response?.status && response?.status >= 400) {
-        errorPromises.push(HttpError.fromResponse(response))
-      }
+      const isHttpError = response?.status && response?.status >= 400
+      const isNetworkError = error && !timeoutMonitor?.getController().signal.reason
 
-      // Record network errors
-      if (error) {
-        errorPromises.push(Promise.resolve(error))
+      if (isHttpError) {
+        errorPromises.push(HttpError.fromResponse(response))
+      } else if (isNetworkError) {
+        errorPromises.push(Promise.resolve(new NetworkError(error, destinationUrl)))
       }
 
       const isUnderRetryLimit = attempt < retries
-      const isNetworkError = !!error
       const isRetryableHttpError = (!!response?.status && RETRYABLE_STATUS_CODES.includes(response.status))
 
       debug('checking if should retry: %s %O', destinationUrl, {
@@ -129,10 +129,22 @@ export const uploadStream = async (fileStream: ReadStream, destinationUrl: strin
         resolve()
       }
     } catch (e) {
-      const error = abortController?.signal.reason ?? e
+      debug('error on upload:', e)
+      const signalError = abortController?.signal.reason
 
-      debug('PUT %s: %s', destinationUrl, error)
-      reject(error)
+      const errors = await Promise.all(errorPromises)
+
+      debug('errors on upload:')
+      errors.forEach((e) => debug(e))
+      if (signalError && !errors.includes(signalError)) {
+        errors.push(signalError)
+      }
+
+      if (errors.length > 1) {
+        reject(new AggregateError(errors, `${errors.length} errors encountered during upload`))
+      } else {
+        reject(errors[0])
+      }
     }
   })
 }

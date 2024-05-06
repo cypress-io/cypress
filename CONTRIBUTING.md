@@ -213,10 +213,12 @@ You must have the following installed on your system to contribute locally:
 `python` is pre-installed on Debian-based systems including Ubuntu.
 The Python versions shipped with Ubuntu versions `20.04`, `23.10` and `22.04` are compatible with Cypress requirements.
 
-Only on Ubuntu `24.04` install Python `3.11` by executing the following command:
+Only on Ubuntu `24.04` install Python `3.11` by executing the following commands:
 
 ```shell
- sudo apt install python3.11
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.11
 ```
 
 Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
@@ -224,6 +226,8 @@ Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
 ```shell
 export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
 ```
+
+For Ubuntu `24.04` refer also to the [Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section [Unprivileged user namespace restrictions](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890#unprivileged-user-namespace-restrictions-15) and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on this version of Ubuntu after building Cypress from source.
 
 #### Windows
 

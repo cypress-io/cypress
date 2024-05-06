@@ -1795,7 +1795,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
