@@ -33,6 +33,7 @@ eslint-plugin-json-format
 @typescript-eslint/parser
 @typescript-eslint/eslint-plugin
 eslint-plugin-mocha
+eslint-plugin-import
 
 # if you have react/jsx files
 eslint-plugin-react
@@ -94,6 +95,7 @@ _Should usually be used at the root of the package._
 
 **requires you to install the following `devDependencies`**:
 ```sh
+eslint-plugin-import
 eslint-plugin-json-format
 @typescript-eslint/parser
 @typescript-eslint/eslint-plugin
@@ -178,11 +180,7 @@ After installing, add the following to your User or Workspace (`.vscode/settings
     {
       "language": "json",
       "autoFix": true
-    },
-    {
-      "language": "coffeescript",
-      "autoFix": false
-    },
+    }
   ],
 }
 ```
