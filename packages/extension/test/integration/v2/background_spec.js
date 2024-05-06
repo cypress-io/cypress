@@ -24,8 +24,10 @@ const browser = {
     },
   },
   windows: {
-    getLastFocused () {},
+    getAll () {},
     getCurrent () {},
+    getLastFocused () {},
+    remove () {},
     update () {},
   },
   runtime: {},
@@ -844,7 +846,7 @@ describe('app/background', () => {
       })
     })
 
-    describe('reset:browser:tabs:for:next:test', () => {
+    describe('reset:browser:tabs:for:next:spec', () => {
       beforeEach(() => {
         sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
         sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
@@ -855,6 +857,8 @@ describe('app/background', () => {
 
       // @see https://github.com/cypress-io/cypress/issues/29172 for Firefox versions 124 and up
       it('closes the tabs in the current browser window and creates a new "about:blank" tab', function (done) {
+        sinon.stub(browser.windows, 'getAll').resolves([{ id: '10' }])
+
         this.socket.on('automation:response', (id, obj) => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
@@ -866,7 +870,58 @@ describe('app/background', () => {
           done()
         })
 
-        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
+        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:spec')
+      })
+
+      it('closes any extra windows', function (done) {
+        sinon.stub(browser.windows, 'getAll').resolves([{ id: '9' }, { id: '10' }, { id: '11' }])
+        sinon.stub(browser.windows, 'remove').resolves()
+
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.remove).to.be.calledWith('9')
+          expect(browser.windows.remove).to.be.calledWith('11')
+          expect(browser.windows.remove).not.to.be.calledWith('10')
+
+          done()
+        })
+
+        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:spec')
+      })
+
+      it('does not fail if we are unable to close the window', function (done) {
+        sinon.stub(browser.windows, 'getAll').resolves([{ id: '9' }, { id: '10' }, { id: '11' }])
+        sinon.stub(browser.windows, 'remove').rejects()
+
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.remove).to.be.calledWith('9')
+          expect(browser.windows.remove).to.be.calledWith('11')
+
+          expect(browser.windows.remove).not.to.be.calledWith('10')
+          done()
+        })
+
+        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:spec')
+      })
+
+      it('does not fail if we are unable to retrieve the windows', function (done) {
+        sinon.stub(browser.windows, 'getAll').rejects()
+        sinon.stub(browser.windows, 'remove')
+
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.remove).not.to.be.called
+          done()
+        })
+
+        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:spec')
       })
     })
   })
