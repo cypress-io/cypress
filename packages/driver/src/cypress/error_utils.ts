@@ -188,23 +188,34 @@ const appendErrMsg = (err, errMsg) => {
   })
 }
 
-const makeErrFromObj = (obj) => {
+const makeErrFromObj = (obj: any) => {
   if (_.isString(obj)) {
     return new Error(obj)
   }
 
-  const err2 = new Error(obj.message)
-
-  err2.name = obj.name
-  err2.stack = obj.stack
-
-  _.each(obj, (val, prop) => {
-    if (!err2[prop]) {
-      err2[prop] = val
+  if (_.isObject(obj) && _.isString((obj as any).message) && _.isString((obj as any).name)) {
+    obj = obj as {
+      message: string
+      name: string
+      stack?: string
     }
-  })
 
-  return err2
+    const err2 = new Error(obj.message)
+
+    err2.name = (obj as any).name
+    err2.stack = (obj as any).stack
+
+    _.each(obj, (val, prop) => {
+      if (!err2[prop]) {
+        err2[prop] = val
+      }
+    })
+
+    return err2
+  }
+
+  // handle all other errors gracefully (e.g. a promise is rejected with undefined)
+  return new Error(`An unknown error has occurred: ${obj}`)
 }
 
 const makeErrFromErr = (err, options: any = {}) => {
