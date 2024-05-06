@@ -199,9 +199,9 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+  async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
     try {
-      await this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      await this.projectBase?.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
     } catch (e) {
       // If the CRI client disconnected or crashed, we want to no-op here so that anything
       // depending on resetting the browser tabs can continue with further operations

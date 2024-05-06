@@ -570,11 +570,11 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('reset:browser:tabs:for:next:test', function () {
+    describe('reset:browser:tabs:for:next:spec', function () {
       it('sends the close target message for the attached target tabs', async function () {
         this.sendCloseTargetCommand.resolves()
 
-        await this.onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+        await this.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
         expect(this.sendCloseTargetCommand).to.be.calledWith(true)
       })
