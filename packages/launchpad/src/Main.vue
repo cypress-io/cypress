@@ -6,6 +6,7 @@
     <MajorVersionWelcome
       v-if="shouldShowWelcome"
       class="pt-[64px]"
+      role="main"
       :video-html="videoHtml"
       @clearLandingPage="handleClearLandingPage"
     >
@@ -19,9 +20,10 @@
         />
       </template>
     </MajorVersionWelcome>
-    <div
+    <main
       v-else
       class="px-[24px] pt-[86px] pb-[24px]"
+      role="main"
     >
       <BaseError
         v-if="query.data.value.baseError"
@@ -82,7 +84,7 @@
         </template>
         <OpenBrowser v-else />
       </template>
-    </div>
+    </main>
     <CloudViewerAndProject />
     <LoginConnectModals />
   </template>

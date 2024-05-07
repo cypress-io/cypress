@@ -1,3 +1,4 @@
+const path = require('path')
 const _ = require('lodash')
 const EE = require('events')
 const sh = require('shelljs')
@@ -75,12 +76,13 @@ module.exports = {
     const filenamesString = sh.ShellString(filenames.join(' '))
 
     const lintCommand = opts.fix ?
-      `./node_modules/.bin/eslint --color=true --fix '' ${filenamesString}`
-      : `./node_modules/.bin/eslint --color=true '' ${filenamesString}`
+      `npx eslint --color=true --fix ${filenamesString}`
+      : `npx eslint --color=true ${filenamesString}`
 
+    // always run command in the root of the monorepo!
     return Promise.promisify(sh.exec)(
       lintCommand,
-      { silent: false, async: true },
+      { silent: false, async: true, cwd: path.resolve(__dirname, '../../../../') },
     )
     .tapCatch(debugTerse)
     .return(false)

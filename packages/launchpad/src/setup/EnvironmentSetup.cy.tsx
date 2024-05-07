@@ -124,7 +124,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.contains('h3', 'Community framework definition problem')
+    cy.contains('h2', 'Community framework definition problem')
     cy.contains('p', PLURAL_MESSAGE).should('be.visible')
     cy.contains('p', SINGULAR_MESSAGE).should('not.exist')
     cy.contains('li', PATH_1).should('be.visible')
