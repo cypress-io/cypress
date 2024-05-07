@@ -1412,7 +1412,6 @@ jobs:
 
   check-ts:
     <<: *defaults
-    resource_class: small
     steps:
       - restore_cached_workspace
       - install-required-node
