@@ -8,12 +8,12 @@
     "build": "node ./scripts/build.js",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean-deps": "rimraf node_modules",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
+    "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "@babel/code-frame": "7.8.3",
@@ -31,7 +31,7 @@
     "dataloader": "^2.0.0",
     "dayjs": "^1.9.3",
     "dedent": "^0.7.0",
-    "ejs": "^3.1.8",
+    "ejs": "^3.1.10",
     "endent": "2.0.1",
     "execa": "1.0.0",
     "front-matter": "^4.0.2",

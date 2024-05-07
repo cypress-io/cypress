@@ -1,5 +1,5 @@
 <template>
-  <main class="text-center">
+  <div class="text-center">
     <h1 class="mb-2 text-2rem">
       {{ t('globalPage.empty.title') }}
     </h1>
@@ -7,7 +7,7 @@
       {{ t('globalPage.empty.helper') }}
     </p>
     <FileDropzone @addProject="emit('addProject', $event)" />
-  </main>
+  </div>
 </template>
 
 <script lang="ts" setup>

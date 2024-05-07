@@ -16,6 +16,5 @@
   "dependencies": {
     "express": "^4.17.1"
   },
-  "license": "MIT",
-  "author": "Thorsten Lorenz <thlorenz@gmx.de>"
+  "license": "MIT"
 }

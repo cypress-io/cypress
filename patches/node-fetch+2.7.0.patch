@@ -1,0 +1,15 @@
+diff --git a/node_modules/node-fetch/lib/index.js b/node_modules/node-fetch/lib/index.js
+index 567ff5d..c7e2bd9 100644
+--- a/node_modules/node-fetch/lib/index.js
++++ b/node_modules/node-fetch/lib/index.js
+@@ -1449,7 +1449,9 @@ function fetch(url, opts) {
+ 		const request = new Request(url, opts);
+ 		const options = getNodeRequestOptions(request);
+ 
+-		const send = (options.protocol === 'https:' ? https : http).request;
++		const isHttps = options.protocol === 'https:';
++		options.defaultPort = (isHttps ? 443 : 80);
++		const send = (isHttps ? https : http).request;
+ 		const signal = request.signal;
+ 
+ 		let response = null;

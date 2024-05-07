@@ -235,7 +235,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._errors.length
   }
 
-  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args: any) {
+  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any) {
     this._errors.push({
       fatal: true,
       error,
