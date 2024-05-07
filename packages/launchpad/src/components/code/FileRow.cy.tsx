@@ -117,10 +117,10 @@ describe('FileRow', () => {
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('have.length', 2)
 
-    cy.get('.shiki').should('be.visible')
+    cy.get('div.rounded > div.text-left.cursor-text').should('be.visible')
     cy.contains('cypress/integration/command.js').click()
 
-    cy.get('.shiki').should('not.be.visible')
+    cy.get('div.rounded > div.text-left.cursor-text').should('not.exist')
   })
 
   it('responds nice to small screens', { viewportWidth: 500 }, () => {
