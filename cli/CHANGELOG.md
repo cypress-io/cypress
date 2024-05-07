@@ -11,6 +11,7 @@ _Released 5/7/2024 (PENDING)_
 
 - Fixed a bug where promises rejected with `undefined` were failing inside `cy.origin()`. Addresses [#23937](https://github.com/cypress-io/cypress/issues/23937).
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
+- Fixed network issues in requests using fetch for users where Cypress is run behind a proxy that performs HTTPS decryption (common among corporate proxies). Fixes [#29171](https://github.com/cypress-io/cypress/issues/29171)
 - Fixed an issue where extra windows weren't being closed between specs in Firefox causing potential issues in subsequent specs. Fixes [#29473](https://github.com/cypress-io/cypress/issues/29473).
 
 **Misc:**
