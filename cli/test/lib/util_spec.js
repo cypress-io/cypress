@@ -21,7 +21,6 @@ describe('util', () => {
   context('.isBrokenGtkDisplay', () => {
     it('detects only GTK message', () => {
       os.platform.returns('linux')
-      os.arch.returns('x64')
       const text = '[some noise here] Gtk: cannot open display: 99'
 
       expect(util.isBrokenGtkDisplay(text)).to.be.true
