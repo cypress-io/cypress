@@ -16,6 +16,7 @@ Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 - Fixed a bug where promises rejected with `undefined` were failing inside `cy.origin()`. Addresses [#23937](https://github.com/cypress-io/cypress/issues/23937).
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
+- Fixed an issue where extra windows weren't being closed between specs in Firefox causing potential issues in subsequent specs. Fixes [#29473](https://github.com/cypress-io/cypress/issues/29473).
 
 **Misc:**
 
