@@ -97,8 +97,11 @@ sinon.stub = function (obj, method) {
 
 beforeEach(function () {
   sinon.stub(os, 'platform')
+  sinon.stub(os, 'arch')
   sinon.stub(os, 'release')
   sinon.stub(util, 'getOsVersionAsync').resolves('Foo-OsVersion')
+
+  os.arch.returns('x64')
 })
 
 afterEach(function () {

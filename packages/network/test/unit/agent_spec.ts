@@ -227,6 +227,15 @@ describe('lib/agent', function () {
           })
         })
 
+        it('HTTP pages are requested with correct host header when loaded via fetch', function () {
+          return this.fetch(`http://localhost:${HTTP_PORT}/get`)
+          .then(() => {
+            expect(this.servers.lastRequestHeaders).to.include({
+              host: `localhost:${HTTP_PORT}`,
+            })
+          })
+        })
+
         it('HTTPS pages can be loaded', function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
@@ -255,6 +264,15 @@ describe('lib/agent', function () {
           })
         })
 
+        it('HTTPS pages are requested with correct host header when loaded via fetch', function () {
+          return this.fetch(`https://localhost:${HTTPS_PORT}/get`)
+          .then(() => {
+            expect(this.servers.lastRequestHeaders).to.include({
+              host: 'localhost',
+            })
+          })
+        })
+
         it('HTTPS pages can be loaded via fetch with no explicit port', function () {
           return this.fetch(`https://localhost/get`)
           .then((response) => response.text())
@@ -266,6 +284,15 @@ describe('lib/agent', function () {
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
+          })
+        })
+
+        it('HTTPS pages requested with correct host header when loaded via fetch with no explicit port', function () {
+          return this.fetch(`https://localhost/get`)
+          .then(() => {
+            expect(this.servers.lastRequestHeaders).to.include({
+              host: 'localhost',
+            })
           })
         })
 
