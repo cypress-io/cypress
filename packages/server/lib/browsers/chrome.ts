@@ -55,7 +55,7 @@ const disabledFeatures = [
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
   // Force the deprecation of upload events
-  'DeprecateUnloadByUserAndOrigin'
+  'DeprecateUnloadByUserAndOrigin',
 ]
 
 // Common Chrome Flags for Automation
