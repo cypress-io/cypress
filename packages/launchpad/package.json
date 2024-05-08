@@ -57,6 +57,7 @@
     "gravatar": "1.8.0",
     "javascript-time-ago": "2.3.8",
     "markdown-it": "13.0.1",
+    "mocha": "10.4.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "type-fest": "^2.3.4",
     "unplugin-vue-components": "0.24.1",
