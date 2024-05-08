@@ -58,7 +58,15 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _protocol: AppCaptureProtocolInterface | undefined
   private _runnableId: string | undefined
   private _captureHash: string | undefined
-  private _afterSpecDuration: number | undefined
+  private _afterSpecDurations: {
+    drainCDPEvents: number
+    finalizePendingRunnables: number
+    drainAUTEvents: number
+    resolveBodyPromises: number
+    closeDb: number
+    teardownBBindings: number
+    afterSpec: number
+  } | undefined
 
   get protocolEnabled (): boolean {
     return !!this._protocol
@@ -130,7 +138,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   beforeSpec (spec: { instanceId: string }) {
-    this._afterSpecDuration = undefined
+    this._afterSpecDurations = undefined
 
     if (!this._protocol) {
       return
@@ -176,13 +184,17 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug({ startTime })
     try {
-      await this.invokeAsync('afterSpec', { isEssential: true })
+      const durations = await this.invokeAsync('afterSpec', { isEssential: true })
+
+      this._afterSpecDurations = durations ? {
+        afterSpec: (performance.now() + performance.timeOrigin) - startTime,
+        ...durations,
+      } : undefined
+
+      return durations
     } catch (e) {
       // rethrow; this is try/catch so we can 'finally' ascertain duration
       throw e
-    } finally {
-      this._afterSpecDuration = (performance.now() + performance.timeOrigin) - startTime
-      debug('afterSpec timing:', { startTime, duration: this._afterSpecDuration })
     }
   }
 
@@ -310,9 +322,11 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       return {
         fileSize,
-        afterSpecDuration: this._afterSpecDuration,
         success: true,
         specAccess: this._protocol.getDbMetadata(),
+        ...(this._afterSpecDurations ? {
+          afterSpecDurations: this._afterSpecDurations,
+        } : {}),
       }
     } catch (e) {
       if (captureErrors) {
@@ -415,9 +429,9 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>): Promise<ReturnType<AppCaptureProtocolInterface[K]> | undefined> {
     if (!this._protocol) {
-      return
+      return undefined
     }
 
     try {

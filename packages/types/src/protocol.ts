@@ -27,7 +27,7 @@ export interface AppCaptureProtocolCommon {
   beforeTest(test: Record<string, any>): Promise<void>
   preAfterTest(test: Record<string, any>, options: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
-  afterSpec (): Promise<void>
+  afterSpec (): Promise<AfterSpecDurations | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
@@ -92,8 +92,17 @@ export type ProtocolManagerOptions = {
 type UploadCaptureArtifactResult = {
   success: boolean
   fileSize: number | bigint
-  afterSpecDuration?: number
   specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+  afterSpecDurations?: AfterSpecDurations
+}
+
+export type AfterSpecDurations = {
+  drainCDPEvents: number
+  finalizePendingRunnables: number
+  drainAUTEvents: number
+  resolveBodyPromises: number
+  closeDb: number
+  teardownBBindings: number
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
