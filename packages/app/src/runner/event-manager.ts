@@ -344,7 +344,7 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('unload', () => {
+    $window.on('pagehide', () => {
       this._clearAllCookies()
     })
 

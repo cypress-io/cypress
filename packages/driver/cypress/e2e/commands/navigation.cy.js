@@ -103,7 +103,7 @@ describe('src/cy/commands/navigation', () => {
 
       cy.reload().then(() => {
         expect(rel).to.be.calledWith('beforeunload')
-        expect(rel).to.be.calledWith('unload')
+        expect(rel).to.be.calledWith('pagehide')
       })
     })
 
@@ -412,7 +412,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy.go('back').then(() => {
           expect(rel).to.be.calledWith('beforeunload')
-          expect(rel).to.be.calledWith('unload')
+          expect(rel).to.be.calledWith('pagehide')
         })
       })
     })

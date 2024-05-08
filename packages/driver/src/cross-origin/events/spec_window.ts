@@ -6,12 +6,12 @@ export const handleSpecWindowEvents = (cy: $Cy) => {
   const handleWindowUnhandledRejectionEvent = handleErrorEvent(cy, 'spec')('unhandledrejection')
 
   const handleUnload = () => {
-    window.removeEventListener('unload', handleUnload)
+    window.removeEventListener('pagehide', handleUnload)
     window.removeEventListener('error', handleWindowErrorEvent)
     window.removeEventListener('unhandledrejection', handleWindowUnhandledRejectionEvent)
   }
 
-  window.addEventListener('unload', handleUnload)
+  window.addEventListener('pagehide', handleUnload)
   window.addEventListener('error', handleWindowErrorEvent)
   window.addEventListener('unhandledrejection', handleWindowUnhandledRejectionEvent)
 }

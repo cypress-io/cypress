@@ -93,7 +93,7 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     callbacks.onBeforeUnload(e)
   })
 
-  addListener(contentWindow, 'unload', (e) => {
+  addListener(contentWindow, 'pagehide', (e) => {
     // when we unload we need to remove all of the event listeners
     removeAllListeners()
 
