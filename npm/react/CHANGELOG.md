@@ -1,3 +1,5 @@
+# [@cypress/react-v8.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v8.0.0...@cypress/react-v8.0.1) (2024-05-06)
+
 # [@cypress/react-v8.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.3...@cypress/react-v8.0.0) (2023-08-29)
 
 
