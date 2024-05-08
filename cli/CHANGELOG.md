@@ -7,6 +7,12 @@ _Released 5/21/2024 (PENDING)_
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
 
+**Features:**
+
+- Running the command `cypress open --browser <browser-name-or-path>`will
+launch the browser after testing type selection in the GUI. Addresses 
+[#22003](https://github.com/cypress-io/cypress/issues/22003).
+Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 ## 13.9.0
 
@@ -15,11 +21,6 @@ _Released 5/7/2024_
 **Features:**
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
-
-- Running the command `cypress open --browser <browser-name-or-path>`will
-launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003).
-Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
