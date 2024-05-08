@@ -4,18 +4,18 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo '@packages/example needs: yarn build'",
+    "build": "node ./bin/build.js && gulp build",
     "clean-deps": "rimraf node_modules",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build -b gh-pages",
+    "postinstall": "echo '@packages/example needs: yarn build'",
     "test": "yarn test-unit",
     "test-e2e": "cypress run",
-    "test-unit": "echo 'no unit tests'",
-    "build": "node ./bin/build.js && gulp build",
-    "predeploy": "yarn build",
-    "deploy": "gh-pages -d build -b gh-pages"
+    "test-unit": "echo 'no unit tests'"
   },
   "devDependencies": {
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "2.0.6",
+    "cypress-example-kitchensink": "2.0.7",
     "gh-pages": "5.0.0",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",

@@ -578,7 +578,7 @@ export class CdpAutomation implements CDPClient {
           this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
-      case 'reset:browser:tabs:for:next:test':
+      case 'reset:browser:tabs:for:next:spec':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
