@@ -102,7 +102,7 @@ export type AfterSpecDurations = {
   drainAUTEvents: number
   resolveBodyPromises: number
   closeDb: number
-  teardownBBindings: number
+  teardownBindings: number
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
@@ -110,8 +110,10 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
+  afterSpec (): Promise<AfterSpecDurations | undefined>
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, captureErrorsOverride?: boolean): Promise<UploadCaptureArtifactResult | void>
+
 }
 
 type Response = {

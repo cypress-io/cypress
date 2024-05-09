@@ -4,7 +4,7 @@ import type { AfterSpecDurations } from '@packages/types'
 const debug = Debug('cypress:server:cloud:artifact')
 
 const isAggregateError = (err: any): err is AggregateError => {
-  return !!err.errorsw
+  return !!err.errors
 }
 
 export const ArtifactKinds = Object.freeze({

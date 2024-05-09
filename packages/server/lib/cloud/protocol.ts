@@ -14,7 +14,7 @@ import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -58,13 +58,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _protocol: AppCaptureProtocolInterface | undefined
   private _runnableId: string | undefined
   private _captureHash: string | undefined
-  private _afterSpecDurations: {
-    drainCDPEvents: number
-    finalizePendingRunnables: number
-    drainAUTEvents: number
-    resolveBodyPromises: number
-    closeDb: number
-    teardownBBindings: number
+  private _afterSpecDurations: AfterSpecDurations & {
     afterSpec: number
   } | undefined
 
@@ -443,6 +437,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       } else {
         throw error
       }
+
+      return undefined
     }
   }
 
