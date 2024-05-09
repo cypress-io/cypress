@@ -5,17 +5,17 @@
   "scripts": {
     "build": "node ./script/build.js",
     "check-ts": "vue-tsc --noEmit",
-    "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
-    "test": "yarn cypress:run && yarn types",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
-    "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
+    "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "test": "yarn cypress:run && yarn types"
   },
   "dependencies": {
     "@packages/data-context": "0.0.0-development"

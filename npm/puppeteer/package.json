@@ -5,8 +5,8 @@
   "private": false,
   "main": "dist/plugin/index.js",
   "scripts": {
-    "build-prod": "yarn build",
     "build": "rimraf dist && tsc || echo 'built, with errors'",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "cypress:open": "node ../../scripts/cypress.js open",
     "cypress:run": "node ../../scripts/cypress.js run --browser chrome",
