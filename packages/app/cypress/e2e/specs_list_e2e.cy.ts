@@ -153,7 +153,7 @@ describe('App: Spec List (E2E)', () => {
 
       it('displays only matching spec', function () {
         cy.get('button')
-        .contains('26 matches')
+        .contains('28 matches')
         .should('not.contain.text', 'of')
 
         clearSearchAndType('content')
@@ -161,13 +161,13 @@ describe('App: Spec List (E2E)', () => {
         .should('have.length', 3)
         .and('contain', 'dom-content.spec.js')
 
-        cy.get('button').contains('3 of 26 matches')
+        cy.get('button').contains('3 of 28 matches')
 
         cy.findByLabelText('Search specs').clear().type('asdf')
         cy.findAllByTestId('spec-item')
         .should('have.length', 0)
 
-        cy.get('button').contains('0 of 26 matches')
+        cy.get('button').contains('0 of 28 matches')
       })
 
       it('only shows matching folders', () => {
@@ -186,6 +186,20 @@ describe('App: Spec List (E2E)', () => {
         cy.findByTestId('spec-item')
         .should('have.length', 1)
         .and('contain', 'app.spec.js')
+      })
+
+      it('search by digits inside long strings', function () {
+        clearSearchAndType('4276')
+
+        cy.findByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'dummyTest4276_test.spec.js')
+
+        clearSearchAndType('7890')
+
+        cy.findByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'dummy7890Test_test.spec.js')
       })
 
       it('ignores non-number characters', function () {
@@ -218,7 +232,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByLabelText('Search specs')
         .should('have.value', '')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('clears the filter if the user presses ESC key', function () {
@@ -227,7 +241,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.get('@searchField').should('have.value', '')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('shows empty message if no results', function () {
@@ -243,7 +257,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('Clear search').click()
         cy.focused().should('have.id', 'spec-filter')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('normalizes directory path separators for Windows', function () {
