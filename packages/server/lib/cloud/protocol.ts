@@ -59,7 +59,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _runnableId: string | undefined
   private _captureHash: string | undefined
   private _afterSpecDurations: AfterSpecDurations & {
-    afterSpec: number
+    afterSpecTotal: number
   } | undefined
 
   get protocolEnabled (): boolean {
@@ -181,7 +181,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       const durations = await this.invokeAsync('afterSpec', { isEssential: true })
 
       this._afterSpecDurations = durations ? {
-        afterSpec: (performance.now() + performance.timeOrigin) - startTime,
+        afterSpecTotal: (performance.now() + performance.timeOrigin) - startTime,
         ...durations,
       } : undefined
 

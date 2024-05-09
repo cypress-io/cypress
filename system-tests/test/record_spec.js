@@ -2364,7 +2364,7 @@ describe('e2e record', () => {
               },
             })
 
-            expect(artifactReport?.protocol?.afterSpecDurations?.afterSpec).to.be.a('number')
+            expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
           })
         })
       })

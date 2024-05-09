@@ -34,7 +34,9 @@ export interface ArtifactUploadResult {
   allErrors?: Error[]
   uploadDuration?: number
   originalError?: Error
-  afterSpecDurations?: AfterSpecDurations
+  afterSpecDurations?: AfterSpecDurations & {
+    afterSpecTotal: number
+  }
   specAccess?: {
     offset: number
     size: number

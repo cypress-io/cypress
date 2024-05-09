@@ -290,7 +290,9 @@ export type ProtocolMetadata = ArtifactMetadata & {
     size: number
     offset: number
   }
-  afterSpecDurations?: AfterSpecDurations
+  afterSpecDurations?: AfterSpecDurations & {
+    afterSpecTotal: number
+  }
 }
 
 export type UpdateInstanceArtifactsPayload = {
