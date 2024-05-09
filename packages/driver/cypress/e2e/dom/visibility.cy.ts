@@ -833,9 +833,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is hidden when parent overflow hidden and out of bounds above', function () {
-        cy.log(`Wiewport width ${ Cypress.config('viewportWidth').toString()}`)
-        cy.log(`Viewport height ${ Cypress.config('viewportHeight').toString()}`)
-        expect(this.$elOutOfParentBoundsAbove.find('span')).to.be.hidden
+        expect(this.$elOutOfParentBoundsAbove.find('span'), `expected '<span>' to be 'hidden' when Wiewport width ${ Cypress.config('viewportWidth').toString()} Viewport height ${ Cypress.config('viewportHeight').toString()}`).to.be.hidden
       })
 
       it('is hidden when parent overflow hidden and out of bounds below', function () {
