@@ -30,6 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
+        - chore/fix_kitchen_sink
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -89,7 +90,16 @@ executors:
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-
+  
+  kitchensink-executor:
+    docker:
+      - image: cypress/browsers-internal:node18.20.2-chrome124-ff125
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+  
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -2876,6 +2886,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3211,6 +3222,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
