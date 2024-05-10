@@ -101,7 +101,6 @@
     "mocha-teamcity-reporter": "3.0.0",
     "morgan": "1.9.1",
     "node-machine-id": "1.1.12",
-    "opn": "https://github.com/cypress-io/opn.git#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "1.2.2",
     "p-defer": "^3.0.0",
     "p-queue": "6.1.0",
