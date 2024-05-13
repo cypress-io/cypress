@@ -1,6 +1,6 @@
 const os = require('os')
 const Promise = require('bluebird')
-const Xvfb = require('@cypress/xvfb')
+const Xvfb = require('xvfb')
 const { stripIndent } = require('common-tags')
 const Debug = require('debug')
 const { throwFormErrorText, errors } = require('../errors')
