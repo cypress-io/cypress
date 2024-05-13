@@ -7,6 +7,10 @@ _Released 5/21/2024 (PENDING)_
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
 
+**Misc:**
+
+- Enhanced the type definitions available to `cy.intercept` and `cy.wait`. The `body` property of both the request and response in an interception can optionally be specified with user-defined types. Addresses [#29507](https://github.com/cypress-io/cypress/issues/29507).
+
 **Dependency Updates:**
 
 - Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
