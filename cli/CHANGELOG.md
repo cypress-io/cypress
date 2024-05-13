@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.9.1
+## 13.10.0
 
 _Released 5/21/2024 (PENDING)_
+
+**Features:**
+
+- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addressed in [#29332](https://github.com/cypress-io/cypress/pull/29332).
 
 **Bugfixes:**
 
@@ -19,7 +23,6 @@ _Released 5/7/2024_
 **Features:**
 
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
-- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addressed in [#29332](https://github.com/cypress-io/cypress/pull/29332).
 
 **Bugfixes:**
 
