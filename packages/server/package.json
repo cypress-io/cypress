@@ -75,7 +75,7 @@
     "getos": "3.2.1",
     "glob": "7.1.3",
     "graceful-fs": "4.2.9",
-    "http-proxy": "https://github.com/cypress-io/node-http-proxy.git#9322b4b69b34f13a6f3874e660a35df3305179c6",
+    "http-proxy": "1.18.1",
     "human-interval": "1.0.0",
     "image-size": "0.8.3",
     "is-ci": "^3.0.1",
@@ -217,6 +217,7 @@
     "nohoist": [
       "@benmalka/foxdriver",
       "devtools-protocol",
+      "http-proxy",
       "tsconfig-paths"
     ]
   },
