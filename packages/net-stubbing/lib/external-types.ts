@@ -488,42 +488,6 @@ interface WaitOptions {
   timeout: number
 }
 
-/**
- * Maps the array of `[Req, Res]` tuples to an array or tuple of `Interception`s.
- * This is used below in the `wait` method that takes an array of aliases.
- * We try to work out the number of aliases and use that for the length of the `Interception`s tuple.
- * Otherwise return a normal array.
- */
-type MapToInterceptions<T, A> = A extends []
-  ? [] // Empty aliases always implies empty interceptions.
-  : (A extends readonly [string, ...readonly string[]]
-    ? MapToInterceptionsFromConstAliases<T, A>
-    : MapToInterceptionsFromArrayAliases<T, A>);
-
-type MapToInterceptionsFromConstAliases<T, A> = A extends []
-  ? [] // Empty aliases always implies empty interceptions.
-  : (A extends readonly [string, ...infer Aliases]
-    ? (T extends [[infer Req, infer Res], ...infer Rest]
-
-      // Can infer first position, then recurse. Pass tail of aliases array *and* tail of types.
-      ? [Interception<Req, Res>, ...MapToInterceptionsFromConstAliases<Rest, Aliases>]
-
-      // Cannot infer types in first position. Pass tail of aliases array.
-      // Pass full types because length cannot be inferred.
-      : [Interception<any, any>, ...MapToInterceptionsFromConstAliases<T, Aliases>])
-    : [])
-
-type MapToInterceptionsFromArrayAliases<T, A> =
-  (T extends [[infer Req, infer Res], ...infer Rest]
-    // Can infer first position, then recurse. Pass tail of types.
-    // Pass full aliases because length cannot be inferred.
-    ? [Interception<Req, Res>, ...MapToInterceptionsFromArrayAliases<Rest, A>]
-
-    // Alias list is now empty or we couldn't infer how long it was.
-    // If empty and inferrable, we are at the end of recursion, so return definitely empty.
-    // Otherwise we couldn't infer anything about the types, so we only know that it's a list.
-    : Interception[])
-
 declare global {
   namespace Cypress {
     // TODO: Why is Subject unused?
@@ -604,7 +568,7 @@ declare global {
         })
       ```
       */
-      wait<T extends [any, any][] = [any, any][], A extends string[] | readonly string[] = string[]>(aliases: A, options?: Partial<WaitOptions>): Chainable<MapToInterceptions<T, A>>
+      wait(aliases: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
     }
   }
 }
