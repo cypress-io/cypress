@@ -354,7 +354,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
       ((elProps.left + elProps.width) <= ancestorProps.left) ||
 
       // target el is under the ancestor's visible area
-      elProps.top < 0 || (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
+      (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
 
       // target el is above the ancestor's visible area
       ((elProps.top + elProps.height) <= ancestorProps.top)
