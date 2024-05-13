@@ -243,6 +243,13 @@ export const routeHandlers: Record<string, RouteHandler> = {
       }
     },
   },
+  putCaptureScript: {
+    method: 'put',
+    url: '/capture-protocol/script/*',
+    res: async (_, res) => {
+      res.status(413).send('')
+    },
+  },
   putCaptureProtocolUpload: {
     method: 'put',
     url: '/capture-protocol/upload',
