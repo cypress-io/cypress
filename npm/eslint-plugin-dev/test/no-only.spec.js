@@ -1,47 +1,45 @@
 const path = require('path')
-const CLIEngine = require('eslint').CLIEngine
+const eslint = require('eslint')
 const plugin = require('..')
 const _ = require('lodash')
 const { expect } = require('chai')
 
 const ruleName = 'no-only'
 const pluginName = '__plugin__'
+const ESLint = eslint.ESLint
 
-function execute (file, options = {}) {
-  const opts = _.defaultsDeep(options, {
+async function execute (file, options = {}) {
+  const defaultConfig = {
     fix: true,
-    config: {
+    ignore: false,
+    useEslintrc: false,
+    baseConfig: {
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
       },
+      rules: {
+        [`${pluginName}/${ruleName}`]: ['error'],
+      },
+      plugins: [pluginName],
     },
-  })
-
-  const cli = new CLIEngine({
-    parserOptions: {
-      ecmaVersion: 2018,
-      sourceType: 'module',
+    plugins: {
+      [pluginName]: plugin,
     },
-    rules: {
-      [`${pluginName}/${ruleName}`]: ['error'],
-    },
-    ...opts,
-    ignore: false,
-    useEslintrc: false,
-    plugins: [pluginName],
-  })
+  }
+  const opts = _.defaultsDeep(options, defaultConfig)
 
-  cli.addPlugin(pluginName, plugin)
-  const results = cli.executeOnFiles([path.join(__dirname, file)]).results[0]
+  const cli = new ESLint(opts)
 
-  return results
+  const results = await cli.lintFiles([path.join(__dirname, file)])
+
+  return results[0]
 }
 
 describe('no-only', () => {
   it('lint js with only', async () => {
     const filename = './fixtures/with-only.js'
-    const result = execute(filename, {
+    const result = await execute(filename, {
       fix: true,
     })
 

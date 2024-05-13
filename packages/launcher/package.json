@@ -3,15 +3,15 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf --glob \"lib/*.js\" && rimraf --glob \"lib/**/*.js\" || true",
     "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "bluebird": "3.5.3",

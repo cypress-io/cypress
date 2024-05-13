@@ -435,7 +435,7 @@ describe('lib/browsers/electron', () => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
 
-        await this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+        await this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
         expect(this.win.destroy).to.be.called
       })

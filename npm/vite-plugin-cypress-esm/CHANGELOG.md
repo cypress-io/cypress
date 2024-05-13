@@ -1,3 +1,10 @@
+# [@cypress/vite-plugin-cypress-esm-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-plugin-cypress-esm-v1.1.0...@cypress/vite-plugin-cypress-esm-v1.1.1) (2024-05-10)
+
+
+### Bug Fixes
+
+* Some fixes and improvements to vite-plugin-cypress-esm ([#29368](https://github.com/cypress-io/cypress/issues/29368)) ([cf88556](https://github.com/cypress-io/cypress/commit/cf88556d4493128a1a031861448285be1e714818))
+
 # [@cypress/vite-plugin-cypress-esm-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-plugin-cypress-esm-v1.0.1...@cypress/vite-plugin-cypress-esm-v1.1.0) (2023-08-07)
 
 

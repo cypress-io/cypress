@@ -4,7 +4,6 @@ const { Menu } = require('electron')
 const { shell } = require('electron')
 
 const appData = require('../util/app_data')
-const open = require('../util/open')
 
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple
@@ -44,7 +43,7 @@ module.exports = {
           {
             label: 'View App Data',
             click () {
-              return open.opn(appData.path())
+              return shell.openPath(appData.path())
             },
           },
           {
@@ -195,7 +194,7 @@ module.exports = {
       {
         label: 'View App Data',
         click () {
-          return open.opn(appData.path())
+          return shell.openPath(appData.path())
         },
       },
     ]

@@ -19,6 +19,7 @@ describe('http/response-middleware', function () {
       'InterceptResponse',
       'PatchExpressSetHeader',
       'OmitProblematicHeaders',
+      'MaybeSetOriginAgentClusterHeader',
       'SetInjectionLevel',
       'MaybePreventCaching',
       'MaybeStripDocumentDomainFeaturePolicy',
@@ -446,6 +447,65 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('MaybeSetOriginAgentClusterHeader', function () {
+    const { MaybeSetOriginAgentClusterHeader } = ResponseMiddleware
+
+    let CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+    let PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+    let ctx
+
+    beforeEach(function () {
+      CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+      PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      ctx = {
+        req: {
+          proxiedUrl: 'http://localhost:4455',
+        },
+        res: {
+          setHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+    })
+
+    afterEach(function () {
+      beforeEach(function () {
+        process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+        process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      })
+    })
+
+    it('doesn\'t set the Origin-Agent-Cluster for the request if cypress-in-cypress testing is off', function () {
+      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.called
+      })
+    })
+
+    it('doesn\'t set the Origin-Agent-Cluster for the request if cypress-in-cypress testing is on but url does NOT match http proxy', function () {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+      process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = 'http://localhost:4456'
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.called
+      })
+    })
+
+    it('sets the Origin-Agent-Cluster for the request if cypress-in-cypress testing is on and url matches http proxy', function () {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+      process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = 'http://localhost:4455'
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
   })
 
   describe('SetInjectionLevel', function () {
