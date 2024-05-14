@@ -6,6 +6,7 @@ _Released 5/21/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Fixed the display of some command assertions. Fixed in [#29517](https://github.com/cypress-io/cypress/pull/29517).
 
 **Dependency Updates:**
 
