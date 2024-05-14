@@ -7,6 +7,7 @@ const { _, Promise, $ } = Cypress
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
     beforeEach(function () {
+      localStorage.debug = 'cypress:runner:event-manager,cypress:driver:cross-origin:events,cypress:driver:listeners'
       cy.visit('/fixtures/generic.html')
     })
 

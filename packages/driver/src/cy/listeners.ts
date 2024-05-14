@@ -1,8 +1,11 @@
 import _ from 'lodash'
 import { handleInvalidEventTarget, handleInvalidAnchorTarget, GuardedEvent, GuardedAnchorEvent } from './top_attr_guards'
+import Debug from 'debug'
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 const HISTORY_NAV_ATTRS = 'go back forward'.split(' ')
+
+const debug = Debug('cypress:driver:listeners')
 
 type BoundEventHandler<K extends keyof WindowEventMap> =
   K extends 'click' ? (this: Window, ev: GuardedAnchorEvent) => any
@@ -94,6 +97,7 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
   })
 
   addListener(contentWindow, 'pagehide', (e) => {
+    debug('driver listeners -> pagehide')
     // when we unload we need to remove all of the event listeners
     removeAllListeners()
 

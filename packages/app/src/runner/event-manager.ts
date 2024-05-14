@@ -16,6 +16,9 @@ import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
+import Debug from 'debug'
+
+const debug = Debug('cypress:runner:event-manager')
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -344,7 +347,8 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('pagehide', () => {
+    $window.on('pagehide', (e) => {
+      debug('pageHide', e)
       this._clearAllCookies()
     })
 
