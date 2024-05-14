@@ -434,11 +434,12 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
   })
 }
 
+let firstTime = true
+
 async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec, browser, protocolManager } = options
-  const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
   let browserLaunchAttempt = 1
 
   // without this the run mode is only setting new spec
@@ -487,11 +488,12 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       // TODO: remove the need to extend options and coerce this type
       launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
     ])
-    .timeout(browserTimeout)
+    .timeout(firstTime ? 1000 : 5000)
     .then(() => {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
     .catch(Bluebird.TimeoutError, async (err) => {
+      firstTime = false
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
       console.log('')
 
