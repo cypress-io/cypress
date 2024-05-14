@@ -6,6 +6,7 @@ orbs:
 
 jobs:
   verify-ci-should-run:
+    resource_class: small
     docker:
       - image: cimg/node:current
     steps:

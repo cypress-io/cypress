@@ -5,6 +5,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   constructor () {
     throw new Error('Error instantiating Protocol Capture')
   }
+  cdpReconnect (): Promise<void> {
+    return Promise.resolve()
+  }
 
   preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
     return Promise.resolve()
