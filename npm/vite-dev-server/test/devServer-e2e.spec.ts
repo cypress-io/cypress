@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
-import { devServer } from '..'
 import path from 'path'
+import { devServer } from '..'
 import type { ConfigHandler } from '../src/devServer'
 
 const requestSpecFile = (file: string, port: number) => {
@@ -69,7 +69,7 @@ const cypressConfig = {
 } as any as Cypress.PluginConfigOptions
 
 describe('#devServer', () => {
-  it('serves specs via a vite dev server', async () => {
+  it('serves specs via vite dev server', async () => {
     const { port, close } = await devServer({
       cypressConfig,
       viteConfig,
@@ -82,6 +82,31 @@ describe('#devServer', () => {
     expect(response).to.eq('const foo = () => {}\n')
 
     await closeServer(close)
+  })
+
+  it('serves specs via vite dev server in middleware mode', async () => {
+    const { server, close } = await devServer({
+      cypressConfig,
+      viteConfig: {
+        ...viteConfig,
+        server: { middlewareMode: true },
+      },
+      specs: createSpecs('foo.spec.js'),
+      devServerEvents: new EventEmitter(),
+    })
+
+    await closeServer(close)
+
+    const port = 5173
+    const httpServer = http.createServer(server.middlewares)
+
+    httpServer.listen(port)
+
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
+
+    expect(response).to.eq('const foo = () => {}\n')
+
+    await closeServer((cb) => httpServer.close(cb))
   })
 })
 .timeout(5000)
