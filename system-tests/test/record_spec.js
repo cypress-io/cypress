@@ -23,13 +23,14 @@ const {
   postInstanceTestsResponse,
   encryptBody,
   disableCaptureProtocolWithMessage,
+  disableCaptureProtocolUploadUrl,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
   routeHandlers,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
-const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
+const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR, PROTOCOL_STUB_NO_DB_WRITE } = require('../lib/protocol-stubs/protocolStubResponse')
 const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -1528,6 +1529,44 @@ describe('e2e record', () => {
       })
     })
 
+    describe('update instance artifacts', () => {
+      const routes = createRoutes({
+        putArtifacts: {
+          res (_, res) {
+            return res.sendStatus(500)
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('warns but proceeds', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            `POST /runs/${runId}/instances`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
+            'PUT /screenshots/1.png',
+            `PUT /instances/${instanceId}/artifacts`,
+            `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
+          ])
+        })
+      })
+    })
+
     describe('api retries on error', () => {
       let count = 0
 
@@ -2401,6 +2440,37 @@ describe('e2e record', () => {
           })
         })
 
+        describe('db is unreadable', () => {
+          enableCaptureProtocol(PROTOCOL_STUB_NO_DB_WRITE)
+          beforeEach(() => {
+            if (fs.existsSync(archiveFile)) {
+              return fsPromise.rm(archiveFile)
+            }
+          })
+
+          it('displays warning and continues', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+            })
+          })
+        })
+
         describe('error initializing protocol', () => {
           enableCaptureProtocol(PROTOCOL_STUB_CONSTRUCTOR_ERROR)
 
@@ -2524,7 +2594,7 @@ describe('capture-protocol api errors', () => {
 
   enableCaptureProtocol()
 
-  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
+  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER, status = 500, statusText = 'Internal Server Error') => {
     let failures = 0
 
     return setupStubbedServer(createRoutes({
@@ -2532,7 +2602,7 @@ describe('capture-protocol api errors', () => {
         res: (req, res) => {
           if (failures < numberOfFailuresBeforeSuccess) {
             failures += 1
-            res.status(500).send('500 - Internal Server Error')
+            res.status(status).send(`${status} - ${statusText}`)
           } else {
             routeHandlers[endpoint].res(req, res)
           }
@@ -2541,7 +2611,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 3 times and fails', () => {
+  describe('upload 500 - does not retry', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2561,7 +2631,33 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol).to.exist()
         expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload after 3 attempts. Errors: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+          'Failed to upload Test Replay: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+        )
+      })
+    })
+  })
+
+  describe('upload 503 - tries 3 times and fails', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, 'Service Unavailable')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload Test Replay after 3 attempts. Errors: 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
         )
 
         expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
@@ -2569,8 +2665,8 @@ describe('capture-protocol api errors', () => {
     })
   })
 
-  describe('upload 500 - retries 2 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2)
+  describe('upload 503 - retries 2 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2, 503, 'Internal Server Error')
 
     let archiveFile = ''
 
@@ -2593,6 +2689,36 @@ describe('capture-protocol api errors', () => {
         spec: 'record_pass*',
         record: true,
         snapshot: true,
+      })
+    })
+  })
+
+  describe('upload network error', () => {
+    disableCaptureProtocolUploadUrl()
+    setupStubbedServer(createRoutes())
+
+    it('retries 3 times, warns and continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload Test Replay after 3 attempts. Errors: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test',
+        )
+
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })

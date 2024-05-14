@@ -8,7 +8,7 @@ import { Component } from '@angular/core'
     </ul>`,
 })
 export class WithDirectivesComponent {
-  show = true;
+  show = true
 
-  items = ['breakfast', 'lunch', 'dinner'];
+  items = ['breakfast', 'lunch', 'dinner']
 }

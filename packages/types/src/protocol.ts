@@ -18,6 +18,7 @@ export interface CDPClient {
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolCommon {
+  cdpReconnect (): Promise<void>
   addRunnables (runnables: any): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
@@ -40,7 +41,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
-export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb'
+export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact'
 
 export interface ProtocolError {
   args?: any
@@ -48,6 +49,11 @@ export interface ProtocolError {
   captureMethod: ProtocolCaptureMethod
   fatal?: boolean
   runnableId?: string
+  isUploadError?: boolean
+}
+
+export const isProtocolInitializationError = (error: ProtocolError) => {
+  return ['setupProtocol', 'beforeSpec', 'getCaptureProtocolScript'].includes(error.captureMethod)
 }
 
 type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {
@@ -73,8 +79,8 @@ export type ProtocolErrorReport = {
 
 export type CaptureArtifact = {
   uploadUrl: string
-  fileSize: number
-  payload: Readable
+  fileSize: number | bigint
+  filePath: string
 }
 
 export type ProtocolManagerOptions = {
@@ -89,7 +95,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>
-  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number | bigint, success: boolean, error?: string } | void>
 }
 
 type Response = {

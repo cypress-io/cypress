@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import { create } from '../../../lib/browsers/cri-client'
+import { ProtocolManagerShape } from '@packages/types'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -23,7 +24,7 @@ describe('lib/browsers/cri-client', function () {
     _notifier: EventEmitter
   }
   let onError: sinon.SinonStub
-  let getClient: (options?: { host?: string, fullyManageTabs?: boolean }) => ReturnType<typeof create>
+  let getClient: (options?: { host?: string, fullyManageTabs?: boolean, protocolManager?: ProtocolManagerShape }) => ReturnType<typeof create>
 
   beforeEach(function () {
     send = sinon.stub()
@@ -49,8 +50,8 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = ({ host, fullyManageTabs } = {}) => {
-      return criClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs })
+    getClient = ({ host, fullyManageTabs, protocolManager } = {}) => {
+      return criClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager })
     }
   })
 
@@ -129,15 +130,32 @@ describe('lib/browsers/cri-client', function () {
 
           expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
         })
+
+        it(`when socket is closed mid send ('WebSocket connection closed' variant)`, async function () {
+          const err = new Error('WebSocket connection closed')
+
+          send.onFirstCall().rejects(err)
+          const client = await getClient()
+
+          await client.close()
+
+          expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
+        })
       })
     })
   })
 
   describe('on reconnect', () => {
-    it('resends *.enable commands', async () => {
+    it('resends *.enable commands and notifies protocol manager', async () => {
       criStub._notifier.on = sinon.stub()
 
-      const client = await getClient()
+      const protocolManager = {
+        cdpReconnect: sinon.stub(),
+      } as ProtocolManagerShape
+
+      const client = await getClient({
+        protocolManager,
+      })
 
       client.send('Page.enable')
       // @ts-ignore
@@ -157,6 +175,7 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledTwice
       expect(criStub.send).to.be.calledWith('Page.enable')
       expect(criStub.send).to.be.calledWith('Network.enable')
+      expect(protocolManager.cdpReconnect).to.be.called
     })
 
     it('errors if reconnecting fails', async () => {

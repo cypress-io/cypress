@@ -105,6 +105,18 @@ export function makeCypressWebpackConfig (
     }
   }
 
+  if (webpackDevServerMajorVersion === 5) {
+    return {
+      ...finalConfig,
+      devServer: {
+        port: webpackDevServerPort,
+        client: {
+          overlay: false,
+        },
+      },
+    }
+  }
+
   if (webpackDevServerMajorVersion === 4) {
     return {
       ...finalConfig,
