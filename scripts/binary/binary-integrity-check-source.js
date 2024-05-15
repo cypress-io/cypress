@@ -147,10 +147,6 @@ function integrityCheck (options) {
   stackIntegrityCheck({ stackToMatch:
     [
       {
-        functionName: 'stackIntegrityCheck',
-        fileName: '<embedded>',
-      },
-      {
         functionName: 'integrityCheck',
         fileName: '<embedded>',
       },
