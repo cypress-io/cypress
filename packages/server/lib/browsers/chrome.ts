@@ -55,12 +55,9 @@ let browserCriClient: BrowserCriClient | undefined
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
-  /**
-   * By returning empty objects here, the user is indicating that they do not want
-   * Chrome preferences read. If they do not provide preferences via config,
-   * this effectively prevents Cypress from writing to the Chrome preferences files.
-   * See: _writeChromePreferences
-   */
+  // skip reading the preferences if requested by the user,
+  // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
+  // see https://github.com/cypress-io/cypress/issues/29330
   if (process.env.IGNORE_CHROME_PREFERENCES) {
     debug('ignoring chrome preferences...')
 
