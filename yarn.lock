@@ -22671,9 +22671,9 @@ mz@^2.7.0:
     thenify-all "^1.0.0"
 
 nan@^2.10.0, nan@^2.12.1, nan@^2.17.0, nan@^2.18.0:
-  version "2.18.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.18.0.tgz#26a6faae7ffbeb293a39660e88a76b82e30b7554"
-  integrity sha512-W7tfG7vMOGtD30sHoZSSc/JVYiyDPEyQVso/Zz+/uQd0B0L46gtC+pHha5FFMRpil6fm/AoEcRWyOVi4+E/f8w==
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.19.0.tgz#bb58122ad55a6c5bc973303908d5b16cfdd5a8c0"
+  integrity sha512-nO1xXxfh/RWNxfd/XPfbIfFk5vgLsAxUR9y5O0cHMJu/AW9U95JLXqthYHjEp+8gQ5p96K9jUp8nbVOxCdRbtw==
 
 nano-time@1.0.0:
   version "1.0.0"
@@ -32346,10 +32346,6 @@ xvfb-maybe@0.2.1, xvfb-maybe@^0.2.1:
   dependencies:
     debug "^2.2.0"
     which "^1.2.4"
-
-"xvfb@https://github.com/cypress-io/node-xvfb.git#22e3783c31d81ebe64d8c0df491ea00cdc74726a":
-  version "0.3.0"
-  resolved "https://github.com/cypress-io/node-xvfb.git#22e3783c31d81ebe64d8c0df491ea00cdc74726a"
 
 y18n@^3.2.1:
   version "3.2.2"
