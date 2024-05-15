@@ -136,8 +136,8 @@ const connect = function (host, path, extraOpts) {
         return invoke('takeScreenshot', id)
       case 'reset:browser:state':
         return invoke('resetBrowserState', id)
-      case 'reset:browser:tabs:for:next:test':
-        return invoke('resetBrowserTabsForNextTest', id)
+      case 'reset:browser:tabs:for:next:spec':
+        return invoke('resetBrowserTabsForNextSpec', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -284,12 +284,35 @@ const automation = {
     return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
   },
 
-  resetBrowserTabsForNextTest (fn) {
+  resetBrowserTabsForNextSpec (callback) {
     return Promise.try(() => {
       return browser.windows.getCurrent({ populate: true })
-    }).then((windowInfo) => {
-      return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))
-    }).then(fn)
+    }).then(async (currentWindowInfo) => {
+      const windows = await browser.windows.getAll().catch(() => [])
+
+      for (const window of windows) {
+        // remove/close the window if it's not the current window
+        if (window.id !== currentWindowInfo.id) {
+          await browser.windows.remove(window.id).catch(() => {})
+        }
+      }
+
+      return currentWindowInfo
+    }).then(async (currentWindowInfo) => {
+      let newTabId = null
+
+      try {
+        // in versions of Firefox 124 and up, firefox no longer creates a new tab for us when we close all tabs in the browser.
+        // to keep change minimal and backwards compatible, we are creating an 'about:blank' tab here to keep the behavior consistent.
+        // this works in previous versions as well since one tab is left, hence one will not be created for us in Firefox 123 and below
+        const newAboutBlankTab = await browser.tabs.create({ url: 'about:blank', active: false })
+
+        newTabId = newAboutBlankTab.id
+      // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      return browser.tabs.remove(currentWindowInfo.tabs.map((tab) => tab.id).filter((tab) => tab.id !== newTabId))
+    }).then(callback)
   },
 
   query (data) {
@@ -337,7 +360,6 @@ const automation = {
     })
     .then(fn)
   },
-
 }
 
 module.exports = automation

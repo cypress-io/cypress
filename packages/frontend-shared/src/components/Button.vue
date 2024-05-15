@@ -167,7 +167,7 @@ const linkProps = computed(() => {
   if (props.disabled) {
     return {
       role: 'link',
-      ariaDisabled: 'disabled',
+      ariaDisabled: 'true',
       href: null,
     }
   }

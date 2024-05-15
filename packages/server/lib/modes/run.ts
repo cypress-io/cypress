@@ -652,7 +652,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
-    await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
 
     debug('resetting server state')
 

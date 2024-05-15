@@ -5,17 +5,17 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "test": "yarn test-unit",
-    "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rimraf node_modules",
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
-    "pretest-unit": "yarn clean",
-    "test-unit": "mocha",
+    "clean-deps": "rimraf node_modules",
+    "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "test": "yarn test-unit",
     "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "pretest-unit": "yarn clean",
+    "test-unit": "mocha"
   },
   "dependencies": {
     "ansi_up": "5.0.0",

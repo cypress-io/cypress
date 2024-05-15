@@ -11,6 +11,7 @@ import {
   setupHooks,
   checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
+import { ComponentPublicInstanceConstructor } from 'vue/types/v3-component-public-instance'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
@@ -119,7 +120,7 @@ const resetStoreVM = (Vue, { store }) => {
  *         ^^^^^ this type
  *  mount(Hello)
  */
-type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor
+type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor | ComponentPublicInstanceConstructor
 
 /**
  * Options to pass to the component when creating it, like

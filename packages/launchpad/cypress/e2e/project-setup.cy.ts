@@ -581,7 +581,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('pnpm add -D react-scripts react-dom react')
     })
 
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
@@ -673,8 +673,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
-    it.skip('takes the user to first step of ct setup when switching from app', () => {
+    it('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
