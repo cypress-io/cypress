@@ -5,8 +5,8 @@ const disabledFeatures = [
   // Disables "Enhanced ad privacy in Chrome" dialog
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
-  // Force the deprecation of upload events
-  'DeprecateUnloadByUserAndOrigin',
+  // Uncomment to force the deprecation of unload events
+  // 'DeprecateUnloadByUserAndOrigin',
 ]
 
 // Common Chrome Flags for Automation
@@ -94,8 +94,8 @@ const DEFAULT_FLAGS = [
   // enable precise memory info so performance.memory returns more accurate values
   'enable-precise-memory-info',
 
-  // Force the deprecation of upload events
-  `--enable-features=PermissionsPolicyUnload,DeprecateUnload`,
+  // Uncomment to force the deprecation of upload events
+  //`--enable-features=PermissionsPolicyUnload,DeprecateUnload`,
 ]
 
 // prepend -- to each flag and concatenate them together
