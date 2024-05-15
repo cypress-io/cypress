@@ -8,6 +8,11 @@ _Released 5/21/2024 (PENDING)_
 - Fixed an issue where Cypress did not detect visible elements with width or height in rem as visible. Fixes [#29224](https://github.com/cypress-io/cypress/issues/29093) and [#28638](https://github.com/cypress-io/cypress/issues/28638).
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
 
+**Dependency Updates:**
+
+- Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
+- Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
+
 ## 13.9.0
 
 _Released 5/7/2024_
