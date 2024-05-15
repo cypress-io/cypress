@@ -6,6 +6,7 @@ _Released 5/21/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Migrated navigation and window:unload events from `window`'s `unload` event to the `pagehide` event, to account for removal from Chrome. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
 
 **Dependency Updates:**
 
