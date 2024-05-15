@@ -16,19 +16,36 @@ const devServerPublicPathRoute = CypressInstance.config('devServerPublicPathRout
 if (supportFile) {
   let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
 
+  console.log('support before', supportRelativeToProjectRoot)
   if (CypressInstance.config('platform') === 'win32') {
     const platformProjectRoot = projectRoot.replaceAll('/', '\\')
 
     supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
+    console.log('support after', supportRelativeToProjectRoot)
   }
+
+  console.log(devServerPublicPathRoute)
+  console.log(supportRelativeToProjectRoot)
+
+  supportRelativeToProjectRoot = supportRelativeToProjectRoot.replaceAll('\\', '/')
+  console.log(supportRelativeToProjectRoot)
+  // supportRelativeToProjectRoot = 'cypress\\support\\component.js'
+  // console.log('support override', supportRelativeToProjectRoot)
 
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
+
+  let pathing = devServerPublicPathRoute
+
+  if (devServerPublicPathRoute === '') {
+    pathing = '.'
+  }
+
   importsToLoad.push({
-    load: () => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`),
+    load: () => import(`${pathing}${supportRelativeToProjectRoot}`),
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
-    relativeUrl: `${devServerPublicPathRoute}${supportRelativeToProjectRoot}`,
+    relativeUrl: `${pathing}${supportRelativeToProjectRoot}`,
   })
 }
 
