@@ -46,7 +46,9 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true,
     /** Allows us to strip internal types sourced from webpack */
-    "stripInternal": true
+    "stripInternal": true,
+    /* skips checking declaration types. we skip this because rollup 4 (vite 5) requires moduleResolution: 'bundler'. @see https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971 */
+    "skipLibCheck": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "*.js"]
