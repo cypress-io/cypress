@@ -369,8 +369,8 @@ describe('lib/config', () => {
           })
         })
 
-        it('passes if a string contains an invalid character but encodes it', function () {
-          this.setup({ fileServerFolder: encodeURIComponent('/specialCharacters/无法解析的特殊字符') })
+        it('passes if a string contains encoded special characters', function () {
+          this.setup({ fileServerFolder: encodeURI('/specialCharacters/无法解析的特殊字符') })
 
           return this.expectValidationPasses()
         })
