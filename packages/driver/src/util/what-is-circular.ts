@@ -8,7 +8,7 @@ export function whatIsCircular (obj) {
   return _dfs(obj)
 }
 
-function _dfs (obj, parents = [], parentKeys = []) {
+function _dfs (obj, parents: any[] = [], parentKeys: any[] = []) {
   // recurse depth-first until we hit something we've seen before
   for (const key in obj) {
     const val = obj[key]
