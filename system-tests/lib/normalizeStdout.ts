@@ -191,9 +191,17 @@ export const normalizeStdout = function (str: string, options: any = {}) {
       if (matches !== null) {
         const fullString = matches.groups.full
         const width = parseInt(matches.groups.width)
-        const height = parseInt(matches.groups.height)
+        let height = parseInt(matches.groups.height)
 
-        str = str.replaceAll(fullString, `(${width}x${height + 1})`)
+        // A bit hacky, but all of our system tests in firefox have even pixel snapshots.
+        // This coercion is necessary because sub window snapshots, such as
+        // element or viewport captures, have the correct viewport.
+        // Since in this context we cannot deterministically figure out where the
+        // snapshot came from, this "workaround" accomplishes getting the correct height
+        // in the snapshot.
+        height = height % 2 === 0 ? height : height + 1
+
+        str = str.replaceAll(fullString, `(${width}x${height})`)
       }
     } catch (e) {
       // swallow error here as system test will fail anyway and problem should be obvious

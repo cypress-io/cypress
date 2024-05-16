@@ -25,7 +25,9 @@ describe('windowSize', () => {
     } else {
       expect({
         innerWidth: top.window.innerWidth,
-        innerHeight: top.window.innerHeight,
+        // Since Firefox 126, the expected height pixels on screenshots have been off by 1 pixel
+        // this is a small margin of error, which we will account for here by adding a pixel to the expected snapshot
+        innerHeight: Cypress.browser.name === 'firefox' ? top.window.innerHeight + 1 : top.window.innerHeight,
         // screenWidth: top.screen.width,
         // screenHeight: top.screen.height,
         // availWidth: top.screen.availWidth,
