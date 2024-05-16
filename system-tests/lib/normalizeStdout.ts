@@ -174,6 +174,23 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
+    // Since Firefox 126, the expected height pixels on screenshots have been off by 1 pixel
+    // this is a small margin of error, which we will account for here by adding a pixel to the expected snapshot
+  } else if (options.browser === 'firefox') {
+    try {
+      const widthAndHeightMatcher = new RegExp(/(?<full>\((?<width>\d+)x(?<height>\d+)\))/g)
+      const matches = widthAndHeightMatcher.exec(str)
+
+      if (matches !== null) {
+        const fullString = matches.groups.full
+        const width = parseInt(matches.groups.width)
+        const height = parseInt(matches.groups.height)
+
+        str = str.replaceAll(fullString, `(${width}x${height + 1})`)
+      }
+    } catch (e) {
+      // swallow error here as system test will fail anyway and problem should be obvious
+    }
   }
 
   return replaceStackTraceLines(str, options.browser)
