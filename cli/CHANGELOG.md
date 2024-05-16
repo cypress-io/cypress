@@ -6,7 +6,7 @@ _Released 5/21/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
-- Fixed an issue parsing the `fileServerFolder` path when there are special characters. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+- Fixed an issue setting the `x-cypress-file-path` header when there are invalid header characters in the file path. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
 
 **Dependency Updates:**
 
