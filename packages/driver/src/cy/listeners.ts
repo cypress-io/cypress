@@ -61,7 +61,7 @@ type BoundCallbacks = {
   onSubmit: (e) => any
   onLoad: (e) => any
   onBeforeUnload: (e) => undefined | Promise<undefined>
-  onUnload: (e) => any
+  onPageHide: (e: PageTransitionEvent) => any
   onNavigation: (...args) => any
   onAlert: (str) => any
   onConfirm: (str) => boolean
@@ -98,7 +98,7 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     removeAllListeners()
 
     // else we know to proceed onwards!
-    callbacks.onUnload(e)
+    callbacks.onPageHide(e)
   })
 
   addListener(contentWindow, 'hashchange', (e) => {

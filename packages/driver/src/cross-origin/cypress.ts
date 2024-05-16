@@ -218,7 +218,7 @@ const attachToWindow = (autWindow: Window) => {
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
     },
-    onUnload (e) {
+    onPageHide (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
 
