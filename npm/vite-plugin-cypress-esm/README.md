@@ -9,7 +9,7 @@ A Vite plugin that intercepts and rewrites ES module imports within [Cypress com
 Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in the terminal, for the code transformation, and in the browser console, for intercepting and wrapping the modules in a Proxy. 
 ## Compatibility
 
-| @cypress/vite-plugin-mock-esm | cypress |
+| @cypress/vite-plugin-cypress-esm | cypress |
 | ------------------------ | ------- |
 | >= v1                    | >= v12  |
 

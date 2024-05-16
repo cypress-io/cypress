@@ -26,6 +26,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+    cy.visit('/fixtures/empty.html')
   })
 
   context('cy.intercept()', function () {
@@ -2199,7 +2200,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
       context('with `times`', function () {
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-        it('only uses each handler N times', { retries: 15 }, function () {
+        it('only uses each handler N times', { browser: '!webkit', retries: 15 }, function () {
           const url = uniqueRoute('/foo')
           const third = sinon.stub()
 

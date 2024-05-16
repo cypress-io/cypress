@@ -31,7 +31,6 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'electron-28'
         - 'publish-binary'
-        - 'em/circle2'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -43,7 +42,6 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'electron-28', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/service-worker-capture', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -55,7 +53,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'electron-28', << pipeline.git.branch >> ]
-    - equal: [ 'em/circle2', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -79,8 +76,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'electron-28', << pipeline.git.branch >> ]
-    - equal: [ 'lerna-optimize-tasks', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/mochaEvents_win_sep', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -89,17 +84,26 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.18.2-chrome120-ff115
+      - image: cypress/browsers-internal:node18.18.2-chrome125-ff126
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-
+  
+  kitchensink-executor:
+    docker:
+      - image: cypress/browsers-internal:node18.18.2-chrome125-ff126
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+  
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.18.2-chrome120-ff115
+      - image: cypress/browsers-internal:node18.18.2-chrome125-ff126
         user: node
     environment:
       PLATFORM: linux
@@ -107,11 +111,8 @@ executors:
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-  mac:
-    macos:
-      # Executor should have Node >= required version
-      xcode: "15.0.0"
-    resource_class: macos.x86.medium.gen2
+  darwin-amd64:
+    machine: true
     environment:
       PLATFORM: darwin
 
@@ -121,7 +122,7 @@ executors:
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:
-      image: windows-server-2019-vs2019:stable
+      image: windows-server-2022-gui:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.large
     environment:
@@ -552,7 +553,7 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               docker run -d --name centos7-builder centos7-builder /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
-              docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 28.2.3 --include-regex 'better_sqlite3.node$'"
+              docker exec -it centos7-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 28.3.1 --include-regex 'better_sqlite3.node$'"
               docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f centos7-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -666,11 +667,9 @@ commands:
             echo Total containers $CIRCLE_NODE_TOTAL
 
             if [[ -v MAIN_RECORD_KEY ]]; then
-              if [[ <<parameters.package>> == 'app' && <<parameters.type>> == 'e2e' ]]; then
-                export DEBUG=cypress:*
-              fi
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
@@ -1006,6 +1005,10 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
+      - run:
+          name: Install yarn if not already installed
+          command: |
+            yarn --version || npm i -g yarn
       - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
           pull_request_id: <<parameters.pull_request_id>>
@@ -1723,6 +1726,7 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1730,6 +1734,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1737,6 +1742,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1744,6 +1750,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1801,7 +1808,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
@@ -1818,6 +1825,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
       percy:
         type: boolean
         default: false
@@ -1835,7 +1845,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
@@ -1851,6 +1861,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
+    resource_class: medium+
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -1858,6 +1869,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1866,6 +1878,7 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1880,7 +1893,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: large
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1903,6 +1916,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 3
     steps:
       - restore_cached_workspace
@@ -1928,6 +1942,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 2
     steps:
       - restore_cached_workspace
@@ -2198,7 +2213,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2234,6 +2249,7 @@ jobs:
       resource_class:
         type: string
         default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
@@ -2296,6 +2312,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -2869,6 +2886,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3204,6 +3222,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3336,15 +3355,15 @@ darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-x64-build
         context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
 
@@ -3355,33 +3374,29 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
-
-    - test-kitchensink:
-        name: darwin-x64-test-kitchensink
-        executor: mac
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
+  
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
@@ -3436,7 +3451,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
@@ -3450,7 +3465,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3458,7 +3473,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build

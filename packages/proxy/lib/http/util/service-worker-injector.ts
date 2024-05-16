@@ -5,10 +5,15 @@ import type { ServiceWorkerClientEvent } from './service-worker-manager'
 // this should be of type ServiceWorkerGlobalScope from the webworker lib,
 // but we can't reference it directly because it causes errors in other packages
 interface ServiceWorkerGlobalScope extends WorkerGlobalScope {
+  registration: ServiceWorkerRegistration
+  clients: {
+    claim: () => Promise<void>
+    matchAll(): Promise<{ url: string }[]>
+  }
   onfetch: FetchListener | null
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void
-  __cypressServiceWorkerClientEvent: (event: string) => void
+  __cypressServiceWorkerClientEvent: ((event: string) => void) | undefined
 }
 
 // this should be of type FetchEvent from the webworker lib,
@@ -18,7 +23,15 @@ interface FetchEvent extends Event {
   respondWith(r: Response | PromiseLike<Response>): void
 }
 
+// this should be of type ExtendableEvent from the webworker lib,
+// but we can't reference it directly because it causes errors in other packages
+interface ExtendableEvent extends Event {
+  waitUntil(f: Promise<any>): void
+}
+
 type FetchListener = (this: ServiceWorkerGlobalScope, ev: FetchEvent) => any
+
+type ServiceWorkerClientEventWithoutScope = Omit<ServiceWorkerClientEvent, 'scope'>
 
 declare let self: ServiceWorkerGlobalScope
 
@@ -30,20 +43,15 @@ declare let self: ServiceWorkerGlobalScope
 export const injectIntoServiceWorker = (body: Buffer) => {
   function __cypressInjectIntoServiceWorker () {
     let listenerCount = 0
-    let eventQueue: ServiceWorkerClientEvent[] = []
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const targetToWrappedHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
     const targetToOrigHandleEventMap = new WeakMap<Object, EventListenerOrEventListenerObject>()
 
-    const sendEvent = (event: ServiceWorkerClientEvent) => {
-      // if the binding has been created, we can call it
-      // otherwise, we need to queue the event
-      if (self.__cypressServiceWorkerClientEvent) {
-        self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
-      } else {
-        eventQueue.push(event)
-      }
+    const sendEvent = (event: ServiceWorkerClientEventWithoutScope) => {
+      const payload = Object.assign({}, event, { scope: self.registration.scope })
+
+      self.__cypressServiceWorkerClientEvent!(JSON.stringify(payload))
     }
 
     const sendHasFetchEventHandlers = () => {
@@ -57,6 +65,11 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     const sendFetchRequest = (payload: { url: string, isControlled: boolean }) => {
       // call the CDP binding to inform the backend whether or not the service worker handled the request
       sendEvent({ type: 'fetchRequest', payload })
+    }
+
+    const sendClientsClaimed = (payload: { clientUrls: string[] }) => {
+      // call the CDP binding to inform the backend that the service worker is now handling requests
+      sendEvent({ type: 'clientsClaimed', payload })
     }
 
     // A listener is considered valid if it is a function or an object (with the handleEvent function or the function could be added later)
@@ -177,6 +190,12 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         const capture = getCaptureValue(options)
         const newListener = capture ? captureListenersMap.get(listener) : nonCaptureListenersMap.get(listener)
 
+        // If the listener is not in the map, we don't need to remove it
+        // and we can just call the original removeEventListener function
+        if (!newListener) {
+          return oldRemoveEventListener(type, listener, options)
+        }
+
         // call the original removeEventListener function prior to doing any additional work since it may fail
         const result = oldRemoveEventListener(type, newListener!, options)
 
@@ -197,60 +216,76 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       return oldRemoveEventListener(type, listener, options)
     }
 
-    const originalPropertyDescriptor = Object.getOwnPropertyDescriptor(
+    const originalOnFetchPropertyDescriptor = Object.getOwnPropertyDescriptor(
       self,
       'onfetch',
     )
 
-    if (!originalPropertyDescriptor) {
-      return
+    if (originalOnFetchPropertyDescriptor) {
+      // Overwrite the onfetch property so we can
+      // determine if the service worker handled the request
+      Object.defineProperty(
+        self,
+        'onfetch',
+        {
+          configurable: originalOnFetchPropertyDescriptor.configurable,
+          enumerable: originalOnFetchPropertyDescriptor.enumerable,
+          get () {
+            return originalOnFetchPropertyDescriptor.get?.call(this)
+          },
+          set (value: typeof self.onfetch) {
+            let newHandler
+
+            if (value) {
+              newHandler = wrapListener(value)
+            }
+
+            originalOnFetchPropertyDescriptor.set?.call(this, newHandler)
+
+            sendHasFetchEventHandlers()
+          },
+        },
+      )
     }
 
-    // Overwrite the onfetch property so we can
-    // determine if the service worker handled the request
-    Object.defineProperty(
-      self,
-      'onfetch',
-      {
-        configurable: originalPropertyDescriptor.configurable,
-        enumerable: originalPropertyDescriptor.enumerable,
-        get () {
-          return originalPropertyDescriptor.get?.call(this)
-        },
-        set (value: typeof self.onfetch) {
-          let newHandler
+    const oldClientsClaim = self.clients.claim
 
-          if (value) {
-            newHandler = wrapListener(value)
-          }
+    // Overwrite the clients.claim method so we can inform the backend that the service worker is now handling requests
+    self.clients.claim = async () => {
+      await oldClientsClaim.call(self.clients)
 
-          originalPropertyDescriptor.set?.call(this, newHandler)
+      const clients = await self.clients.matchAll()
+      const clientUrls = clients.map((client) => client.url)
 
-          sendHasFetchEventHandlers()
-        },
-      },
-    )
+      sendClientsClaimed({ clientUrls })
+    }
 
-    // listen for the activate event so we can inform the
-    // backend whether or not the service worker has a handler
-    self.addEventListener('activate', () => {
-      sendHasFetchEventHandlers()
+    // During the install phase, we need to wait for the binding to be created
+    // before sending the hasFetchEventHandlers event and any other events
+    self.addEventListener('install', (event) => {
+      const waitForBinding = () => {
+        // if the binding has not been created yet, we need to wait for it
+        if (!self.__cypressServiceWorkerClientEvent) {
+          return new Promise<void>((resolve) => {
+            const timer = setInterval(() => {
+              if (self.__cypressServiceWorkerClientEvent) {
+                clearInterval(timer)
+                resolve()
+              }
+            }, 5)
+          })
+        }
 
-      // if the binding has not been created yet, we need to wait for it
-      if (!self.__cypressServiceWorkerClientEvent) {
-        const timer = setInterval(() => {
-          if (self.__cypressServiceWorkerClientEvent) {
-            clearInterval(timer)
-
-            // send any events that were queued
-            eventQueue.forEach((event) => {
-              self.__cypressServiceWorkerClientEvent(JSON.stringify(event))
-            })
-
-            eventQueue = []
-          }
-        }, 5)
+        return Promise.resolve()
       }
+
+      const installHandler = async () => {
+        // wait for the binding to be created before sending the hasFetchEventHandlers event
+        await waitForBinding()
+        sendHasFetchEventHandlers()
+      }
+
+      (event as ExtendableEvent).waitUntil(installHandler())
     })
   }
 

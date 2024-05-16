@@ -1,5 +1,5 @@
 const activate = async () => {
-  self.clients.claim()
+  await self.clients.claim()
   if (self.registration.navigationPreload) {
     await self.registration.navigationPreload.enable()
   }

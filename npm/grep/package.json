@@ -4,8 +4,8 @@
   "description": "Filter tests using substring",
   "main": "src/support.js",
   "scripts": {
-    "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
     "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'",
+    "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
@@ -31,7 +31,6 @@
     "url": "git+https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/grep#readme",
-  "author": "Cypress Tools Team",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
