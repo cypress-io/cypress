@@ -1126,6 +1126,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return undefined
       },
       onPageHide (e) {
+        // unload is being actively deprecated/removed by chrome, so for
+        // compatibility, we are using `window`'s `pagehide` event as a proxy
+        // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
         return cy.Cypress.action('app:window:unload', e)
       },
       onNavigation (...args) {

@@ -222,6 +222,9 @@ const attachToWindow = (autWindow: Window) => {
       cy.state('window', undefined)
       cy.state('document', undefined)
 
+      // unload is being actively deprecated/removed by chrome, so for
+      // compatibility, we are using `window`'s `pagehide` event as a proxy
+      // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
       return Cypress.action('app:window:unload', e)
     },
     onNavigation (...args) {
