@@ -14,7 +14,6 @@ import fixture from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
-import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
@@ -336,13 +335,6 @@ export class SocketBase {
 
         socket.on('mocha', (...args: unknown[]) => {
           return options.onMocha.apply(options, args)
-        })
-
-        socket.on('open:finder', (p, cb = function () {}) => {
-          return open.opn(p)
-          .then(() => {
-            return cb()
-          })
         })
 
         socket.on('recorder:frame', (data) => {

@@ -1,5 +1,5 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.9.1
+## 13.10.0
 
 _Released 5/21/2024 (PENDING)_
 
@@ -9,10 +9,12 @@ _Released 5/21/2024 (PENDING)_
 
 **Features:**
 
-- Running the command `cypress open --browser <browser-name-or-path>`will
-launch the browser after testing type selection in the GUI. Addresses 
-[#22003](https://github.com/cypress-io/cypress/issues/22003).
-Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
+**Dependency Updates:**
+
+- Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
+- Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
 ## 13.9.0
 
@@ -23,7 +25,6 @@ _Released 5/7/2024_
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
 
 **Bugfixes:**
-
 
 - Fixed a bug where promises rejected with `undefined` were failing inside `cy.origin()`. Addresses [#23937](https://github.com/cypress-io/cypress/issues/23937).
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
