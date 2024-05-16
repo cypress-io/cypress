@@ -29,13 +29,13 @@ if (supportFile) {
 
     supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
 
-    // Support Relative path (as well as in some cases absolute path) lookup is done with unix style operators.
+    // Support relative path (as well as in some cases absolute path) lookup is done with unix style operators.
     supportRelativeToProjectRoot = supportRelativeToProjectRoot.replaceAll('\\', '/')
   }
 
   // We need a slash before /cypress/supportFile.js if the devServerPublicPathRoute is populated, this happens by default
   // with the current string replacement logic. Otherwise, we need to specify the relative path to look up if devServerPublicPathRoute
-  // if not defined as it would be in the base directory
+  // is not defined as it would be in the base directory
 
   const relativeUrl = `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
 
