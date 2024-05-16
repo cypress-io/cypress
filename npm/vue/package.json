@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@vitejs/plugin-vue": "4.2.0",
+    "@vitejs/plugin-vue": "5.0.4",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.3.2",
     "axios": "0.21.2",
