@@ -56,7 +56,7 @@ const makePlugins = (plugins) => {
       },
       ...plugins.iconsOptions,
     }),
-    Components({
+    Components.default({
       resolvers: IconsResolver({
         // <i-cy-book_x16/>
         customCollections: ['cy'],

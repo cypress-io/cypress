@@ -23,7 +23,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@babel/parser": "7.23.0",
+    "@babel/parser": "7.24.5",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
@@ -134,8 +134,8 @@
     "widest-line": "3.1.0"
   },
   "devDependencies": {
-    "@babel/core": "7.23.2",
-    "@babel/preset-env": "7.22.9",
+    "@babel/core": "7.24.5",
+    "@babel/preset-env": "7.24.5",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
