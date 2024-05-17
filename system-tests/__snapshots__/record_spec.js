@@ -4248,3 +4248,86 @@ StatusCodeError: 500 - "Internal Server Error"
 
 
 `
+
+exports['e2e record capture-protocol enabled but missing upload url Does not try to upload the protocol artifact to the capture protocol script url 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+Warning: We are unable to upload the Test Replay recording of this spec due to a missing or invalid upload URL.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Failed Capturing - Invalid or missing Test Replay upload URL
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
