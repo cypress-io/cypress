@@ -103,6 +103,18 @@ describe('Config options', () => {
       expect(verifyFile).to.eq('OK')
     })
   })
+
+  it('supports middleware mode', () => {
+    cy.scaffoldProject('vite3.0.2-react')
+    cy.openProject('vite3.0.2-react', ['--config-file', 'cypress-vite-middleware-mode.config.ts', '--component'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 2)
+  })
 })
 
 describe('sourcemaps', () => {
