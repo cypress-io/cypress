@@ -3,6 +3,10 @@
 
 _Released 5/21/2024 (PENDING)_
 
+**Features:**
+
+- Added support for middleware mode (as supported by Vite dev server itself) to `@cypress/vite-dev-server`. Addressed in [#29219](https://github.com/cypress-io/cypress/pull/29219).
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
