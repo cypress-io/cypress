@@ -13,6 +13,10 @@ _Released 5/21/2024 (PENDING)_
 - Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
 - Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
+**Performance:**
+
+- Improve performance `expectedPropertiesObj` in logger. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
+
 ## 13.9.0
 
 _Released 5/7/2024_
