@@ -4,6 +4,7 @@ const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
 const { RunPlugins } = require('./run_plugins')
+const { omit } = require('lodash')
 
 const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 
@@ -169,12 +170,12 @@ function run (ipc, file, projectRoot) {
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
-                })
+                }).then((server) => omit(server, ['server']))
               }
 
               devServerOpts.cypressConfig = config
 
-              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+              return devServer(devServerOpts, result.component && result.component.devServerConfig).then((server) => omit(server, ['server']))
             })
 
             return setupNodeEvents(on, config)
