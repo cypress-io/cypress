@@ -2584,6 +2584,35 @@ describe('e2e record', () => {
       })
     })
   })
+
+  describe('capture-protocol enabled but missing upload url', () => {
+    enableCaptureProtocol()
+    setupStubbedServer(createRoutes({
+      postInstanceResults: {
+        res: (req, res) => {
+          res.status(200).json({
+            screenshotUploadUrls: [],
+            videoUploadUrl: undefined,
+            captureUloadUrl: undefined,
+          })
+        },
+      },
+    }))
+
+    it('Does not try to upload the protocol artifact to the capture protocol script url', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const requestUrls = getRequestUrls()
+
+        expect(requestUrls.find((url) => url.includes('PUT /capture-protocol/script/'))).to.be.undefined
+      })
+    })
+  })
 })
 
 describe('capture-protocol api errors', () => {
