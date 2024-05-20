@@ -180,14 +180,20 @@ export class ProtocolManager implements ProtocolManagerShape {
     try {
       const durations = await this.invokeAsync('afterSpec', { isEssential: true })
 
-      this._afterSpecDurations = durations ? {
-        afterSpecTotal: (performance.now() + performance.timeOrigin) - startTime,
-        ...durations,
-      } : undefined
+      const afterSpecTotal = (performance.now() + performance.timeOrigin) - startTime
 
-      return durations
+      this._afterSpecDurations = {
+        afterSpecTotal,
+        ...(durations ? durations : {}),
+      }
+
+      return undefined
     } catch (e) {
       // rethrow; this is try/catch so we can 'finally' ascertain duration
+      this._afterSpecDurations = {
+        afterSpecTotal: (performance.now() + performance.timeOrigin - startTime),
+      }
+
       throw e
     }
   }

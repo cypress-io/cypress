@@ -300,13 +300,22 @@ describe('lib/cloud/protocol', () => {
     let filePath: string
     let fileSize: number
     let uploadUrl: string
-    let expectedAfterSpecDuration: number
+    let expectedAfterSpecTotal: number
     let offset: number
     let size: number
     let instanceId: string
     let clock
 
     describe('when protocol is initialized, and spec has finished', () => {
+      const expectedAfterSpecDurations = {
+        drainCDPEvents: 1,
+        finalizePendingRunnables: 3,
+        drainAUTEvents: 5,
+        resolveBodyPromises: 7,
+        closeDb: 11,
+        teardownBindings: 13,
+      }
+
       beforeEach(async () => {
         filePath = '/foo/bar'
         fileSize = 1000
@@ -319,14 +328,14 @@ describe('lib/cloud/protocol', () => {
         sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
         protocolManager.beforeSpec({ instanceId })
 
-        expectedAfterSpecDuration = 225
+        expectedAfterSpecTotal = 225
 
         clock = sinon.useFakeTimers()
         sinon.stub(performance, 'timeOrigin').value(0)
         sinon.stub(protocol, 'afterSpec').callsFake(async () => {
-          await clock.tickAsync(expectedAfterSpecDuration)
+          await clock.tickAsync(expectedAfterSpecTotal)
 
-          return Promise.resolve()
+          return expectedAfterSpecDurations
         })
 
         await protocolManager.afterSpec()
@@ -348,7 +357,11 @@ describe('lib/cloud/protocol', () => {
           expect(res).to.include({
             fileSize,
             success: true,
-            afterSpecDuration: expectedAfterSpecDuration,
+          })
+
+          expect(res?.afterSpecDurations).to.include({
+            afterSpecTotal: expectedAfterSpecTotal,
+            ...expectedAfterSpecDurations,
           })
 
           // @ts-ignore

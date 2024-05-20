@@ -97,12 +97,12 @@ type UploadCaptureArtifactResult = {
 }
 
 export type AfterSpecDurations = {
-  drainCDPEvents: number
-  finalizePendingRunnables: number
-  drainAUTEvents: number
-  resolveBodyPromises: number
-  closeDb: number
-  teardownBindings: number
+  drainCDPEvents?: number
+  finalizePendingRunnables?: number
+  drainAUTEvents?: number
+  resolveBodyPromises?: number
+  closeDb?: number
+  teardownBindings?: number
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
