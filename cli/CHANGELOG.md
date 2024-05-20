@@ -5,7 +5,7 @@ _Released 5/21/2024 (PENDING)_
 
 **Features:**
 
-- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addressed in [#29332](https://github.com/cypress-io/cypress/pull/29332).
+- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
 
 **Bugfixes:**
 
