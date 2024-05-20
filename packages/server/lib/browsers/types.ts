@@ -27,6 +27,7 @@ export type BrowserInstance = EventEmitter & {
    * TODO: remove need for this
    */
   isProcessExit?: boolean
+  isOrphanedBrowserProcess?: boolean
 }
 
 export type BrowserLauncher = {
@@ -52,4 +53,5 @@ export type BrowserLauncher = {
 
 export type GracefulShutdownOptions = {
   gracefulShutdown?: boolean
+  shouldPreserveCriClient?: boolean
 }
