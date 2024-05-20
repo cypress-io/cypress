@@ -5,7 +5,9 @@ _Released 5/21/2024 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where orphaned Electron processes were inadvertently terminating the browser's CRI client. Fixes [#28397](https://github.com/cypress-io/cypress/issues/28397). Fixed in [#29515](https://github.com/cypress-io/cypress/pull/29515).
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Fixed an issue where Cypress would use the wrong URL to upload Test Replay recordings when it wasn't able to determine the upload URL. It now displays an error when the upload URL cannot be determined, rather than a "Request Entity Too Large" error. Addressed in [#29512](https://github.com/cypress-io/cypress/pull/29512).
 
 **Features:**
 

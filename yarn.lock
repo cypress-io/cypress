@@ -3069,14 +3069,6 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/what-is-circular@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@cypress/what-is-circular/-/what-is-circular-1.0.1.tgz#c88adb7106a4e1624e403512fc87c18e9700c877"
-  integrity sha512-AZP6hxdiXhVKSdTeIb8tBkotH5sq/MEvECk4byAF44ulPL7MXvhInRthof20cK3UDAycKo0ThJvT71mhSfsOPw==
-  dependencies:
-    lodash.includes "^4.3.0"
-    lodash.isobject "^3.0.2"
-
 "@cypress/xvfb@^1.2.4":
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@cypress/xvfb/-/xvfb-1.2.4.tgz#2daf42e8275b39f4aa53c14214e557bd14e7748a"
@@ -20976,11 +20968,6 @@ lodash.isnumber@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz#3ce76810c5928d03352301ac287317f11c0b1ffc"
   integrity sha1-POdoEMWSjQM1IwGsKHMX8RwLH/w=
-
-lodash.isobject@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/lodash.isobject/-/lodash.isobject-3.0.2.tgz#3c8fb8d5b5bf4bf90ae06e14f2a530a4ed935e1d"
-  integrity sha1-PI+41bW/S/kK4G4U8qUwpO2TXh0=
 
 lodash.isplainobject@4.0.6, lodash.isplainobject@^4.0.6:
   version "4.0.6"
