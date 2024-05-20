@@ -262,6 +262,33 @@ describe('lib/browsers/electron', () => {
     })
   })
 
+  context('.kill', () => {
+    beforeEach(async function () {
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+    })
+
+    it('does not terminate the browserCriClient if the instance is an orphaned process', async function () {
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.isOrphanedBrowserProcess = true
+      instance.kill()
+
+      expect(this.browserCriClient.close).not.to.be.called
+    })
+
+    it('terminates the browserCriClient otherwise', async function () {
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.kill()
+
+      expect(this.browserCriClient.close).to.be.called
+    })
+  })
+
   context('._launch', () => {
     beforeEach(() => {
       sinon.stub(menu, 'set')
