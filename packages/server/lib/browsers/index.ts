@@ -24,12 +24,14 @@ interface KillOptions {
   isProcessExit?: boolean
   nullOut?: boolean
   unbind?: boolean
+  isOrphanedBrowserProcess?: boolean
 }
 
 const kill = (options: KillOptions = {}) => {
   options = _.defaults({}, options, {
     instance,
     isProcessExit: false,
+    isOrphanedBrowserProcess: false,
     unbind: true,
     nullOut: true,
   })
@@ -60,7 +62,7 @@ const kill = (options: KillOptions = {}) => {
     debug('killing browser process')
 
     instanceToKill.isProcessExit = options.isProcessExit
-
+    instanceToKill.isOrphanedBrowserProcess = options.isOrphanedBrowserProcess
     instanceToKill.kill()
   })
 }
@@ -180,7 +182,7 @@ export = {
 
     const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
-    debug('browser opened')
+    debug(`browser opened for launch ${thisLaunchAttempt}`)
 
     // in most cases, we'll kill any running browser instance before launching
     // a new one when we call `await kill()` early in this function.
@@ -204,8 +206,11 @@ export = {
     // this browser, it means it has been orphaned and should be terminated.
     //
     // https://github.com/cypress-io/cypress/issues/24377
-    if (thisLaunchAttempt !== launchAttempt) {
-      await kill({ instance: _instance, nullOut: false })
+    const isOrphanedBrowserProcess = thisLaunchAttempt !== launchAttempt
+
+    if (isOrphanedBrowserProcess) {
+      debug(`killing process because launch attempt: ${thisLaunchAttempt} does not match current launch attempt: ${launchAttempt}`)
+      await kill({ instance: _instance, isOrphanedBrowserProcess, nullOut: false })
 
       return null
     }

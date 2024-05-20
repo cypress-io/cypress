@@ -651,6 +651,13 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
     CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
       const err = makeErr()
 
