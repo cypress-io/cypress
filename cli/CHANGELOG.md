@@ -11,7 +11,7 @@ _Released 5/21/2024 (PENDING)_
 
 **Misc:**
 
-- Report afterSpec durations to Cloud API when running in record mode with Test Replay enabled. Addressed in [#29500](https://github.com/cypress-io/cypress/pull/29500/).
+- Report afterSpec durations to Cloud API when running in record mode with Test Replay enabled. Addressed in [#29500](https://github.com/cypress-io/cypress/pull/29500).
 
 **Dependency Updates:**
 
