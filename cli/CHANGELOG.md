@@ -5,8 +5,14 @@ _Released 5/21/2024 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where orphaned Electron processes were inadvertently terminating the browser's CRI client. Fixes [#28397](https://github.com/cypress-io/cypress/issues/28397). Fixed in [#29515](https://github.com/cypress-io/cypress/pull/29515).
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Fixed an issue where Cypress would use the wrong URL to upload Test Replay recordings when it wasn't able to determine the upload URL. It now displays an error when the upload URL cannot be determined, rather than a "Request Entity Too Large" error. Addressed in [#29512](https://github.com/cypress-io/cypress/pull/29512).
 
+**Dependency Updates:**
+
+- Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
+- Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
 ## 13.9.0
 
@@ -17,7 +23,6 @@ _Released 5/7/2024_
 - Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
 
 **Bugfixes:**
-
 
 - Fixed a bug where promises rejected with `undefined` were failing inside `cy.origin()`. Addresses [#23937](https://github.com/cypress-io/cypress/issues/23937).
 - We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).

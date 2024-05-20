@@ -54,6 +54,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
+    debug(`browser CRI is not set. Creating...`)
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
@@ -68,6 +69,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   const sendClose = async () => {
+    debug(`sendClose called, browserCriClient is set? ${!!browserCriClient}`)
     if (browserCriClient) {
       const gracefulShutdown = true
 
@@ -443,10 +445,15 @@ export = {
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
   clearInstanceState (options: GracefulShutdownOptions = {}) {
-    debug('closing remote interface client', { options })
-    // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
-    browserCriClient = null
+    // in the case of orphaned browser clients, we should preserve the CRI client as it is connected
+    // to the same host regardless of window
+    debug('clearInstanceState called with options', { options })
+    if (!options.shouldPreserveCriClient) {
+      debug('closing remote interface client')
+      // Do nothing on failure here since we're shutting down anyway
+      browserCriClient?.close(options.gracefulShutdown).catch(() => {})
+      browserCriClient = null
+    }
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
@@ -534,7 +541,7 @@ export = {
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
-        clearInstanceState({ gracefulShutdown: true })
+        clearInstanceState({ gracefulShutdown: true, shouldPreserveCriClient: this.isOrphanedBrowserProcess })
 
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways
