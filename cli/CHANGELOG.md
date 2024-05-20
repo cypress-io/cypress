@@ -3,6 +3,10 @@
 
 _Released 5/21/2024 (PENDING)_
 
+**Performance:**
+
+- Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
+
 **Bugfixes:**
 
 - Fixed an issue where orphaned Electron processes were inadvertently terminating the browser's CRI client. Fixes [#28397](https://github.com/cypress-io/cypress/issues/28397). Fixed in [#29515](https://github.com/cypress-io/cypress/pull/29515).
