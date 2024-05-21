@@ -22,12 +22,14 @@
   },
   "devDependencies": {
     "chai": "^4.3.6",
+    "decache": "^4.6.2",
     "dedent": "^0.7.0",
     "mocha": "^9.2.2",
     "sinon": "^13.0.1",
     "ts-node": "^10.9.2",
-    "vite": "4.5.2",
-    "vite-plugin-inspect": "0.7.24"
+    "vite-4": "npm:vite@^4.5.2",
+    "vite-5": "npm:vite@^5.2.8",
+    "vite-plugin-inspect": "0.8.4"
   },
   "files": [
     "dist",

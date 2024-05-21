@@ -565,6 +565,15 @@ export const AllCypressErrors = {
         
         ${fmt.highlightSecondary(error)}`
   },
+  CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: (error: Error) => {
+    return errTemplate`\
+        Warning: We are unable to upload the Test Replay recording of this spec due to a missing or invalid upload URL.
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+    `
+  },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
     return errTemplate`\
         Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
