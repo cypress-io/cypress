@@ -368,6 +368,12 @@ describe('lib/config', () => {
             return this.expectValidationFails('the value was: true')
           })
         })
+
+        it('passes if a string contains encoded special characters', function () {
+          this.setup({ fileServerFolder: encodeURI('/specialCharacters/无法解析的特殊字符') })
+
+          return this.expectValidationPasses()
+        })
       })
 
       context('fixturesFolder', () => {
