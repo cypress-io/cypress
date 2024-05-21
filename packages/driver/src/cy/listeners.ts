@@ -93,7 +93,9 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     callbacks.onBeforeUnload(e)
   })
 
-  addListener(contentWindow, 'pagehide', (e) => {
+  const unloadEvent = Cypress.browser.family === 'chromium' ? 'pagehide' : 'unload'
+
+  addListener(contentWindow, unloadEvent, (e) => {
     // when we unload we need to remove all of the event listeners
     removeAllListeners()
 

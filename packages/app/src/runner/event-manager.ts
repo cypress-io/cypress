@@ -344,7 +344,9 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('pagehide', (e) => {
+    const unloadEvent = this.isBrowser({ family: 'chromium' }) ? 'pagehide' : 'unload'
+
+    $window.on(unloadEvent, (e) => {
       this._clearAllCookies()
     })
 
