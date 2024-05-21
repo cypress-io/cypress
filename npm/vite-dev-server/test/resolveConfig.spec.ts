@@ -8,7 +8,6 @@ import sinon from 'sinon'
 import SinonChai from 'sinon-chai'
 import type { ViteDevServerConfig } from '../src/devServer'
 
-type Vite = typeof import('vite-5')
 Chai.use(SinonChai)
 
 const getViteDevServerConfig = (projectRoot: string) => {
@@ -23,18 +22,27 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: [4, 5] = [4, 5]
+const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any })[] = [
+  {
+    version: 4,
+    vite: vite4,
+  },
+  {
+    version: 5,
+    vite: vite5,
+  },
+]
 
 describe('resolveConfig', function () {
   this.timeout(1000 * 60)
 
-  MAJOR_VERSIONS.forEach((version) => {
+  MAJOR_VERSIONS.forEach(({ version, vite: discoveredVite }) => {
     context(`config resolution: v${version}`, () => {
       it('with <project-root>/vite.config.js', async () => {
         const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
         const viteDevServerConfig = getViteDevServerConfig(projectRoot)
 
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, version === 5 ? vite5 : (vite4 as unknown as Vite))
+        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfig.configFile).to.contain(`vite${version}-inspect`)
         expect(viteConfig.plugins.map((p: any) => p.name)).to.have.members(['cypress:main', 'cypress:sourcemap'])
@@ -45,7 +53,7 @@ describe('resolveConfig', function () {
         const inlineViteConfig = { base: '/will-be-overwritten', server: { port: 99999 } }
         const viteDevServerConfig = { ...getViteDevServerConfig(projectRoot), viteConfig: inlineViteConfig }
 
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, version === 5 ? vite5 : (vite4 as unknown as Vite))
+        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfig.configFile).eq(false)
         expect(viteConfig.base).eq('/__cypress/src/')
@@ -69,7 +77,7 @@ describe('resolveConfig', function () {
           viteConfig: viteConfigFn,
         }
 
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, version === 5 ? vite5 : (vite4 as unknown as Vite))
+        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfigFn).to.be.called
         expect(viteConfig.server?.fs?.allow).to.include('some/other/file')
@@ -87,7 +95,7 @@ describe('resolveConfig', function () {
 
       it('should be disabled in run mode', async () => {
         viteDevServerConfig.cypressConfig.isTextTerminal = true
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, version === 5 ? vite5 : (vite4 as unknown as Vite))
+        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfig.server?.watch?.ignored).to.eql('**/*')
         expect(viteConfig.server?.hmr).to.be.false
@@ -95,7 +103,7 @@ describe('resolveConfig', function () {
 
       it('uses defaults in open mode', async () => {
         viteDevServerConfig.cypressConfig.isTextTerminal = false
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, version === 5 ? vite5 : (vite4 as unknown as Vite))
+        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfig.server?.watch?.ignored).to.be.undefined
         expect(viteConfig.server?.hmr).to.be.undefined
