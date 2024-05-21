@@ -106,25 +106,27 @@ const extractArtifactsFromOptions = async ({
   try {
     const protocolFilePath = protocolManager?.getArchivePath()
 
-    const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
-
-    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()
+    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && captureUploadUrl && !protocolManager.hasFatalError()
 
     debug('should add protocol artifact? %o', {
       protocolFilePath,
-      protocolUploadUrl,
+      captureUploadUrl,
       protocolManager: !!protocolManager,
       fatalError: protocolManager?.hasFatalError(),
       shouldAddProtocolArtifact,
     })
 
     if (shouldAddProtocolArtifact) {
-      const protocolArtifact = await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager)
+      const protocolArtifact = await createProtocolArtifact(protocolFilePath, captureUploadUrl, protocolManager)
 
       debug(protocolArtifact)
       if (protocolArtifact) {
         artifacts.push(protocolArtifact)
       }
+    } else if (protocolCaptureMeta.url && !captureUploadUrl) {
+      const err = new Error('Invalid or missing Test Replay upload URL')
+
+      protocolManager?.addFatalError('protocolUploadUrl', err)
     }
   } catch (e) {
     debug('Error creating protocol artifact: %O', e)
@@ -171,7 +173,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   const postArtifactExtractionFatalError = protocolManager?.getFatalError()
 
   if (postArtifactExtractionFatalError) {
-    if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
+    if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
+      errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
+    } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
       errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
     } else {
       errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
