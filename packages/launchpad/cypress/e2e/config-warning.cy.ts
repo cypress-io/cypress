@@ -258,8 +258,8 @@ describe('component testing dependency warnings', () => {
   })
 
   it('does not show warning for project that does not require bundler to be installed', () => {
-    cy.scaffoldProject('next-12')
-    cy.openProject('next-12', ['--component'])
+    cy.scaffoldProject('next-14')
+    cy.openProject('next-14', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
