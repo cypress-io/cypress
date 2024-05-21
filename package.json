@@ -94,7 +94,7 @@
     "@nrwl/nx-cloud": "16.0.5",
     "@octokit/auth-app": "6.0.3",
     "@octokit/core": "5.0.2",
-    "@percy/cli": "1.27.4",
+    "@percy/cli": "1.28.6",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/better-sqlite3": "^7.6.3",
