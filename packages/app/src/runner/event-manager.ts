@@ -344,6 +344,9 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
+    // While we must move to pagehide for Chromium, it does not work for our
+    // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
+    // event as a proxy for AUT unloads.
     const unloadEvent = this.isBrowser({ family: 'chromium' }) ? 'pagehide' : 'unload'
 
     $window.on(unloadEvent, (e) => {

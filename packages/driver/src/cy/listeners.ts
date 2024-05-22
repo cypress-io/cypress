@@ -93,6 +93,10 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     callbacks.onBeforeUnload(e)
   })
 
+  // While we must move to pagehide for Chromium, it does not work for our
+  // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
+  // event as a proxy for AUT unloads.
+
   const unloadEvent = Cypress.browser.family === 'chromium' ? 'pagehide' : 'unload'
 
   addListener(contentWindow, unloadEvent, (e) => {
