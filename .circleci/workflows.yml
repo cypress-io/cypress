@@ -1914,6 +1914,7 @@ jobs:
           percy: << parameters.percy >>
           package: reporter
           type: ct
+          debug: cypress:server:protocol,cypress*:protocol:capture*
 
   reporter-integration-tests:
     <<: *defaults
