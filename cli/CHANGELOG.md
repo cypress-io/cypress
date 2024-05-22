@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.10.1
+## 13.11.0
 
 _Released 5/28/2024 (PENDING)_
+
+**Features:**
+
+- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
 
 **Bugfixes:**
 
@@ -14,10 +18,6 @@ _Released 5/21/2024_
 **Features:**
 
 - Added support for `vite` `v5` to `@cypress/vite-dev-server`. Addresses [#28347](https://github.com/cypress-io/cypress/issues/28347).
-
-**Features:**
-
-- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
 
 **Bugfixes:**
 
