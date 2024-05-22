@@ -59,7 +59,7 @@ const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => 
   // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
   // see https://github.com/cypress-io/cypress/issues/29330
   if (process.env.IGNORE_CHROME_PREFERENCES) {
-    debug('ignoring chrome preferences...')
+    debug('ignoring chrome preferences: not reading from chrome preference files')
 
     return Bluebird.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
   }
@@ -104,7 +104,13 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
   })
 }
 
-const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences) => {
+const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences): Promise<void> => {
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    debug('ignoring chrome preferences: not writing to preference files')
+
+    return Promise.resolve()
+  }
+
   return Bluebird.map(_.keys(originalPrefs), (key) => {
     const originalJson = originalPrefs[key]
     const newJson = newPrefs[key]

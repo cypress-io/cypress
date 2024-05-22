@@ -208,7 +208,7 @@ describe('lib/browsers/chrome', () => {
         writeJson.restore()
       })
 
-      it('does not write preferences', async function () {
+      it('does not read or write preferences', async function () {
         chrome._writeExtension.restore()
         utils.getProfileDir.restore()
 
@@ -220,6 +220,7 @@ describe('lib/browsers/chrome', () => {
         }, 'http://', openOpts, this.automation)
 
         expect(writeJson).not.to.be.called
+        expect(this.readJson).not.to.be.called
       })
     })
 
