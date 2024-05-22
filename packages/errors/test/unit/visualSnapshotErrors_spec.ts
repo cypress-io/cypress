@@ -651,6 +651,13 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
     CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
       const err = makeErr()
 
@@ -1323,7 +1330,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0 || ^=5.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',

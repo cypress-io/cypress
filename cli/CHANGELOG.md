@@ -1,11 +1,27 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.9.1
+## 13.10.1
 
-_Released 5/21/2024 (PENDING)_
+_Released 5/28/2024 (PENDING)_
 
 **Bugfixes:**
 
+- Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
+
+## 13.10.0
+
+_Released 5/21/2024_
+
+**Features:**
+
+- Added support for `vite` `v5` to `@cypress/vite-dev-server`. Addresses [#28347](https://github.com/cypress-io/cypress/issues/28347).
+
+**Bugfixes:**
+
+- Fixed an issue where orphaned Electron processes were inadvertently terminating the browser's CRI client. Fixes [#28397](https://github.com/cypress-io/cypress/issues/28397). Fixed in [#29515](https://github.com/cypress-io/cypress/pull/29515).
+- Fixed an issue where Cypress would use the wrong URL to upload Test Replay recordings when it wasn't able to determine the upload URL. It now displays an error when the upload URL cannot be determined, rather than a "Request Entity Too Large" error. Addressed in [#29512](https://github.com/cypress-io/cypress/pull/29512).
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Fixed an issue setting the `x-cypress-file-path` header when there are invalid header characters in the file path. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+- Fixed the display of some command assertions. Fixed in [#29517](https://github.com/cypress-io/cypress/pull/29517).
 
 **Misc:**
 
@@ -14,6 +30,7 @@ _Released 5/21/2024 (PENDING)_
 **Dependency Updates:**
 
 - Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
+- Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
 ## 13.9.0
 
