@@ -48,7 +48,7 @@
     "skipLibCheck": true,
     /** Allows us to strip internal types sourced from webpack */
     "stripInternal": true,
-    "importsNotUsedAsValues": "error"
+    "ignoreDeprecations": "5.0"
   },
   "include": ["src"],
   "exclude": ["node_modules", "*.js"]

@@ -8,7 +8,7 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
+    "ignoreDeprecations": "5.0",
     "outDir": "dist",
     "declaration": true
   },

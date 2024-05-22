@@ -5,7 +5,7 @@
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
-    "importsNotUsedAsValues": "error",
+    "ignoreDeprecations": "5.0",
     "types": []
   },
   "include": ["**/*"]

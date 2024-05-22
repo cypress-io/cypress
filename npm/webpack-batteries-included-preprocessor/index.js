@@ -1,6 +1,11 @@
 const path = require('path')
+const fs = require('fs-extra')
+const JSON5 = require('json5')
 const webpack = require('webpack')
+const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -10,6 +15,37 @@ const hasTsLoader = (rules) => {
       return use.loader && use.loader.includes('ts-loader')
     })
   })
+}
+
+const getTSCompilerOptionsForUser = (configFilePath) => {
+  const compilerOptions = {
+    sourceMap: false,
+    inlineSourceMap: true,
+    inlineSources: true,
+    downlevelIteration: true,
+  }
+
+  if (!configFilePath) {
+    return compilerOptions
+  }
+
+  try {
+    // eslint-disable-next-line no-restricted-syntax
+    const tsconfigJSON = fs.readFileSync(configFilePath, 'utf8')
+    // file might have trailing commas, new lines, etc. JSON5 can parse those correctly
+    const parsedJSON = JSON5.parse(tsconfigJSON)
+
+    // if the user has sourceMap's configured, set the option to true and turn off inlineSourceMaps
+    if (parsedJSON?.compilerOptions?.sourceMap) {
+      compilerOptions.sourceMap = true
+      compilerOptions.inlineSourceMap = false
+      compilerOptions.inlineSources = false
+    }
+  } catch (e) {
+    debug(`error in getTSCompilerOptionsForUser. Returning default...`, e)
+  } finally {
+    return compilerOptions
+  }
 }
 
 const addTypeScriptConfig = (file, options) => {
@@ -30,6 +66,8 @@ const addTypeScriptConfig = (file, options) => {
   // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
   const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
+  const compilerOptions = getTSCompilerOptionsForUser(configFile)
+
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
     exclude: [/node_modules/],
@@ -38,11 +76,7 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions: {
-            inlineSourceMap: true,
-            inlineSources: true,
-            downlevelIteration: true,
-          },
+          compilerOptions,
           logLevel: 'error',
           silent: true,
           transpileOnly: true,

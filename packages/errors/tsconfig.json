@@ -11,6 +11,6 @@
     "experimentalDecorators": true,
     "noImplicitReturns": false,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error"
+    "ignoreDeprecations": "5.0"
   }
 }
