@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.10.1
+
+_Released 5/28/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
+
 ## 13.10.0
 
 _Released 5/21/2024_
