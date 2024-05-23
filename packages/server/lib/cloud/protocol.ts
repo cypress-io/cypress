@@ -176,7 +176,6 @@ export class ProtocolManager implements ProtocolManagerShape {
   async afterSpec () {
     const startTime = performance.now() + performance.timeOrigin
 
-    debug({ startTime })
     try {
       const ret = await this.invokeAsync('afterSpec', { isEssential: true })
       const durations = ret?.durations
