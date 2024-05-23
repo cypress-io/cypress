@@ -1042,6 +1042,8 @@
     "./node_modules/@cypress/commit-info/src/index.js",
     "./node_modules/@cypress/commit-info/src/utils.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
     "./node_modules/@cypress/parse-domain/build/tries/icann.complete.json",
     "./node_modules/@cypress/parse-domain/build/tries/private.complete.json",
@@ -3183,6 +3185,8 @@
     "./node_modules/recast/parsers/babel.js",
     "./node_modules/recast/parsers/esprima.js",
     "./node_modules/recast/parsers/typescript.js",
+    "./node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/request-promise-core/configure/request2.js",
     "./node_modules/request-promise-core/errors.js",
     "./node_modules/request-promise-core/lib/errors.js",
@@ -4357,5 +4361,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "05a636bde20b3be88e7d595e285c2925b12338d674c0cd550a1805e42ee7e46f"
+  "deferredHash": "0eec24c49c7ecbd169b2af9824b9ea15afc600de81d7169c8e28fa83af72daf2"
 }
