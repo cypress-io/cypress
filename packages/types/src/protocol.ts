@@ -110,7 +110,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
-  afterSpec (): Promise<AfterSpecDurations | undefined>
+  afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, captureErrorsOverride?: boolean): Promise<UploadCaptureArtifactResult | void>
 
