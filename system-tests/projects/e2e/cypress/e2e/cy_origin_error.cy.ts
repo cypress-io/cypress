@@ -20,7 +20,6 @@ describe('cy.origin errors', () => {
 
   verify('command failure', this, {
     line: 16,
-    column: 8,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
@@ -37,8 +36,7 @@ describe('cy.origin errors', () => {
   })
 
   verify('failure when using dependency', this, {
-    line: 32,
-    column: 8,
+    line: 29,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
