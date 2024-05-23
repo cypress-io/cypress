@@ -25,6 +25,7 @@ describe('cy.origin errors', () => {
     before () {
       cy.visit('/primary_origin.html')
     },
+    isCyOrigin: true,
   })
 
   fail('failure when using dependency', this, () => {
@@ -36,11 +37,12 @@ describe('cy.origin errors', () => {
   })
 
   verify('failure when using dependency', this, {
-    line: 29,
+    line: 30,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
       cy.visit('/primary_origin.html')
     },
+    isCyOrigin: true,
   })
 })
