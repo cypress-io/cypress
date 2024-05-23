@@ -308,12 +308,14 @@ describe('lib/cloud/protocol', () => {
 
     describe('when protocol is initialized, and spec has finished', () => {
       const expectedAfterSpecDurations = {
-        drainCDPEvents: 1,
-        finalizePendingRunnables: 3,
-        drainAUTEvents: 5,
-        resolveBodyPromises: 7,
-        closeDb: 11,
-        teardownBindings: 13,
+        durations: {
+          drainCDPEvents: 1,
+          finalizePendingRunnables: 3,
+          drainAUTEvents: 5,
+          resolveBodyPromises: 7,
+          closeDb: 11,
+          teardownBindings: 13,
+        },
       }
 
       beforeEach(async () => {
@@ -361,7 +363,7 @@ describe('lib/cloud/protocol', () => {
 
           expect(res?.afterSpecDurations).to.include({
             afterSpecTotal: expectedAfterSpecTotal,
-            ...expectedAfterSpecDurations,
+            ...expectedAfterSpecDurations.durations,
           })
 
           // @ts-ignore
