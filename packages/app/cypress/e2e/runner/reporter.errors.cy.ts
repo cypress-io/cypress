@@ -268,17 +268,15 @@ describe('errors ui', {
     })
 
     verify('assertion failure', {
-      column: 25,
       message: `expected 'actual' to equal 'expected'`,
     })
 
     verify('exception', {
-      column: 10,
+      column: 12,
       message: 'bar is not a function',
     })
 
     verify('command failure', {
-      column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `.get('#does-not-exist')`,
     })

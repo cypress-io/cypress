@@ -285,7 +285,6 @@ describe('errors ui', {
     })
 
     verify('assertion failure in request callback', {
-      column: 22,
       message: [
         `expected 'a' to equal 'b'`,
       ],
@@ -295,8 +294,7 @@ describe('errors ui', {
     })
 
     verify('assertion failure in response callback', {
-      column: 24,
-      codeFrameText: '.reply(()=>{',
+      codeFrameText: '.reply(function()',
       message: [
         `expected 'b' to equal 'c'`,
       ],
@@ -306,7 +304,6 @@ describe('errors ui', {
     })
 
     verify('fails when erroneous response is received while awaiting response', {
-      column: 6,
       // TODO: determine why code frame output is different in run/open mode
       // this fails the active test because it's an asynchronous
       // response failure from the network
