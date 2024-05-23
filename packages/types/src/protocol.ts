@@ -27,7 +27,7 @@ export interface AppCaptureProtocolCommon {
   beforeTest(test: Record<string, any>): Promise<void>
   preAfterTest(test: Record<string, any>, options: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
-  afterSpec (): Promise<AfterSpecDurations | undefined>
+  afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void

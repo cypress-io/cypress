@@ -178,7 +178,8 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug({ startTime })
     try {
-      const durations = await this.invokeAsync('afterSpec', { isEssential: true })
+      const ret = await this.invokeAsync('afterSpec', { isEssential: true })
+      const durations = ret?.durations
 
       const afterSpecTotal = (performance.now() + performance.timeOrigin) - startTime
 
@@ -186,6 +187,8 @@ export class ProtocolManager implements ProtocolManagerShape {
         afterSpecTotal,
         ...(durations ? durations : {}),
       }
+
+      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
 
       return undefined
     } catch (e) {

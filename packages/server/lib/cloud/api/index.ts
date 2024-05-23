@@ -512,6 +512,8 @@ export default {
   },
 
   updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions, body: UpdateInstanceArtifactsPayload) {
+    debug('PUT %s %O', recordRoutes.instanceArtifacts(options.instanceId), body)
+
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
