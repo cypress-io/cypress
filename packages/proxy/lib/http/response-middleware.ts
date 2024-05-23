@@ -22,7 +22,8 @@ import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
 import { injectIntoServiceWorker } from './util/service-worker-injector'
-import { validateHeaderName } from 'http'
+import { validateHeaderName, validateHeaderValue } from 'http'
+import error from '@packages/errors'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -314,10 +315,19 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     Object.entries(headers).filter(([key, value]) => {
       try {
         validateHeaderName(key)
+        if (Array.isArray(value)) {
+          value.forEach((v) => validateHeaderValue(key, v))
+        } else {
+          validateHeaderValue(key, value)
+        }
 
         return true
       } catch (err) {
-        this.debug('Warning: Found header with the invalid name \'%s\', taking it off the response', key)
+        if (err.code === 'ERR_INVALID_HTTP_TOKEN') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_NAME', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else if (err.code === 'ERR_INVALID_HEADER_VALUE') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        }
 
         return false
       }
