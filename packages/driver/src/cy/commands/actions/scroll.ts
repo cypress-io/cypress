@@ -128,7 +128,6 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
-          // @ts-expect-error
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
