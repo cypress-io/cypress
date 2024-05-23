@@ -76,7 +76,7 @@ export const WIZARD_DEPENDENCY_VITE = {
   package: 'vite',
   installer: 'vite',
   description: 'Vite is dev server that serves your source files over native ES modules',
-  minVersion: '^2.0.0 || ^3.0.0 || ^4.0.0',
+  minVersion: '^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_NUXT = {
