@@ -596,6 +596,7 @@ commands:
           name: Run driver tests in Cypress
           environment:
             CYPRESS_CONFIG_ENV: production
+            DEBUG: cypress:server:protocol
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
