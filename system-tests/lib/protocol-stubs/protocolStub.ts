@@ -131,7 +131,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     .catch(() => {
     })
 
-    return DURATIONS
+    return { durations: DURATIONS }
   }
 
   beforeTest = (test) => {
