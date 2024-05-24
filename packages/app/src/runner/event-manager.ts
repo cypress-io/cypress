@@ -99,6 +99,15 @@ export class EventManager {
       return this.rerunSpec()
     }
 
+    const rerunF = () => {
+      if (!this) {
+        // if the tests have been reloaded then there is nothing to rerun
+        return
+      }
+
+      return this.rerunFailedSpec()
+    }
+
     const connectionInfo: AddGlobalListenerOptions = {
       element: options.element,
       randomString: options.randomString,
@@ -213,6 +222,8 @@ export class EventManager {
     })
 
     this.reporterBus.on('runner:restart', rerun)
+
+    this.reporterBus.on('runner:restart-failed', rerunF)
 
     const sendEventIfSnapshotProps = (testId, logId, event) => {
       if (!Cypress) return
@@ -855,6 +866,21 @@ export class EventManager {
     Cypress.removeAllListeners()
 
     this.localBus.emit('restart')
+  }
+
+  async rerunFailedSpec () {
+    if (!this || !Cypress) {
+      // if the tests have been reloaded then there is nothing to rerun
+      return
+    }
+
+    await this.resetReporter()
+
+    // this probably isn't 100% necessary since Cypress will fall out of scope
+    // but we want to be aggressive here and force GC early and often
+    Cypress.removeAllListeners()
+
+    this.localBus.emit('restart-failed')
   }
 
   _interceptStudio (displayProps) {

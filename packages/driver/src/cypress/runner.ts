@@ -361,6 +361,76 @@ const isLastSuite = (suite, tests) => {
   .value() === suite
 }
 
+export function flattenTestsFromSuites (data) {
+  let allTests = []
+
+  function extractTests (obj) {
+    if (obj.tests) {
+      allTests = allTests.concat(obj.tests)
+    }
+
+    if (obj.suites) {
+      obj.suites.forEach((suite) => extractTests(suite))
+    }
+  }
+
+  extractTests(data)
+
+  return allTests
+}
+
+// retrieve data from the last run to enable skipping
+export function loadPassedTests (testLocation) {
+  if (!window.passedTestsInfo) {
+    window.passedTestsInfo = {}
+  }
+
+  //TODO should be from a file and not from window
+  return window.passedTestsInfo[testLocation] ? window.passedTestsInfo[testLocation] : []
+  //return $utils.loadLastRunInfoFromFile(specsPath)
+}
+
+// this allows saving the info from the last run to enable skipping
+export function savePassedTests (suite, savedInfo, testLocation) {
+  //if the tests finished running the info is suite.suites[0]
+  //if the tests were stopped during execution the info is still on suite
+  let currentTests = flattenTestsFromSuites(suite)
+
+  function saveTest (test) {
+    if (!test) {
+      return
+    }
+
+    if (test.state === 'passed') {
+      if (!savedInfo.some((savedTest) => savedTest.id === test.id)) {
+        savedInfo.push({ 'id': test.id, 'body': test.body })
+      }
+    } else if (test.state === 'failed') {
+      if (savedInfo.some((savedTest) => savedTest.id === test.id)) {
+        savedInfo = savedInfo.filter((savedTest) => savedTest.id !== test.id)
+      }
+    }
+  }
+
+  currentTests.forEach(saveTest.bind(this))
+
+  //TODO should be from a file and not from window
+  window.passedTestsInfo[testLocation] = savedInfo
+  //$utils.saveLastRunInfoToFile(specsPath, savedInfo)
+}
+
+export function setSkipOnPassedTests (suite, savedInfo) {
+  let currentTests = flattenTestsFromSuites(suite)
+
+  function skipTest (test) {
+    if (savedInfo.some((savedTest) => savedTest.body === test.body)) {
+      test.pending = 'true'
+    }
+  }
+
+  currentTests.forEach(skipTest.bind(this))
+}
+
 // we are the last test that will run in the suite
 // if we're the last test in the tests array or
 // if we failed from a hook and that hook was 'before'
@@ -1217,9 +1287,15 @@ export default {
     let _uncaughtFn: (() => never) | null = null
     let _resumedAtTestIndex: number | null = null
     let _skipCollectingLogs = true
+    let _passedTests = []
+    let _shouldSkipPassedTests = false
     const _runner = mocha.getRunner()
 
+    _passedTests = loadPassedTests(Cypress.spec.absolute)
     _runner.suite = mocha.getRootSuite()
+    if (Cypress.spec.skipPassed) {
+      _shouldSkipPassedTests = true
+    }
 
     function isNotAlreadyRunTest (test) {
       return _resumedAtTestIndex == null || getTestIndexFromId(test.id) >= _resumedAtTestIndex
@@ -1583,6 +1659,10 @@ export default {
           mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
         }
 
+        if (_shouldSkipPassedTests) {
+          setSkipOnPassedTests(_runner.suite, _passedTests)
+        }
+
         return normalizeAll(
           _runner.suite,
           tests,
@@ -1905,6 +1985,7 @@ export default {
       },
 
       stop () {
+        savePassedTests(_runner.suite, _passedTests, Cypress.spec.absolute)
         if (_runner.stopped) {
           return
         }

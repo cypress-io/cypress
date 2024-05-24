@@ -119,9 +119,11 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
       cy.get('li p').contains('Toggle specs list').should('be.visible')
+      cy.get('li p').contains('Re-run failed tests').should('be.visible')
       cy.get('li span').contains('r')
       cy.get('li span').contains('s')
       cy.get('li span').contains('f')
+      cy.get('li span').contains('t')
 
       // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       cy.get('[aria-label="Close"]').click()
@@ -216,9 +218,11 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
       cy.get('li p').contains('Toggle specs list').should('be.visible')
+      cy.get('li p').contains('Re-run failed tests').should('be.visible')
       cy.get('li span').contains('r')
       cy.get('li span').contains('s')
       cy.get('li span').contains('f')
+      cy.get('li span').contains('t')
       cy.get('[aria-label="Close"]').click()
       cy.findByText('Keyboard shortcuts').should('not.exist')
     })

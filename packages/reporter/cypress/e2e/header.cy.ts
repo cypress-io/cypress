@@ -236,6 +236,21 @@ describe('header', () => {
         cy.wrap(runner.emit).should('be.calledWith', 'runner:restart')
       })
 
+      it('displays restart-failed button', () => {
+        cy.get('.restart-failed').should('be.visible')
+      })
+
+      it('displays tooltip for restart-failed button', () => {
+        cy.get('.restart-failed').trigger('mouseover')
+        cy.get('.cy-tooltip').should('have.text', 'Run Failed Tests T')
+      })
+
+      it('emits runner:restart-failed when restart-failed button is clicked', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.restart-failed').click()
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:restart-failed')
+      })
+
       it('does not display stop button', () => {
         cy.get('.stop').should('not.exist')
       })

@@ -26,6 +26,8 @@ class Shortcuts {
         break
       case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
+      case 't' : !appState.studioActive && events.emit('restart-failed')
+        break
       case 'f': action('toggle:spec:list', () => {
         appState.toggleSpecList()
         events.emit('save:state')

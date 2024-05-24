@@ -137,6 +137,10 @@ describe('shortcuts', function () {
       .then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
+      .get('#temp-input').clear().type('t', { force: true })
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart:failed')
+      })
     })
 
     it('has shortcut in tooltips', () => {
@@ -146,6 +150,9 @@ describe('shortcuts', function () {
 
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+
+      cy.get('button.restart-failed').trigger('mouseover')
+      cy.get('.cy-tooltip').should('have.text', 'Run Failed Tests T')
 
       cy.window().then((win) => win.state.isRunning = true)
       cy.get('button.stop').trigger('mouseover')

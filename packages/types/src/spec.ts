@@ -8,6 +8,7 @@ export interface BaseSpec {
 export interface SpecFile extends BaseSpec {
   baseName: string
   fileName: string
+  skipPassed: boolean
 }
 
 export interface FoundSpec extends SpecFile {

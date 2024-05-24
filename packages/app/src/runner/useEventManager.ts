@@ -13,13 +13,13 @@ export function useEventManager () {
   const studioStore = useStudioStore()
   const router = useRouter()
 
-  function runSpec (isRerun: boolean = false) {
+  function runSpec (isRerun: boolean = false, skipPassed: boolean = false) {
     if (!specStore.activeSpec) {
       throw Error(`Cannot run spec when specStore.active spec is null or undefined!`)
     }
 
     autStore.setScriptError(null)
-    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
+    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun, skipPassed)
   }
 
   function initializeRunnerLifecycleEvents () {
@@ -30,6 +30,15 @@ export function useEventManager () {
         const isRerun = true
 
         runSpec(isRerun)
+      }
+    })
+
+    eventManager.on('restart-failed', () => {
+      // If we get the event to restart but have already navigated away from the runner, don't execute the spec
+      if (specStore.activeSpec) {
+        const isRerun = true
+
+        runSpec(isRerun, true)
       }
     })
 

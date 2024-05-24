@@ -411,7 +411,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
+async function executeSpec (spec: SpecFile, isRerun: boolean = false, skipPassed: boolean = false) {
   await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
@@ -424,6 +424,9 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
 
   // TODO: UNIFY-1318 - figure out how to manage window.config.
   const config = getRunnerConfigFromWindow()
+
+  // this lets Cypress driver skip passed tests
+  spec.skipPassed = skipPassed
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)

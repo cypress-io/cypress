@@ -154,6 +154,10 @@ const events: Events = {
       runner.emit('runner:restart')
     }))
 
+    localBus.on('restart-failed', action('restart-failed', () => {
+      runner.emit('runner:restart-failed')
+    }))
+
     localBus.on('show:command', (testId, logId) => {
       runner.emit('runner:console:log', testId, logId)
     })

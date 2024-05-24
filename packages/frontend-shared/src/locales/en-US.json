@@ -284,7 +284,8 @@
       "title": "Keyboard shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
-      "toggle": "Toggle specs list"
+      "toggle": "Toggle specs list",
+      "failed": "Re-run failed tests"
     },
     "toggleLabel": {
       "expanded": "Collapse sidebar",

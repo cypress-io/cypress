@@ -3,6 +3,8 @@ import capitalize from 'underscore.string/capitalize'
 import methods from 'methods'
 import dayjs from 'dayjs'
 import $ from 'jquery'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import $dom from '../dom'
 import $jquery from '../dom/jquery'
@@ -418,5 +420,44 @@ export default {
   isPromiseLike (ret) {
     // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
+  },
+
+  checkFileExists (file) {
+    return fs.promises.access(file, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
+  },
+
+  loadLastRunInfoFromFile (pathF) {
+    const directory = path.dirname('/')
+    const fileBaseName = path.basename(pathF, path.extname(pathF))
+    const filePath = path.join(directory, fileBaseName+'-passed.txt')
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.promises.readFile(filePath, 'utf8').then((data) => {
+          return JSON.parse(data)
+        })
+      }
+
+      return []
+    } catch (error) {
+      // do smth
+      return []
+    }
+  },
+
+  async saveLastRunInfoToFile (pathF, testInfo) {
+    const directory = path.dirname('/')
+    const fileBaseName = path.basename(pathF, path.extname(pathF))
+    const filePath = path.join(directory, fileBaseName+'-passed')
+
+    try {
+      const data = JSON.stringify(testInfo, null, 2)
+
+      fs.promises.writeFile(filePath, data, { encoding: 'utf8', flag: 'w' })
+    } catch (error) {
+      // do smth
+    }
   },
 }

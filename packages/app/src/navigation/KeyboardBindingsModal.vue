@@ -56,5 +56,9 @@ const keyBindings = [
     key: ['f'],
     description: t('sidebar.keyboardShortcuts.toggle'),
   },
+  {
+    key: ['t'],
+    description: t('sidebar.keyboardShortcuts.failed'),
+  },
 ]
 </script>

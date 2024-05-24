@@ -301,6 +301,11 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:restart')
     })
 
+    it('emits runner:restart-failed on restart-failed', () => {
+      events.emit('restart-failed')
+      expect(runner.emit).to.have.been.calledWith('runner:restart-failed')
+    })
+
     it('emits runner:console:log on show:command', () => {
       events.emit('show:command', 'command id')
       expect(runner.emit).to.have.been.calledWith('runner:console:log', 'command id')

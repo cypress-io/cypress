@@ -14,6 +14,7 @@ import NextIcon from '@packages/frontend-shared/src/assets/icons/action-next_x16
 import PlayIcon from '@packages/frontend-shared/src/assets/icons/action-play_x16.svg'
 import RestartIcon from '@packages/frontend-shared/src/assets/icons/action-restart_x16.svg'
 import StopIcon from '@packages/frontend-shared/src/assets/icons/action-stop_x16.svg'
+import RerunFailedIcon from '@packages/frontend-shared/src/assets/icons/action-rerun-failed_x16.svg'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
@@ -67,6 +68,17 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
               <RestartIcon transform="scale(-1 1)" />
             ) : (
               <RestartIcon />
+            )}
+          </button>
+        </Tooltip>
+      ))}
+      {ifThen(!appState.isRunning, (
+        <Tooltip placement='bottom' title={<p>Run Failed Tests <span className='kbd'>T</span></p>} className='cy-tooltip'>
+          <button aria-label='Rerun all failed tests' className='restart-failed' onClick={emit('restart-failed')}>
+            {appState.studioActive ? (
+              <RerunFailedIcon transform="scale(-1 1)" />
+            ) : (
+              <RerunFailedIcon />
             )}
           </button>
         </Tooltip>
