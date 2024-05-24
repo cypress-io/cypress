@@ -19,6 +19,7 @@ export const VueI18n = createI18n()
 export function createI18n (opts = {}) {
   return _createI18n<MessageSchema, 'en-US'>({
     locale: 'en-US',
+    // @ts-expect-error
     messages: compiledMessages,
     ...opts,
   })
