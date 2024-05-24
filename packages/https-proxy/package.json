@@ -25,12 +25,12 @@
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^3.0.0",
-    "@cypress/request-promise": "^5.0.0",
     "@packages/network": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
+    "request-promise": "4.2.6",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
     "sinon-chai": "3.3.0",

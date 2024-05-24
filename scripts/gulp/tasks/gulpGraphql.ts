@@ -1,5 +1,5 @@
 // @ts-expect-error - no types
-import rp from '@cypress/request-promise'
+import rp from 'request-promise'
 import path from 'path'
 import pDefer from 'p-defer'
 import chalk from 'chalk'

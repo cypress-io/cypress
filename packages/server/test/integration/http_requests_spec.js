@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const _ = require('lodash')
 let r = require('@cypress/request')
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 const compression = require('compression')
 const dns = require('dns')
 const express = require('express')

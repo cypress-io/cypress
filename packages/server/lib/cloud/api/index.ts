@@ -2,10 +2,10 @@ const _ = require('lodash')
 const os = require('os')
 const debug = require('debug')('cypress:server:cloud:api')
 const debugProtocol = require('debug')('cypress:server:protocol')
-const request = require('@cypress/request-promise')
+const request = require('request-promise')
 const humanInterval = require('human-interval')
 
-const RequestErrors = require('@cypress/request-promise/errors')
+const RequestErrors = require('request-promise/errors')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 

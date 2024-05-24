@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const http = require('http')
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 const Promise = require('bluebird')
 const evilDns = require('evil-dns')
 const { setupFullConfigWithDefaults } = require('@packages/config')

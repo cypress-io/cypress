@@ -1,6 +1,6 @@
 const _ = require('lodash')
 let r = require('@cypress/request')
-let rp = require('@cypress/request-promise')
+let rp = require('request-promise')
 const url = require('url')
 const tough = require('tough-cookie')
 const debug = require('debug')('cypress:server:request')
@@ -448,7 +448,7 @@ module.exports = function (options = {}) {
   return {
     r: require('@cypress/request'),
 
-    rp: require('@cypress/request-promise'),
+    rp: require('request-promise'),
 
     getDelayForRetry,
 

@@ -1,4 +1,4 @@
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 const path = require('path')
 const bodyParser = require('body-parser')
 const multer = require('multer')

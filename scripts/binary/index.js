@@ -12,7 +12,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const questionsRemain = require('@cypress/questions-remain')
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 
 const zip = require('./zip')
 const ask = require('./ask')

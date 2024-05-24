@@ -1,5 +1,5 @@
 const fs = require('fs-extra')
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 const util = require('util')
 const exec = require('child_process').exec
 const minimist = require('minimist')

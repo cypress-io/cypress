@@ -2,7 +2,7 @@ const ciProvider = require('@packages/server/lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
-const rp = require('@cypress/request-promise')
+const rp = require('request-promise')
 const debug = require('debug')('cypress:performance')
 
 const API_URL = process.env.PERF_API_URL || 'http://localhost:2999/track'
