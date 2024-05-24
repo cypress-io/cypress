@@ -352,7 +352,7 @@ describe('lib/cloud/protocol', () => {
           mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).resolves()
         })
 
-        it('unlinks the db & returns fileSize, afterSpecDuration, success=true, and the db metadata', async () => {
+        it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
           const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
           expect(res).not.to.be.undefined
@@ -384,12 +384,23 @@ describe('lib/cloud/protocol', () => {
           ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).rejects(err)
         })
 
-        describe('and CAPTURE_ERRORs is enabled', () => {
+        describe('and there is no local protocol path in env', () => {
+          let prevLocalProtocolPath
+
+          beforeEach(() => {
+            prevLocalProtocolPath = process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = undefined
+          })
+
+          afterEach(() => {
+            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = prevLocalProtocolPath
+          })
+
           it('unlinks the db & rethrows the error', async () => {
             let threw = false
 
             try {
-              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize }, true)
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
             } catch (e) {
               threw = true
               expect(e).to.eq(err)
@@ -399,12 +410,23 @@ describe('lib/cloud/protocol', () => {
           })
         })
 
-        describe('and CAPTURE_ERRORS is not enabled', () => {
+        describe('and process.env.CYPRESS_LOCAL_PROTOCOL_PATH is truthy', () => {
+          let prevLocalProtocolPath
+
+          beforeEach(() => {
+            prevLocalProtocolPath = process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = '/path'
+          })
+
+          afterEach(() => {
+            process.env.CYPRESS_LOCAL_PROTOCOL_PATH = prevLocalProtocolPath
+          })
+
           it('unlinks the db and does not rethrow', async () => {
             let threw = false
 
             try {
-              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize }, false)
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
             } catch (e) {
               threw = true
             }

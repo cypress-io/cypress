@@ -315,7 +315,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    const captureErrors = captureErrorsOverride ?? CAPTURE_ERRORS
+    const captureErrors = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
