@@ -30,6 +30,7 @@ const getTSCompilerOptionsForUser = (configFilePath) => {
   }
 
   try {
+    // If possible, try to read the user's tsconfig.json and see if sourceMap is configured
     // eslint-disable-next-line no-restricted-syntax
     const tsconfigJSON = fs.readFileSync(configFilePath, 'utf8')
     // file might have trailing commas, new lines, etc. JSON5 can parse those correctly
