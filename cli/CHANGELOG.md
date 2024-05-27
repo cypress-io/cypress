@@ -6,6 +6,7 @@ _Released 5/28/2024 (PENDING)_
 **Bugfixes:**
 
 - Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
+- Fixed an issue where auto scrolling the reporter would sometimes be disabled without the user's intent. Fixes [#25084](https://github.com/cypress-io/cypress/issues/25084).
 
 ## 13.10.0
 
