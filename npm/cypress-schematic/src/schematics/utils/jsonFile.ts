@@ -25,7 +25,7 @@ export type JSONPath = (string | number)[];
 
 /** @internal */
 export class JSONFile {
-  content: string;
+  content: string
 
   constructor (private readonly host: Tree, private readonly path: string) {
     const buffer = this.host.read(this.path)
@@ -37,7 +37,7 @@ export class JSONFile {
     }
   }
 
-  private _jsonAst: Node | undefined;
+  private _jsonAst: Node | undefined
   private get JsonAst (): Node | undefined {
     if (this._jsonAst) {
       return this._jsonAst

@@ -223,6 +223,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
 
@@ -276,6 +277,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
   })

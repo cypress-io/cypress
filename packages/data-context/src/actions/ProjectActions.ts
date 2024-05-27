@@ -52,7 +52,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
-  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetBrowserTabsForNextSpec(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
   routeToDebug(runNumber: number): void
@@ -279,7 +279,7 @@ export class ProjectActions {
 
     // Used for run-all-specs feature
     if (options?.shouldLaunchNewTab) {
-      await this.api.resetBrowserTabsForNextTest(true)
+      await this.api.resetBrowserTabsForNextSpec(true)
       this.api.resetServer()
     }
 

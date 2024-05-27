@@ -1,11 +1,106 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.10.1
+
+_Released 5/28/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
+
+## 13.10.0
+
+_Released 5/21/2024_
+
+**Features:**
+
+- Added support for `vite` `v5` to `@cypress/vite-dev-server`. Addresses [#28347](https://github.com/cypress-io/cypress/issues/28347).
+
+**Bugfixes:**
+
+- Fixed an issue where orphaned Electron processes were inadvertently terminating the browser's CRI client. Fixes [#28397](https://github.com/cypress-io/cypress/issues/28397). Fixed in [#29515](https://github.com/cypress-io/cypress/pull/29515).
+- Fixed an issue where Cypress would use the wrong URL to upload Test Replay recordings when it wasn't able to determine the upload URL. It now displays an error when the upload URL cannot be determined, rather than a "Request Entity Too Large" error. Addressed in [#29512](https://github.com/cypress-io/cypress/pull/29512).
+- Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
+- Fixed an issue setting the `x-cypress-file-path` header when there are invalid header characters in the file path. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
+- Fixed the display of some command assertions. Fixed in [#29517](https://github.com/cypress-io/cypress/pull/29517).
+
+**Dependency Updates:**
+
+- Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
+- Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
+
+## 13.9.0
+
+_Released 5/7/2024_
+
+**Features:**
+
+- Added more descriptive error messages when Test Replay fails to record or upload. Addresses [#29022](https://github.com/cypress-io/cypress/issues/29022).
+
+**Bugfixes:**
+
+- Fixed a bug where promises rejected with `undefined` were failing inside `cy.origin()`. Addresses [#23937](https://github.com/cypress-io/cypress/issues/23937).
+- We now pass the same default Chromium flags to Electron as we do to Chrome. As a result of this change, the application under test's `navigator.webdriver` property will now correctly be `true` when testing in Electron. Fixes [#27939](https://github.com/cypress-io/cypress/issues/27939).
+- Fixed network issues in requests using fetch for users where Cypress is run behind a proxy that performs HTTPS decryption (common among corporate proxies). Fixes [#29171](https://github.com/cypress-io/cypress/issues/29171).
+- Fixed an issue where extra windows weren't being closed between specs in Firefox causing potential issues in subsequent specs. Fixes [#29473](https://github.com/cypress-io/cypress/issues/29473).
+
+**Misc:**
+
+- Improved accessibility of the Cypress App in some areas. Addressed in [#29322](https://github.com/cypress-io/cypress/pull/29322).
+
+**Dependency Updates:**
+
+- Updated electron from `27.1.3` to `27.3.10` to address [CVE-2024-3156](https://nvd.nist.gov/vuln/detail/CVE-2024-3156). Addressed in [#29431](https://github.com/cypress-io/cypress/pull/29431).
+
+## 13.8.1
+
+_Released 4/23/2024_
+
+**Performance:**
+
+- Fixed a performance issue with activated service workers that aren't controlling clients which could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`13.6.0`](https://docs.cypress.io/guides/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1, even when a test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
+- Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
+
+**Misc:**
+
+- `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
+
+**Dependency Updates:**
+
+- Updated zod from `3.20.3` to `3.22.5`. Addressed in [#29367](https://github.com/cypress-io/cypress/pull/29367).
+
+## 13.8.0
+
+_Released 4/18/2024_
+
+**Features:**
+
+- Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
+
+**Misc:**
+
+- The [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) environment variable from [Semaphore](https://semaphoreci.com/) CI is now captured to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
+
 ## 13.7.3
 
-_Released 4/16/2024 (PENDING)_
+_Released 4/11/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where asserts with custom messages weren't displaying properly. Fixes [#29167](https://github.com/cypress-io/cypress/issues/29167).
+- Fixed and issue where Cypress launch arguments were not being escaped correctly with multiple values inside quotes. Fixes [#27454](https://github.com/cypress-io/cypress/issues/27454).
 
 **Misc:**
 
 - Updated the Chrome flags to not show the "Enhanced Ad Privacy" dialog. Addresses [#29199](https://github.com/cypress-io/cypress/issues/29199).
+- Suppresses benign warnings that reference Vulkan on GPU-less hosts. Addresses [#29085](https://github.com/cypress-io/cypress/issues/29085). Addressed in [#29278](https://github.com/cypress-io/cypress/pull/29278).
 
 ## 13.7.2
 

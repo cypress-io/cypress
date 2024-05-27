@@ -15,8 +15,7 @@ export type AutomationOptions = {
   screenshotsFolder?: string | false
   onBrowserPreRequest?: OnBrowserPreRequest
   onRequestEvent?: OnRequestEvent
-  onRequestServedFromCache?: (requestId: string) => void
-  onRequestFailed?: (requestId: string) => void
+  onRemoveBrowserPreRequest?: (requestId: string) => void
   onDownloadLinkClicked?: (downloadUrl: string) => void
   onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated
   onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
@@ -31,8 +30,7 @@ export class Automation {
   private screenshot: { capture: (data: any, automate: any) => any }
   public onBrowserPreRequest: OnBrowserPreRequest | undefined
   public onRequestEvent: OnRequestEvent | undefined
-  public onRequestServedFromCache: ((requestId: string) => void) | undefined
-  public onRequestFailed: ((requestId: string) => void) | undefined
+  public onRemoveBrowserPreRequest: ((requestId: string) => void) | undefined
   public onDownloadLinkClicked: ((downloadUrl: string) => void) | undefined
   public onServiceWorkerRegistrationUpdated: OnServiceWorkerRegistrationUpdated | undefined
   public onServiceWorkerVersionUpdated: OnServiceWorkerVersionUpdated | undefined
@@ -42,8 +40,7 @@ export class Automation {
   constructor (options: AutomationOptions) {
     this.onBrowserPreRequest = options.onBrowserPreRequest
     this.onRequestEvent = options.onRequestEvent
-    this.onRequestServedFromCache = options.onRequestServedFromCache
-    this.onRequestFailed = options.onRequestFailed
+    this.onRemoveBrowserPreRequest = options.onRemoveBrowserPreRequest
     this.onDownloadLinkClicked = options.onDownloadLinkClicked
     this.onServiceWorkerRegistrationUpdated = options.onServiceWorkerRegistrationUpdated
     this.onServiceWorkerVersionUpdated = options.onServiceWorkerVersionUpdated

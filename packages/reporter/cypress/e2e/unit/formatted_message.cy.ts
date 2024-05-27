@@ -71,6 +71,13 @@ describe('formattedMessage', () => {
       expect(result).to.equal('expected <strong>span</strong> to have CSS property <strong>background-color</strong> with the value <strong>rgb(0, 0, 0)</strong>, but the value was <strong>rgba(0, 0, 0, 0)</strong>')
     })
 
+    it('bolds asterisks with "but" without comma', () => {
+      const specialMessage = 'expected **foo** to have length above **1** but got **0**'
+      const result = formattedMessage(specialMessage)
+
+      expect(result).to.equal('expected <strong>foo</strong> to have length above <strong>1</strong> but got <strong>0</strong>')
+    })
+
     it('bolds asterisks with simple assertions', () => {
       const specialMessage = 'expected **dom** to be visible'
       const result = formattedMessage(specialMessage, 'assert')
@@ -84,6 +91,13 @@ describe('formattedMessage', () => {
       const result = formattedMessage(specialMessage, 'assert')
 
       expect(result).to.equal('expected <strong>&lt;button#increment&gt;</strong> to be enabled')
+    })
+
+    it('renders the custom message properly with the assertion message', () => {
+      const specialMessage = 'My Custom Message: expected **abcdef** to equal **abcdef**'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('My Custom Message: expected <strong>abcdef</strong> to equal <strong>abcdef</strong>')
     })
   })
 

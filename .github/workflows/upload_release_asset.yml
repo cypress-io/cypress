@@ -13,6 +13,8 @@ jobs:
           FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
