@@ -5,7 +5,7 @@ _Released 6/4/2024 (PENDING)_
 
 **Features:**
 
-- Added support for `next` `v14` for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
+- Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 
 **Bugfixes:**
 
