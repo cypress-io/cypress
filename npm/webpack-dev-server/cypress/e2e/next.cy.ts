@@ -105,6 +105,7 @@ for (const project of WEBPACK_REACT) {
     })
   })
 }
+
 // Since next-14-tsconfig-tailwind does not use the fixture directory we need to write our own test suite
 // We want to specifically test typescript files with next-14 as there have been known problems with
 // module: bundler and cypress compatibility
