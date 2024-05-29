@@ -33,10 +33,17 @@ describe('webpack-batteries-included-preprocessor', () => {
 
   context('#getTSCompilerOptionsForUser', () => {
     const mockTsconfigPath = '/path/to/tsconfig.json'
+    let readFileTsConfigMock
     let preprocessor
+    let readFileTsConfigStub
+    let webpackOptions
 
     beforeEach(() => {
       const tsConfigPathSpy = sinon.spy()
+
+      readFileTsConfigMock = () => {
+        throw new Error('Could not read file!')
+      }
 
       mock('tsconfig-paths-webpack-plugin', tsConfigPathSpy)
       mock('@cypress/webpack-preprocessor', (options) => {
@@ -48,6 +55,22 @@ describe('webpack-batteries-included-preprocessor', () => {
       sinon.stub(tsconfig, 'findSync').callsFake(() => mockTsconfigPath)
 
       preprocessor = require('../../index')
+
+      const fs = require('fs-extra')
+
+      readFileTsConfigStub = sinon.stub(fs, 'readFileSync').withArgs(mockTsconfigPath, 'utf8').callsFake(() => {
+        return readFileTsConfigMock()
+      })
+
+      webpackOptions = {
+        module: {
+          rules: [],
+        },
+        resolve: {
+          extensions: [],
+          plugins: [],
+        },
+      }
     })
 
     afterEach(() => {
@@ -57,26 +80,17 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     it('always returns compilerOptions even if there is an error discovering the user\'s tsconfig.json', () => {
-      const webpackOptions = {
-        module: {
-          rules: [],
-        },
-        resolve: {
-          extensions: [],
-          plugins: [],
-        },
-      }
       const preprocessorCB = preprocessor({
         typescript: true,
         webpackOptions,
       })
 
-      // will not be able to find the user's tsconfig
       preprocessorCB({
         filePath: 'foo.ts',
         outputPath: '.js',
       })
 
+      sinon.assert.calledOnce(readFileTsConfigStub)
       const tsLoader = webpackOptions.module.rules[0].use[0]
 
       expect(tsLoader.loader).to.contain('ts-loader')
@@ -95,8 +109,6 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     it('turns inlineSourceMaps on by default even if none are configured', () => {
-      const fs = require('fs-extra')
-
       // make json5 compat schema
       const mockTsConfig = `{
           "compilerOptions": {
@@ -105,19 +117,8 @@ describe('webpack-batteries-included-preprocessor', () => {
           }
         }`
 
-      const readFileTsConfigStub = sinon.stub(fs, 'readFileSync').withArgs(mockTsconfigPath, 'utf8').callsFake(() => {
-        return mockTsConfig
-      })
+      readFileTsConfigMock = () => mockTsConfig
 
-      const webpackOptions = {
-        module: {
-          rules: [],
-        },
-        resolve: {
-          extensions: [],
-          plugins: [],
-        },
-      }
       const preprocessorCB = preprocessor({
         typescript: true,
         webpackOptions,
@@ -142,8 +143,6 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     it('turns on sourceMaps and disables inlineSourceMap and inlineSources if the sourceMap configuration option is set by the user', () => {
-      const fs = require('fs-extra')
-
       // make json5 compat schema
       const mockTsConfig = `{
           "compilerOptions": {
@@ -152,19 +151,8 @@ describe('webpack-batteries-included-preprocessor', () => {
           }
         }`
 
-      const readFileTsConfigStub = sinon.stub(fs, 'readFileSync').withArgs(mockTsconfigPath, 'utf8').callsFake(() => {
-        return mockTsConfig
-      })
+      readFileTsConfigMock = () => mockTsConfig
 
-      const webpackOptions = {
-        module: {
-          rules: [],
-        },
-        resolve: {
-          extensions: [],
-          plugins: [],
-        },
-      }
       const preprocessorCB = preprocessor({
         typescript: true,
         webpackOptions,
