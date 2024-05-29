@@ -880,7 +880,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
               if (fp) {
                 // if so we know this is a local file request
-                details.filePath = fp
+                details.filePath = decodeURI(fp)
               }
 
               debug('setting details resolving url %o', details)
