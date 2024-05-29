@@ -317,16 +317,23 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
         validateHeaderName(key)
         if (Array.isArray(value)) {
           value.forEach((v) => validateHeaderValue(key, v))
-        } else {
+        } else if (value !== undefined) {
           validateHeaderValue(key, value)
+        } else {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, new TypeError('Header value is undefined while expecting string'))
+
+          return false
         }
 
         return true
       } catch (err) {
         if (err.code === 'ERR_INVALID_HTTP_TOKEN') {
           error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_NAME', { [key]: value }, this.req.method, this.req.originalUrl, err)
-        } else if (err.code === 'ERR_INVALID_HEADER_VALUE') {
+        } else if (err.code === 'ERR_INVALID_CHAR') {
           error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else {
+          // rethrow any other errors
+          throw err
         }
 
         return false
