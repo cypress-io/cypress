@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.9.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.8.0...@cypress/webpack-dev-server-v3.9.0) (2024-05-30)
+
+
+### Features
+
+* support Next.JS version 14 ([#29558](https://github.com/cypress-io/cypress/issues/29558)) ([cf6b29d](https://github.com/cypress-io/cypress/commit/cf6b29db229cc825f27fd78e7baeafaa16576f9a))
+
 # [@cypress/webpack-dev-server-v3.8.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.4...@cypress/webpack-dev-server-v3.8.0) (2024-04-18)
 
 
