@@ -1,5 +1,5 @@
 {
-  "name": "angular-18",
+  "name": "angular-signals",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -23,8 +23,8 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.0.1",
-    "@angular/cli": "^18.0.1",
+    "@angular-devkit/build-angular": "^18.0.2",
+    "@angular/cli": "^18.0.2",
     "@angular/compiler-cli": "^18.0.0",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.1.0",

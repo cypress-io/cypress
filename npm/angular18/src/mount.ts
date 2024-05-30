@@ -8,7 +8,8 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, signal } from '@angular/core'
+import { toObservable } from '@angular/core/rxjs-interop'
 import {
   ComponentFixture,
   getTestBed,
@@ -24,6 +25,7 @@ import {
   setupHooks,
   getContainerEl,
 } from '@cypress/mount-utils'
+import isFunction from 'lodash/isFunction'
 
 /**
  * Additional module configurations needed while mounting the component, like
@@ -71,7 +73,8 @@ export interface MountConfig<T> extends TestModuleMetadata {
    *  cy.get('@mySpy').should('have.been.called')
    * })
    */
-  componentProperties?: Partial<{ [P in keyof T]: T[P] }>
+  // allow InputSignals to be type primitive and WritableSignal for type compliance
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P]}>
 }
 
 let activeFixture: ComponentFixture<any> | null = null
@@ -255,6 +258,111 @@ function setupFixture<T> (
   return fixture
 }
 
+// Best known way to currently detect whether or not a function is a signal is if the signal symbol exists.
+// From there, we can take our best guess based on what exists on the object itself
+function isSignal (prop: any): boolean {
+  try {
+    const symbol = Object.getOwnPropertySymbols(prop).find((symbol) => symbol.toString() === 'Symbol(SIGNAL)')
+
+    return !!symbol
+  } catch (e) {
+    // likely a primitive type or something else. We can return false here
+    return false
+  }
+}
+
+// currently not a great way to detect if a function is an InputSignal. When we discover a better way to detect a signal we should incorporate it here
+function isInputSignal (prop: any): boolean {
+  return isSignal(prop) && typeof prop === 'function' && prop['name'] === 'inputValueFn'
+}
+
+// currently not a great way to detect if a function is a Model Signal. Need to improve this
+function isModelSignal (prop: any): boolean {
+  return isSignal(prop) && isWritableSignal(prop) && typeof prop.subscribe === 'function'
+}
+
+// currently not a great way to detect if a function is a Writable Signal. Need to improve this
+function isWritableSignal (prop: any): boolean {
+  return isSignal(prop) && typeof prop === 'function' && typeof prop.set === 'function'
+}
+
+function convertPropertyToSignalIfApplicable (propValue: any, componentValue: any, injector: Injector) {
+  const isComponentValueAnInputSignal = isInputSignal(componentValue)
+  const isComponentValueAModelSignal = isModelSignal(componentValue)
+  let convertedValueIfApplicable = propValue
+
+  // If the component has the property defined as an InputSignal, we need to detect whether a primitive value or not was passed into the component as a prop
+  // and attempt to merge the value in correctly.
+  // We don't want to expose the primitive created signal as it should really be one-way binding from within the component.
+  // However, to make CT testing easier, a user can technically pass in a signal to an input component and assert on the signal itself
+  if (isComponentValueAnInputSignal) {
+    const isPassedInValueNotAFunction = !isFunction(propValue)
+
+    if (isPassedInValueNotAFunction) {
+      // Input signals require an injection context to set initial values.
+      // Because of this, we cannot create them outside the scope of the component.
+      // Options for input signals also don't allow the passing of an injection contexts, so in order to work around this,
+      // we convert the primitive input passed into the input to a writable signal
+      convertedValueIfApplicable = signal(propValue)
+    }
+
+    // If the component has the property defined as a ModelSignal, we need to detect whether a primitive value or not was passed into the component as a prop.
+    // If a primitive property is passed into the component model, we need to set the model to that value and propagate changes of that model through the output spy.
+    // Since the primitive likely lives outside the context of Angular, the primitive will NOT be updated outside of this context. Instead, the output spy will allow you
+    // to see this change.       // TODO: this is why we might need to expose a changed event
+    // If the value passed into the property is in fact a signal, we need to set up two-way binding between the signals to make sure changes from one propagate to another.
+  } else if (isComponentValueAModelSignal) {
+    const isPassedInValueLikelyARegularSignal = isWritableSignal(propValue)
+
+    // if the value passed into the component is a signal, set up two-way binding
+    if (isPassedInValueLikelyARegularSignal) {
+      // update the passed in value with the models updates
+      componentValue.subscribe((value: any) => {
+        propValue.set(value)
+      })
+
+      // update the model signal with the properties updates
+      toObservable(propValue, {
+        injector,
+      }).subscribe((value) => {
+        componentValue.set(value)
+      })
+    } else {
+      // it's a primitive, set it as we only need to handle updating the model signal and emit changes on this through the output spy.
+      componentValue.set(propValue)
+
+      convertedValueIfApplicable = componentValue
+    }
+  }
+
+  return convertedValueIfApplicable
+}
+
+function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
+  if (config.componentProperties) {
+    const expectedChangeKey = `${key}Change`
+    let changeKeyIfExists = !!Object.keys(config.componentProperties).find((componentKey) => componentKey === expectedChangeKey)
+
+    // since spies do NOT make change handlers by default, similar to the Output() decorator, we need to create the spy and subscribe to the signal
+    if (!changeKeyIfExists && config.autoSpyOutputs) {
+      component[expectedChangeKey] = createOutputSpy(`${expectedChangeKey}Spy`)
+      changeKeyIfExists = true
+    }
+
+    if (changeKeyIfExists) {
+      const componentValue = component[key]
+
+      if (isWritableSignal(componentValue) && !isInputSignal(componentValue)) {
+        toObservable(componentValue, {
+          injector,
+        }).subscribe((value) => {
+          component[expectedChangeKey]?.emit(value)
+        })
+      }
+    }
+  }
+}
+
 /**
  * Gets the componentInstance and Object.assigns any componentProperties() passed in the MountConfig
  *
@@ -267,8 +375,21 @@ function setupComponent<T> (
   fixture: ComponentFixture<T>,
 ): void {
   let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
+  const injector = fixture.componentRef.injector
 
   if (config?.componentProperties) {
+    // convert primitives to signals if passed in type is a primitive but expected type is signal
+    // a bit of magic. need to move to another function
+    Object.keys(component).forEach((key) => {
+      // @ts-expect-error
+      const passedInValue = config?.componentProperties[key]
+      const componentValue = component[key]
+
+      // @ts-expect-error
+      config.componentProperties[key] = convertPropertyToSignalIfApplicable(passedInValue, componentValue, injector)
+      detectAndRegisterOutputSpyToSignal(config, component, key, injector)
+    })
+
     component = Object.assign(component, config.componentProperties)
   }
 
@@ -306,7 +427,7 @@ function setupComponent<T> (
  * @param component Angular component being mounted or its template
  * @param config configuration used to configure the TestBed
  * @example
- * import { mount } from '@cypress/angular'
+ * import { mount } from '@cypress/angular18'
  * import { StepperComponent } from './stepper.component'
  * import { MyService } from 'services/my.service'
  * import { SharedModule } from 'shared/shared.module';
@@ -367,12 +488,21 @@ export function mount<T> (
  * @returns EventEmitter<T>
  * @example
  * import { StepperComponent } from './stepper.component'
- * import { mount, createOutputSpy } from '@cypress/angular'
+ * import { mount, createOutputSpy } from '@cypress/angular18'
  *
  * it('Has spy', () => {
  *   mount(StepperComponent, { componentProperties: { change: createOutputSpy('changeSpy') } })
  *   cy.get('[data-cy=increment]').click()
  *   cy.get('@changeSpy').should('have.been.called')
+ * })
+ *
+ * // Or for use with Angular Signals following the output nomenclature.
+ * // see https://v17.angular.io/guide/model-inputs#differences-between-model-and-input/
+ *
+ * it('Has spy', () => {
+ *   mount(StepperComponent, { componentProperties: { count: signal(0), countChange: createOutputSpy('countChange') } })
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('@countChange').should('have.been.called')
  * })
  */
 export const createOutputSpy = <T>(alias: string) => {

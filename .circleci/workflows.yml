@@ -2053,6 +2053,15 @@ jobs:
           command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
+  npm-angular18:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn lerna run build --scope @cypress/angular18
+      - store-npm-logs
+
   npm-puppeteer-unit-tests:
     <<: *defaults
     steps:
@@ -2794,6 +2803,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-angular:
         requires:
           - build
+    - npm-angular18:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -2812,6 +2824,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - check-ts
           - npm-angular
+          - npm-angular18
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
@@ -3141,6 +3154,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-angular:
         requires:
           - build
+    - npm-angular18:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -3158,6 +3174,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - check-ts
           - npm-angular
+          - npm-angular18
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
