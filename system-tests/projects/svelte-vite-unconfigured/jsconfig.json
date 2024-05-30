@@ -3,7 +3,7 @@
     "moduleResolution": "Node",
     "target": "ESNext",
     "module": "ESNext",
-    "ignoreDeprecations": "5.0",
+    "importsNotUsedAsValues": "error",
     "isolatedModules": true,
     "resolveJsonModule": true,
     "sourceMap": true,
