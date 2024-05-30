@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/angular",
+  "name": "@cypress/angular-signals",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
   "main": "dist/index.js",
@@ -8,22 +8,23 @@
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
+    "dev": "rollup -c rollup.config.mjs -w",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^14.2.0",
-    "@angular/core": "^14.2.0",
-    "@angular/platform-browser-dynamic": "^14.2.0",
+    "@angular/common": "^17.2.0",
+    "@angular/core": "^17.2.0",
+    "@angular/platform-browser-dynamic": "^17.2.0",
     "@cypress/mount-utils": "0.0.0-development",
-    "typescript": "^4.7.4",
-    "zone.js": "~0.11.4"
+    "typescript": "~5.4.5",
+    "zone.js": "~0.14.6"
   },
   "peerDependencies": {
-    "@angular/common": ">=13",
-    "@angular/core": ">=13",
-    "@angular/platform-browser-dynamic": ">=13",
-    "zone.js": ">=0.11.0"
+    "@angular/common": ">=17.2",
+    "@angular/core": ">=17.2",
+    "@angular/platform-browser-dynamic": ">=17.2",
+    "zone.js": ">=0.13.0"
   },
   "files": [
     "dist"
@@ -34,7 +35,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular-signals/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
   "keywords": [
     "angular",
@@ -45,12 +46,8 @@
   ],
   "contributors": [
     {
-      "name": "Jordan Powell",
-      "social": "@jordanpowell88"
-    },
-    {
-      "name": "Zach Williams",
-      "social": "@ZachJW34"
+      "name": "Bill Glesias",
+      "social": "@atofstryker"
     }
   ],
   "module": "dist/index.js",
@@ -61,7 +58,7 @@
     "targets": {
       "build": {
         "outputs": [
-          "{workspaceRoot}/cli/angular"
+          "{workspaceRoot}/cli/angular-signals"
         ]
       }
     }
