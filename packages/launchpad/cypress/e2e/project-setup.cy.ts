@@ -694,4 +694,30 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('h1', 'Project setup')
     })
   })
+
+  describe('config loading state', () => {
+    describe('when currentProject config loading state changes from loading to loaded after the first query', () => {
+      beforeEach(() => {
+        let callCount = 0
+
+        cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
+          req.reply(async (res) => {
+            callCount++
+            if (callCount === 2) {
+              res.body.data.currentProject.isLoadingConfigFile = false
+            } else if (callCount === 1) {
+              res.body.data.currentProject.isLoadingConfigFile = true
+            } else {
+              throw new Error('MainLaunchpadQuery should only be refetched if the config file is not loading')
+            }
+          })
+        })
+      })
+
+      it('eventually displays the launchpad', () => {
+        scaffoldAndOpenProject('pristine')
+        cy.visitLaunchpad()
+      })
+    })
+  })
 })

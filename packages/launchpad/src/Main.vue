@@ -217,8 +217,7 @@ watch(
     /*
      * conditions for refetch are:
      * - There is a current project, but Config file has not yet loaded
-     * - There are no pending (delayed) refetches
-     * - The query is not paused
+     * - There are no pending (delayed) refetches, or fetches in progress
      * - There is no baseError - we don't want to continue to refetch if
      *   things have errored out.
      */
@@ -227,8 +226,7 @@ watch(
       isLoadingConfig &&
       !isFetchingProject &&
       !refetchDelaying.value &&
-      !hasBaseError.value &&
-      !query.isPaused
+      !hasBaseError.value
     ) {
       refetchDelaying.value = true
       setTimeout(() => {
