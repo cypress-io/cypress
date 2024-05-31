@@ -229,9 +229,15 @@ watch(
       !hasBaseError.value
     ) {
       refetchDelaying.value = true
+      refetchCount.value++
       setTimeout(() => {
         refetchDelaying.value = false
-        refetchCount.value++
+        if (
+          (currentProject && !isLoadingConfig) || hasBaseError.value
+        ) {
+          return
+        }
+
         query.executeQuery({ requestPolicy: 'network-only' })
       }, (refetchCount.value + 1) * 500)
     }
