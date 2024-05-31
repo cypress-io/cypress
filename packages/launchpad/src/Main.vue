@@ -205,7 +205,7 @@ const refetchCount = ref(0)
  * opening the project and the DataContext completing its retrieval of the configuration.
  * In these cases, we want to retry the query until the config file is fully loaded.
  *
- * If the ProjectConfigIPC encounteres an error while loading the config, it will update the
+ * If the ProjectConfigIPC encounters an error while loading the config, it will update the
  * baseError field via subscription, so there is not a limit set here on retries.
  */
 
