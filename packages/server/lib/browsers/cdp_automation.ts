@@ -555,6 +555,10 @@ export class CdpAutomation implements CDPClient {
         return true
       case 'remote:debugger:protocol':
         return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
+      case 'remote:debugger:protocol:off':
+        return this.off(data.event, data.callback)
+      case 'remote:debugger:protocol:on':
+        return this.on(data.event, data.callback)
       case 'take:screenshot':
         debugVerbose('capturing screenshot')
 
