@@ -5,6 +5,7 @@ _Released 6/4/2024 (PENDING)_
 
 **Features:**
 
+- Added support for using Chrome DevTools Protocol's `on` and `off` functions for event listening. Addresses [#29598](https://github.com/cypress-io/cypress/issues/29598)
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 
 **Bugfixes:**
