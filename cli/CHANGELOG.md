@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.10.1
+## 13.11.0
 
-_Released 5/28/2024 (PENDING)_
+_Released 6/4/2024 (PENDING)_
+
+**Features:**
+
+- Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 
 **Bugfixes:**
 
