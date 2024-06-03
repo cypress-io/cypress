@@ -440,8 +440,8 @@ export class ProjectBase extends EE {
     this.ctx.actions.servers.setAppSocketServer(ios)
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+  async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
+    return this.server.socket.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {

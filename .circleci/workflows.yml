@@ -30,6 +30,8 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
+        - 'publish-binary'
+        - 'feat/support_next_14'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,7 +42,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/service_worker_uncontrolled', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_next_14', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -51,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/service_worker_uncontrolled', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_next_14', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -74,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/service_worker_uncontrolled', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_next_14', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -83,17 +85,26 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome118-ff115
+      - image: cypress/browsers-internal:node18.17.1-chrome124-ff125
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-
+  
+  kitchensink-executor:
+    docker:
+      - image: cypress/browsers-internal:node18.20.2-chrome124-ff125
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+  
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome118-ff115
+      - image: cypress/browsers-internal:node18.17.1-chrome124-ff125
         user: node
     environment:
       PLATFORM: linux
@@ -141,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mschile/service_worker_uncontrolled" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/support_next_14" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -653,11 +664,6 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' && '<<parameters.package>>' == 'app' && '<<parameters.type>>' == 'e2e' ]]; then
-              IS_WINDOWS_APP_INTEGRATION_TEST=true
-            else
-              IS_WINDOWS_APP_INTEGRATION_TEST=false
-            fi
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
@@ -665,22 +671,14 @@ commands:
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
-              if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
-                echo "on windows running app-integration tests. Skipping flaky tests"
-                # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-                # Do NOT record on windows packages/app due to encryption issues
-                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
-              else
-                DEBUG=<<parameters.debug>> \
-                CYPRESS_CONFIG_ENV=production \
-                CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-                PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-                PERCY_ENABLE=${PERCY_TOKEN:-0} \
-                PERCY_PARALLEL_TOTAL=-1 \
-                CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-                $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
-              fi
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_CONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
 
@@ -700,12 +698,6 @@ commands:
 
               # To run the `yarn` command, we need to walk out of the package folder.
               cd ../..
-
-              if [[ "$IS_WINDOWS_APP_INTEGRATION_TEST" = true ]]; then
-                echo "on windows running app-integration tests. Skipping flaky tests"
-                # if windows app integration tests, skip some very flaky tests that fail to load for undetermined reasons
-                TESTFILES=$(cd packages/<<parameters.package>> && /usr/bin/find cypress/e2e -regextype posix-extended -name '*.cy.*' -not -regex '.*(experimentalRetries|reporter.command_errors|ct-framework-errors|reporter-ct-vite|reporter-ct-webpack|reporter.errors|reporter.hooks|cypress-in-cypress|runner.ui|specs|studio).*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
-              fi
 
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
@@ -1735,6 +1727,7 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1742,6 +1735,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1749,6 +1743,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1756,6 +1751,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1813,7 +1809,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: large
       percy:
         type: boolean
         default: false
@@ -1830,6 +1826,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
       percy:
         type: boolean
         default: false
@@ -1863,6 +1862,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
+    resource_class: medium+
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -1870,6 +1870,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1878,6 +1879,7 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1892,7 +1894,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: large
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1915,6 +1917,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 3
     steps:
       - restore_cached_workspace
@@ -1940,6 +1943,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 2
     steps:
       - restore_cached_workspace
@@ -2210,7 +2214,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2309,6 +2313,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -2882,6 +2887,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3217,6 +3223,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3445,7 +3452,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
@@ -3459,7 +3466,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3467,7 +3474,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build

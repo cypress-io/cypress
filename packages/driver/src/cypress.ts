@@ -117,6 +117,8 @@ class $Cypress {
   log: any
   isBrowser: any
   browserMajorVersion: any
+  // This is NodeEventEmitter['emit'], but typescript cannot determine that it is
+  // definitively initialized due to being initialized with $Events.extend(this)
   emit: any
   emitThen: any
   emitMap: any

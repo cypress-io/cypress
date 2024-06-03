@@ -14,7 +14,6 @@ import fixture from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
-import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
@@ -41,7 +40,7 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
-  private _sendResetBrowserTabsForNextTestMessage
+  private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
@@ -281,8 +280,8 @@ export class SocketBase {
           })
         })
 
-        this._sendResetBrowserTabsForNextTestMessage = async (shouldKeepTabOpen: boolean) => {
-          await automationRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen })
+        this._sendResetBrowserTabsForNextSpecMessage = async (shouldKeepTabOpen: boolean) => {
+          await automationRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen })
         }
 
         this._sendResetBrowserStateMessage = async () => {
@@ -336,13 +335,6 @@ export class SocketBase {
 
         socket.on('mocha', (...args: unknown[]) => {
           return options.onMocha.apply(options, args)
-        })
-
-        socket.on('open:finder', (p, cb = function () {}) => {
-          return open.opn(p)
-          .then(() => {
-            return cb()
-          })
         })
 
         socket.on('recorder:frame', (data) => {
@@ -616,9 +608,9 @@ export class SocketBase {
     })
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    if (this._sendResetBrowserTabsForNextTestMessage) {
-      await this._sendResetBrowserTabsForNextTestMessage(shouldKeepTabOpen)
+  async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
+    if (this._sendResetBrowserTabsForNextSpecMessage) {
+      await this._sendResetBrowserTabsForNextSpecMessage(shouldKeepTabOpen)
     }
   }
 

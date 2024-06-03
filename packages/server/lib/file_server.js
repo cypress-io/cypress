@@ -34,7 +34,7 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
   // %20 with white space
   const file = decodeURI(url.parse(path.join(...args)).pathname)
 
-  res.setHeader('x-cypress-file-path', file)
+  res.setHeader('x-cypress-file-path', encodeURI(file))
 
   return send(req, url.parse(req.url).pathname, {
     root: path.resolve(fileServerFolder),

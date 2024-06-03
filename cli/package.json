@@ -4,11 +4,12 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "clean": "node ./scripts/clean.js",
-    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "build-cli": "node ./scripts/build.js && node ./scripts/post-build.js",
+    "clean": "node ./scripts/clean.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",
@@ -16,7 +17,6 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn dtslint",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
