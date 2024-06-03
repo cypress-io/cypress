@@ -671,7 +671,7 @@ export default {
     if (!verified) {
       debugProtocol(`Unable to verify protocol signature %s`, url)
 
-      return null
+      throw new Error('Unable to verify protocol signature')
     }
 
     debugProtocol(`Loaded protocol via url %s`, url)
