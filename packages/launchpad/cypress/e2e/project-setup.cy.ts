@@ -731,7 +731,7 @@ describe('Launchpad: Setup Project', () => {
           }
 
           callCount++
-          req.reply(async (res) => {
+          req.reply((res) => {
             res.body.data.currentProject.isLoadingConfigFile = true
             if (res.body.data.baseError) {
               resWithBaseError = callCount
