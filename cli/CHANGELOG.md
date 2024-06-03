@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.10.1
 
-_Released 5/28/2024 (PENDING)_
+_Released 6/4/2024 (PENDING)_
+
+**Performance:**
+
+- Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
 
 **Bugfixes:**
 
@@ -27,10 +31,6 @@ _Released 5/21/2024_
 
 - Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
 - Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
-
-**Performance:**
-
-- Improve performance `expectedPropertiesObj` in logger. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
 
 ## 13.9.0
 
