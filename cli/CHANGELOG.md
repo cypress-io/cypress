@@ -5,7 +5,8 @@ _Released 6/04/2024 (PENDING)_
 
 **Features:**
 
- - Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+- Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+- Adds Signal support for Angular 18 Component Testing. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
 **Bugfixes:**
 
