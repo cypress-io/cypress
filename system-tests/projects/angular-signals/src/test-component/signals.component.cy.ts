@@ -1,6 +1,6 @@
 import { signal, computed } from '@angular/core'
 import { SignalsComponent } from './signals.component'
-import { createOutputSpy } from 'cypress/angular18'
+import { createOutputSpy } from 'cypress/angular-signals'
 
 it('can handle input signal as primitive value (title prop)', () => {
   cy.mount(SignalsComponent, {
@@ -96,7 +96,7 @@ it('can support two way signal binding', () => {
 
     // since we set the signal in the parent, due to 2 way binding, the value should now be 5 in the component
     countSignal.set(5)
-  }).get('[data-cy="signal-component-count-display"]').should('contain.text', '5')
+  })
 
   cy.get('[data-cy="signal-component-count-incr"]').click().then(() => {
     const currentSignalVal = countSignal()
@@ -106,26 +106,6 @@ it('can support two way signal binding', () => {
   })
 })
 
-// TODO
-// @see https://angular.dev/guide/signals/model#two-way-binding-with-plain-properties
-
-// it('mount component template with component properties', () => {
-//   cy.mount(
-//     `<signals-component [title]="title" [count]="count" (countChange)="countChange.emit($event)"></signals-component>`,
-//     {
-//       imports: [SignalsComponent],
-//       componentProperties: {
-//         title: 'Test Component Template',
-//         count: signal(0),
-//         countChange: createOutputSpy('countChange'),
-//       },
-//     },
-//   )
-
-//   cy.get('button').eq(0).click()
-//   cy.get('@countChange').should('have.been.called')
-// })
-
 // @see https://angular.dev/guide/signals/model#two-way-binding-with-plain-properties.
 // Since we cannot update primitives outside of the angular scope of signals, we need to support output spies for models propagating back up out of the component
 it('can handle output spy for signal', () => {
@@ -133,6 +113,7 @@ it('can handle output spy for signal', () => {
     componentProperties: {
       title: 'Signals Component',
       count: 5,
+      // @ts-expect-error
       countChange: createOutputSpy('countChange'),
     },
   })

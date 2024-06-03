@@ -118,7 +118,7 @@
     "react18",
     "angular",
     "svelte",
-    "angular18"
+    "angular-signals"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -171,10 +171,10 @@
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
       "require": "./svelte/dist/cypress-svelte.cjs.js"
     },
-    "./angular18": {
-      "types": "./angular18/dist/index.d.ts",
-      "import": "./angular18/dist/index.js",
-      "require": "./angular18/dist/index.js"
+    "./angular-signals": {
+      "types": "./angular-signals/dist/index.d.ts",
+      "import": "./angular-signals/dist/index.js",
+      "require": "./angular-signals/dist/index.js"
     }
   },
   "workspaces": {

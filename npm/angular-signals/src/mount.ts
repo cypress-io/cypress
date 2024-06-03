@@ -427,7 +427,7 @@ function setupComponent<T> (
  * @param component Angular component being mounted or its template
  * @param config configuration used to configure the TestBed
  * @example
- * import { mount } from '@cypress/angular18'
+ * import { mount } from '@cypress/angular-signals'
  * import { StepperComponent } from './stepper.component'
  * import { MyService } from 'services/my.service'
  * import { SharedModule } from 'shared/shared.module';
@@ -488,7 +488,7 @@ export function mount<T> (
  * @returns EventEmitter<T>
  * @example
  * import { StepperComponent } from './stepper.component'
- * import { mount, createOutputSpy } from '@cypress/angular18'
+ * import { mount, createOutputSpy } from '@cypress/angular-signals'
  *
  * it('Has spy', () => {
  *   mount(StepperComponent, { componentProperties: { change: createOutputSpy('changeSpy') } })

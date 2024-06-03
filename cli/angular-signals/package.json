@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/angular18",
+  "name": "@cypress/angular-signals",
   "version": "0.0.0-development",
   "description": "Test Angular Components using Cypress",
   "main": "dist/index.js",
@@ -13,18 +13,18 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^18.0.1",
-    "@angular/core": "^18.0.1",
-    "@angular/platform-browser-dynamic": "^18.0.1",
+    "@angular/common": "^17.2.0",
+    "@angular/core": "^17.2.0",
+    "@angular/platform-browser-dynamic": "^17.2.0",
     "@cypress/mount-utils": "0.0.0-development",
     "typescript": "~5.4.5",
     "zone.js": "~0.14.6"
   },
   "peerDependencies": {
-    "@angular/common": ">=18",
-    "@angular/core": ">=18",
-    "@angular/platform-browser-dynamic": ">=18",
-    "zone.js": ">=0.12.0"
+    "@angular/common": ">=17.2",
+    "@angular/core": ">=17.2",
+    "@angular/platform-browser-dynamic": ">=17.2",
+    "zone.js": ">=0.13.0"
   },
   "files": [
     "dist"
@@ -35,7 +35,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular18/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular-signals/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
   "keywords": [
     "angular",
