@@ -199,7 +199,7 @@ const refetchDelaying = ref(false)
 const refetchCount = ref(0)
 
 /*
- * Sometimes the config file has not been loaded by the DataConntext's config manager by the
+ * Sometimes the config file has not been loaded by the DataContext's config manager by the
  * time the MainLaunchpadQueryDocument request is sent off. The server ends up resolving
  * the isLoadingConfigFile field as false. In certain situations, there can be a race between
  * opening the project and the DataContext completing its retrieval of the configuration.
