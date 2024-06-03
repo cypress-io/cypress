@@ -6,10 +6,11 @@ _Released 6/4/2024 (PENDING)_
 **Features:**
 
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
-
-**Features:**
-
 - Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
+
+**Performance:**
+
+- Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
 
 **Bugfixes:**
 
