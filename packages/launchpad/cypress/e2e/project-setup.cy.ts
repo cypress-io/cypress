@@ -701,7 +701,7 @@ describe('Launchpad: Setup Project', () => {
         let responseCount = 0
 
         cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
-          req.reply(async (res) => {
+          req.reply((res) => {
             responseCount++
             if (responseCount === 2) {
               res.body.data.currentProject.isLoadingConfigFile = false
