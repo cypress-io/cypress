@@ -1,91 +1,91 @@
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
 type Method =
-    | 'ACL'
-    | 'BIND'
-    | 'CHECKOUT'
-    | 'CONNECT'
-    | 'COPY'
-    | 'DELETE'
-    | 'GET'
-    | 'HEAD'
-    | 'LINK'
-    | 'LOCK'
-    | 'M-SEARCH'
-    | 'MERGE'
-    | 'MKACTIVITY'
-    | 'MKCALENDAR'
-    | 'MKCOL'
-    | 'MOVE'
-    | 'NOTIFY'
-    | 'OPTIONS'
-    | 'PATCH'
-    | 'POST'
-    | 'PROPFIND'
-    | 'PROPPATCH'
-    | 'PURGE'
-    | 'PUT'
-    | 'REBIND'
-    | 'REPORT'
-    | 'SEARCH'
-    | 'SOURCE'
-    | 'SUBSCRIBE'
-    | 'TRACE'
-    | 'UNBIND'
-    | 'UNLINK'
-    | 'UNLOCK'
-    | 'UNSUBSCRIBE'
-    | 'acl'
-    | 'bind'
-    | 'checkout'
-    | 'connect'
-    | 'copy'
-    | 'delete'
-    | 'get'
-    | 'head'
-    | 'link'
-    | 'lock'
-    | 'm-search'
-    | 'merge'
-    | 'mkactivity'
-    | 'mkcalendar'
-    | 'mkcol'
-    | 'move'
-    | 'notify'
-    | 'options'
-    | 'patch'
-    | 'post'
-    | 'propfind'
-    | 'proppatch'
-    | 'purge'
-    | 'put'
-    | 'rebind'
-    | 'report'
-    | 'search'
-    | 'source'
-    | 'subscribe'
-    | 'trace'
-    | 'unbind'
-    | 'unlink'
-    | 'unlock'
-    | 'unsubscribe'
+  | 'ACL'
+  | 'BIND'
+  | 'CHECKOUT'
+  | 'CONNECT'
+  | 'COPY'
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'LINK'
+  | 'LOCK'
+  | 'M-SEARCH'
+  | 'MERGE'
+  | 'MKACTIVITY'
+  | 'MKCALENDAR'
+  | 'MKCOL'
+  | 'MOVE'
+  | 'NOTIFY'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PROPFIND'
+  | 'PROPPATCH'
+  | 'PURGE'
+  | 'PUT'
+  | 'REBIND'
+  | 'REPORT'
+  | 'SEARCH'
+  | 'SOURCE'
+  | 'SUBSCRIBE'
+  | 'TRACE'
+  | 'UNBIND'
+  | 'UNLINK'
+  | 'UNLOCK'
+  | 'UNSUBSCRIBE'
+  | 'acl'
+  | 'bind'
+  | 'checkout'
+  | 'connect'
+  | 'copy'
+  | 'delete'
+  | 'get'
+  | 'head'
+  | 'link'
+  | 'lock'
+  | 'm-search'
+  | 'merge'
+  | 'mkactivity'
+  | 'mkcalendar'
+  | 'mkcol'
+  | 'move'
+  | 'notify'
+  | 'options'
+  | 'patch'
+  | 'post'
+  | 'propfind'
+  | 'proppatch'
+  | 'purge'
+  | 'put'
+  | 'rebind'
+  | 'report'
+  | 'search'
+  | 'source'
+  | 'subscribe'
+  | 'trace'
+  | 'unbind'
+  | 'unlink'
+  | 'unlock'
+  | 'unsubscribe'
 
 export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
 export namespace CyHttpMessages {
-  export interface BaseMessage {
+  export interface BaseMessage<T = any> {
     /**
      * The body of the HTTP message.
      * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
      * If the body was binary content, this will be a buffer.
      */
-    body: any
+    body: T
     /**
      * The headers of the HTTP message.
      */
     headers: { [key: string]: string | string[] }
   }
 
-  export type IncomingResponse = BaseMessage & {
+  export type IncomingResponse<T = any> = BaseMessage<T> & {
     /**
      * The HTTP status code of the response.
      */
@@ -104,7 +104,7 @@ export namespace CyHttpMessages {
     delay?: number
   }
 
-  export type IncomingHttpResponse = IncomingResponse & {
+  export type IncomingHttpResponse<T = any> = IncomingResponse<T> & {
     /**
      * Continue the HTTP response, merging the supplied values with the real response.
      */
@@ -118,14 +118,14 @@ export namespace CyHttpMessages {
     /**
      * Wait for `delay` milliseconds before sending the response to the client.
      */
-    setDelay: (delay: number) => IncomingHttpResponse
+    setDelay: (delay: number) => IncomingHttpResponse<T>
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
-    setThrottle: (throttleKbps: number) => IncomingHttpResponse
+    setThrottle: (throttleKbps: number) => IncomingHttpResponse<T>
   }
 
-  export type IncomingRequest = BaseMessage & {
+  export type IncomingRequest<T = any> = BaseMessage<T> & {
     /**
      * Request HTTP method (GET, POST, ...).
      */
@@ -137,7 +137,7 @@ export namespace CyHttpMessages {
     /**
      * URL query string as object.
      */
-    query: Record<string, string|number>
+    query: Record<string, string | number>
     /**
      * The HTTP version used in the request. Read only.
      */
@@ -163,7 +163,7 @@ export namespace CyHttpMessages {
     alias?: string
   }
 
-  export interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
+  export interface IncomingHttpRequest<TRequest = any, TResponse = any> extends IncomingRequest<TRequest>, RequestEvents<TResponse> {
     /**
      * Destroy the request and respond with a network error.
      */
@@ -173,7 +173,7 @@ export namespace CyHttpMessages {
      * If a function is passed, the request will be sent outgoing, and the function will be called
      * with the response from the upstream server.
      */
-    continue(interceptor?: HttpResponseInterceptor): void
+    continue(interceptor?: HttpResponseInterceptor<TResponse>): void
     /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
@@ -181,7 +181,7 @@ export namespace CyHttpMessages {
      * If a `StaticResponse` is passed, it will be used as the response, and no request will be made
      * to the upstream server.
      */
-    reply(interceptor?: StaticResponse | HttpResponseInterceptor): void
+    reply(interceptor?: StaticResponse | HttpResponseInterceptor<TResponse>): void
     /**
      * Shortcut to reply to the request with a body and optional headers.
      */
@@ -197,8 +197,8 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export interface ResponseComplete {
-    finalResBody?: BaseMessage['body']
+  export interface ResponseComplete<T = any> {
+    finalResBody?: BaseMessage<T>['body']
   }
 
   export interface NetworkError {
@@ -220,14 +220,14 @@ export type GlobPattern = string
  * request to the next handler (if there is one), otherwise the request will be passed to the next
  * handler synchronously.
  */
-export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest) => void | Promise<void>
+export type HttpRequestInterceptor<TRequest = any, TResponse = any> = (req: CyHttpMessages.IncomingHttpRequest<TRequest, TResponse>) => void | Promise<void>
 
 /**
  * Interceptor for an HTTP response. If a Promise is returned, it will be awaited before passing the
  * request to the next handler (if there is one), otherwise the request will be passed to the next
  * handler synchronously.
  */
-export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse) => void | Promise<void>
+export type HttpResponseInterceptor<T = any> = (res: CyHttpMessages.IncomingHttpResponse<T>) => void | Promise<void>
 
 /**
  * Matches a single number or any of an array of acceptable numbers.
@@ -248,44 +248,44 @@ export interface Subscription {
   skip?: boolean
 }
 
-interface RequestEvents {
+interface RequestEvents<T> {
   /**
    * Emitted before `response` and before any `req.continue` handlers.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'before:response', cb: HttpResponseInterceptor): this
+  on(eventName: 'before:response', cb: HttpResponseInterceptor<T>): this
   /**
    * Emitted after `before:response` and after any `req.continue` handlers - before the response is sent to the browser.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'response', cb: HttpResponseInterceptor): this
+  on(eventName: 'response', cb: HttpResponseInterceptor<T>): this
   /**
    * Emitted once the response to a request has finished sending to the browser.
    * Modifications to `res` have no impact.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): this
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse<T>) => void | Promise<void>): this
 }
 
 /**
  * Request/response cycle.
  */
-export interface Interception {
+export interface Interception<TRequest = any, TResponse = any> {
   id: string
   /* @internal */
   browserRequestId?: string
   routeId: string
   /* @internal */
   setLogFlag: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
-  request: CyHttpMessages.IncomingRequest
+  request: CyHttpMessages.IncomingRequest<TRequest>
   /**
    * Was `cy.wait()` used to wait on this request?
    * @internal
    */
   requestWaited: boolean
-  response?: CyHttpMessages.IncomingResponse
+  response?: CyHttpMessages.IncomingResponse<TResponse>
   /**
    * The error that occurred during this request.
    */
@@ -312,17 +312,17 @@ export type InterceptionState =
   'Complete' |
   'Errored'
 
-export interface Route {
+export interface Route<TRequest = any, TResponse = any> {
   alias?: string
   log: any
   options: RouteMatcherOptions
-  handler: RouteHandler
+  handler: RouteHandler<TRequest, TResponse>
   hitCount: number
-  requests: { [key: string]: Interception }
+  requests: { [key: string]: Interception<TRequest, TResponse> }
   command: any
 }
 
-export interface RouteMap { [key: string]: Route }
+export interface RouteMap<TRequest = any, TResponse = any> { [key: string]: Route<TRequest, TResponse> }
 
 /**
  * A `RouteMatcher` describes a filter for HTTP requests.
@@ -393,9 +393,9 @@ export interface RouteMatcherOptionsGeneric<S> {
   url?: S
 }
 
-export type RouteHandlerController = HttpRequestInterceptor
+export type RouteHandlerController<TRequest = any, TResponse = any> = HttpRequestInterceptor<TRequest, TResponse>
 
-export type RouteHandler = string | StaticResponseWithOptions | RouteHandlerController | object
+export type RouteHandler<TRequest = any, TResponse = any> = string | StaticResponseWithOptions | RouteHandlerController<TRequest, TResponse> | object
 
 export type InterceptOptions = {
   /**
@@ -510,7 +510,7 @@ declare global {
        *      })
        *    })
        */
-      intercept(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      intercept<TRequest = any, TResponse = any>(url: RouteMatcher, response?: RouteHandler<TRequest, TResponse>): Chainable<null>
       /**
        * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
@@ -518,7 +518,7 @@ declare global {
        * @example
        *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
-      intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      intercept<TRequest = any, TResponse = any>(method: Method, url: RouteMatcher, response?: RouteHandler<TRequest, TResponse>): Chainable<null>
       /**
        * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
@@ -529,7 +529,7 @@ declare global {
        *
        * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
        */
-      intercept(url: StringMatcher, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
+      intercept<TRequest = any, TResponse = any>(url: StringMatcher, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler<TRequest, TResponse>): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *
@@ -548,7 +548,7 @@ declare global {
       })
       ```
       */
-      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Interception>
+      wait<TRequest = any, TResponse = any>(alias: string, options?: Partial<WaitOptions>): Chainable<Interception<TRequest, TResponse>>
       /**
        * Wait for list of requests to complete.
        *
@@ -568,7 +568,7 @@ declare global {
         })
       ```
       */
-      wait(alias: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
+      wait(aliases: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
     }
   }
 }
