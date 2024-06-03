@@ -172,6 +172,10 @@ const _removeRootExtension = () => {
 
 // https://github.com/cypress-io/cypress/issues/2048
 const _disableRestorePagesPrompt = function (userDir) {
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    return Promise.resolve()
+  }
+
   const prefsPath = path.join(userDir, 'Default', 'Preferences')
 
   return fs.readJson(prefsPath)
