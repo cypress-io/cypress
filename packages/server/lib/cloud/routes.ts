@@ -2,7 +2,7 @@ import _ from 'lodash'
 import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
-const apiUrl = process.env.CYPRESS_API_URL || app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
 
 const CLOUD_ENDPOINTS = {
   api: '',

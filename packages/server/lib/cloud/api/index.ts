@@ -272,6 +272,7 @@ type CreateRunResponse = {
     tags: string[] | null
     mountVersion?: number
     disabledMessage?: string
+    verified?: boolean
   } | undefined
 }
 
@@ -395,12 +396,13 @@ export default {
     })
     .then(async (result: CreateRunResponse) => {
       const protocolManager = new ProtocolManager()
-
       const captureProtocolUrl = result.capture?.url || result.captureProtocolUrl
+      const captureProtocolPreVerified = result.capture?.verified || false
 
       options.project.protocolManager = protocolManager
 
-      debugProtocol({ captureProtocolUrl })
+      debugProtocol(result)
+      debugProtocol({ captureProtocolUrl, captureProtocolPreVerified })
 
       let script
 
@@ -408,7 +410,7 @@ export default {
         const protocolUrl = captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
         if (protocolUrl) {
-          script = await this.getCaptureProtocolScript(protocolUrl)
+          script = await this.getCaptureProtocolScript(protocolUrl, captureProtocolPreVerified)
         }
       } catch (e) {
         debugProtocol('Error downloading capture code', e)
@@ -644,7 +646,7 @@ export default {
     })
   },
 
-  async getCaptureProtocolScript (url: string) {
+  async getCaptureProtocolScript (url: string, preVerified: boolean) {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
@@ -668,10 +670,12 @@ export default {
 
     const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 
-    if (!verified) {
+    if (!verified || !preVerified) {
       debugProtocol(`Unable to verify protocol signature %s`, url)
 
-      return null
+      if (!preVerified) {
+        return null
+      }
     }
 
     debugProtocol(`Loaded protocol via url %s`, url)
