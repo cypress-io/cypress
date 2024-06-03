@@ -670,7 +670,7 @@ export default {
 
     const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 
-    if (!verified || !preVerified) {
+    if (!verified && !preVerified) {
       debugProtocol(`Unable to verify protocol signature %s`, url)
 
       return null
