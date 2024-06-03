@@ -7,6 +7,10 @@ _Released 6/4/2024 (PENDING)_
 
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 
+**Performance:**
+
+- Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
+
 **Bugfixes:**
 
 - Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
