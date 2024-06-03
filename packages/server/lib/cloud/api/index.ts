@@ -673,9 +673,7 @@ export default {
     if (!verified || !preVerified) {
       debugProtocol(`Unable to verify protocol signature %s`, url)
 
-      if (!preVerified) {
-        return null
-      }
+      return null
     }
 
     debugProtocol(`Loaded protocol via url %s`, url)
