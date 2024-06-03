@@ -9,7 +9,7 @@ _Released 6/4/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixes situations where Launchpad would hang if the project config had not been loaded when the Launchpad Main.vue first queries the current project. Fixes [#29486](https://github.com/cypress-io/cypress/issues/29486).
+- Fixed a situation where the Launchpad would hang if the project config had not been loaded when the Launchpad first queries the current project. Fixes [#29486](https://github.com/cypress-io/cypress/issues/29486).
 - Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
 
 ## 13.10.0
