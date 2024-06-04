@@ -304,7 +304,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact, captureErrorsOverride?: boolean) {
+  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
     if (!this._protocol || !filePath || !this._db) {
       debug('not uploading due to one of the following being falsy: %O', {
         _protocol: !!this._protocol,
