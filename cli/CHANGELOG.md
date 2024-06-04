@@ -6,15 +6,25 @@ _Released 6/4/2024 (PENDING)_
 **Features:**
 
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
+- Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
+
+**Performance:**
+
+- Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
 
 **Bugfixes:**
 
+- Fixed a situation where the Launchpad would hang if the project config had not been loaded when the Launchpad first queries the current project. Fixes [#29486](https://github.com/cypress-io/cypress/issues/29486).
 - Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
 - Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
 
 **Dependency Updates:**
 
 - Updated typescript from `4.7.4` to `5.3.3`. Addressed in [#29568](https://github.com/cypress-io/cypress/pull/29568).
+
+**Misc:**
+
+- Enhanced the type definitions available to `cy.intercept` and `cy.wait`. The `body` property of both the request and response in an interception can optionally be specified with user-defined types. Addresses [#29507](https://github.com/cypress-io/cypress/issues/29507).
 
 ## 13.10.0
 

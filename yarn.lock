@@ -2942,15 +2942,6 @@
     mkdirp "^0.5.1"
     npm-run-all "^4.1.5"
 
-"@cypress/questions-remain@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@cypress/questions-remain/-/questions-remain-1.0.1.tgz#334dc830323192995b43d7bbae9dd6db5e551a22"
-  integrity sha1-M03IMDIxkplbQ9e7rp3W215VGiI=
-  dependencies:
-    bluebird "3.5.0"
-    check-more-types "2.24.0"
-    lazy-ass "1.6.0"
-
 "@cypress/react-tooltip@0.5.3":
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/@cypress/react-tooltip/-/react-tooltip-0.5.3.tgz#3e0635304b2bf7dab5b7c251eb1ad23048b05dac"
@@ -10790,11 +10781,6 @@ bluebird-retry@0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/bluebird-retry/-/bluebird-retry-0.11.0.tgz#1289ab22cbbc3a02587baad35595351dd0c1c047"
   integrity sha1-EomrIsu8OgJYe6rTVZU1HdDBwEc=
-
-bluebird@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
-  integrity sha1-eRQg1/VR7qKJdFOop3ZT+WYG1nw=
 
 bluebird@3.5.3:
   version "3.5.3"
@@ -25905,6 +25891,11 @@ ramda@0.27.1, ramda@^0.27.1:
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
   integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
 
+ramda@0.28.0:
+  version "0.28.0"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.28.0.tgz#acd785690100337e8b063cab3470019be427cc97"
+  integrity sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==
+
 randexp@0.5.3:
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/randexp/-/randexp-0.5.3.tgz#f31c2de3148b30bdeb84b7c3f59b0ebb9fec3738"
@@ -28273,6 +28264,23 @@ snap-shot-core@10.2.4:
     quote "0.4.0"
     ramda "0.27.1"
 
+snap-shot-it@7.9.10, snap-shot-it@^7.9.6:
+  version "7.9.10"
+  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.10.tgz#6198a19f6281fa701254fabfa7c895783cee09b1"
+  integrity sha512-9USmsI2jc2kQslRhqkzFX+2K23o6v3VEzlQHwUNpZbbnEdU0ommReg2+Px7260sd+P/6CtaDx+LXadzt4caMVQ==
+  dependencies:
+    "@bahmutov/data-driven" "1.0.0"
+    check-more-types "2.24.0"
+    common-tags "1.8.2"
+    debug "4.3.4"
+    has-only "1.1.1"
+    its-name "1.0.0"
+    lazy-ass "1.6.0"
+    pluralize "8.0.0"
+    ramda "0.28.0"
+    snap-shot-compare "3.0.0"
+    snap-shot-core "10.2.4"
+
 snap-shot-it@7.9.2:
   version "7.9.2"
   resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.2.tgz#575302f8b3881fde851bdaa99c65e1fd9760bb98"
@@ -28307,7 +28315,7 @@ snap-shot-it@7.9.3:
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.0"
 
-snap-shot-it@7.9.6, snap-shot-it@^7.9.6:
+snap-shot-it@7.9.6:
   version "7.9.6"
   resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.6.tgz#042c168980a1dc3ba7ffe2bb2beeaa8e9512772d"
   integrity sha512-t/ADZfQ8EUk4J76S5cmynye7qg1ecUFqQfANiOMNy0sFmYUaqfx9K/AWwpdcpr3vFsDptM+zSuTtKD0A1EOLqA==
