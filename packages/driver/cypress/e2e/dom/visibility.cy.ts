@@ -258,7 +258,7 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentNoWidthHeightOverflowAuto = add(`\
 <div style='width: 0; height: 0px; overflow: auto;'>
-  <span id='parentNoWidthAndHeight' >parent no size, overflow: auto</span>
+  <span>parent no size, overflow: auto</span>
 </div>`)
 
       this.$parentWithWidthHeightNoOverflow = add(`\
