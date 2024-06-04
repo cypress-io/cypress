@@ -278,6 +278,10 @@ describe('errors ui', {
     })
   })
 
+  // FIXME: @see https://github.com/cypress-io/cypress/issues/29614
+  // projects using Typescript 5 do not calculate the userInvocationStack correctly,
+  // leading to a small mismatch when linking stack traces back to the user's IDE from
+  // the command log.
   it('cy.intercept', () => {
     const verify = loadErrorSpec({
       filePath: 'errors/intercept.cy.ts',

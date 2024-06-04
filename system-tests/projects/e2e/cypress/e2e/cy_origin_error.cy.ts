@@ -18,6 +18,10 @@ describe('cy.origin errors', () => {
     })
   })
 
+  // FIXME: @see https://github.com/cypress-io/cypress/issues/29614
+  // projects using Typescript 5 do not calculate the userInvocationStack correctly,
+  // leading to a small mismatch when linking stack traces back to the user's IDE from
+  // the command log.
   verify('command failure', this, {
     line: 16,
     message: 'Expected to find element',
@@ -36,6 +40,10 @@ describe('cy.origin errors', () => {
     })
   })
 
+  // FIXME: @see https://github.com/cypress-io/cypress/issues/29614
+  // projects using Typescript 5 do not calculate the userInvocationStack correctly,
+  // leading to a small mismatch when linking stack traces back to the user's IDE from
+  // the command log.
   verify('failure when using dependency', this, {
     line: 30,
     message: 'Expected to find element',
