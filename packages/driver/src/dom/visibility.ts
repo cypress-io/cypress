@@ -233,18 +233,24 @@ const canClipContent = function ($el, $ancestor) {
     return false
   }
 
-  //fix for 29093
+  // fix for 29093
   if (elHasDisplayContents($ancestor)) {
     return false
   }
 
   // the closest parent with position relative, absolute, or fixed
   const $offsetParent = $el.offsetParent()
+  const isClosestAncsestor = isAncestor($ancestor, $offsetParent)
+
+  // fix for 28638 - when element postion is relative and it's parent absolute
+  if (elHasPositionRelative($el) && isClosestAncsestor && elHasPositionAbsolute($ancestor)) {
+    return false
+  }
 
   // even if ancestors' overflow is clippable, if the element's offset parent
   // is a parent of the ancestor, the ancestor will not clip the element
   // unless the element is position relative
-  if (!elHasPositionRelative($el) && isAncestor($ancestor, $offsetParent)) {
+  if (!elHasPositionRelative($el) && isClosestAncsestor) {
     return false
   }
 
@@ -335,7 +341,6 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
     return false
   }
 
-  //fix for 28638
   if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
     return false
   }
