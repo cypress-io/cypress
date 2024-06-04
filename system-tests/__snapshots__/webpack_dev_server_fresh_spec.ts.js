@@ -2408,7 +2408,7 @@ Your configFile threw an error from: cypress-webpack.config.ts
 We stopped running your tests because your config file crashed.
 
 CypressWebpackDevServerError: Incompatible major versions of webpack and webpack-dev-server!
-      webpack-dev-server major version 5 only works with major versions of webpack 4 - saw webpack-dev-server version 5.0.4.
+      webpack-dev-server major version 5 only works with major versions of webpack 5 - saw webpack-dev-server version 5.0.4.
       If using webpack major version 4, please install webpack-dev-server version 4 to be used with @cypress/webpack-dev-server or upgrade to webpack 5.
       [stack trace lines]
 `
