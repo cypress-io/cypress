@@ -195,12 +195,12 @@ const elHasOpacityZero = ($el) => {
   return $el.css('opacity') === '0'
 }
 
-const elHasBlockStyle = ($el) => {
-  return $el.css('display') === 'block' || $el.css('display') === 'inline-block'
-}
-
 const elHasDisplayNone = ($el) => {
   return $el.css('display') === 'none'
+}
+
+const elHasDisplayContents = ($el) => {
+  return $el.css('display') === 'contents'
 }
 
 const elHasDisplayInline = ($el) => {
@@ -330,6 +330,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
     return false
   }
 
+  //fix for 29093
+  if (elHasDisplayContents($ancestor)) {
+    return false
+  }
+
   //fix for 28638
   if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
     return false
@@ -338,7 +343,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
   if (canClipContent($el, $ancestor)) {
     const ancestorProps = $ancestor.get(0).getBoundingClientRect()
 
-    if ((elHasPositionAbsolute($el) || elHasBlockStyle($el)) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
       return elIsOutOfBoundsOfAncestorsOverflow($el, el, getParent($ancestor))
     }
 
