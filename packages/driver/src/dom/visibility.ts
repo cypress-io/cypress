@@ -233,6 +233,11 @@ const canClipContent = function ($el, $ancestor) {
     return false
   }
 
+  //fix for 29093
+  if (elHasDisplayContents($ancestor)) {
+    return false
+  }
+
   // the closest parent with position relative, absolute, or fixed
   const $offsetParent = $el.offsetParent()
 
@@ -327,11 +332,6 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
   // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
   if (isUndefinedOrHTMLBodyDoc($ancestor)) {
-    return false
-  }
-
-  //fix for 29093
-  if (elHasDisplayContents($ancestor)) {
     return false
   }
 
