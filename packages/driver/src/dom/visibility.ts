@@ -114,7 +114,7 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
 
   // else check if el is outside the bounds
   // of its ancestors overflow
-  return elIsOutOfBoundsOfAncestorsOverflow($el, el)
+  return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
@@ -167,12 +167,14 @@ const elHasNoClientWidthOrHeight = ($el) => {
   return (elClientWidth($el) <= 0) || (elClientHeight($el) <= 0)
 }
 
+const elementBoundingRect = ($el) => $el[0].getBoundingClientRect()
+
 const elClientHeight = ($el) => {
-  return $el[0].getBoundingClientRect().height
+  return elementBoundingRect($el).height
 }
 
 const elClientWidth = ($el) => {
-  return $el[0].getBoundingClientRect().width
+  return elementBoundingRect($el).width
 }
 
 const elHasVisibilityHiddenOrCollapse = ($el) => {
@@ -195,12 +197,12 @@ const elHasOpacityZero = ($el) => {
   return $el.css('opacity') === '0'
 }
 
-const elHasBlockStyle = ($el) => {
-  return $el.css('display') === 'block' || $el.css('display') === 'inline-block'
-}
-
 const elHasDisplayNone = ($el) => {
   return $el.css('display') === 'none'
+}
+
+const elHasDisplayContents = ($el) => {
+  return $el.css('display') === 'contents'
 }
 
 const elHasDisplayInline = ($el) => {
@@ -233,13 +235,24 @@ const canClipContent = function ($el, $ancestor) {
     return false
   }
 
+  // fix for 29093
+  if (elHasDisplayContents($ancestor)) {
+    return false
+  }
+
   // the closest parent with position relative, absolute, or fixed
   const $offsetParent = $el.offsetParent()
+  const isClosestAncsestor = isAncestor($ancestor, $offsetParent)
+
+  // fix for 28638 - when element postion is relative and it's parent absolute
+  if (elHasPositionRelative($el) && isClosestAncsestor && elHasPositionAbsolute($ancestor)) {
+    return false
+  }
 
   // even if ancestors' overflow is clippable, if the element's offset parent
   // is a parent of the ancestor, the ancestor will not clip the element
   // unless the element is position relative
-  if (!elHasPositionRelative($el) && isAncestor($ancestor, $offsetParent)) {
+  if (!elHasPositionRelative($el) && isClosestAncsestor) {
     return false
   }
 
@@ -322,7 +335,7 @@ const elIsNotElementFromPoint = function ($el) {
   return true
 }
 
-const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ancestor = getParent($el)) {
+const elIsOutOfBoundsOfAncestorsOverflow = function ($el: JQuery<any>, $ancestor = getParent($el)) {
   // no ancestor, not out of bounds!
   // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
@@ -330,7 +343,6 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
     return false
   }
 
-  //fix for 28638
   if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
     return false
   }
@@ -338,12 +350,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
   if (canClipContent($el, $ancestor)) {
     const ancestorProps = $ancestor.get(0).getBoundingClientRect()
 
-    if ((elHasPositionAbsolute($el) || elHasBlockStyle($el)) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
-      return elIsOutOfBoundsOfAncestorsOverflow($el, el, getParent($ancestor))
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+      return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
     }
 
-    // const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
-    const elProps = el.getBoundingClientRect()
+    const elProps = $el.get(0).getBoundingClientRect()
 
     // target el is out of bounds
     if (
@@ -363,7 +374,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, el: HTMLElement, $ance
     }
   }
 
-  return elIsOutOfBoundsOfAncestorsOverflow($el, el, getParent($ancestor))
+  return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
 }
 
 const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
@@ -573,9 +584,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
       return `This element \`${node}\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`
     }
   } else {
-    const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
-
-    if (elIsOutOfBoundsOfAncestorsOverflow($el, el)) {
+    if (elIsOutOfBoundsOfAncestorsOverflow($el)) {
       return `This element \`${node}\` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \`hidden\`, \`scroll\` or \`auto\``
     }
   }
