@@ -7,6 +7,8 @@ _Released 6/4/2024 (PENDING)_
 
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 
+- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
 **Performance:**
 
 - Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
@@ -35,10 +37,6 @@ _Released 5/21/2024_
 - Fixed an issue where Cypress was unable to search in the Specs list for files or folders containing numbers. Fixes [#29034](https://github.com/cypress-io/cypress/issues/29034).
 - Fixed an issue setting the `x-cypress-file-path` header when there are invalid header characters in the file path. Fixes [#25839](https://github.com/cypress-io/cypress/issues/25839).
 - Fixed the display of some command assertions. Fixed in [#29517](https://github.com/cypress-io/cypress/pull/29517).
-
-**Features:**
-
-- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Dependency Updates:**
 
