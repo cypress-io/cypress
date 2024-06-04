@@ -1,6 +1,12 @@
 import type { FoundBrowser } from '@packages/types'
 
 describe('Choose a browser page', () => {
+  before(() => {
+    cy.withCtx((ctx, _) => {
+      ctx.actions.project.launchCount = 0
+    })
+  })
+
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
@@ -11,6 +17,24 @@ describe('Choose a browser page', () => {
         filter: (browser) => {
           return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
         },
+      })
+    })
+
+    it('launches when --browser is passed alone through the command line', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
+      cy.openProject('launchpad', ['--browser', 'edge'])
+      cy.visitLaunchpad()
+
+      cy.skipWelcome()
+      cy.get('[data-cy=card]').then(($buttons) => {
+        $buttons[0].click()
+      })
+
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
       })
     })
 

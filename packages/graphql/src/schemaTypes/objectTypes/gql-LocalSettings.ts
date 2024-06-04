@@ -33,6 +33,28 @@ export const LocalSettingsPreferences = objectType({
       },
     })
 
+    t.boolean('isValidBrowser', {
+      resolve: async (_source, _args, ctx) => {
+        try {
+          if (!ctx.coreData.cliBrowser) {
+            return false
+          }
+
+          const browser = await ctx._apis.browserApi.ensureAndGetByNameOrPath(ctx.coreData.cliBrowser)
+
+          return Boolean(browser)
+        } catch (e) {
+          // if error is thrown browser doesn't exist
+          return false
+        }
+      },
+    })
+
+    t.int('globalLaunchCount', {
+      description: 'A launch count to keep track of launchProject calls from projectActions',
+      resolve: (_source, _args, ctx) => ctx.actions.project.launchCount,
+    })
+
     t.boolean('debugSlideshowComplete')
     t.boolean('desktopNotificationsEnabled')
     t.dateTime('dismissNotificationBannerUntil')

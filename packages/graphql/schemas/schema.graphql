@@ -1431,8 +1431,14 @@ type LocalSettingsPreferences {
   debugSlideshowComplete: Boolean
   desktopNotificationsEnabled: Boolean
   dismissNotificationBannerUntil: DateTime
+
+  """
+  A launch count to keep track of launchProject calls from projectActions
+  """
+  globalLaunchCount: Int
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
+  isValidBrowser: Boolean
   majorVersionWelcomeDismissed: JSON
   notifyWhenRunCompletes: JSON
   notifyWhenRunStarts: Boolean
