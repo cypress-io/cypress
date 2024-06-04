@@ -45,7 +45,7 @@ describe('cy.origin errors', () => {
   // leading to a small mismatch when linking stack traces back to the user's IDE from
   // the command log.
   verify('failure when using dependency', this, {
-    line: 30,
+    line: 34,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
