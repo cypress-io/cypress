@@ -251,6 +251,13 @@ describe('src/cypress/dom/visibility', () => {
   </div>
 </div>`)
 
+      this.$parentOfDivNoWidth = add(`\
+<div style='width: 0; height: 100px; overflow: hidden;'>
+  <div style='height: 500px; width: 500px;'>
+    <div id='parentOfDivNoWidth' >parent width: 0</div>
+  </div>
+</div>`)
+
       this.$parentNoHeight = add(`\
 <div style='width: 100px; height: 0px; overflow: hidden;'>
   <span>parent height: 0</span>
@@ -735,6 +742,11 @@ describe('src/cypress/dom/visibility', () => {
       it('is hidden if parent has overflow: hidden and no width', function () {
         expect(this.$parentNoWidth.find('#parentNoWidth')).to.be.hidden
         expect(this.$parentNoWidth.find('#parentNoWidth')).to.not.be.visible
+      })
+
+      it('is hidden if parent has overflow: hidden and no width', function () {
+        expect(this.$parentOfDivNoWidth.find('#parentOfDivNoWidth')).to.be.hidden
+        expect(this.$parentOfDivNoWidth.find('#parentOfDivNoWidth')).to.not.be.visible
       })
 
       it('is hidden if parent has overflow: hidden and no height', function () {
