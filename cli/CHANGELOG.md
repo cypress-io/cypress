@@ -3,8 +3,6 @@
 
 _Released 6/4/2024_
 
-- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
-
 **Performance:**
 
 - Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
@@ -13,6 +11,7 @@ _Released 6/4/2024_
 
 - Added support for [Next.js 14](https://nextjs.org/blog/next-14) for component testing. Addresses [#28185](https://github.com/cypress-io/cypress/issues/28185).
 - Added an `IGNORE_CHROME_PREFERENCES` environment variable to ignore Chrome preferences when launching Chrome. Addresses [#29330](https://github.com/cypress-io/cypress/issues/29330).
+- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
