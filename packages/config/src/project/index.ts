@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
+// @ts-ignore
 import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'

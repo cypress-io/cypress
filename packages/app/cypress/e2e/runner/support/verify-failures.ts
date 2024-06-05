@@ -50,13 +50,23 @@ const verifyFailure = (options) => {
     codeFrameText = specTitle
   }
 
-  const codeFrameColumnArray = [].concat(column)
-  const codeFrameColumn = codeFrameColumnArray[0]
-  const stackColumnArray = codeFrameColumnArray.map((col) => col - 1)
-  const stackColumn = stackColumnArray[0]
+  let codeFrameColumnArray: number[] = []
+  let codeFrameColumn = column
+  let stackColumnArray: number[] = []
+  let stackColumn = column
 
-  stackRegex = regex || stackRegex || new RegExp(`${fileName}:${line || '\\d+'}:(${stackColumnArray.join('|')})`)
-  codeFrameRegex = regex || codeFrameRegex || new RegExp(`${fileName}:${line || '\\d+'}:(${codeFrameColumnArray.join('|')})`)
+  // Only calculate a column if one is passed into the verify function.
+  // Not all stack traces in Typescript 5+ will have a column associated if they throw at the end of the column.
+  // This is now considered the beginning of the row, which does not produce a column
+  if (column) {
+    codeFrameColumnArray = codeFrameColumnArray.concat(column)
+    codeFrameColumn = codeFrameColumnArray[0]
+    stackColumnArray = codeFrameColumnArray.map((col) => col - 1)
+    stackColumn = stackColumnArray[0]
+  }
+
+  stackRegex = regex || stackRegex || new RegExp(`${fileName}:${line || '\\d+'}${stackColumnArray.length ? `:(${stackColumnArray.join('|')})` : ''}`)
+  codeFrameRegex = regex || codeFrameRegex || new RegExp(`${fileName}:${line || '\\d+'}${codeFrameColumnArray.length ? `:(${codeFrameColumnArray.join('|')})` : ''}`)
 
   cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
