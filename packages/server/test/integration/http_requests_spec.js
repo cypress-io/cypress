@@ -3851,13 +3851,13 @@ describe('Routes', () => {
     })
 
     context('file requests', () => {
-      beforeEach(function () {
+      function setupProject ({ fileServerFolder }) {
         Fixtures.scaffold()
 
         return this.setup('/index.html', {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            fileServerFolder: 'dev',
+            fileServerFolder,
             specPattern: 'my-tests/**/*',
             supportFile: false,
           },
@@ -3883,6 +3883,12 @@ describe('Routes', () => {
             expect(res.headers['last-modified']).to.exist
           })
         })
+      }
+
+      beforeEach(function () {
+        this.setupProject = setupProject.bind(this)
+
+        return this.setupProject({ fileServerFolder: 'dev' })
       })
 
       it('sets etag', function () {
@@ -3953,7 +3959,39 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
+          expect(res.headers).to.have.property('x-cypress-file-path', encodeURI(`${Fixtures.projectPath('no-server')}/dev/a space/foo.txt`))
+          expect(res.body).to.eq('foo')
+        })
+      })
 
+      /**
+       * NOTE: certain characters cannot be used inside our own monorepo due to our system tests also needing to run
+       * inside Windows. The following are reserved characters:
+       *
+       * < (less than)
+       * > (greater than)
+       * : (colon)
+       * " (double quote)
+       * / (forward slash)
+       * \ (backslash)
+       * | (vertical bar or pipe)
+       * ? (question mark)
+       * * (asterisk)
+       *
+       * @see https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions for more details
+       */
+      it('can serve files with special characters in the fileServerFolder path', async function () {
+        await this.setupProject({ fileServerFolder: `dev/_ ;.,'!(){}[]@=-+$&\`~^ĵ符` })
+
+        return this.rp({
+          url: `${this.proxy}/foo.txt`,
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers).to.have.property('x-cypress-file-path', encodeURI(`${Fixtures.projectPath('no-server')}/dev/_ ;.,'!(){}[]@=-+$&\`~^ĵ符/foo.txt`))
           expect(res.body).to.eq('foo')
         })
       })
