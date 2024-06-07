@@ -91,7 +91,7 @@ You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint
 | // because it tests failing spec.
 > describe('fail', - > );
-| 
+| //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHlwZXNjcmlwdF9zeW50YXhfZXJyb3IuY3kuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJ0eXBlc2NyaXB0X3N5bnRheF9lcnJvci5jeS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxzQ0FBc0M7QUFDdEMsaUNBQWlDO0FBQ2pDLFFBQVEsQ0FBQyxNQUFNLEVBQUUsQ0FBQyxHQUFFLEFBQUQsQ0FBRSxDQUFBIiwic291cmNlc0NvbnRlbnQiOlsiLy8gVGhlIGNvZGUgYmVsb3cgaXMgaWdub3JlZCBieSBlc2xpbnRcbi8vIGJlY2F1c2UgaXQgdGVzdHMgZmFpbGluZyBzcGVjLlxuZGVzY3JpYmUoJ2ZhaWwnLCAtPiApXG4iXX0=
 
 [tsl] ERROR in /foo/bar/.projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts(3,21)
       TS1109: Expression expected.

@@ -694,4 +694,56 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('h1', 'Project setup')
     })
   })
+
+  describe('config loading state', () => {
+    describe('when currentProject config loading state changes from loading to loaded after the first query', () => {
+      beforeEach(() => {
+        let responseCount = 0
+
+        cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
+          req.reply((res) => {
+            responseCount++
+            if (responseCount === 2) {
+              res.body.data.currentProject.isLoadingConfigFile = false
+            } else if (responseCount === 1) {
+              res.body.data.currentProject.isLoadingConfigFile = true
+            } else {
+              throw new Error('Too many calls to MainLaunchpadQuery')
+            }
+          })
+        })
+      })
+
+      it('eventually displays the launchpad', () => {
+        scaffoldAndOpenProject('pristine')
+        cy.visitLaunchpad()
+      })
+    })
+
+    describe('when the initial config is loading, but eventually fails', () => {
+      it('shows the error message, and only calls the endpoint enough times to receive the baseError', () => {
+        let callCount = 0
+        let resWithBaseError: number | undefined
+
+        cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
+          if (resWithBaseError && callCount >= resWithBaseError) {
+            throw new Error('Too many calls to MainLaunchpadQuery')
+          }
+
+          callCount++
+          req.reply((res) => {
+            res.body.data.currentProject.isLoadingConfigFile = true
+            if (res.body.data.baseError) {
+              resWithBaseError = callCount
+            }
+          })
+        })
+
+        scaffoldAndOpenProject('config-with-ts-syntax-error')
+        cy.visitLaunchpad()
+        cy.get('[data-cy=error-header]').contains('Cypress configuration error')
+        cy.wait(1000)
+      })
+    })
+  })
 })

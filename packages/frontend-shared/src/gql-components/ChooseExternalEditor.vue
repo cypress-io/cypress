@@ -1,5 +1,6 @@
 <template>
   <div class="flex items-center">
+    <!-- @vue-expect-error -->
     <Select
       :model-value="selectedEditor"
       :options="editorOptions"

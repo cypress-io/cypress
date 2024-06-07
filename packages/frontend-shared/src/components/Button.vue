@@ -35,6 +35,7 @@
     </ButtonInternals>
   </button>
 
+  <!-- @vue-expect-error -->
   <component
     :is="linkVersion"
     v-else
