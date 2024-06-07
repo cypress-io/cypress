@@ -10,6 +10,7 @@ const npmModulesToCopy = [
   'mount-utils',
   'react',
   'react18',
+  'react19',
   'vue',
   'vue2',
   'angular',

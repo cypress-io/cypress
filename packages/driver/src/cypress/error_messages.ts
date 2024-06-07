@@ -1048,6 +1048,13 @@ export default {
         docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
       }
     },
+    react_19_not_supported_cypress_react () {
+      return {
+        message: '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. ReactDOM.render() is no longer supported. You will need to migrate to `cypress/react19`, which is designed for React 19.',
+        // TODO: Update this to an official changelog entry
+        docsUrl: 'https://react.dev/blog/2024/04/25/react-19-upgrade-guide#removed-reactdom-render',
+      }
+    },
   },
 
   navigation: {

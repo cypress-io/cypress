@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "react": "19.0.0-rc-81c5ff2e04-20240521",
+    "react-dom": "19.0.0-rc-81c5ff2e04-20240521"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.2.11",
+    "webpack": "^5.91.0"
+  },
+  "sideEffects": false,
+  "projectFixtureDirectory": "react"
+}

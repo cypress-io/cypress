@@ -83,7 +83,8 @@
     "targets": {
       "build": {
         "dependsOn": [
-          "!@cypress/react18:build"
+          "!@cypress/react18:build",
+          "!@cypress/react19:build"
         ],
         "outputs": [
           "{workspaceRoot}/cli/vue",

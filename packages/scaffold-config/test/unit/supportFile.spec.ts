@@ -4,7 +4,7 @@ import { expect } from 'chai'
 
 describe('supportFileComponent', () => {
   context('react', () => {
-    for (const mountModule of ['cypress/react', 'cypress/react18'] as const) {
+    for (const mountModule of ['cypress/react', 'cypress/react18', 'cypress/react19'] as const) {
       it(`handles ${mountModule} and JS`, () => {
         const actual = supportFileComponent('js', mountModule)
 

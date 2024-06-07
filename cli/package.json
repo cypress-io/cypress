@@ -71,6 +71,7 @@
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
     "@cypress/react18": "0.0.0-development",
+    "@cypress/react19": "0.0.0-development",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/svelte": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
@@ -116,6 +117,7 @@
     "react",
     "vue2",
     "react18",
+    "react19",
     "angular",
     "svelte"
   ],
@@ -155,6 +157,11 @@
       "types": "./react18/dist/index.d.ts",
       "import": "./react18/dist/cypress-react.esm-bundler.js",
       "require": "./react18/dist/cypress-react.cjs.js"
+    },
+    "./react19": {
+      "types": "./react19/dist/index.d.ts",
+      "import": "./react19/dist/cypress-react.esm-bundler.js",
+      "require": "./react19/dist/cypress-react.cjs.js"
     },
     "./mount-utils": {
       "types": "./mount-utils/dist/index.d.ts",

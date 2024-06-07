@@ -42,6 +42,13 @@ const cleanup = () => {
  * }
  */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
+  if (major(React.version) === 19) {
+    // with React 19, ReactDOM.render() has been removed, so we can no longer mount with the cypress/react package and will need to throw
+    // an error to tell users to upgrade
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.react_19_not_supported_cypress_react')
+  }
+
   if (major(React.version) === 18) {
     const message = '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. Consider changing to `cypress/react18`, which is designed for React 18.'
 

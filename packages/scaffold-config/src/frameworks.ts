@@ -108,7 +108,17 @@ const reactMountModule = async (projectPath: string) => {
     return 'cypress/react'
   }
 
-  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
+  const MAJOR_REACT_VERSION = semver.major(reactPkg.detectedVersion)
+
+  // TODO: support react 19 and test
+  switch (MAJOR_REACT_VERSION) {
+    case 19:
+      return 'cypress/react19'
+    case 18:
+      return 'cypress/react18'
+    default:
+      return 'cypress/react'
+  }
 }
 
 export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const

@@ -7,6 +7,7 @@ const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
   // TODO: Flaky. { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
+  { projectName: 'react19', test: 'App.cy' },
   { projectName: 'create-react-app-configured', test: 'App.cy' },
   { projectName: 'vueclivue3-configured', test: 'HelloWorld.cy' },
   { projectName: 'nuxtjs-vue2-configured', test: 'Tutorial.cy' },
