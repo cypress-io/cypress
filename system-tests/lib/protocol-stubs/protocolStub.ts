@@ -14,8 +14,6 @@ const getFilePath = (filename) => {
 
 const CDP_EVENT_DRAIN_DURATION = 1
 
-const FINALIZE_RUNNABLES_DURATION = 3
-
 const AUT_EVENT_DRAIN_DURATION = 5
 
 const BODY_PROMISES_DURATION = 7
@@ -26,7 +24,6 @@ const TEARDOWN_BINDINGS_DURATION = 13
 
 const DURATIONS = {
   drainCDPEvents: CDP_EVENT_DRAIN_DURATION,
-  finalizePendingRunnables: FINALIZE_RUNNABLES_DURATION,
   drainAUTEvents: AUT_EVENT_DRAIN_DURATION,
   resolveBodyPromises: BODY_PROMISES_DURATION,
   closeDb: CLOSE_DB_DURATION,

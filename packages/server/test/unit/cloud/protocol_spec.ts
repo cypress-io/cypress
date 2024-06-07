@@ -310,7 +310,6 @@ describe('lib/cloud/protocol', () => {
       const expectedAfterSpecDurations = {
         durations: {
           drainCDPEvents: 1,
-          finalizePendingRunnables: 3,
           drainAUTEvents: 5,
           resolveBodyPromises: 7,
           closeDb: 11,

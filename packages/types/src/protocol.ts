@@ -98,7 +98,6 @@ type UploadCaptureArtifactResult = {
 
 export type AfterSpecDurations = {
   drainCDPEvents?: number
-  finalizePendingRunnables?: number
   drainAUTEvents?: number
   resolveBodyPromises?: number
   closeDb?: number

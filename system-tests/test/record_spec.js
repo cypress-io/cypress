@@ -2356,7 +2356,6 @@ describe('e2e record', () => {
             expect(artifactReport?.protocol).to.containSubset({
               afterSpecDurations: {
                 drainCDPEvents: 1,
-                finalizePendingRunnables: 3,
                 drainAUTEvents: 5,
                 resolveBodyPromises: 7,
                 closeDb: 11,
