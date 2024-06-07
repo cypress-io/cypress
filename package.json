@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.10.0",
+  "version": "13.11.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -74,7 +74,6 @@
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
     "@babel/eslint-parser": "7.24.1",
-    "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "^3.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.6.1",
@@ -197,7 +196,7 @@
     "semver": "7.5.3",
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
-    "snap-shot-it": "7.9.3",
+    "snap-shot-it": "7.9.10",
     "stop-only": "3.0.1",
     "strip-ansi": "6.0.0",
     "tar": "6.1.15",
@@ -207,7 +206,7 @@
     "through2": "^4.0.2",
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
-    "typescript": "4.7.4",
+    "typescript": "5.3.3",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {

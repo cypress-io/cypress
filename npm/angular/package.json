@@ -16,7 +16,7 @@
     "@angular/core": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@cypress/mount-utils": "0.0.0-development",
-    "typescript": "^4.7.4",
+    "typescript": "~5.4.5",
     "zone.js": "~0.11.4"
   },
   "peerDependencies": {
