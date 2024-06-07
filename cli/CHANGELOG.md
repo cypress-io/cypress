@@ -3,6 +3,10 @@
 
 _Released 6/18/2024 (PENDING)_
 
+**Performance:**
+
+- Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
+
 **Features:**
 
 - Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
@@ -45,10 +49,6 @@ _Released 5/21/2024_
 **Features:**
 
 - Added support for `vite` `v5` to `@cypress/vite-dev-server`. Addresses [#28347](https://github.com/cypress-io/cypress/issues/28347).
-
-**Performance:**
-
-- Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
 
 **Bugfixes:**
 
