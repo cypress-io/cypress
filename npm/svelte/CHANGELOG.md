@@ -1,3 +1,10 @@
+# [@cypress/svelte-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v2.0.0...@cypress/svelte-v2.0.1) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
 # [@cypress/svelte-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v1.0.2...@cypress/svelte-v2.0.0) (2022-11-07)
 
 
