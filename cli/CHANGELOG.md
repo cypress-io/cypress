@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.11.1
+
+_Released 6/20/2024_
+
+**Bugfixes:**
+
+- When capture protocol script fails verification, an appropriate error is displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
+
 ## 13.11.0
 
 _Released 6/4/2024_
