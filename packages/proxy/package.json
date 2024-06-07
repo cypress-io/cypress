@@ -39,7 +39,7 @@
     "devtools-protocol": "0.0.927104",
     "express": "4.19.2",
     "supertest": "6.0.1",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "files": [
     "lib"

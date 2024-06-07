@@ -31,7 +31,7 @@
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
     "ts-node": "^10.9.2",
-    "typescript": "4.7.4"
+    "typescript": "5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=13.6.0"
