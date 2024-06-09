@@ -31,7 +31,7 @@ describe('e2e launching browsers by path', () => {
       expectedExitCode: 1,
     })
     .then((res) => {
-      expect(res.stdout).to.contain('We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`')
+      expect(res.stdout).to.contain('Browser: /this/aint/gonna/be/found is not supported by Cypress.')
 
       expect(res.code).to.eq(1)
     })
