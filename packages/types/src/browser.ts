@@ -36,11 +36,11 @@ export type Browser = {
    */
   displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
-  versionRegex: RegExp
+  versionRegex?: RegExp
   /** If set, this is the base path that will be used for setting userDataDir. Useful for creating profiles in snap confinement. */
   profilePath?: string
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
-  binary: string | string[]
+  binary?: string | string[]
   /** optional browser information */
   info?: string
   /** optional warning that will be shown in the GUI */
@@ -63,8 +63,6 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary' | 'validator'
   unsupportedVersion?: boolean
   disabled?: boolean
 }
-
-export type ElectronBrowser = Omit<Browser, 'versionRegex' | 'binary'>
 
 /**
  * Partial browser object, returned by an OS-specific launcher helper.
