@@ -121,6 +121,7 @@ export const AllCypressErrors = {
 
         Cypress supports the following browsers:
         ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
+        Please note: webkit support is still experimental.
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -133,6 +134,7 @@ export const AllCypressErrors = {
 
         Cypress supports the following browsers:
         ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox', 'webkit'])}
+        Please note: webkit support is still experimental.
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
