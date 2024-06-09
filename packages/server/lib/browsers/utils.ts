@@ -362,8 +362,6 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   const combinedBrowsers = _.union(
     _.map(launcher.knownBrowsers, 'name'),
     _.map(browsers, 'name'),
-    [launcher.electronBrowser.name],
-    [launcher.webkitBrowser.name],
   )
   const isSupported = isBrowserSupported(nameOrPath, combinedBrowsers)
 

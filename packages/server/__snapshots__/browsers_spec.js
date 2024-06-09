@@ -11,6 +11,7 @@ Cypress supports the following browsers:
  - edge
  - firefox
  - webkit
+Please note: webkit support is still experimental.
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -35,6 +36,7 @@ Cypress supports the following browsers:
  - edge
  - firefox
  - webkit
+Please note: webkit support is still experimental.
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -57,6 +59,7 @@ Cypress supports the following browsers:
  - edge
  - firefox
  - webkit
+Please note: webkit support is still experimental.
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
