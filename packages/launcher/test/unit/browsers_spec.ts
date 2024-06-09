@@ -11,7 +11,9 @@ describe('browsers', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('exports multiline versionRegexes', () => {
-    expect(_.every(knownBrowsers.map(({ versionRegex }) => {
+    const browsersWithVersionRegex = _.filter(knownBrowsers, 'versionRegex')
+
+    expect(_.every(browsersWithVersionRegex.map(({ versionRegex }) => {
       return versionRegex.multiline
     }))).to.be.true
   })

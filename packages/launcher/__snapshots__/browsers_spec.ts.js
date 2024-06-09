@@ -123,4 +123,22 @@ exports['browsers returns the expected list of browsers 1'] = [
     ],
     'minSupportedVersion': 79,
   },
+  {
+    'name': 'electron',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Electron',
+    'info': 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+  },
+  {
+    'name': 'webkit',
+    'family': 'webkit',
+    'channel': 'stable',
+    'displayName': 'WebKit',
+    'versionRegex': {},
+    'binary': [
+      'playwright-webkit',
+    ],
+    'warning': 'WebKit support is currently experimental. Some functions may not work as expected.',
+  },
 ]

@@ -211,4 +211,38 @@ exports['darwin browser detection detects browsers as expected 1'] = [
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
+  {
+    'name': 'electron',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Electron',
+    'info': 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+    'path': '/Applications/Electron.app',
+    'version': 'someVersion',
+    'findAppParams': {
+      'appName': 'Electron.app',
+      'executable': '',
+      'appId': 'com.electron.cypress',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+  {
+    'name': 'webkit',
+    'family': 'webkit',
+    'channel': 'stable',
+    'displayName': 'WebKit',
+    'versionRegex': {},
+    'binary': [
+      'playwright-webkit',
+    ],
+    'warning': 'WebKit support is currently experimental. Some functions may not work as expected.',
+    'path': '/Applications/WebKit.app',
+    'version': 'someVersion',
+    'findAppParams': {
+      'appName': 'WebKit.app',
+      'executable': '',
+      'appId': 'org.webkit.Playwright',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
 ]

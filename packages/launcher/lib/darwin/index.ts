@@ -87,6 +87,22 @@ export const browsers: Detectors = {
       versionProperty: 'CFBundleShortVersionString',
     },
   },
+  webkit: {
+    stable: {
+      appName: 'WebKit.app',
+      executable: '',
+      appId: 'org.webkit.Playwright',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+  },
+  electron: {
+    stable: {
+      appName: 'Electron.app',
+      executable: '',
+      appId: 'com.electron.cypress',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+  },
 }
 
 export const getVersionString = linuxHelper.getVersionString

@@ -35,6 +35,13 @@ function detect (goalBrowsers: Browser[]) {
 
 const HOMEDIR = 'C:/Users/flotwig'
 
+// Electron and WebKit can be safely removed since Electron is baked into the Cypress binary
+// and WebKit is not available for Windows
+// https://github.com/cypress-io/cypress/pull/29066
+const filteredKnownBrowsers = _.filter(knownBrowsers, (browser) => {
+  return browser.name !== 'electron' && browser.name !== 'webkit'
+})
+
 describe('windows browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
@@ -68,12 +75,14 @@ describe('windows browser detection', () => {
     // edge canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe`, '14')
 
-    snapshot(await detect(knownBrowsers))
+    stubBrowser('C:/Program Files (x86)/path/to/electron.exe', '14')
+
+    snapshot(await detect(filteredKnownBrowsers))
   })
 
   it('detects 64-bit Chrome Beta app path', async () => {
     stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })
+    const chrome = _.find(filteredKnownBrowsers, { name: 'chrome', channel: 'beta' })
 
     snapshot(await windowsHelper.detect(chrome))
   })
@@ -81,7 +90,7 @@ describe('windows browser detection', () => {
   // @see https://github.com/cypress-io/cypress/issues/8425
   it('detects new Chrome 64-bit app path', async () => {
     stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })
+    const chrome = _.find(filteredKnownBrowsers, { name: 'chrome', channel: 'stable' })
 
     snapshot(await windowsHelper.detect(chrome))
   })
@@ -92,7 +101,7 @@ describe('windows browser detection', () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Nightly/firefox.exe`, '200')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Developer Edition/firefox.exe`, '300')
 
-    const firefoxes = _.filter(knownBrowsers, { family: 'firefox' })
+    const firefoxes = _.filter(filteredKnownBrowsers, { family: 'firefox' })
 
     snapshot(await detect(firefoxes))
   })
@@ -129,7 +138,7 @@ describe('windows browser detection', () => {
 
     return detectByPath(path).then((browser) => {
       expect(browser).to.deep.equal(
-        Object.assign({}, knownBrowsers.find((gb) => {
+        Object.assign({}, filteredKnownBrowsers.find((gb) => {
           return gb.name === 'chrome'
         }), {
           displayName: 'Custom Chrome',
