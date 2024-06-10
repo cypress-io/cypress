@@ -1,3 +1,10 @@
+# [@cypress/angular-v2.0.4](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.3...@cypress/angular-v2.0.4) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
 # [@cypress/angular-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.2...@cypress/angular-v2.0.3) (2023-03-14)
 
 
