@@ -8,6 +8,7 @@ const WEBPACK_ANGULAR: ProjectFixtureDir[] = [
   'angular-15',
   'angular-16',
   'angular-17',
+  'angular-18',
 ]
 
 // Add to this list to focus on a particular permutation

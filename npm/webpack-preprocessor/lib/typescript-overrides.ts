@@ -29,7 +29,8 @@ export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) 
     const { createProgram } = typescript
 
     debug('typescript found, overriding typescript.createProgram()')
-
+    // NOTE: typescript.createProgram is only called in typescript versions 4 and under
+    // For Typescript 5, please see the @cypress/webpack-batteries-included-preprocessor package
     typescript.createProgram = (...args: any[]) => {
       const [rootNamesOrOptions, _options] = args
       const options = getProgramOptions(rootNamesOrOptions, _options)
