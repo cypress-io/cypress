@@ -1,5 +1,4 @@
 import React from 'react'
-// @ts-expect-error
 import ReactDOM from 'react-dom/client'
 import { getContainerEl } from '@cypress/mount-utils'
 import {
@@ -53,6 +52,7 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
   // to wipe away any state
   cleanup()
   const internalOptions: InternalMountOptions = {
+    // @ts-expect-error
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement) => {
       if (!root) {
@@ -65,6 +65,7 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
     cleanup,
   }
 
+  // @ts-expect-error
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 

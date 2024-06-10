@@ -8061,7 +8061,14 @@
   dependencies:
     "@types/react" "^16"
 
-"@types/react@*", "@types/react@16.9.50", "@types/react@^16":
+"@types/react-dom@^18":
+  version "18.3.0"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.0.tgz#0cbc818755d87066ab6ca74fbedb2547d74a82b0"
+  integrity sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==
+  dependencies:
+    "@types/react" "*"
+
+"@types/react@*", "@types/react@16.9.50", "@types/react@^16", "@types/react@^18":
   version "16.9.50"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.50.tgz#cb5f2c22d42de33ca1f5efc6a0959feb784a3a2d"
   integrity sha512-kPx5YsNnKDJejTk1P+lqThwxN2PczrocwsvqXnjvVvKpFescoY62ZiM3TV7dH1T8lFhlHZF+PE5xUyimUwqEGA==
@@ -26065,6 +26072,13 @@ react-dom@16.8.6:
     prop-types "^15.6.2"
     scheduler "^0.13.6"
 
+react-dom@19.0.0-rc-81c5ff2e04-20240521:
+  version "19.0.0-rc-81c5ff2e04-20240521"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-19.0.0-rc-81c5ff2e04-20240521.tgz#d3544dfd40735d13314989a4a98ff21ac2628860"
+  integrity sha512-oRvLt3+En5x4xTwZ6mtUxEviKL5tpa4Rll4aIoFZMpmLxCy9a1y9GnToYqa5s/ARCKQPfA98+xK+XZrnp9txFA==
+  dependencies:
+    scheduler "0.25.0-rc-81c5ff2e04-20240521"
+
 react-dom@^15.3.2:
   version "15.7.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.7.0.tgz#39106dee996d0742fb0f43d567ef8b8153483ab2"
@@ -26199,6 +26213,11 @@ react@16.8.6:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.13.6"
+
+react@19.0.0-rc-81c5ff2e04-20240521:
+  version "19.0.0-rc-81c5ff2e04-20240521"
+  resolved "https://registry.yarnpkg.com/react/-/react-19.0.0-rc-81c5ff2e04-20240521.tgz#d3f333da381595295201187085ca5034e76fd68b"
+  integrity sha512-f0CUMu4N2VBPbfv4wP+ydp+ulrOsqdY/4nBEV/pCOsz98NoBV56ka511yRAYJYDOcHbYdaCHG9gG1057D+cieA==
 
 react@^15.3.2:
   version "15.7.0"
@@ -27315,6 +27334,11 @@ sax@>=0.6.0, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
+
+scheduler@0.25.0-rc-81c5ff2e04-20240521:
+  version "0.25.0-rc-81c5ff2e04-20240521"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.25.0-rc-81c5ff2e04-20240521.tgz#4cf2cf7800ea7e5a8a2f27d251de8d5b343168cd"
+  integrity sha512-KiZmJjyOiYuCI1e41iciBLBy7ImMh7mD388k88Hd0sJQdX3Tgw74+v8xZ4ZSCiSsJ8xXeoZSzmgPgfZY5T9Z7A==
 
 scheduler@^0.13.6:
   version "0.13.6"
@@ -30515,7 +30539,7 @@ typescript@5.4.5, typescript@^5.4.5, typescript@~5.4.5:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
   integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
 
-"typescript@^3 || ^4", typescript@^4.7.4:
+"typescript@^3 || ^4":
   version "4.9.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==

@@ -18,8 +18,8 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "cypress": "0.0.0-development",
-    "react": "^19",
-    "react-dom": "^19",
+    "react": "19.0.0-rc-81c5ff2e04-20240521",
+    "react-dom": "19.0.0-rc-81c5ff2e04-20240521",
     "rollup": "3.7.3",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "~5.4.5"
@@ -28,8 +28,8 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "cypress": "*",
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "19.0.0-rc-81c5ff2e04-20240521",
+    "react-dom": "19.0.0-rc-81c5ff2e04-20240521"
   },
   "files": [
     "dist"
