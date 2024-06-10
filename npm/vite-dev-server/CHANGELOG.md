@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v5.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.1.0...@cypress/vite-dev-server-v5.1.1) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
 # [@cypress/vite-dev-server-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.7...@cypress/vite-dev-server-v5.1.0) (2024-05-21)
 
 
