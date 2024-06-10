@@ -438,7 +438,8 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec, browser, protocolManager } = options
-  const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
+  // HARDCODE timeout to 10 seconds to speed up loop
+  const browserTimeout = Number(10000)
   let browserLaunchAttempt = 1
 
   // without this the run mode is only setting new spec
