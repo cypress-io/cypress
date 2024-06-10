@@ -17,7 +17,6 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-   53 modules
 
 
   ✓ renders hello world
@@ -197,7 +196,6 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-   50 modules
 
 
   ✓ renders hello world
@@ -1090,9 +1088,6 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-12 assets
-67 modules
-webpack 5.91.0 compiled successfully in 920 ms
 
 
   ✓ renders hello world

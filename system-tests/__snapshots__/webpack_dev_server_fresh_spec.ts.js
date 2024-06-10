@@ -18,7 +18,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-ℹ ｢wdm｣:    20 modules
 ℹ ｢wdm｣: Compiled successfully.
 
 
@@ -73,7 +72,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-   41 modules
 
 
   ✓ ensures we have launched at the overridden port
@@ -130,9 +128,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-ℹ ｢wdm｣: 5 assets
-36 modules
-webpack x.x.x compiled successfully in xxx ms
 ℹ ｢wdm｣: Compiled successfully.
 
 
@@ -187,9 +182,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-6 assets
-58 modules
-webpack x.x.x compiled successfully in xxx ms
 
 
   ✓ ensures we have launched at the overridden port
@@ -659,7 +651,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-   51 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -1496,9 +1487,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-16 assets
-68 modules
-
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -1510,7 +1498,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   9 |
       [stack trace lines]
 
-webpack x.x.x compiled with x errors in xxx ms
+webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -1922,9 +1910,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-16 assets
-72 modules
-
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -1936,7 +1921,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.j
   9 |
       [stack trace lines]
 
-webpack x.x.x compiled with x errors in xxx ms
+webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -2363,9 +2348,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-6 assets
-62 modules
-webpack x.x.x compiled successfully in xxx ms
 
 
   ✓ ensures we have launched at the overridden port
