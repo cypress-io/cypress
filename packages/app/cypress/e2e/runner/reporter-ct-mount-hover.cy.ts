@@ -25,7 +25,7 @@ for (const { projectName, test } of PROJECTS) {
       cy.findBrowsers()
     }),
     it(`While hovering on Mount(), shows component on AUT for ${projectName}`, () => {
-      if (`${projectName}` === 'react18') {
+      if (`${projectName}` === 'react18' || `${projectName}` === 'react19') {
         cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()

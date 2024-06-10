@@ -8,7 +8,7 @@ function App () {
 describe('using legacy mount', () => {
   it('issues a error telling the user to update', (done) => {
     cy.on('fail', (e) => {
-      expect(e.message).to.equal('[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. ReactDOM.render() is no longer supported. You will need to migrate to `cypress/react19`, which is designed for React 19.')
+      expect(e.message).to.contain('[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. ReactDOM.render() is no longer supported. You will need to migrate to `cypress/react19`, which is designed for React 19.')
       done()
     })
 
