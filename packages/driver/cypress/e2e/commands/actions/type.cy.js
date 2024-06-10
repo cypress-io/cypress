@@ -1305,6 +1305,54 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('100{enter}')
         .should('have.value', '100')
       })
+
+      context('can utilize up and down arrow keys', () => {
+        beforeEach(() => {
+          cy.get('#number-with-value').then(($input) => $input.val(1))
+        })
+
+        it('can utilize {upArrow}', () => {
+          cy.get('#number-with-value')
+          .type('{upArrow}')
+          .should('have.value', 2)
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#number-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('can utilize {downArrow}', () => {
+          cy.get('#number-with-value').then(($input) => $input.val(1))
+
+          cy.get('#number-with-value')
+          .type('{downArrow}')
+          .should('have.value', 0)
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#number-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      })
     })
 
     describe('input[type=email]', () => {
