@@ -9,6 +9,7 @@ _Released 6/18/2024 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed type action with {upArrow} and {downArrow} arguments not triggering events on `input[type=number]`. Fixes [#29611](https://github.com/cypress-io/cypress/issues/29611)
 - Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
 
 **Dependency Updates:**
