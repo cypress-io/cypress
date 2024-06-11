@@ -175,8 +175,7 @@ export const detectByPath = (
 
   const detectBrowserByVersionString = (stdout: string): Browser | undefined => {
     return find(goalBrowsers, (goalBrowser: Browser) => {
-      // return goalBrowser.versionRegex.test(stdout)
-      return !goalBrowser.versionRegex || goalBrowser.versionRegex.test(stdout)
+      return goalBrowser.versionRegex?.test(stdout) ?? false
     })
   }
 
@@ -185,8 +184,8 @@ export const detectByPath = (
       return (
         goalBrowser.name === browserKey ||
         goalBrowser.displayName === browserKey ||
-        // goalBrowser.binary.indexOf(browserKey) > -1
-        (!goalBrowser.binary || goalBrowser.binary.indexOf(browserKey) > -1)
+        (Array.isArray(goalBrowser.binary) && goalBrowser.binary.includes(browserKey)) ||
+        (typeof goalBrowser.binary === 'string' && goalBrowser.binary === browserKey)
       )
     })
   }

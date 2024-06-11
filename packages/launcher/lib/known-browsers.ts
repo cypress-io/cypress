@@ -160,7 +160,6 @@ export const knownBrowsers: Browser[] = [
     family: 'webkit',
     channel: 'stable',
     displayName: 'WebKit',
-    versionRegex: /BROWSER_VERSION = \'(?<version>[^']+)\'/gm,
     binary: ['playwright-webkit'],
     warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
   },
