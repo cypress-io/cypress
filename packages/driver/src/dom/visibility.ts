@@ -571,7 +571,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   }
 
   $parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))
-  if (!elHasDisplayContents($parent)) {
+  if ($parent) {
     parentNode = stringifyElement($parent, 'short')
     width = elClientWidth($el)
     height = elClientHeight($parent)
