@@ -1,5 +1,6 @@
 import debugFn from 'debug'
-import type { InlineConfig, UserConfig, ViteDevServer } from 'vite'
+import semverMajor from 'semver/functions/major'
+import type { InlineConfig, UserConfig, ViteDevServer } from 'vite-5'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
@@ -23,6 +24,15 @@ export async function devServer (config: ViteDevServerConfig): Promise<Partial<C
   // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = getVite(config)
   const viteConfig = await createViteDevServerConfig(config, vite)
+
+  let majorVersion: number | undefined = undefined
+
+  if (vite.version) {
+    majorVersion = semverMajor(vite.version)
+    debug(`Found vite version v${majorVersion}`)
+  } else {
+    debug(`vite version not found`)
+  }
 
   debug('Creating Vite Server')
   const server = await devServer.create(viteConfig, vite)

@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "react": "^17.0.0",
+    "vite": "4.5.3",
+    "vite-plugin-inspect": "0.8.4"
+  },
+  "projectFixtureDirectory": "react"
+}

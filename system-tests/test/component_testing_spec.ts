@@ -43,8 +43,7 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  // TODO: Figure out correct dependencies to make Next.js, 11-12  work.
-  systemTests.it.skip('nextjs-configured', {
+  systemTests.it('nextjs-configured', {
     project: 'nextjs-configured',
     testingType: 'component',
     spec: 'components/button.cy.jsx',

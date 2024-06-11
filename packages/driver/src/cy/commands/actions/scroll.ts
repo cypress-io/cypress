@@ -376,6 +376,7 @@ export default (Commands, Cypress, cy, state) => {
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
           // scroll our axis
+          // @ts-ignore
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,

@@ -651,6 +651,13 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
     CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
       const err = makeErr()
 
@@ -1323,7 +1330,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0 || ^=5.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',
@@ -1367,6 +1374,22 @@ describe('visual error templates', () => {
     EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderName: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_VALUE: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
       }
     },
   })

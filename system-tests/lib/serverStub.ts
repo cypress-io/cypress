@@ -15,6 +15,7 @@ import systemTests from './system-tests'
 let CAPTURE_PROTOCOL_ENABLED = false
 let CAPTURE_PROTOCOL_MESSAGE: string | undefined
 let CAPTURE_PROTOCOL_UPLOAD_ENABLED = true
+let CAPTURE_PROTOCOL_INVALID_SIG = false
 
 import {
   TEST_PRIVATE,
@@ -236,11 +237,18 @@ export const routeHandlers: Record<string, RouteHandler> = {
     res: async (req, res) => {
       if (protocolStub) {
         res.header('Content-Encoding', 'gzip')
-        res.header('x-cypress-signature', protocolStub.sign)
+        res.header('x-cypress-signature', CAPTURE_PROTOCOL_INVALID_SIG ? 'some-invalid-sig' : protocolStub.sign)
         res.status(200).send(protocolStub.compressed)
       } else {
         res.status(404).send('')
       }
+    },
+  },
+  putCaptureScript: {
+    method: 'put',
+    url: '/capture-protocol/script/*',
+    res: async (_, res) => {
+      res.status(413).send('')
     },
   },
   putCaptureProtocolUpload: {
@@ -457,6 +465,16 @@ export const disableCaptureProtocolWithMessage = (message: string) => {
 
   afterEach(() => {
     CAPTURE_PROTOCOL_MESSAGE = undefined
+  })
+}
+
+export const enableInvalidProtocolSignature = () => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_INVALID_SIG = true
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_INVALID_SIG = false
   })
 }
 
