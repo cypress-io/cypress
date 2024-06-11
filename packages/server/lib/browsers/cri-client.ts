@@ -144,7 +144,11 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
     cri._ws.send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri._ws, data, callback)
+      try {
+        return send.call(cri._ws, data, callback)
+      } catch (e: any) {
+        debugVerboseSend('Error sending CDP command %o %O', JSON.parse(data), e)
+      }
     }
   }
 
