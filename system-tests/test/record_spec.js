@@ -27,6 +27,7 @@ const {
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
   routeHandlers,
+  enableInvalidProtocolSignature,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
@@ -2364,6 +2365,23 @@ describe('e2e record', () => {
             })
 
             expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
+          })
+        })
+      })
+
+      describe('when capture protocol script returns with an invalid signature', () => {
+        enableCaptureProtocol()
+        enableInvalidProtocolSignature()
+
+        it('displays an appropriate error message', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            browser: 'chrome',
+            spec: 'record_pass*',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 0,
           })
         })
       })
