@@ -2354,6 +2354,17 @@ describe('e2e record', () => {
             expect(artifactReport?.protocol).to.an('object')
             expect(artifactReport?.protocol?.url).to.be.a('string')
             expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
+            expect(artifactReport?.protocol).to.containSubset({
+              afterSpecDurations: {
+                drainCDPEvents: 1,
+                drainAUTEvents: 5,
+                resolveBodyPromises: 7,
+                closeDb: 11,
+                teardownBindings: 13,
+              },
+            })
+
+            expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
           })
         })
       })
