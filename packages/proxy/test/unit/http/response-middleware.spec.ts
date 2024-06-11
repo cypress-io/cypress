@@ -275,6 +275,41 @@ describe('http/response-middleware', function () {
       })
     })
 
+    let badHeaders = {
+      'bad-header ': 'value', //(contains trailling space)
+      'Content Type': 'value', //(contains a space)
+      'User-Agent:': 'value', //(contains a colon)
+      'Accept-Encoding;': 'value', //(contains a semicolon)
+      '@Origin': 'value', //(contains an at symbol)
+      'Authorization?': 'value', //(contains a question mark)
+      'X-My-Header/Version': 'value', //(contains a slash)
+      'Referer[1]': 'value', //(contains square brackets)
+      'If-None-Match{1}': 'value', //(contains curly braces)
+      'X-Forwarded-For<1>': 'value', //(contains angle brackets)
+    }
+
+    it('removes invalid headers and leaves valid headers', function () {
+      prepareContext({ ...badHeaders, 'good-header': 'value' })
+
+      return testMiddleware([OmitProblematicHeaders], ctx)
+      .then(() => {
+        expect(ctx.res.set).to.have.been.calledOnce
+        expect(ctx.res.set).to.be.calledWith(sinon.match(function (actual) {
+          // Check if the invalid headers are removed
+          for (let header in actual) {
+            if (header in badHeaders) {
+              throw new Error(`Unexpected header "${header}"`)
+            }
+          }
+
+          // Check if the valid header is present
+          expect(actual['good-header']).to.equal('value')
+
+          return true
+        }))
+      })
+    })
+
     const validCspHeaderNames = [
       'content-security-policy',
       'Content-Security-Policy',
@@ -444,6 +479,7 @@ describe('http/response-middleware', function () {
           setHeader: sinon.stub(),
           on: (event, listener) => {},
           off: (event, listener) => {},
+          getHeaderNames: () => Object.keys(ctx.incomingRes.headers),
         },
       }
     }

@@ -21,7 +21,7 @@
     "@packages/data-context": "0.0.0-development"
   },
   "devDependencies": {
-    "@antfu/utils": "^0.7.0",
+    "@antfu/utils": "^0.7.8",
     "@cypress-design/css": "^0.13.3",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
