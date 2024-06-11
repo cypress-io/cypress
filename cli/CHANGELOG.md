@@ -1,12 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-
 ## 13.12.0
 
 _Released 6/18/2024 (PENDING)_
 
 **Features:**
 
-- Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+- Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
 
 **Bugfixes:**
 
