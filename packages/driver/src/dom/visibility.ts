@@ -167,12 +167,14 @@ const elHasNoClientWidthOrHeight = ($el) => {
   return (elClientWidth($el) <= 0) || (elClientHeight($el) <= 0)
 }
 
+const elementBoundingRect = ($el) => $el[0].getBoundingClientRect()
+
 const elClientHeight = ($el) => {
-  return $el[0].getBoundingClientRect().height
+  return elementBoundingRect($el).height
 }
 
 const elClientWidth = ($el) => {
-  return $el[0].getBoundingClientRect().width
+  return elementBoundingRect($el).width
 }
 
 const elHasVisibilityHiddenOrCollapse = ($el) => {
@@ -195,8 +197,8 @@ const elHasOpacityZero = ($el) => {
   return $el.css('opacity') === '0'
 }
 
-const elHasBlockStyle = ($el) => {
-  return $el.css('display') === 'block' || $el.css('display') === 'inline-block'
+const elHasDisplayContents = ($el) => {
+  return $el.css('display') === 'contents'
 }
 
 const elHasDisplayNone = ($el) => {
@@ -230,6 +232,11 @@ const elHasClippableOverflow = function ($el) {
 const canClipContent = function ($el, $ancestor) {
   // can't clip without overflow properties
   if (!elHasClippableOverflow($ancestor)) {
+    return false
+  }
+
+  // fix for 29605 - display: contents
+  if (elHasDisplayContents($ancestor)) {
     return false
   }
 
@@ -330,6 +337,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
     return false
   }
 
+  // fix for 29605 - display: contents
+  if (elHasDisplayContents($el)) {
+    return false
+  }
+
   //fix for 28638
   if (elHasPositionRelative($el) && elHasPositionAbsolute($ancestor)) {
     return false
@@ -338,12 +350,11 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent(
   if (canClipContent($el, $ancestor)) {
     const ancestorProps = $ancestor.get(0).getBoundingClientRect()
 
-    if ((elHasPositionAbsolute($el) || elHasBlockStyle($el)) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
       return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
     }
 
-    const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
-    const elProps = el.getBoundingClientRect()
+    const elProps = $el.get(0).getBoundingClientRect()
 
     // target el is out of bounds
     if (
@@ -374,7 +385,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // is effectively hidden
   // -----UNLESS------
   // the parent or a descendent has position: absolute|fixed
-  const $parent = getParent($el)
+  let $parent = getParent($el)
 
   // stop if we've reached the body or html
   // in case there is no body
@@ -384,6 +395,13 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return false
   }
 
+  if (elHasDisplayContents($el)) {
+    $parent = getParent($el)
+    if (isUndefinedOrHTMLBodyDoc($parent)) {
+      return false
+    }
+  }
+
   // a child can never have a computed opacity
   // greater than that of its parent
   // so if the parent has an opacity of 0, so does the child
@@ -391,7 +409,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
+  if (elHasOverflowHidden($parent) && !elHasDisplayContents($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
@@ -552,9 +570,10 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
-  if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
+  $parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))
+  if (!elHasDisplayContents($parent)) {
     parentNode = stringifyElement($parent, 'short')
-    width = elClientWidth($parent)
+    width = elClientWidth($el)
     height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
