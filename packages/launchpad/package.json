@@ -60,7 +60,7 @@
     "rollup-plugin-polyfill-node": "^0.7.0",
     "type-fest": "^2.3.4",
     "unplugin-vue-components": "0.24.1",
-    "vite": "4.5.2",
+    "vite": "4.5.3",
     "vite-plugin-optimize-persist": "0.1.2",
     "vite-plugin-package-config": "0.1.1",
     "vite-svg-loader": "4.0.0",
