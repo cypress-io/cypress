@@ -18,16 +18,16 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
 
 
   cy.origin test retries
-    (Attempt 1 of 3) appropriately retries test within "cy.origin" without propagating other errors errors
-    (Attempt 2 of 3) appropriately retries test within "cy.origin" without propagating other errors errors
-    1) appropriately retries test within "cy.origin" without propagating other errors errors
+    (Attempt 1 of 3) appropriately retries test within "cy.origin" without propagating other errors
+    (Attempt 2 of 3) appropriately retries test within "cy.origin" without propagating other errors
+    1) appropriately retries test within "cy.origin" without propagating other errors
 
 
   0 passing
   1 failing
 
   1) cy.origin test retries
-       appropriately retries test within "cy.origin" without propagating other errors errors:
+       appropriately retries test within "cy.origin" without propagating other errors:
      AssertionError: expected true to be false
       [stack trace lines]
 
@@ -43,7 +43,7 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cy_origin_retries.cy.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -53,13 +53,13 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
 
   -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_retries.cy.ts/cy.origin test retries      (1280x720)
      -- appropriately retries test within cy.origin without propagating other errors                
-     errors (failed).png                                                                            
+     (failed).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_retries.cy.ts/cy.origin test retries      (1280x720)
      -- appropriately retries test within cy.origin without propagating other errors                
-     errors (failed) (attempt 2).png                                                                
+     (failed) (attempt 2).png                                                                       
   -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_retries.cy.ts/cy.origin test retries      (1280x720)
      -- appropriately retries test within cy.origin without propagating other errors                
-     errors (failed) (attempt 3).png                                                                
+     (failed) (attempt 3).png                                                                       
 
 
 ====================================================================================================

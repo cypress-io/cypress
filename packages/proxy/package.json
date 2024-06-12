@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\"",
-    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\"",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\""
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -27,20 +28,26 @@
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/request": "2.88.10",
-    "@cypress/request-promise": "4.2.6",
+    "@cypress/request": "^3.0.0",
+    "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.10",
-    "express": "4.17.3",
+    "devtools-protocol": "0.0.927104",
+    "express": "4.19.2",
     "supertest": "6.0.1",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "files": [
     "lib"
   ],
-  "types": "./lib/index.ts"
+  "types": "./lib/index.ts",
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  }
 }

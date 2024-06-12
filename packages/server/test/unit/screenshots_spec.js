@@ -30,6 +30,8 @@ describe('lib/screenshots', () => {
 
     this.appData = {
       capture: 'viewport',
+      appOnly: true,
+      hideRunnerUi: false,
       clip: { x: 0, y: 0, width: 10, height: 10 },
       viewport: { width: 40, height: 40 },
     }
@@ -146,6 +148,37 @@ describe('lib/screenshots', () => {
         expect(details.pixelRatio).to.equal(1)
 
         expect(details.takenAt).to.match(iso8601Regex)
+      })
+    })
+
+    describe('runner hidden', () => {
+      beforeEach(function () {
+        this.currentTest.timeout(5000)
+      })
+
+      it('crops if this is not an appOnly capture but the runner is hidden', function () {
+        this.appData.hideRunnerUi = true
+        this.appData.capture = 'runner'
+        this.appData.appOnly = false
+
+        this.passPixelTest()
+
+        return screenshots.capture(this.appData, this.automate)
+        .then(() => {
+          expect(this.jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+        })
+      })
+
+      it('retries until helper pixels are no longer present for runner capture with runner hidden', function () {
+        this.appData.hideRunnerUi = true
+        this.appData.capture = 'runner'
+        this.appData.appOnly = false
+
+        this.getPixelColor.withArgs(0, 0).onCall(1).returns('white')
+
+        return screenshots.capture(this.appData, this.automate).then(() => {
+          expect(this.automate).to.be.calledTwice
+        })
       })
     })
 
@@ -395,7 +428,7 @@ describe('lib/screenshots', () => {
         }
       })
 
-      it('stiches together 1x DPI images', function () {
+      it('stitches together 1x DPI images', function () {
         return screenshots
         .capture(this.data1, this.dataUri('DPI-1x/1.png'))
         .then((img1) => {
@@ -698,6 +731,8 @@ describe('lib/screenshots', () => {
         testId: 'r1',
         name: 'my-screenshot',
         capture: 'runner',
+        appOnly: false,
+        hideRunnerUi: false,
         clip: { x: 0, y: 0, width: 1000, height: 660 },
         viewport: { width: 1400, height: 700 },
         scaled: true,

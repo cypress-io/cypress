@@ -4,7 +4,7 @@ import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react', 'webpack5_wds5-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []
@@ -17,12 +17,13 @@ for (const project of WEBPACK_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts'])
+      cy.openProject(project, ['--config-file', 'cypress-webpack.config.ts', '--component'])
       cy.startAppServer('component')
     })
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('App.cy.jsx').click()
       cy.waitForSpecToFinish({ passCount: 2 })
     })
@@ -34,6 +35,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReact.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.get('.test-err-code-frame').should('be.visible')
@@ -53,6 +55,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.get('.test-err-code-frame').should('be.visible')
@@ -71,6 +74,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('AppCompilationError.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.contains('An uncaught error was detected outside of a test')
@@ -114,6 +118,7 @@ for (const project of WEBPACK_REACT) {
     // https://cypress-io.atlassian.net/browse/UNIFY-1697
     it('filters missing spec files from loader during pre-compilation', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       // 1. assert spec executes successfully
       cy.contains('App.cy.jsx').click()

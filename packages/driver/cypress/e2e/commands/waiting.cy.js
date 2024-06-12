@@ -760,6 +760,77 @@ describe('src/cy/commands/waiting', () => {
           expect(xhr2.response.body).to.deep.eq(resp2)
         })
       })
+
+      it('all responses returned in correct order - unique aliases', () => {
+        const resp1 = { value: 'alpha' }
+        const resp2 = { value: 'beta' }
+        const resp3 = { value: 'gamma' }
+        const resp4 = { value: 'delta' }
+        const resp5 = { value: 'epsilon' }
+
+        cy.intercept(/alpha/, resp1).as('getAlpha')
+        cy.intercept(/beta/, resp2).as('getBeta')
+        cy.intercept(/gamma/, resp3).as('getGamma')
+        cy.intercept(/delta/, resp4).as('getDelta')
+        cy.intercept(/epsilon/, resp5).as('getEpsilon')
+
+        cy.window().then((win) => {
+          xhrGet(win, '/epsilon')
+          xhrGet(win, '/beta')
+          xhrGet(win, '/gamma')
+          xhrGet(win, '/delta')
+          xhrGet(win, '/alpha')
+
+          return null
+        })
+
+        cy.wait(['@getAlpha', '@getBeta', '@getGamma', '@getDelta', '@getEpsilon']).then((responses) => {
+          expect(responses[0]?.response?.body.value).to.eq('alpha')
+          expect(responses[1]?.response?.body.value).to.eq('beta')
+          expect(responses[2]?.response?.body.value).to.eq('gamma')
+          expect(responses[3]?.response?.body.value).to.eq('delta')
+          expect(responses[4]?.response?.body.value).to.eq('epsilon')
+        })
+      })
+
+      it('all responses returned in correct order - duplicate aliases', () => {
+        let alphaCount = 0
+        let betaCount = 0
+        let gammaCount = 0
+
+        cy.intercept(/alpha/, (req) => {
+          req.reply({ value: `alpha-${alphaCount}` })
+          alphaCount++
+        }).as('getAlpha')
+
+        cy.intercept(/beta/, (req) => {
+          req.reply({ value: `beta-${betaCount}` })
+          betaCount++
+        }).as('getBeta')
+
+        cy.intercept(/gamma/, (req) => {
+          req.reply({ value: `gamma-${gammaCount}` })
+          gammaCount++
+        }).as('getGamma')
+
+        cy.window().then((win) => {
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/beta')
+          xhrGet(win, '/gamma')
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/gamma')
+
+          return null
+        })
+
+        cy.wait(['@getGamma', '@getBeta', '@getGamma', '@getAlpha', '@getAlpha']).then((responses) => {
+          expect(responses[0]?.response?.body.value).to.eq('gamma-0')
+          expect(responses[1]?.response?.body.value).to.eq('beta-0')
+          expect(responses[2]?.response?.body.value).to.eq('gamma-1')
+          expect(responses[3]?.response?.body.value).to.eq('alpha-0')
+          expect(responses[4]?.response?.body.value).to.eq('alpha-1')
+        })
+      })
     })
 
     describe('multiple separate alias waits', () => {
@@ -872,15 +943,124 @@ describe('src/cy/commands/waiting', () => {
 
           this.logs.push(log)
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
-        cy.wait(10, { log: false }).then(function () {
-          const { lastLog } = this
+      describe('explicit wait time', function () {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
 
-          expect(lastLog).to.be.undefined
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog.get('name')).to.eq('wait')
+            expect(hiddenLog.get('hidden')).to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+        })
+      })
+
+      describe('wait for xhr', function () {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.ok
+            expect(hiddenWaitLog.get('name')).to.eq('wait')
+            expect(hiddenWaitLog.get('hidden')).to.be.true
+            expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+        })
+      })
+
+      it('can turn off logging for wait for xhr', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'wait') {
+            this.hiddenWaitLog = log
+          }
+        })
+
+        const response = { foo: 'foo' }
+
+        cy
+        .intercept('GET', /.*/, response).as('fetch')
+        .window().then((win) => {
+          xhrGet(win, '/foo')
+
+          return null
+        })
+        .wait('@fetch.response', { log: false })
+        .then(function (xhr) {
+          const { lastWaitLog, hiddenWaitLog } = this
+
+          expect(xhr.response.body).to.deep.eq(response)
+
+          expect(lastWaitLog).to.be.undefined
+          expect(hiddenWaitLog).to.be.ok
+          expect(hiddenWaitLog.get('name')).to.eq('wait')
+          expect(hiddenWaitLog.get('hidden')).to.be.true
+          expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -941,9 +1121,12 @@ describe('src/cy/commands/waiting', () => {
         it('#consoleProps', () => {
           cy.wait(10).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'wait',
-              'Waited For': '10ms before continuing',
-              'Yielded': undefined,
+              name: 'wait',
+              type: 'command',
+              props: {
+                'Waited For': '10ms before continuing',
+                'Yielded': undefined,
+              },
             })
           })
         })
@@ -951,9 +1134,12 @@ describe('src/cy/commands/waiting', () => {
         it('#consoleProps as a child', () => {
           cy.wrap({}).wait(10).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'wait',
-              'Waited For': '10ms before continuing',
-              'Yielded': {},
+              name: 'wait',
+              type: 'command',
+              props: {
+                'Waited For': '10ms before continuing',
+                'Yielded': {},
+              },
             })
           })
         })
@@ -1024,12 +1210,6 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      describe('function argument errors', () => {
-        it('.log')
-
-        it('#consoleProps')
-      })
-
       describe('alias argument', () => {
         beforeEach(() => {
           cy.visit('/fixtures/empty.html')
@@ -1094,9 +1274,12 @@ describe('src/cy/commands/waiting', () => {
           })
           .wait('@getFoo').then(function (xhr) {
             expect(this.lastWaitLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'wait',
-              'Waited For': 'getFoo',
-              Yielded: xhr,
+              name: 'wait',
+              type: 'command',
+              props: {
+                'Waited For': 'getFoo',
+                Yielded: xhr,
+              },
             })
           })
         })
@@ -1113,9 +1296,12 @@ describe('src/cy/commands/waiting', () => {
           })
           .wait(['@getFoo', '@getBar']).then(function (xhrs) {
             expect(this.lastWaitLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'wait',
-              'Waited For': 'getFoo, getBar',
-              Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
+              name: 'wait',
+              type: 'command',
+              props: {
+                'Waited For': 'getFoo, getBar',
+                Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
+              },
             })
           })
         })

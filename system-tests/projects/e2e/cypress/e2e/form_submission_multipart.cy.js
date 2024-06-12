@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const { Blob, _ } = Cypress
 
-Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) => {
+Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath, commandTimeoutOpts) => {
   const mimeTypes = {
     jpeg: 'image/jpeg',
     jpg: 'image/jpeg',
@@ -14,10 +14,10 @@ Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) 
 
   const fixtureOrReadFile = function (filePath) {
     if (_.startsWith(filePath, '/')) {
-      return cy.readFile(filePath, 'base64')
+      return cy.readFile(filePath, 'base64', commandTimeoutOpts)
     }
 
-    return cy.fixture(filePath, 'base64')
+    return cy.fixture(filePath, 'base64', commandTimeoutOpts)
   }
 
   return fixtureOrReadFile(filePath).then((image) => {
@@ -62,16 +62,16 @@ describe('<form> submissions', () => {
   })
 
   context('can submit a multipart/form-data form with attachments', () => {
-    const testUpload = (fixturePath, containsOpts = {}) => {
+    const testUpload = (fixturePath, commandTimeoutOpts = {}) => {
       cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
       cy.get('input[type=file]')
-      .setFile(fixturePath)
+      .setFile(fixturePath, commandTimeoutOpts)
 
       cy.get('input[type=submit]')
       .click()
 
       cy.document()
-      .contains('files match', containsOpts)
+      .contains('files match', commandTimeoutOpts)
     }
 
     it('image/png', () => {

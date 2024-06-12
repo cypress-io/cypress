@@ -77,9 +77,7 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
   const matchedLogs = Array.from(logMap.values()).filter((log: any) => {
     const props = log.get()
 
-    let consoleProps = _.isFunction(props?.consoleProps) ? props.consoleProps() : props?.consoleProps
-
-    return consoleProps.Command === consolePropCommand && props.id.includes(matchingOrigin)
+    return props.name === consolePropCommand && props.id.includes(matchingOrigin)
   })
 
   // While we'd expect the incoming log order to be deterministic, in practice we've found it fairly
@@ -171,6 +169,29 @@ export const makeRequestForCookieBehaviorTests = (
     xhr.send()
   })
 }
+
+function runCommands () {
+  cy.exec('echo "hello"')
+  cy.readFile('cypress/fixtures/app.json')
+  cy.writeFile('cypress/_test-output/written.json', 'contents')
+  cy.task('return:arg', 'arg')
+  cy.get('#basic').selectFile('cypress/fixtures/valid.json')
+  if (!Cypress.isBrowser({ family: 'webkit' })) {
+    cy.origin('http://foobar.com:3500', () => {})
+  }
+}
+
+export const runImportedPrivilegedCommands = runCommands
+
+declare global {
+  interface Window {
+    runGlobalPrivilegedCommands: () => void
+  }
+}
+
+window.runGlobalPrivilegedCommands = runCommands
+
+Cypress.Commands.add('runSupportFileCustomPrivilegedCommands', runCommands)
 
 Cypress.Commands.addQuery('getAll', getAllFn)
 

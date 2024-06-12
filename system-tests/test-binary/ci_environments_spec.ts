@@ -16,7 +16,7 @@ function smokeTestDockerImage (title: string, dockerImage: string, expectedExitC
 describe('e2e binary CI environments', () => {
   smokeTestDockerImage(
     'bare node image fails (lacks xvfb)',
-    'node:12', 1,
+    'node:18', 1,
     async (exec) => {
       const { stdout } = await exec()
 
@@ -25,17 +25,12 @@ describe('e2e binary CI environments', () => {
   )
 
   smokeTestDockerImage(
-    'bare xvfb image fails',
-    'cypressinternal/xvfb:12.13.0', 1,
+    'ubuntu 22 passes',
+    'cypress/base-internal:ubuntu22-node18', 0,
   )
 
   smokeTestDockerImage(
-    'ubuntu 16 passes',
-    'cypress/base:ubuntu16-12.13.1', 0,
-  )
-
-  smokeTestDockerImage(
-    'ubuntu 19 passes',
-    'cypress/base:ubuntu19-node12.14.1', 0,
+    'ubuntu 24 passes',
+    'cypress/base-internal:ubuntu24-node18', 0,
   )
 })

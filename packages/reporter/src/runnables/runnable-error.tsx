@@ -2,8 +2,8 @@ import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 import React from 'react'
 
-import QuestionMarkIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-question-mark-outline_x16.svg'
-import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+import QuestionMarkIcon from '@packages/frontend-shared/src/assets/icons/action-question-mark-outline_x16.svg'
+import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 const md = new Markdown({ html: true })
 

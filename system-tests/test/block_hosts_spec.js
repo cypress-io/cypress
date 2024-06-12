@@ -25,7 +25,6 @@ describe('e2e blockHosts', () => {
     }],
     settings: {
       blockHosts: 'localhost:3131',
-      video: false,
       e2e: {
         baseUrl: 'http://localhost:3232',
       },

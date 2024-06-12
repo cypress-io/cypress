@@ -80,7 +80,6 @@ describe('e2e iframes', () => {
     spec: 'iframe.cy.js',
     snapshot: true,
     config: {
-      videoCompression: false,
       hosts: {
         '*.foo.com': '127.0.0.1',
         '*.bar.com': '127.0.0.1',

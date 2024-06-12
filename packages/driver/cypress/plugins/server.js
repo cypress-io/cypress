@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const auth = require('basic-auth')
 const bodyParser = require('body-parser')
 const express = require('express')
@@ -9,6 +9,7 @@ const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 const { cors } = require('@packages/network')
+const { authCreds } = require('../fixtures/auth_creds')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
@@ -121,14 +122,14 @@ const createApp = (port) => {
     return res.send(req.body)
   })
 
-  app.get('/1mb', (req, res) => {
+  app.get('*/1mb', (req, res) => {
     return res.type('text').send('X'.repeat(1024 * 1024))
   })
 
   app.get('/basic_auth', (req, res) => {
     const user = auth(req)
 
-    if (user && ((user.name === 'cypress') && (user.pass === 'password123'))) {
+    if (user?.name === authCreds.username && user?.pass === authCreds.password) {
       return res.send('<html><body>basic auth worked</body></html>')
     }
 
@@ -342,6 +343,19 @@ const createApp = (port) => {
     res.send(_var)
   })
 
+  app.get('/download-basic-auth.csv', (req, res) => {
+    const user = auth(req)
+
+    if (user?.name === authCreds.username && user?.pass === authCreds.password) {
+      return res.sendFile(path.join(__dirname, '..', 'fixtures', 'downloads_records.csv'))
+    }
+
+    return res
+    .set('WWW-Authenticate', 'Basic')
+    .type('html')
+    .sendStatus(401)
+  })
+
   app.post('/upload', (req, res) => {
     res.sendStatus(200)
   })
@@ -355,11 +369,24 @@ const createApp = (port) => {
             const el = document.createElement('p')
             el.id = 'p' + i
             el.innerHTML = 'x'.repeat(100000)
-            
+
             document.body.appendChild(el)
           }
         </script>
-      </html>  
+      </html>
+    `)
+  })
+
+  app.get('/aut-commands', async (req, res) => {
+    const script = (await fs.readFileAsync(path.join(__dirname, '..', 'fixtures', 'aut-commands.js'))).toString()
+
+    res.send(`
+      <html>
+        <body>
+          <input type="file" />
+          <script>${script}</script>
+        </body>
+      </html>
     `)
   })
 

@@ -172,7 +172,6 @@ describe('e2e requests', () => {
     spec: 'request.cy.js',
     snapshot: true,
     config: {
-      videoCompression: false,
       responseTimeout: 1000,
     },
   })

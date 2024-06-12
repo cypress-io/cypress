@@ -88,6 +88,5 @@ describe('<InstallDependencies />', () => {
 
     cy.findByLabelText('Dismiss').click()
     cy.contains('You\'ve successfully installed all required dependencies.').should('not.exist')
-    cy.percySnapshot('installation completed after banner dismissed')
   })
 })

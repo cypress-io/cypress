@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."

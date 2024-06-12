@@ -21,7 +21,7 @@ describe('TestingTypeCards', () => {
       cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 2)
 
       cy.contains('Build and test the entire experience of your application').should('be.visible')
-      cy.percySnapshot()
+      cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
     })
   })
 
@@ -39,7 +39,8 @@ describe('TestingTypeCards', () => {
       },
     }).then(() => {
       cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 2)
-      cy.percySnapshot()
+      cy.contains('Build and test the entire experience of your application').should('be.visible')
+      cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
     })
   })
 
@@ -60,7 +61,7 @@ describe('TestingTypeCards', () => {
       cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 1)
 
       cy.contains('Build and test the entire experience of your application').should('be.visible')
-      cy.percySnapshot()
+      cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
     })
   })
 
@@ -78,8 +79,9 @@ describe('TestingTypeCards', () => {
       },
     })
 
+    cy.contains('Build and test the entire experience of your application').should('be.visible')
+    cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
     cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 1)
     cy.findAllByText(defaultMessages.setupPage.testingCard.running).should('have.length', 1)
-    cy.percySnapshot()
   })
 })

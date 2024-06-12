@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+
 import type * as webpack from 'webpack'
 import type * as webpackDevServer from 'webpack-dev-server'
 
@@ -12,14 +13,23 @@ declare global {
   }
 }
 
+const port = 8888
+
+const webpackConfig = require('./webpack.config.js')
+
+webpackConfig.devServer ??= {}
+webpackConfig.devServer.port = port
+
 export default defineConfig({
-  videoCompression: false, // turn off video compression for CI
+  env: {
+    PORT_CHECK: port,
+  },
   component: {
     devServer: {
       framework: 'react',
       bundler: 'webpack',
       webpackConfig: {
-        ...require('./webpack.config.js'),
+        ...webpackConfig,
         stats: 'minimal',
       },
     },

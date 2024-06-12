@@ -11,7 +11,6 @@ describe('<CopyText />', () => {
 
     cy.contains('button', defaultMessages.clipboard.copy)
     .should('be.visible')
-    .percySnapshot()
   })
 
   it('overflows nicely', { viewportWidth: 800, viewportHeight: 120 }, () => {

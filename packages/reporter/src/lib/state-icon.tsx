@@ -3,12 +3,12 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import { TestState } from '@packages/types'
-import FailedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
-import PassedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
-import PendingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
-import ProcessingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-processing_x12.svg'
-import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x12.svg'
-import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import FailedIcon from '@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
+import PassedIcon from '@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
+import PendingIcon from '@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
+import ProcessingIcon from '@packages/frontend-shared/src/assets/icons/status-processing_x12.svg'
+import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x12.svg'
+import WandIcon from '@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 
 interface Props extends React.HTMLProps<HTMLDivElement> {
   state: TestState

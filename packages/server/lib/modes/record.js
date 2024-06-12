@@ -1,28 +1,29 @@
 const _ = require('lodash')
 const path = require('path')
 const la = require('lazy-ass')
-const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
 const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../cloud/api')
+const api = require('../cloud/api').default
 const exception = require('../cloud/exception')
-const upload = require('../cloud/upload')
 
 const errors = require('../errors')
 const capture = require('../capture')
 const Config = require('../config')
 const env = require('../util/env')
-const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
+
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
+
+const { uploadArtifacts } = require('../cloud/artifacts/upload_artifacts')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -107,72 +108,34 @@ const getSpecRelativePath = (spec) => {
   return _.get(spec, 'relative', null)
 }
 
-const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
-
-  const uploads = []
-  let count = 0
-
-  const nums = () => {
-    count += 1
-
-    return chalk.gray(`(${count}/${uploads.length})`)
+/*
+artifacts : [
+  {
+    reportKey: 'protocol' | 'screenshots' | 'video',
+    uploadUrl: string,
+    filePath?: string,
+    url: string,
+    fileSize?: number | bigint,
+    payload?: Buffer,
+    message?: string,
   }
+]
 
-  const send = (pathToFile, url) => {
-    const success = () => {
-      if (!quiet) {
-        // eslint-disable-next-line no-console
-        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
-      }
-    }
+returns:
+[
+  {
+    success: boolean,
+    error?: string,
+    url: artifact.uploadUrl,
+    pathToFile: artifact.filePath,
+    fileSize: artifact.fileSize,
+    key: artifact.reportKey,
+  },
+  ...
+]
+*/
 
-    const fail = (err) => {
-      debug('failed to upload artifact %o', {
-        file: pathToFile,
-        stack: err.stack,
-      })
-
-      if (!quiet) {
-        // eslint-disable-next-line no-console
-        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
-      }
-    }
-
-    return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
-    )
-  }
-
-  if (videoUploadUrl && shouldUploadVideo) {
-    send(video, videoUploadUrl)
-  }
-
-  if (screenshotUploadUrls) {
-    screenshotUploadUrls.forEach((obj) => {
-      const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
-
-      return send(screenshot.path, obj.uploadUrl)
-    })
-  }
-
-  if (!uploads.length && !quiet) {
-    // eslint-disable-next-line no-console
-    console.log('  - Nothing to Upload')
-  }
-
-  return Promise
-  .all(uploads)
-  .catch((err) => {
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
-
-    return exception.create(err)
-  })
-}
-
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -267,7 +230,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -324,6 +287,7 @@ const createRun = Promise.method((options = {}) => {
     ci,
     commit,
     autoCancelAfterFailures,
+    project,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -617,6 +581,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       browserVersion: browser.version,
     }
 
+    telemetry.startSpan({ name: 'record:createRun' })
+
     return createRun({
       projectRoot,
       git,
@@ -632,8 +598,10 @@ const createRunAndRecordSpecs = (options = {}) => {
       testingType,
       configFile: config ? config.configFile : null,
       autoCancelAfterFailures,
+      project,
     })
     .then((resp) => {
+      telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -643,11 +611,13 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const { runUrl, runId, machineId, groupId } = resp
+      const protocolCaptureMeta = resp.capture || {}
 
       let captured = null
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
+        telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -667,13 +637,18 @@ const createRunAndRecordSpecs = (options = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
+          const result = _
           .chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            instanceId,
           })
           .value()
+
+          telemetry.getSpan('record:beforeSpecRun')?.end()
+
+          return result
         })
       }
 
@@ -684,19 +659,9 @@ const createRunAndRecordSpecs = (options = {}) => {
           return
         }
 
+        telemetry.startSpan({ name: 'record:afterSpecRun' })
+
         debug('after spec run %o', { spec })
-
-        if (!quiet) {
-          // eslint-disable-next-line no-console
-          console.log('')
-
-          terminal.header('Uploading Screenshots & Videos', {
-            color: ['blue'],
-          })
-
-          // eslint-disable-next-line no-console
-          console.log('')
-        }
 
         return specWriter.countStudioUsage(spec.absolute)
         .then((metadata) => {
@@ -715,14 +680,22 @@ const createRunAndRecordSpecs = (options = {}) => {
             return
           }
 
-          const { video, shouldUploadVideo, screenshots } = results
-          const { videoUploadUrl, screenshotUploadUrls } = resp
+          debug('postInstanceResults resp %O', resp)
+          const { video, screenshots } = results
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            runId,
+            instanceId,
             video,
             screenshots,
             videoUploadUrl,
-            shouldUploadVideo,
+            captureUploadUrl,
+            platform,
+            projectId,
+            spec,
+            protocolCaptureMeta,
+            protocolManager: project.protocolManager,
             screenshotUploadUrls,
             quiet,
           })
@@ -732,6 +705,8 @@ const createRunAndRecordSpecs = (options = {}) => {
             return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
           })
         })

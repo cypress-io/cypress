@@ -5,30 +5,31 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
-    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
-    "watch": "tsc -w",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
     "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "watch": "tsc -w"
   },
   "dependencies": {
     "debug": "^4.3.4",
     "find-up": "6.3.0",
     "node-html-parser": "5.3.3",
-    "semver": "^7.3.2"
+    "semver": "^7.5.3"
   },
   "devDependencies": {
     "chai": "^4.3.6",
+    "decache": "^4.6.2",
     "dedent": "^0.7.0",
     "mocha": "^9.2.2",
     "sinon": "^13.0.1",
-    "ts-node": "^10.9.1",
-    "vite": "4.3.2",
-    "vite-plugin-inspect": "0.7.24"
+    "ts-node": "^10.9.2",
+    "vite-4": "npm:vite@^4.5.3",
+    "vite-5": "npm:vite@^5.2.8",
+    "vite-plugin-inspect": "0.8.4"
   },
   "files": [
     "dist",
@@ -46,5 +47,14 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

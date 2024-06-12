@@ -32,6 +32,7 @@ export {
   SocketIOServer,
 }
 
+// TODO: I don't know that this is used anywhere?
 export const getPathToClientSource = () => {
   return clientSource
 }

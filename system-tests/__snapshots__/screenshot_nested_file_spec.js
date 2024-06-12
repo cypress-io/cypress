@@ -31,7 +31,7 @@ exports['e2e screenshot in nested spec / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_nested_file.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

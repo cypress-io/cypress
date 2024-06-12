@@ -77,6 +77,19 @@ describe('lib/exec/spawn', function () {
         ERROR: No matching issuer found
 
         objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
+
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_intel.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so supports Vulkan 1.1, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this verison of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
+
+        Warning: vkCreateInstance: Found no drivers!
+        Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
+            at CheckVkSuccessImpl (../../third_party/dawn/src/dawn/native/vulkan/VulkanError.cpp:88)
+            at CreateVkInstance (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:458)
+            at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
+            at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
+            at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
       `
 
       const lines = _
@@ -409,7 +422,7 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('inherits when on linux and xvfb isnt needed', function () {
+    it('inherits when on linux and xvfb isn\'t needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       os.platform.returns('linux')
       xvfb.isNeeded.returns(false)

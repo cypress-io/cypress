@@ -170,10 +170,11 @@ export default function (Commands, Cypress, cy, state) {
       })
     }
 
-    const log = this.get('_log') || (options.log !== false && Cypress.log({
+    const log = this.get('_log') || Cypress.log({
       message: `.${path}`,
+      hidden: options.log === false,
       timeout: options.timeout,
-    }))
+    })
 
     this.set('timeout', options.timeout)
     this.set('ensureExistenceFor', 'subject')
@@ -189,7 +190,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const value = _.get(subject, path)
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps () {
           const obj = {
@@ -243,8 +244,9 @@ export default function (Commands, Cypress, cy, state) {
       } })
     }
 
-    const log = options.log !== false && Cypress.log({
+    const log = Cypress.log({
       message: `.${path}()`,
+      hidden: options.log === false,
       timeout: options.timeout,
     })
 
@@ -253,7 +255,7 @@ export default function (Commands, Cypress, cy, state) {
     const itsFn = cy.now('its', path, options)
 
     // .its() has an implicit assertions that the return value shouldn't be null, but
-    // .invoke() has no such requirement. Removing ensureExistenceFor resests implicit
+    // .invoke() has no such requirement. Removing ensureExistenceFor resets implicit
     // assertion that .its() added
     this.set('ensureExistenceFor', null)
 
@@ -280,7 +282,7 @@ export default function (Commands, Cypress, cy, state) {
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps: () => {
           return {
-            Command: 'invoke',
+            name: 'invoke',
             Function: `.${path}(${$utils.stringify(args)})`,
             Subject: subject,
             'With Arguments': args,

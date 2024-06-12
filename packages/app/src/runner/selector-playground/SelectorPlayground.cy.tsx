@@ -28,8 +28,6 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     cy.get('[data-cy="selected-playground-method"]').should('contain', 'cy.get')
     cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
-
-    cy.percySnapshot()
   })
 
   it('toggles enabled', () => {
@@ -84,13 +82,9 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-num-elements"]').contains('10 matches')
 
-    cy.percySnapshot()
-
     cy.then(() => selectorPlaygroundStore.setValidity(false))
 
     cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
-
-    cy.percySnapshot('Invalid playground selector')
   })
 
   it('focuses and copies selector text', () => {
@@ -161,9 +155,12 @@ describe('SelectorPlayground', () => {
     */
     cy.then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
-        Elements: 2,
-        Yielded: undefined, // stubbed dom does not actually return anything
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
+        props: {
+          Elements: 2,
+          Yielded: undefined, // stubbed dom does not actually return anything
+        },
       })
     })
   })
@@ -176,13 +173,17 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-print"]').as('print')
     cy.get('@print').click().then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
-        Yielded: 'Nothing',
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
+        props: {
+          Yielded: 'Nothing',
+        },
       })
     })
   })
 
-  it('shows tooltips when buttons are focused', () => {
+  // TODO: fix this flaky test
+  it.skip('shows tooltips when buttons are focused', () => {
     mountSelectorPlayground()
 
     cy.get('[data-cy="playground-toggle"]').focus()

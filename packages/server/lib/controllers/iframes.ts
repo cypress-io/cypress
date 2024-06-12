@@ -42,14 +42,20 @@ export const iframesController = {
   },
 
   component: ({ config, nodeProxy }: CT, req: Request, res: Response) => {
-    // always proxy to the index.html file
-    // attach header data for webservers
-    // to properly intercept and serve assets from the correct src root
-    // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = encodeURI(req.params[0])
-    req.url = `${config.devServerPublicPathRoute}/index.html`
+    // requests to the index.html are from initializing the iframe. They include the specPath as query parameter
+    const specPath = req.query.specPath
 
-    // user the node proxy here instead of the network proxy
+    if (typeof specPath === 'string') {
+      // for those requests we need to provide the spec-path via this header
+      req.headers.__cypress_spec_path = encodeURI(specPath)
+      req.url = `${config.devServerPublicPathRoute}/index.html`
+      delete req.query.specPath
+    } else {
+      // all other requests should be forwarded to the devserver, preserving their relative paths so assets with relative urls work.
+      req.url = `${config.devServerPublicPathRoute}/${req.params[0]}`
+    }
+
+    // use the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // our internal index.html handler
 

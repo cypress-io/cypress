@@ -82,19 +82,6 @@ const createCypress = () => {
     }
   })
 
-  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name }, { responseEvent }) => {
-    // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
-    let requestedCrossOriginSnapshot = {}
-
-    // don't attempt to take snapshots after the spec bridge has been unloaded. Instead, send an empty snapshot back to the primary
-    // to display current state of dom
-    if (cy.state('document') !== undefined) {
-      requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
-    }
-
-    Cypress.specBridgeCommunicator.toPrimary(responseEvent, requestedCrossOriginSnapshot)
-  })
-
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 
@@ -231,10 +218,13 @@ const attachToWindow = (autWindow: Window) => {
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
     },
-    onUnload (e) {
+    onPageHide (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
 
+      // unload is being actively deprecated/removed by chrome, so for
+      // compatibility, we are using `window`'s `pagehide` event as a proxy
+      // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
       return Cypress.action('app:window:unload', e)
     },
     onNavigation (...args) {

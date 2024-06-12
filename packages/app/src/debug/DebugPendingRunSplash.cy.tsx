@@ -4,9 +4,8 @@ describe('<DebugPendingRunSplash />', () => {
   it('renders as expected', () => {
     cy.mount(<DebugPendingRunSplash/>)
 
-    cy.contains('Failures will be displayed here')
-
-    cy.percySnapshot()
+    cy.findByTestId('title').contains('Testing in progress...')
+    cy.findByTestId('splash-subtitle').contains('Failures will be displayed here')
   })
 
   it('renders scheduled to complete message', () => {
@@ -14,7 +13,5 @@ describe('<DebugPendingRunSplash />', () => {
 
     cy.contains('Scheduled to complete...')
     cy.findByTestId('splash-subtitle').should('not.exist')
-
-    cy.percySnapshot()
   })
 })

@@ -46,7 +46,5 @@ describe('<RecordKey />', () => {
     cy.contains('button', defaultMessages.clipboard.copy)
     .should('be.visible')
     .and('not.be.disabled')
-
-    cy.percySnapshot()
   })
 })

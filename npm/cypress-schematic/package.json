@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
-    "lint": "eslint --ext .ts,.json, ."
+    "lint": "eslint --ext .ts,.json, .",
+    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts"
   },
   "dependencies": {
     "jsonc-parser": "^3.0.0",
@@ -22,10 +22,10 @@
     "@schematics/angular": "^14.2.1",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
-    "@types/node": "^18.0.6",
+    "@types/node": "^18.17.5",
     "chai": "4.2.0",
     "mocha": "3.5.3",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "@angular/cli": ">=14",
@@ -37,7 +37,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
-  "author": "Cypress DX Team",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
   "keywords": [
     "schematics",
@@ -53,6 +52,17 @@
   "builders": "./src/builders/builders.json",
   "ng-add": {
     "save": "devDependencies"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/src/**/*.js",
+          "{projectRoot}/src/**/*.d.ts",
+          "{projectRoot}/src/**/*.js.map"
+        ]
+      }
+    }
   },
   "schematics": "./src/schematics/collection.json"
 }

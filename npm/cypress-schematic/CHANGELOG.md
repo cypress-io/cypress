@@ -1,3 +1,12 @@
+# [@cypress/schematic-v2.5.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.5.1...@cypress/schematic-v2.5.2) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+# [@cypress/schematic-v2.5.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.5.0...@cypress/schematic-v2.5.1) (2023-09-07)
+
 # [@cypress/schematic-v2.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.4.0...@cypress/schematic-v2.5.0) (2023-01-25)
 
 

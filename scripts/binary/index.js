@@ -4,14 +4,13 @@ const cwd = process.cwd()
 const path = require('path')
 const _ = require('lodash')
 const os = require('os')
-const gift = require('gift')
+const simpleGit = require('simple-git')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const minimist = require('minimist')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
-const questionsRemain = require('@cypress/questions-remain')
 const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
@@ -19,12 +18,22 @@ const ask = require('./ask')
 const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
+const questionsRemain = require('./util/questions-remain')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
+const { exec } = require('child_process')
+const xvfb = require('../../cli/lib/exec/xvfb')
+const smoke = require('./smoke')
+const verify = require('../../cli/lib/tasks/verify')
+const execa = require('execa')
 
-// initialize on existing repo
-const repo = Promise.promisifyAll(gift(cwd))
+const log = function (msg) {
+  const time = new Date()
+  const timeStamp = time.toLocaleTimeString()
+
+  console.log(timeStamp, chalk.yellow(msg), chalk.blue(meta.PLATFORM))
+}
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -52,14 +61,37 @@ const askMissingOptions = function (properties = []) {
   return questionsRemain(pickedQuestions)
 }
 
+async function testExecutableVersion (buildAppExecutable, version) {
+  log('#testVersion')
+
+  console.log('testing built app executable version')
+  console.log(`by calling: ${buildAppExecutable} --version`)
+
+  const args = ['--version']
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  const result = await execa(buildAppExecutable, args)
+
+  la(result.stdout, 'missing output when getting built version', result)
+
+  console.log('built app version', result.stdout)
+  la(result.stdout.trim() === version.trim(), 'different version reported',
+    result.stdout, 'from input version to build', version)
+
+  console.log('✅ using --version on the Cypress binary works')
+}
+
 // hack for @packages/server modifying cwd
 process.chdir(cwd)
 
 const commitVersion = function (version) {
   const msg = `release ${version} [skip ci]`
 
-  return repo.commitAsync(msg, {
-    'allow-empty': true,
+  return simpleGit.commit(msg, {
+    '--allow-empty': null,
   })
 }
 
@@ -200,6 +232,54 @@ const deploy = {
     })
   },
 
+  package (options) {
+    console.log('#package')
+    if (options == null) {
+      options = this.parseOptions(process.argv)
+    }
+
+    debug('parsed build options %o', options)
+
+    return askMissingOptions(['version', 'platform'])(options)
+    .then(() => {
+      console.log('packaging binary: platform %s version %s', options.platform, options.version)
+
+      return build.packageElectronApp(options)
+    })
+  },
+
+  async smoke (options) {
+    console.log('#smoke')
+
+    if (options == null) {
+      options = this.parseOptions(process.argv)
+    }
+
+    debug('parsed build options %o', options)
+
+    await askMissingOptions(['version'])(options)
+
+    // runSmokeTests
+    let usingXvfb = xvfb.isNeeded()
+
+    try {
+      if (usingXvfb) {
+        await xvfb.start()
+      }
+
+      log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+      await testExecutableVersion(meta.buildAppExecutable(), options.version)
+
+      const executablePath = meta.buildAppExecutable()
+
+      await smoke.test(executablePath, meta.buildAppDir())
+    } finally {
+      if (usingXvfb) {
+        await xvfb.stop()
+      }
+    }
+  },
+
   zip (options) {
     console.log('#zip')
     if (!options) {
@@ -271,6 +351,22 @@ const deploy = {
     return moveBinaries(args)
   },
 
+  // purge all URLs from Cloudflare cache from file
+  'purge-urls' (args = process.argv) {
+    console.log('#purge-urls')
+
+    const options = minimist(args, {
+      string: 'filePath',
+      alias: {
+        filePath: 'f',
+      },
+    })
+
+    la(check.unemptyString(options.filePath), 'missing file path to url list', options)
+
+    return uploadUtils.purgeUrlsFromCloudflareCache(options.filePath)
+  },
+
   // purge all platforms of a desktop app for specific version
   'purge-version' (args = process.argv) {
     console.log('#purge-version')
@@ -304,6 +400,31 @@ const deploy = {
         return this.upload(options)
       })
     })
+  },
+
+  async checkIfBinaryExistsOnCdn (args = process.argv) {
+    console.log('#checkIfBinaryExistsOnCdn')
+
+    const url = await uploadArtifactToS3([...args, '--dry-run', 'true'])
+
+    console.log(`Checking if ${url} exists...`)
+
+    const binaryExists = await rp.head(url)
+    .then(() => true)
+    .catch(() => false)
+
+    if (binaryExists) {
+      console.log('A binary was already built for this operating system and commit hash. Skipping binary build process...')
+      exec('circleci-agent step halt', (_, __, stdout) => {
+        console.log(stdout)
+      })
+
+      return
+    }
+
+    console.log('Binary does not yet exist. Continuing to build binary...')
+
+    return binaryExists
   },
 }
 

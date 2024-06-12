@@ -4,6 +4,10 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
+const image1Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cypress.iconset', 'icon_16x16.png')
+const image2Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cypress.iconset', 'icon_32x32.png')
+const image3Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cypress.iconset', 'icon_128x128.png')
+
 async function startSpiedVideoCapture (videoName, options = {}) {
   const props = await videoCapture.start({ videoName, ...options })
 
@@ -28,7 +32,7 @@ Output file #0 does not contain any stream\n`
 }
 
 describe('Video Capture', () => {
-  context('#start', () => {
+  context('#start.writeVideoFrame', () => {
     let tmpFilename
 
     beforeEach(() => {
@@ -63,27 +67,6 @@ describe('Video Capture', () => {
       await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
     })
 
-    it('will eventually timeout on single frame write', async () => {
-      const { writeVideoFrameAsBuffer, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
-
-      writeVideoFrameAsBuffer('foo')
-
-      await expect(endVideoCapture(1)).be.rejectedWith('operation timed out')
-    })
-
-    // https://github.com/cypress-io/cypress/issues/6408
-    it('waits for at least 2 stream writes before ending', async () => {
-      const { writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
-
-      writeVideoFrameAsBuffer('foo')
-
-      const endVideoCaptureResult = endVideoCapture()
-
-      writeVideoFrameAsBuffer('foobar')
-
-      await expect(endVideoCaptureResult).rejectedWith(END_OF_FILE_ERROR)
-    })
-
     // https://github.com/cypress-io/cypress/issues/16648
     context('deduping frames', async () => {
       it('does not dedupe when not webminput', async () => {
@@ -94,7 +77,6 @@ describe('Video Capture', () => {
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         expect(_pt.write).callCount(4)
-        // await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
       })
     })
 
@@ -106,6 +88,49 @@ describe('Video Capture', () => {
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       expect(_pt.write).calledOnce
+    })
+  })
+
+  context('#start.endVideoCapture', () => {
+    let tmpFilename
+
+    beforeEach(() => {
+      tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
+    })
+
+    it('ends immediately if more than two frames written', async () => {
+      const { writeVideoFrame, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
+
+      writeVideoFrame(fse.readFileSync(image1Path))
+      writeVideoFrame(fse.readFileSync(image2Path))
+      writeVideoFrame(fse.readFileSync(image3Path))
+
+      const waitForMoreFrames = false
+
+      await endVideoCapture(waitForMoreFrames)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/6408
+    it('waits for at least 2 stream writes before ending if spec not skipped by the cloud', async () => {
+      const { writeVideoFrame, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
+
+      writeVideoFrame(fse.readFileSync(image1Path))
+
+      const waitForMoreFrames = true
+      const endVideoCaptureResult = endVideoCapture(waitForMoreFrames)
+
+      writeVideoFrame(fse.readFileSync(image2Path))
+
+      await endVideoCaptureResult
+    })
+
+    it('ends immediately if less than two frames have been written and spec is skipped by the cloud', async () => {
+      const { writeVideoFrame, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
+
+      writeVideoFrame(fse.readFileSync(image1Path))
+      const waitForMoreFrames = false
+
+      await endVideoCapture(waitForMoreFrames)
     })
   })
 })

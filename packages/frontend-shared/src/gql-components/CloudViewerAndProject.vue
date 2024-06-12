@@ -34,6 +34,7 @@ fragment CloudViewerAndProject on Query {
   }
   currentProject {
     id
+    projectId
     config
     currentTestingType
     isFullConfigReady
@@ -96,6 +97,7 @@ const {
   setPromptShown,
   setCypressFirstOpened,
   setTestingType,
+  setProjectId,
   setBannersState,
 } = userProjectStatusStore
 
@@ -150,6 +152,7 @@ watchEffect(async () => {
   }
 
   setTestingType(currentProject?.currentTestingType ?? undefined)
+  setProjectId(currentProject?.projectId ?? undefined)
 
   const AUTH_STATE_ERRORS = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER']
 

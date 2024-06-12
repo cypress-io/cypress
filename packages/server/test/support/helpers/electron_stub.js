@@ -17,6 +17,7 @@ module.exports = {
     exit () {},
     commandLine: {
       appendSwitch () {},
+      getSwitchValue () {},
       appendArgument () {},
     },
     disableHardwareAcceleration () {},

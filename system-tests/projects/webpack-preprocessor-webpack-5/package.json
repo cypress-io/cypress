@@ -4,7 +4,7 @@
     "@babel/plugin-transform-runtime": "7.18.10",
     "@babel/preset-env": "7.19.0",
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
-    "babel-loader": "8.2.5",
+    "babel-loader": "8.3.0",
     "webpack": "^5.74.0"
   }
 }

@@ -76,6 +76,18 @@ export default {
     }
   },
 
+  monkeypatchBeforeAsync (origFn, fn) {
+    return async function () {
+      const newArgs = await fn.apply(this, arguments)
+
+      if (newArgs !== undefined) {
+        return origFn.apply(this, newArgs)
+      }
+
+      return origFn.apply(this, arguments)
+    }
+  },
+
   unwrapFirst (val) {
     // this method returns the first item in an array
     // and if its still a jquery object, then we return
@@ -229,6 +241,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
+    // @ts-expect-error
     .without(undefined)
     .join(', ')
     .value()

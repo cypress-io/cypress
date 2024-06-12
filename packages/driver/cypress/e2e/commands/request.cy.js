@@ -9,7 +9,7 @@ describe('src/cy/commands/request', () => {
     responseTimeout: RESPONSE_TIMEOUT,
   }, () => {
     beforeEach(() => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     describe('argument signature', () => {
@@ -125,6 +125,60 @@ describe('src/cy/commands/request', () => {
           this.expectOptionsToBe({
             url: 'http://www.github.com/projects/foo',
             body: 'foo',
+          })
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/28789
+      context('accepts trivial RFC 8259 compliant body objects', () => {
+        it('accepts body equal to true', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: true }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              body: true,
+              json: true,
+            })
+          })
+        })
+
+        it('accepts body equal to false', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: false }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              body: false,
+              json: true,
+            })
+          })
+        })
+
+        it('accepts (explicitly defined) null body', () => {
+          cy.request({ method: 'POST', url: 'http://www.github.com/projects/foo', body: null }).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
+          })
+
+          cy.request('POST', 'http://www.github.com/projects/foo', null).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
+          })
+
+          cy.request('http://www.github.com/projects/foo', null).then(function () {
+            this.expectOptionsToBe({
+              method: 'POST',
+              url: 'http://www.github.com/projects/foo',
+              //body: null,
+              json: true,
+            })
           })
         })
       })
@@ -645,7 +699,11 @@ describe('src/cy/commands/request', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
@@ -655,7 +713,33 @@ describe('src/cy/commands/request', () => {
           log: false,
         })
         .then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        Cypress.backend
+        .withArgs('http:request')
+        .resolves({ isOkStatusCode: true, status: 200 })
+
+        cy.request({
+          url: 'http://localhost:8080',
+          log: false,
+        })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('request')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -723,14 +807,17 @@ describe('src/cy/commands/request', () => {
         })
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'request',
-            Request: allRequestResponse,
-            Yielded: {
-              duration: 10,
-              status: 201,
-              body: { id: 123 },
-              headers: {
-                'Content-Type': 'application/json',
+            name: 'request',
+            type: 'command',
+            props: {
+              Request: allRequestResponse,
+              Yielded: {
+                duration: 10,
+                status: 201,
+                body: { id: 123 },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               },
             },
           })
@@ -779,14 +866,17 @@ describe('src/cy/commands/request', () => {
         })
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'request',
-            Requests: allRequestResponses,
-            Yielded: {
-              duration: 10,
-              status: 201,
-              body: { id: 123 },
-              headers: {
-                'Content-Type': 'application/json',
+            name: 'request',
+            type: 'command',
+            props: {
+              Requests: allRequestResponses,
+              Yielded: {
+                duration: 10,
+                status: 201,
+                body: { id: 123 },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               },
             },
           })

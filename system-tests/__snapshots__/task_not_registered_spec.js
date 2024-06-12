@@ -45,7 +45,7 @@ https://on.cypress.io/api/task
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     task_not_registered.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

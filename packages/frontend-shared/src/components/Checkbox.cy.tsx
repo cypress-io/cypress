@@ -2,15 +2,18 @@ import { ref } from 'vue'
 import Checkbox from './Checkbox.vue'
 
 describe('<Checkbox />', () => {
-  it('renders', () => {
-    const value = ref(true)
+  it('emits onUpdate:modalValue', () => {
+    const reference = ref(true)
+    const updateStub = cy.stub()
 
-    cy.mount(() => (<Checkbox
-      label="Welcome guide settings"
-      id="welcome-opt-out"
-      modelValue={value.value}
-    >
-      <span class="text-gray-800 font-light">Show the welcome guide when opening Cypress.</span>
-    </Checkbox>))
+    cy.mount(<Checkbox label='Welcome guide settings' id="welcome-opt-out" modelValue={reference.value} onUpdate:modelValue={updateStub} />)
+
+    cy.findByLabelText('Welcome guide settings').click().then(() => {
+      expect(updateStub).to.have.been.calledWith(false)
+    })
+
+    cy.findByLabelText('Welcome guide settings').click().then(() => {
+      expect(updateStub).to.have.been.calledWith(true)
+    })
   })
 })

@@ -73,21 +73,22 @@ context('cy.origin connectors', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('its')
-        expect(consoleProps.Property).to.equal('.length')
-        expect(consoleProps.Yielded).to.equal(3)
+        expect(consoleProps.name).to.equal('its')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Property).to.equal('.length')
+        expect(consoleProps.props.Yielded).to.equal(3)
 
-        expect(consoleProps.Subject.length).to.equal(3)
+        expect(consoleProps.props.Subject.length).to.equal(3)
 
         // make sure subject elements are indexed in the correct order
-        expect(consoleProps.Subject[0]).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps.Subject[0]).to.have.property('id').that.equals('input')
+        expect(consoleProps.props.Subject[0]).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props.Subject[0]).to.have.property('id').that.equals('input')
 
-        expect(consoleProps.Subject[1]).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps.Subject[1]).to.have.property('id').that.equals('name')
+        expect(consoleProps.props.Subject[1]).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props.Subject[1]).to.have.property('id').that.equals('name')
 
-        expect(consoleProps.Subject[2]).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps.Subject[2]).to.have.property('id').that.equals('age')
+        expect(consoleProps.props.Subject[2]).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props.Subject[2]).to.have.property('id').that.equals('age')
       })
     })
 
@@ -107,12 +108,13 @@ context('cy.origin connectors', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('invoke')
-        expect(consoleProps.Function).to.equal('.text()')
-        expect(consoleProps.Yielded).to.equal('button')
+        expect(consoleProps.name).to.equal('invoke')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Function).to.equal('.text()')
+        expect(consoleProps.props.Yielded).to.equal('button')
 
-        expect(consoleProps.Subject[0]).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps.Subject[0]).to.have.property('id').that.equals('button')
+        expect(consoleProps.props.Subject[0]).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props.Subject[0]).to.have.property('id').that.equals('button')
       })
     })
   })

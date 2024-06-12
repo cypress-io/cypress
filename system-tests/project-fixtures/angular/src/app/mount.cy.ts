@@ -398,7 +398,7 @@ describe('angular mount', () => {
       cy.get('p').should('have.text', 'component provided service')
     })
 
-    it('should override component-providers via TestBed.overrideCmponent', () => {
+    it('should override component-providers via TestBed.overrideComponent', () => {
       TestBed.overrideComponent(ComponentProviderComponent, { set: { providers: [{ provide: MessageService, useValue: { message: 'overridden service' } }] } })
       cy.mount(ComponentProviderComponent)
       cy.get('p').should('have.text', 'overridden service')

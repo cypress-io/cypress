@@ -13,9 +13,9 @@ import { Scroller, UserScrollCallback } from '../lib/scroller'
 import type { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
-import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
-import StudioIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
-import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+import OpenIcon from '@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+import StudioIcon from '@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 const Loading = () => (
   <div className='runnable-loading'>

@@ -31,7 +31,7 @@
   </Tooltip>
 </template>
 <script lang="ts" setup>
-import { IconTechnologyTerminalLog, IconTechnologyImageScreenshot, IconActionPlaySmall } from '@cypress-design/vue-icon'
+import { IconTechnologyTerminalLog, IconTechnologyImageScreenshot, IconActionPlaySmall, IconActionTestReplay } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ArtifactType } from './utils/debugArtifacts'
@@ -46,6 +46,7 @@ const ICON_MAP: Record<ArtifactType, any> = {
   'TERMINAL_LOG': IconTechnologyTerminalLog,
   'IMAGE_SCREENSHOT': IconTechnologyImageScreenshot,
   'PLAY': IconActionPlaySmall,
+  'REPLAY': IconActionTestReplay,
 }
 
 </script>

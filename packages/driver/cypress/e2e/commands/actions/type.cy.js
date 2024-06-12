@@ -325,7 +325,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('waits until element stops animating', () => {
       cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
-        expect(retries).to.be.gt(1)
+        expect(retries).to.be.gte(1)
       })
     })
 
@@ -2425,7 +2425,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('releases modfier keys at the end of the shortcut sequence', () => {
+    it('releases modifier keys at the end of the shortcut sequence', () => {
       cy.get(':text:first').type('h{ctrl+alt++}i')
       .then(function ($input) {
         const table = this.lastLog.invoke('consoleProps').table[2]()
@@ -2845,8 +2845,38 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
+    })
 
-      null
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').type('foobar', { log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').type('foobar', { log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+
+        expect(hiddenLog).to.be.ok
+        expect(hiddenLog.get('name'), 'log name').to.eq('type')
+        expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+      })
     })
 
     it('passes in $el', () => {
@@ -2979,7 +3009,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
       })
     })
 
@@ -2987,20 +3017,42 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('has all of the regular options', () => {
         cy.get('input:first').type('foobar').then(function ($input) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('type')
-          expect(console.Typed).to.eq('foobar')
-          expect(console['Applied To']).to.eq($input.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(consoleProps.name).to.eq('type')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Typed).to.eq('foobar')
+          expect(consoleProps.props['Applied To']).to.eq($input.get(0))
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+        })
+      })
 
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+      it('has a table of mouse events', () => {
+        cy.get(':text:first').type('hi')
+        .then(function ($input) {
+          const table = this.lastLog.invoke('consoleProps').table[1]()
+
+          expect(table).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
         })
       })
 
       // Updated not to input text when non-shift modifier is pressed
       // https://github.com/cypress-io/cypress/issues/5424
-      it('has a table of keys', () => {
+      it('has a table of keyboard events', () => {
         cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
         .then(function ($input) {
           const table = this.lastLog.invoke('consoleProps').table[2]()

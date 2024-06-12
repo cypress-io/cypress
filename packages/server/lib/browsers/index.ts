@@ -7,9 +7,11 @@ import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
+import type { DataContext } from '@packages/data-context'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
@@ -22,12 +24,14 @@ interface KillOptions {
   isProcessExit?: boolean
   nullOut?: boolean
   unbind?: boolean
+  isOrphanedBrowserProcess?: boolean
 }
 
 const kill = (options: KillOptions = {}) => {
   options = _.defaults({}, options, {
     instance,
     isProcessExit: false,
+    isOrphanedBrowserProcess: false,
     unbind: true,
     nullOut: true,
   })
@@ -58,7 +62,7 @@ const kill = (options: KillOptions = {}) => {
     debug('killing browser process')
 
     instanceToKill.isProcessExit = options.isProcessExit
-
+    instanceToKill.isOrphanedBrowserProcess = options.isOrphanedBrowserProcess
     instanceToKill.kill()
   })
 }
@@ -129,29 +133,29 @@ export = {
     return instance
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance | null> {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    await browserLauncher.connectToExisting(browser, options, automation)
+    await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
 
     return this.getBrowserInstance()
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
+  async connectProtocolToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], protocolManager?: ProtocolManagerShape }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.connectProtocolToBrowser(options)
+  },
+
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    const newInstance = await browserLauncher.connectToNewSpec(browser, options, automation)
-
-    // if a new instance was returned, update our instance to use the new one
-    if (newInstance) {
-      instance = newInstance
-      instance.browser = browser
-    }
+    await browserLauncher.connectToNewSpec(browser, options, automation, cdpSocketServer)
 
     return this.getBrowserInstance()
   },
 
-  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
+  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx: DataContext): Promise<BrowserInstance | null> {
     // this global helps keep track of which launch attempt is the latest one
     launchAttempt++
 
@@ -168,7 +172,7 @@ export = {
       onBrowserClose () {},
     })
 
-    ctx.browser.setBrowserStatus('opening')
+    ctx.actions.app.setBrowserStatus('opening')
 
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
@@ -176,9 +180,9 @@ export = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation)
+    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
-    debug('browser opened')
+    debug(`browser opened for launch ${thisLaunchAttempt}`)
 
     // in most cases, we'll kill any running browser instance before launching
     // a new one when we call `await kill()` early in this function.
@@ -202,8 +206,11 @@ export = {
     // this browser, it means it has been orphaned and should be terminated.
     //
     // https://github.com/cypress-io/cypress/issues/24377
-    if (thisLaunchAttempt !== launchAttempt) {
-      await kill({ instance: _instance, nullOut: false })
+    const isOrphanedBrowserProcess = thisLaunchAttempt !== launchAttempt
+
+    if (isOrphanedBrowserProcess) {
+      debug(`killing process because launch attempt: ${thisLaunchAttempt} does not match current launch attempt: ${launchAttempt}`)
+      await kill({ instance: _instance, isOrphanedBrowserProcess, nullOut: false })
 
       return null
     }
@@ -215,7 +222,9 @@ export = {
     // so that there is a default for each browser but
     // enable the browser to configure the interface
     instance.once('exit', async (code, signal) => {
-      ctx.browser.setBrowserStatus('closed')
+      debug('browser instance exit event received %o', { code, signal })
+
+      ctx.actions.app.setBrowserStatus('closed')
       // TODO: make this a required property
       if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
 
@@ -241,8 +250,6 @@ export = {
         }
 
         await options.onError(err)
-
-        await options.relaunchBrowser!()
       }
     })
 
@@ -267,8 +274,19 @@ export = {
     if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
 
     options.onBrowserOpen()
-    ctx.browser.setBrowserStatus('open')
+    ctx.actions.app.setBrowserStatus('open')
 
     return instance
+  },
+
+  /**
+   * Closes extra targets that are not the Cypress tab
+   */
+  async closeExtraTargets () {
+    if (!instance?.browser) return
+
+    const browserLauncher = await getBrowserLauncher(instance.browser, [])
+
+    await browserLauncher.closeExtraTargets()
   },
 } as const

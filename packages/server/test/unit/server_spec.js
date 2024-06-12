@@ -6,7 +6,7 @@ const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
 const { setupFullConfigWithDefaults } = require('@packages/config')
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const fileServer = require(`../../lib/file_server`)
 const ensureUrl = require(`../../lib/util/ensure-url`)
@@ -20,7 +20,7 @@ mockery.registerMock('morgan', () => {
 
 describe('lib/server', () => {
   beforeEach(function () {
-    this.server = new ServerE2E()
+    this.server = new ServerBase()
 
     return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
@@ -54,7 +54,7 @@ describe.skip('lib/server', () => {
     return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
-      this.server = new ServerE2E()
+      this.server = new ServerBase()
 
       this.oldFileServer = this.server._fileServer
       this.server._fileServer = this.fileServer

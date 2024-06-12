@@ -23,6 +23,7 @@ interface serializedRunnable {
   title: string
   parent: serializedRunnable
   ctx: {}
+  _currentRetry: number
   _timeout: number
   titlePath: string
 }
@@ -44,6 +45,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 
   runnable.ctx = data.ctx
   runnable.id = data.id
+  runnable._currentRetry = data._currentRetry
   runnable._timeout = data._timeout
   // Short circuit title path to avoid implementing it up the parent chain.
   runnable.titlePath = () => {
@@ -181,9 +183,16 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
+    // the name of this function is used to verify if privileged commands are
+    // properly called. it shouldn't be removed and if the name is changed, it
+    // needs to also be changed in server/lib/browsers/privileged-channel.js
+    function invokeOriginFn (callback) {
+      return window.eval(`(${callback})`)(args)
+    }
+
     try {
       const callback = await getCallbackFn(fn, file)
-      const value = window.eval(`(${callback})`)(args)
+      const value = invokeOriginFn(callback)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {

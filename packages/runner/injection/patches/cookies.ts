@@ -115,7 +115,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
         })
 
         // send the cookie to the server so it can be removed from the browser
-        // via aututomation. If the cookie expiry is set inside the server-side cookie jar,
+        // via automation. If the cookie expiry is set inside the server-side cookie jar,
         // the cookie will be automatically removed.
         sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
 

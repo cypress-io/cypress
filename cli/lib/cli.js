@@ -122,6 +122,8 @@ const descriptions = {
   record: 'records the run. sends test results, screenshots and videos to Cypress Cloud.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
+  runnerUi: 'displays the Cypress Runner UI',
+  noRunnerUi: 'hides the Cypress Runner UI',
   spec: 'runs specific spec file(s). defaults to "all"',
   tag: 'named tag(s) for recorded runs in Cypress Cloud',
   version: 'prints Cypress version',
@@ -252,6 +254,8 @@ const addCypressRunCommand = (program) => {
   .option('-q, --quiet', text('quiet'))
   .option('--record [bool]', text('record'), coerceFalse)
   .option('-r, --reporter <reporter>', text('reporter'))
+  .option('--runner-ui', text('runnerUi'))
+  .option('--no-runner-ui', text('noRunnerUi'))
   .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
   .option('-s, --spec <spec>', text('spec'))
   .option('-t, --tag <tag>', text('tag'))

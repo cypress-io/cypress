@@ -4,23 +4,32 @@
   "private": true,
   "browser": "src/index.js",
   "scripts": {
+    "prebuild": "rimraf ./dist",
     "build": "node ../../scripts/run-webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "cypress:run": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "postinstall": "echo '@packages/runner needs: yarn build'",
-    "watch": "node ../../scripts/run-webpack --watch --progress",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "watch": "node ../../scripts/run-webpack --watch --progress"
   },
   "devDependencies": {
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "cross-env": "6.0.3",
-    "webpack": "^4.44.2",
-    "webpack-cli": "3.3.2"
+    "rimraf": "^5.0.1",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/driver",
+      "@packages/reporter",
+      "@packages/config"
+    ]
+  }
 }

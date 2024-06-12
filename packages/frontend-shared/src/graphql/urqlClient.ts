@@ -10,7 +10,7 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
-import type { Socket } from '@packages/socket/lib/browser'
+import type { SocketShape } from '@packages/socket/lib/types'
 import { client } from '@packages/socket/lib/browser'
 import { createClient as createWsClient } from 'graphql-ws'
 
@@ -93,7 +93,7 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 
 declare global {
   interface Window {
-    ws?: Socket
+    ws?: SocketShape
     /**
      * We can set this in onBeforeLoad in Cypress tests, allowing us
      * to use cy.intercept in tests that we need it
@@ -107,6 +107,7 @@ declare global {
       base64Config: string
       namespace: AutomationElementId
       hideCommandLog: boolean
+      hideRunnerUi: boolean
     }
     __Cypress__: boolean
   }

@@ -1,10 +1,11 @@
 <template>
   <button
     :id="name"
-    class="border-transparent border rounded-[50px] relative hocus-default"
+    class="border-transparent border rounded-[50px] relative hocus-default disabled:ring-0 disabled:outline-0 disabled:bg-gray-100"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container, {
       '!hocus:ring-0': size === 'sm'
     }]"
+    :disabled="disabled"
     role="switch"
     :aria-checked="value"
     @click="$emit('update', !value)"
@@ -22,9 +23,11 @@ withDefaults(defineProps<{
   value: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl'
   name: string // required for an id so that an external <label> can be associated with the switch
+  disabled?: boolean
 }>(), {
   value: false,
   size: 'lg',
+  disabled: false,
 })
 
 const sizeClasses = {

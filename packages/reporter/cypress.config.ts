@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import webpackConfig from './webpack.config'
+import WP from '../../npm/webpack-preprocessor'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -14,15 +15,17 @@ export default defineConfig({
     openMode: 0,
   },
 
-  videoCompression: false, // turn off video compression for CI
-
   e2e: {
     experimentalStudio: true,
     baseUrl: 'http://localhost:5006',
-    setupNodeEvents (_on, config) {
+    setupNodeEvents (on, config) {
       const express = require('express')
 
       express().use(express.static('dist')).listen(5006)
+
+      on('file:preprocessor', WP({
+        webpackOptions: webpackConfig,
+      }))
 
       return config
     },

@@ -29,7 +29,7 @@ export default function (Commands, Cypress, cy, state) {
   // this MUST be prepended else if we are stubbing or spying on
   // global timers they will be reset in agents before this runs
   // its reset function
-  Cypress.prependListener('test:before:run', reset)
+  Cypress.prependListener('test:before:after:run:async', reset)
 
   Cypress.on('window:before:load', (contentWindow) => {
     // if a clock has been created before this event (likely before
@@ -76,11 +76,7 @@ export default function (Commands, Cypress, cy, state) {
         log: true,
       })
 
-      const log = (name, message = '', snapshot = true, consoleProps = {}) => {
-        if (!options.log) {
-          return
-        }
-
+      const log = (name, shouldLog, message = '', snapshot = true, consoleProps = {}) => {
         const details = clock!.details()
         const logNow = details.now
         const logMethods = details.methods.slice()
@@ -89,6 +85,7 @@ export default function (Commands, Cypress, cy, state) {
           name,
           message: message ? message : '',
           type: 'parent',
+          hidden: shouldLog === false,
           end: true,
           snapshot,
           consoleProps () {
@@ -104,7 +101,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const { tick } = clock
 
-      clock.tick = function (ms, options: Partial<Cypress.Loggable> = {}) {
+      clock.tick = function (ms, userOptions: Partial<Cypress.Loggable> = {}) {
         if ((ms != null) && !_.isNumber(ms)) {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
@@ -113,14 +110,14 @@ export default function (Commands, Cypress, cy, state) {
           ms = 0
         }
 
-        let theLog
+        userOptions = _.defaults({}, userOptions, {
+          log: options.log,
+        })
 
-        if (options.log !== false) {
-          theLog = log('tick', `${ms}ms`, false, {
-            'Now': clock!.details().now + ms,
-            'Ticked': `${ms} milliseconds`,
-          })
-        }
+        const theLog = log('tick', userOptions.log, `${ms}ms`, false, {
+          'Now': clock!.details().now + ms,
+          'Ticked': `${ms} milliseconds`,
+        })
 
         if (theLog) {
           theLog.snapshot('before', { next: 'after' })
@@ -137,12 +134,14 @@ export default function (Commands, Cypress, cy, state) {
 
       const { restore } = clock
 
-      clock.restore = function (options: Partial<Cypress.Loggable> = {}) {
+      clock.restore = function (userOptions: Partial<Cypress.Loggable> = {}) {
         const ret = restore.apply(this)
 
-        if (options.log !== false) {
-          log('restore')
-        }
+        userOptions = _.defaults({}, userOptions, {
+          log: options.log,
+        })
+
+        log('restore', userOptions.log)
 
         ctx.clock = null
 
@@ -153,7 +152,7 @@ export default function (Commands, Cypress, cy, state) {
         return ret
       }
 
-      log('clock')
+      log('clock', options.log)
 
       state('clock', clock)
 

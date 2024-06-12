@@ -38,7 +38,5 @@ describe('<ExperimentRow />', () => {
       cy.findByText(expDisabled.description).should('be.visible')
       cy.findByText(expDisabled.key).should('be.visible')
     })
-
-    cy.percySnapshot()
   })
 })

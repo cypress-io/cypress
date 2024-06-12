@@ -113,7 +113,7 @@ const CI_PROVIDERS = {
   'travis': 'TRAVIS',
   'wercker': isWercker,
   netlify: 'NETLIFY',
-  layerci: 'LAYERCI',
+  webappio: 'WEBAPPIO',
 }
 
 const _detectProviderName = () => {
@@ -262,6 +262,10 @@ const _providerCiParams = () => {
       'GITHUB_RUN_ID',
       'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
+      'GITHUB_BASE_REF',
+      'GITHUB_HEAD_REF',
+      'GITHUB_REF_NAME',
+      'GITHUB_REF',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -336,6 +340,7 @@ const _providerCiParams = () => {
       'SEMAPHORE_EXECUTABLE_UUID',
       'SEMAPHORE_GIT_BRANCH',
       'SEMAPHORE_GIT_DIR',
+      'SEMAPHORE_GIT_PR_NUMBER',
       'SEMAPHORE_GIT_REF',
       'SEMAPHORE_GIT_REF_TYPE',
       'SEMAPHORE_GIT_REPO_SLUG',
@@ -414,15 +419,15 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
-    // https://layerci.com/docs/layerfile-reference/build-env
-    layerci: extract([
-      'LAYERCI_JOB_ID',
-      'LAYERCI_RUNNER_ID',
+    // https://docs.webapp.io/layerfile-reference/build-env
+    webappio: extract([
+      'JOB_ID',
+      'RUNNER_ID',
       'RETRY_INDEX',
-      'LAYERCI_PULL_REQUEST',
-      'LAYERCI_REPO_NAME',
-      'LAYERCI_REPO_OWNER',
-      'LAYERCI_BRANCH',
+      'PULL_REQUEST_URL',
+      'REPOSITORY_NAME',
+      'REPOSITORY_OWNER',
+      'GIT_BRANCH',
       'GIT_TAG', // short hex for commits
     ]),
   }
@@ -536,7 +541,13 @@ const _providerCommitParams = () => {
     },
     githubActions: {
       sha: env.GITHUB_SHA,
-      branch: env.GH_BRANCH || env.GITHUB_REF,
+      // GH_BRANCH       - populated with HEAD branch by cypress/github-action
+      // GITHUB_HEAD_REF - populated with the head ref or source branch
+      //                   of the pull request in a workflow run and is
+      //                   otherwise unset
+      // GITHUB_REF_NAME - populated with short ref name of the branch or
+      //                   tag that triggered the workflow run
+      branch: env.GH_BRANCH || env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
       runAttempt: env.GITHUB_RUN_ATTEMPT,
@@ -611,9 +622,9 @@ const _providerCommitParams = () => {
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
     },
-    layerci: {
+    webappio: {
       sha: env.GIT_COMMIT,
-      branch: env.LAYERCI_BRANCH,
+      branch: env.GIT_BRANCH,
       message: env.GIT_COMMIT_TITLE,
     },
   }

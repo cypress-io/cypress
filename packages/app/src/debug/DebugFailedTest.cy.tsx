@@ -36,6 +36,8 @@ const instance1: TestResults['instance'] = {
   groupId: '123',
   status: 'FAILED',
   hasScreenshots: true,
+  hasReplay: true,
+  replayUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/replay',
   screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
   hasStdout: true,
   stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
@@ -116,15 +118,13 @@ describe('<DebugFailedTest/>', () => {
     assertRowContents(testResult)
 
     cy.findByTestId('test-group').realHover()
-    cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
+    cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 4)
     cy.findByTestId('debug-artifacts').children().each((artifact) => {
       cy.wrap(artifact).find('a').should('have.attr', 'href')
       .and('match', /utm_medium/)
       .and('match', /utm_campaign/)
       .and('match', /utm_source/)
     })
-
-    cy.percySnapshot()
   })
 
   it('contains multiple titleParts segments', { viewportWidth: 1200 }, () => {
@@ -139,8 +139,6 @@ describe('<DebugFailedTest/>', () => {
     ))
 
     assertRowContents(multipleTitleParts)
-
-    cy.percySnapshot()
   })
 
   it('tests multiple groups', { viewportWidth: 1200 }, () => {
@@ -167,7 +165,7 @@ describe('<DebugFailedTest/>', () => {
     cy.findByTestId('debug-artifacts').should('not.exist')
     cy.findAllByTestId('grouped-row').should('have.length', 2)
     cy.findAllByTestId('grouped-row').first().realHover()
-    cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 3)
+    cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 4)
     cy.percySnapshot()
   })
 
@@ -188,8 +186,6 @@ describe('<DebugFailedTest/>', () => {
 
     cy.contains('...').realHover()
     cy.contains('[data-cy=tooltip-content]', 'Test content 2 > Test content 3 > Test content 4').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('conditionally renders artifacts', () => {
@@ -209,6 +205,7 @@ describe('<DebugFailedTest/>', () => {
       hasStdout: false,
       hasScreenshots: false,
       hasVideo: false,
+      hasReplay: false,
     }
 
     render({ ...testResult, instance: artifactFreeInstance })
@@ -225,5 +222,21 @@ describe('<DebugFailedTest/>', () => {
     render({ ...testResult, instance: { ...artifactFreeInstance, hasVideo: true } })
     cy.findByTestId('debug-artifacts').children().should('have.length', 1)
     cy.findByTestId('PLAY-button').should('exist')
+
+    render({ ...testResult, instance: { ...artifactFreeInstance, hasReplay: true } })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 1)
+    cy.findByTestId('REPLAY-button').should('exist')
+
+    render({ ...testResult, instance: instance1 })
+    cy.findByTestId('debug-artifacts').children()
+    .should('have.length', 4)
+    .first()
+    .should('have.attr', 'data-cy', 'artifact--REPLAY')
+    .next()
+    .should('have.attr', 'data-cy', 'artifact--TERMINAL_LOG')
+    .next()
+    .should('have.attr', 'data-cy', 'artifact--IMAGE_SCREENSHOT')
+    .next()
+    .should('have.attr', 'data-cy', 'artifact--PLAY')
   })
 })

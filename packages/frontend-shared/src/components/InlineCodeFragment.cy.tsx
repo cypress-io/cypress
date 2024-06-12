@@ -6,6 +6,5 @@ describe('<InlineCodeFragment/>', () => {
 
     cy.contains('I am code')
     .should('be.visible')
-    .percySnapshot()
   })
 })

@@ -1,11 +1,11 @@
-import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter/lib/constants.json'
+import constants from '@packages/rewriter/lib/constants.json'
 
 export const patchElementIntegrity = (window: Window) => {
   const originalFormElementSetAttribute = window.HTMLScriptElement.prototype.setAttribute
 
   window.HTMLScriptElement.prototype.setAttribute = function (qualifiedName, value) {
     if (qualifiedName === 'integrity') {
-      qualifiedName = STRIPPED_INTEGRITY_TAG
+      qualifiedName = constants.STRIPPED_INTEGRITY_TAG
     }
 
     return originalFormElementSetAttribute.apply(this, [qualifiedName, value])
@@ -15,7 +15,7 @@ export const patchElementIntegrity = (window: Window) => {
 
   window.HTMLLinkElement.prototype.setAttribute = function (qualifiedName, value) {
     if (qualifiedName === 'integrity') {
-      qualifiedName = STRIPPED_INTEGRITY_TAG
+      qualifiedName = constants.STRIPPED_INTEGRITY_TAG
     }
 
     return originalAnchorElementSetAttribute.apply(this, [qualifiedName, value])

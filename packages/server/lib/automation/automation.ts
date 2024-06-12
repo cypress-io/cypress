@@ -3,25 +3,57 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
+import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
+import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
-export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
+export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
+
+export type AutomationOptions = {
+  cyNamespace?: string
+  cookieNamespace?: string
+  screenshotsFolder?: string | false
+  onBrowserPreRequest?: OnBrowserPreRequest
+  onRequestEvent?: OnRequestEvent
+  onRemoveBrowserPreRequest?: (requestId: string) => void
+  onDownloadLinkClicked?: (downloadUrl: string) => void
+  onServiceWorkerRegistrationUpdated?: OnServiceWorkerRegistrationUpdated
+  onServiceWorkerVersionUpdated?: OnServiceWorkerVersionUpdated
+  onServiceWorkerClientSideRegistrationUpdated?: OnServiceWorkerClientSideRegistrationUpdated
+  onServiceWorkerClientEvent: ServiceWorkerEventHandler
+}
 
 export class Automation {
   private requests: Record<number, (any) => void>
   private middleware: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
+  public onBrowserPreRequest: OnBrowserPreRequest | undefined
+  public onRequestEvent: OnRequestEvent | undefined
+  public onRemoveBrowserPreRequest: ((requestId: string) => void) | undefined
+  public onDownloadLinkClicked: ((downloadUrl: string) => void) | undefined
+  public onServiceWorkerRegistrationUpdated: OnServiceWorkerRegistrationUpdated | undefined
+  public onServiceWorkerVersionUpdated: OnServiceWorkerVersionUpdated | undefined
+  public onServiceWorkerClientSideRegistrationUpdated: OnServiceWorkerClientSideRegistrationUpdated | undefined
+  public onServiceWorkerClientEvent: ServiceWorkerEventHandler
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent) {
+  constructor (options: AutomationOptions) {
+    this.onBrowserPreRequest = options.onBrowserPreRequest
+    this.onRequestEvent = options.onRequestEvent
+    this.onRemoveBrowserPreRequest = options.onRemoveBrowserPreRequest
+    this.onDownloadLinkClicked = options.onDownloadLinkClicked
+    this.onServiceWorkerRegistrationUpdated = options.onServiceWorkerRegistrationUpdated
+    this.onServiceWorkerVersionUpdated = options.onServiceWorkerVersionUpdated
+    this.onServiceWorkerClientSideRegistrationUpdated = options.onServiceWorkerClientSideRegistrationUpdated
+    this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
+
     this.requests = {}
 
     // set the middleware
     this.middleware = this.initializeMiddleware()
 
-    this.cookies = new Cookies(cyNamespace, cookieNamespace)
-    this.screenshot = Screenshot(screenshotsFolder)
+    this.cookies = new Cookies(options.cyNamespace, options.cookieNamespace)
+    this.screenshot = Screenshot(options.screenshotsFolder)
   }
 
   initializeMiddleware = (): AutomationMiddleware => {
@@ -127,6 +159,7 @@ export class Automation {
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':
+        case 'canceled:download':
         case 'complete:download':
           return data
         default:

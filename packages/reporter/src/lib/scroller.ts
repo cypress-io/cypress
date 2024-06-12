@@ -21,14 +21,12 @@ const SCROLL_THRESHOLD_MS = 50
 export class Scroller {
   private _container: Element | null = null
   private _userScrollCount = 0
-  private _userScroll = true
   private _countUserScrollsTimeout?: number
   private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
 
-    this._userScroll = true
     this._userScrollCount = 0
 
     this._listenToScrolls(onUserScroll)
@@ -38,16 +36,15 @@ export class Scroller {
     if (!this._container) return
 
     this._container.addEventListener('scroll', () => {
-      if (!this._userScroll) {
-        // programmatic scroll
-        this._userScroll = true
+      this._userScrollCount++
 
+      if (this._userScrollCount <= 0) {
+        // programmatic scroll
         return
       }
 
       // there can be false positives for user scrolls, so make sure we get 3
       // or more scroll events within 50ms to count it as a user intending to scroll
-      this._userScrollCount++
       if (this._userScrollCount >= 3) {
         if (onUserScroll) {
           onUserScroll()
@@ -87,7 +84,7 @@ export class Scroller {
       scrollTopGoal = 0
     }
 
-    this._userScroll = false
+    this._userScrollCount--
     this._container.scrollTop = scrollTopGoal
   }
 
@@ -127,14 +124,13 @@ export class Scroller {
   // for testing purposes
   __reset () {
     this._container = null
-    this._userScroll = true
     this._userScrollCount = 0
     clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = undefined
     this._userScrollThresholdMs = SCROLL_THRESHOLD_MS
   }
 
-  __setScrollThreholdMs (ms: number) {
+  __setScrollThresholdMs (ms: number) {
     const isCypressInCypress = document.defaultView !== top
 
     // only allow this to be set in testing

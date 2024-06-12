@@ -44,6 +44,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/index.js',
+    'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
@@ -87,7 +88,11 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         '@swc/core',
         'emitter',
         'ts-loader',
+        'uglify-js',
+        'esbuild',
+        'enhanced-resolve/lib/createInnerCallback',
         '@babel/preset-typescript/package.json',
+        './addon/addon-native',
       ],
     })
 
@@ -137,19 +142,8 @@ const createServerEntryPointBundle = async (buildAppDir) => {
 
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
 
-  console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
-
-  // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
-  const bytenode = await import('bytenode')
-
-  await bytenode.compileFile({
-    filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
-    output: path.join(buildAppDir, 'packages', 'server', 'index.jsc'),
-    electron: true,
-  })
-
   // Convert these inputs to a relative file path. Note that these paths are posix paths.
-  return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
+  return [...Object.keys(esbuildResult.metafile.inputs)].filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
 }
 
 const buildEntryPointAndCleanup = async (buildAppDir) => {
@@ -184,8 +178,12 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
 
   // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
   await consolidateDeps({ projectBaseDir: buildAppDir })
+}
 
+const cleanupUnneededDependencies = async (buildAppDir) => {
+  console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
   // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // this is it's own function as we always want to clean out unneeded dependencies
   await del([
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
@@ -198,7 +196,6 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', '@babel', '**', 'esm'),
     path.join(buildAppDir, '**', 'ramda', 'es'),
     path.join(buildAppDir, '**', 'jimp', 'es'),
-    path.join(buildAppDir, '**', '@jimp', '**', 'es'),
     path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
@@ -212,13 +209,13 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', '*.d.ts'),
     path.join(buildAppDir, '**', 'ajv', 'lib', '**', '*.ts'),
     path.join(buildAppDir, '**', '*.flow'),
-    // Example files are not needed
-    path.join(buildAppDir, '**', 'jimp', 'browser', 'examples'),
     // Documentation files are not needed
     path.join(buildAppDir, '**', 'JSV', 'jsdoc-toolkit'),
     path.join(buildAppDir, '**', 'JSV', 'docs'),
     path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
     // Files used as part of prebuilding are not necessary
+    path.join(buildAppDir, '**', 'node_gyp_bins'),
+    path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
@@ -245,4 +242,5 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
 
 module.exports = {
   buildEntryPointAndCleanup,
+  cleanupUnneededDependencies,
 }

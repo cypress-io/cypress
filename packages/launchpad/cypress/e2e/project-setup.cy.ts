@@ -50,8 +50,11 @@ describe('Launchpad: Setup Project', () => {
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
-    cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not Configured')
-    cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not Configured')
+    cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+    .should(e2eIsConfigured ? 'not.exist' : 'exist')
+
+    cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
+    .should(ctIsConfigured ? 'not.exist' : 'exist')
   }
 
   const verifyChooseABrowserPage = () => {
@@ -217,7 +220,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
@@ -422,7 +425,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="component"]').click()
 
@@ -578,7 +581,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('pnpm add -D react-scripts react-dom react')
     })
 
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
@@ -615,7 +618,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()
@@ -670,8 +673,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
-    it.skip('takes the user to first step of ct setup when switching from app', () => {
+    it('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -690,6 +692,58 @@ describe('Launchpad: Setup Project', () => {
       cy.reload()
 
       cy.contains('h1', 'Project setup')
+    })
+  })
+
+  describe('config loading state', () => {
+    describe('when currentProject config loading state changes from loading to loaded after the first query', () => {
+      beforeEach(() => {
+        let responseCount = 0
+
+        cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
+          req.reply((res) => {
+            responseCount++
+            if (responseCount === 2) {
+              res.body.data.currentProject.isLoadingConfigFile = false
+            } else if (responseCount === 1) {
+              res.body.data.currentProject.isLoadingConfigFile = true
+            } else {
+              throw new Error('Too many calls to MainLaunchpadQuery')
+            }
+          })
+        })
+      })
+
+      it('eventually displays the launchpad', () => {
+        scaffoldAndOpenProject('pristine')
+        cy.visitLaunchpad()
+      })
+    })
+
+    describe('when the initial config is loading, but eventually fails', () => {
+      it('shows the error message, and only calls the endpoint enough times to receive the baseError', () => {
+        let callCount = 0
+        let resWithBaseError: number | undefined
+
+        cy.intercept('POST', '/__launchpad/graphql/query-MainLaunchpadQuery', (req) => {
+          if (resWithBaseError && callCount >= resWithBaseError) {
+            throw new Error('Too many calls to MainLaunchpadQuery')
+          }
+
+          callCount++
+          req.reply((res) => {
+            res.body.data.currentProject.isLoadingConfigFile = true
+            if (res.body.data.baseError) {
+              resWithBaseError = callCount
+            }
+          })
+        })
+
+        scaffoldAndOpenProject('config-with-ts-syntax-error')
+        cy.visitLaunchpad()
+        cy.get('[data-cy=error-header]').contains('Cypress configuration error')
+        cy.wait(1000)
+      })
     })
   })
 })

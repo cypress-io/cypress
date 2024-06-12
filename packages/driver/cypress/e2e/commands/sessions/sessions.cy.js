@@ -53,13 +53,13 @@ describe('cy.session', { retries: 0 }, () => {
   })
 
   describe('testIsolation=true', { testIsolation: true }, () => {
-    describe('test:before:run:async', () => {
-      it('clears page before each run', () => {
+    describe('test:before:after:run:async', () => {
+      it('clears page before the end of each run', () => {
         cy.visit('/fixtures/form.html')
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -68,18 +68,82 @@ describe('cy.session', { retries: 0 }, () => {
         .should('eq', 'about:blank')
       })
 
+      it('clears page before the end of each run when nextTestHasTestIsolationOn is undefined', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: undefined })
+
+          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
+        })
+        .url()
+        .should('eq', 'about:blank')
+      })
+
+      it('does not clear the page before the end of each run if the next test has test isolation off', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank', { testIsolation: true })
+        })
+        .url()
+        .should('not.eq', 'about:blank')
+      })
+
+      it('clears the browser cookie after each run', () => {
+        cy.window()
+        .then((win) => {
+          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+        })
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
+        })
+
+        cy.window().its('cookie').should('be.undefined')
+      })
+
+      it('does not clear the browser cookie after each run if the next test has test isolation off', () => {
+        cy.window()
+        .then((win) => {
+          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+        })
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+        })
+
+        cy.window().its('cookie').should('eq', 'key=value; SameSite=Strict; Secure; Path=/fixtures')
+      })
+    })
+
+    describe('test:before:run:async', () => {
       it('clears session data before each run', async () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
-        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
 
         expect(clearCurrentSessionData).to.be.called
       })
 
       it('resets rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
-        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
 
         expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
       })
@@ -87,20 +151,18 @@ describe('cy.session', { retries: 0 }, () => {
       it('clears the browser context before each run', () => {
         cy.window()
         .then((win) => {
-          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
           win.localStorage.setItem('animal', 'bear')
           win.sessionStorage.setItem('food', 'burgers')
         })
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
-
-          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
+          await Cypress.action('runner:test:before:run:async', {
+            id: 'r1',
+            currentRetry: 0,
+          }, Cypress.state('runnable'))
         })
 
-        cy.window().its('cookie').should('be.undefined')
         cy.window().its('localStorage').should('have.length', 0)
         cy.window().its('sessionStorage').should('have.length', 0)
       })
@@ -245,9 +307,10 @@ describe('cy.session', { retries: 0 }, () => {
         it('has session details in the consoleProps', () => {
           const consoleProps = logs[0].get('consoleProps')()
 
-          expect(consoleProps.Command).to.eq('session')
-          expect(consoleProps.id).to.eq('session-1')
-          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+          expect(consoleProps.name).to.eq('session')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.id).to.eq('session-1')
+          expect(consoleProps.props.Domains).to.eq('This session captured data from localhost.')
 
           expect(consoleProps.groups).to.have.length(1)
           expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -789,7 +852,10 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:run:async', {
+            id: 'r1',
+            currentRetry: 0,
+          }, Cypress.state('runnable'))
 
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
@@ -800,15 +866,21 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not clear session data before each run', async () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
-        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
 
         expect(clearCurrentSessionData).not.to.be.called
       })
 
       it('does not reset rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
-        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+        await Cypress.action('runner:test:before:run:async', {
+          id: 'r1',
+          currentRetry: 0,
+        }, Cypress.state('runnable'))
 
         expect(backendSpy).not.to.be.calledWith('reset:rendered:html:origins')
       })
@@ -823,7 +895,10 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:run:async', {
+            id: 'r1',
+            currentRetry: 0,
+          }, Cypress.state('runnable'))
 
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
@@ -974,9 +1049,10 @@ describe('cy.session', { retries: 0 }, () => {
         it('has session details in the consoleProps', () => {
           const consoleProps = logs[0].get('consoleProps')()
 
-          expect(consoleProps.Command).to.eq('session')
-          expect(consoleProps.id).to.eq('session-1')
-          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+          expect(consoleProps.name).to.eq('session')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.id).to.eq('session-1')
+          expect(consoleProps.props.Domains).to.eq('This session captured data from localhost.')
 
           expect(consoleProps.groups).to.have.length(1)
           expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -1056,9 +1132,10 @@ describe('cy.session', { retries: 0 }, () => {
         it('has session details in the consoleProps', () => {
           const consoleProps = logs[0].get('consoleProps')()
 
-          expect(consoleProps.Command).to.eq('session')
-          expect(consoleProps.id).to.eq(sessionId)
-          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+          expect(consoleProps.name).to.eq('session')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.id).to.eq(sessionId)
+          expect(consoleProps.props.Domains).to.eq('This session captured data from localhost.')
 
           expect(consoleProps.groups).to.have.length(1)
           expect(consoleProps.groups[0].name).to.eq('localhost data:')

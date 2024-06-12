@@ -46,16 +46,28 @@ function createProxyModule (module) {
 
       log(`🧪 Redefining ${key}`)
 
-      Object.defineProperty(target, key, {
+      const params = {
         ...descriptor,
         ...overrides,
-      })
+      }
 
-      if (typeof descriptor.value === 'function') {
+      // If a property defines accessors it cannot also specify `value` and/or `writable`.
+      // Those are implicit from the presence of the accessor functions.
+      if ('get' in params || 'set' in params) {
+        delete params.writable
+        delete params.value
+      }
+
+      Object.defineProperty(target, key, params)
+
+      // The underlying value could be a raw value *or* a value provided by a getter
+      const describedValue = descriptor.value || descriptor.get?.()
+
+      if (typeof describedValue === 'function') {
         // This is how you can see if something is a class
-        // Playground: https://regex101.com/r/OS2Iyg/1
+        // TODO: Revisit, there has to be a better way to do this
         // Important! RegEx instances are stateful, do not extract to a constant
-        const isClass = /class.+?\{.+?\}/gms.test(descriptor.value.toString())
+        const isClass = /^class\s.+?\{.+?\}/gms.test(describedValue.toString())
 
         if (isClass) {
           log(`🏗️ Handling ${key} as a constructor`)
@@ -69,11 +81,20 @@ function createProxyModule (module) {
           log(`🎁 Handling ${key} with a standard wrapper function`)
 
           proxies[key] = function (...params) {
-            return target[key].apply(this, params)
+            // Prefer invoking with `apply` so we get proper context in the invoked function
+            if (target[key].apply) {
+              return target[key].apply(this, params)
+            }
+
+            // Certain weird edge-cases manage to create functions without the Function
+            // prototype, thus no `apply` 🤷. Fall back to straight invocation
+            return target[key](params)
           }
         }
 
         proxies[key].prototype = target[key].prototype
+      } else {
+        log(`${key} is not a function`)
       }
     })
   }
@@ -83,7 +104,7 @@ function createProxyModule (module) {
     return module.default
   }
 
-  if (module.default && typeof module.default !== 'function') {
+  if (module.default) {
     redefinePropertyDescriptors(module.default, {
       writable: true,
       enumerable: true,
@@ -155,7 +176,7 @@ function log (msg) {
     return
   }
 
-  console.log(`[cypress:vite-plugin-mock-esm]: ${msg}`)
+  console.log(`[cypress:vite-plugin-cypress-esm]: ${msg}`)
 }
 
 function cacheAndProxifyModule (id, module) {
@@ -165,15 +186,21 @@ function cacheAndProxifyModule (id, module) {
 
   log(`🔨 creating proxy module for ${id}`)
 
-  const moduleProxy = createProxyModule(module)
+  try {
+    const moduleProxy = createProxyModule(module)
 
-  log(`✅ created proxy module for ${id}`)
+    log(`✅ created proxy module for ${id}`)
 
-  __cypressModuleCache.set(module, moduleProxy)
+    __cypressModuleCache.set(module, moduleProxy)
 
-  log(`📈 Module cache now contains ${__cypressModuleCache.size} entries`)
+    log(`📈 Module cache now contains ${__cypressModuleCache.size} entries`)
 
-  return moduleProxy
+    return moduleProxy
+  } catch (err) {
+    console.warn(`Failed to proxy module ${id}, using original which will *not* support stub/spy`, err)
+
+    return module
+  }
 }
 
 window.__cypressDynamicModule = function (id, importPromise, _debug = false) {

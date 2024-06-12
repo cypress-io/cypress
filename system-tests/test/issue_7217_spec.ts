@@ -16,8 +16,5 @@ describe('e2e issue 7217', () => {
     },
     browser: 'electron',
     snapshot: true,
-    config: {
-      video: false,
-    },
   })
 })

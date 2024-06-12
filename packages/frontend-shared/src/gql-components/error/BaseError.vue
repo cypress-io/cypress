@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="baseError"
-    class="pt-[16px] min-w-[476px] max-w-[848px]"
+    class="pt-[16px] min-w-[476px] max-w-[848px] m-auto"
   >
     <div>
       <div class="pb-[24px] text-center">
@@ -94,6 +94,7 @@
               </template>
               <pre
                 data-testid="error-header"
+                tabindex="0"
                 class="bg-white rounded font-light border border-red-200 p-[16px] overflow-auto"
                 v-html="baseError.errorStack"
               />

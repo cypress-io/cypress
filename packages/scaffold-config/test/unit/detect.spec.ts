@@ -191,7 +191,7 @@ describe('detectFramework', () => {
     expect(actual.bundler).to.eq('vite')
   })
 
-  ;['10.0.0', '11.0.0', '12.0.0'].forEach((v) => {
+  ;['10.0.0', '11.0.0', '12.0.0', '13.0.0', '14.0.0'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
 
@@ -457,7 +457,7 @@ describe('detectLanguage', () => {
       expect(actual).to.eq('ts')
     })
 
-    it('with a TypeScript commponent spec', async () => {
+    it('with a TypeScript component spec', async () => {
       const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
       fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])

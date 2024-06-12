@@ -8,6 +8,7 @@
           "id": "Q2xvdWRSdW46TUdWZXhvQkRPNg==",
           "runNumber": 136,
           "status": "FAILED",
+          "totalFailed": "1",
           "commitInfo": {
             "sha": "commit2",
             "__typename": "CloudRunCommitInfo"
@@ -18,6 +19,7 @@
           "id": "Q2xvdWRSdW46ckdXb2wzbzJHVg==",
           "runNumber": 134,
           "status": "PASSED",
+          "totalFailed": "0",
           "commitInfo": {
             "sha": "37fa5bfb9e774d00a03fe8f0d439f06ec70f533d",
             "__typename": "CloudRunCommitInfo"

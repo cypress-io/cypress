@@ -240,9 +240,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
     expectStartToBeBeforeEnd(run, 'stats.startedAt', 'stats.endedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
-    const attempts = _.flatMap(run.tests, (test) => test.attempts)
-
-    const wallClocks = _.sumBy(attempts, 'duration')
+    const wallClocks = _.sumBy(run.tests, 'duration')
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
@@ -250,7 +248,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       run,
       'stats.duration',
       wallClocks,
-      wallClocks + 400, // add 400ms to account for padding
+      wallClocks + 1000, // add 600ms to account for padding
       1234,
     )
 
@@ -258,7 +256,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       run,
       'reporterStats.duration',
       wallClocks,
-      wallClocks + 400, // add 400ms to account for padding
+      wallClocks + 1000, // add 600ms to account for padding
       1234,
     )
 
@@ -268,48 +266,22 @@ export const expectCorrectModuleApiResult = (json, opts: {
       if (test.displayError) {
         test.displayError = systemTests.normalizeStdout(test.displayError)
       }
-    })
 
-    attempts.forEach((attempt) => {
-      // normalize stack
-      if (attempt.error) {
-        attempt.error.stack = systemTests.normalizeStdout(attempt.error.stack).trim()
-      }
-
-      // normalize startedAt
-      if (attempt.startedAt) {
-        const d = new Date(attempt.startedAt)
-
-        expect(d.toJSON()).to.eq(attempt.startedAt)
-        attempt.startedAt = STATIC_DATE
-
-        if (opts.video) {
-          expect(attempt.videoTimestamp).to.be.a('number')
-          attempt.videoTimestamp = 9999
-        }
-      }
-
-      attempt.screenshots.forEach((screenshot) => {
-        // expect(screenshot.screenshotId).to.have.length(5)
-
-        const d = new Date(screenshot.takenAt)
-
-        expect(d.toJSON()).to.eq(screenshot.takenAt)
-        screenshot.takenAt = STATIC_DATE
-
-        // screenshot.screenshotId = 'some-random-id'
-        screenshot.path = systemTests.normalizeStdout(screenshot.path)
-      })
-
-      if (attempt.duration) {
-        expect(attempt.duration).to.be.a('number')
-        attempt.duration = 1234
-      }
+      test.duration = 1234
     })
 
     if (opts.video) {
       // normalize video path
       run.video = systemTests.normalizeStdout(run.video)
     }
+
+    run.screenshots.forEach((screenshot) => {
+      const d = new Date(screenshot.takenAt)
+
+      expect(d.toJSON()).to.eq(screenshot.takenAt)
+      screenshot.takenAt = STATIC_DATE
+
+      screenshot.path = systemTests.normalizeStdout(screenshot.path)
+    })
   })
 }

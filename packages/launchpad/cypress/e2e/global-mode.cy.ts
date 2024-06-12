@@ -117,8 +117,6 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
-
-      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {
@@ -189,6 +187,12 @@ describe('Launchpad: Global Mode', () => {
         })
       }
 
+      const waitForConfigLoad = () => {
+        cy.contains('Initializing config...').should('be.visible')
+        // ensure the config is fully loaded before clicking the breadcrumb back
+        cy.contains('Initializing config...').should('not.exist')
+      }
+
       const projectList = ['todos']
 
       setupAndValidateProjectsList(projectList)
@@ -202,6 +206,7 @@ describe('Launchpad: Global Mode', () => {
       // Component testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="component"]').click()
+      waitForConfigLoad()
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
@@ -214,6 +219,7 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="e2e"]').click()
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
+      waitForConfigLoad()
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
@@ -287,17 +293,6 @@ describe('Launchpad: Global Mode', () => {
         .should('have.length', projectList.length)
       })
 
-      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
-      it.skip('filters project results when searching by project path', () => {
-        setupAndValidateProjectsList(projectList)
-        cy.get('#project-search').type('packages')
-        cy.get('[data-cy="project-card"')
-        .should('have.length', projectList.length)
-
-        cy.get('#project-search').type(`${path.sep}todos`)
-        cy.contains(defaultMessages.globalPage.noResultsMessage)
-      })
-
       it('shows "empty results" pages when searching for a non-existent name', () => {
         setupAndValidateProjectsList(projectList)
         cy.get('#project-search').type('hi')
@@ -310,17 +305,6 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[data-cy="no-results-clear"]').click()
         cy.get('[data-cy="project-card"]')
         .should('have.length', projectList.length)
-      })
-
-      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
-      it.skip('shows "empty results" pages when searching for a non-existent path', () => {
-        setupAndValidateProjectsList(projectList)
-        cy.get('#project-search').type('packages')
-        cy.get('[data-cy="project-card"')
-        .should('have.length', projectList.length)
-
-        cy.get('#project-search').type(`${path.sep}random`)
-        cy.contains(defaultMessages.globalPage.noResultsMessage)
       })
     })
   })

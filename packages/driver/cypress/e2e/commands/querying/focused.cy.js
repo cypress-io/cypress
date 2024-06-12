@@ -87,8 +87,6 @@ describe('src/cy/commands/querying', () => {
             this.lastLog = log
           }
         })
-
-        return null
       })
 
       it('is a parent command', () => {
@@ -96,6 +94,36 @@ describe('src/cy/commands/querying', () => {
           const { lastLog } = this
 
           expect(lastLog.get('type')).not.to.eq('child')
+        })
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body').focused({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body').focused({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('focused')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
       })
 
@@ -130,9 +158,12 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps', () => {
         cy.get('input:first').focused().then(function ($input) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focused',
-            Yielded: $input.get(0),
-            Elements: 1,
+            name: 'focused',
+            type: 'command',
+            props: {
+              Yielded: $input.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -145,9 +176,12 @@ describe('src/cy/commands/querying', () => {
 
         cy.focused().should('not.exist').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'focused',
-            Yielded: '--nothing--',
-            Elements: 0,
+            name: 'focused',
+            type: 'command',
+            props: {
+              Yielded: '--nothing--',
+              Elements: 0,
+            },
           })
         })
       })

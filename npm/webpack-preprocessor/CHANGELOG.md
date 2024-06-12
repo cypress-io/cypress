@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.1...@cypress/webpack-preprocessor-v6.0.2) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+# [@cypress/webpack-preprocessor-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.0...@cypress/webpack-preprocessor-v6.0.1) (2023-12-26)
+
+# [@cypress/webpack-preprocessor-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.17.1...@cypress/webpack-preprocessor-v6.0.0) (2023-08-29)
+
+
+* `@cypress/webpack-preprocessor-v6.0.0` was inadvertently released and published. There are no breaking changes or any other changes in this release.
+
 # [@cypress/webpack-preprocessor-v5.17.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.17.0...@cypress/webpack-preprocessor-v5.17.1) (2023-05-01)
 
 # [@cypress/webpack-preprocessor-v5.17.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.3...@cypress/webpack-preprocessor-v5.17.0) (2023-02-15)

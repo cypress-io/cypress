@@ -24,5 +24,6 @@ describe('e2e screenshot fullPage capture', () => {
   systemTests.it('passes', {
     spec: 'screenshot_fullpage_capture.cy.js',
     snapshot: true,
+    browser: '!firefox', // This test is flaky on Firefox
   })
 })

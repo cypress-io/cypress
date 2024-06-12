@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
+// @ts-ignore
 import deepDiff from 'return-deep-diff'
 
 import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
@@ -105,8 +106,16 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     debug('resolved config object %o', cfg.resolved)
   }
 
+  const diffsClone = _.cloneDeep(diffs) ?? {}
+
   // merge cfg into overrides
-  const merged = _.defaultsDeep(diffs, cfg)
+  const merged = _.defaultsDeep(diffs, cfg) ?? {}
+
+  for (const [key, value] of Object.entries(diffsClone)) {
+    if (Array.isArray(value)) {
+      merged[key] = _.cloneDeep(value)
+    }
+  }
 
   debug('merged config object %o', merged)
 

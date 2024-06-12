@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const server = require('socket.io')
-const client = require('socket.io-client')
 const parser = require('socket.io-parser')
 const { hasBinary } = require('socket.io-parser/dist/is-binary')
 const expect = require('chai').expect
@@ -18,21 +17,28 @@ describe('Socket', function () {
   })
 
   it('exports client from lib/browser', function () {
-    expect(browserLib.client).to.eq(client)
+    expect(browserLib.client).to.be.defined
   })
 
   it('exports createWebSocket from lib/browser', function () {
     expect(browserLib.createWebsocket).to.be.defined
   })
 
-  it('creates a websocket for non webkit browsers', function () {
-    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
+  it('creates a websocket for non chromium and non webkit browsers', function () {
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'firefox' })
 
     expect(socket.io.opts.path).to.eq('/path')
     expect(socket.io.opts.transports[0]).to.eq('websocket')
   })
 
-  it('creates a websocket for non webkit browsers', function () {
+  it('creates a websocket for chromium browsers', function () {
+    global.window = {}
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
+
+    expect(socket._namespace).to.eq('/path/default')
+  })
+
+  it('creates a websocket for webkit browsers', function () {
     const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
 
     expect(socket.io.opts.path).to.eq('/path')

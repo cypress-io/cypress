@@ -9,6 +9,7 @@ type Promisified<T extends (...args: any) => any>
 interface PromisifiedFsExtra {
   statAsync: (path: string | Buffer) => Bluebird<ReturnType<typeof fsExtra.statSync>>
   removeAsync: Promisified<typeof fsExtra.removeSync>
+  readFileAsync: Promisified<typeof fsExtra.readFileSync>
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
   pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
 }

@@ -81,7 +81,7 @@ The internal Cypress web server responded with:
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_failing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -136,7 +136,6 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/e2e/stdout_exit_early_failing.cy.js
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js: Unexpected token (1:1)
 
@@ -161,7 +160,7 @@ Fix the error in your code and re-run your tests.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_exit_early_failing.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -227,7 +226,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -283,7 +282,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     spec.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -310,7 +309,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_specfile.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -338,7 +337,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_specfile_display_spec_with_a_really_long_name_that_never_has_a_line_break │
   │               _or_new_line.cy.js                                                               │
@@ -373,7 +372,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     nested-4/spec.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -474,7 +473,7 @@ exports['e2e stdout / displays assertion errors'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_assertion_errors.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

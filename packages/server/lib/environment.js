@@ -1,4 +1,5 @@
 require('./util/fs')
+const DEFAULT_ELECTRON_FLAGS = require('./util/chromium_flags').DEFAULT_ELECTRON_FLAGS
 
 const os = require('os')
 
@@ -43,50 +44,43 @@ try {
     app,
   } = require('electron')
 
-  app.commandLine.appendSwitch('disable-renderer-backgrounding', true)
-  app.commandLine.appendSwitch('ignore-certificate-errors', true)
-
-  // These flags are for webcam/WebRTC testing
-  // https://github.com/cypress-io/cypress/issues/2704
-  app.commandLine.appendSwitch('use-fake-ui-for-media-stream')
-  app.commandLine.appendSwitch('use-fake-device-for-media-stream')
-
-  // https://github.com/cypress-io/cypress/issues/2376
-  app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
-
-  // allows webSecurity: false to work as expected in webPreferences
-  // https://github.com/electron/electron/issues/18214
-  app.commandLine.appendSwitch('disable-site-isolation-trials')
-
-  // prevent electron from using /dev/shm, which can cause crashes in Docker
-  // https://github.com/cypress-io/cypress/issues/15814
-  app.commandLine.appendSwitch('disable-dev-shm-usage')
-
-  // prevent navigation throttling when navigating in the browser rapid fire
-  // https://github.com/cypress-io/cypress/pull/20271
-  app.commandLine.appendSwitch('disable-ipc-flooding-protection')
-
-  // ensure we get the most accurate memory usage
-  app.commandLine.appendSwitch('enable-precise-memory-info')
+  debug('appending default switches for electron: %O', DEFAULT_ELECTRON_FLAGS)
+  DEFAULT_ELECTRON_FLAGS.forEach(({ name, value }) => {
+    value ? app.commandLine.appendSwitch(name, value) : app.commandLine.appendSwitch(name)
+  })
 
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
-    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
+    // regex will be used to convert ELECTRON_EXTRA_LAUNCH_ARGS into an array, for example
+    // input: 'foo --ipsum=0 --bar=--baz=quux --lorem="--ipsum=dolor --sit=amet"'
+    // output: ['foo', '--ipsum=0', '--bar=--baz=quux', '--lorem="--ipsum=dolor --sit=amet"']
+    const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
+    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.match(regex) || []
 
     electronLaunchArguments.forEach((arg) => {
       // arg can be just key --disable-http-cache
       // or key value --remote-debugging-port=8315
-      // https://github.com/cypress-io/cypress/issues/7994
-      const [key, value] = arg.split('=')
+      // or key value with another value --foo=--bar=4196
+      // or key value with another multiple value --foo='--bar=4196 --baz=quux'
+      const [key, ...value] = arg.split('=')
 
       // because this is an environment variable, everything is a string
       // thus we don't have to worry about casting
       // --foo=false for example will be "--foo", "false"
-      if (value) {
-        app.commandLine.appendSwitch(key, value)
+      if (value.length) {
+        let joinedValues = value.join('=')
+
+        // check if the arg is wrapped in " or ' (unicode)
+        const isWrappedInQuotes = !!['\u0022', '\u0027'].find(((charAsUnicode) => joinedValues.startsWith(charAsUnicode) && joinedValues.endsWith(charAsUnicode)))
+
+        if (isWrappedInQuotes) {
+          joinedValues = joinedValues.slice(1, -1)
+        }
+
+        app.commandLine.appendSwitch(key, joinedValues)
       } else {
         app.commandLine.appendSwitch(key)
       }

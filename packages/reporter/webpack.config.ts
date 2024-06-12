@@ -1,6 +1,8 @@
-import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, HtmlWebpackPlugin, getCleanWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import type { Configuration } from 'webpack'
+
+const CleanWebpackPlugin = getCleanWebpackPlugin()
 
 // @ts-ignore
 const config: Configuration = {
@@ -23,6 +25,7 @@ config.plugins = [
     template: path.resolve(__dirname, 'static/index.html'),
     inject: false,
   }),
+  new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 ]
 
 config.resolve = {

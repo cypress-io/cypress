@@ -35,17 +35,16 @@ export default (Commands, Cypress, cy, state) => {
     // increase the timeout by the delta
     cy.timeout(ms, true, 'wait')
 
-    if (options.log !== false) {
-      options._log = Cypress.log({
-        timeout: ms,
-        consoleProps () {
-          return {
-            'Waited For': `${ms}ms before continuing`,
-            'Yielded': subject,
-          }
-        },
-      })
-    }
+    options._log = Cypress.log({
+      hidden: options.log === false,
+      timeout: ms,
+      consoleProps () {
+        return {
+          'Waited For': `${ms}ms before continuing`,
+          'Yielded': subject,
+        }
+      },
+    })
 
     return Promise
     .delay(ms, 'wait')
@@ -53,26 +52,20 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   const waitString = (subject, str, options) => {
-    let log
+    // if this came from the spec bridge, we need to set a few additional properties to ensure the log displays correctly
+    // otherwise, these props will be pulled from the current command which will be cy.origin on the primary
+    const log = options._log = Cypress.log({
+      hidden: options.log === false,
+      type: 'parent',
+      aliasType: 'route',
+      // avoid circular reference
+      options: _.omit(options, '_log'),
+    })
 
-    if (options.log !== false) {
-      let specBridgeLogOptions = {}
-
-      // if this came from the spec bridge, we need to set a few additional properties to ensure the log displays correctly
-      // otherwise, these props will be pulled from the current command which will be cy.origin on the primary
-      if (options.isCrossOriginSpecBridge) {
-        specBridgeLogOptions = {
-          name: 'wait',
-          message: '',
-        }
-      }
-
-      log = options._log = Cypress.log({
-        type: 'parent',
-        aliasType: 'route',
-        // avoid circular reference
-        options: _.omit(options, '_log'),
-        ...specBridgeLogOptions,
+    if (options.isCrossOriginSpecBridge) {
+      log?.set({
+        name: 'wait',
+        message: '',
       })
     }
 
@@ -90,6 +83,10 @@ export default (Commands, Cypress, cy, state) => {
       const req = waitForRoute(alias, state, type)
 
       if (req) {
+        // Attach alias to request to ensure driver access to
+        // dynamic aliases. See #24653
+        req.request.alias = alias
+
         return req
       }
 
@@ -250,7 +247,28 @@ export default (Commands, Cypress, cy, state) => {
     .then((responses) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses
+      const ret = responses.length === 1 ? responses[0] : ((resp) => {
+        const respMap = new Map()
+        const respSeq = resp.map((r) => r.routeId)
+
+        // responses are sorted in the order the user specified them. if there are multiples of the same
+        // alias awaited, they're sorted in execution order
+        resp.sort((a, b) => {
+          if (!a.browserRequestId || !b.browserRequestId) {
+            return 0
+          }
+
+          // sort responses based on browser request ID
+          const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
+          const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
+
+          return parseInt(requestIdSuffixA) < parseInt(requestIdSuffixB) ? -1 : 1
+        }).forEach((r) => {
+          respMap.get(r.routeId)?.push(r) ?? respMap.set(r.routeId, [r])
+        })
+
+        return respSeq.map((routeId) => respMap.get(routeId)?.shift())
+      })(responses)
 
       if (log) {
         log.set('consoleProps', () => {

@@ -2,6 +2,7 @@ const path = require('path')
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
+const minimist = require('minimist')
 
 const checkedInBinaryVersion = require('../package.json').version
 const { changeCatagories } = require('./semantic-commits/change-categories')
@@ -102,9 +103,11 @@ if (require.main !== module) {
 (async () => {
   process.chdir(path.join(__dirname, '..'))
 
-  const { nextVersion } = await getNextVersionForBinary()
+  const args = minimist(process.argv.slice(2))
 
-  if (process.argv.includes('--npm') && checkedInBinaryVersion !== nextVersion) {
+  const nextVersion = args.nextVersion || (await getNextVersionForBinary()).nextVersion
+
+  if (args.npm && checkedInBinaryVersion !== nextVersion) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
 
     console.log(`Running '${cmd}'...`)

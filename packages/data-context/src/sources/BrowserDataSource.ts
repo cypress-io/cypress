@@ -1,9 +1,9 @@
-import type { FoundBrowser, BrowserStatus } from '@packages/types'
-import os from 'os'
 import execa from 'execa'
-
-import type { DataContext } from '..'
 import _ from 'lodash'
+import os from 'os'
+
+import type { FoundBrowser } from '@packages/types'
+import type { DataContext } from '..'
 
 let isPowerShellAvailable: undefined | boolean
 let powerShellPromise: Promise<void> | undefined
@@ -130,13 +130,5 @@ export class BrowserDataSource {
 
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
-  }
-
-  setBrowserStatus (browserStatus: BrowserStatus) {
-    this.ctx.update((d) => {
-      d.app.browserStatus = browserStatus
-    })
-
-    this.ctx.emitter.browserStatusChange()
   }
 }

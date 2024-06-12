@@ -5,16 +5,15 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
-    "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
-    "watch": "node ../../scripts/run-webpack --watch --progress",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -24,6 +23,7 @@
     "@packages/icons": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "chai": "3.5.0",
+    "chokidar-cli": "2.1.0",
     "cross-env": "6.0.3",
     "eol": "0.9.1",
     "fs-extra": "9.1.0",
@@ -32,9 +32,9 @@
     "mock-require": "3.0.3",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
-    "ts-loader": "8.4.0",
+    "ts-loader": "9.4.4",
     "webextension-polyfill": "0.4.0",
-    "webpack": "4.44.2"
+    "webpack": "^5.88.2"
   },
   "files": [
     "app",

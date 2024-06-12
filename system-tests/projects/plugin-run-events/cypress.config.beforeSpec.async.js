@@ -2,7 +2,6 @@ module.exports = {
   fixturesFolder: false,
   e2e: {
     supportFile: false,
-    video: false,
     setupNodeEvents (on, config) {
       on('before:spec', (args) => {
         console.log('<---- before:spec promise start')

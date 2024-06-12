@@ -18,11 +18,19 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  videoCompression: false, // turn off video compression for CI
   e2e: {
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
+      on('task', {
+        log (message) {
+          // eslint-disable-next-line no-console
+          console.log(message)
+
+          return null
+        },
+      })
+
       return require('./cypress/plugins')(on, config)
     },
     baseUrl: 'http://localhost:3500',

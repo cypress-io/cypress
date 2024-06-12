@@ -1,7 +1,7 @@
-import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
 import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import { SupportStatusEnum } from '../enumTypes'
+import { WizardBundler } from './gql-WizardBundler'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -27,12 +27,12 @@ export const WizardFrontendFramework = objectType({
 
     t.nonNull.boolean('isSelected', {
       description: 'Whether this is the selected framework in the wizard',
-      resolve: (source, args, ctx) => ctx.wizardData.chosenFramework?.type === source.type,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.chosenFramework?.type === source.type,
     })
 
     t.nonNull.boolean('isDetected', {
       description: 'Whether this is the detected framework',
-      resolve: (source, args, ctx) => ctx.wizardData.detectedFramework?.type === source.type,
+      resolve: (source, args, ctx) => ctx.coreData.wizard.detectedFramework?.type === source.type,
     })
 
     t.nonNull.list.nonNull.field('supportedBundlers', {
@@ -49,7 +49,7 @@ export const WizardFrontendFramework = objectType({
           return b
         }
 
-        return ctx.wizardData.chosenFramework?.supportedBundlers.map(findBundler) ?? []
+        return ctx.coreData.wizard.chosenFramework?.supportedBundlers.map(findBundler) ?? []
       },
     })
 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <h1>CSP Script Test</h1>
+  <link href="http://www.foobar.com:4466/csp_empty_style.css" rel="stylesheet" />
+
+  <!-- load a few cross origin scripts to check CSP -->
+  <script type="text/javascript" src="http://www.foobar.com:4466/csp_empty_script.js"></script>
+  <script type="text/javascript" src="http://app.foobar.com:4466/csp_empty_script.js"></script>
+
+  <!-- in tandem with some same origin scripts -->
+  <script type="text/javascript" src="http://localhost:4466/csp_empty_script.js"></script>
+  <script nonce="random_nonce">window.top.postMessage({ event: 'csp-script-ran', data: 'nonce script ran'}, '*')</script>
+  <!-- this script hashes to sha256-YM+jfV8mJ3IaF5lqpgvjnYAWdy0k77pupK3tsdMuZv8= -->
+  <script>window.top.postMessage({ event: 'csp-script-ran', data: 'hash script ran'}, '*')</script>
+
+  <form action="/" id="form" method="post">
+    <input type="text" name="fieldName" value="fieldValue" />
+    <input type="submit" id="submit" value="submit" />
+  </form>
+
+</body>
+</html>

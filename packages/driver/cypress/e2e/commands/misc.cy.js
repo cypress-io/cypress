@@ -70,9 +70,12 @@ describe('src/cy/commands/misc', () => {
       it('consoleProps', () => {
         return cy.log('foobarbaz', [{}]).then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'log',
+            name: 'log',
+            type: 'command',
             args: [[{}]],
-            message: 'foobarbaz',
+            props: {
+              message: 'foobarbaz',
+            },
           })
         })
       })
@@ -236,8 +239,6 @@ describe('src/cy/commands/misc', () => {
             this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('throws when wrapping an array of windows', (done) => {
@@ -330,8 +331,35 @@ describe('src/cy/commands/misc', () => {
           this.lastLog = log
           this.logs.push(log)
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.wrap('', { log: false }).then(() => {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.wrap('', { log: false }).then(() => {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name')).to.eq('wrap')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs immediately', function (done) {

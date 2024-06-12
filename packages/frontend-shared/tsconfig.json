@@ -61,14 +61,18 @@
       "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress",
       "cypress-real-events", 
-      "cypress",
-      "cypress-axe"
+      "cypress"
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
+    "ignoreDeprecations": "5.0",
+    /* 
+     * TODO: remove importsNotUsedAsValues after typescript 5.5 and up as it will no longer work. If we want the same behavior
+     * as importsNotUsedAsValues, we need to use "verbatimModuleSyntax", which will require this package to be an ES Module.
+     */
     "importsNotUsedAsValues": "error",
     "useUnknownInCatchVariables": false
   }

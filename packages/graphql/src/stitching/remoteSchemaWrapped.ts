@@ -4,7 +4,7 @@ import type { DataContext } from '@packages/data-context'
 import type { RequestPolicy } from '@urql/core'
 import assert from 'assert'
 import debugLib from 'debug'
-import { BREAK, OperationDefinitionNode, print, visit } from 'graphql'
+import { BREAK, OperationDefinitionNode, visit } from 'graphql'
 import { remoteSchema } from './remoteSchema'
 
 const debug = debugLib('cypress:graphql:remoteSchemaWrapped')
@@ -62,7 +62,6 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
       fieldName: info.fieldName,
       requestPolicy,
       operationType: obj.operationType ?? 'query',
-      operation: print(operationDoc),
       operationDoc,
       operationVariables: obj.variables,
       // When we respond eagerly with a result, but receive an updated value

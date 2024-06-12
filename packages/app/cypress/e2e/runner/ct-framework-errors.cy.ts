@@ -33,7 +33,7 @@ function verifyErrorOnlyCapturedOnce (err: string) {
 function loadErrorSpec (options: Options): VerifyFunc {
   const { projectName, filePath, failCount, passCount = '--', configFile } = options
 
-  cy.openProject(projectName, ['--config-file', configFile])
+  cy.openProject(projectName, ['--config-file', configFile, '--component'])
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
@@ -68,7 +68,7 @@ reactVersions.forEach((reactVersion) => {
     it('error conditions', () => {
       const verify = loadErrorSpec({
         projectName: `react${reactVersion}`,
-        configFile: 'cypress-vite.config.ts',
+        configFile: 'cypress-vite-default.config.ts',
         filePath: 'src/Errors.cy.jsx',
         failCount: 4,
       })
@@ -136,12 +136,12 @@ describe('Next.js', {
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
-    cy.scaffoldProject('next-12')
+    cy.scaffoldProject('next-14')
   })
 
   it('error conditions', () => {
     const verify = loadErrorSpec({
-      projectName: 'next-12',
+      projectName: 'next-14',
       configFile: 'cypress.config.js',
       filePath: 'cypress/Errors.cy.jsx',
       failCount: 4,

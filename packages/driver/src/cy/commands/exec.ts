@@ -3,35 +3,38 @@ import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
   _log?: Log
   cmd?: string
+  timeout: number
 }
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    exec (cmd: string, userOptions: Partial<Cypress.ExecOptions> = {}) {
+    exec (cmd: string, userOptions: Partial<Cypress.ExecOptions>, ...extras: never[]) {
+      userOptions = userOptions || {}
+
       const options: InternalExecOptions = _.defaults({}, userOptions, {
         log: true,
-        timeout: Cypress.config('execTimeout'),
+        timeout: Cypress.config('execTimeout') as number,
         failOnNonZeroExit: true,
         env: {},
       })
 
       let consoleOutput
 
-      if (options.log) {
-        consoleOutput = {}
+      consoleOutput = {}
 
-        options._log = Cypress.log({
-          message: _.truncate(cmd, { length: 25 }),
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleOutput
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: _.truncate(cmd, { length: 25 }),
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleOutput
+        },
+      })
 
       if (!cmd || !_.isString(cmd)) {
         $errUtils.throwErrByPath('exec.invalid_argument', {
@@ -46,7 +49,12 @@ export default (Commands, Cypress, cy) => {
       // because we're handling timeouts ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('exec', _.pick(options, 'cmd', 'timeout', 'env'))
+      return runPrivilegedCommand({
+        commandName: 'exec',
+        cy,
+        Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+        options: _.pick(options, 'cmd', 'timeout', 'env'),
+      })
       .timeout(options.timeout)
       .then((result) => {
         if (options._log) {
@@ -75,20 +83,26 @@ export default (Commands, Cypress, cy) => {
         })
       })
       .catch(Promise.TimeoutError, { timedOut: true }, () => {
-        return $errUtils.throwErrByPath('exec.timed_out', {
+        $errUtils.throwErrByPath('exec.timed_out', {
           onFail: options._log,
           args: { cmd, timeout: options.timeout },
         })
       })
-      .catch((error) => {
+      .catch((err) => {
         // re-throw if timedOut error from above
-        if (error.name === 'CypressError') {
-          throw error
+        if (err.name === 'CypressError') {
+          throw err
         }
 
-        return $errUtils.throwErrByPath('exec.failed', {
+        if (err.isNonSpec) {
+          $errUtils.throwErrByPath('miscellaneous.non_spec_invocation', {
+            args: { cmd: 'exec' },
+          })
+        }
+
+        $errUtils.throwErrByPath('exec.failed', {
           onFail: options._log,
-          args: { cmd, error },
+          args: { cmd, error: err },
         })
       })
     },

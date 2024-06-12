@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
+import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks/mochaEvents'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -7,11 +8,12 @@ export default defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  videoCompression: false, // turn off video compression for CI
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
+  experimentalMemoryManagement: true,
+  experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   component: {
     experimentalSingleTabRunMode: true,
@@ -44,6 +46,8 @@ export default defineConfig({
       on('task', {
         initGitRepoForTestProject,
         resetGitRepoForTestProject,
+        writeMochaEventSnapshot,
+        readMochaEventSnapshot,
       })
 
       return await e2ePluginSetup(on, config)

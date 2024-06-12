@@ -562,6 +562,39 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollTo')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+      })
+
       it('logs out scrollTo', () => {
         cy.get('#scroll-to-both').scrollTo(25).then(function () {
           const { lastLog } = this
@@ -614,14 +647,15 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('#consoleProps', () => {
         cy.get('#scroll-to-both').scrollTo(25, { duration: 1 }).then(function ($container) {
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('scrollTo')
-          expect(console.X).to.eq(25)
-          expect(console.Y).to.eq(0)
-          expect(console.Options).to.eq('{duration: 1}')
+          expect(consoleProps.name).to.eq('scrollTo')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.X).to.eq(25)
+          expect(consoleProps.props.Y).to.eq(0)
+          expect(consoleProps.props.Options).to.eq('{duration: 1}')
 
-          expect(console['Scrolled Element']).to.eq($container.get(0))
+          expect(consoleProps.props['Scrolled Element']).to.eq($container.get(0))
         })
       })
     })
@@ -959,6 +993,39 @@ describe('src/cy/commands/actions/scroll', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollIntoView')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
+      })
+
       it('logs out scrollIntoView', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView().then(function () {
           const { lastLog } = this
@@ -1010,11 +1077,12 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('#consoleProps', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView().then(function ($container) {
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('scrollIntoView')
-          expect(console['Applied To']).to.eq($container.get(0))
-          expect(console['Scrolled Element']).to.exist
+          expect(consoleProps.name).to.eq('scrollIntoView')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq($container.get(0))
+          expect(consoleProps.props['Scrolled Element']).to.exist
         })
       })
     })

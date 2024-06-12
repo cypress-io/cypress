@@ -233,13 +233,14 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('get')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Selector).to.equal('#button')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Selector).to.equal('#button')
 
         // The Yielded value here SHOULD be correct as it will be reified from its props as it should not be found in the current DOM state
-        expect(consoleProps.Yielded.tagName).to.equal('BUTTON')
-        expect(consoleProps.Yielded.getAttribute('id')).to.equal('button')
+        expect(consoleProps.props.Yielded.tagName).to.equal('BUTTON')
+        expect(consoleProps.props.Yielded.getAttribute('id')).to.equal('button')
       })
     })
 
@@ -257,13 +258,14 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
-        expect(consoleProps.Command).to.equal('get')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Selector).to.equal('#button')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Selector).to.equal('#button')
 
         // The Yielded value here SHOULD be correct as it will be reified from its props as it should not be found in the current DOM state
-        expect(consoleProps.Yielded.tagName).to.equal('BUTTON')
-        expect(consoleProps.Yielded.getAttribute('id')).to.equal('button')
+        expect(consoleProps.props.Yielded.tagName).to.equal('BUTTON')
+        expect(consoleProps.props.Yielded.getAttribute('id')).to.equal('button')
       })
     })
 
@@ -287,20 +289,21 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('click')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('click')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         // TODO: test class list serialization
-        // expect(consoleProps['Applied To']).to.have.property('classList').that.contains(['my-custom-button-css', 'class2', '@class3'])
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button-inside-a')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('<span>click button</span>')
+        // expect(consoleProps.props['Applied To']).to.have.property('classList').that.contains(['my-custom-button-css', 'class2', '@class3'])
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button-inside-a')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('<span>click button</span>')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -315,7 +318,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -337,18 +340,19 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('dblclick')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('dblclick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('button')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('button')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -363,7 +367,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -385,18 +389,19 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('rightclick')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('rightclick')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Selector).to.be.undefined
-        expect(consoleProps.Yielded).to.be.undefined
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Selector).to.be.undefined
+        expect(consoleProps.props.Yielded).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.contain('button')
-        expect(consoleProps['Applied To'].innerHTML).to.contain('button')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.contain('button')
+        expect(consoleProps.props['Applied To'].innerHTML).to.contain('button')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -411,7 +416,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -436,18 +441,19 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('type')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('type')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Typed).to.equal('foo')
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Typed).to.equal('foo')
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
-        expect(consoleProps['Applied To'].innerHTML).to.equals('')
-        expect(consoleProps['Applied To'].type).to.equal('text')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.props['Applied To'].innerHTML).to.equals('')
+        expect(consoleProps.props['Applied To'].type).to.equal('text')
 
         expect(consoleProps.table[1]).to.be.a('function')
         expect(consoleProps.table[2]).to.be.a('function')
@@ -466,14 +472,14 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
 
         _.forEach(KeyboardEventsTable.data, (datum) => {
           expect(datum).to.have.property('Active Modifiers').that.equals(null)
           expect(datum).to.have.property('Events Fired').that.equals('keydown, keypress, beforeinput, textInput, input, keyup')
           expect(datum).to.have.property('Prevented Default').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
 
         expect(KeyboardEventsTable.data[0]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
@@ -507,19 +513,20 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('submit')
-        expect(consoleProps.Elements).to.equal(1)
+        expect(consoleProps.name).to.equal('submit')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('FORM')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('multiple-inputs-and-input-submit')
-        expect(consoleProps['Applied To'].querySelector('input[name="fname"]')).to.be.ok
-        expect(consoleProps['Applied To'].querySelector('input[name="lname"]')).to.be.ok
-        expect(consoleProps['Applied To'].querySelector('input[type="submit"]')).to.be.ok
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('multiple-inputs-and-input-submit')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="fname"]')).to.be.ok
+        expect(consoleProps.props['Applied To'].querySelector('input[name="lname"]')).to.be.ok
+        expect(consoleProps.props['Applied To'].querySelector('input[type="submit"]')).to.be.ok
 
         // make sure input values are passed along into the serialized snapshot/element
-        expect(consoleProps['Applied To'].querySelector('input[name="fname"]').value).to.equal('foo')
-        expect(consoleProps['Applied To'].querySelector('input[name="lname"]').value).to.equal('bar')
-        expect(consoleProps['Applied To'].querySelector('input[type="submit"]').value).to.equal('submit me')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="fname"]').value).to.equal('foo')
+        expect(consoleProps.props['Applied To'].querySelector('input[name="lname"]').value).to.equal('bar')
+        expect(consoleProps.props['Applied To'].querySelector('input[type="submit"]').value).to.equal('submit me')
       })
     })
 
@@ -540,9 +547,10 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('focus')
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('focus')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
@@ -564,9 +572,10 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('blur')
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('blur')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
@@ -588,11 +597,12 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('clear')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Options).to.be.undefined
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps['Applied To'].getAttribute('id')).to.equal('input')
+        expect(consoleProps.name).to.equal('clear')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Options).to.be.undefined
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
     })
 
@@ -613,14 +623,15 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('check')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('check')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -635,7 +646,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -658,14 +669,15 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('uncheck')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('uncheck')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
+        expect(consoleProps.props.Options).to.be.undefined
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -680,7 +692,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -703,15 +715,16 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('select')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Coords).to.have.property('x').that.is.a('number')
-        expect(consoleProps.Coords).to.have.property('y').that.is.a('number')
+        expect(consoleProps.name).to.equal('select')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
+        expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
 
-        expect(consoleProps.Options).to.be.undefined
-        expect(consoleProps.Selected[0]).to.equal('Japanese')
+        expect(consoleProps.props.Options).to.be.undefined
+        expect(consoleProps.props.Selected[0]).to.equal('Japanese')
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('SELECT')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('SELECT')
 
         expect(consoleProps.table[1]).to.be.a('function')
 
@@ -726,7 +739,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'contextmenu'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
           expect(datum).to.have.property('Stopped Propagation').that.equals(null)
-          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
+          expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
       })
     })
@@ -751,10 +764,11 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollIntoView')
+        expect(consoleProps.name).to.equal('scrollIntoView')
+        expect(consoleProps.type).to.equal('command')
 
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('H5')
-        expect(consoleProps['Scrolled Element']).to.have.property('tagName').that.equals('H5')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('H5')
+        expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('H5')
       })
     })
 
@@ -771,10 +785,11 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollTo')
-        expect(consoleProps.X).to.equal(0)
-        expect(consoleProps.Y).to.equal(300)
-        expect(consoleProps['Scrolled Element']).to.have.property('tagName').that.equals('DIV')
+        expect(consoleProps.name).to.equal('scrollTo')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.X).to.equal(0)
+        expect(consoleProps.props.Y).to.equal(300)
+        expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('DIV')
       })
     })
 
@@ -790,16 +805,17 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('trigger')
-        expect(consoleProps['Event options']).to.have.property('bubbles').that.is.a('boolean')
-        expect(consoleProps['Event options']).to.have.property('cancelable').that.is.a('boolean')
-        expect(consoleProps['Event options']).to.have.property('clientX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('clientY').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('pageX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('pageY').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('screenX').that.is.a('number')
-        expect(consoleProps['Event options']).to.have.property('screenY').that.is.a('number')
-        expect(consoleProps.Yielded[0]).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.name).to.equal('trigger')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Event options']).to.have.property('bubbles').that.is.a('boolean')
+        expect(consoleProps.props['Event options']).to.have.property('cancelable').that.is.a('boolean')
+        expect(consoleProps.props['Event options']).to.have.property('clientX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('clientY').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('pageX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('pageY').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('screenX').that.is.a('number')
+        expect(consoleProps.props['Event options']).to.have.property('screenY').that.is.a('number')
+        expect(consoleProps.props.Yielded[0]).to.have.property('tagName').that.equals('BUTTON')
       })
     })
 
@@ -821,10 +837,11 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('selectFile')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Target).to.have.property('tagName').that.equals('INPUT')
-        expect(consoleProps.Target).to.have.property('id').that.equals('basic')
+        expect(consoleProps.name).to.equal('selectFile')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Target).to.have.property('tagName').that.equals('INPUT')
+        expect(consoleProps.props.Target).to.have.property('id').that.equals('basic')
       })
     })
   })

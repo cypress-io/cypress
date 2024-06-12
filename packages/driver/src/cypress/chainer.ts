@@ -20,13 +20,15 @@ export class $Chainer {
 
   static add (key, fn) {
     $Chainer.prototype[key] = function (...args) {
+      const privilegeVerification = Cypress.emitMap('command:invocation', { name: key, args })
+
       const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
         (new this.specWindow.Error('command invocation stack')).stack,
       )
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation
-      fn(this, userInvocationStack, args)
+      fn(this, userInvocationStack, args, privilegeVerification)
 
       // return the chainer so additional calls
       // are slurped up by the chainer instead of cy

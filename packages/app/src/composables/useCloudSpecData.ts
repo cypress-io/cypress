@@ -27,7 +27,6 @@ type NonNullCloudSpec = Exclude<SpecsListFragment['cloudSpec'], undefined | null
 export function useCloudSpecData (
   isProjectDisconnected: Ref<boolean>,
   isOffline: Ref<boolean>,
-  projectId: string | null | undefined,
   mostRecentUpdate: Ref<string | null>,
   displayedSpecs: Ref<(SpecsListFragment | undefined)[]>,
   allSpecs: (SpecsListFragment | undefined)[],

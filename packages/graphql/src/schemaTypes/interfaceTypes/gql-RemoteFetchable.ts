@@ -5,8 +5,8 @@ export interface RemoteFetchableShape {
   __typename: NexusGenAbstractTypeMembers['RemoteFetchable']
   id: string
   fetchingStatus: RemoteFetchableStatus
-  operation: string
   operationHash: string
+  operation: string
   operationVariables: any
   data?: any
   dataRaw?: any

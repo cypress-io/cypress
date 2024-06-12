@@ -477,8 +477,38 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
+    })
 
-      null
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').clear({ log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').clear({ log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+
+        expect(hiddenLog).to.be.ok
+        expect(hiddenLog.get('name'), 'log name').to.eq('clear')
+        expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+      })
     })
 
     it('logs immediately before resolving', () => {
@@ -534,7 +564,38 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
         expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
+      })
+    })
+
+    it('logs console props', () => {
+      cy.get('input:first')
+      .clear().then(function () {
+        const { lastLog } = this
+        const consoleProps = lastLog.invoke('consoleProps')
+
+        expect(consoleProps).to.be.ok
+        expect(consoleProps).to.have.property('name', 'clear')
+        expect(consoleProps).to.have.property('type', 'command')
+        expect(consoleProps).to.have.property('props')
+        expect(consoleProps.props).to.have.property('Applied To')
+        expect(consoleProps.props).to.have.property('Elements', 1)
+        expect(consoleProps.props).to.have.property('Coords')
+        expect(consoleProps).to.have.property('table')
+        expect(consoleProps.table[1]()).to.containSubset({
+          'name': 'Mouse Events',
+          'data': [
+            { 'Event Type': 'pointerover' },
+            { 'Event Type': 'mouseover' },
+            { 'Event Type': 'pointermove' },
+            { 'Event Type': 'pointerdown' },
+            { 'Event Type': 'mousedown' },
+            { 'Event Type': 'pointerover' },
+            { 'Event Type': 'pointerup' },
+            { 'Event Type': 'mouseup' },
+            { 'Event Type': 'click' },
+          ],
+        })
       })
     })
   })

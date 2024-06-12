@@ -17,12 +17,13 @@ for (const project of VITE_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project, ['--config-file', 'cypress-vite.config.ts'])
+      cy.openProject(project, ['--config-file', 'cypress-vite.config.ts', '--component'])
       cy.startAppServer('component')
     })
 
     it('should mount a passing test', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('App.cy.jsx').click()
       cy.waitForSpecToFinish()
       cy.get('.passed > .num').should('contain', 2)
@@ -35,6 +36,7 @@ for (const project of VITE_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReact.cy.jsx').click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
@@ -54,6 +56,7 @@ for (const project of VITE_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
@@ -73,6 +76,7 @@ for (const project of VITE_REACT) {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('AppCompilationError.cy.jsx').click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)

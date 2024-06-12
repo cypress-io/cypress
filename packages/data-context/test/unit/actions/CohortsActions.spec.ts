@@ -23,7 +23,7 @@ describe('CohortsActions', () => {
       const cohort = await actions.getCohort(name)
 
       expect(cohort).to.be.undefined
-      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(name)
+      expect(ctx.config.cohortsApi.getCohort).to.have.been.calledWith(name)
     })
 
     it('should return cohort if in cache', async () => {
@@ -37,7 +37,7 @@ describe('CohortsActions', () => {
       const cohortReturned = await actions.getCohort(cohort.name)
 
       expect(cohortReturned).to.eq(cohort)
-      expect(ctx.cohortsApi.getCohort).to.have.been.calledWith(cohort.name)
+      expect(ctx.config.cohortsApi.getCohort).to.have.been.calledWith(cohort.name)
     })
   })
 
@@ -50,7 +50,7 @@ describe('CohortsActions', () => {
 
       const pickedCohort = await actions.determineCohort(cohortConfig.name, cohortConfig.cohorts)
 
-      expect(ctx.cohortsApi.insertCohort).to.have.been.calledOnceWith({ name: cohortConfig.name, cohort: match.string })
+      expect(ctx.config.cohortsApi.insertCohort).to.have.been.calledOnceWith({ name: cohortConfig.name, cohort: match.string })
       expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).to.be.true
     })
   })

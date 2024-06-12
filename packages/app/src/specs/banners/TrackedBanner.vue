@@ -28,7 +28,7 @@ type AlertComponentProps = InstanceType<typeof Alert>['$props']
 interface TrackedBannerComponentProps extends AlertComponentProps {
   bannerId: string
   hasBannerBeenShown: boolean
-  eventData: EventData
+  eventData: EventData | undefined
 }
 
 gql`

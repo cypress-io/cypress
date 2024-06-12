@@ -7,7 +7,6 @@ describe('e2e headless', function () {
     const baseSpec = {
       spec: 'headless.cy.js',
       config: {
-        videoCompression: false,
         env: {
           'CI': process.env.CI,
           'EXPECT_HEADLESS': '1',
@@ -46,12 +45,10 @@ describe('e2e headless', function () {
   systemTests.it('tests in headless mode pass', {
     spec: 'headless.cy.js',
     config: {
-      videoCompression: false,
       env: {
         'CI': process.env.CI,
         'EXPECT_HEADLESS': '1',
       },
-      video: false,
     },
     headed: false,
     snapshot: true,
@@ -69,7 +66,6 @@ describe('e2e headless', function () {
     systemTests.it(`tests in headed mode pass in ${b}`, {
       spec: 'headless.cy.js',
       config: {
-        videoCompression: false,
         env: {
           'CI': process.env.CI,
         },

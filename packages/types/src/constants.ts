@@ -25,7 +25,7 @@ export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
 
 // Note: ONLY change this in code that will be merged into a release branch
 // for a new major version of Cypress
-export const MAJOR_VERSION_FOR_CONTENT = '12'
+export const MAJOR_VERSION_FOR_CONTENT = '13'
 
 export const RUN_ALL_SPECS_KEY = '__all' as const
 

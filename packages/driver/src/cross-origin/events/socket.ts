@@ -8,6 +8,10 @@ export const handleSocketEvents = (Cypress) => {
       timeout: Cypress.config().defaultCommandTimeout,
     })
 
+    if (response && response.error) {
+      return callback({ error: response.error })
+    }
+
     callback({ response })
   }
 

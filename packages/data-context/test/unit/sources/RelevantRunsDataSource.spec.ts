@@ -17,8 +17,8 @@ type TestProject = typeof _PROJECTS[number]
 function formatRun (project: TestProject, index: number) {
   const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]
 
-  return (({ status, runNumber, commitInfo }) => {
-    return { status, runNumber, sha: commitInfo.sha }
+  return (({ status, runNumber, commitInfo, totalFailed, id }) => {
+    return { status, runNumber, sha: commitInfo.sha, totalFailed, runId: id }
   })(run)
 }
 
@@ -127,6 +127,8 @@ describe('RelevantRunsDataSource', () => {
       .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
       .onThirdCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
+      const maybeSendRunNotificationStub = sinon.stub(ctx.actions.notification, 'maybeSendRunNotification')
+
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')
       const subValues: any[] = []
       const watchSubscription = async () => {
@@ -143,11 +145,20 @@ describe('RelevantRunsDataSource', () => {
       debug('first check with only one running run')
       await dataSource.checkRelevantRuns([FAKE_SHAS[0]], true)
 
+      expect(maybeSendRunNotificationStub).not.to.have.been.called
+
       debug('second check with the running run completing, but should stay selected')
       await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
 
+      expect(maybeSendRunNotificationStub).to.have.been.calledWithMatch(
+        { runNumber: 1, status: 'RUNNING', sha: 'fcb90f', totalFailed: 0 },
+        { runNumber: 4, status: 'FAILED', sha: 'fc753a', totalFailed: 1 },
+      )
+
       debug('moving runs will cause another check')
       await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
+
+      expect(maybeSendRunNotificationStub).to.have.been.calledOnce
 
       setImmediate(() => {
         subscription.return(undefined)
@@ -160,11 +171,16 @@ describe('RelevantRunsDataSource', () => {
       expect(subValues[0], 'should emit first result of running').to.eql({
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
+        latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         selectedRunNumber: 1,
       })
 
       expect(subValues[1], 'should keep run if selected but no longer in all').to.eql({
         all: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
+        latest: [
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
         ],
@@ -174,6 +190,10 @@ describe('RelevantRunsDataSource', () => {
 
       expect(subValues[2], 'should emit selected run after moving').to.eql({
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
+        latest: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
         commitsAhead: 0,
         selectedRunNumber: 4,
       })
@@ -213,12 +233,17 @@ describe('RelevantRunsDataSource', () => {
 
       expect(subValues[0], 'should emit first result of running').to.eql({
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
+        latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
         selectedRunNumber: 1,
       })
 
       expect(subValues[1], 'should emit newer completed run on different sha').to.eql({
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
+        latest: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
         commitsAhead: 0,
         selectedRunNumber: 4,
       })

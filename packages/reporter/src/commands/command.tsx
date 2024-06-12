@@ -19,29 +19,63 @@ import { determineTagType } from '../sessions/utils'
 import CommandModel, { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
-import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
-import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
-import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
-import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
-
-const md = new Markdown({ breaks: true })
+import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
+import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-export const formattedMessage = (message: string) => {
+const md = new Markdown()
+const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
+
+const asterisksRegex = /^\*\*(.+?)\*\*$/gs
+// regex to match everything outside of expected/actual values like:
+// 'expected **<span>** to exist in the DOM'
+// `expected **glob*glob** to contain *****`
+// `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
+// `expected **foo** to have length above **1** but got **0**`
+// `Custom message expected **<span>** to exist in the DOM`
+const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|,? but[^\*]+/g
+
+// used to format the display of command messages and error messages
+// we use markdown syntax within our error messages (code ticks, urls, etc)
+// and cy.log and Cypress.log supports markdown formatting
+export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  const searchText = ['to match', 'to equal']
-  const regex = new RegExp(searchText.join('|'))
-  const split = message.split(regex)
-  const matchingText = searchText.find((text) => message.includes(text))
-  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  const converted = md.renderInline(spaceEscapedText)
-  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+  // if the command has url args, don't format those chars like __ and ~~
+  if (name === 'visit' || name === 'request' || name === 'origin') {
+    return message
+  }
 
-  return [converted, ...assertion].join(' ')
+  // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'
+  const assertionArray = message.match(assertionRegex)
+
+  if (name === 'assert' && assertionArray) {
+    const expectedActualArray = () => {
+    // get the expected and actual values of assertions
+      const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
+
+      // replace outside double asterisks with strong tags
+      return splitTrim.map((s) => {
+      // we want to escape HTML chars so that they display
+      // correctly in the command log: <p> -> &lt;p&gt;
+        const HTMLEscapedString = mdOnlyHTML.renderInline(s)
+
+        return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
+      })
+    }
+    // for assertions print the exact text so that characters like _ and *
+    // are not escaped in the assertion display when comparing values
+    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+
+    return result.join('')
+  }
+
+  // format markdown for everything else
+  return md.renderInline(message)
 }
 
 const invisibleMessage = (model: CommandModel) => {
@@ -226,7 +260,7 @@ const Message = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
   </span>
 ))

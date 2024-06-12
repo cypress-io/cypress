@@ -13,9 +13,11 @@ jobs:
           FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download Fossa binary and install
 # This step utilizes a curl of the latest install pkg from Fossa.  Using a git action from 
 # Fossa doesn't produce the SBOM artifact needed. This manual approach is the only way to 

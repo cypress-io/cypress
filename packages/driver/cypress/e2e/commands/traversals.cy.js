@@ -142,8 +142,6 @@ describe('src/cy/commands/traversals', () => {
           cy.on('log:added', (attrs, log) => {
             this.lastLog = log
           })
-
-          return null
         })
 
         it('logs immediately before resolving', (done) => {
@@ -195,31 +193,46 @@ describe('src/cy/commands/traversals', () => {
 
         it('#consoleProps', () => {
           cy.get('#list')[name](arg).then(function ($el) {
-            const obj = { Command: name }
-
-            if (_.isFunction(arg)) {
-              obj.Selector = ''
-            } else {
-              obj.Selector = [].concat(arg).join(', ')
-            }
-
             const yielded = Cypress.dom.getElements($el)
 
-            _.extend(obj, {
-              'Applied To': cy.$$('#list')[0],
-              Yielded: yielded,
-              Elements: $el.length,
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              name,
+              type: 'command',
+              props: {
+                Selector: _.isFunction(arg) ? '' : [].concat(arg).join(', '),
+                'Applied To': cy.$$('#list')[0],
+                Yielded: yielded,
+                Elements: $el.length,
+              },
             })
-
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
           })
         })
 
-        it('can be turned off', () => {
+        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
           cy.get('#list')[name](arg, { log: false }).then(function () {
-            const { lastLog } = this
+            const { lastLog, hiddenLog } = this
 
             expect(lastLog.get('name')).to.eq('get')
+            expect(hiddenLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.get('#list')[name](arg, { log: false }).then(function () {
+            const { lastLog, hiddenLog } = this
+
+            expect(lastLog.get('name')).to.eq('get')
+            expect(hiddenLog.get('name'), 'log name').to.eq(name)
+            expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
           })
         })
       })
@@ -360,8 +373,8 @@ describe('src/cy/commands/traversals', () => {
         expect(findLog.get('$el').get(0)).to.eq(button.get(0))
         const consoleProps = findLog.invoke('consoleProps')
 
-        expect(consoleProps.Yielded).to.eq(button.get(0))
-        expect(consoleProps.Elements).to.eq(button.length)
+        expect(consoleProps.props.Yielded).to.eq(button.get(0))
+        expect(consoleProps.props.Elements).to.eq(button.length)
 
         expect(assertionLog.get('state')).to.eq('failed')
         expect(err.message).to.include(assertionLog.get('error').message)

@@ -2,6 +2,8 @@ import type { FoundBrowser } from './browser'
 import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
+import type { ProtocolManagerShape } from './protocol'
+import type Protocol from 'devtools-protocol'
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
@@ -10,6 +12,7 @@ export type OpenProjectLaunchOpts = {
   videoApi?: RunModeVideoApi
   onWarning: (err: Error) => void
   onError: (err: Error) => void
+  protocolManager?: ProtocolManagerShape
 }
 
 export type BrowserLaunchOpts = {
@@ -21,6 +24,7 @@ export type BrowserLaunchOpts = {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
+  protocolManager?: ProtocolManagerShape
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
@@ -47,6 +51,7 @@ export interface LaunchArgs {
   onError?: (error: Error) => void
   os: PlatformName
   exit?: boolean
+  runnerUi?: boolean
 
   onFocusTests?: () => any
 }
@@ -54,6 +59,12 @@ export interface LaunchArgs {
 type NullableMiddlewareHook = (() => void) | null
 
 export type OnRequestEvent = (eventName: string, data: any) => void
+
+export type OnServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => void
+
+export type OnServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => void
+
+export type OnServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorOrigin: string }) => void
 
 export interface AutomationMiddleware {
   onPush?: NullableMiddlewareHook
@@ -89,6 +100,9 @@ export interface OpenProjectLaunchOptions {
   onSavedStateChanged?: WebSocketOptionsCallback
   onChange?: WebSocketOptionsCallback
   onError?: (err: Error) => void
+
+  // Manager used to communicate with the Cloud protocol
+  protocolManager?: ProtocolManagerShape
 
   [key: string]: any
 }

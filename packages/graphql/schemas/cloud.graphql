@@ -811,6 +811,11 @@ type CloudRunInstance implements Node {
   groupId: String!
 
   """
+  Used to determine if the instance has test replay
+  """
+  hasReplay: Boolean
+
+  """
   Used to determine if the instance has screenshots
   """
   hasScreenshots: Boolean!
@@ -825,6 +830,11 @@ type CloudRunInstance implements Node {
   """
   hasVideo: Boolean!
   id: ID!
+
+  """
+  Link to Cypress Cloud to view test replay, if available
+  """
+  replayUrl: String
 
   """
   Link to Cypress Cloud to view stdout, if available
@@ -1095,6 +1105,14 @@ enum CloudTestResultStateEnum {
 }
 
 """
+Type of tests
+"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
+}
+
+"""
 A CloudUser represents an User stored in the Cypress Cloud
 """
 type CloudUser implements Node {
@@ -1175,6 +1193,46 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+"""
+Counts for specs and tests from a local project at a point in time
+"""
+input LocalTestCountsInput {
+  """
+  Current Git branch name for local project
+  """
+  branch: String
+
+  """
+  Total number of example specs found in project
+  """
+  exampleSpecs: Int!
+
+  """
+  Total number of tests found in example specs. This can be an estimate
+  """
+  exampleTests: Int!
+
+  """
+  Project slug for project
+  """
+  projectSlug: String
+
+  """
+  Testing type
+  """
+  testingType: CloudTestingTypeEnum!
+
+  """
+  Total number of specs found in project
+  """
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
+}
+
 type Mutation {
   """
   Create a project in the dashboard and return its object
@@ -1194,6 +1252,11 @@ type Mutation {
   Request access to an organization from a projectId
   """
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """
+  Record event
+  """
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
 
   """
   Adding as a test

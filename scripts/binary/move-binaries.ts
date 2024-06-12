@@ -4,9 +4,8 @@ import { s3helpers } from './s3-api'
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
-// using "arg" module for parsing CLI arguments
-// because it plays really nicely with TypeScript
-import arg from 'arg'
+
+import minimist from 'minimist'
 import pluralize from 'pluralize'
 
 // inquirer-confirm is missing type definition
@@ -112,36 +111,38 @@ export const prompts = {
  */
 export const moveBinaries = async (args = []) => {
   debug('moveBinaries with args %o', args)
-  const options = arg({
-    '--s3bucket': String,
-    '--s3folder': String,
-    '--commit': String,
-    '--version': String,
+
+  const supportedOptions = [
+    's3bucket',
+    's3folder',
+    'commit',
+    'version',
     // optional, if passed, only the binary for that platform will be moved
-    '--platformArch': String,
-    // aliases
-    '--sha': '--commit',
-    '-v': '--version',
-  }, {
-    argv: args.slice(2),
+    'platformArch',
+  ]
+
+  const options = minimist(args.slice(2), {
+    string: supportedOptions,
+    alias: {
+      commit: ['sha'],
+      version: ['v'],
+    },
   })
 
   debug('moveBinaries with options %o', options)
 
-  // @ts-ignore
-  la(is.commitId(options['--commit']), 'missing or invalid commit SHA', options)
-  // @ts-ignore
-  la(is.semver(options['--version']), 'missing version to collect', options)
+  la(is.commitId(options.commit), 'missing or invalid commit SHA', options)
+  la(is.semver(options.version), 'missing version to collect', options)
 
   const releaseOptions: ReleaseInformation = {
-    commit: options['--commit'],
-    version: options['--version'],
+    commit: options.commit,
+    version: options.version,
   }
 
   const credentials = await uploadUtils.getS3Credentials()
   const aws = {
-    'bucket': options['--s3bucket'] || uploadUtils.S3Configuration.bucket,
-    'folder': options['--s3folder'] || uploadUtils.S3Configuration.releaseFolder,
+    bucket: options.s3bucket || uploadUtils.S3Configuration.bucket,
+    folder: options.s3folder || uploadUtils.S3Configuration.releaseFolder,
   }
 
   const s3 = s3helpers.makeS3(credentials)
@@ -151,8 +152,8 @@ export const moveBinaries = async (args = []) => {
 
   let platforms: platformArch[] = uploadUtils.getValidPlatformArchs() as platformArch[]
 
-  if (options['--platformArch']) {
-    const onlyPlatform = options['--platformArch']
+  if (options.platformArch) {
+    const onlyPlatform = options.platformArch
 
     console.log('only moving single platform %s', onlyPlatform)
     la(uploadUtils.isValidPlatformArch(onlyPlatform), 'invalid platform-arch', onlyPlatform)

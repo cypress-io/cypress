@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import webpack from 'webpack'
+import type webpack from 'webpack'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
@@ -21,34 +21,9 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   'css': false,
 }])
 
-let pngRule
-// @ts-ignore
-const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  if (rule.test.toString().includes('png')) {
-    pngRule = rule
-
-    return false
-  }
-
-  return true
-})
-
-pngRule.use[0].options = {
-  name: '[name].[ext]',
-  outputPath: 'img',
-  publicPath: '/__cypress/runner/img/',
-}
-
 // @ts-ignore
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
-  module: {
-    rules: [
-      ...nonPngRules,
-      pngRule,
-    ],
-  },
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.js')],
   },
@@ -116,10 +91,12 @@ export default async function () {
   mainConfig.plugins = [
     // @ts-ignore
     ...mainConfig.plugins,
-    new CopyWebpackPlugin([{
-      // @ts-ignore // There's a race condition in how these types are generated.
-      from: cyIcons.getPathToFavicon('favicon.ico'),
-    }]),
+    new CopyWebpackPlugin({
+      patterns: [{
+        // @ts-ignore // There's a race condition in how these types are generated.
+        from: cyIcons.getPathToFavicon('favicon.ico'),
+      }],
+    }),
   ]
 
   return [

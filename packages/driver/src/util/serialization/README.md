@@ -14,14 +14,14 @@ To determine if a given value is serializable, the value is passed as an argumen
 
 [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) preprocessing is a bit complicated, because the error object itself may be considered serializable depending on the browser's implementation of the structured clone algorithm.
 
-At the time of this writing, the structured clone algorithm does NOT support cloning of errors in Firefox, but is supported in Chromium and `core-js`. However, there are caveats to this support. Take the following snippet:
+At the time of this writing, the structured clone algorithm does support cloning of errors in Firefox 99, but is supported in newer versions of Firefox (such as 115) and is supported in Chromium and `core-js`. However, there are caveats to this support. Take the following snippet:
 
 ```js
-  // firefox
+  // older firefox version 99
   var myError = new Error('error-message') 
-  var myErrorCopy = structuredClone(myError) // throws DOMException: The object could not be cloned
+  var myErrorCopy = structuredClone(myError) // throws DOMException: object could not be cloned
 
-  // chrome/edge/electron
+  // chrome/edge/electron/firefox115+
   var myError = new Error('error-message') 
   myError.foo = 'bar'
   var myErrorCopy = structuredClone(myError)

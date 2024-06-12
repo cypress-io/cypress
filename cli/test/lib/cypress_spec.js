@@ -105,6 +105,7 @@ describe('cypress', function () {
       .then((args) => {
         expect(args.spec).to.equal('foo')
         expect(args.autoCancelAfterFailures).to.equal(4)
+        expect(args.runnerUi).to.be.undefined
       })
     })
 

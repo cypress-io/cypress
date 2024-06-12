@@ -8,6 +8,23 @@ on:
   push:
     branches:
       - 'release/**'
+    paths-ignore:
+      - .husky/**
+      - .vscode/**
+      - .eslintrc.js
+      - .gitattributes
+      - .gitignore
+      - .percy.yml
+      - .prettierignore
+      - .releaserc.js
+      - .yarnclean
+      - CHANGELOG.md
+      - CODE_OF_CONDUCT.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - README.md
+      - ROADMAP.md
+      - SECURITY.md
   workflow_dispatch:
     inputs:
       branch:
@@ -48,8 +65,11 @@ jobs:
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
+      - name: Install setuptools - Mac
+        if: ${{ matrix.platform == 'macos-latest' }}
+        run: sudo -H pip install setuptools
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
@@ -60,9 +80,9 @@ jobs:
           git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
           git config --local user.name "cypress-bot[bot]"
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: 'yarn'
       - name: Run yarn
         run: yarn
@@ -122,7 +142,7 @@ jobs:
       # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')

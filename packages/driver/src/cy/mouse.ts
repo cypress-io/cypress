@@ -58,6 +58,8 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
 export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
   const isWebKit = Cypress.isBrowser('webkit')
+  // Chromium 116+ allows the simulated events to be sent to disabled elements so we need to explicitly exclude them
+  const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     const constructor = el.ownerDocument.defaultView.PointerEvent
@@ -103,14 +105,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
 
   const sendMouseup = (el, evtOptions) => {
-    if ((isFirefox || isWebKit) && el.disabled) {
+    if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
   const sendMousedown = (el, evtOptions): {} | SentEvent => {
-    if ((isFirefox || isWebKit) && el.disabled) {
+    if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
 
@@ -133,21 +135,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
   const sendClick = (el, evtOptions, opts: { force?: boolean } = {}) => {
     // send the click event if firefox and force (needed for force check checkbox)
-    if (!opts.force && (isFirefox || isWebKit) && el.disabled) {
+    if (!opts.force && (isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'click', true, true)
   }
   const sendDblclick = (el, evtOptions) => {
-    if ((isFirefox || isWebKit) && el.disabled) {
+    if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
   }
   const sendContextmenu = (el, evtOptions) => {
-    if ((isFirefox || isWebKit) && el.disabled) {
+    if ((isFirefox || isWebKit || isChromium116OrLater) && el.disabled) {
       return {}
     }
 
@@ -563,6 +565,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         // Only send click event if mousedown element is not detached.
         if ($elements.isDetachedEl(mouseDownPhase.targetEl) || $elements.isDetached(mouseUpPhase.targetEl)) {
           return { skipClickEventReason: 'element was detached' }
+        }
+
+        // Only send click event if element is not disabled.
+        // First find an parent element that can actually be disabled
+        const findParentThatCanBeDisabled = (el: HTMLElement): HTMLElement | null => {
+          const elementsThatCanBeDisabled = ['button', 'input', 'select', 'textarea', 'optgroup', 'option', 'fieldset']
+
+          return elementsThatCanBeDisabled.includes($elements.getTagName(el)) ? el : null
+        }
+
+        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, findParentThatCanBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, findParentThatCanBeDisabled)
+
+        // Then check if parent is indeed disabled
+        if (parentThatCanBeDisabled !== null && $elements.isDisabled($(parentThatCanBeDisabled))) {
+          return { skipClickEventReason: 'element was disabled' }
         }
 
         const commonAncestor = mouseUpPhase.targetEl &&

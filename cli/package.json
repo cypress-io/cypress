@@ -4,11 +4,12 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build-cli": "node ./scripts/build.js && node ./scripts/post-build.js",
     "clean": "node ./scripts/clean.js",
-    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
-    "build": "node ./scripts/build.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",
@@ -16,19 +17,17 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn dtslint",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^2.88.10",
+    "@cypress/request": "^3.0.0",
     "@cypress/xvfb": "^1.2.4",
-    "@types/node": "^14.14.31",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
     "blob-util": "^2.0.2",
     "bluebird": "^3.7.2",
-    "buffer": "^5.6.0",
+    "buffer": "^5.7.1",
     "cachedir": "^2.3.0",
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
@@ -46,7 +45,7 @@
     "figures": "^3.2.0",
     "fs-extra": "^9.1.0",
     "getos": "^3.2.1",
-    "is-ci": "^3.0.0",
+    "is-ci": "^3.0.1",
     "is-installed-globally": "~0.4.0",
     "lazy-ass": "^1.6.0",
     "listr2": "^3.8.3",
@@ -55,9 +54,10 @@
     "minimist": "^1.2.8",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.6.0",
+    "process": "^0.11.10",
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
-    "semver": "^7.3.2",
+    "semver": "^7.5.3",
     "supports-color": "^8.1.1",
     "tmp": "~0.2.1",
     "untildify": "^4.0.0",
@@ -66,7 +66,15 @@
   "devDependencies": {
     "@babel/cli": "7.13.0",
     "@babel/preset-env": "7.13.5",
+    "@cypress/angular": "0.0.0-development",
+    "@cypress/grep": "0.0.0-development",
+    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/react": "0.0.0-development",
+    "@cypress/react18": "0.0.0-development",
     "@cypress/sinon-chai": "2.9.1",
+    "@cypress/svelte": "0.0.0-development",
+    "@cypress/vue": "0.0.0-development",
+    "@cypress/vue2": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
@@ -86,7 +94,7 @@
     "execa-wrap": "1.4.0",
     "hasha": "5.2.2",
     "mocha": "6.2.2",
-    "mock-fs": "5.1.1",
+    "mock-fs": "5.2.0",
     "mocked-env": "1.3.2",
     "nock": "13.2.9",
     "proxyquire": "2.1.3",
@@ -115,7 +123,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
+    "node": "^16.0.0 || ^18.0.0 || >=20.0.0"
   },
   "types": "types",
   "exports": {
@@ -166,6 +174,22 @@
   "workspaces": {
     "nohoist": [
       "@types/*"
+    ]
+  },
+  "nx": {
+    "targets": {
+      "build-cli": {
+        "dependsOn": [
+          "prebuild"
+        ],
+        "outputs": [
+          "{projectRoot}/types",
+          "{projectRoot}/build"
+        ]
+      }
+    },
+    "implicitDependencies": [
+      "@cypress/*"
     ]
   }
 }

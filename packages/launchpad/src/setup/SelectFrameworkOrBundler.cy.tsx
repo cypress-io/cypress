@@ -75,7 +75,9 @@ describe('<SelectFrameworkOrBundler />', () => {
       />
     ))
 
-    cy.percySnapshot()
+    cy.contains('button', 'Solid.js').click()
+    cy.findByTestId('external').should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks').contains('Browse our list of third-party framework integrations')
+    cy.get('[data-testid="icon-check"]').should('be.visible')
   })
 
   it('should select the value', () => {

@@ -10,7 +10,5 @@ describe('<FlakyBadge />', () => {
     cy.findByTestId(flakyBadgeTestId)
     .should('have.text', defaultMessages.specPage.flaky.badgeLabel)
     .and('be.visible')
-
-    cy.percySnapshot()
   })
 })

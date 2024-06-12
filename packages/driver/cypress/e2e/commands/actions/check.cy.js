@@ -384,7 +384,7 @@ describe('src/cy/commands/actions/check', () => {
         })
       })
 
-      it('eventually passes the assertion on multiple :checkboxs', () => {
+      it('eventually passes the assertion on multiple :checkboxes', () => {
         $(':checkbox').click(function () {
           _.delay(() => {
             $(this).addClass('checked')
@@ -598,7 +598,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').check().should('have.class', 'checked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').check(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })
@@ -616,8 +616,39 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('check')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -757,14 +788,31 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('check')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('check')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
+
+          expect(consoleProps).to.have.property('table')
+          expect(consoleProps.table[1]()).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
         })
       })
 
@@ -774,11 +822,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -789,11 +840,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This radio was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This radio was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -806,11 +860,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            name: 'check',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -820,7 +877,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
@@ -1179,7 +1236,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
       })
 
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+      it('throws when cmd receives values but subject has no value attribute', function (done) {
         cy.get('[name=dogs]').uncheck(['husky', 'poodle', 'on']).then(($chk) => {
           expect($chk.length).to.eq(4)
         })
@@ -1199,8 +1256,38 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check().uncheck({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('uncheck')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get(':checkbox:first').check().uncheck({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('uncheck')
+          expect(hiddenLog.get('name'), 'log name').to.eq('uncheck')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -1296,14 +1383,31 @@ describe('src/cy/commands/actions/check', () => {
         cy.get('[name=colors][value=blue]').uncheck().then(function ($input) {
           const { lastLog } = this
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('uncheck')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('uncheck')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
+
+          expect(consoleProps).to.have.property('table')
+          expect(consoleProps.table[1]()).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
         })
       })
 
@@ -1313,11 +1417,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            name: 'uncheck',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1329,11 +1436,14 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            name: 'uncheck',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1343,7 +1453,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })

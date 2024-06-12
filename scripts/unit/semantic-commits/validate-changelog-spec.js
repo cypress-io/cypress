@@ -114,14 +114,24 @@ describe('semantic-pull-request/validate-changelog', () => {
   })
 
   context('validateChangelog', () => {
+    let circleBranch
+
     beforeEach(function () {
       sinon.spy(console, 'log')
       sinon.stub(fs, 'readFileSync')
+
+      circleBranch = process.env.CIRCLE_BRANCH
+      // delete this in case it's set in actual Circle env vars
+      delete process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES
     })
 
     afterEach(function () {
       console.log.restore()
       fs.readFileSync.restore()
+
+      process.env.CIRCLE_BRANCH = circleBranch
+      // clean up after the test that sets and tests it
+      delete process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES
     })
 
     it('verifies changelog entry has been included', async () => {
@@ -214,6 +224,26 @@ _Released 01/17/2033 (PENDING)_
         })
 
         expect(console.log).to.be.calledWith('Does not contain changes that impacts the next Cypress release.')
+      })
+
+      it('when current branch is in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES env var', async () => {
+        process.env.CIRCLE_BRANCH = 'this-branch'
+        process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES = 'this-branch,that-branch'
+
+        const changedFiles = [
+          'npm/grep/lib/index.js',
+        ]
+
+        await validateChangelog({
+          changedFiles,
+          commits: [{
+            prNumber: 77,
+            semanticType: 'feat',
+            associatedIssues: ['75'],
+          }],
+        })
+
+        expect(console.log).to.be.calledWith('Skipping changelog validation because branch (this-branch) is included in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES')
       })
     })
 

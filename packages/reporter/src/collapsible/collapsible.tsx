@@ -3,7 +3,7 @@ import React, { Component, CSSProperties, MouseEvent, ReactNode, RefObject } fro
 
 import { onEnterOrSpace } from '../lib/util'
 
-import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 
 interface Props {
   isOpen?: boolean

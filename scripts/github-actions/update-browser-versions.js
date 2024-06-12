@@ -1,11 +1,12 @@
 const https = require('https')
 const fs = require('fs')
 
-const getLatestVersionData = () => {
+// https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
+const getLatestVersionData = ({ channel, currentVersion }) => {
   const options = {
-    hostname: 'omahaproxy.appspot.com',
+    hostname: 'versionhistory.googleapis.com',
     port: 443,
-    path: '/all.json',
+    path: `/v1/chrome/platforms/linux/channels/${channel}/versions?filter=version>${currentVersion}&order_by=version%20desc`,
     method: 'GET',
   }
 
@@ -34,16 +35,14 @@ const getVersions = async ({ core }) => {
   try {
     // file path is relative to repo root
     const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
-    const data = JSON.parse(await getLatestVersionData())
-    const linuxData = data.find((item) => item.os === 'linux')
-    const stableData = linuxData.versions.find((version) => version.channel === 'stable')
-    const betaData = linuxData.versions.find((version) => version.channel === 'beta')
-    const hasStableUpdate = currentBrowserVersions['chrome:stable'] !== stableData.version
-    const hasBetaUpdate = currentBrowserVersions['chrome:beta'] !== betaData.version
+    const stableData = JSON.parse(await getLatestVersionData({ channel: 'stable', currentVersion: currentBrowserVersions['chrome:stable'] }))
+    const betaData = JSON.parse(await getLatestVersionData({ channel: 'beta', currentVersion: currentBrowserVersions['chrome:beta'] }))
+    const hasStableUpdate = stableData.versions.length > 0
+    const hasBetaUpdate = betaData.versions.length > 0
     let description = 'Update '
 
     if (hasStableUpdate) {
-      description += `Chrome (stable) to ${stableData.version}`
+      description += `Chrome (stable) to ${stableData.versions[0].version}`
 
       if (hasBetaUpdate) {
         description += ' and '
@@ -51,14 +50,14 @@ const getVersions = async ({ core }) => {
     }
 
     if (hasBetaUpdate) {
-      description += `Chrome (beta) to ${betaData.version}`
+      description += `Chrome (beta) to ${betaData.versions[0].version}`
     }
 
     core.setOutput('has_update', (hasStableUpdate || hasBetaUpdate) ? 'true' : 'false')
     core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
-    core.setOutput('latest_stable_version', stableData.version)
+    core.setOutput('latest_stable_version', hasStableUpdate ? stableData.versions[0].version : currentBrowserVersions['chrome:stable'])
     core.setOutput('current_beta_version', currentBrowserVersions['chrome:beta'])
-    core.setOutput('latest_beta_version', betaData.version)
+    core.setOutput('latest_beta_version', hasBetaUpdate ? betaData.versions[0].version : currentBrowserVersions['chrome:beta'])
     core.setOutput('description', description)
   } catch (err) {
     console.log('Errored checking for new Chrome versions:', err.stack)

@@ -7,9 +7,6 @@ describe('e2e plugin run events', () => {
     browser: 'electron',
     project: 'plugin-run-events',
     snapshot: true,
-    config: {
-      video: false,
-    },
   })
 
   systemTests.it('handles async before:spec', {

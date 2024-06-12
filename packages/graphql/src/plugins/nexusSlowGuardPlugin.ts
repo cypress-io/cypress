@@ -22,12 +22,15 @@ export const nexusSlowGuardPlugin = plugin({
 
       if (isPromiseLike(result) && threshold !== false) {
         const resolvePath = pathToArray(info.path)
+        const start = process.hrtime.bigint()
         const hanging = setTimeout(() => {
           const operationId = `${info.operation.operation} ${info.operation.name?.value ?? `(anonymous)`}`
 
           if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+            const totalMS = (process.hrtime.bigint() - start) / BigInt(1000000)
+
             // eslint-disable-next-line no-console
-            console.error(chalk.red(`\n\nNexusSlowGuard: Taking more than ${threshold}ms to execute ${JSON.stringify(resolvePath)} for ${operationId}\n\n`))
+            console.error(chalk.red(`\n\nNexusSlowGuard: Taking more than ${threshold}ms to execute ${JSON.stringify(resolvePath)} for ${operationId} (total time ${totalMS}ms)\n\n`))
           }
         }, threshold)
 

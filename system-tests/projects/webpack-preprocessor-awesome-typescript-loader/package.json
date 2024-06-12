@@ -7,7 +7,7 @@
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
     "@types/node": "^12.11.1",
     "awesome-typescript-loader": "5.2.1",
-    "babel-loader": "8.1.0",
+    "babel-loader": "8.3.0",
     "cypress": "file:../../../cli/build",
     "typescript": "3.9.2"
   }

@@ -74,7 +74,7 @@ export class GraphQLDataSource {
         },
         InlineFragment: (node) => {
           // Remove any non-cloud types from the node
-          if (node.typeCondition && !ctx.schemaCloud.getType(node.typeCondition.name.value)) {
+          if (node.typeCondition && !ctx.config.schemaCloud.getType(node.typeCondition.name.value)) {
             return null
           }
 
@@ -85,7 +85,7 @@ export class GraphQLDataSource {
 
     // Execute the node field against the cloud schema
     return execute({
-      schema: ctx.schemaCloud,
+      schema: ctx.config.schemaCloud,
       contextValue: ctx,
       variableValues: info.variableValues,
       document: {

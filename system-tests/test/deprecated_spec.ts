@@ -20,7 +20,6 @@ describe('deprecated before:browser:launch args', () => {
   systemTests.it('fails when adding unknown properties to launchOptions', {
     browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-unknown-properties',
       },
@@ -34,7 +33,6 @@ describe('deprecated before:browser:launch args', () => {
   systemTests.it('push and no return - warns user exactly once', {
     browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-undefined-mutate-array',
       },
@@ -47,12 +45,11 @@ describe('deprecated before:browser:launch args', () => {
 
   systemTests.it('using non-deprecated API - no warning', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-launch-options-mutate-only-args-property',
       },
@@ -72,12 +69,11 @@ describe('deprecated before:browser:launch args', () => {
 
   systemTests.it('concat return returns once', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     browser: '!webkit', // throws in WebKit since it rejects unsupported arguments
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
       },
@@ -99,11 +95,10 @@ describe('deprecated before:browser:launch args', () => {
   // https://github.com/cypress-io/cypress/issues/20436
   systemTests.it.skip('no mutate return', {
     // TODO: implement webPreferences.additionalArgs here
-    // once we decide if/what we're going to make the implemenation
+    // once we decide if/what we're going to make the implementation
     // SUGGESTION: add this to Cypress.browser.args which will capture
     // whatever args we use to launch the browser
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-new-array-without-mutation',
       },
@@ -122,7 +117,6 @@ describe('deprecated before:browser:launch args', () => {
   systemTests.it('displays errors thrown and aborts the run', {
     browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'throw-explicit-error',
       },
@@ -141,7 +135,6 @@ describe('deprecated before:browser:launch args', () => {
   systemTests.it('displays promises rejected and aborts the run', {
     browser: '!webkit', // TODO(webkit): fix+unskip (add executeBeforeBrowserLaunch to WebKit)
     config: {
-      video: false,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'reject-promise',
       },

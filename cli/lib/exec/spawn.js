@@ -4,7 +4,7 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
-const debugElectron = require('debug')('cypress:electron')
+const debugVerbose = require('debug')('cypress-verbose:cli')
 
 const util = require('../util')
 const state = require('../tasks/state')
@@ -44,7 +44,36 @@ const isCertVerifyProcBuiltin = /(^\[.*ERROR:cert_verify_proc_builtin\.cc|^-----
 // objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
 const isMacOSElectronWebSwapCGLLayerWarning = /^objc\[\d+\]: Class WebSwapCGLLayer is implemented in both.*Which one is undefined\./
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning]
+/**
+ * Electron logs benign warnings about Vulkan when run on hosts that do not have a GPU. This is coming from the primary Electron process,
+ * and not the browser being used for tests.
+ * Samples:
+ * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_intel.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+ * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so supports Vulkan 1.1, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+ * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this verison of Vulkan (Policy #LDP_DRIVER_7)
+ * Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
+ */
+
+const isHostVulkanDriverWarning = /^Warning:.+(#LDP_DRIVER_7|VK_LAYER_MESA_device_select).+/
+
+/**
+ * Electron logs benign warnings about Vulkan when run in docker containers whose host does not have a GPU. This is coming from the primary
+ * Electron process, and not the browser being used for tests.
+ * Sample:
+ * Warning: vkCreateInstance: Found no drivers!
+ * Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
+ *     at CheckVkSuccessImpl (../../third_party/dawn/src/dawn/native/vulkan/VulkanError.cpp:88)
+ *     at CreateVkInstance (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:458)
+ *     at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
+ *     at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
+ *     at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
+ */
+
+const isContainerVulkanDriverWarning = /^Warning: vkCreateInstance/
+
+const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Initialize|Create|operator).+(VulkanError|BackendVk).cpp/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -122,10 +151,9 @@ module.exports = {
       return new Promise((resolve, reject) => {
         _.defaults(overrides, {
           onStderrData: false,
-          electronLogging: false,
         })
 
-        const { onStderrData, electronLogging } = overrides
+        const { onStderrData } = overrides
         const envOverrides = util.getEnvOverrides(options)
         const electronArgs = []
         const node11WindowsFix = isPlatform('win32')
@@ -158,10 +186,6 @@ module.exports = {
 
         if (node11WindowsFix) {
           stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
-        }
-
-        if (electronLogging) {
-          stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
         }
 
         if (util.isPossibleLinuxWithIncorrectDisplay()) {
@@ -236,12 +260,14 @@ module.exports = {
 
             // bail if this is warning line garbage
             if (isGarbageLineWarning(str)) {
+              debugVerbose(str)
+
               return
             }
 
-            // if we have a callback and this explictly returns
+            // if we have a callback and this explicitly returns
             // false then bail
-            if (onStderrData && onStderrData(str) === false) {
+            if (onStderrData && onStderrData(str)) {
               return
             }
 
@@ -293,13 +319,6 @@ module.exports = {
             // then we know that's why cypress exited early
             if (util.isBrokenGtkDisplay(str)) {
               brokenGtkDisplay = true
-            }
-
-            // we should attempt to always slurp up
-            // the stderr logs unless we've explicitly
-            // enabled the electron debug logging
-            if (!debugElectron.enabled) {
-              return false
             }
           },
         })

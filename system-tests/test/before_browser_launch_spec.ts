@@ -15,7 +15,6 @@ describe('e2e before:browser:launch', () => {
   systemTests.it('modifies preferences on disk if DNE', {
     browser: 'chrome',
     config: {
-      video: false,
       env: {
         PATH_TO_CHROME_PROFILE,
       },
@@ -28,9 +27,6 @@ describe('e2e before:browser:launch', () => {
   systemTests.it('can add extensions', {
     browser: '!webkit', // TODO(webkit): fix+unskip, or skip and add a test that this fails with WebKit
     spec: 'spec.cy.js',
-    config: {
-      video: false,
-    },
     headed: true,
     project: 'browser-extensions',
     sanitizeScreenshotDimensions: true,

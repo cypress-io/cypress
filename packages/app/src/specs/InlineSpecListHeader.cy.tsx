@@ -82,7 +82,6 @@ describe('InlineSpecListHeader', () => {
     useRunAllSpecsStore()
 
     mountWithProps({ isRunAllSpecsAllowed: true })
-    cy.percySnapshot()
 
     cy.get('[data-cy=run-all-specs-for-all]').as('run-all-btn').realHover()
     cy.contains(`Run ${EXPECTED_SPEC_COUNT} specs`).should('be.visible')

@@ -5,6 +5,7 @@ describe('Reporter Header', () => {
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
     })
@@ -13,7 +14,7 @@ describe('Reporter Header', () => {
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
-      cy.get('[data-selected-spec="false"]').should('have.length', '28')
+      cy.get('[data-selected-spec="false"]').should('have.length', '32')
     })
 
     // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
@@ -46,6 +47,7 @@ describe('Reporter Header', () => {
         cy.openProject('cypress-in-cypress')
         cy.startAppServer()
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.contains('dom-content.spec').click()
         cy.waitForSpecToFinish()
       })
@@ -76,6 +78,7 @@ describe('Reporter Header', () => {
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('dom-content-scrollable-commands.spec').click()
 
       // wait for the test to scroll all the way to the bottom

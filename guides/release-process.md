@@ -17,12 +17,13 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 - [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `prod`. Make sure to open the "App Developer" expando for some necessary config values. Your AWS config file should end up looking like the following:
 
     ```
-    [prod]
+    [profile prod]
     sso_start_url = <start_url>
     sso_region = <region>
-    aws_access_key_id = <access_key_id>
-    aws_secret_access_key = <secret_access_key>
-    aws_session_token = <session_token>
+    sso_account_id = <account_id>
+    sso_role_name = <role_name>
+    region = <region>
+    cli_pager = <pager>
     ```
 
 - Set up the following environment variables:
@@ -41,6 +42,13 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
       CF_ZONEID="..."
       CF_TOKEN="..."
       ```
+
+- Ensure that you have the following repositories checked out locally and ready to contribute to:
+  - [`cypress-realworld-app`](https://github.com/cypress-io/cypress-realworld-app)
+  - [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)
+  - [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images)
+  - [cypress-io/release-automations][release-automations]
+
 
 If you don't have access to 1Password, ask a team member who has done a deploy.
 
@@ -80,13 +88,17 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `develop` and deployed.
 
-3. Create a Release PR - 
+3. Create a Release PR -
    Bump, submit, get approvals on, and merge a new PR. This PR should:
     - Bump the Cypress `version` in [`package.json`](package.json)
-    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
+    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, and `yarn` to ensure the lockfile is up to date.
     - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 
 4. Once the `develop` branch is passing in CI and you have confirmed the `cypress-bot` has commented on the commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
+    Tips for getting a green build:
+     - If the `windows` workflow is failing with timeout errors, you can retry from the last failed step.
+     - Sometimes a test can get stuck in a failing state between attempts on the `windows` workflow. In these cases, kicking off a full run of the workflow can help get it into a passing state.
+     - If the `linux-x64` workflow fails due to a flaky test but percy finalizes the build, you *must* restart the workflow from the failed steps. Restarting the entire workflow after a finalized Percy build can cause Percy to fail the next attempt with a "Build has already been finalized" error, requiring pushing a new commit to start fresh.
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
@@ -150,6 +162,10 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 15. Merge the documentation PR from step 11 and the new docker image PR created in step 12 to release the image.
 
 16. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
+    - Build `@packages/example` with `yarn workspace @packages/example build`
+    - Inspect the contents of `./packages/example/build` before deploying, and ensure it looks correct
+    - Run `yarn workspace @packages/example deploy`. This adds changes from `cypress-example-kitchensink` to a commit in the `gh-pages` branch, which will deploy to production with its own CI.
+    - Check the deployed site at `https://example.cypress.io` to ensure the new changes deployed correctly.
 
 17. Once the release is complete, create a Github tag off of the release commit which bumped the version:
     ```shell
@@ -166,18 +182,19 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` artifact from the `verify-release-readiness` CircleCI job and run the following command inside of [cypress-io/release-automations][release-automations]:
 
     ```shell
-    cd packages/issues-in-release && npm run do:comment -- --release-data <path_to_releaseData.json>
+    npm run do:comment -- --release-data <path_to_releaseData.json>
     ```
 
 22. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
 
 23. Notify the team that `develop` is reopen, and post a message to the Releases Slack channel with a link to the changelog.
 
-24. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+24. If utilizing the `SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES` to override and skip changelog validation for this release, change its value as needed or delete it from CircleCI so that subsequent releases and PRs will go through changelog validation.
+
+25. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
-    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose/issues/71)
 
 Take a break, you deserve it! 👉😎👉
 

@@ -114,7 +114,7 @@ const checkBuiltBinary = async () => {
   try {
     await fs.stat(path.join(__dirname, '..', '..', 'cypress.zip'))
   } catch (err) {
-    throw new Error('Expected built cypress.zip at project root. Run `yarn binary-build` and `yarn binary-zip`.')
+    throw new Error('Expected built cypress.zip at project root. Run `yarn binary-build`, `yarn binary-package`, and `yarn binary-zip`.')
   }
 
   try {

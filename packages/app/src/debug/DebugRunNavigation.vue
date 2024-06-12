@@ -38,12 +38,12 @@
           </LightText>
 
           <template v-else-if="latest?.status && latest.runNumber">
-            <DebugRunNumber
+            <RunNumber
               :status="latest.status"
               :value="latest.runNumber"
               class="mx-[8px]"
             />
-            <DebugResults
+            <RunResults
               v-if="latest"
               :gql="latest"
               class="bg-white mr-[12px]"
@@ -135,8 +135,8 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { compact, groupBy } from 'lodash'
 import { computed, FunctionalComponent, h } from 'vue'
 import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
-import DebugResults from './DebugResults.vue'
-import DebugRunNumber from './DebugRunNumber.vue'
+import RunResults from '../runs/RunResults.vue'
+import RunNumber from '../runs/RunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import DebugRunNavigationLimitMessage from './DebugRunNavigationLimitMessage.vue'
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
@@ -149,7 +149,7 @@ const { t } = useI18n()
 
 gql`
 fragment DebugRunNavigationRunInfo on CloudRun {
-  ...DebugResults
+  ...RunResults
   ...DebugProgress_DebugTests
   __typename
   runNumber

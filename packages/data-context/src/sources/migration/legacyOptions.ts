@@ -241,7 +241,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'video',
-    defaultValue: true,
+    defaultValue: false,
     canUpdateDuringTestTime: false,
   }, {
     name: 'videoCompression',

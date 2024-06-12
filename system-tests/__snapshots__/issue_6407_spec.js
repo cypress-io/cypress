@@ -43,7 +43,7 @@ https://on.cypress.io/config
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_6407_spec.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

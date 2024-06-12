@@ -33,7 +33,6 @@ describe('e2e cy.origin retries', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      videoCompression: false,
       retries: 2,
     },
     async onRun (exec) {
@@ -47,5 +46,11 @@ describe('e2e cy.origin retries', () => {
       expect(res.stdout).to.contain('AssertionError')
       expect(res.stdout).to.contain('expected true to be false')
     },
+  })
+
+  systemTests.it('passes runnable state to the secondary origin', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
+    port: PORT,
+    spec: 'cy_origin_retries_runnable.cy.ts',
   })
 })

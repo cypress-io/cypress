@@ -343,18 +343,6 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
       })
     })
 
-    it('cy.readFile', () => {
-      const verify = loadErrorSpec({
-        filePath: 'errors/readfile.cy.js',
-        failCount: 1,
-      }, configFile)
-
-      verify('existence failure', {
-        column: [8, 9],
-        message: 'failed because the file does not exist',
-      })
-    })
-
     it('validation errors', () => {
       const verify = loadErrorSpec({
         filePath: 'errors/validation.cy.js',

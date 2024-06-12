@@ -21,7 +21,5 @@ describe('<SettingsSection />', () => {
     .get('h1').should('contain.text', title)
     .get('p').should('contain.text', description)
     .get('code').should('contain.text', code)
-
-    cy.percySnapshot()
   })
 })

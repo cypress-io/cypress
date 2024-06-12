@@ -938,8 +938,8 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.intercept('*')
       const url4 = 'http://localhost:3501/fixtures/generic.html'
       const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
-      const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
-      const url1 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+      const url2 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url3)}`
+      const url1 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url2)}`
 
       cy.visit(url1)
       .location('href').should('eq', url4)
@@ -1381,8 +1381,7 @@ describe('network stubbing', { retries: 15 }, function () {
       // @see https://github.com/cypress-io/cypress/issues/19330
       // @see https://github.com/cypress-io/cypress/issues/19344
       it('load fixture as Buffer when encoding is null', function () {
-        // call through normally on everything
-        cy.spy(Cypress, 'backend')
+        cy.spy(Cypress, 'backend').log(false)
 
         cy.intercept('/fixtures/media/small.mp4', {
           fixture: 'media/small.mp4,null',
@@ -1390,8 +1389,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.visit('/fixtures/video.html')
         .then(() => {
-          // @ts-ignore .getCall is a Sinon spy command
-          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+          expect(Cypress.backend).to.be.calledWithMatch(
             'net',
             'route:added',
             {
@@ -1407,8 +1405,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
 
       it('load fixture with specified encoding', function () {
-        // call through normally on everything
-        cy.spy(Cypress, 'backend')
+        cy.spy(Cypress, 'backend').log(false)
 
         cy.intercept('non-existing-image.png', {
           headers: { 'content-type': 'image/jpeg' },
@@ -1417,8 +1414,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.visit('/fixtures/img-embed.html')
         .then(() => {
-          // @ts-ignore .getCall is a Sinon spy command
-          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+          expect(Cypress.backend).to.be.calledWithMatch(
             'net',
             'route:added',
             {
@@ -2203,7 +2199,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
       context('with `times`', function () {
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-        it('only uses each handler N times', { retries: 15 }, function () {
+        it('only uses each handler N times', { browser: '!webkit', retries: 15 }, function () {
           const url = uniqueRoute('/foo')
           const third = sinon.stub()
 
@@ -3308,7 +3304,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/should-err*', function (req) {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/should-err*', { times: 1 }, function (req) {
           req.reply(() => {})
         }).then(function () {
           $.get('http://localhost:3333/should-err')
@@ -3367,7 +3366,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/timeout*', (req) => {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/timeout*', { times: 1 }, (req) => {
           req.reply(_.noop)
         }).then(() => {
           $.get('/timeout?ms=50')
@@ -3730,6 +3732,25 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/25448
+      it('gets all aliased Interceptions by alias.all when assigning an alias using req.alias', function () {
+        const url = uniqueRoute('/foo')
+
+        cy.intercept(`${url}*`, (req) => {
+          req.alias = 'alias'
+          req.reply({ bar: 'baz' })
+        })
+        .then(() => {
+          $.get(url)
+          $.get(url)
+        })
+        .wait('@alias').wait('@alias')
+
+        cy.get('@alias.all').then((interceptions) => {
+          expect(interceptions).to.have.length(2)
+        })
+      })
+
       // TODO: fix+document this behavior
       // @see https://github.com/cypress-io/cypress/issues/7663
       it.skip('gets indexed Interception by alias.number', function () {
@@ -3788,6 +3809,31 @@ describe('network stubbing', { retries: 15 }, function () {
           $.get(url)
         })
         .wait('@fromInterceptor')
+        .then(() => {
+          const log = cy.queue.logs({
+            displayName: 'xhr',
+          })[0]
+
+          const renderProps = log.get('renderProps')()
+
+          expect(renderProps.interceptions).to.have.length(1)
+          expect(renderProps.interceptions[0]).to.have.property('alias')
+          expect(renderProps.interceptions[0].alias).to.eq('fromInterceptor')
+        })
+      })
+
+      it('can dynamically alias the request and get with @alias.all', function () {
+        const url = uniqueRoute('/foo')
+
+        cy.intercept(`${url}*`, (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .then(() => {
+          $.get(url)
+          $.get(url)
+        })
+        .wait('@fromInterceptor').wait('@fromInterceptor')
+        .get('@fromInterceptor.all').should('have.length', 2)
       })
 
       it('can time out on a dynamic alias', function (done) {

@@ -2,6 +2,7 @@ import type { BannersState } from '@packages/types'
 import { defineStore } from 'pinia'
 
 interface LoginUserData {
+  id: string
   fullName: string | null
   email: string | null
 }
@@ -13,6 +14,7 @@ export interface UserProjectStatusState {
   utmContent?: string
   cypressFirstOpened?: number
   testingType?: 'e2e' | 'component'
+  projectId?: string
   user: {
     isLoggedIn: boolean
     loginError: boolean
@@ -68,6 +70,7 @@ export const useUserProjectStatusStore = defineStore({
       cypressFirstOpened: undefined,
       userData: undefined,
       testingType: undefined,
+      projectId: undefined,
       user: {
         isLoggedIn: false,
         loginError: false,
@@ -124,6 +127,9 @@ export const useUserProjectStatusStore = defineStore({
     },
     setTestingType (testingType: 'e2e' | 'component' | undefined) {
       this.testingType = testingType
+    },
+    setProjectId (projectId: string | undefined) {
+      this.projectId = projectId
     },
     setBannersState (banners: BannersState) {
       this.bannersState = banners

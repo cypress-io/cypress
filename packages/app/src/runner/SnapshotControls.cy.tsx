@@ -11,10 +11,6 @@ const snapshotControlsSelector = '[data-testid=snapshot-controls]'
 const unpinButtonSelector = '[data-testid=unpin]'
 
 describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => {
-  afterEach(() => {
-    cy.wait(100).percySnapshot()
-  })
-
   const mountSnapshotControls = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),

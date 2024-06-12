@@ -133,7 +133,15 @@ module.exports = {
   },
 
   package (options = {}) {
-    const pkgr = require('electron-packager')
+    /**
+     * NOTE: electron-packager as of v16.0.0 does not play well with
+     * our mksnapshot. Requiring the package in this way, dynamically, will
+     * make it undiscoverable by mksnapshot, which is OK since electron-packager
+     * is a build dependency.
+     */
+    const e = 'electron'
+    const p = 'packager'
+    const pkgr = require(`${e}-${p}`)
     const icons = require('@packages/icons')
 
     const iconPath = icons.getPathToIcon('cypress')

@@ -56,8 +56,6 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       cy.contains('The viewport determines').should('not.exist')
       cy.contains('Chrome 1').click()
       cy.contains('Firefox').should('not.exist')
-
-      cy.percySnapshot()
     })
   })
 
@@ -72,9 +70,8 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.mount(<SpecRunnerHeaderRunMode />)
 
+      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.Chrome)
       cy.get('[data-cy="select-browser"] > button').should('be.disabled')
-
-      cy.percySnapshot()
     })
   })
 
@@ -90,7 +87,7 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       cy.mount(<SpecRunnerHeaderRunMode />)
 
       cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
-      cy.percySnapshot()
+      cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     })
   })
 })

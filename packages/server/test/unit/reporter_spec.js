@@ -109,7 +109,7 @@ describe('lib/reporter', () => {
     })
 
     it('recursively creates suites for fullTitle', function () {
-      const args = this.reporter.parseArgs('fail', [this.testObj])
+      const args = this.reporter.parseArgs('fail', this.testObj)
 
       expect(args[0]).to.eq('fail')
 
@@ -139,7 +139,7 @@ describe('lib/reporter', () => {
     })
 
     it('emits start', function () {
-      this.reporter.emit('start')
+      this.reporter.emit('start', {})
       expect(this.emit).to.be.calledWith('start')
 
       expect(this.emit).to.be.calledOn(this.reporter.runner)

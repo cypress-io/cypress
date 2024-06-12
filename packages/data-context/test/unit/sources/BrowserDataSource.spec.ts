@@ -43,7 +43,7 @@ describe('BrowserDataSource', () => {
       expect(result[1].custom).to.be.true
     })
 
-    it('does not add user custom browser if name and version matchnes a machine browser', async () => {
+    it('does not add user custom browser if name and version matches a machine browser', async () => {
       const browser = { ...userBrowser, name: 'aaa', version: '100' }
       const machineBrowser = { ...foundBrowserChrome, name: 'aaa', version: '100' }
 

@@ -40,7 +40,7 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_multipart.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -102,7 +102,7 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_multipart.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -165,7 +165,7 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_failing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -226,7 +226,7 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_passing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

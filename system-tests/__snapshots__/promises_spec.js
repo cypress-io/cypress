@@ -43,7 +43,7 @@ exports['e2e promises / failing1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     promises.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

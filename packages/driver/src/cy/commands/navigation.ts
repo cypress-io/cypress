@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import whatIsCircular from '@cypress/what-is-circular'
 import UrlParse from 'url-parse'
 import Promise from 'bluebird'
 
@@ -9,6 +8,7 @@ import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
+import { whatIsCircular } from '../../util/what-is-circular'
 
 import type { RunState } from '@packages/types'
 
@@ -216,7 +216,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }
 
-  // this prevents a log occurring when we navigate to about:blank inbetween tests
+  // this prevents a log occurring when we navigate to about:blank in between tests
   // e.g. for new sessions lifecycle
   if (!state('duringUserTestExecution')) {
     return
@@ -302,6 +302,23 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     const promise = new Promise((resolve) => {
+      const handleDownloadUnloadEvent = () => {
+        cy.state('onPageLoadErr', null)
+        cy.isStable(true, 'download')
+
+        options._log
+        .set({
+          message: 'download fired beforeUnload event',
+          consoleProps () {
+            return {
+              Note: 'This event fired when the download was initiated.',
+            }
+          },
+        }).snapshot().end()
+
+        resolve()
+      }
+
       const onWindowLoad = ({ url }) => {
         const href = state('autLocation').href
         const count = getRedirectionCount(href)
@@ -326,16 +343,16 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
         if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
-          options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
+          options._log?.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {
-          options._log.set('message', '--page loaded--').snapshot().end()
+          options._log?.set('message', '--page loaded--').snapshot().end()
         }
 
         resolve()
       }
 
       const onCrossOriginFailure = (err) => {
-        options._log.set('message', '--page loaded--').snapshot().error(err)
+        options._log?.set('message', '--page loaded--').snapshot().error(err)
 
         resolve()
       }
@@ -351,12 +368,13 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
         }
       }
 
+      cy.once('download:received', handleDownloadUnloadEvent)
       cy.once('internal:window:load', onInternalWindowLoad)
 
       // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
-          options._log.set('message', '').end()
+          options._log?.set('message', '').end()
           resolve()
         }
       })
@@ -570,11 +588,9 @@ export default (Commands, Cypress, cy, state, config) => {
             throwArgsErr()
           }
 
-          if (options.log) {
-            options._log = Cypress.log({ timeout: options.timeout })
+          options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
-            options._log.snapshot('before', { next: 'after' })
-          }
+          options._log?.snapshot('before', { next: 'after' })
 
           cleanup = () => {
             knownCommandCausedInstability = false
@@ -610,9 +626,7 @@ export default (Commands, Cypress, cy, state, config) => {
         timeout: config('pageLoadTimeout'),
       })
 
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
-      }
+      options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
       const win = state('window')
 
@@ -777,21 +791,14 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('visit.body_circular', { args: { path } })
       }
 
-      if (options.log) {
-        let message = url
-
-        if (options.method !== 'GET') {
-          message = `${options.method} ${message}`
-        }
-
-        options._log = Cypress.log({
-          message,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
+      options._log = Cypress.log({
+        message: options.method === 'GET' ? url : `${options.method} ${url}`,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
 
       url = $Location.normalize(url)
 

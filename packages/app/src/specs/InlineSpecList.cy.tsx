@@ -72,7 +72,11 @@ describe('InlineSpecList', () => {
       cy.get(newSpecSelector).click()
       cy.contains(defaultMessages.createSpec.newSpecModalTitle).should('be.visible')
 
-      cy.percySnapshot()
+      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).should('be.visible')
+      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description).should('be.visible')
+
+      cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.header).should('be.visible')
+      cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.description).should('be.visible')
     })
 
     it('should handle spec refresh', () => {

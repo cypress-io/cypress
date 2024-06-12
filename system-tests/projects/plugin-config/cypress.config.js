@@ -11,6 +11,7 @@ module.exports = {
       })
       .then(() => {
         config.defaultCommandTimeout = 500
+        config.video = true
         config.videoCompression = 20
         config.env.foo = 'bar'
 

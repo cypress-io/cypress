@@ -18,6 +18,8 @@ declare global {
        *
        */
       waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number): void
+      verifyE2ESelected(): void
+      verifyCtSelected(): void
     }
   }
 }

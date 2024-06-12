@@ -93,6 +93,29 @@ describe('upload-release-artifact', () => {
       expect(() => uploadArtifactToS3(['--type', 'npm-package', '--version', '1.0.0'])).to.throw()
     })
 
+    it('does not call s3 methods and returns url when --dry-run is passed', async () => {
+      uploadUtils.formHashFromEnvironment.returns('hash')
+      uploadUtils.getUploadNameByOsAndArch.returns('darwin-x64')
+
+      const binaryArgs = ['--file', 'my.zip', '--type', 'binary', '--version', '1.0.0', '--dry-run', 'true']
+
+      const binaryUrl = await uploadArtifactToS3(binaryArgs)
+
+      expect(uploadUtils.formHashFromEnvironment).to.have.calledOnce
+      expect(uploadUtils.getUploadNameByOsAndArch).to.have.calledOnce
+      expect(upload.toS3).not.to.have.been.called
+      expect(binaryUrl).to.equal('https://cdn.cypress.io/beta/binary/1.0.0/darwin-x64/hash/cypress.zip')
+
+      const packageArgs = ['--file', 'cypress.tgz', '--type', 'npm-package', '--version', '1.0.0', '--dry-run', 'true']
+
+      const packageUrl = await uploadArtifactToS3(packageArgs)
+
+      expect(uploadUtils.formHashFromEnvironment).to.have.calledTwice
+      expect(uploadUtils.getUploadNameByOsAndArch).to.have.calledTwice
+      expect(upload.toS3).not.to.have.been.called
+      expect(packageUrl).to.equal('https://cdn.cypress.io/beta/npm/1.0.0/darwin-x64/hash/cypress.tgz')
+    })
+
     it('uploads binary to s3 and saves url to json', () => {
       uploadUtils.formHashFromEnvironment.returns('hash')
       uploadUtils.getUploadNameByOsAndArch.returns('darwin-x64')

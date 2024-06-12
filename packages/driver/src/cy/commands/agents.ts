@@ -76,9 +76,8 @@ const onInvoke = function (Cypress, obj, args) {
     consoleProps () {
       const consoleObj: Record<string, any> = {}
 
-      consoleObj.Command = null
-      consoleObj.Error = null
-      consoleObj.Event = `${agentName} called`
+      consoleObj.name = `${agentName} called`
+      consoleObj.error = null
 
       consoleObj[agent._cyType] = agent
       consoleObj['Call #'] = agent.callCount

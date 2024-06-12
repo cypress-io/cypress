@@ -116,6 +116,7 @@ export type MountResponse<T> = {
 // 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
 // Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
 // so we'll patch here pending a fix in that library
+// @ts-ignore Ignore so that way we can bypass semantic error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.
 globalThis.it.skip = globalThis.xit
 
 @Injectable()

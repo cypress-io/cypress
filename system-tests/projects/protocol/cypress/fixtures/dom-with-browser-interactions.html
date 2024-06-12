@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DOM with Browser Interactions Fixture</title>
+  </head>
+  <body>
+    <div id="dom">
+      <h1>DOM with Browser Interactions Fixture</h1>
+      <p>Fixture for browser interaction tests.</p>
+      <input type="text" id="text-target" placeholder="Input text">
+      <select name="select" id="select-target">
+        <option value="1">One</option>
+        <option value="2">Two</option>
+      </select>
+      <select name="select-multi" id="select-target-multi" multiple>
+        <option value="1">One</option>
+        <option value="2">Two</option>
+      </select>
+      <div>
+        <input type="radio" name="radio-inputs" id="radio-1" />
+        <input type="radio" name="radio-inputs" id="radio-2" />
+      </div>
+      <input type="checkbox" name="check" id="check-target" />
+      <div style="height:10000px; position: relative;">
+        <div id="scroll-target-window" style="position:absolute;bottom:0px;height:100px;width:100px;overflow:scroll;background:#ccc">
+          <div id="spacer" style="height:100px;width:100px;background:#cff"></div>
+          <div id="scroll-target-element" style="background:#fcf;height:100px;width:100px;margin-left:100px;"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

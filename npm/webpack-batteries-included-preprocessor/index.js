@@ -1,5 +1,11 @@
 const path = require('path')
+const fs = require('fs-extra')
+const JSON5 = require('json5')
+const webpack = require('webpack')
+const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -9,6 +15,38 @@ const hasTsLoader = (rules) => {
       return use.loader && use.loader.includes('ts-loader')
     })
   })
+}
+
+const getTSCompilerOptionsForUser = (configFilePath) => {
+  const compilerOptions = {
+    sourceMap: false,
+    inlineSourceMap: true,
+    inlineSources: true,
+    downlevelIteration: true,
+  }
+
+  if (!configFilePath) {
+    return compilerOptions
+  }
+
+  try {
+    // If possible, try to read the user's tsconfig.json and see if sourceMap is configured
+    // eslint-disable-next-line no-restricted-syntax
+    const tsconfigJSON = fs.readFileSync(configFilePath, 'utf8')
+    // file might have trailing commas, new lines, etc. JSON5 can parse those correctly
+    const parsedJSON = JSON5.parse(tsconfigJSON)
+
+    // if the user has sourceMap's configured, set the option to true and turn off inlineSourceMaps
+    if (parsedJSON?.compilerOptions?.sourceMap) {
+      compilerOptions.sourceMap = true
+      compilerOptions.inlineSourceMap = false
+      compilerOptions.inlineSources = false
+    }
+  } catch (e) {
+    debug(`error in getTSCompilerOptionsForUser. Returning default...`, e)
+  } finally {
+    return compilerOptions
+  }
 }
 
 const addTypeScriptConfig = (file, options) => {
@@ -26,8 +64,10 @@ const addTypeScriptConfig = (file, options) => {
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-package'
-  const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
+  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
+  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
+
+  const compilerOptions = getTSCompilerOptionsForUser(configFile)
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
@@ -37,11 +77,7 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions: {
-            inlineSourceMap: true,
-            inlineSources: true,
-            downlevelIteration: true,
-          },
+          compilerOptions,
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -107,8 +143,8 @@ const getDefaultWebpackOptions = () => {
             plugins: [
               ...[
                 'babel-plugin-add-module-exports',
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-proposal-object-rest-spread',
+                '@babel/plugin-transform-class-properties',
+                '@babel/plugin-transform-object-rest-spread',
               ].map(require.resolve),
               [require.resolve('@babel/plugin-transform-runtime'), {
                 absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
@@ -131,23 +167,59 @@ const getDefaultWebpackOptions = () => {
         loader: require.resolve('coffee-loader'),
       }],
     },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
+      }),
+    ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
-      alias: {
-        'child_process': require.resolve('./empty'),
-        'cluster': require.resolve('./empty'),
-        'console': require.resolve('./empty'),
-        'dgram': require.resolve('./empty'),
-        'dns': require.resolve('./empty'),
-        'fs': require.resolve('./empty'),
-        'http2': require.resolve('./empty'),
-        'inspector': require.resolve('./empty'),
-        'module': require.resolve('./empty'),
-        'net': require.resolve('./empty'),
-        'perf_hooks': require.resolve('./empty'),
-        'readline': require.resolve('./empty'),
-        'repl': require.resolve('./empty'),
-        'tls': require.resolve('./empty'),
+      fallback: {
+        assert: require.resolve('assert/'),
+        buffer: require.resolve('buffer/'),
+        child_process: false,
+        cluster: false,
+        console: false,
+        constants: require.resolve('constants-browserify'),
+        crypto: require.resolve('crypto-browserify'),
+        dgram: false,
+        dns: false,
+        domain: require.resolve('domain-browser'),
+        events: require.resolve('events/'),
+        fs: false,
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        http2: false,
+        inspector: false,
+        module: false,
+        net: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        perf_hooks: false,
+        punycode: require.resolve('punycode/'),
+        process: require.resolve('process/browser.js'),
+        querystring: require.resolve('querystring-es3'),
+        readline: false,
+        repl: false,
+        stream: require.resolve('stream-browserify'),
+        string_decoder: require.resolve('string_decoder/'),
+        sys: require.resolve('util/'),
+        timers: require.resolve('timers-browserify'),
+        tls: false,
+        tty: require.resolve('tty-browserify'),
+        url: require.resolve('url/'),
+        util: require.resolve('util/'),
+        vm: require.resolve('vm-browserify'),
+        zlib: require.resolve('browserify-zlib'),
       },
       plugins: [],
     },

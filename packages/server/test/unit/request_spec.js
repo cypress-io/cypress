@@ -389,7 +389,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise(undefined, this.fn, {
         url: 'http://www.github.com/foo',
         cookies: false,
         body: 'foobarbaz',
@@ -441,7 +441,7 @@ describe('lib/request', () => {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request.sendPromise(undefined, this.fn, {
         url: 'http://www.github.com/dashboard',
         cookies: false,
       })
@@ -583,11 +583,7 @@ describe('lib/request', () => {
       .get('/foo')
       .reply(200, 'derp')
 
-      const headers = {}
-
-      headers['user-agent'] = 'foobarbaz'
-
-      return request.sendPromise(headers, this.fn, {
+      return request.sendPromise('foobarbaz', this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -937,6 +933,64 @@ describe('lib/request', () => {
           expect(resp.body).to.eq('<html></html>')
 
           expect(init).not.to.be.calledWithMatch({ json: true })
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/28789
+    context('json=true', () => {
+      beforeEach(() => {
+        nock('http://localhost:8080')
+        .matchHeader('Content-Type', 'application/json')
+        .post('/login')
+        .reply(200, '<html></html>')
+      })
+
+      it('does not modify regular JSON objects', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const body = {
+          foo: 'bar',
+        }
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body })
+        })
+      })
+
+      it('converts boolean JSON literals to strings', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body: true,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body: 'true' })
+        })
+      })
+
+      it('converts null JSON literals to \'null\'', function () {
+        const init = sinon.spy(request.rp.Request.prototype, 'init')
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/login',
+          method: 'POST',
+          cookies: false,
+          json: true,
+          body: null,
+        })
+        .then(() => {
+          expect(init).to.be.calledWithMatch({ body: 'null' })
         })
       })
     })

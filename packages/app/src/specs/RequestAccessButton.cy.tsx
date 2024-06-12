@@ -32,8 +32,6 @@ describe('<RequestAccessButton />', () => {
       cy.get(requestAccessButtonSelector)
       .should('be.visible')
       .and('contain.text', messages.requestAccessButton)
-
-      cy.percySnapshot()
     })
 
     it('triggers mutation on button click', () => {
@@ -83,8 +81,6 @@ describe('<RequestAccessButton />', () => {
       cy.get(requestSentButton)
       .should('be.visible')
       .and('contain.text', messages.requestSentButton)
-
-      cy.percySnapshot()
     })
   })
 })

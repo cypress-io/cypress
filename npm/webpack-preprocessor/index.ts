@@ -324,10 +324,21 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // this event is triggered when watching and a file is saved
     const onCompile = () => {
       debug('compile', filePath)
-      const nextBundle = utils.createDeferred<string>()
+      /**
+       * Webpack 5 fix:
+       * If the bundle is the initial bundle, do not create the deferred promise
+       * as we already have one from above. Creating additional deferments on top of
+       * the first bundle causes reference issues with the first bundle returned, meaning
+       * the promise that is resolved/rejected is different from the one that is returned, which
+       * makes the preprocessor permanently hang
+       */
+      if (!bundles[filePath].initial) {
+        const nextBundle = utils.createDeferred<string>()
 
-      bundles[filePath].promise = nextBundle.promise
-      bundles[filePath].deferreds.push(nextBundle)
+        bundles[filePath].promise = nextBundle.promise
+        bundles[filePath].deferreds.push(nextBundle)
+      }
+
       bundles[filePath].promise.finally(() => {
         debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
         // when the bundling is finished, emit 'rerun' to let Cypress

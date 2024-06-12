@@ -101,12 +101,11 @@ const runSmokeTest = (binaryDir, options) => {
     debug('smoke test command:', smokeTestCommand)
     debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
-    const env = _.extend({}, process.env, {
-      ELECTRON_ENABLE_LOGGING: true,
-    })
-
     const stdioOptions = _.extend({}, {
-      env,
+      env: {
+        ...process.env,
+        FORCE_COLOR: 0,
+      },
       timeout: options.smokeTestTimeout,
     })
 

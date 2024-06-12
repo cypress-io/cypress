@@ -4,7 +4,7 @@ import { FileDetails } from '@packages/types'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
+import TextIcon from '@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 import OpenFileInIDE from './open-file-in-ide'
 
 interface Props {

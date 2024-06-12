@@ -149,14 +149,15 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.shouldWithTimeout(() => {
           const { consoleProps } = findCrossOriginLogs('getCookie', logs, 'foobar.com')
 
-          expect(consoleProps.Command).to.equal('getCookie')
-          expect(consoleProps.Yielded).to.have.property('domain').that.includes('foobar.com')
-          expect(consoleProps.Yielded).to.have.property('expiry').that.is.a('number')
-          expect(consoleProps.Yielded).to.have.property('httpOnly').that.equals(false)
-          expect(consoleProps.Yielded).to.have.property('secure').that.equals(false)
-          expect(consoleProps.Yielded).to.have.property('name').that.equals('foo')
-          expect(consoleProps.Yielded).to.have.property('value').that.equals('bar')
-          expect(consoleProps.Yielded).to.have.property('path').that.is.a('string')
+          expect(consoleProps.name).to.equal('getCookie')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props.Yielded).to.have.property('domain').that.includes('foobar.com')
+          expect(consoleProps.props.Yielded).to.have.property('expiry').that.is.a('number')
+          expect(consoleProps.props.Yielded).to.have.property('httpOnly').that.equals(false)
+          expect(consoleProps.props.Yielded).to.have.property('secure').that.equals(false)
+          expect(consoleProps.props.Yielded).to.have.property('name').that.equals('foo')
+          expect(consoleProps.props.Yielded).to.have.property('value').that.equals('bar')
+          expect(consoleProps.props.Yielded).to.have.property('path').that.is.a('string')
         })
       })
 
@@ -174,17 +175,18 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
 
           const { consoleProps } = allGetCookieLogs.pop() as any
 
-          expect(consoleProps.Command).to.equal('getCookies')
-          expect(consoleProps['Num Cookies']).to.equal(1)
+          expect(consoleProps.name).to.equal('getCookies')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Num Cookies']).to.equal(1)
 
           // can't exactly assert on length() as this is a array proxy object
-          expect(consoleProps.Yielded.length).to.equal(1)
-          expect(consoleProps.Yielded[0]).to.have.property('expiry').that.is.a('number')
-          expect(consoleProps.Yielded[0]).to.have.property('httpOnly').that.equals(false)
-          expect(consoleProps.Yielded[0]).to.have.property('secure').that.equals(false)
-          expect(consoleProps.Yielded[0]).to.have.property('name').that.equals('foo')
-          expect(consoleProps.Yielded[0]).to.have.property('value').that.equals('bar')
-          expect(consoleProps.Yielded[0]).to.have.property('path').that.is.a('string')
+          expect(consoleProps.props.Yielded.length).to.equal(1)
+          expect(consoleProps.props.Yielded[0]).to.have.property('expiry').that.is.a('number')
+          expect(consoleProps.props.Yielded[0]).to.have.property('httpOnly').that.equals(false)
+          expect(consoleProps.props.Yielded[0]).to.have.property('secure').that.equals(false)
+          expect(consoleProps.props.Yielded[0]).to.have.property('name').that.equals('foo')
+          expect(consoleProps.props.Yielded[0]).to.have.property('value').that.equals('bar')
+          expect(consoleProps.props.Yielded[0]).to.have.property('path').that.is.a('string')
         })
       })
 
@@ -198,14 +200,15 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.shouldWithTimeout(() => {
           const { consoleProps } = findCrossOriginLogs('setCookie', logs, 'foobar.com')
 
-          expect(consoleProps.Command).to.equal('setCookie')
-          expect(consoleProps.Yielded).to.have.property('domain').that.includes('foobar.com')
-          expect(consoleProps.Yielded).to.have.property('expiry').that.is.a('number')
-          expect(consoleProps.Yielded).to.have.property('httpOnly').that.equals(false)
-          expect(consoleProps.Yielded).to.have.property('secure').that.equals(false)
-          expect(consoleProps.Yielded).to.have.property('name').that.equals('foo')
-          expect(consoleProps.Yielded).to.have.property('value').that.equals('bar')
-          expect(consoleProps.Yielded).to.have.property('path').that.is.a('string')
+          expect(consoleProps.name).to.equal('setCookie')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props.Yielded).to.have.property('domain').that.includes('foobar.com')
+          expect(consoleProps.props.Yielded).to.have.property('expiry').that.is.a('number')
+          expect(consoleProps.props.Yielded).to.have.property('httpOnly').that.equals(false)
+          expect(consoleProps.props.Yielded).to.have.property('secure').that.equals(false)
+          expect(consoleProps.props.Yielded).to.have.property('name').that.equals('foo')
+          expect(consoleProps.props.Yielded).to.have.property('value').that.equals('bar')
+          expect(consoleProps.props.Yielded).to.have.property('path').that.is.a('string')
         })
       })
 
@@ -219,15 +222,16 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.shouldWithTimeout(() => {
           const { consoleProps } = findCrossOriginLogs('clearCookie', logs, 'foobar.com')
 
-          expect(consoleProps.Command).to.equal('clearCookie')
-          expect(consoleProps.Yielded).to.equal('null')
-          expect(consoleProps['Cleared Cookie']).to.have.property('domain').that.includes('foobar.com')
-          expect(consoleProps['Cleared Cookie']).to.have.property('expiry').that.is.a('number')
-          expect(consoleProps['Cleared Cookie']).to.have.property('httpOnly').that.equals(false)
-          expect(consoleProps['Cleared Cookie']).to.have.property('secure').that.equals(false)
-          expect(consoleProps['Cleared Cookie']).to.have.property('name').that.equals('foo')
-          expect(consoleProps['Cleared Cookie']).to.have.property('value').that.equals('bar')
-          expect(consoleProps['Cleared Cookie']).to.have.property('path').that.is.a('string')
+          expect(consoleProps.name).to.equal('clearCookie')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props.Yielded).to.equal('null')
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('domain').that.includes('foobar.com')
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('expiry').that.is.a('number')
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('httpOnly').that.equals(false)
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('secure').that.equals(false)
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('name').that.equals('foo')
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('value').that.equals('bar')
+          expect(consoleProps.props['Cleared Cookie']).to.have.property('path').that.is.a('string')
         })
       })
 
@@ -243,20 +247,21 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.shouldWithTimeout(() => {
           const { consoleProps } = findCrossOriginLogs('clearCookies', logs, 'foobar.com')
 
-          expect(consoleProps.Command).to.equal('clearCookies')
-          expect(consoleProps['Num Cookies']).to.equal(2)
+          expect(consoleProps.name).to.equal('clearCookies')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Num Cookies']).to.equal(2)
 
-          expect(consoleProps.Yielded).to.equal('null')
+          expect(consoleProps.props.Yielded).to.equal('null')
 
-          expect(consoleProps['Cleared Cookies'].length).to.equal(2)
+          expect(consoleProps.props['Cleared Cookies'].length).to.equal(2)
 
-          expect(consoleProps['Cleared Cookies'][0]).to.have.property('name').that.equals('foo')
-          expect(consoleProps['Cleared Cookies'][0]).to.have.property('value').that.equals('bar')
+          expect(consoleProps.props['Cleared Cookies'][0]).to.have.property('name').that.equals('foo')
+          expect(consoleProps.props['Cleared Cookies'][0]).to.have.property('value').that.equals('bar')
 
-          expect(consoleProps['Cleared Cookies'][1]).to.have.property('name').that.equals('faz')
-          expect(consoleProps['Cleared Cookies'][1]).to.have.property('value').that.equals('baz')
+          expect(consoleProps.props['Cleared Cookies'][1]).to.have.property('name').that.equals('faz')
+          expect(consoleProps.props['Cleared Cookies'][1]).to.have.property('value').that.equals('baz')
 
-          _.forEach(consoleProps['Cleared Cookies'], (clearedCookie) => {
+          _.forEach(consoleProps.props['Cleared Cookies'], (clearedCookie) => {
             expect(clearedCookie).to.have.property('httpOnly').that.equals(false)
             expect(clearedCookie).to.have.property('secure').that.equals(false)
             expect(clearedCookie).to.have.property('path').that.is.a('string')

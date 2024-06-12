@@ -47,22 +47,38 @@ describe('src/cy/commands/querying', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        this.logs = []
-
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'root') {
-            this.lastLog = log
-
-            this.logs.push(log)
-          }
+          this.lastLog = log
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
-        cy.root({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.root({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.root({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('root')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
       })
 
@@ -114,8 +130,11 @@ describe('src/cy/commands/querying', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'root',
-            Yielded: $root.get(0),
+            name: 'root',
+            type: 'command',
+            props: {
+              Yielded: $root.get(0),
+            },
           })
         })
       })

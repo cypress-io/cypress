@@ -368,6 +368,12 @@ describe('lib/config', () => {
             return this.expectValidationFails('the value was: true')
           })
         })
+
+        it('passes if a string contains encoded special characters', function () {
+          this.setup({ fileServerFolder: encodeURI('/specialCharacters/无法解析的特殊字符') })
+
+          return this.expectValidationPasses()
+        })
       })
 
       context('fixturesFolder', () => {
@@ -572,6 +578,64 @@ describe('lib/config', () => {
         })
       })
 
+      context('experimentalCspAllowList', () => {
+        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'form-action', 'child-src', 'frame-src']).split(',').join(', ')
+
+        it('passes if false', function () {
+          this.setup({ experimentalCspAllowList: false })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if true', function () {
+          this.setup({ experimentalCspAllowList: true })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string', function () {
+          this.setup({ experimentalCspAllowList: 'fake-directive' })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('passes if an empty array', function () {
+          this.setup({ experimentalCspAllowList: [] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: ['default-src', 'form-action'] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if null', function () {
+          this.setup({ experimentalCspAllowList: null })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string[]', function () {
+          this.setup({ experimentalCspAllowList: ['script-src', 'fake-directive-2'] })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('fails if any[]', function () {
+          this.setup({ experimentalCspAllowList: [true, 'default-src'] })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('fails if not falsy, or subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: 1 })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+      })
+
       context('supportFile', () => {
         it('passes if false', function () {
           this.setup({ e2e: { supportFile: false } })
@@ -622,10 +686,22 @@ describe('lib/config', () => {
           return this.expectValidationPasses()
         })
 
+        it('passes if true', function () {
+          this.setup({ videoCompression: true })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a valid CRF value', function () {
+          this.setup({ videoCompression: 70 })
+
+          return this.expectValidationFails('to be a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
+        })
+
         it('fails if not a number', function () {
           this.setup({ videoCompression: 'foo' })
 
-          return this.expectValidationFails('be a number or false')
+          return this.expectValidationFails('to be a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
         })
       })
 
@@ -638,20 +714,6 @@ describe('lib/config', () => {
 
         it('fails if not a boolean', function () {
           this.setup({ video: 42 })
-
-          return this.expectValidationFails('be a boolean')
-        })
-      })
-
-      context('videoUploadOnPasses', () => {
-        it('passes if a boolean', function () {
-          this.setup({ videoUploadOnPasses: false })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a boolean', function () {
-          this.setup({ videoUploadOnPasses: 99 })
 
           return this.expectValidationFails('be a boolean')
         })
@@ -827,29 +889,27 @@ describe('lib/config', () => {
       })
 
       context('retries', () => {
-        const retriesError = 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls'
-
         // need to keep the const here or it'll get stripped by the build
         // eslint-disable-next-line no-unused-vars
         const cases = [
-          [{ retries: null }, 'with null', true],
-          [{ retries: 3 }, 'when a number', true],
-          [{ retries: 3.2 }, 'when a float', false],
-          [{ retries: -1 }, 'with a negative number', false],
-          [{ retries: true }, 'when true', false],
-          [{ retries: false }, 'when false', false],
-          [{ retries: {} }, 'with an empty object', true],
-          [{ retries: { runMode: 3 } }, 'when runMode is a positive number', true],
-          [{ retries: { runMode: -1 } }, 'when runMode is a negative number', false],
-          [{ retries: { openMode: 3 } }, 'when openMode is a positive number', true],
-          [{ retries: { openMode: -1 } }, 'when openMode is a negative number', false],
-          [{ retries: { openMode: 3, TypoRunMode: 3 } }, 'when there is an additional unknown key', false],
-          [{ retries: { openMode: 3, runMode: 3 } }, 'when both runMode and openMode are positive numbers', true],
-        ].forEach(([config, expectation, shouldPass]) => {
-          it(`${shouldPass ? 'passes' : 'fails'} ${expectation}`, function () {
+          [{ retries: null }, 'with null', null],
+          [{ retries: 3 }, 'when a number', null],
+          [{ retries: 3.2 }, 'when a float', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: -1 }, 'with a negative number', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: true }, 'when true', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: false }, 'when false', 'Expected retries to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.'],
+          [{ retries: {} }, 'with an empty object', null],
+          [{ retries: { runMode: 3 } }, 'when runMode is a positive number', null],
+          [{ retries: { runMode: -1 } }, 'when runMode is a negative number', 'Expected retries.runMode to be a positive whole number greater than or equals 0 or null.'],
+          [{ retries: { openMode: 3 } }, 'when openMode is a positive number', null],
+          [{ retries: { openMode: -1 } }, 'when openMode is a negative number', 'Expected retries.openMode to be a positive whole number greater than or equals 0 or null'],
+          [{ retries: { openMode: 3, TypoRunMode: 3 } }, 'when there is an additional unknown key', 'Expected retries to be an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls.'],
+          [{ retries: { openMode: 3, runMode: 3 } }, 'when both runMode and openMode are positive numbers', null],
+        ].forEach(([config, expectation, expectedError]) => {
+          it(`${expectedError ? 'fails' : 'passes'} ${expectation}`, function () {
             this.setup(config)
 
-            return shouldPass ? this.expectValidationPasses() : this.expectValidationFails(retriesError)
+            return expectedError ? this.expectValidationFails(expectedError) : this.expectValidationPasses()
           })
         })
       })

@@ -74,7 +74,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       cy.intercept('/foo', (req) => {
         // delay the response to ensure the wait will wait for response
         req.reply({
-          delay: 100,
+          delay: 200,
           body: response,
         })
       }).as('foo')
@@ -142,7 +142,11 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
     })
 
-    it('doesn\'t log when log: false', () => {
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
       cy.intercept('/foo', {}).as('foo')
 
       cy.origin('http://www.foobar.com:3500', () => {
@@ -152,9 +156,31 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const expectedLogs = findCrossOriginLogs('wait', logs, 'localhost')
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
 
-        expect(expectedLogs).to.be.empty
+        expect(waitLog[0]).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        logs.set(attrs.id, log)
+      })
+
+      cy.intercept('/foo', {}).as('foo')
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.then(() => window.xhrGet('/foo'))
+
+        cy.wait('@foo', { log: false })
+      })
+
+      cy.shouldWithTimeout(() => {
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
+
+        expect(waitLog.name).to.eq('wait')
+        expect(waitLog.hidden).to.be.true
+        expect(waitLog.snapshots.length, 'log snapshot length').to.eq(1)
       })
     })
 
@@ -316,8 +342,9 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('wait', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('wait')
-        expect(consoleProps['Waited For']).to.equal('200ms before continuing')
+        expect(consoleProps.name).to.equal('wait')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Waited For']).to.equal('200ms before continuing')
       })
     })
 
@@ -334,9 +361,10 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
-          expect(consoleProps['Waited For']).to.equal('foo')
-          expect(consoleProps.Yielded).to.equal(Cypress.state('routes')[consoleProps.Yielded.routeId].requests[consoleProps.Yielded.id])
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Waited For']).to.equal('foo')
+          expect(consoleProps.props.Yielded).to.equal(Cypress.state('routes')[consoleProps.props.Yielded.routeId].requests[consoleProps.props.Yielded.id])
         })
       })
 
@@ -357,10 +385,11 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
-          expect(consoleProps['Waited For']).to.equal('foo, bar')
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props['Waited For']).to.equal('foo, bar')
           const routes = Cypress.state('routes')
-          const yielded = consoleProps.Yielded
+          const yielded = consoleProps.props.Yielded
           const expectedRoutes = [routes[yielded[0].routeId].requests[yielded[0].id], routes[yielded[1].routeId].requests[yielded[1].id]]
 
           expect(yielded).to.deep.equal(expectedRoutes)

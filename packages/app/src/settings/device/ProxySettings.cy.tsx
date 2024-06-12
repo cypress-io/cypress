@@ -15,13 +15,13 @@ describe('<ProxySettings />', {
       render: (gql) => <div class="p-[24px]"><ProxySettings gql={gql} /></div>,
     })
 
+    cy.contains('h2', 'Proxy settings')
+    cy.contains('p', 'Cypress auto-detected the following proxy settings from your operating system.')
     cy.findByText('Proxy bypass list')
     .get('[data-testid=bypass-list]').should('have.text', 'proxy-bypass')
 
     cy.findByText('Proxy server')
     .get('[data-testid=proxy-server]').should('have.text', 'proxy-server')
-
-    cy.percySnapshot()
   })
 
   it('renders the title and description', () => {

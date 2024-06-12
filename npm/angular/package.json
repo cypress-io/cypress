@@ -7,7 +7,6 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
@@ -17,7 +16,7 @@
     "@angular/core": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@cypress/mount-utils": "0.0.0-development",
-    "typescript": "^4.7.4",
+    "typescript": "~5.4.5",
     "zone.js": "~0.11.4"
   },
   "peerDependencies": {
@@ -36,7 +35,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/angular/#readme",
-  "author": "Jordan Powell",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fangular&template=1-bug-report.md&title=",
   "keywords": [
     "angular",
@@ -58,6 +56,15 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{workspaceRoot}/cli/angular"
+        ]
+      }
+    }
   },
   "standard": {
     "globals": [

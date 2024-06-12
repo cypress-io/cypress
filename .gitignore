@@ -92,7 +92,7 @@ system-tests/lib/fixtureDirs.ts
 /packages/frontend-shared/src/generated
 /packages/frontend-shared/cypress/e2e/support/e2eProjectDirs.ts
 
-# from npm/create-cypress-tests
+# from old npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/src/test-output
 
@@ -395,3 +395,6 @@ tooling/v8-snapshot/cache/dev-win32
 tooling/v8-snapshot/cache/prod-darwin
 tooling/v8-snapshot/cache/prod-linux
 tooling/v8-snapshot/cache/prod-win32
+
+# Cloud API validations
+system-tests/lib/validations

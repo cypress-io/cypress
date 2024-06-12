@@ -1,6 +1,6 @@
-import { parse } from 'graphql'
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape, AuthStateShape } from '../data'
+import { gql } from '@urql/core'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
@@ -33,12 +33,19 @@ export class AuthActions {
   }
 
   async checkAuth () {
-    const operation = `query Cypress_CheckAuth { cloudViewer { id email fullName } }`
+    const operationDoc = gql`
+      query Cypress_CheckAuth { 
+        cloudViewer { 
+          id 
+          email 
+          fullName 
+        } 
+      }`
+
     const result = await this.ctx.cloud.executeRemoteGraphQL({
       fieldName: 'cloudViewer',
       operationType: 'query',
-      operation,
-      operationDoc: parse(operation),
+      operationDoc,
       operationVariables: {},
     })
 

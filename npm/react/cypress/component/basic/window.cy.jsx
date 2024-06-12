@@ -27,7 +27,7 @@ it('has the same window from the component as from test', () => {
   mount(<Component />)
   cy.contains('component')
   cy.window()
-  .its('location.pathname')
+  .its('location.search')
   // this filename
   .should('match', /window.cy.jsx$/)
 

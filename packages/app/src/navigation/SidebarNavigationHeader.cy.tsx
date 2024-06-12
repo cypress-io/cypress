@@ -9,7 +9,6 @@ describe('SidebarNavigationHeader', () => {
 
     cy.get('[data-cy="testing-type-e2e"]').should('exist')
     cy.contains('test-project')
-    cy.percySnapshot()
   })
 
   it('renders component icon', () => {
@@ -26,6 +25,5 @@ describe('SidebarNavigationHeader', () => {
 
     cy.get('[data-cy="testing-type-component"]').should('exist')
     cy.contains('test-project')
-    cy.percySnapshot()
   })
 })

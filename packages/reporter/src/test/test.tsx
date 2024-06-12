@@ -16,9 +16,9 @@ import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 
-import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
-import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
-import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+import CheckIcon from '@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+import ClipboardIcon from '@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
+import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events: Events

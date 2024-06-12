@@ -4,16 +4,17 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
     "test-unit": "node test",
-    "test-watch": "echo 'no watching of tests'",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "tslib": "2.3.1",
     "typescript-cached-transpile": "^0.0.6"
   },

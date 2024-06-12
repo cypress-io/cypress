@@ -241,8 +241,6 @@ describe('<DebugRunNavigation />', () => {
 
     cy.contains('We found more than 100 runs.').should('be.visible')
     cy.findByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
-
-    cy.percySnapshot()
   })
 
   describe('Switch to latest run button', () => {

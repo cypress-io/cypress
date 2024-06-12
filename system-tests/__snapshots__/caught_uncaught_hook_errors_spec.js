@@ -72,7 +72,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
   │ Pending:      0                                                                                │
   │ Skipped:      3                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     hook_caught_error_failing.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -161,7 +161,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Pending:      0                                                                                │
   │ Skipped:      2                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     hook_uncaught_error_failing.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -237,7 +237,7 @@ Because this error occurred during a \`before each\` hook we are skipping all of
   │ Pending:      0                                                                                │
   │ Skipped:      3                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     hook_uncaught_root_error_failing.cy.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -322,7 +322,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     hook_uncaught_error_events_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

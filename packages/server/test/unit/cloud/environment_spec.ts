@@ -6,7 +6,7 @@ import { exec } from 'child_process'
 import originalResolvePackagePath from 'resolve-package-path'
 import proxyquire from 'proxyquire'
 
-describe('lib/cloud/api', () => {
+describe('lib/cloud/environment', () => {
   beforeEach(() => {
     delete process.env.CYPRESS_API_URL
     process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({

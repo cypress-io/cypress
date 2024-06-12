@@ -216,20 +216,45 @@ describe('src/cy/commands/querying - shadow dom', () => {
         cy.get('#shadow-element-1').shadow()
         .then(function ($el) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Applied To': cy.$$('#shadow-element-1')[0],
-            Yielded: Cypress.dom.getElements($el),
-            Elements: $el.length,
-            Command: 'shadow',
+            name: 'shadow',
+            type: 'command',
+            props: {
+              'Applied To': cy.$$('#shadow-element-1')[0],
+              Yielded: Cypress.dom.getElements($el),
+              Elements: $el.length,
+            },
           })
         })
       })
 
-      it('can be turned off', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.get('#shadow-element-1').shadow({ log: false })
         .then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
           expect(lastLog.get('name')).to.eq('get')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#shadow-element-1').shadow({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+
+          expect(hiddenLog.get('name')).to.eq('shadow')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
       })
     })

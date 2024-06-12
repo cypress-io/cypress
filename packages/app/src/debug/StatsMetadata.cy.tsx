@@ -235,7 +235,5 @@ describe('<StatsMetadata />', () => {
         cy.findByTestId(testingOrder[index]).should('be.visible')
       }
     })
-
-    cy.percySnapshot()
   })
 })

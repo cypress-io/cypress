@@ -3,8 +3,8 @@ type EventEmitter2 = import("eventemitter2").EventEmitter2
 
 interface CyEventEmitter extends Omit<EventEmitter2, 'waitFor'> {
   proxyTo: (cy: Cypress.cy) => null
-  emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
-  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
+  emitMap: (eventName: string, ...args: any[]) => Array<(...args: any[]) => any>
+  emitThen: (eventName: string, ...args: any[]) => Bluebird.BluebirdStatic
 }
 
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/events.d.ts

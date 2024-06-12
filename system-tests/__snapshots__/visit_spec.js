@@ -55,7 +55,7 @@ exports['e2e visit / low response timeout / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -128,7 +128,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_http_500_response_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -210,7 +210,7 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_non_html_content_type_failing.cy.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -302,7 +302,7 @@ When this \`load\` event occurs, Cypress will continue running commands.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_http_timeout_failing.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -439,7 +439,7 @@ Common situations why this would fail:
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_response_never_ends_failing.cy.js                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -508,7 +508,7 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_2196.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -591,7 +591,7 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   │ Pending:      6                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     source_rewriting.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

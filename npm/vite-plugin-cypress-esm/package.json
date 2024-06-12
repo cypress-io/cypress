@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "cypress:open": "node ../../scripts/cypress open --project . --component",
-    "test": "node ../../scripts/cypress run --project . --component",
-    "watch": "tsc -w",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "cypress:run": "node ../../scripts/cypress run --project . --component",
+    "lint": "eslint --ext .js,.ts,.json, .",
+    "test": "npm run cypress:run",
+    "watch": "tsc -w"
   },
   "dependencies": {
     "debug": "^4.3.4",
@@ -24,7 +24,7 @@
     "react-query": "3.39.3",
     "react-router": "6.10.0",
     "react-router-dom": "6.10.0",
-    "vite": "4.1.4"
+    "vite": "4.5.2"
   },
   "files": [
     "dist",
@@ -41,5 +41,14 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

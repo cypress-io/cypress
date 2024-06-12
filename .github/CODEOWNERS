@@ -1,0 +1,5 @@
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Changes to the Module API, after:run, or after:spec results should be
+# reviewed by Brian and/or Jennifer
+/system-tests/__snapshots__/results_spec.ts.js @brian-mann @jennifer-shehane

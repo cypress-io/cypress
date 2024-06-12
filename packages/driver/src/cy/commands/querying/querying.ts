@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { isEmpty } from 'lodash'
 
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
@@ -7,7 +7,7 @@ import $utils from '../../../cypress/utils'
 import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
-import { aliasRe, aliasIndexRe } from '../../aliases'
+import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -15,6 +15,8 @@ type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withi
 
 type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
 type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
+
+type QueryCommandOptions = 'get' | 'contains' | 'shadow' | ''
 
 function getAlias (selector, log, cy) {
   const alias = selector.slice(1)
@@ -38,7 +40,9 @@ function getAlias (selector, log, cy) {
       aliasObj = cy.getAlias(toSelect)
     } catch (err) {
       // possibly this is a dynamic alias, check to see if there is a request
-      const requests = getAliasedRequests(alias, cy.state)
+      // We need to use the stripped alias
+      const strippedAlias = aliasDisplayName(toSelect)
+      const requests = getAliasedRequests(strippedAlias, cy.state)
 
       if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
         err.retry = false
@@ -46,7 +50,7 @@ function getAlias (selector, log, cy) {
       }
 
       aliasObj = {
-        alias,
+        alias: strippedAlias,
         command: cy.state('routes')[requests[0].routeId].command,
       }
     }
@@ -57,7 +61,7 @@ function getAlias (selector, log, cy) {
 
     const { command } = aliasObj
 
-    log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
+    cy.state('current') === this && log?.set('referencesAlias', { name: alias })
 
     /*
      * There are two cases for aliases, each explained in more detail below:
@@ -66,8 +70,7 @@ function getAlias (selector, log, cy) {
      */
 
     if (command.get('name') === 'intercept') {
-      // Intercept aliases are fairly similar, but `getAliasedRequests` does *not* handle indexes
-      // and we have to do it ourselves here.
+      // `getAliasedRequests` does *not* handle indexes and we have to do it ourselves here.
 
       const requests = getAliasedRequests(aliasObj.alias, cy.state)
 
@@ -83,7 +86,7 @@ function getAlias (selector, log, cy) {
       const index = match ? match[1] : requests.length
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10) - 1] || null)
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
@@ -140,6 +143,14 @@ function getAlias (selector, log, cy) {
   }
 }
 
+function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+    $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
+      args: { timeout: options.timeout },
+    })
+  }
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
@@ -148,12 +159,15 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    const log = userOptions.log !== false && (userOptions._log || Cypress.log({
+    validateTimeoutFromOpts(userOptions, 'get')
+
+    const log = userOptions._log || Cypress.log({
       message: selector,
       type: 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
-    }))
+    })
 
     this.set('timeout', userOptions.timeout)
     this.set('_log', log)
@@ -203,7 +217,7 @@ export default (Commands, Cypress, cy, state) => {
         throw err
       }
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         $el,
         consoleProps: () => {
           return {
@@ -251,13 +265,16 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    // find elements by the :cy-contains psuedo selector
+    validateTimeoutFromOpts(userOptions, 'contains')
+
+    // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
       message: $utils.stringify(_.compact([filter, text])),
       type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
@@ -352,10 +369,13 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
+
+    validateTimeoutFromOpts(userOptions, 'shadow')
 
     this.set('timeout', userOptions.timeout)
     this.set('onFail', (err) => {

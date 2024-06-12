@@ -92,9 +92,6 @@ import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
-// cloudProjectSpec.specRuns was marked deprecated in the cloud in favor of a new
-// field. When the work is completed to use that field, remove this eslist-disable comment
-/* eslint-disable graphql/no-deprecated-fields */
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
   id
@@ -108,38 +105,36 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
     ... on CloudProjectSpec {
       id
       retrievedAt
-      specRuns(first: 4, fromBranch: $fromBranch) {
-        nodes {
-          id
-          runNumber
-          basename
-          path
-          extension
-          testsFailed{
-            min
-            max
-          }
-          testsPassed{
-            min
-            max
-          }
-          testsPending{
-            min
-            max
-          }
-          testsSkipped{
-            min
-            max
-          }
-          createdAt
-          groupCount
-          specDuration{
-            min
-            max
-          }
-          status
-          url
+      specRunsForRunIds(cloudRunIds: $runIds) {
+        id
+        runNumber
+        basename
+        path
+        extension
+        testsFailed{
+          min
+          max
         }
+        testsPassed{
+          min
+          max
+        }
+        testsPending{
+          min
+          max
+        }
+        testsSkipped{
+          min
+          max
+        }
+        createdAt
+        groupCount
+        specDuration{
+          min
+          max
+        }
+        status
+        url
       }
     }
   }
@@ -153,7 +148,7 @@ const props = defineProps<{
 }>()
 
 const runs = computed(() => {
-  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRunsForRunIds ?? [] : []
 })
 
 const isRunsLoaded = computed(() => {

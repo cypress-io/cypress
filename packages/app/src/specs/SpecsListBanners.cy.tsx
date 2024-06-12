@@ -10,16 +10,17 @@ import { UserProjectStatusStore, useUserProjectStatusStore } from '@packages/fro
 import type { UserProjectStatusState } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const AlertSelector = 'alert-header'
+const AlertBody = 'alert-body'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
 describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1000 }, () => {
-  const validateBaseRender = () => {
+  const validateBaseRender = (title: string, content: string) => {
     it('should render as expected', () => {
-      cy.findByTestId(AlertSelector).should('be.visible')
-      cy.percySnapshot()
+      cy.findByTestId(AlertSelector).should('be.visible').contains(title)
+      cy.findByTestId(AlertBody).should('be.visible').contains(content)
     })
   }
 
@@ -198,7 +199,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isSpecNotFound={visible} /> })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'Spec not found',
+      'It is possible that the file has been moved or deleted. Please choose from the list of specs below.',
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -216,7 +221,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isOffline={visible} /> })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'No internet connection',
+      'Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from Cypress Cloud.',
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -236,7 +245,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} onRefetchFailedCloudData={refetchCallback} isFetchError={visible} /> })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'Lost connection',
+      `The request timed out or failed when trying to retrieve the recorded run metrics from Cypress Cloud. The information that you're seeing in the table below may be incomplete as a result.`,
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -264,7 +277,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isProjectNotFound={visible} /> })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      `Couldn't find your project`,
+      'We were unable to find an existing project matching the projectId: "test-project-id" set in your Cypress config file. You can reconnect with an existing project or create a new project.',
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -306,7 +323,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'Request access to project',
+      'This is a private project that you do not currently have access to. Please request access from the project owner in order to view the list of runs.',
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -341,7 +362,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'Request access to project',
+      `The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.`,
+    )
+
     validateCloseControl()
     validateCloseOnPropChange(visible)
     validateReopenOnPropChange(visible)
@@ -494,7 +519,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       })
     })
 
-    validateBaseRender()
+    validateBaseRender(
+      'React component testing is available for this project',
+      'You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.',
+    )
+
     validateCloseControl()
     validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
 

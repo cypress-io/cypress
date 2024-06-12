@@ -49,7 +49,7 @@ subscription DebugTestingProgress_Specs($id: ID!) {
   relevantRunSpecChange(runId: $id) {
     id
     ...DebugPendingRunCounts
-      scheduledToCompleteAt
+    scheduledToCompleteAt
   }
 }
 `

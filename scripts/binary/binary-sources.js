@@ -4,6 +4,8 @@ const path = require('path')
 const esbuild = require('esbuild')
 
 const escapeString = (string) => string.replaceAll(`\``, `\\\``).replaceAll(`$`, `\\$`)
+const secret = require('crypto').randomBytes(48).toString('hex')
+const DUMMY_INDEX_JSC_HASH = 'abcddcbaabcddcbaabcddcbaabcddcba'
 
 function read (file) {
   const pathToFile = require.resolve(`./${file}`)
@@ -24,20 +26,35 @@ const getBinaryEntryPointSource = async () => {
   return esbuildResult.outputFiles[0].text
 }
 
+const getBinaryByteNodeEntryPointSource = async () => {
+  const esbuildResult = await esbuild.build({
+    entryPoints: [require.resolve('./binary-byte-node-entry-point-source.js')],
+    bundle: true,
+    platform: 'node',
+    write: false,
+    minify: true,
+    treeShaking: true,
+  })
+
+  return esbuildResult.outputFiles[0].text
+}
+
 const getIntegrityCheckSource = (baseDirectory) => {
   const fileSource = read('binary-integrity-check-source.js')
-  const secret = require('crypto').randomBytes(48).toString('hex')
 
   const mainIndexHash = crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './index.js'), 'utf8')).digest('hex')
-  const indexJscHash = crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './packages/server/index.jsc'), 'utf8')).digest('hex')
 
   return fileSource.split('\n').join(`\n  `)
   .replaceAll('MAIN_INDEX_HASH', mainIndexHash)
-  .replaceAll('INDEX_JSC_HASH', indexJscHash)
+  .replaceAll('INDEX_JSC_HASH', DUMMY_INDEX_JSC_HASH)
   .replaceAll('HMAC_SECRET', secret)
   .replaceAll('CRYPTO_CREATE_HMAC_TO_STRING', escapeString(crypto.createHmac.toString()))
   .replaceAll('CRYPTO_HMAC_UPDATE_TO_STRING', escapeString(crypto.Hmac.prototype.update.toString()))
   .replaceAll('CRYPTO_HMAC_DIGEST_TO_STRING', escapeString(crypto.Hmac.prototype.digest.toString()))
+}
+
+const getIndexJscHash = (baseDirectory) => {
+  return crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './packages/server/index.jsc'), 'utf8')).digest('hex')
 }
 
 const getEncryptionFileSource = async (encryptionFilePath) => {
@@ -58,7 +75,7 @@ const validateEncryptionFile = async (encryptionFilePath) => {
   }
 }
 
-const getCloudApiFileSource = async (cloudApiFilePath) => {
+const getCloudEnvironmentFileSource = async (cloudApiFilePath) => {
   const fileContents = await fs.readFile(cloudApiFilePath, 'utf8')
 
   if (!fileContents.includes('process.env.CYPRESS_ENV_DEPENDENCIES')) {
@@ -72,7 +89,7 @@ const getCloudApiFileSource = async (cloudApiFilePath) => {
   return fileContents
 }
 
-const validateCloudApiFile = async (cloudApiFilePath) => {
+const validateCloudEnvironmentFile = async (cloudApiFilePath) => {
   if (process.env.CYPRESS_ENV_DEPENDENCIES) {
     const afterReplaceCloudApi = await fs.readFile(cloudApiFilePath, 'utf8')
 
@@ -82,11 +99,34 @@ const validateCloudApiFile = async (cloudApiFilePath) => {
   }
 }
 
+const getProtocolFileSource = async (protocolFilePath) => {
+  const fileContents = await fs.readFile(protocolFilePath, 'utf8')
+
+  if (!fileContents.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
+    throw new Error(`Expected to find CYPRESS_LOCAL_PROTOCOL_PATH in protocol file`)
+  }
+
+  return fileContents.replaceAll('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
+}
+
+const validateProtocolFile = async (protocolFilePath) => {
+  const afterReplaceProtocol = await fs.readFile(protocolFilePath, 'utf8')
+
+  if (afterReplaceProtocol.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
+    throw new Error(`Expected process.env.CYPRESS_LOCAL_PROTOCOL_PATH to be stripped from protocol file`)
+  }
+}
+
 module.exports = {
   getBinaryEntryPointSource,
+  getBinaryByteNodeEntryPointSource,
   getIntegrityCheckSource,
   getEncryptionFileSource,
-  getCloudApiFileSource,
-  validateCloudApiFile,
   validateEncryptionFile,
+  getCloudEnvironmentFileSource,
+  validateCloudEnvironmentFile,
+  getProtocolFileSource,
+  validateProtocolFile,
+  getIndexJscHash,
+  DUMMY_INDEX_JSC_HASH,
 }

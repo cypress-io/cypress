@@ -6,7 +6,7 @@
 @import 'lib/switch';
 @import 'lib/tag';
 @import 'lib/tooltip';
-@import '~@reach/dialog/styles.css';
+@import '@reach/dialog/styles.css';
 // import all other scss files in src except if they are in lib
 // or their file name is `selector-playground` or `main`
 // NOTE: no need to import scss files in their components

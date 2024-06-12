@@ -1,7 +1,6 @@
 import chalk from 'chalk'
-import CleanWebpackPlugin from 'clean-webpack-plugin'
-const webpack = require('webpack')
-import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import webpack from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
@@ -9,23 +8,22 @@ import LiveReloadPlugin from 'webpack-livereload-plugin'
 import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-// import { RuleSetRule } from 'webpack'
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
-const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_LIVERELOAD)
+const liveReloadEnabled = process.env.ENABLE_LIVE_RELOAD === '1'
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
-// opt out of livereload with arg --no-livereload
+// opt in to livereload with ENABLE_LIVE_RELOAD set to '1'
 // eslint-disable-next-line no-console
-if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
+if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. Unset ${chalk.bold('ENABLE_LIVE_RELOAD')} to disable`))
 
 process.env.NODE_ENV = env
 
 // @ts-ignore
 const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
+  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[contenthash]',
 })
 
 evalDevToolPlugin.evalDevToolPlugin = true
@@ -34,8 +32,6 @@ const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
-  namedChunks: true,
-  namedModules: true,
   removeAvailableModules: true,
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
@@ -44,18 +40,20 @@ const optimization = {
 
 const stats = {
   errors: true,
-  warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
   warnings: true,
   all: false,
   builtAt: true,
   colors: true,
   modules: true,
-  maxModules: 20,
   excludeModules: /(main|test-entry).scss/,
   timings: true,
 }
 
-function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
+const ignoreWarnings = [{
+  module: /node_modules\/mocha\/lib\/mocha.js/,
+}]
+
+function makeSassLoaders ({ modules }: { modules: boolean }) {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -76,15 +74,18 @@ function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
         loader: require.resolve('css-loader'),
         options: {
           // sourceMap: true,
+          // esModule: false,
           modules,
         },
       }, // translates CSS into CommonJS
       {
         loader: require.resolve('postcss-loader'),
         options: {
-          plugins: [
-            require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-          ],
+          postcssOptions: {
+            plugins: [
+              require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+            ],
+          },
         },
       },
       {
@@ -111,17 +112,25 @@ const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: {
 const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]
 
 export const getCommonConfig = () => {
-  const commonConfig: Configuration = {
+  const commonConfig = {
     mode: 'none',
-    node: {
-      fs: 'empty',
-      child_process: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      module: 'empty',
-    },
+    ignoreWarnings,
     resolve: {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
+      // see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a for polyfill migration details
+      fallback: {
+        buffer: require.resolve('buffer/'),
+        child_process: false,
+        fs: false,
+        module: false,
+        net: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        process: require.resolve('process/browser.js'),
+        stream: require.resolve('stream-browserify'),
+        tls: false,
+        url: require.resolve('url/'),
+      },
     },
 
     stats,
@@ -138,7 +147,9 @@ export const getCommonConfig = () => {
               plugins: [
                 // "istanbul",
                 [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-                [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-class-properties'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-private-methods'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-private-property-in-object'), { loose: true }],
               ],
               presets: [
                 babelPresetEnvConfig,
@@ -159,26 +170,36 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
-          test: /\.(eot|svg|ttf|woff|woff2)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
-            },
-          ],
+          test: /\.(eot|ttf|woff|woff2)$/,
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'fonts/[name][ext]',
+          },
         },
         {
           test: /\.(png|gif)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './img/[name].[ext]',
-              },
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'img/[name][ext]',
+          },
+        },
+        // leveraged for SVGs as components for react components inside the reporter.
+        // The loader is needed for the reporter under component tests, and the runner
+        // as it bundles the reporter.
+        {
+          test: /\.svg$/i,
+          issuer: /\.[jt]sx?$/,
+          use: [{
+            loader: '@svgr/webpack',
+            options: {
+              // we leverage classes in our svgs that correspond to scss classes.
+              // svgo prefixes these classes be default, which we don't want, so we must disable it
+              // @see https://react-svgr.com/docs/options/#svgo
+              svgo: false,
             },
-          ],
+          }],
         },
         {
           test: /\.wasm$/,
@@ -193,7 +214,6 @@ export const getCommonConfig = () => {
     },
 
     plugins: [
-      new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
       new MiniCSSExtractWebpackPlugin(),
 
       // Enable source maps / eval maps
@@ -206,16 +226,31 @@ export const getCommonConfig = () => {
       // other sourcemap options:
       // [new webpack.SourceMapDevToolPlugin({
       //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[contenthash]'
       // })] :
-
       ...[
         (env === 'production'
-          ? new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
+          ? new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
           : evalDevToolPlugin
         ),
       ],
-      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
+      // Cypress needs access globally to the buffer and process objects.
+      // These were polyfilled by webpack in v4 and no longer are in v5.
+      // To work around this, we provide the process and buffer and globals into the webpack bundle.
+      // @see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a#polyfilling-globals
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
+      }),
+      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
     cache: true,
@@ -226,15 +261,23 @@ export const getCommonConfig = () => {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const getSimpleConfig = () => ({
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    module: 'empty',
-  },
+  ignoreWarnings,
   resolve: {
     extensions: ['.js', '.ts', '.json'],
+    // see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a for polyfill migration details
+    fallback: {
+      buffer: require.resolve('buffer/'),
+      child_process: false,
+      fs: false,
+      module: false,
+      net: false,
+      os: require.resolve('os-browserify/browser'),
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser.js'),
+      stream: require.resolve('stream-browserify'),
+      tls: false,
+      url: require.resolve('url/'),
+    },
   },
 
   stats,
@@ -242,6 +285,15 @@ export const getSimpleConfig = () => ({
 
   cache: true,
 
+  plugins: [
+    new webpack.DefinePlugin({
+      // The main & cross-origin injection code in @packages/runner needs
+      // access to the process.env.NODE_DEBUG variable.
+      // Since the injection lives inside html, it makes most sense to just use the
+      // DefinePlugin to push the value into the bundle instead of providing the whole process
+      'process.env.NODE_DEBUG': JSON.stringify('process.env.NODE_DEBUG'),
+    }),
+  ],
   module: {
     rules: [
       {
@@ -251,7 +303,9 @@ export const getSimpleConfig = () => ({
           loader: require.resolve('babel-loader'),
           options: {
             plugins: [
-              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-class-properties'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-private-methods'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-private-property-in-object'), { loose: true }],
             ],
             presets: [
               babelPresetEnvConfig,
@@ -279,14 +333,14 @@ export const getSimpleConfig = () => ({
       },
     ],
   },
-
-  plugins: [
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-  ],
 })
 
 export { HtmlWebpackPlugin }
 
 export function getCopyWebpackPlugin () {
   return require('copy-webpack-plugin')
+}
+
+export function getCleanWebpackPlugin () {
+  return CleanWebpackPlugin
 }

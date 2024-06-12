@@ -27,7 +27,8 @@ describe('Debug page states', () => {
     it('renders', () => {
       cy.mount(<DebugPassed />)
 
-      cy.percySnapshot()
+      cy.contains('Well Done!')
+      cy.contains('All your tests passed')
     })
   })
 
@@ -35,17 +36,19 @@ describe('Debug page states', () => {
     it('renders for single spec', () => {
       cy.mount(<DebugErrored errors={[mockError]} totalSkippedSpecs={1} totalSpecs={1} />)
 
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Incomplete')
+      cy.contains(mockError)
       cy.contains('1 of 1 spec skipped').should('be.visible')
-
-      cy.percySnapshot()
     })
 
     it('renders for plural specs', () => {
       cy.mount(<DebugErrored errors={[mockError]} totalSkippedSpecs={4} totalSpecs={50} />)
 
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Incomplete')
+      cy.contains(mockError)
       cy.contains('4 of 50 specs skipped').should('be.visible')
-
-      cy.percySnapshot()
     })
   })
 
@@ -53,7 +56,9 @@ describe('Debug page states', () => {
     it('renders', () => {
       cy.mount(<DebugNoTests />)
 
-      cy.percySnapshot()
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Incomplete')
+      cy.contains('Run has no tests')
     })
   })
 
@@ -61,14 +66,21 @@ describe('Debug page states', () => {
     it('renders without CI information', () => {
       cy.mount(<DebugTimedout totalSkippedSpecs={4} totalSpecs={50} />)
 
-      cy.percySnapshot()
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Incomplete')
+      cy.contains('The run started but never completed. This can happen when the run is cancelled from CI or when Cypress crashes while running tests. Archive this run to remove it from the runs list and analytics.')
+      cy.contains('4 of 50 specs skipped')
     })
 
     it('renders with CI information', () => {
       cy.mount(<DebugTimedout
         ci={{ id: '123', url: 'https://circleci.com/', formattedProvider: 'CircleCI', ciBuildNumberFormatted: '12345' }} totalSkippedSpecs={4} totalSpecs={50} />)
 
-      cy.percySnapshot()
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Incomplete')
+      cy.contains('The run started but never completed. This can happen when the run is cancelled from CI or when Cypress crashes while running tests. Check your CircleCI #12345 logs for more information. Archive this run to remove it from the runs list and analytics.')
+      cy.findByTestId('external').contains('CircleCI #12345').should('have.attr', 'href', 'https://circleci.com/')
+      cy.contains('4 of 50 specs skipped')
     })
   })
 
@@ -87,7 +99,9 @@ describe('Debug page states', () => {
           />,
         )
 
-        cy.percySnapshot()
+        cy.contains('You\'ve reached your monthly test result limit')
+        cy.contains('Your Free Cypress Cloud plan includes 100 monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.')
+        cy.findByTestId('external').contains('Contact admin')
       })
 
       it('displays messaging for plan admins', () => {
@@ -103,7 +117,9 @@ describe('Debug page states', () => {
           />,
         )
 
-        cy.percySnapshot()
+        cy.contains('You\'ve reached your monthly test result limit')
+        cy.contains('Your Free Cypress Cloud plan includes 100 monthly recorded test results. Upgrade your plan now to view more test results.')
+        cy.findByTestId('external').contains('Upgrade plan')
       })
     })
 
@@ -121,7 +137,9 @@ describe('Debug page states', () => {
           />,
         )
 
-        cy.percySnapshot()
+        cy.contains('Beyond data retention')
+        cy.contains('Your data retention limit is 30 days and these tests ran 60 days ago. Upgrade your plan to increase your data retention limit.')
+        cy.findByTestId('external').contains('Contact admin')
       })
 
       it('displays messaging for plan admins', () => {
@@ -137,7 +155,9 @@ describe('Debug page states', () => {
           />,
         )
 
-        cy.percySnapshot()
+        cy.contains('Beyond data retention')
+        cy.contains('Your data retention limit is 30 days and these tests ran 60 days ago. Upgrade your plan to increase your data retention limit.')
+        cy.findByTestId('external').contains('Upgrade plan')
       })
     })
 
@@ -158,7 +178,9 @@ describe('Debug page states', () => {
           />,
         )
 
-        cy.percySnapshot()
+        cy.contains('You\'ve reached your monthly test result limit')
+        cy.contains('Your Free Cypress Cloud plan includes 30 monthly recorded test results. Upgrade your plan now to view more test results.')
+        cy.findByTestId('external').contains('Upgrade plan')
       })
     })
   })
@@ -166,8 +188,12 @@ describe('Debug page states', () => {
   context('cancelled', () => {
     it('renders', () => {
       cy.mount(<DebugCancelledAlert totalSpecs={5} totalSkippedSpecs={2} cancellation={{ cancelledAt: '2019-01-25T02:00:00.000Z', cancelledBy: { email: 'adams@cypress.io', fullName: 'Test Tester' } }} />)
-
-      cy.percySnapshot()
+      cy.findByTestId('collapsible').should('be.visible')
+      cy.get('h2').contains('Manually cancelled')
+      cy.contains('2 of 5 specs skipped')
+      cy.findByTestId('cancelled-by-user-avatar').should('have.attr', 'style', 'background-image: url("https://s.gravatar.com/avatar/402f6cafb6c02371c2c23c5215ae3d85?size=48&default=mm");')
+      cy.contains('Test Tester')
+      cy.contains('Jan 24, 2019 9:00 PM')
     })
   })
 })

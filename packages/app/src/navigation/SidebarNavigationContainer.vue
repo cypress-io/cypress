@@ -15,7 +15,7 @@ import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
 import { computed, ref, watchEffect } from 'vue'
 
 gql`
-query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
+query SideBarNavigationContainer($selectedRunNumber: Int!, $hasSelectedRun: Boolean!, $latestRunNumber: Int!, $hasLatestRun: Boolean!) {
   ...SidebarNavigation
 }
 `
@@ -26,8 +26,10 @@ const relevantRuns = useRelevantRun('SIDEBAR')
 
 const variables = computed(() => {
   return {
-    runNumber: relevantRuns.value?.selectedRun?.runNumber || -1,
-    hasCurrentRun: !!relevantRuns.value?.selectedRun?.runNumber,
+    selectedRunNumber: relevantRuns.value?.selectedRun?.runNumber || -1,
+    hasSelectedRun: !!relevantRuns.value?.selectedRun?.runNumber,
+    latestRunNumber: relevantRuns.value?.latest?.[0]?.runNumber || -1,
+    hasLatestRun: !!relevantRuns.value?.latest?.[0]?.runNumber,
   }
 })
 

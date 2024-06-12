@@ -23,6 +23,7 @@ describe('lib/gui/windows', () => {
     this.win.getPosition = sinon.stub().returns([3, 4])
     this.win.webContents = new EventEmitter()
     this.win.webContents.openDevTools = sinon.stub()
+    this.win.webContents.setWindowOpenHandler = sinon.stub()
     this.win.webContents.userAgent = DEFAULT_USER_AGENT
     this.win.isDestroyed = sinon.stub().returns(false)
   })

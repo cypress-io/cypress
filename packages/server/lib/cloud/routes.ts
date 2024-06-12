@@ -13,6 +13,8 @@ const CLOUD_ENDPOINTS = {
   instanceTests: 'instances/:id/tests',
   instanceResults: 'instances/:id/results',
   instanceStdout: 'instances/:id/stdout',
+  instanceArtifacts: 'instances/:id/artifacts',
+  captureProtocolErrors: 'capture-protocol/errors',
   exceptions: 'exceptions',
   telemetry: 'telemetry',
 } as const

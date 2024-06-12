@@ -1,19 +1,20 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
-import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+// import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
 describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   context('default config', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
       cy.startAppServer('component')
     })
 
     it('test component', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -24,19 +25,22 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains('Canary').should('be.visible')
       cy.findByTestId('viewport').click()
 
-      snapshotAUTPanel('browsers open')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
       cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
       .should('be.visible')
 
-      snapshotAUTPanel('viewport info open')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('viewport info open')
 
       cy.get('body').click()
 
       cy.findByTestId('playground-activator').click()
       cy.findByTestId('playground-selector').clear().type('[data-cy-root]')
 
-      snapshotAUTPanel('cy.get selector')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('cy.get selector')
 
       cy.findByTestId('playground-num-elements').contains('1 match')
 
@@ -50,7 +54,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.findByTestId('playground-selector').clear().type('Component Test')
 
-      snapshotAUTPanel('cy.contains selector')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('cy.contains selector')
 
       cy.findByTestId('playground-num-elements').contains('1 match')
 
@@ -60,6 +65,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('navigation between specs and other parts of the app works', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -84,6 +90,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
     it('redirects to the specs list with error if a spec is not found', { retries: 15 }, () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       const { title, intro, explainer } = defaultMessages.specPage.noSpecError
       const badFilePath = 'src/DoesNotExist.spec.js'
 
@@ -125,6 +132,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('browser picker in runner calls mutation with current spec path', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -154,6 +162,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('restarts server on devServer config change', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get('[data-cy="spec-item"]')
 
       cy.withCtx(async (ctx, { sinon }) => {
@@ -174,63 +183,6 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
         expect(ctx.actions.project.initializeActiveProject).to.be.called
       })
     })
-
-    it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
-      cy.openProject('cypress-in-cypress')
-      cy.startAppServer('component')
-
-      cy.visitApp()
-      cy.contains('TestComponent.spec').click()
-      cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
-      cy.get('.passed > .num').should('contain', 1)
-      cy.get('.failed > .num').should('contain', '--')
-
-      cy.findByTestId('sidebar-link-runs-page').click()
-      cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-
-      cy.findByTestId('sidebar-link-specs-page').click()
-      cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-
-      cy.contains('TestComponent.spec').click()
-      cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
-
-      cy.window().then((win) => {
-        const connected = () => win.ws?.connected
-
-        win.ws?.close()
-
-        cy.wrap({
-          connected,
-        }).invoke('connected').should('be.false')
-
-        win.ws?.connect()
-
-        cy.wrap({
-          connected,
-        }).invoke('connected').should('be.true')
-      })
-
-      cy.withCtx(async (ctx, o) => {
-        await ctx.actions.file.writeFileInProject(o.path, `
-  import React from 'react'
-  import { mount } from 'cypress/react'
-
-  describe('TestComponent', () => {
-    it('renders the new test component', () => {
-      mount(<div>Component Test</div>)
-
-      cy.contains('Component Test').should('be.visible')
-    })
-  })
-  `)
-      }, { path: getPathForPlatform('src/TestComponent.spec.jsx') })
-
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the new test component')
-      cy.get('.passed > .num').should('contain', 1)
-      cy.get('.failed > .num').should('contain', '--')
-    })
   })
 
   context('custom config', () => {
@@ -240,10 +192,11 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     })
 
     it('set the correct viewport values from CLI', () => {
-      cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+      cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333', '--component'])
       cy.startAppServer('component')
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
 
       cy.get('#unified-runner').should('have.css', 'width', '333px')

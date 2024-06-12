@@ -4,9 +4,9 @@ import React from 'react'
 
 import { StatsStore } from './stats-store'
 
-import FailedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
-import PassedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
-import PendingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
+import FailedIcon from '@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
+import PassedIcon from '@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
+import PendingIcon from '@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
 
 const count = (num: number) => num > 0 ? num : '--'
 

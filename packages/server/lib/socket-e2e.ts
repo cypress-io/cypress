@@ -46,7 +46,8 @@ export class SocketE2E extends SocketBase {
 
     return fs.statAsync(filePath)
     .then(() => {
-      return this._io?.emit('watched:file:changed')
+      this._cdpIo?.emit('watched:file:changed')
+      this._socketIo?.emit('watched:file:changed')
     }).catch(() => {
       return debug('could not find test file that changed %o', filePath)
     })

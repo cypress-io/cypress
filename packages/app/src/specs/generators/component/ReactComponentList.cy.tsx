@@ -18,8 +18,6 @@ describe('ReactComponentList', () => {
     cy.mount(<ReactComponentList file={mockFile} />)
 
     cy.contains('No components found').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('renders error state if errored is true', () => {
@@ -30,8 +28,6 @@ describe('ReactComponentList', () => {
     cy.mount(<ReactComponentList file={mockFile} />)
 
     cy.contains('Unable to parse file').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('fetches and displays a list of components', () => {
@@ -40,8 +36,6 @@ describe('ReactComponentList', () => {
     cy.contains('FooBar').should('be.visible')
     cy.contains('BarFoo').should('be.visible')
     cy.contains('FooBarBaz').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('calls selectItem on click', () => {

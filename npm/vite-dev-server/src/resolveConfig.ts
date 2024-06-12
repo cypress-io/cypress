@@ -4,7 +4,7 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import type { InlineConfig } from 'vite'
+import type { InlineConfig } from 'vite-5'
 import path from 'path'
 import semverGte from 'semver/functions/gte'
 
@@ -62,9 +62,10 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   return finalConfig
 }
 
-function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig {
+function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig | InlineConfig {
   const {
     cypressConfig: {
+      port,
       projectRoot,
       devServerPublicPathRoute,
       supportFile,
@@ -73,6 +74,8 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     },
     specs,
   } = config
+
+  const vitePort = port ?? undefined
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list
@@ -122,6 +125,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
           vite.searchForWorkspaceRoot?.(process.cwd()),
         ],
       },
+      port: vitePort,
       host: '127.0.0.1',
       // Disable file watching and HMR when executing tests in `run` mode
       ...(isTextTerminal

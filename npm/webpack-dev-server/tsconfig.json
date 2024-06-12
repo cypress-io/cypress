@@ -45,9 +45,15 @@
     // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true,
+    "skipLibCheck": true,
     /** Allows us to strip internal types sourced from webpack */
     "stripInternal": true,
-    "importsNotUsedAsValues": "error"
+    "ignoreDeprecations": "5.0",
+    /* 
+     * TODO: remove importsNotUsedAsValues after typescript 5.5 and up as it will no longer work. If we want the same behavior
+     * as importsNotUsedAsValues, we need to use "verbatimModuleSyntax", which will require this package to be an ES Module.
+     */
+    "importsNotUsedAsValues": "error",
   },
   "include": ["src"],
   "exclude": ["node_modules", "*.js"]

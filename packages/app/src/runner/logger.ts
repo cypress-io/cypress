@@ -38,7 +38,13 @@ export const logger = {
   },
 
   _logValues (consoleProps: any) {
-    const formattedLog = this._formatted(_.omit(consoleProps, 'args', 'groups', 'table'))
+    consoleProps ||= {}
+
+    const formattedLog = this._formatted({
+      [consoleProps.type]: consoleProps.name,
+      ..._.pick(consoleProps, 'error', 'snapshot'),
+      ...consoleProps.props,
+    })
 
     _.each(formattedLog, (value, key) => {
       // don't log empty strings
@@ -56,6 +62,8 @@ export const logger = {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
 
     return _.reduce(consoleProps, (memo, value, key) => {
+      if (!key || key === 'undefined') return memo
+
       const append = ': '
 
       key = _.capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')

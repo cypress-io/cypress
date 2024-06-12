@@ -35,7 +35,7 @@ exports['e2e viewport / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     viewport.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

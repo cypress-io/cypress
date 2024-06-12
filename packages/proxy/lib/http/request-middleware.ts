@@ -10,6 +10,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
+
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -31,43 +32,30 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  const requestIsXhrOrFetch = this.req.headers['x-cypress-is-xhr-or-fetch']
-
-  span?.setAttributes({
-    isAUTFrame: this.req.isAUTFrame,
-  })
+  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
 
-  if (this.req.headers['x-cypress-is-xhr-or-fetch']) {
-    this.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
-    delete this.req.headers['x-cypress-is-xhr-or-fetch']
-  }
-
-  if (!doesTopNeedToBeSimulated(this) ||
-    // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
-    // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
-    // This is only needed for defensive purposes.
-    (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
-    this.next()
-
-    return
-  }
-
-  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
-
-  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
-
-  this.req.requestedWith = requestedWith
-  this.req.credentialsLevel = credentialStatus
-
   span?.setAttributes({
-    calculatedResourceType: this.req.resourceType,
-    credentialsLevel: credentialStatus,
+    isAUTFrame: this.req.isAUTFrame,
+    isFromExtraTarget: this.req.isFromExtraTarget,
   })
+
+  // we only want to intercept requests from the main target and not ones from
+  // extra tabs or windows, so run the bare minimum request/response middleware
+  // to send the request/response directly through
+  if (this.req.isFromExtraTarget) {
+    this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
+
+    delete this.req.headers['x-cypress-is-from-extra-target']
+
+    this.onlyRunMiddleware([
+      'MaybeSetBasicAuthHeaders',
+      'SendRequestOutgoing',
+    ])
+  }
 
   span?.end()
   this.next()
@@ -103,6 +91,100 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
   this.next()
 }
 
+const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'correlate:prerequest', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const shouldCorrelatePreRequests = this.shouldCorrelatePreRequests()
+
+  span?.setAttributes({
+    shouldCorrelatePreRequest: shouldCorrelatePreRequests,
+  })
+
+  if (!shouldCorrelatePreRequests) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const onClose = () => {
+    // if we haven't matched a browser pre-request and the request has been destroyed, raise an error
+    if (this.req.destroyed) {
+      span?.end()
+      this.reqMiddlewareSpan?.end()
+
+      this.onError(new Error('request destroyed before browser pre-request was received'))
+    }
+  }
+
+  const copyResourceTypeAndNext = () => {
+    this.res.off('close', onClose)
+
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    span?.setAttributes({
+      resourceType: this.req.resourceType,
+    })
+
+    span?.end()
+
+    return this.next()
+  }
+
+  if (this.req.headers['x-cypress-resolving-url']) {
+    this.debug('skipping prerequest for resolve:url')
+    delete this.req.headers['x-cypress-resolving-url']
+    const requestId = `cy.visit-${Date.now()}`
+
+    this.req.browserPreRequest = {
+      requestId,
+      method: this.req.method,
+      url: this.req.proxiedUrl,
+      // @ts-ignore
+      headers: this.req.headers,
+      resourceType: 'document',
+      originalResourceType: 'document',
+    }
+
+    this.res.on('close', () => {
+      this.socket.toDriver('request:event', 'response:received', {
+        requestId,
+        headers: this.res.getHeaders(),
+        status: this.res.statusCode,
+      })
+    })
+
+    return copyResourceTypeAndNext()
+  }
+
+  this.res.once('close', onClose)
+
+  this.debug('waiting for prerequest')
+  this.pendingRequest = this.getPreRequest((({ browserPreRequest, noPreRequestExpected }) => {
+    this.req.browserPreRequest = browserPreRequest
+    this.req.noPreRequestExpected = noPreRequestExpected
+    copyResourceTypeAndNext()
+  }))
+}
+
+const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
+  if (!doesTopNeedToBeSimulated(this) ||
+    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+    this.next()
+
+    return
+  }
+
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+
+  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+
+  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
+  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  this.req.credentialsLevel = credentialStatus
+  this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -121,7 +203,7 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
 
   span?.setAttributes({
     currentAUTUrl,
@@ -169,66 +251,6 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   span?.end()
   this.next()
-}
-
-const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  const span = telemetry.startSpan({ name: 'correlate:prerequest', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const shouldCorrelatePreRequests = this.shouldCorrelatePreRequests()
-
-  span?.setAttributes({
-    shouldCorrelatePreRequest: shouldCorrelatePreRequests,
-  })
-
-  if (!this.shouldCorrelatePreRequests()) {
-    span?.end()
-
-    return this.next()
-  }
-
-  const copyResourceTypeAndNext = () => {
-    this.req.resourceType = this.req.browserPreRequest?.resourceType
-
-    span?.setAttributes({
-      resourceType: this.req.resourceType,
-    })
-
-    span?.end()
-
-    return this.next()
-  }
-
-  if (this.req.headers['x-cypress-resolving-url']) {
-    this.debug('skipping prerequest for resolve:url')
-    delete this.req.headers['x-cypress-resolving-url']
-    const requestId = `cy.visit-${Date.now()}`
-
-    this.req.browserPreRequest = {
-      requestId,
-      method: this.req.method,
-      url: this.req.proxiedUrl,
-      // @ts-ignore
-      headers: this.req.headers,
-      resourceType: 'document',
-      originalResourceType: 'document',
-    }
-
-    this.res.on('close', () => {
-      this.socket.toDriver('request:event', 'response:received', {
-        requestId,
-        headers: this.res.getHeaders(),
-        status: this.res.statusCode,
-      })
-    })
-
-    return copyResourceTypeAndNext()
-  }
-
-  this.debug('waiting for prerequest')
-  this.getPreRequest(((browserPreRequest) => {
-    this.req.browserPreRequest = browserPreRequest
-    copyResourceTypeAndNext()
-  }))
 }
 
 function shouldLog (req: CypressIncomingRequest) {
@@ -358,7 +380,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else
+  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
 
   span?.setAttributes({
@@ -375,8 +397,12 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
     if (doesAcceptHeadingIncludeGzip) {
       this.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      this.req.headers['accept-encoding'] = 'identity'
     }
+  } else {
+    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
+    // In that case, we want to explicitly filter that down to `gzip` and identity
+    this.req.headers['accept-encoding'] = 'gzip,identity'
   }
 
   span?.end()
@@ -460,6 +486,13 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     this.debug('request aborted')
     // if the request is aborted, close out the middleware span and http span. the response middleware did not run
 
+    const pendingRequest = this.pendingRequest
+
+    if (pendingRequest) {
+      delete this.pendingRequest
+      this.removePendingRequest(pendingRequest)
+    }
+
     this.reqMiddlewareSpan?.setAttributes({
       requestAborted: true,
     })
@@ -525,9 +558,10 @@ export default {
   LogRequest,
   ExtractCypressMetadataHeaders,
   MaybeSimulateSecHeaders,
+  CorrelateBrowserPreRequest,
+  CalculateCredentialLevelIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  CorrelateBrowserPreRequest,
   SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,

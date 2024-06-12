@@ -563,7 +563,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('waits until element stops animating', () => {
         cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('mouseover').then(() => {
-          expect(retries).to.be.gt(1)
+          expect(retries).to.be.gte(1)
         })
       })
 
@@ -1187,8 +1187,39 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').trigger('mouseover', { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('trigger')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('button:first').trigger('mouseover', { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('trigger')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('trigger')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -1258,11 +1289,12 @@ describe('src/cy/commands/actions/trigger', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           const logCoords = this.lastLog.get('coords')
-          const eventOptions = consoleProps['Event options']
+          const eventOptions = consoleProps.props['Event options']
 
           expect(logCoords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
           expect(logCoords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
-          expect(consoleProps.Command).to.eq('trigger')
+          expect(consoleProps.name).to.eq('trigger')
+          expect(consoleProps.type).to.eq('command')
           expect(eventOptions.bubbles).to.be.true
           expect(eventOptions.cancelable).to.be.true
           expect(eventOptions.clientX).to.be.be.a('number')

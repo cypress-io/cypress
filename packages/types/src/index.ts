@@ -41,3 +41,7 @@ export * from './modeOptions'
 export * from './git'
 
 export * from './video'
+
+export * from './protocol'
+
+export * from './proxy'

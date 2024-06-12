@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
+import { gte } from 'semver'
 import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
@@ -46,7 +47,7 @@ export async function getProjectConfig (projectRoot: string): Promise<Cypress.An
     defaultProject = Object.keys(angularJson.projects).find((name) => angularJson.projects[name].projectType === 'application')
 
     if (!defaultProject) {
-      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://docs.cypress.io/guides/references/configuration#Options-API to see how to pass in a custom project configuration')
+      throw new Error('Could not find a project with projectType "application" in "angular.json". Visit https://on.cypress.io/configuration to see how to pass in a custom project configuration')
     }
   }
 
@@ -135,9 +136,11 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
   }
 
-  const cypressTypes = getProjectFilePath(workspaceRoot, 'node_modules', 'cypress', 'types', 'index.d.ts')
+  const typeRoots = [
+    getProjectFilePath(workspaceRoot, 'node_modules'),
+  ]
 
-  includePaths.push(cypressTypes)
+  const types = ['cypress']
 
   const tsConfigContent = JSON.stringify({
     extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
@@ -145,19 +148,21 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
+      types,
+      typeRoots,
     },
     include: includePaths,
-  })
+  }, null, 2)
 
-  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot)), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
 }
 
-export async function getTempDir (): Promise<string> {
-  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
+export async function getTempDir (projectName: string): Promise<string> {
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', projectName)
 
   await fs.ensureDir(cypressTempDir)
 
@@ -165,10 +170,22 @@ export async function getTempDir (): Promise<string> {
 }
 
 export async function getAngularCliModules (projectRoot: string) {
+  let angularVersion: string
+
+  try {
+    angularVersion = await getInstalledPackageVersion('@angular-devkit/core', projectRoot)
+  } catch {
+    throw new Error(`Could not resolve "@angular-devkit/core". Do you have it installed?`)
+  }
+
   const angularCLiModules = [
     '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
-    '@angular-devkit/build-angular/src/webpack/configs/common.js',
-    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+    // in Angular 16.1 the locations of these files below were changed
+    ...(
+      gte(angularVersion, '16.1.0')
+        ? ['@angular-devkit/build-angular/src/tools/webpack/configs/common.js', '@angular-devkit/build-angular/src/tools/webpack/configs/styles.js']
+        : ['@angular-devkit/build-angular/src/webpack/configs/common.js', '@angular-devkit/build-angular/src/webpack/configs/styles.js']
+    ),
     '@angular-devkit/core/src/index.js',
   ] as const
 
@@ -193,6 +210,15 @@ export async function getAngularCliModules (projectRoot: string) {
     getStylesConfig,
     logging,
   }
+}
+
+async function getInstalledPackageVersion (pkgName: string, projectRoot: string): Promise<string> {
+  const packageJsonPath = require.resolve(`${pkgName}/package.json`, { paths: [projectRoot] })
+  const { version } = JSON.parse(
+    await fs.readFile(packageJsonPath, { encoding: 'utf-8' }),
+  )
+
+  return version
 }
 
 export async function getAngularJson (projectRoot: string): Promise<AngularJson> {

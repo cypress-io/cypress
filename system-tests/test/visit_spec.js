@@ -138,7 +138,7 @@ describe('e2e visit', () => {
         return startTlsV1Server(6776)
         .then((serv) => {
           return exec()
-          .then(() => {
+          .finally(() => {
             return serv.destroy()
           })
         })
@@ -149,7 +149,6 @@ describe('e2e visit', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'source_rewriting.cy.js',
       config: {
-        videoCompression: false,
         experimentalSourceRewriting: true,
       },
       snapshot: true,

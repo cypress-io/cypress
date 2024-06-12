@@ -1,6 +1,7 @@
 import type { SinonStub } from 'sinon'
 
 const SidebarSettingsLinkSelector = '[data-cy="sidebar-link-settings-page"]'
+const isWindows = Cypress.platform === 'win32'
 
 describe('App: Settings', () => {
   before(() => {
@@ -14,6 +15,7 @@ describe('App: Settings', () => {
   it('visits settings page', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
 
     cy.contains('[data-cy="app-header-bar"]', 'Settings')
@@ -27,11 +29,12 @@ describe('App: Settings', () => {
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId and shows override from CLI', () => {
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.startAppServer('e2e')
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Project ID').should('be.visible')
@@ -39,7 +42,7 @@ describe('App: Settings', () => {
       cy.findByText('Copy').click()
       cy.findByText('Copied!').should('be.visible')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
       })
     })
 
@@ -48,6 +51,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Record key').should('be.visible')
@@ -58,6 +62,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.get('[data-cy="code-box"]').should('contain', '***')
@@ -90,7 +95,8 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
-      cy.get('.spec-list-container').scrollTo('bottom')
+      cy.specsPageIsVisible()
+      cy.findByTestId('spec-list-container').scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
       cy.waitForSpecToFinish()
@@ -107,6 +113,7 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.withCtx((ctx, o) => {
         o.sinon.spy(ctx.actions.auth, 'logout')
       })
@@ -131,11 +138,12 @@ describe('App: Settings', () => {
   describe('Project settings', () => {
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
-      cy.openProject('simple-ct')
+      cy.openProject('simple-ct', ['--component'])
       cy.startAppServer('component')
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('2 matches')
@@ -154,6 +162,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
@@ -165,6 +174,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="settings-experiments"]').within(() => {
@@ -216,6 +226,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-code"]').contains('{')
@@ -226,6 +237,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
@@ -269,6 +281,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
@@ -330,6 +343,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
@@ -379,6 +393,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
@@ -386,15 +401,161 @@ describe('App: Settings', () => {
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
   })
+
+  describe('notifications', () => {
+    // Run notifications will initially be released without support for Windows
+    // https://github.com/cypress-io/cypress/issues/26786
+    const itSkipIfWindows = isWindows ? it.skip : it
+
+    let setPreferencesStub
+    let showSystemNotificationStub
+
+    context('not enabled', () => {
+      beforeEach(() => {
+        cy.withCtx((ctx, o) => {
+          setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+          showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+          ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = null
+        })
+      })
+
+      itSkipIfWindows('redirects to settings page and focuses notifications when enabling via banner', () => {
+      // Make it really vertically narrow to ensure the "scrollTo" behavior is working as expected.
+        cy.startAppServer('e2e')
+        cy.loginUser()
+        cy.visitApp()
+        cy.specsPageIsVisible()
+        cy.get('button').contains('Enable desktop notifications').click()
+        // We specifically scroll this anchor into view when clicking the "Enable desktop notifications" button.
+        cy.get('section#notifications').should('be.visible')
+      })
+    })
+
+    context('are enabled', () => {
+      function visitNotificationSettingsPage () {
+        cy.startAppServer('e2e')
+        cy.visitApp('settings')
+        cy.contains('Device settings').click()
+        cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+      }
+
+      beforeEach(() => {
+        cy.withCtx((ctx, o) => {
+          setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+          showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+          ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
+          ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
+          ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
+        })
+      })
+
+      it('shows or hides notification settings based on operating system', () => {
+        cy.startAppServer('e2e')
+        cy.visitApp('settings')
+        cy.contains('Device settings').click()
+
+        if (isWindows) {
+          cy.contains('Desktop notifications').should('not.exist')
+        } else {
+          cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+        }
+      })
+
+      itSkipIfWindows('correctly sets default state', () => {
+        visitNotificationSettingsPage()
+
+        cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
+        cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
+
+        cy.contains('Notify me when a run completes').should('be.visible')
+        cy.findByLabelText('Passed').should('be.visible').should('not.be.checked')
+        cy.findByLabelText('Failed').should('be.visible').should('be.checked')
+        cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked')
+        cy.findByLabelText('Errored').should('be.visible').should('not.be.checked')
+      })
+
+      itSkipIfWindows('updates preferences', () => {
+        visitNotificationSettingsPage()
+
+        cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true').click()
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.contains('Notify me when a run completes').should('be.visible')
+        cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+      })
+
+      itSkipIfWindows('sends test notification', () => {
+        visitNotificationSettingsPage()
+
+        cy.contains('button', 'Send a test notification').click()
+
+        cy.withCtx((ctx) => {
+          expect(showSystemNotificationStub).to.have.been.calledWith('Hello From Cypress', 'This is a test notification')
+        })
+
+        cy.contains('a', 'Troubleshoot').should('have.attr', 'href', 'https://on.cypress.io/notifications-troubleshooting')
+      })
+    })
+  })
 })
 
 describe('App: Settings without cloud', () => {
   it('the projectId section shows a prompt to log in when there is no projectId, and uses correct UTM params', () => {
     cy.scaffoldProject('simple-ct')
-    cy.openProject('simple-ct')
+    cy.openProject('simple-ct', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Cypress Cloud settings').click()
     cy.findByText('Project ID').should('not.exist')
@@ -417,10 +578,11 @@ describe('App: Settings without cloud', () => {
 
   it('have returned browsers', () => {
     cy.scaffoldProject('simple-ct')
-    cy.openProject('simple-ct')
+    cy.openProject('simple-ct', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Project settings').click()
 

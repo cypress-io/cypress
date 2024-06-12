@@ -1,3 +1,3 @@
 module.exports = {
-  stats: 'errors-warnings',
+  stats: 'none',
 }

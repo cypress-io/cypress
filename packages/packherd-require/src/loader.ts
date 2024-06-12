@@ -782,6 +782,7 @@ export class PackherdModuleLoader {
       : this._createRequire(fullPath, moduleUri, parent)
 
     return {
+      isPreloading: false,
       children: [],
       exports: {},
       filename: fullPath,

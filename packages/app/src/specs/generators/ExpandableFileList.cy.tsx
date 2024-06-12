@@ -50,7 +50,6 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
 
     it('correctly formats a difficult file', () => {
       cy.get('body').contains('[...all]')
-      cy.percySnapshot()
     })
   })
 
@@ -73,8 +72,6 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
 
       </div>))
       .get(noResultsSelector).should('be.visible')
-
-      cy.percySnapshot()
 
       cy.get('[data-testid=add-file]')
       .click()

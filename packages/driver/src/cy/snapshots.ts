@@ -4,10 +4,94 @@ import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
+import { finder } from '@medv/finder'
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
 export const FINAL_SNAPSHOT_NAME = 'final state'
+
+type SelectorNode = {
+  frameId?: string
+  selector: string
+  ownerDoc: Document | ShadowRoot
+  host?: SelectorNode
+}
+
+const returnShadowRootIfShadowDomNode = (node: Element): ShadowRoot | null => {
+  // the shadowRoot object property only lives on the node context OUTSIDE the shadow DOM, meaning that
+  // node.parentNode.host.shadowRoot works. Oddly, this is considered an instance of an Object and not
+  // a ShadowRoot, so checking for the shadowRoot on the host property is likely safe.
+  const isNodeShadowRoot = (n: any) => !!n?.host?.shadowRoot
+
+  let parent = node && node.parentNode
+
+  while (parent) {
+    if (isNodeShadowRoot(parent)) {
+      return parent as ShadowRoot
+    }
+
+    parent = parent.parentNode
+  }
+
+  return null
+}
+
+function findSelectorForElement (elem: Element, root: Document | ShadowRoot) {
+  // finder tries to find the shortest unique selector to an element,
+  // but since we are more concerned with speed, we set the threshold to 1 and maxNumberOfTries to 0
+  // @see https://github.com/antonmedv/finder/issues/75
+  return finder(elem, { root: root as unknown as Element, threshold: 1, maxNumberOfTries: 0 })
+}
+
+/**
+ * Builds a recursive structure of selectors in order to re-identify during Test Replay.
+ *
+ * @param elem - an HTML Element that lives within the shadow DOM or the regular DOM
+ * @returns SelectorNode if the selector can be discovered. For regular elements, this should only be one object deep, but for shadow DOM
+ * elements, the SelectorNode tree could be N levels deep until the root is discovered
+ */
+function constructElementSelectorTree (elem: Element): SelectorNode | undefined {
+  try {
+    const ownerDoc = elem.ownerDocument
+    const elWindow = ownerDoc.defaultView
+
+    if (elWindow === null) {
+      return undefined
+    }
+
+    // finder will return a string if it can find the selector.
+    // otherwise, an error will throw and we will fall back to shadowDom lookup.
+    const selector = findSelectorForElement(elem, ownerDoc)
+
+    const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+
+    return { selector, frameId, ownerDoc: elem.ownerDocument, host: undefined }
+  } catch {
+    // the element may not always be found since it's possible for the element to be removed from the DOM
+    // Or maybe its in the shadow DOM.
+    // If it is a shadow DOM element, return the ShadowRoot as well to relate the node to the root document
+    try {
+      const shadowRoot = returnShadowRootIfShadowDomNode(elem)
+
+      // If we have a shadow DOM element, get the frameId and unique selector of the ShadowRoot
+      // see https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot
+      if (shadowRoot) {
+        // Look up the details of the shadowRoot to see which element the ShadowRoot is bound to, i.e. the host.
+        const hostDetails = constructElementSelectorTree(shadowRoot.host)
+
+        // look up our element inside the context of the ShadowRoot
+        const selectorFromShadowWorld = findSelectorForElement(elem, shadowRoot)
+
+        // gives us enough information to associate the shadow element to the ShadowRoot/host to reconstruct in Test Replay
+        return { selector: selectorFromShadowWorld, frameId: undefined, ownerDoc: shadowRoot, host: hostDetails }
+      }
+    } catch {
+      return undefined
+    }
+  }
+
+  return undefined
+}
 
 export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const snapshotsCss = createSnapshotsCSS($$, state)
@@ -153,10 +237,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
     // jQuery v3 runs in strict mode and throws an error if you attempt to set a property
 
-    // TODO: in firefox sometimes this throws a cross-origin access error
-    const isJqueryElement = $dom.isElement($elToHighlight) && $dom.isJquery($elToHighlight)
+    const shouldHighlightElement = isJqueryElement($elToHighlight)
 
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).attr(HIGHLIGHT_ATTR, 'true')
     }
 
@@ -200,7 +283,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // which would reduce memory, and some CPU operations
 
     // now remove it after we clone
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).removeAttr(HIGHLIGHT_ATTR)
     }
 
@@ -227,6 +310,52 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
   }
 
+  const isJqueryElement = ($el) => {
+    // TODO: in firefox sometimes this throws a cross-origin access error
+    return $dom.isElement($el) && $dom.isJquery($el)
+  }
+
+  const buildSelectorArray = (el: HTMLElement) => {
+    // flatten selector to only include selector string values, which we can imply is a shadowRoot if other values exist in the tree
+    // this keeps the structure similar to axe-core
+    // @see https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#results-object -> target
+    const selectors: string[] | undefined = []
+    let frameId: string | undefined
+    const flattenElementSelectorTree = (el: SelectorNode | undefined): void => {
+      if (el) {
+        selectors.unshift(el?.selector)
+
+        if (el?.host) {
+          flattenElementSelectorTree(el.host)
+        } else {
+          frameId = el.frameId
+        }
+      }
+    }
+
+    const elToHighlight = constructElementSelectorTree(el)
+
+    flattenElementSelectorTree(elToHighlight)
+
+    let selector: string | string[] | undefined
+
+    switch (selectors.length) {
+      case 0:
+        selector = undefined
+        break
+      case 1:
+        selector = selectors[0]
+        break
+      default:
+        selector = selectors
+    }
+
+    return selector ? [{
+      selector,
+      frameId,
+    }] : []
+  }
+
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
     // when using cy.origin() and in a transitionary state, state('document')
@@ -237,6 +366,30 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // preprocessed in a spec bridge.
     if (!preprocessedSnapshot && !state('document')) {
       return null
+    }
+
+    const timestamp = performance.now() + performance.timeOrigin
+
+    // if the protocol has been enabled, our snapshot is just the name, timestamp, and highlighted elements,
+    // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
+    // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
+    if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
+      const snapshot: {
+        name: string
+        timestamp: number
+        elementsToHighlight?: {
+          selector: string | string []
+          frameId: string
+        }[]
+      } = { name, timestamp }
+
+      if (isJqueryElement($elToHighlight)) {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => buildSelectorArray(el))
+      }
+
+      Cypress.action('cy:protocol-snapshot')
+
+      return snapshot
     }
 
     try {
@@ -271,6 +424,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
       const snapshot = {
         name,
+        timestamp,
         htmlAttrs: $htmlAttrs,
         body,
       }

@@ -3,28 +3,30 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "build": "node ./script/build.js",
     "check-ts": "vue-tsc --noEmit",
-    "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
-    "test": "yarn cypress:run && yarn types",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
-    "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
+    "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "test": "yarn cypress:run && yarn types"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@packages/data-context": "0.0.0-development"
+  },
   "devDependencies": {
-    "@antfu/utils": "^0.3.0",
-    "@cypress-design/css": "^0.13.1",
+    "@antfu/utils": "^0.7.8",
+    "@cypress-design/css": "^0.13.3",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
-    "@iconify/json": "1.1.368",
-    "@iconify/vue": "3.0.0-beta.1",
-    "@intlify/unplugin-vue-i18n": "0.10.0",
+    "@iconify-json/logos": "1.1.42",
+    "@iconify-json/mdi": "1.1.63",
     "@percy/core": "^1.0.0-beta.48",
     "@percy/cypress": "^3.1.2",
     "@testing-library/cypress": "9.0.0",
@@ -46,7 +48,6 @@
     "browser-logos": "github:alrra/browser-logos",
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
-    "cypress-axe": "0.14.0",
     "cypress-plugin-tab": "1.0.5",
     "cypress-real-events": "1.6.0",
     "dayjs": "^1.9.3",
@@ -70,7 +71,7 @@
     "tailwindcss": "^3.3.1",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.24.1",
-    "vite": "4.3.2",
+    "vite": "4.5.2",
     "vite-plugin-components": "0.11.3",
     "vite-svg-loader": "4.0.0",
     "vue": "3.2.47",
@@ -78,7 +79,7 @@
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
-    "vue-tsc": "^0.3.0",
+    "vue-tsc": "^2.0.19",
     "wonka": "^4.0.15"
   },
   "module": "es2020",
@@ -86,6 +87,22 @@
     "nohoist": [
       "@toycode/markdown-it-class",
       "patch-package"
+    ]
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "generate-shiki-theme"
+        ],
+        "outputs": [
+          "{projectRoot}/src/generated/schema-for-tests.gen.json"
+        ]
+      }
+    },
+    "implicitDependencies": [
+      "@packages/data-context",
+      "@packages/graphql"
     ]
   }
 }

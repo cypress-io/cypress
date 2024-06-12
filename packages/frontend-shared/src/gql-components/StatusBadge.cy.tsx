@@ -27,9 +27,7 @@ describe('<StatusBadge />', () => {
     ))
 
     cy.findByText('not configured').should('be.visible')
-    cy.percySnapshot()
     cy.findByText('toggle').click()
     cy.findByText('configured').should('be.visible')
-    cy.percySnapshot()
   })
 })

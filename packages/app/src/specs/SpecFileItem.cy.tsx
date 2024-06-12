@@ -8,8 +8,6 @@ describe('SpecFileItem', () => {
       </div>))
 
     cy.contains('Hello.spec.jsx').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('renders a SpecFileItem with the base filename and extension when selected', () => {
@@ -19,8 +17,6 @@ describe('SpecFileItem', () => {
       </div>))
 
     cy.contains('Hello.spec.jsx').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('truncates spec name if it exceeds container width and provides title for full spec name', () => {

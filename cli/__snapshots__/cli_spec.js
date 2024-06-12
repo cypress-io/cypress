@@ -86,6 +86,8 @@ exports['shows help for run --foo 1'] = `
     -q, --quiet                                                 run quietly, using only the configured reporter
     --record [bool]                                             records the run. sends test results, screenshots and videos to Cypress Cloud.
     -r, --reporter <reporter>                                   runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
+    --runner-ui                                                 displays the Cypress Runner UI
+    --no-runner-ui                                              hides the Cypress Runner UI
     -o, --reporter-options <reporter-options>                   options for the mocha reporter. defaults to "null"
     -s, --spec <spec>                                           runs specific spec file(s). defaults to "all"
     -t, --tag <tag>                                             named tag(s) for recorded runs in Cypress Cloud

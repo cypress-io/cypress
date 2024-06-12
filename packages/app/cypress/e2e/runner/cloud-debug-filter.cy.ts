@@ -11,7 +11,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/test.cy.js': ['t2'],
       }
     })
@@ -25,7 +25,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish({ passCount: 2, failCount: 2 })
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/test.cy.js': ['s1 t4'],
       }
     })
@@ -44,7 +44,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/lots-of-tests.cy.js': ['test1'],
       }
     })
@@ -54,12 +54,6 @@ describe('cloud debug test filtering', () => {
 
     cy.get('@reporterPanel').then((el) => el.width(500))
     cy.get('@reporterPanel').percySnapshot('wide')
-
-    cy.get('@reporterPanel').then((el) => el.width(350))
-    cy.get('@reporterPanel').percySnapshot('medium')
-
-    cy.get('@reporterPanel').then((el) => el.width(250))
-    cy.get('@reporterPanel').percySnapshot('narrow')
 
     cy.get('@reporterPanel').then((el) => el.width(150))
     cy.get('@reporterPanel').percySnapshot('skinny')
@@ -72,7 +66,7 @@ describe('cloud debug test filtering', () => {
 
     // .only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/skip-and-only.cy.js': ['t1', 't3'],
       }
     })
@@ -86,7 +80,7 @@ describe('cloud debug test filtering', () => {
 
     // .only is ignored as it is not in set of filtered tests
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/skip-and-only.cy.js': ['t3'],
       }
     })
@@ -100,7 +94,7 @@ describe('cloud debug test filtering', () => {
 
     // .skip is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/skip-and-only.cy.js': ['t2', 't3'],
       }
     })
@@ -112,9 +106,9 @@ describe('cloud debug test filtering', () => {
 
     cy.get('.debug-dismiss').contains('2 / 4 tests').click().waitForSpecToFinish()
 
-    // suite.only is respected
+    // suite only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/skip-and-only.cy.js': ['t3', 's1 t4'],
       }
     })
@@ -126,7 +120,7 @@ describe('cloud debug test filtering', () => {
 
   it('works with browser filter', () => {
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/lots-of-tests.cy.j': ['t1', 's1 t2'],
       }
     })
@@ -146,7 +140,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = {
+      ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/lots-of-tests.cy.j': ['t2', 't3'],
       }
     })

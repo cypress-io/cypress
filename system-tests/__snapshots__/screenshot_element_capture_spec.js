@@ -31,7 +31,7 @@ exports['e2e screenshot element capture / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  11                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_element_capture.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

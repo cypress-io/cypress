@@ -4,7 +4,7 @@ const execa = require('execa')
 const path = require('path')
 const la = require('lazy-ass')
 const fs = require('fs')
-const filesize = require('filesize')
+const { filesize } = require('filesize')
 
 // prints disk usage numbers using "du" utility
 // available on Linux and Mac

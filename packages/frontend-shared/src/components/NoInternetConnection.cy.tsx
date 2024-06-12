@@ -16,7 +16,5 @@ describe('<NoInternetConnection />', () => {
     cy.log('Mount with slot content')
     cy.mount(() => <NoInternetConnection> Extra Text </NoInternetConnection>)
     cy.contains('Extra Text').should('be.visible')
-
-    cy.percySnapshot()
   })
 })

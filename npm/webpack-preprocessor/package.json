@@ -6,8 +6,9 @@
   "main": "dist",
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
-    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
     "deps": "deps-ok && dependency-check --no-dev .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -16,9 +17,7 @@
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "check-ts": "tsc --noEmit",
-    "watch": "rimraf dist && tsc --watch",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
     "bluebird": "3.7.1",
@@ -26,11 +25,11 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.1",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
     "@types/mocha": "9.0.0",
     "@types/webpack": "^4.41.12",
-    "babel-loader": "^8.0.2",
+    "babel-loader": "^9.1.3",
     "chai": "4.1.2",
     "chalk": "3.0.0",
     "chokidar-cli": "2.1.0",
@@ -38,7 +37,6 @@
     "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
     "deps-ok": "1.4.1",
-    "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
     "fs-extra": "^10.1.0",
     "mocha": "^7.1.0",
@@ -48,13 +46,13 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.9.1",
-    "webpack": "^4.44.2"
+    "ts-node": "^10.9.2",
+    "webpack": "^5.88.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
-    "babel-loader": "^8.0.2 || ^9",
+    "babel-loader": "^8.3 || ^9",
     "webpack": "^4 || ^5"
   },
   "files": [
@@ -73,5 +71,17 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ]
+  ],
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "!@cypress/react18:build"
+        ],
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
+  }
 }

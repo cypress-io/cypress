@@ -27,14 +27,12 @@ describe('<LastUpdatedHeader />', () => {
   it('mounts correctly with git unavailable', () => {
     mountWithProps(false)
 
-    cy.findByTestId('last-updated-header').trigger('mouseenter')
+    cy.findByTestId('last-updated-header').contains('Last updated').trigger('mouseenter')
 
     const expectedTooltipText = defaultMessages.specPage.lastUpdated.tooltip.gitInfoUnavailable
     .replace('{0}', defaultMessages.specPage.lastUpdated.tooltip.gitInfo)
 
     cy.get(popperContentSelector).should('have.text', expectedTooltipText)
-
-    cy.percySnapshot()
   })
 
   it('delays popping tooltip', () => {

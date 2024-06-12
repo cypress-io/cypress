@@ -338,6 +338,38 @@ describe('src/cy/commands/actions/submit', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('form:first').submit({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('form:first').submit({ log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('submit')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+        })
+      })
+
       it('logs immediately before resolving', () => {
         const $form = cy.$$('form:first')
 
@@ -409,9 +441,12 @@ describe('src/cy/commands/actions/submit', () => {
           const { lastLog } = this
 
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'submit',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
+            name: 'submit',
+            type: 'command',
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+            },
           })
         })
       })

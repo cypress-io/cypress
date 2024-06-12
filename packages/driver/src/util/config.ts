@@ -25,7 +25,7 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
       return
     }
 
-    if (overrideLevels === 'never') {
+    if (overrideLevels === 'never' && configKey !== 'protocolEnabled') {
       delete objectLikeConfig[configKey]
     }
   })
@@ -103,7 +103,9 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     validateOverridableAtRunTime(config, isSuiteOverride, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'
 
-      if (validationResult.supportedOverrideLevel === 'suite') {
+      if (validationResult.supportedOverrideLevel === 'global_only') {
+        errKey = 'config.invalid_mocha_config_override.global_only'
+      } else if (validationResult.supportedOverrideLevel === 'suite') {
         errKey = 'config.invalid_mocha_config_override.suite_only'
       } else if (mochaOverrideLevel) {
         errKey = 'config.invalid_mocha_config_override.read_only'

@@ -6,6 +6,7 @@ const fse = require('fs-extra')
 const os = require('os')
 const Promise = require('bluebird')
 const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
+const _ = require('lodash')
 
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
@@ -68,9 +69,12 @@ const getPublisher = async function () {
     params: {
       Bucket: S3Configuration.bucket,
     },
-    accessKeyId: aws.accessKeyId,
-    secretAccessKey: aws.secretAccessKey,
-    sessionToken: aws.sessionToken,
+    credentials: {
+      accessKeyId: aws.accessKeyId,
+      secretAccessKey: aws.secretAccessKey,
+      sessionToken: aws.sessionToken,
+    },
+    region: 'us-east-1',
   })
 }
 
@@ -108,6 +112,15 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
     return purgeDesktopAppFromCache({ version, platformArch, zipName })
   })
 }
+
+// reads all lines in from a file as URLs and purges them from Cloudflare
+// see Slack conversation https://cypressio.slack.com/archives/C055U0SMV32/p1695851503262999?thread_ts=1695846392.723289&cid=C055U0SMV32
+const purgeUrlsFromCloudflareCache = async function (urlsFilePath) {
+  const urls = (await fse.readFile(urlsFilePath)).toString().split('\n')
+
+  return Promise.map(_.compact(urls), purgeCloudflareCache, { concurrency: 5 })
+}
+
 // simple check for platform-arch string
 // example: isValidPlatformArch("darwin") // FALSE
 const isValidPlatformArch = check.oneOf(validPlatformArchs)
@@ -156,4 +169,5 @@ module.exports = {
   saveUrl,
   formHashFromEnvironment,
   getUploadUrl,
+  purgeUrlsFromCloudflareCache,
 }

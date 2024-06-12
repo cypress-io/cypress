@@ -63,7 +63,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the AUT', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
-        cy.stub(Cypress, 'backend').callThrough()
+        cy.stub(Cypress, 'backend').log(false).callThrough()
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
@@ -89,7 +89,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -109,7 +109,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -129,7 +129,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -173,7 +173,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           cy.then(() => {
             expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
               url: 'http://app.foobar.com:3500/test-request',
-              requestedWith: 'fetch',
+              resourceType: 'fetch',
               credentialStatus: 'include',
             })
           })
@@ -184,7 +184,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the spec bridge', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
-        cy.stub(Cypress, 'backend').callThrough()
+        cy.stub(Cypress, 'backend').log(false).callThrough()
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
@@ -218,7 +218,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -248,7 +248,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -276,7 +276,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -327,7 +327,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
         cy.then(() => {
           expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
             url: 'http://app.foobar.com:3500/test-request',
-            requestedWith: 'fetch',
+            resourceType: 'fetch',
             credentialStatus: 'include',
           })
         })
@@ -338,7 +338,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
       window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
 
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
 
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
@@ -346,14 +346,14 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       cy.then(() => {
         expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
           url: 'http://localhost:3500/foo.bar.baz.json',
-          requestedWith: 'fetch',
+          resourceType: 'fetch',
           credentialStatus: 'same-origin',
         })
       })
     })
 
     it('does not patch fetch in the spec window or the AUT if the AUT is on the primary', () => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
       cy.visit('fixtures/xhr-fetch-requests.html')
 
       cy.window().then((win) => {
@@ -386,7 +386,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the AUT', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
-        cy.stub(Cypress, 'backend').callThrough()
+        cy.stub(Cypress, 'backend').log(false).callThrough()
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
@@ -410,7 +410,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             cy.then(() => {
               expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                 url: 'http://www.foobar.com:3500/test-request',
-                requestedWith: 'xhr',
+                resourceType: 'xhr',
                 credentialStatus: withCredentials,
               })
             })
@@ -450,7 +450,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
         cy.then(() => {
           expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
             url: 'http://app.foobar.com:3500/test-request',
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialStatus: true,
           })
         })
@@ -460,9 +460,9 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the spec bridge', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
-        cy.stub(Cypress, 'backend').callThrough()
+        cy.stub(Cypress, 'backend').log(false).callThrough()
         cy.origin('http://www.foobar.com:3500', () => {
-          cy.stub(Cypress, 'backend').callThrough()
+          cy.stub(Cypress, 'backend').log(false).callThrough()
         })
 
         cy.visit('/fixtures/primary-origin.html')
@@ -502,7 +502,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             cy.then(() => {
               expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                 url: 'http://www.foobar.com:3500/test-request-credentials',
-                requestedWith: 'xhr',
+                resourceType: 'xhr',
                 credentialStatus: withCredentials,
               })
             })
@@ -554,7 +554,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           cy.then(() => {
             expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
               url: 'http://app.foobar.com:3500/test-request',
-              requestedWith: 'xhr',
+              resourceType: 'xhr',
               credentialStatus: true,
             })
           })
@@ -566,7 +566,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
       window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
 
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
 
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
@@ -574,14 +574,14 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       cy.then(() => {
         expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
           url: 'http://localhost:3500/foo.bar.baz.json',
-          requestedWith: 'xhr',
+          resourceType: 'xhr',
           credentialStatus: false,
         })
       })
     })
 
     it('does not patch xmlHttpRequest in the spec window or the AUT if the AUT is on the primary', () => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
       cy.visit('fixtures/xhr-fetch-requests.html')
 
       cy.window().then((win) => {

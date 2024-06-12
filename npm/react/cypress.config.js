@@ -1,7 +1,6 @@
 module.exports = {
   'viewportWidth': 400,
   'viewportHeight': 400,
-  'video': false,
   'projectId': 'z9dxah',
   'env': {
     'reactDevtools': true,

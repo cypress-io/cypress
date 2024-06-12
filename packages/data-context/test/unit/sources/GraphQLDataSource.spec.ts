@@ -25,7 +25,7 @@ describe('GraphQLDataSource', () => {
     ctx.project.projectId = async () => 'abc123'
 
     pushFragmentIterator = await Promise.resolve(subscribe({
-      schema: ctx.schema,
+      schema: ctx.config.schema,
       contextValue: ctx,
       document: parse(`subscription {
         pushFragment {
@@ -47,7 +47,7 @@ describe('GraphQLDataSource', () => {
   function executeQuery (query: string) {
     return Promise.resolve(execute({
       document: parse(query),
-      schema: ctx.schema,
+      schema: ctx.config.schema,
       contextValue: ctx,
     }))
   }

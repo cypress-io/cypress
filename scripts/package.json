@@ -1,0 +1,8 @@
+{
+  "name": "internal-scripts",
+  "version": "0.0.0-development",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext .js,.ts,.json, ."
+  }
+}

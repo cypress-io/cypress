@@ -18,6 +18,72 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    describe('should throw when timeout is not a number', () => {
+      const options = { timeout: {} }
+      const getErrMsgForTimeout = (timeout) => `\`cy.get()\` only accepts a \`number\` for its \`timeout\` option. You passed: \`${timeout}\``
+
+      it('timeout passed as plain object {}', (done) => {
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as some string', (done) => {
+        options.timeout = 'abc'
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as null', (done) => {
+        options.timeout = null
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as NaN', (done) => {
+        options.timeout = NaN
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as Boolean', (done) => {
+        options.timeout = false
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+
+      it('timeout passed as array', (done) => {
+        options.timeout = []
+        cy.get('#some-el', options)
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+          done()
+        })
+      })
+    })
+
+    it('should timeout when element can\'t be found', (done) => {
+      cy.get('#some-el', { timeout: 100 })
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('Timed out retrying after 100ms')
+        done()
+      })
+    })
+
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
@@ -333,6 +399,36 @@ describe('src/cy/commands/querying', () => {
         return null
       })
 
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body', { log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('body', { log: false })
+        .then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
+        })
+      })
+
       it('logs elements length', () => {
         let buttons = cy.$$('button')
 
@@ -435,10 +531,13 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps', () => {
         cy.get('body').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Selector: 'body',
-            Yielded: $body.get(0),
-            Elements: 1,
+            name: 'get',
+            type: 'command',
+            props: {
+              Selector: 'body',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -446,10 +545,13 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with an alias', () => {
         cy.get('body').as('b').get('@b').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@b',
-            Yielded: $body.get(0),
-            Elements: 1,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@b',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -457,9 +559,12 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with a primitive alias', () => {
         cy.noop({ foo: 'foo' }).as('obj').get('@obj').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@obj',
-            Yielded: obj,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@obj',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -472,9 +577,12 @@ describe('src/cy/commands/querying', () => {
           return win.$.get('/users')
         }).wait('@getUsers').get('@getUsers').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
-            Alias: '@getUsers',
-            Yielded: obj,
+            name: 'get',
+            type: 'command',
+            props: {
+              Alias: '@getUsers',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -504,6 +612,27 @@ describe('src/cy/commands/querying', () => {
 
         cy.get('body').as('b').get('@b').then(($body) => {
           expect($body.get(0)).to.eq(body.get(0))
+        })
+      })
+
+      it('can get alias with logging off', { protocolEnabled: true }, () => {
+        const logs = []
+        let hiddenLog
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.on('_log:added', (attrs, log) => {
+          hiddenLog = log
+        })
+
+        cy.get('body').as('b').get('@b', { log: false })
+        .then(function () {
+          expect(logs.length).to.eq(1)
+          expect(hiddenLog.get('name')).to.eq('get')
+          expect(hiddenLog.get('hidden')).to.be.true
+          expect(hiddenLog.get('snapshots')).to.have.length(1)
         })
       })
 
@@ -950,8 +1079,8 @@ describe('src/cy/commands/querying', () => {
           expect(getLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = getLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)
@@ -1531,14 +1660,15 @@ space
     })
 
     describe('special characters', () => {
-      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' ')
+      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; : ~'.split(' ')
 
-      it(`finds content by string with characters`, () => {
+      it(`finds selector with characters`, () => {
+        Cypress.config({ numTestsKeptInMemory: 0 })
         _.each(specialCharacters, (char) => {
-          const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
+          const button = $(`<button id="form-field${char}:r1:">special char ${char} content</button>`).appendTo(cy.$$('body'))
 
-          cy.contains('span', char).then(($span) => {
-            expect($span.get(0)).to.eq(span.get(0))
+          cy.contains('button', char).then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
           })
         })
       })
@@ -1654,11 +1784,14 @@ space
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'contains',
-            Content: 'nested contains',
-            'Applied To': $complex.get(0),
-            Yielded: $label.get(0),
-            Elements: 1,
+            name: 'contains',
+            type: 'command',
+            props: {
+              Content: 'nested contains',
+              'Applied To': $complex.get(0),
+              Yielded: $label.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -1794,8 +1927,8 @@ space
           expect(containsLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = containsLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)

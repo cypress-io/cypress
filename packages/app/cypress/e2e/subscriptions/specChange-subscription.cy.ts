@@ -7,6 +7,7 @@ describe('specChange subscription', () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
     cy.visitApp()
+    cy.specsPageIsVisible()
   })
 
   describe('specs list', () => {
@@ -75,6 +76,8 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/accounts/accounts_new.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin_users_list.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin.user/foo_list.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation-describe-config.spec.js'),
           getPathForPlatform('cypress/e2e/z001.spec.js'),
           getPathForPlatform('cypress/e2e/z002.spec.js'),
           getPathForPlatform('cypress/e2e/z003.spec.js'),
@@ -84,6 +87,8 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/z007.spec.js'),
           getPathForPlatform('cypress/e2e/z008.spec.js'),
           getPathForPlatform('cypress/e2e/z009.spec.js'),
+          getPathForPlatform('cypress/e2e/dummyTest4276_test.spec.js'),
+          getPathForPlatform('cypress/e2e/dummy7890Test_test.spec.js'),
         ],
       })
 
@@ -118,6 +123,8 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/accounts/accounts_new.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin_users_list.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin.user/foo_list.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation-describe-config.spec.js'),
           getPathForPlatform('cypress/e2e/z001.spec.js'),
           getPathForPlatform('cypress/e2e/z002.spec.js'),
           getPathForPlatform('cypress/e2e/z003.spec.js'),
@@ -127,6 +134,8 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/z007.spec.js'),
           getPathForPlatform('cypress/e2e/z008.spec.js'),
           getPathForPlatform('cypress/e2e/z009.spec.js'),
+          getPathForPlatform('cypress/e2e/dummyTest4276_test.spec.js'),
+          getPathForPlatform('cypress/e2e/dummy7890Test_test.spec.js'),
         ],
       })
 
@@ -188,7 +197,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 24)
+      .should('have.length', 28)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -199,7 +208,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 25)
+      .should('have.length', 29)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -214,7 +223,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 24)
+      .should('have.length', 28)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -225,7 +234,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 23)
+      .should('have.length', 27)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -255,6 +264,8 @@ e2e: {
           getPathForPlatform('cypress/e2e/accounts/accounts_new.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin_users_list.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin.user/foo_list.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation-describe-config.spec.js'),
           getPathForPlatform('cypress/e2e/z001.spec.js'),
           getPathForPlatform('cypress/e2e/z002.spec.js'),
           getPathForPlatform('cypress/e2e/z003.spec.js'),
@@ -264,6 +275,8 @@ e2e: {
           getPathForPlatform('cypress/e2e/z007.spec.js'),
           getPathForPlatform('cypress/e2e/z008.spec.js'),
           getPathForPlatform('cypress/e2e/z009.spec.js'),
+          getPathForPlatform('cypress/e2e/dummyTest4276_test.spec.js'),
+          getPathForPlatform('cypress/e2e/dummy7890Test_test.spec.js'),
         ],
       })
 
@@ -286,7 +299,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 24)
+      .should('have.length', 28)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -329,14 +342,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '24 matches')
+      .should('contain', '28 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '25 matches')
+      .should('contain', '29 matches')
     })
 
     it('responds to specChange event for a removed file', () => {
@@ -346,14 +359,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '24 matches')
+      .should('contain', '28 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.removeFileInProject(o.path)
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 matches')
+      .should('contain', '27 matches')
     })
 
     it('handles removing the last file', () => {
@@ -380,6 +393,8 @@ e2e: {
           getPathForPlatform('cypress/e2e/accounts/accounts_new.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin_users_list.spec.js'),
           getPathForPlatform('cypress/e2e/admin_users/admin.user/foo_list.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation.spec.js'),
+          getPathForPlatform('cypress/e2e/test-isolation-describe-config.spec.js'),
           getPathForPlatform('cypress/e2e/z001.spec.js'),
           getPathForPlatform('cypress/e2e/z002.spec.js'),
           getPathForPlatform('cypress/e2e/z003.spec.js'),
@@ -389,6 +404,8 @@ e2e: {
           getPathForPlatform('cypress/e2e/z007.spec.js'),
           getPathForPlatform('cypress/e2e/z008.spec.js'),
           getPathForPlatform('cypress/e2e/z009.spec.js'),
+          getPathForPlatform('cypress/e2e/dummyTest4276_test.spec.js'),
+          getPathForPlatform('cypress/e2e/dummy7890Test_test.spec.js'),
         ],
       })
 
@@ -410,7 +427,7 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '24 matches')
+      .should('contain', '28 matches')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -435,6 +452,40 @@ e2e: {
 
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
       .should('contain', '3 matches')
+
+      // Regression for https://github.com/cypress-io/cypress/issues/27103
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js',
+`   
+module.exports = {
+  projectId: 'abc123',
+  experimentalInteractiveRunEvents: true,
+  component: {
+    specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
+    supportFile: false,
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+    }
+  },
+  e2e: {
+    specPattern: ['cypress/e2e/**/dom-cont*.spec.{js,ts}'],
+    supportFile: false,
+    setupNodeEvents(on, config) {
+      /**
+       * This should make Cypress yield a "no specs found" error.
+       *
+       * This stops being the case if 'specPattern' is an array.
+       */
+      config.specPattern = [];
+      return config;
+    },
+  },
+}`)
+      })
+
+      cy.get('[data-cy="create-spec-page-title"]')
+      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
     })
   })
 })
