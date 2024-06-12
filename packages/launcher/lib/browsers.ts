@@ -49,11 +49,5 @@ export function launch (
     debug('%s exited: %o', browser.name, { code, signal })
   })
 
-  // kill the browser
-  setTimeout(() => {
-    console.log('killing the browser after 5 seconds to mock crash...')
-    proc.kill()
-  }, 5000)
-
   return proc
 }
