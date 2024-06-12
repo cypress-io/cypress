@@ -4,34 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <title>29605 repro</title>
-  <style id="compiled-css" type="text/css">
-    .big {
-      font-size: 128px;
-    }
-
-    .contents {
-      display: contents
-    }
-
-    .overflow-hidden {
-      overflow: hidden
-    }
-
-    @media (min-width: 1024px) {
-      .lg\:grid {
-        display: grid
-      }
-    }
-  </style>
 </head>
 
 <body>
-  <div class="overflow-hidden contents">
-    <aside id="sidebar-left" class="lg:w-auto">
-      <section class="b-4">
-        <p class="big">IN SECTION</p>
-      </section>
-    </aside>
+  <div id="parent" style="overflow: hidden; display: contents;">
+    <div id="child" style="height:200px; width: 200px; background: #f00"></div>
   </div>
 </body>
 </html>
