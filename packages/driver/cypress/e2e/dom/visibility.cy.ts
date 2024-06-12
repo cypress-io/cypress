@@ -174,8 +174,8 @@ describe('src/cypress/dom/visibility', () => {
       this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
       this.$displayNone = add('<button style="display: none">display: none</button>')
       this.$inputHidden = add('<input type="hidden" value="abcdef">')
-      this.$divNoWidth = add('<div style="width: 0; height: 100px;">width: 0</div>')
-      this.$divNoHeight = add('<div style="width: 50px; height: 0px;">height: 0</div>')
+      this.$divNoWidth = add('<div id="divNoWidth" style="width: 0; height: 100px;">width: 0</div>')
+      this.$divNoHeight = add('<div id="divNoHeight" style="width: 50px; height: 0px;">height: 0</div>')
       this.$divDetached = $('<div>foo</div>')
       this.$divVisible = add(`<div>visible</div>`)
 
@@ -1142,15 +1142,15 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has effective zero width', function () {
-        this.reasonIs(this.$divNoWidth, 'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        this.reasonIs(this.$divNoWidth, 'This element `<div#divNoWidth>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
       })
 
       it('has effective zero height', function () {
-        this.reasonIs(this.$divNoHeight, 'This element `<div>` is not visible because it has an effective width and height of: `50 x 0` pixels.')
+        this.reasonIs(this.$divNoHeight, 'This element `<div#divNoHeight>` is not visible because it has an effective width and height of: `50 x 0` pixels.')
       })
 
       it('has a parent with an effective zero width and overflow: hidden', function () {
-        this.reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        this.reasonIs(this.$parentNoWidth.find('#parentNoWidth'), 'This element `<span#parentNoWidth>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `0 x 100` pixels.')
       })
 
       it('element sits outside boundaries of parent with overflow clipping', function () {

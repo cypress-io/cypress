@@ -169,13 +169,9 @@ const elHasNoClientWidthOrHeight = ($el) => {
 
 const elementBoundingRect = ($el) => $el[0].getBoundingClientRect()
 
-const elClientHeight = ($el) => {
-  return elementBoundingRect($el).height
-}
+const elClientHeight = ($el) => elementBoundingRect($el).height
 
-const elClientWidth = ($el) => {
-  return elementBoundingRect($el).width
-}
+const elClientWidth = ($el) => elementBoundingRect($el).width
 
 const elHasVisibilityHiddenOrCollapse = ($el) => {
   return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
@@ -329,7 +325,7 @@ const elIsNotElementFromPoint = function ($el) {
   return true
 }
 
-const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent($el)) {
+const elIsOutOfBoundsOfAncestorsOverflow = function ($el: JQuery<any>, $ancestor = getParent($el)) {
   // no ancestor, not out of bounds!
   // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
@@ -385,7 +381,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // is effectively hidden
   // -----UNLESS------
   // the parent or a descendent has position: absolute|fixed
-  let $parent = getParent($el)
+  const $parent = getParent($el)
 
   // stop if we've reached the body or html
   // in case there is no body
@@ -396,10 +392,9 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   }
 
   if (elHasDisplayContents($el)) {
-    $parent = getParent($el)
-    if (isUndefinedOrHTMLBodyDoc($parent)) {
-      return false
-    }
+    let $parent = getParent($el)
+
+    return elIsHiddenByAncestors($parent, checkOpacity, $parent)
   }
 
   // a child can never have a computed opacity
@@ -423,7 +418,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   return elIsHiddenByAncestors($parent, checkOpacity, $origEl)
 }
 
-const parentHasNoClientWidthOrHeightAndOverflowHidden = function ($el) {
+const parentHasNoClientWidthOrHeightAndOverflowHidden = function ($el: JQuery<HTMLElement>) {
   // if we've walked all the way up to body or html then return false
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return false
@@ -570,11 +565,10 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
-  $parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))
-  if ($parent) {
+  if ($parent = parentHasNoClientWidthOrHeightAndOverflowHidden(getParent($el))) {
     parentNode = stringifyElement($parent, 'short')
-    width = elClientWidth($el)
-    height = elClientHeight($parent)
+    let width = elClientWidth($parent)
+    let height = elClientHeight($parent)
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
