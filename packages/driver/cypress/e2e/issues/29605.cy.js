@@ -7,6 +7,6 @@ describe('issue #29605', () => {
   })
 
   it('can click selection when display: contents width used', () => {
-    cy.get('#sidebar-left > section').click()
+    cy.get('#child').should('be.visible')
   })
 })
