@@ -102,13 +102,8 @@ describe('lib/browsers/cri-client', function () {
           it(`with '${msg}'`, async function () {
             const err = new Error(msg)
 
-            send.onFirstCall().callsFake(() => {
-              return Promise.reject(err)
-            })
-
-            send.onSecondCall().callsFake(() => {
-              return Promise.resolve()
-            })
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().resolves()
 
             const client = await getClient()
 
