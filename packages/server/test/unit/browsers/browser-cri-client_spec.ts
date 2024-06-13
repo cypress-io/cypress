@@ -1,5 +1,5 @@
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
-import * as CriClient from '../../../lib/browsers/cri-client'
+import { CriClient } from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'

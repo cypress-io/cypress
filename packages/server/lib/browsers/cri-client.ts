@@ -1,11 +1,10 @@
-import CRI from 'chrome-remote-interface'
+import CDP from 'chrome-remote-interface'
 import debugModule from 'debug'
 import _ from 'lodash'
 import * as errors from '../errors'
-
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
-import type CDP from 'chrome-remote-interface'
 
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
 import type { ProtocolManagerShape } from '@packages/types'
@@ -53,6 +52,8 @@ type Subscription = {
   cb: Function
 }
 
+type CmdParams<TCmd extends CdpCommand> = ProtocolMapping.Commands[TCmd]['paramsType'][0]
+
 interface CDPClient extends CDP.Client {
   off: EventEmitter['off']
   _ws: WebSocket
@@ -64,7 +65,7 @@ export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
   maxPostDataSize: 0,
 }
 
-export interface CriClient {
+export interface ICriClient {
   /**
    * The target id attached to by this client
    */
@@ -87,8 +88,6 @@ export interface CriClient {
    * Calls underlying remote interface client close
    */
   close (): Promise<void>
-
-  onReconnectAttempt? (retryIndex: number): void
 
   /**
    * The internal queue of replayable messages that run after a disconnect
@@ -144,7 +143,11 @@ const maybeDebugCdpMessages = (cri: CDPClient) => {
     cri._ws.send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri._ws, data, callback)
+      try {
+        return send.call(cri._ws, data, callback)
+      } catch (e: any) {
+        debugVerboseSend('Error sending CDP command %o %O', JSON.parse(data), e)
+      }
     }
   }
 
@@ -172,120 +175,141 @@ type CreateParams = {
   onReconnect?: (client: CriClient) => void
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
-  browserClient?: CriClient
+  browserClient?: ICriClient
+  onReconnectAttempt?: (retryIndex: number) => void
 }
 
-export const create = async ({
-  target,
-  onAsynchronousError,
-  host,
-  port,
-  onReconnect,
-  protocolManager,
-  fullyManageTabs,
-  browserClient,
-}: CreateParams): Promise<CriClient> => {
-  const subscriptions: Subscription[] = []
-  const enableCommands: EnableCommand[] = []
-  let enqueuedCommands: EnqueuedCommand[] = []
+export class CriClient implements ICriClient {
+  private subscriptions: Subscription[] = []
+  private enableCommands: EnableCommand[] = []
+  private enqueuedCommands: EnqueuedCommand[] = []
 
-  let closed = false // has the user called .close on this?
-  let connected = false // is this currently connected to CDP?
-  let crashed = false // has this crashed?
-  let reconnection: Promise<void> | undefined = undefined
+  private _closed = false
+  private _connected = false
+  private crashed = false
+  private reconnection: Promise<void> | undefined = undefined
 
-  let cri: CDPClient
-  let client: CriClient
+  private cri: CDPClient | undefined
 
-  const reconnect = async (retryIndex) => {
-    connected = false
+  constructor (
+    public targetId: string,
+    private onAsynchronousError: Function,
+    private host?: string,
+    private port?: number,
+    private onReconnect?: (client: CriClient) => void,
+    private protocolManager?: ProtocolManagerShape,
+    private fullyManageTabs?: boolean,
+    private browserClient?: ICriClient,
+    private onReconnectAttempt?: (retryIndex: number) => void,
+  ) {}
 
-    if (closed) {
-      debug('disconnected, not reconnecting because client is closed %o', { closed, target })
-      enqueuedCommands = []
+  static async create ({
+    target,
+    onAsynchronousError,
+    host,
+    port,
+    onReconnect,
+    protocolManager,
+    fullyManageTabs,
+    browserClient,
+    onReconnectAttempt,
+  }: CreateParams): Promise<CriClient> {
+    const newClient = new CriClient(target, onAsynchronousError, host, port, onReconnect, protocolManager, fullyManageTabs, browserClient, onReconnectAttempt)
+
+    await newClient.connect()
+
+    return newClient
+  }
+
+  private async reconnect (retryIndex: number = 0) {
+    this._connected = false
+
+    if (this.closed) {
+      debug('disconnected, not reconnecting because client is closed %o', { closed: this.closed, target: this.targetId })
+      this.enqueuedCommands = []
 
       return
     }
 
-    client.onReconnectAttempt?.(retryIndex)
+    this.onReconnectAttempt?.(retryIndex)
 
-    debug('disconnected, attempting to reconnect... %o', { retryIndex, closed, target })
+    debug('disconnected, attempting to reconnect... %o', { retryIndex, closed: this.closed, target: this.targetId })
 
-    await connect()
+    await this.connect()
 
-    debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands, target })
+    debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions: this.subscriptions, enableCommands: this.enableCommands, enqueuedCommands: this.enqueuedCommands, target: this.targetId })
 
-    subscriptions.forEach((sub) => {
-      cri.on(sub.eventName, sub.cb as any)
+    this.subscriptions.forEach((sub) => {
+      this.cri?.on(sub.eventName, sub.cb as any)
     })
 
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
-    await Promise.all(enableCommands.map(async ({ command, params, sessionId }) => {
+    await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
       // these commands may have been enqueued, so we need to resolve those promises and remove
       // them from the queue when we send here
       const isInFlightCommand = (candidate: EnqueuedCommand) => {
         return candidate.command === command && candidate.params === params && candidate.sessionId === sessionId
       }
-      const enqueued = enqueuedCommands.find(isInFlightCommand)
+      const enqueued = this.enqueuedCommands.find(isInFlightCommand)
 
       try {
-        const response = await cri.send(command, params, sessionId)
+        const response = await this.cri?.send(command, params, sessionId)
 
         enqueued?.p.resolve(response)
       } catch (e) {
         enqueued?.p.reject(e)
       } finally {
-        enqueuedCommands = enqueuedCommands.filter((candidate) => {
+        this.enqueuedCommands = this.enqueuedCommands.filter((candidate) => {
           return !isInFlightCommand(candidate)
         })
       }
     }))
 
-    enqueuedCommands.forEach((cmd) => {
-      cri.send(cmd.command, cmd.params, cmd.sessionId).then(cmd.p.resolve as any, cmd.p.reject as any)
+    this.enqueuedCommands.forEach((cmd) => {
+      this.cri!.send(cmd.command, cmd.params, cmd.sessionId).then(cmd.p.resolve as any, cmd.p.reject as any)
     })
 
-    enqueuedCommands = []
+    this.enqueuedCommands = []
 
-    if (onReconnect) {
-      onReconnect(client)
+    if (this.onReconnect) {
+      this.onReconnect(this)
     }
 
     // When CDP disconnects, it will automatically reconnect and re-apply various subscriptions
     // (e.g. DOM.enable, Network.enable, etc.). However, we need to restart tracking DOM mutations
     // from scratch. We do this by capturing a brand new full snapshot of the DOM.
-    await protocolManager?.cdpReconnect()
+    await this.protocolManager?.cdpReconnect()
   }
 
-  const retryReconnect = async () => {
-    if (reconnection) {
+  private retryReconnect = async () => {
+    if (this.reconnection) {
       debug('reconnection in progress; not starting new process, returning promise for in-flight reconnection attempt')
 
-      return reconnection
+      return this.reconnection
     }
 
-    debug('disconnected, starting retries to reconnect... %o', { closed, target })
+    debug('disconnected, starting retries to reconnect... %o', { closed: this.closed, target: this.targetId })
 
     const retry = async (retryIndex = 0) => {
       retryIndex++
 
       try {
-        const attempt = await reconnect(retryIndex)
+        const attempt = await this.reconnect(retryIndex)
 
-        reconnection = undefined
+        this.reconnection = undefined
 
         return attempt
       } catch (err) {
-        if (closed) {
-          debug('could not reconnect because client is closed %o', { closed, target })
+        if (this.closed) {
+          debug('could not reconnect because client is closed %o', { closed: this.closed, target: this.targetId })
 
-          enqueuedCommands = []
+          this.enqueuedCommands = []
 
           return
         }
 
-        debug('could not reconnect, retrying... %o', { closed, target, err })
+        debug('could not reconnect, retrying... %o', { closed: this.closed, target: this.targetId, err })
 
         if (retryIndex < 20) {
           await new Promise((resolve) => setTimeout(resolve, 100))
@@ -297,38 +321,38 @@ export const create = async ({
 
         // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
         cdpError.isFatalApiErr = true
-        reconnection = undefined
-        onAsynchronousError(cdpError)
+        this.reconnection = undefined
+        this.onAsynchronousError(cdpError)
       }
     }
 
-    reconnection = retry()
+    this.reconnection = retry()
 
-    return reconnection
+    return this.reconnection
   }
 
-  const connect = async () => {
-    await cri?.close()
+  async connect () {
+    await this.cri?.close()
 
-    debug('connecting %o', { connected, target })
+    debug('connecting %o', { connected: this._connected, target: this.targetId })
 
-    cri = await CRI({
-      host,
-      port,
-      target,
+    this.cri = await CDP({
+      host: this.host,
+      port: this.port,
+      target: this.targetId,
       local: true,
       useHostName: true,
     }) as CDPClient
 
-    connected = true
+    this._connected = true
 
-    debug('connected %o', { connected, target })
+    debug('connected %o', { connected: this._connected, target: this.targetId, ws: this.cri._ws })
 
-    maybeDebugCdpMessages(cri)
+    maybeDebugCdpMessages(this.cri)
 
     // Having a host set indicates that this is the child cri target, a.k.a.
     // the main Cypress tab (as opposed to the root browser cri target)
-    const isChildTarget = !!host
+    const isChildTarget = !!this.host
 
     // don't reconnect in these circumstances
     if (
@@ -338,7 +362,7 @@ export const create = async ({
       // that we don't want to reconnect on
       && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     ) {
-      cri.on('disconnect', retryReconnect)
+      this.cri.on('disconnect', this.retryReconnect)
     }
 
     // We're only interested in child target traffic. Browser cri traffic is
@@ -346,26 +370,26 @@ export const create = async ({
     // to targets and enable network traffic. We must attach in a paused state
     // so that we can enable network traffic before the target starts running.
     if (isChildTarget) {
-      cri.on('Target.targetCrashed', async (event) => {
-        if (event.targetId !== target) {
+      this.cri.on('Target.targetCrashed', async (event) => {
+        if (event.targetId !== this.targetId) {
           return
         }
 
         debug('crash detected')
-        crashed = true
+        this.crashed = true
       })
 
-      if (fullyManageTabs) {
-        cri.on('Target.attachedToTarget', async (event) => {
+      if (this.fullyManageTabs) {
+        this.cri.on('Target.attachedToTarget', async (event) => {
           try {
             // Service workers get attached at the page and browser level. We only want to handle them at the browser level
             // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
             if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
-              await cri.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+              await this.cri!.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
             }
 
             if (event.waitingForDebugger) {
-              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+              await this.cri!.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
             }
           } catch (error) {
             // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
@@ -374,158 +398,158 @@ export const create = async ({
         })
 
         // Ideally we could use filter rather than checking the type above, but that was added relatively recently
-        await cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
-        await cri.send('Target.setDiscoverTargets', { discover: true })
+        await this.cri.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
+        await this.cri.send('Target.setDiscoverTargets', { discover: true })
       }
     }
   }
 
-  await connect()
-
-  client = {
-    targetId: target,
-
-    async send (command: CdpCommand, params?: object, sessionId?: string) {
-      if (crashed) {
-        return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
+  private enqueueCommand <TCmd extends CdpCommand> (
+    command: TCmd,
+    params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
+    sessionId?: string,
+  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
+    return new Promise((resolve, reject) => {
+      const obj: EnqueuedCommand = {
+        command,
+        p: { resolve, reject },
       }
 
-      const enqueue = () => {
-        debug('enqueueing command', { command, params })
-
-        return new Promise((resolve, reject) => {
-          const obj: EnqueuedCommand = {
-            command,
-            p: { resolve, reject } as DeferredPromise,
-          }
-
-          if (params) {
-            obj.params = params
-          }
-
-          if (sessionId) {
-            obj.sessionId = sessionId
-          }
-
-          enqueuedCommands.push(obj)
-        })
+      if (params) {
+        obj.params = params
       }
 
-      // Keep track of '*.enable' commands so they can be resent when
-      // reconnecting
-      if (command.endsWith('.enable') || ['Runtime.addBinding', 'Target.setDiscoverTargets'].includes(command)) {
-        debug('registering enable command', command)
-        const obj: EnableCommand = {
-          command,
-        }
-
-        if (params) {
-          obj.params = params
-        }
-
-        if (sessionId) {
-          obj.sessionId = sessionId
-        }
-
-        enableCommands.push(obj)
+      if (sessionId) {
+        obj.sessionId = sessionId
       }
 
-      if (connected) {
-        try {
-          return await cri.send(command, params, sessionId)
-        } catch (err) {
-          debug('Encountered error on send %o', { command, params, sessionId, err })
-          // This error occurs when the browser has been left open for a long
-          // time and/or the user's computer has been put to sleep. The
-          // socket disconnects and we need to recreate the socket and
-          // connection
-          if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
-            debug('error classified as not WEBSOCKET_NOT_OPEN_RE, rethrowing')
-            throw err
-          }
-
-          debug('error classified as WEBSOCKET_NOT_OPEN_RE; enqueuing and attempting to reconnect')
-
-          const p = enqueue() as Promise<any>
-
-          await retryReconnect()
-
-          // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
-          if (enqueuedCommands.length === 0 && closed) {
-            debug('connection was closed was trying to reconnect')
-
-            return Promise.reject(new Error(`${command} will not run as browser CRI connection was reset`))
-          }
-
-          return p
-        }
-      }
-
-      return enqueue()
-    },
-
-    on (eventName, cb) {
-      subscriptions.push({ eventName, cb })
-      debug('registering CDP on event %o', { eventName })
-
-      cri.on(eventName, cb)
-      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
-      // Long term we should use flat mode entirely across all of chrome remote interface
-      if (eventName.startsWith('Network.')) {
-        browserClient?.on(eventName, cb)
-      }
-    },
-
-    off (eventName, cb) {
-      subscriptions.splice(subscriptions.findIndex((sub) => {
-        return sub.eventName === eventName && sub.cb === cb
-      }), 1)
-
-      cri.off(eventName, cb)
-      // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
-      // Long term we should use flat mode entirely across all of chrome remote interface
-      if (eventName.startsWith('Network.')) {
-        browserClient?.off(eventName, cb)
-      }
-    },
-
-    get ws () {
-      return cri._ws
-    },
-
-    get queue () {
-      return {
-        enableCommands,
-        enqueuedCommands,
-        subscriptions,
-      }
-    },
-
-    get closed () {
-      return closed
-    },
-
-    get connected () {
-      return connected
-    },
-
-    async close () {
-      if (closed) {
-        debug('not closing, cri client is already closed %o', { closed, target })
-
-        return
-      }
-
-      debug('closing cri client %o', { closed, target })
-
-      closed = true
-
-      return cri.close()
-      .finally(() => {
-        debug('closed cri client %o', { closed, target })
-      })
-    },
+      this.enqueuedCommands.push(obj)
+    })
   }
 
-  return client
+  public async send<TCmd extends CdpCommand> (
+    command: TCmd,
+    params?: CmdParams<TCmd>,
+    sessionId?: string,
+  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
+    if (this.crashed) {
+      return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
+    }
+
+    // Keep track of '*.enable' commands so they can be resent when
+    // reconnecting
+    if (command.endsWith('.enable') || ['Runtime.addBinding', 'Target.setDiscoverTargets'].includes(command)) {
+      debug('registering enable command', command)
+      const obj: EnableCommand = {
+        command,
+      }
+
+      if (params) {
+        obj.params = params
+      }
+
+      if (sessionId) {
+        obj.sessionId = sessionId
+      }
+
+      this.enableCommands.push(obj)
+    }
+
+    if (this._connected) {
+      try {
+        return await this.cri!.send(command, params, sessionId)
+      } catch (err) {
+        debug('Encountered error on send %o', { command, params, sessionId, err })
+        // This error occurs when the browser has been left open for a long
+        // time and/or the user's computer has been put to sleep. The
+        // socket disconnects and we need to recreate the socket and
+        // connection
+        if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
+          debug('error classified as not WEBSOCKET_NOT_OPEN_RE, rethrowing')
+          throw err
+        }
+
+        debug('error classified as WEBSOCKET_NOT_OPEN_RE; enqueuing and attempting to reconnect')
+
+        const p = this.enqueueCommand(command, params, sessionId)
+
+        await this.retryReconnect()
+
+        // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
+        if (this.enqueuedCommands.length === 0 && this.closed) {
+          debug('connection was closed was trying to reconnect')
+
+          return Promise.reject(new Error(`${command} will not run as browser CRI connection was reset`))
+        }
+
+        return p
+      }
+    }
+
+    return this.enqueueCommand(command, params, sessionId)
+  }
+
+  public on<T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) {
+    this.subscriptions.push({ eventName, cb })
+    debug('registering CDP on event %o', { eventName })
+
+    this.cri!.on(eventName, cb)
+
+    if (eventName.startsWith('Network.')) {
+      this.browserClient?.on(eventName, cb)
+    }
+  }
+
+  off<T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) {
+    this.subscriptions.splice(this.subscriptions.findIndex((sub) => {
+      return sub.eventName === eventName && sub.cb === cb
+    }), 1)
+
+    this.cri!.off(eventName, cb)
+    // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)
+    // Long term we should use flat mode entirely across all of chrome remote interface
+    if (eventName.startsWith('Network.')) {
+      this.browserClient?.off(eventName, cb)
+    }
+  }
+
+  get ws () {
+    return this.cri!._ws
+  }
+
+  get queue () {
+    return {
+      enableCommands: this.enableCommands,
+      enqueuedCommands: this.enqueuedCommands,
+      subscriptions: this.subscriptions,
+    }
+  }
+
+  get closed () {
+    return this._closed
+  }
+
+  get connected () {
+    return this._connected
+  }
+
+  async close () {
+    if (this._closed) {
+      debug('not closing, cri client is already closed %o', { closed: this._closed, target: this.targetId })
+
+      return
+    }
+
+    debug('closing cri client %o', { closed: this._closed, target: this.targetId })
+
+    this._closed = true
+
+    try {
+      await this.cri?.close()
+    } catch (e) {
+      debug('error closing cri client targeting %s: %o', this.targetId, e)
+    } finally {
+      debug('closed cri client %o', { closed: this._closed, target: this.targetId })
+    }
+  }
 }
