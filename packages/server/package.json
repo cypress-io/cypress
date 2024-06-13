@@ -83,7 +83,7 @@
     "is-html": "2.0.0",
     "jimp": "0.22.12",
     "jose": "^4.15.5",
-    "jsonlint": "1.6.3",
+    "json-parse-even-better-errors": "^3.0.2",
     "launch-editor": "2.3.0",
     "lazy-ass": "1.6.0",
     "lockfile": "1.0.4",
