@@ -4301,7 +4301,6 @@
     "./packages/server/node_modules/setprototypeof/index.js",
     "./packages/server/node_modules/string-width/index.js",
     "./packages/server/node_modules/string-width/node_modules/strip-ansi/index.js",
-    "./packages/server/node_modules/url-parse/index.js",
     "./packages/socket/lib/utils.ts",
     "./packages/socket/node_modules/engine.io-parser/lib/commons.js",
     "./packages/socket/node_modules/engine.io-parser/lib/decodePacket.js",
@@ -4355,5 +4354,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "9bbe7e1042d82796f1587b288faef54fc67c4dd823362a309081b6db54560285"
+  "deferredHash": "10d96d18d8991d1ae428a4a9b2f9118baf69effcd28bf6c176bfaea03f3972bf"
 }
