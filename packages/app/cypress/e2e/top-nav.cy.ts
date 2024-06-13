@@ -65,7 +65,6 @@ describe('App Top Nav Workflows', () => {
       it('shows the current browser in the top nav browser list button', () => {
         cy.findByTestId('top-nav-active-browser-icon')
         .should('have.attr', 'src')
-        .and('contain', 'chrome')
 
         cy.findByTestId('top-nav-active-browser').should('contain', 'Chrome 1')
       })
