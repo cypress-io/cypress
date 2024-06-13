@@ -6,7 +6,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
 
-import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
+import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from './cdp_automation'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
@@ -104,7 +104,7 @@ export interface ICriClient {
   /**
    * Unregisters callback for particular event.
    */
-  off (eventName: string, cb: (event: any) => void): void
+  off: OffFn
 }
 
 const maybeDebugCdpMessages = (cri: CDPClient) => {
@@ -202,6 +202,26 @@ export class CriClient implements ICriClient {
     private browserClient?: ICriClient,
     private onReconnectAttempt?: (retryIndex: number) => void,
   ) {}
+
+  get ws () {
+    return this.cri!._ws
+  }
+
+  get queue () {
+    return {
+      enableCommands: this.enableCommands,
+      enqueuedCommands: this.enqueuedCommands,
+      subscriptions: this.subscriptions,
+    }
+  }
+
+  get closed () {
+    return this._closed
+  }
+
+  get connected () {
+    return this._connected
+  }
 
   static async create ({
     target,
@@ -331,7 +351,30 @@ export class CriClient implements ICriClient {
     return this.reconnection
   }
 
-  async connect () {
+  private enqueueCommand <TCmd extends CdpCommand> (
+    command: TCmd,
+    params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
+    sessionId?: string,
+  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
+    return new Promise((resolve, reject) => {
+      const obj: EnqueuedCommand = {
+        command,
+        p: { resolve, reject },
+      }
+
+      if (params) {
+        obj.params = params
+      }
+
+      if (sessionId) {
+        obj.sessionId = sessionId
+      }
+
+      this.enqueuedCommands.push(obj)
+    })
+  }
+
+  public connect = async () => {
     await this.cri?.close()
 
     debug('connecting %o', { connected: this._connected, target: this.targetId })
@@ -404,34 +447,11 @@ export class CriClient implements ICriClient {
     }
   }
 
-  private enqueueCommand <TCmd extends CdpCommand> (
-    command: TCmd,
-    params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
-    sessionId?: string,
-  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
-    return new Promise((resolve, reject) => {
-      const obj: EnqueuedCommand = {
-        command,
-        p: { resolve, reject },
-      }
-
-      if (params) {
-        obj.params = params
-      }
-
-      if (sessionId) {
-        obj.sessionId = sessionId
-      }
-
-      this.enqueuedCommands.push(obj)
-    })
-  }
-
-  public async send<TCmd extends CdpCommand> (
+  public send = async <TCmd extends CdpCommand> (
     command: TCmd,
     params?: CmdParams<TCmd>,
     sessionId?: string,
-  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
+  ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> => {
     if (this.crashed) {
       return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
     }
@@ -489,7 +509,7 @@ export class CriClient implements ICriClient {
     return this.enqueueCommand(command, params, sessionId)
   }
 
-  public on<T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) {
+  public on = <T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => {
     this.subscriptions.push({ eventName, cb })
     debug('registering CDP on event %o', { eventName })
 
@@ -500,7 +520,7 @@ export class CriClient implements ICriClient {
     }
   }
 
-  off<T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) {
+  public off = <T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => {
     this.subscriptions.splice(this.subscriptions.findIndex((sub) => {
       return sub.eventName === eventName && sub.cb === cb
     }), 1)
@@ -513,27 +533,7 @@ export class CriClient implements ICriClient {
     }
   }
 
-  get ws () {
-    return this.cri!._ws
-  }
-
-  get queue () {
-    return {
-      enableCommands: this.enableCommands,
-      enqueuedCommands: this.enqueuedCommands,
-      subscriptions: this.subscriptions,
-    }
-  }
-
-  get closed () {
-    return this._closed
-  }
-
-  get connected () {
-    return this._connected
-  }
-
-  async close () {
+  public close = async () => {
     if (this._closed) {
       debug('not closing, cri client is already closed %o', { closed: this._closed, target: this.targetId })
 
