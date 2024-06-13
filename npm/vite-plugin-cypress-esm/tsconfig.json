@@ -46,7 +46,9 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true,
     /** Allows us to strip internal types sourced from webpack */
-    "stripInternal": true
+    "stripInternal": true,
+    /* skips checking declaration types. we skip this because we have multiple versions of vite installed as dev dependencies */
+    "skipLibCheck": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "*.js"]
