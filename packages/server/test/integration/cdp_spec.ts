@@ -6,7 +6,7 @@ import WebSocket from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
 import { CriClient } from '../../lib/browsers/cri-client'
 import { expect, nock } from '../spec_helper'
-
+import pDefer from 'p-defer'
 import sinon from 'sinon'
 
 // import Bluebird from 'bluebird'
@@ -34,6 +34,8 @@ describe('CDP Clients', () => {
   let criClient: CriClient
   let messages: object[]
   let onMessage: sinon.SinonStub
+  let messageResponse: ReturnType<typeof pDefer>
+  let neverAck: boolean
 
   const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
     return new Promise((resolve, reject) => {
@@ -48,11 +50,15 @@ describe('CDP Clients', () => {
 
         // eslint-disable-next-line no-console
         ws.on('error', console.error)
-        ws.on('message', (data) => {
+        ws.on('message', async (data) => {
           const msg = JSON.parse(data.toString())
 
           messages.push(msg)
           onMessage(msg)
+
+          if (neverAck) {
+            return
+          }
 
           // ACK back if we have a msg.id
           if (msg.id) {
@@ -60,6 +66,10 @@ describe('CDP Clients', () => {
               id: msg.id,
               result: {},
             }))
+          } else if (messageResponse) {
+            const message = await messageResponse.promise
+
+            ws.send(JSON.stringify(message))
           }
         })
       })
@@ -93,6 +103,7 @@ describe('CDP Clients', () => {
   }
 
   beforeEach(async () => {
+    messageResponse = undefined
     messages = []
 
     onMessage = sinon.stub()
@@ -165,6 +176,81 @@ describe('CDP Clients', () => {
       })
     })
 
+    it('continuously re-sends commands that fail due to disconnect, until target is closed', async () => {
+      /**
+       * This test is specifically for the case when a CRIClient websocket trampolines, and
+       * enqueued messages fail due to a disconnected websocket.
+       *
+       * That happens if a command fails due to an in-flight disconnect, and then fails again
+       * after being enqueued due to an in-flight disconnect.
+       *
+       * The steps taken here to reproduce:
+       * 1. Connect to the websocket
+       * 2. Send the command, and wait for it to be received by the websocket (but not responded to)
+       * 3. Disconnect the websocket
+       * 4. Allow the websocket to be reconnected after 3 tries, and wait for successful reconnection
+       * 5. Wait for the command to be re-sent and received by the websocket (but not responded to)
+       * 6. Disconnect the websocket.
+       * 7. Allow the websocket to be reconnected after 3 tries, and wait for successful reconnection
+       * 8. Wait for the command to be resent, received, and responded to successfully.
+       */
+      neverAck = true
+      const command: CDPCommands = {
+        command: 'DOM.getDocument',
+        params: { depth: -1 },
+      }
+      let reconnectPromise = pDefer()
+      let commandSent = pDefer()
+      const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
+        wsSrv = await startWsServer((ws) => {
+        })
+      })
+
+      const onReconnect = sinon.stub().callsFake(() => {
+        reconnectPromise.resolve()
+      })
+
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: (e) => commandSent.reject(e),
+        onReconnect,
+      })
+
+      criClient.onReconnectAttempt = reconnectOnThirdTry
+
+      onMessage = sinon.stub().callsFake(() => {
+        commandSent.resolve()
+      })
+
+      const cmdExecution = criClient.send(command.command, command.params)
+
+      await commandSent.promise
+      await Promise.all([clientDisconnected(), closeWsServer()])
+
+      commandSent = pDefer()
+      onMessage.resetHistory()
+
+      reconnectOnThirdTry.resetHistory()
+
+      await reconnectPromise.promise
+      await commandSent.promise
+      await Promise.all([clientDisconnected(), closeWsServer()])
+
+      reconnectPromise = pDefer()
+
+      // set up response value
+      messageResponse = pDefer()
+      messageResponse.resolve({ response: true })
+      neverAck = false
+
+      // wait for reconnection to server
+      await reconnectPromise.promise
+
+      const res = await cmdExecution
+
+      expect(res).to.eq({ response: true })
+    })
+
     it('restores sending enqueued commands, subscriptions, and enable commands on reconnect', () => {
       const enableCommands: CDPCommands[] = [
         { command: 'Page.enable', params: {} },
@@ -225,7 +311,7 @@ describe('CDP Clients', () => {
           closeWsServer(),
         ])
 
-        // expect 6 message calls
+        // expect 5 message calls
         onMessage = sinon.stub().onCall(5).callsFake(resolve)
 
         // now enqueue these commands

@@ -98,8 +98,9 @@ describe('lib/browsers/cri-client', function () {
           'WebSocket is not open',
           // @see https://github.com/cypress-io/cypress/issues/7180
           'WebSocket is already in CLOSING or CLOSED state',
+          'WebSocket connection closed',
         ]).forEach((msg) => {
-          it(`with '${msg}'`, async function () {
+          it(`with one '${msg}' message it retries once`, async function () {
             const err = new Error(msg)
 
             send.onFirstCall().rejects(err)
@@ -110,6 +111,19 @@ describe('lib/browsers/cri-client', function () {
             await client.send('DOM.getDocument', { depth: -1 })
 
             expect(send).to.be.calledTwice
+          })
+
+          it(`with two '${msg}' message it retries twice`, async () => {
+            const err = new Error(msg)
+
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().rejects(err)
+            send.onThirdCall().resolves()
+
+            const client = await getClient()
+
+            await client.send('DOM.getDocument', { depth: -1 })
+            expect(send).to.be.called.times(3)
           })
         })
       })
