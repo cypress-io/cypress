@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## <RELEASE_VERSION>
+
+_Released <RELEASE_DATE> (PENDING)_
+
+**Features:**
+
+- `cy.type({upArrow})` and `cy.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](**https://github.com/cypress-io/cypress/issues/29665**)
+
 ## 13.11.0
 
 _Released 6/4/2024_
