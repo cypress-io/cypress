@@ -69,6 +69,7 @@ const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
 const isValidNumberInputChar = /[-+eE\d\.]/
+const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
 
 const INITIAL_MODIFIERS = {
   alt: false,
@@ -405,6 +406,8 @@ const validateTyping = (
   const isBody = $el.is('body')
   const isTextLike = $dom.isTextLike(el)
 
+  const arrowKeyChars = arrowKeysRe.exec(chars)
+
   let dateChars
   let monthChars
   let weekChars
@@ -479,6 +482,10 @@ const validateTyping = (
     const dateExists = (date) => {
       // dayjs rounds up dates that don't exist to valid dates
       return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
+    }
+
+    if (_.isString(chars) && arrowKeyChars) {
+      return {}
     }
 
     if (
