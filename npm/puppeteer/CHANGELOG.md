@@ -1,3 +1,10 @@
+# [@cypress/puppeteer-v0.1.5](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.4...@cypress/puppeteer-v0.1.5) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
 # [@cypress/puppeteer-v0.1.4](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.3...@cypress/puppeteer-v0.1.4) (2024-04-02)
 
 # [@cypress/puppeteer-v0.1.3](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.2...@cypress/puppeteer-v0.1.3) (2024-02-20)

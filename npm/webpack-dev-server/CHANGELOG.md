@@ -1,3 +1,15 @@
+# [@cypress/webpack-dev-server-v3.10.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.9.0...@cypress/webpack-dev-server-v3.10.0) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+
+### Features
+
+* add CT support for angular 18 ([#29584](https://github.com/cypress-io/cypress/issues/29584)) ([cceea03](https://github.com/cypress-io/cypress/commit/cceea0386447bbf8ada7dab22e7159a78060bcca))
+
 # [@cypress/webpack-dev-server-v3.9.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.8.0...@cypress/webpack-dev-server-v3.9.0) (2024-05-30)
 
 
