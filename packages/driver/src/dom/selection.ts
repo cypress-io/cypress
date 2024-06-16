@@ -339,7 +339,6 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
     const validInputTypes = [
       'number',
       'datetime-local',
-      'datetime',
       'date',
       'time',
       'week',
