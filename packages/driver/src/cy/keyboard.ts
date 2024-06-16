@@ -508,6 +508,10 @@ const validateTyping = (
   if (isMonth) {
     monthChars = monthRe.exec(chars)
 
+    if (_.isString(chars) && arrowKeyChars) {
+      return {}
+    }
+
     if (_.isString(chars) && monthChars) {
       skipCheckUntilIndex = _getEndIndex(chars, monthChars[0])
 
@@ -522,6 +526,10 @@ const validateTyping = (
 
   if (isWeek) {
     weekChars = weekRe.exec(chars)
+
+    if (_.isString(chars) && arrowKeyChars) {
+      return {}
+    }
 
     if (_.isString(chars) && weekChars) {
       skipCheckUntilIndex = _getEndIndex(chars, weekChars[0])
@@ -538,6 +546,10 @@ const validateTyping = (
   if (isTime) {
     timeChars = timeRe.exec(chars)
 
+    if (_.isString(chars) && arrowKeyChars) {
+      return {}
+    }
+
     if (_.isString(chars) && timeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, timeChars[0])
 
@@ -552,6 +564,10 @@ const validateTyping = (
 
   if (isDateTime) {
     dateTimeChars = dateTimeRe.exec(chars)
+
+    if (_.isString(chars) && arrowKeyChars) {
+      return {}
+    }
 
     if (_.isString(chars) && dateTimeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, dateTimeChars[0])
