@@ -5,8 +5,7 @@ _Released 6/18/2024 (PENDING)_
 
 **Features:**
 
-- `cy.type({upArrow})` and `cy.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
--  Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+- Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
 
 **Bugfixes:**
 
@@ -15,7 +14,7 @@ _Released 6/18/2024 (PENDING)_
 - When capture protocol script fails verification, an appropriate error is now displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
 - Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
 
-**Misc:**
+**Misc:** 
 
 - Report afterSpec durations to Cloud API when running in record mode with Test Replay enabled. Addressed in [#29500](https://github.com/cypress-io/cypress/pull/29500).
 
@@ -42,11 +41,7 @@ _Released 6/4/2024_
 
 - Fixed a situation where the Launchpad would hang if the project config had not been loaded when the Launchpad first queries the current project. Fixes [#29486](https://github.com/cypress-io/cypress/issues/29486).
 - Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
-- Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
 
-**Dependency Updates:**
-
-- Updated typescript from `4.7.4` to `5.3.3`. Addressed in [#29568](https://github.com/cypress-io/cypress/pull/29568).
 
 **Misc:**
 
