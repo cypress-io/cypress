@@ -117,7 +117,7 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
 
-const elHasNoEffectiveWidthOrHeight = ($el) => {
+const elHasNoEffectiveWidthOrHeight = ($el, parent = false) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
@@ -137,7 +137,8 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   const height = elOffsetHeight($el)
   const overflowHidden = elHasOverflowHidden($el)
 
-  return isZeroLengthAndTransformNone(width, height, transform) ||
+  return ((parent ? elOffsetWidth($el) <= 0 : false)
+  && isZeroLengthAndTransformNone(width, height, transform)) ||
   isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
   (el.getClientRects().length <= 0)
 }
@@ -370,7 +371,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
+  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent, true)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
