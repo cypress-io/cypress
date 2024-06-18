@@ -40,7 +40,7 @@ const isVisible = (el: Element) => {
   return el.checkVisibility(optionsObject)//!isHidden(el, 'isVisible()')
 }
 
-const checkIsOptionVisible = (el, recurse?) => {
+const checkIsOptionVisible = (el) => {
   // an option is considered visible if its parent select is visible
   if (isOption(el) || isOptgroup(el)) {
     // if its parent select is visible, then it's not hidden
