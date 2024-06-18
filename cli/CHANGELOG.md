@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.12.1
+
+_Released 7/2/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Replaced json-lint with json-parse-even-better-errors. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
+
 ## 13.12.0
 
 _Released 6/18/2024_
@@ -22,7 +30,6 @@ _Released 6/18/2024_
 **Dependency Updates:**
 
 - Updated firefox-profile from `4.3.1` to `4.6.0`. Addressed in [#29662](https://github.com/cypress-io/cypress/pull/29662).
-- Replaced json-lint with json-parse-even-better-errors. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated typescript from `4.7.4` to `5.3.3`. Addressed in [#29568](https://github.com/cypress-io/cypress/pull/29568).
 - Updated url-parse from `1.5.9` to `1.5.10`. Addressed in [#29650](https://github.com/cypress-io/cypress/pull/29650).
 
