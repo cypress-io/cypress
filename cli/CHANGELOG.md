@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.12.1
+
+_Released 7/2/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated tmp from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
+
 ## 13.12.0
 
 _Released 6/18/2024_
