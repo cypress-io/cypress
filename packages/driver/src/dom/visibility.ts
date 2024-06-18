@@ -10,12 +10,54 @@ const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstPare
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
-
-const isVisible = (el) => {
-  return !isHidden(el, 'isVisible()')
+const { wrap } = $jquery
+let optionsObject = {
+  checkVisibilityCSS: true,
+  checkOpacity: true,
+  opacityPropert: true,
+  contentVisibilityAuto: true,
 }
 
-const { wrap } = $jquery
+const isVisible = (el: Element) => {
+  ensureEl(el, 'isVisible()')
+
+  const striclyHidden = isStrictlyHidden(el)
+
+  if (striclyHidden) {
+    return false
+  }
+
+  const optionIsVisible = checkIsOptionVisible(el)
+
+  if (optionIsVisible === true) {
+    return true
+  }
+
+  if (optionIsVisible > 1) {
+    return false
+  }
+
+  return el.checkVisibility(optionsObject)//!isHidden(el, 'isVisible()')
+}
+
+const checkIsOptionVisible = (el, recurse?) => {
+  // an option is considered visible if its parent select is visible
+  if (isOption(el) || isOptgroup(el)) {
+    // if its parent select is visible, then it's not hidden
+    const $select = getFirstParentWithTagName(el, 'select')
+
+    if ($select && $select.length) {
+      // if the select is hidden, the options in it are not visible too
+      if ($select.checkVisibility(optionsObject) === false) {
+        return 1 //this signal not visible
+      }
+    }
+
+    return true //this signal visible
+  }
+
+  return 0 //this signal not option element
+}
 
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
