@@ -1,20 +1,37 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.0
+## 13.13.0
 
-_Released 6/18/2024 (PENDING)_
+_Released 7/02/2024 (PENDING)_
 
 **Features:**
 
-- Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
 - Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
+
+## 13.12.0
+
+_Released 6/18/2024_
+
+**Features:**
+
+- Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
 
 **Bugfixes:**
 
+- We now trigger `input` and `change` events when typing `{upArrow}` and `{downArrow}` via `.type()` on `input[type=number]` elements. Fixes [#29611](https://github.com/cypress-io/cypress/issues/29611)
+- Fixed an issue where auto scrolling the reporter would sometimes be disabled without the user's intent. Fixes [#25084](https://github.com/cypress-io/cypress/issues/25084).
 - Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
+- When capture protocol script fails verification, an appropriate error is now displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
+- Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
+
+**Misc:** 
+
+- Report afterSpec durations to Cloud API when running in record mode with Test Replay enabled. Addressed in [#29500](https://github.com/cypress-io/cypress/pull/29500).
 
 **Dependency Updates:**
 
+- Updated firefox-profile from `4.3.1` to `4.6.0`. Addressed in [#29662](https://github.com/cypress-io/cypress/pull/29662).
 - Updated typescript from `4.7.4` to `5.3.3`. Addressed in [#29568](https://github.com/cypress-io/cypress/pull/29568).
+- Updated url-parse from `1.5.9` to `1.5.10`. Addressed in [#29650](https://github.com/cypress-io/cypress/pull/29650).
 
 ## 13.11.0
 
