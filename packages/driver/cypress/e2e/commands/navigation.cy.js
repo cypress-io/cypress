@@ -97,13 +97,15 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('removes listeners', () => {
+      cy.log(Cypress.browser)
+      const unloadEvent = Cypress.browser.family === 'chromium' ? 'pagehide' : 'unload'
       const win = cy.state('window')
 
       const rel = cy.stub(win, 'removeEventListener')
 
       cy.reload().then(() => {
         expect(rel).to.be.calledWith('beforeunload')
-        expect(rel).to.be.calledWith('unload')
+        expect(rel).to.be.calledWith(unloadEvent)
       })
     })
 
@@ -411,8 +413,10 @@ describe('src/cy/commands/navigation', () => {
         const rel = cy.stub(win, 'removeEventListener')
 
         cy.go('back').then(() => {
+          const unloadEvent = cy.browser.family === 'chromium' ? 'pagehide' : 'unload'
+
           expect(rel).to.be.calledWith('beforeunload')
-          expect(rel).to.be.calledWith('unload')
+          expect(rel).to.be.calledWith(unloadEvent)
         })
       })
     })

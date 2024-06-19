@@ -30,6 +30,8 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
+        - 'ignore-chrom-prefs'
+        - 'publish-binary'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,7 +42,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'bump-electron-27.3.10', << pipeline.git.branch >> ]
+    - equal: [ 'ignore-chrom-prefs', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -51,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'bump-electron-27.3.10', << pipeline.git.branch >> ]
+    - equal: [ 'ignore-chrom-prefs', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -74,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_internal_browser_images', << pipeline.git.branch >> ]
+    - equal: [ 'feat/support_next_14', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -89,7 +91,16 @@ executors:
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-
+  
+  kitchensink-executor:
+    docker:
+      - image: cypress/browsers-internal:node18.20.2-chrome124-ff125
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+  
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -141,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "bump-electron-27.3.10" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ignore-chrom-prefs" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1716,6 +1727,7 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1723,6 +1735,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1730,6 +1743,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1737,6 +1751,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
+    resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1811,6 +1826,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
       percy:
         type: boolean
         default: false
@@ -1844,6 +1862,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
+    resource_class: medium+
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -1851,6 +1870,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1859,6 +1879,7 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1873,7 +1894,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: large
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1896,6 +1917,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 3
     steps:
       - restore_cached_workspace
@@ -1921,6 +1943,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
+    resource_class: medium+
     parallelism: 2
     steps:
       - restore_cached_workspace
@@ -2191,7 +2214,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2290,6 +2313,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -2863,6 +2887,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3198,6 +3223,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        executor: kitchensink-executor
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
@@ -3426,7 +3452,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
@@ -3440,7 +3466,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build
@@ -3448,7 +3474,7 @@ windows-workflow: &windows-workflow
     - run-launchpad-integration-tests-chrome:
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
-        resource_class: windows.xlarge
+        resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
         requires:
           - windows-build

@@ -216,7 +216,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^2.0.0 || ^3.0.0 || ^4.0.0, found 2.0.0-beta.70')
+    .should('contain.text', 'vite. Expected ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0, found 2.0.0-beta.70')
     .should('contain.text', 'react. Expected ^16.0.0 || ^17.0.0 || ^18.0.0, found 15.6.2.')
     .should('contain.text', 'react-dom. Expected ^16.0.0 || ^17.0.0 || ^18.0.0 but dependency was not found.')
 
@@ -258,8 +258,8 @@ describe('component testing dependency warnings', () => {
   })
 
   it('does not show warning for project that does not require bundler to be installed', () => {
-    cy.scaffoldProject('next-12')
-    cy.openProject('next-12', ['--component'])
+    cy.scaffoldProject('next-14')
+    cy.openProject('next-14', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
