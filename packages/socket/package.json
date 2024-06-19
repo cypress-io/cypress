@@ -19,7 +19,7 @@
     "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
     "flatted": "3.2.9",
-    "socket.io": "4.0.1",
+    "socket.io": "4.6.2",
     "socket.io-client": "4.0.1",
     "uuid": "8.3.2"
   },
