@@ -223,7 +223,6 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
 }
 
 const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') => {
-  // ensureEl(el, methodName)
   if (ifNoElementReturnFalse(el, methodName) && el === undefined) {
     return false
   }
@@ -234,54 +233,53 @@ const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') 
     return false // is visible
   }
 
-  //console.log(' el '+el)
-  if ($el) {
-    if (ifNoElementReturnFalse($el, methodName) && $el === undefined) {
-      return false
-    }
-
-    const el2 = getParent($el)
-    let $el2 = $jquery.wrap(el2)
-
-    //console.log('css '+$el2.css('position'))
-    if ($el2.css('position') === 'absolute') {
-      return false
-    }
-
-    if (elHasOverflowAuto($el2)) {
-      return false
-    }
-
-    if (elHasOverflowHidden($el2)) {
-      // console.log(' overflow')
-      //console.log($el2.height())
-      if (elHasNoEffectiveWidthOrHeight($el2)) {
-        return true
-      }
-
-      return false
-    }
-
-    if ($el2.prop('tagName') === 'BODY') {
-      return false
-    }
-
-    return isBehindAncestors($el2)
+  if (ifNoElementReturnFalse($el, methodName) && $el === undefined) {
+    return false
   }
 
-  return false
-  // if(elHasVisibilityHidden(el)){
-  //   console.log('got hidden')
-  // }
-  //console.log(el)
-  //const hasParentAbsolut = getFirstAbsolutePositionParent(el)
-  // if (elOrAncestorIsFixedOrSticky($el)) {
-  //   return elIsNotElementFromPoint($el)
-  // }
-  // const hasAbsolute=elHasPositionAbsolute($el)
-  // console.log('hasParentAbsolutStart '+ hasAbsolute)
-  // return hasAbsolute
+  if (elHasPositionAbsolute($el)) {
+    return false
+  }
+
+  const el2 = getParent($el)
+  let $el2 = $jquery.wrap(el2)
+
+  if (elHasPointerEventsNone($el2)) { //pointer-events: none
+    return true
+  }
+
+  if (elHasPositionAbsolute($el2) || elHasOverflowAuto($el2) || elHasPositionFixed($el2)) {
+    return false
+  }
+
+  if (elHasOverflowHidden($el2)) {
+    if (elHasNoEffectiveWidthOrHeight($el2)) {
+      return true
+    }
+
+    return false
+  }
+
+  if ($el2.prop('tagName') === 'BODY') {
+    return false
+  }
+
+  return isBehindAncestors($el2, methodName)
 }
+
+// return false
+// if(elHasVisibilityHidden(el)){
+//   console.log('got hidden')
+// }
+//console.log(el)
+//const hasParentAbsolut = getFirstAbsolutePositionParent(el)
+// if (elOrAncestorIsFixedOrSticky($el)) {
+//   return elIsNotElementFromPoint($el)
+// }
+// const hasAbsolute=elHasPositionAbsolute($el)
+// console.log('hasParentAbsolutStart '+ hasAbsolute)
+// return hasAbsolute
+// }
 
 const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
   contentVisibilityAuto: true }) => {
@@ -389,6 +387,12 @@ const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
   return cssOverflow.includes('hidden')
+}
+const elHasPointerEventsNone = ($el) => {
+  return $el.css('pointer-events') === 'none'
+}
+const elHasPositionFixed = ($el) => {
+  return $el.css('position') === 'fixed'
 }
 
 const elHasPositionRelative = ($el) => {
