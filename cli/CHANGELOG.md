@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.12.1
+
+_Released 7/2/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
+
 ## 13.12.0
 
 _Released 6/18/2024_
