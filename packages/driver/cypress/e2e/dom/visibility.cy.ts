@@ -791,6 +791,9 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is visible if position: fixed and parent has pointer-events: none', function () {
         expect(this.$parentPointerEventsNone.find('span')).to.be.visible
+      })
+
+      it('is not hidden if position: fixed and parent has pointer-events: none', function () {
         expect(this.$parentPointerEventsNone.find('span')).to.not.be.hidden
       })
 
