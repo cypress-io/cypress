@@ -60,31 +60,38 @@ const isVisible = (el) => {
     }
 
     return true
-  }else{
-    // if ($transform.detectVisibility(el) === 'visible') {
-      // return true
+  }
+
+  // if ($transform.detectVisibility(el) === 'visible') {
+  // return true
   //   }
   return false
-  }
+
   //!isHidden(el, 'isVisible()')
 }
 //TODO real implementation check here
 const elIsOutsideOfView = (el) => {
   let rect = el.getBoundingClientRect()
-  let $el=$jquery.wrap(el)
+  let $el = $jquery.wrap(el)
+
   if (ifNoElementReturnFalse($el, 'elIsOutsideOfView()') && $el === undefined) {
     return false
   }
+
   if ($transform.detectVisibility($el) === 'visible') {
-    if(elHasPositionFixed($el)){
+    if (elHasPositionFixed($el)) {
       if (rect.left < 0 || rect.right < 0) return true
-      if(rect.y+rect.height<0) return true
+
+      if (rect.y + rect.height < 0) return true
     }
+
     return false
   }
+
   if ($transform.detectVisibility($el) === 'transformed') {
     return false
   }
+
   return false
 }
 
@@ -252,7 +259,7 @@ const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') 
   const el2 = getParent($el)
   let $el2 = $jquery.wrap(el2)
 
-  if (elHasPositionFixed($el)&&elHasPointerEventsNone($el2)) { //pointer-events: none
+  if (elHasPositionFixed($el) && elHasPointerEventsNone($el2)) { //pointer-events: none
     return true
   }
 
@@ -264,6 +271,7 @@ const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') 
     if (elHasNoEffectiveWidthOrHeight($el2)) {
       return true
     }
+
     return false
   }
 
@@ -386,6 +394,7 @@ const elHasDisplayInline = ($el) => {
 
 const elHasOverflowAuto = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
+
   return cssOverflow.includes('auto')
 }
 
