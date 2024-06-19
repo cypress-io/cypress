@@ -1,7 +1,7 @@
 {
   "name": "@cypress/angular-signals",
   "version": "0.0.0-development",
-  "description": "Test Angular Components using Cypress",
+  "description": "Test Angular Components using Signals with Cypress",
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
