@@ -7,6 +7,10 @@ _Released 7/02/2024 (PENDING)_
 
 - Fixed an issue where Chrome launch instances would not recreate the browser CRI client correctly after recovering from an unexpected browser closure. Fixes [#27657](https://github.com/cypress-io/cypress/issues/27657). Fixed in [#29663](https://github.com/cypress-io/cypress/pull/29663).
 
+**Dependency Updates:**
+
+- Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
+
 ## 13.12.0
 
 _Released 6/18/2024_
