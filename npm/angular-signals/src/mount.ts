@@ -1,14 +1,14 @@
-import 'zone.js'
+// import 'zone.js'
 
 /**
  * @hack fixes "Mocha has already been patched with Zone" error.
  */
 // @ts-ignore
 window.Mocha['__zone_patch__'] = false
-import 'zone.js/testing'
+// import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, signal } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, signal, ɵprovideZonelessChangeDetection } from '@angular/core'
 import { toObservable } from '@angular/core/rxjs-interop'
 import {
   ComponentFixture,
@@ -160,6 +160,9 @@ function bootstrapModule<T> (
     useClass: CypressAngularErrorHandler,
   })
 
+  // test zoneless
+  testModuleMetaData.providers.push(ɵprovideZonelessChangeDetection())
+
   // check if the component is a standalone component
   if ((component as any).ɵcmp?.standalone) {
     testModuleMetaData.imports.push(component)
@@ -251,7 +254,7 @@ function setupFixture<T> (
   setupComponent(config, fixture)
 
   fixture.whenStable().then(() => {
-    fixture.autoDetectChanges(config.autoDetectChanges ?? true)
+    // fixture.autoDetectChanges(config.autoDetectChanges ?? true)
   })
 
   return fixture

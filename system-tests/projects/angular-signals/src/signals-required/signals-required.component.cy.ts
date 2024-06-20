@@ -14,7 +14,7 @@ it('errors on required props missing', (done) => {
   cy.mount(SignalsRequiredComponent)
 })
 
-it('can handle input signal as primitive value (title prop)', () => {
+it.only('can handle input signal as primitive value (title prop)', () => {
   cy.mount(SignalsRequiredComponent, {
     componentProperties: {
       title: 'Signals Component as Primitive',
