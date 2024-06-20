@@ -7,6 +7,10 @@ _Released 7/02/2024 (PENDING)_
 
 - Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
+**Dependency Updates:**
+
+- Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
+
 ## 13.12.0
 
 _Released 6/18/2024_
