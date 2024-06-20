@@ -351,11 +351,22 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
     if (check) {
       if (up) {
         if (typeof el.stepUp === 'function') {
+          const changeEvent = new Event('change')
+
+          const inputEvent = new Event('input')
+
           el.stepUp()
+          el.dispatchEvent(inputEvent)
+          el.dispatchEvent(changeEvent)
         }
       } else {
         if (typeof el.stepDown === 'function') {
+          const changeEvent = new Event('change')
+          const inputEvent = new Event('input')
+
           el.stepDown()
+          el.dispatchEvent(inputEvent)
+          el.dispatchEvent(changeEvent)
         }
       }
     }
