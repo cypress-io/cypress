@@ -3,6 +3,10 @@
 
 _Released 7/2/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where Firefox 129 (Firefox Nightly) would not launch with Cypress. Fixes [#29713](https://github.com/cypress-io/cypress/issues/29713). Fixed in [#29720](https://github.com/cypress-io/cypress/pull/29720).
+
 **Dependency Updates:**
 
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
