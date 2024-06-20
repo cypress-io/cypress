@@ -24,6 +24,7 @@
     "@angular/common": ">=17.2",
     "@angular/core": ">=17.2",
     "@angular/platform-browser-dynamic": ">=17.2",
+    "rxjs": ">=7.5.0",
     "zone.js": ">=0.13.0"
   },
   "files": [

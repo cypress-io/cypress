@@ -25,6 +25,7 @@ import {
   setupHooks,
   getContainerEl,
 } from '@cypress/mount-utils'
+import type { Subscription } from 'rxjs'
 
 /**
  * Additional module configurations needed while mounting the component, like
@@ -77,6 +78,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
 }
 
 let activeFixture: ComponentFixture<any> | null = null
+let activeInternalSubscriptions: Subscription[] = []
 
 function cleanup () {
   // Not public, we need to call this to remove the last component from the DOM
@@ -89,8 +91,15 @@ function cleanup () {
     throw notSupportedError
   }
 
+  // clean up internal subscriptions if any exist. We use this for two-way data binding for
+  // signal() models
+  activeInternalSubscriptions.forEach((subscription) => {
+    subscription.unsubscribe()
+  })
+
   getTestBed().resetTestingModule()
   activeFixture = null
+  activeInternalSubscriptions = []
 }
 
 /**
@@ -323,11 +332,17 @@ function convertPropertyToSignalIfApplicable (propValue: any, componentValue: an
       })
 
       // update the model signal with the properties updates
-      toObservable(propValue, {
+      const convertedToObservable = toObservable(propValue, {
         injector,
-      }).subscribe((value) => {
-        componentValue.set(value)
       })
+
+      // push the subscription into an array to be cleaned up at the end of the test
+      // to prevent a memory leak
+      activeInternalSubscriptions.push(
+        convertedToObservable.subscribe((value) => {
+          componentValue.set(value)
+        }),
+      )
     } else {
       // it's a non signal type, set it as we only need to handle updating the model signal and emit changes on this through the output spy.
       componentValue.set(propValue)
