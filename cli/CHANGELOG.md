@@ -5,7 +5,7 @@ _Released 7/2/2024 (PENDING)_
 
 **Features:**
 
-- `cy.type({upArrow})` and `cy.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
+- `.type({upArrow})` and `.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
 
 **Dependency Updates:**
 
@@ -17,7 +17,6 @@ _Released 6/18/2024_
 
 **Features:**
 
-- `cy.type({upArrow})` and `cy.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
 - Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
 
 **Bugfixes:**
