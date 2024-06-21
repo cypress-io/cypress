@@ -1,5 +1,5 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.1
+## 13.13.0
 
 _Released 7/2/2024 (PENDING)_
 
