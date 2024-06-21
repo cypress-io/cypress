@@ -59,13 +59,13 @@
     "request-progress": "^3.0.0",
     "semver": "^7.5.3",
     "supports-color": "^8.1.1",
-    "tmp": "~0.2.1",
+    "tmp": "~0.2.3",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.13.0",
-    "@babel/preset-env": "7.13.5",
+    "@babel/cli": "7.24.5",
+    "@babel/preset-env": "7.24.5",
     "@cypress/angular": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
