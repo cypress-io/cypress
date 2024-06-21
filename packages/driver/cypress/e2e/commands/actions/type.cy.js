@@ -3164,7 +3164,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=date]', () => {
-      it('{upArrow} day by 1', () => {
+      it('{upArrow} increases day by 1', () => {
         cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
         cy.get('#date-without-value').type('{upArrow}')
         cy.get('#date-without-value').should('have.value', '2000-01-02')
