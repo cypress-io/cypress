@@ -199,6 +199,12 @@ const defaultPreferences = {
 
   'privacy.trackingprotection.enabled': false,
 
+  // CDP is deprecated in Firefox 129 and up.
+  // In order to enable CDP, we need to set
+  // remote.active-protocol=2
+  // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+  // @see https://github.com/cypress-io/cypress/issues/29713
+  'remote.active-protocols': 2,
   // Enable Remote Agent
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1544393
   'remote.enabled': true,

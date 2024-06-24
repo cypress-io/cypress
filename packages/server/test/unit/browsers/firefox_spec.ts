@@ -334,6 +334,23 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    // CDP is deprecated in Firefox 129 and up.
+    // In order to enable CDP, we need to set
+    // remote.active-protocol=2
+    // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+    // @see https://github.com/cypress-io/cypress/issues/29713
+    it('sets "remote.active-protocols"=2 to keep CDP enabled for firefox versions 129 and up', function () {
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            'remote.active-protocols': 2,
+          },
+        }), this.options)
+      })
+    })
+
     it('updates the preferences', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
