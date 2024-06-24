@@ -59,7 +59,7 @@
     "request-progress": "^3.0.0",
     "semver": "^7.5.3",
     "supports-color": "^8.1.1",
-    "tmp": "~0.2.1",
+    "tmp": "~0.2.3",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
   },
