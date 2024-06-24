@@ -53,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ignore-chrom-prefs', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update-ubuntu-publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -136,7 +136,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2023.07.1
+      image: ubuntu-2004:2024.05.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -152,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ignore-chrom-prefs" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/update-ubuntu-publish-binary" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1718,7 +1718,7 @@ jobs:
       PLATFORM: linux
     machine:
       # using `machine` gives us a Linux VM that can run Docker
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2024.05.1
       docker_layer_caching: true
     resource_class: medium
     steps:
