@@ -12,8 +12,8 @@ const fixedOrAbsoluteRe = /(fixed|absolute)/
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
 const { wrap } = $jquery
 let optionsObject = {
-  checkVisibilityCSS: true,
   checkOpacity: true,
+  checkVisibilityCSS: true,
   opacityPropert: true,
   contentVisibilityAuto: true,
 }
@@ -94,6 +94,8 @@ const isVisible = (el) => {
     return false
   }
 
+  // console.log("in browser visibility")
+  // console.log(el.checkVisibility(optionsObject))
   if (el.checkVisibility(optionsObject) === true) {
     const isOutsideOfView = elIsOutsideOfView(el)
 
@@ -315,30 +317,34 @@ const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') 
   }
 
   const el2 = getParent($el)
-  let $el2 = $jquery.wrap(el2)
+  let $parent = $jquery.wrap(el2)
 
-  if (elHasPositionFixed($el) && elHasPointerEventsNone($el2)) { //pointer-events: none
-    return isBehindOtherElement($el, $el2)//isBehindOtherElement($jquery.unwrap($el)[0],$jquery.unwrap($el2)[0])
+  if (elHasPositionFixed($el) && elHasPointerEventsNone($parent)) { //pointer-events: none
+    return isBehindOtherElement($el, $parent)//isBehindOtherElement($jquery.unwrap($el)[0],$jquery.unwrap($el2)[0])
     //
   }
 
-  if (elHasPositionAbsolute($el2) || elHasOverflowAuto($el2) || elHasPositionFixed($el2)) {
+  if (elHasPositionFixed($parent)) {
     return false
   }
 
-  if (elHasOverflowHidden($el2)) {
-    if (elHasNoEffectiveWidthOrHeight($el2)) {
+  if (elHasPositionAbsolute($parent) || elHasOverflowAuto($parent)) {
+    return false
+  }
+
+  if (elHasOverflowHidden($parent)) {
+    if (elHasNoEffectiveWidthOrHeight($parent)) {
       return true
     }
 
     return false
   }
 
-  if ($el2.prop('tagName') === 'BODY') {
+  if ($parent.prop('tagName') === 'BODY') {
     return false
   }
 
-  return isBehindAncestors($el2, methodName)
+  return isBehindAncestors($parent, methodName)
 }
 
 // return false
