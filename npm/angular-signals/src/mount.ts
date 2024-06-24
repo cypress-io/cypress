@@ -31,7 +31,6 @@ import type { Subscription } from 'rxjs'
  * Additional module configurations needed while mounting the component, like
  * providers, declarations, imports and even component @Inputs()
  *
- *
  * @interface MountConfig
  * @see https://angular.io/api/core/testing/TestModuleMetadata
  */
@@ -267,7 +266,8 @@ function setupFixture<T> (
 }
 
 // Best known way to currently detect whether or not a function is a signal is if the signal symbol exists.
-// From there, we can take our best guess based on what exists on the object itself
+// From there, we can take our best guess based on what exists on the object itself.
+// @see https://github.com/cypress-io/cypress/issues/29731.
 function isSignal (prop: any): boolean {
   try {
     const symbol = Object.getOwnPropertySymbols(prop).find((symbol) => symbol.toString() === 'Symbol(SIGNAL)')
@@ -280,17 +280,20 @@ function isSignal (prop: any): boolean {
   }
 }
 
-// currently not a great way to detect if a function is an InputSignal. When we discover a better way to detect a signal we should incorporate it here.
+// currently not a great way to detect if a function is an InputSignal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
 function isInputSignal (prop: any): boolean {
   return isSignal(prop) && typeof prop === 'function' && prop['name'] === 'inputValueFn'
 }
 
-// currently not a great way to detect if a function is a Model Signal. Need to improve this.
+// currently not a great way to detect if a function is a Model Signal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
 function isModelSignal (prop: any): boolean {
   return isSignal(prop) && isWritableSignal(prop) && typeof prop.subscribe === 'function'
 }
 
-// currently not a great way to detect if a function is a Writable Signal. Need to improve this.
+// currently not a great way to detect if a function is a Writable Signal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
 function isWritableSignal (prop: any): boolean {
   return isSignal(prop) && typeof prop === 'function' && typeof prop.set === 'function'
 }

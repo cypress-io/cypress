@@ -25,9 +25,10 @@ it('can handle input signal as primitive value (title prop)', () => {
   cy.get('[data-cy="signals-required-component-title-display"]').should('contain.text', 'Signals Component as Primitive')
 })
 
-// FIXME: we currently need to allow this as there isn't a great way to set input signals in a component due to how input signals are instantiated
-// This also should lead to a better testing experience where the input signal can actually be asserted, though not possible within the constaints
-// of the regular angular framework
+// FIXME: we currently need to allow this as there isn't a great way to set input signals in a component due to how input signals are instantiated.
+// This also should lead to a better testing experience where the input signal can actually be asserted, though not possible within the constraints
+// of the regular angular framework.
+// @see https://github.com/cypress-io/cypress/issues/29732.
 it('also allows writable signal as input signal', () => {
   cy.mount(SignalsRequiredComponent, {
     componentProperties: {
