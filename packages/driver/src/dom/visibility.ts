@@ -18,58 +18,58 @@ let optionsObject = {
   contentVisibilityAuto: true,
 }
 
-function isBehindOtherElement (element, parent) {
-// console.log()
-// console.log(parent)
-  // const boundingRect = element.getBoundingClientRect()
-  // // adjust coordinates to get more accurate results
-  // const left = boundingRect.left + 1
-  // const right = boundingRect.right - 1
-  // const top = boundingRect.top + 1
-  // const bottom = boundingRect.bottom - 1
-  // let result1,result2, result3,result4
+// function isBehindOtherElement (element, parent) {
+// // console.log()
+// // console.log(parent)
+//   // const boundingRect = element.getBoundingClientRect()
+//   // // adjust coordinates to get more accurate results
+//   // const left = boundingRect.left + 1
+//   // const right = boundingRect.right - 1
+//   // const top = boundingRect.top + 1
+//   // const bottom = boundingRect.bottom - 1
+//   // let result1,result2, result3,result4
 
-  // console.log('is visible old '+isVisibleOld(element))
-  return isVisibleOld(element)
-  // console.log('left '+left)
-  // console.log('right '+right)
-  //   console.log('top '+top)
-  //   // console.log('bottom '+bottom)
-  //   // console.log(jqueryEl.offset().top)
-  //   let runnerMainWindow=document.getElementById('unified-runner')
-  //   let elOffsetWidth: number| undefined=runnerMainWindow?.offsetWidth
-  //   if(elOffsetWidth!==undefined){
-  //   let  offsetWidth=elOffsetWidth
-  //   console.log(' o '+offsetWidth)
-  //   // console.log('from left '+document.elementsFromPoint(left+ offsetWidth, top))
-  //   let elementsFromPoint=document.elementsFromPoint(left+ offsetWidth, top)
-  //   // console.log()
-  //   for(let elFromPoint of elementsFromPoint){
-  // console.log(elFromPoint)
-  //   }
-  // console.log(' no of siblings ')
-  //lastChild
-  // !!
-  // console.log(getParent(parent))
-  // if(element.siblings().length>0)
-  //   {return true
+//   // console.log('is visible old '+isVisibleOld(element))
+//   return isVisibleOld(element)
+//   // console.log('left '+left)
+//   // console.log('right '+right)
+//   //   console.log('top '+top)
+//   //   // console.log('bottom '+bottom)
+//   //   // console.log(jqueryEl.offset().top)
+//   //   let runnerMainWindow=document.getElementById('unified-runner')
+//   //   let elOffsetWidth: number| undefined=runnerMainWindow?.offsetWidth
+//   //   if(elOffsetWidth!==undefined){
+//   //   let  offsetWidth=elOffsetWidth
+//   //   console.log(' o '+offsetWidth)
+//   //   // console.log('from left '+document.elementsFromPoint(left+ offsetWidth, top))
+//   //   let elementsFromPoint=document.elementsFromPoint(left+ offsetWidth, top)
+//   //   // console.log()
+//   //   for(let elFromPoint of elementsFromPoint){
+//   // console.log(elFromPoint)
+//   //   }
+//   // console.log(' no of siblings ')
+//   //lastChild
+//   // !!
+//   // console.log(getParent(parent))
+//   // if(element.siblings().length>0)
+//   //   {return true
 
-  //   }
-  // }
-  //const fixed = [].filter.call(document.all, e => getComputedStyle(e).position == 'fixed');
+//   //   }
+//   // }
+//   //const fixed = [].filter.call(document.all, e => getComputedStyle(e).position == 'fixed');
 
-//console.log(fixed)
-  // if(!element.contains(document.elementFromPoint(left, top))) result1=true
-  // if(!element.contains(document.elementFromPoint(right, top))) result2=true
-  // if(!element.contains(document.elementFromPoint(left, bottom))) result3=true
-  // if(!element.contains(document.elementFromPoint(right, bottom))) result4=true
-  // console.log('res1 '+result1+ ' r2 '+result2+' r3 '+result3+ ' r4 '+result4)
-  // if(result1&&result2&&result3&&result4)
-  //   return true
-  // console.log('vis '+element.checkVisibility(optionsObject))
-  // return !element.checkVisibility(optionsObject)
-  // return false
-}
+// //console.log(fixed)
+//   // if(!element.contains(document.elementFromPoint(left, top))) result1=true
+//   // if(!element.contains(document.elementFromPoint(right, top))) result2=true
+//   // if(!element.contains(document.elementFromPoint(left, bottom))) result3=true
+//   // if(!element.contains(document.elementFromPoint(right, bottom))) result4=true
+//   // console.log('res1 '+result1+ ' r2 '+result2+' r3 '+result3+ ' r4 '+result4)
+//   // if(result1&&result2&&result3&&result4)
+//   //   return true
+//   // console.log('vis '+element.checkVisibility(optionsObject))
+//   // return !element.checkVisibility(optionsObject)
+//   // return false
+// }
 
 const isVisible = (el) => {
   ensureEl(el, 'isVisible()')
@@ -320,7 +320,8 @@ const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') 
   let $parent = $jquery.wrap(el2)
 
   if (elHasPositionFixed($el) && elHasPointerEventsNone($parent)) { //pointer-events: none
-    return isBehindOtherElement($el, $parent)//isBehindOtherElement($jquery.unwrap($el)[0],$jquery.unwrap($el2)[0])
+    return isVisibleOld($el)
+    //return isBehindOtherElement($el, $parent)//isBehindOtherElement($jquery.unwrap($el)[0],$jquery.unwrap($el2)[0])
     //
   }
 
