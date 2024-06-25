@@ -25,9 +25,7 @@ const isVisible = (el) => {
     return true // is visible
   }
 
-  const striclyHidden = isStrictlyHidden(el)
-
-  if (striclyHidden) {
+  if (isStrictlyHidden(el)) {
     return false
   }
 
