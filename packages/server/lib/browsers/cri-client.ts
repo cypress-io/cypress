@@ -380,6 +380,12 @@ export class CriClient implements ICriClient {
 
     debug('connecting %o', { connected: this._connected, target: this.targetId })
 
+    /**
+     * TODO: https://github.com/cypress-io/cypress/issues/29744
+     * this (`cri` / `this.cri`) symbol is referenced via closure in event listeners added in this method; this
+     * may prevent old instances of `CDPClient` from being garbage collected.
+     */
+
     const cri = this.cri = await CDP({
       host: this.host,
       port: this.port,
