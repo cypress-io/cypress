@@ -27,7 +27,7 @@ export interface AppCaptureProtocolCommon {
   beforeTest(test: Record<string, any>): Promise<void>
   preAfterTest(test: Record<string, any>, options: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
-  afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
+  afterSpec (): Promise<{ durations: Record<string, string | number | undefined> } | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
@@ -93,15 +93,7 @@ type UploadCaptureArtifactResult = {
   success: boolean
   fileSize: number | bigint
   specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
-  afterSpecDurations?: AfterSpecDurations
-}
-
-export type AfterSpecDurations = {
-  drainCDPEvents?: number
-  drainAUTEvents?: number
-  resolveBodyPromises?: number
-  closeDb?: number
-  teardownBindings?: number
+  metrics?: Record<string, string | number | undefined>
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
@@ -109,7 +101,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string }): void
-  afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
+  afterSpec (): Promise<{ durations: Record<string, string | number | undefined> } | undefined>
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | void>
 

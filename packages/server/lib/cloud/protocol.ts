@@ -14,7 +14,7 @@ import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -58,7 +58,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _protocol: AppCaptureProtocolInterface | undefined
   private _runnableId: string | undefined
   private _captureHash: string | undefined
-  private _afterSpecDurations: AfterSpecDurations & {
+  private _metrics: Record<string, string | number | undefined> & {
     afterSpecTotal: number
   } | undefined
 
@@ -132,7 +132,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   beforeSpec (spec: { instanceId: string }) {
-    this._afterSpecDurations = undefined
+    this._metrics = undefined
 
     if (!this._protocol) {
       return
@@ -178,21 +178,21 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       const ret = await this.invokeAsync('afterSpec', { isEssential: true })
-      const durations = ret?.durations
+      const metrics = ret?.durations
 
       const afterSpecTotal = (performance.now() + performance.timeOrigin) - startTime
 
-      this._afterSpecDurations = {
+      this._metrics = {
         afterSpecTotal,
-        ...(durations ? durations : {}),
+        ...(metrics ? metrics : {}),
       }
 
-      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
+      debug('Persisting after spec durations in state: %O', this._metrics)
 
       return undefined
     } catch (e) {
       // rethrow; this is try/catch so we can 'finally' ascertain duration
-      this._afterSpecDurations = {
+      this._metrics = {
         afterSpecTotal: (performance.now() + performance.timeOrigin - startTime),
       }
 
@@ -326,8 +326,8 @@ export class ProtocolManager implements ProtocolManagerShape {
         fileSize,
         success: true,
         specAccess: this._protocol.getDbMetadata(),
-        ...(this._afterSpecDurations ? {
-          afterSpecDurations: this._afterSpecDurations,
+        ...(this._metrics ? {
+          afterSpecDurations: this._metrics,
         } : {}),
       }
     } catch (e) {

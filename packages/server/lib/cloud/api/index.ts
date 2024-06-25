@@ -22,7 +22,6 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
-import type { AfterSpecDurations } from '@packages/types'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -290,7 +289,7 @@ export type ProtocolMetadata = ArtifactMetadata & {
     size: number
     offset: number
   }
-  afterSpecDurations?: AfterSpecDurations & {
+  metrics?: Record<string, string | number | undefined> & {
     afterSpecTotal: number
   }
 }
