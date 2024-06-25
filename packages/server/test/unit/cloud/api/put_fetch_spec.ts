@@ -9,9 +9,6 @@ import { NetworkError } from '../../../../lib/cloud/api/network_error'
 
 describe('cloud/api/put_fetch', () => {
   const url = 'https://some.test/url'
-  const opts = {
-    method: 'PUT',
-  }
   const jsonText = '{ "content": "json" }'
   const jsonObj = JSON.parse(jsonText)
   const nonJsonText = 'some text response'
@@ -33,7 +30,7 @@ describe('cloud/api/put_fetch', () => {
     beforeEach(() => {
       resolveVal = new Response()
       sinon.stub(resolveVal, 'url').get(() => url)
-      stubbedCrossFetch.withArgs(url, opts).resolves(resolveVal)
+      stubbedCrossFetch.resolves(resolveVal)
     })
 
     describe('when fetch resolves with a json-parseable response', () => {
@@ -44,7 +41,7 @@ describe('cloud/api/put_fetch', () => {
 
       describe('and parseJSON flag is true', () => {
         it('resolves with the parsed object', async () => {
-          const res = await fetch<{ content: string }>(url, { parseJSON: true })
+          const res = await fetch<{'content': string}>(url)
 
           expect(res).to.eq(jsonObj)
         })
@@ -52,7 +49,7 @@ describe('cloud/api/put_fetch', () => {
 
       describe('and parseJSON flag is false', () => {
         it('resolves with the response text as a string', async () => {
-          const res = await fetch<string>(url)
+          const res = await fetch(url, { parse: 'text' })
 
           expect(res).to.eq(jsonText)
         })
@@ -65,12 +62,12 @@ describe('cloud/api/put_fetch', () => {
         sinon.stub(resolveVal, 'text').resolves(nonJsonText)
       })
 
-      describe('and parseJSON flag is true', () => {
+      describe('and default parse (json) is used', () => {
         it('throws a parse error', async () => {
           let err: any
 
           try {
-            await fetch(url, { parseJSON: true })
+            await fetch(url)
           } catch (e) {
             err = e
           }
@@ -79,9 +76,9 @@ describe('cloud/api/put_fetch', () => {
         })
       })
 
-      describe('and parseJSON flag is false', () => {
+      describe('and text parse is used', () => {
         it('resolves with the response text as a string', async () => {
-          const res = await fetch<string>(url)
+          const res = await fetch(url, { parse: 'text' })
 
           expect(res).to.eq(nonJsonText)
         })
@@ -100,7 +97,7 @@ describe('cloud/api/put_fetch', () => {
         let err
 
         try {
-          await fetch(url)
+          await fetch(url, { parse: 'text' })
         } catch (e) {
           err = e
         }
@@ -121,7 +118,7 @@ describe('cloud/api/put_fetch', () => {
       let err
 
       try {
-        await fetch(url)
+        await fetch(url, { parse: 'text' })
       } catch (e) {
         err = e
       }

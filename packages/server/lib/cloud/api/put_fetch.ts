@@ -2,13 +2,38 @@ import crossFetch from 'cross-fetch'
 import { NetworkError } from './network_error'
 import { HttpError } from './http_error'
 import { ParseError } from './parse_error'
+import { agent } from '@packages/network'
 
-export async function putFetch <TReturn extends any = unknown> (input: RequestInfo | URL, init?: RequestInit & { parseJSON: boolean }): Promise<TReturn> {
+type PutInit = Omit<RequestInit, 'agent' | 'method'>
+
+export const ParseKinds = Object.freeze({
+  JSON: 'json',
+  TEXT: 'text',
+})
+
+type ParseKind = typeof ParseKinds[keyof typeof ParseKinds]
+
+type PutOptions = PutInit & {
+  parse?: ParseKind
+}
+
+export async function putFetch <
+  TReturn extends any
+> (input: RequestInfo | URL, options: PutOptions = { parse: 'json' }): Promise<TReturn> {
+  const {
+    parse,
+    ...init
+  } = options
+
   try {
-    const { parseJSON, ...initParam } = init ?? {}
-    const response = await crossFetch(input, {
-      ...initParam,
+    const response = await (crossFetch as typeof crossFetch)(input, {
+      ...(init || {}),
       method: 'PUT',
+      // cross-fetch thinks this is in the browser, so declares
+      // types based on that rather than on node-fetch which it
+      // actually uses under the hood. node-fetch supports `agent`.
+      // @ts-expect-error
+      agent,
     })
 
     if (response.status >= 400) {
@@ -18,9 +43,14 @@ export async function putFetch <TReturn extends any = unknown> (input: RequestIn
     }
 
     try {
-      const body = await (parseJSON ? response.json() : response.text())
-
-      return body as TReturn
+      switch (parse) {
+        case ParseKinds.JSON:
+          return await response.json() as TReturn
+        case ParseKinds.TEXT:
+          return await response.text() as TReturn
+        default:
+          return response.body as any
+      }
     } catch (e) {
       const parseError = new ParseError(e, e.message)
 
