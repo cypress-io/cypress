@@ -21,11 +21,7 @@ let optionsObject = {
 const isVisible = (el) => {
   ensureEl(el, 'isVisible()')
 
-  if (isBody(el) || isHTML(el)) {
-    return true // is visible
-  }
-
-  if (isStrictlyHidden(el)) {
+  if (isVisibilityVisible(el)) {
     return false
   }
 
@@ -39,27 +35,25 @@ const isVisible = (el) => {
     return false
   }
 
-  if (el.checkVisibility(optionsObject) === true) {
-    if (isHiddenByAncestors(el)) {
-      return false
-    }
-
-    return true
-  }
-
-  return false
+  return el.checkVisibility(optionsObject) && !isHiddenByAncestors(el)
 }
 
 const checkIsOptionVisible = (el) => {
   // an option is considered visible if its parent select is visible
   if (isOption(el) || isOptgroup(el)) {
+    const $el = $jquery.wrap(el)
+
+    if (elHasDisplayNone($el)) {
+      return 2
+    }
+
     // if its parent select is visible, then it's not hidden
-    const $select = getFirstParentWithTagName(el, 'select')
+    const $select = getFirstParentWithTagName($el, 'select')
 
     if ($select && $select.length) {
       // if the select is hidden, the options in it are not visible too
-      if ($select.checkVisibility(optionsObject) === false) {
-        return 1 //this signal not visible
+      if (isStrictlyHidden($select)) {
+        return 2 //this signal not visible
       }
     }
 
@@ -151,6 +145,15 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   return false
 }
 
+const isVisibilityVisible = (el) => {
+  const $el = $jquery.wrap(el)
+
+  if ($transform.detectVisibility($el) !== 'visible') {
+    return true
+  }
+
+  return false
+}
 const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
   contentVisibilityAuto: true }) => {
   ensureEl(el, methodName)

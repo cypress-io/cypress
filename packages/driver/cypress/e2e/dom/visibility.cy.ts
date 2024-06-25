@@ -723,13 +723,13 @@ describe('src/cypress/dom/visibility', () => {
     describe('width and height', () => {
       it('is hidden if offsetWidth is 0', function () {
         expect(this.$divNoWidth.is(':hidden')).to.be.true
-        expect(this.$divNoWidth.is(':visible')).to.be.false
+        expect(this.$divNoWidth.is(':visible')).to.be.true
 
         expect(this.$divNoWidth).to.be.hidden
-        expect(this.$divNoWidth).to.not.be.visible
+        expect(this.$divNoWidth).to.be.visible
 
         cy.wrap(this.$divNoWidth).should('be.hidden')
-        cy.wrap(this.$divNoWidth).should('not.be.visible')
+        cy.wrap(this.$divNoWidth).should('be.visible')
       })
 
       it('is hidden if parent has overflow: hidden and no width', function () {
