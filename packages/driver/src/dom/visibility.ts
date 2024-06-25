@@ -94,18 +94,19 @@ const isVisible = (el) => {
     return false
   }
 
-  // console.log("in browser visibility")
-  // console.log(el.checkVisibility(optionsObject))
   if (el.checkVisibility(optionsObject) === true) {
-    const isOutsideOfView = elIsOutsideOfView(el)
+    // const notVisibleBecauseOfAncestor = isBehindAncestors(el)
+    // if (notVisibleBecauseOfAncestor === true) {
+    //   return false
+    // }
 
-    if (isOutsideOfView === true) {
+    if (isHiddenByAncestors(el)) {
       return false
     }
 
-    const notVisibleBecauseOfAncestor = isBehindAncestors(el)
+    const isOutsideOfView = elIsOutsideOfView(el)
 
-    if (notVisibleBecauseOfAncestor === true) {
+    if (isOutsideOfView === true) {
       return false
     }
 
@@ -115,20 +116,20 @@ const isVisible = (el) => {
   return false
 }
 
-//Should not be needed in future
-const isVisibleOld = (el, methodName = 'isVisibleOld') => {
-  let oldOptions = {
-    checkOpacity: true, checkVisibilityCSS: false,
-    opacityPropert: false,
-    contentVisibilityAuto: false,
-  }
+// //Should not be needed in future
+// const isVisibleOld = (el, methodName = 'isVisibleOld') => {
+//   let oldOptions = {
+//     checkOpacity: true, checkVisibilityCSS: false,
+//     opacityPropert: false,
+//     contentVisibilityAuto: false,
+//   }
 
-  if (isStrictlyHidden(el, methodName, oldOptions, isHidden)) {
-    return true
-  }
+//   if (isStrictlyHidden(el, methodName, oldOptions, isHidden)) {
+//     return true
+//   }
 
-  return isHiddenByAncestors(el, methodName, oldOptions)
-}
+//   return isHiddenByAncestors(el, methodName, oldOptions)
+// }
 //TODO real implementation check here
 const elIsOutsideOfView = (el) => {
   let rect = el.getBoundingClientRect()
@@ -174,39 +175,6 @@ const checkIsOptionVisible = (el) => {
   return 0 //this signal not option element
 }
 
-// const isElOutsideOfView = function(element,percentVisible=100) {
-//   // let
-//   //   rect = el.getBoundingClientRect(),
-//   //   windowHeight = (window.innerHeight || document.documentElement.clientHeight)
-//   //   if(el.tagName==='BUTTON'){
-//   //     console.log(" top "+rect.top)
-//   //     console.log(" height "+rect.height)
-//   //     console.log(" rect.bottom "+rect.bottom)
-//   //     console.log(" windowHeight "+windowHeight)
-//   //     let resTop=Math.floor(100 - (((rect.top >= 0 ? 0 : rect.top) / +-rect.height) * 100))
-//   //     console.log('MathHeight '+resTop)
-//   //     let resHeight=Math.floor(100 - ((rect.bottom - windowHeight) / rect.height) * 100)
-//   //     console.log('MathHeight '+resHeight)
-//   //     console.log('flor ='+Math.floor((rect.bottom - windowHeight) / rect.height) )
-//   //   }
-//     if(element.offsetTop<window.innerHeight &&
-//       element.offsetTop>-element.offsetHeight
-//     && element.offsetLeft>-element.offsetWidth
-//     && element.offsetLeft<window.innerWidth){
-//      return false;
-//    } else {
-
-//      return true;
-//    }
-
-// if (
-//   // el width not in viewport
-//   el.left<0|| (el.width + el.left)<0 ||
-//   el.top<0 || el.top+el.height<0 ) {
-//   return true
-// }else return false}
-// }else return false
-// }
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
@@ -297,56 +265,50 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   return false
 }
 
-const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') => {
-  if (ifNoElementReturnFalse(el, methodName) && el === undefined) {
-    return false
-  }
+// const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') => {
+//   if (ifNoElementReturnFalse(el, methodName) && el === undefined) {
+//     return false
+//   }
 
-  const $el = $jquery.wrap(el)
+//   const $el = $jquery.wrap(el)
 
-  if (isBody(el) || isHTML(el)) {
-    return false // is visible
-  }
+//   if (isBody(el) || isHTML(el)) {
+//     return false // is visible
+//   }
 
-  if (ifNoElementReturnFalse($el, methodName) && $el === undefined) {
-    return false
-  }
+//   if (ifNoElementReturnFalse($el, methodName) && $el === undefined) {
+//     return false
+//   }
 
-  if (elHasPositionAbsolute($el)) {
-    return false
-  }
+//   if (elHasPositionAbsolute($el)) {
+//     return false
+//   }
 
-  const el2 = getParent($el)
-  let $parent = $jquery.wrap(el2)
+//   const el2 = getParent($el)
+//   let $parent = $jquery.wrap(el2)
 
-  if (elHasPositionFixed($el) && elHasPointerEventsNone($parent)) { //pointer-events: none
-    return isVisibleOld($el)
-    //return isBehindOtherElement($el, $parent)//isBehindOtherElement($jquery.unwrap($el)[0],$jquery.unwrap($el2)[0])
-    //
-  }
+//   if (elHasPositionFixed($el) && elHasPointerEventsNone($parent)) { //pointer-events: none
+//     return isVisibleOld($el)
+//   }
 
-  if (elHasPositionFixed($parent)) {
-    return false
-  }
+//   if (elHasPositionAbsolute($parent) || elHasOverflowAuto($parent) || elHasPositionFixed($parent)) {
+//     return false
+//   }
 
-  if (elHasPositionAbsolute($parent) || elHasOverflowAuto($parent)) {
-    return false
-  }
+//   if (elHasOverflowHidden($parent)) {
+//     if (parentHasNoOffsetWidthOrHeightAndOverflowHidden($el)) {//&& !elHasDisplayBlock($parent)
+//       return true
+//     }
 
-  if (elHasOverflowHidden($parent)) {
-    if (elHasNoEffectiveWidthOrHeight($parent)) {
-      return true
-    }
+//     return false
+//   }
 
-    return false
-  }
+//   if ($parent.prop('tagName') === 'BODY') {
+//     return false
+//   }
 
-  if ($parent.prop('tagName') === 'BODY') {
-    return false
-  }
-
-  return isBehindAncestors($parent, methodName)
-}
+//   return isBehindAncestors($parent, methodName)
+// }
 
 // return false
 // if(elHasVisibilityHidden(el)){
@@ -458,20 +420,10 @@ const elHasDisplayInline = ($el) => {
   return $el.css('display') === 'inline'
 }
 
-const elHasOverflowAuto = function ($el) {
-  const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
-
-  return cssOverflow.includes('auto')
-}
-
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
   return cssOverflow.includes('hidden')
-}
-
-const elHasPointerEventsNone = ($el) => {
-  return $el.css('pointer-events') === 'none'
 }
 
 const elHasPositionFixed = ($el) => {

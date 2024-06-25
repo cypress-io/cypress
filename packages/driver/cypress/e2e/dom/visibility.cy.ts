@@ -771,7 +771,7 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is hidden if position: fixed and covered up', function () {
         expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).to.be.hidden
-        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).to.be.visible
+        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).to.not.be.visible
       })
 
       it('is hidden if position: fixed and off screen', function () {
@@ -786,7 +786,7 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is hidden if only the parent has position absolute', function () {
         expect(this.$parentPosAbs.find('span#parentPosAbs')).to.be.hidden
-        expect(this.$parentPosAbs.find('span#parentPosAbs')).to.be.visible
+        expect(this.$parentPosAbs.find('span#parentPosAbs')).to.not.be.visible
       })
 
       it('is visible if position: fixed and parent has pointer-events: none', function () {
@@ -823,7 +823,7 @@ describe('src/cypress/dom/visibility', () => {
 
     describe('css overflow', () => {
       it('is hidden when parent overflow auto and no width/height', function () {
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span#parentNoWidthHeightOverflowAuto')).to.be.visible
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span#parentNoWidthHeightOverflowAuto')).to.not.be.visible
         expect(this.$parentNoWidthHeightOverflowAuto.find('span#parentNoWidthHeightOverflowAuto')).to.be.hidden
       })
 
