@@ -44,39 +44,7 @@ const isVisible = (el) => {
       return false
     }
 
-    const isOutsideOfView = elIsOutsideOfView(el)
-
-    if (isOutsideOfView === true) {
-      return false
-    }
-
     return true
-  }
-
-  return false
-}
-
-//TODO real implementation check here
-const elIsOutsideOfView = (el) => {
-  let rect = el.getBoundingClientRect()
-  let $el = $jquery.wrap(el)
-
-  if (ifNoElementReturnFalse($el, 'elIsOutsideOfView()') && $el === undefined) {
-    return false
-  }
-
-  if ($transform.detectVisibility($el) === 'visible') {
-    if (elHasPositionFixed($el)) {
-      if (rect.left < 0 || rect.right < 0) return true
-
-      if (rect.y + rect.height < 0) return true
-    }
-
-    return false
-  }
-
-  if ($transform.detectVisibility($el) === 'transformed') {
-    return false
   }
 
   return false
@@ -113,14 +81,6 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true,
   }
 
   return isHiddenByAncestors(el, methodName, options)
-}
-
-const ifNoElementReturnFalse = (el, methodName) => {
-  if (!isElement(el)) {
-    return false
-  }
-
-  return true
 }
 
 const ensureEl = (el, methodName) => {
@@ -190,65 +150,6 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
 
   return false
 }
-
-// const isBehindAncestors = (el: JQuery<any>, methodName = 'isBehindAncestors()') => {
-//   if (ifNoElementReturnFalse(el, methodName) && el === undefined) {
-//     return false
-//   }
-
-//   const $el = $jquery.wrap(el)
-
-//   if (isBody(el) || isHTML(el)) {
-//     return false // is visible
-//   }
-
-//   if (ifNoElementReturnFalse($el, methodName) && $el === undefined) {
-//     return false
-//   }
-
-//   if (elHasPositionAbsolute($el)) {
-//     return false
-//   }
-
-//   const el2 = getParent($el)
-//   let $parent = $jquery.wrap(el2)
-
-//   if (elHasPositionFixed($el) && elHasPointerEventsNone($parent)) { //pointer-events: none
-//     return isVisibleOld($el)
-//   }
-
-//   if (elHasPositionAbsolute($parent) || elHasOverflowAuto($parent) || elHasPositionFixed($parent)) {
-//     return false
-//   }
-
-//   if (elHasOverflowHidden($parent)) {
-//     if (parentHasNoOffsetWidthOrHeightAndOverflowHidden($el)) {//&& !elHasDisplayBlock($parent)
-//       return true
-//     }
-
-//     return false
-//   }
-
-//   if ($parent.prop('tagName') === 'BODY') {
-//     return false
-//   }
-
-//   return isBehindAncestors($parent, methodName)
-// }
-
-// return false
-// if(elHasVisibilityHidden(el)){
-//   console.log('got hidden')
-// }
-//console.log(el)
-//const hasParentAbsolut = getFirstAbsolutePositionParent(el)
-// if (elOrAncestorIsFixedOrSticky($el)) {
-//   return elIsNotElementFromPoint($el)
-// }
-// const hasAbsolute=elHasPositionAbsolute($el)
-// console.log('hasParentAbsolutStart '+ hasAbsolute)
-// return hasAbsolute
-// }
 
 const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
   contentVisibilityAuto: true }) => {
@@ -350,10 +251,6 @@ const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
   return cssOverflow.includes('hidden') || cssOverflow.includes('clip')
-}
-
-const elHasPositionFixed = ($el) => {
-  return $el.css('position') === 'fixed'
 }
 
 const elHasPositionRelative = ($el) => {
