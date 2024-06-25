@@ -192,7 +192,7 @@ export class CriClient implements ICriClient {
 
   private cri: CDPClient | undefined
 
-  constructor (
+  private constructor (
     public targetId: string,
     private onAsynchronousError: Function,
     private host?: string,
@@ -380,7 +380,7 @@ export class CriClient implements ICriClient {
 
     debug('connecting %o', { connected: this._connected, target: this.targetId })
 
-    this.cri = await CDP({
+    const cri = this.cri = await CDP({
       host: this.host,
       port: this.port,
       target: this.targetId,
@@ -424,16 +424,16 @@ export class CriClient implements ICriClient {
       })
 
       if (this.fullyManageTabs) {
-        this.cri.on('Target.attachedToTarget', async (event) => {
+        cri.on('Target.attachedToTarget', async (event) => {
           try {
             // Service workers get attached at the page and browser level. We only want to handle them at the browser level
             // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
             if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
-              await this.cri!.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+              await cri.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
             }
 
             if (event.waitingForDebugger) {
-              await this.cri!.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+              await cri.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
             }
           } catch (error) {
             // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
