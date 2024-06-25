@@ -1,8 +1,11 @@
 import fsAsync from 'fs/promises'
 import fs from 'fs'
 import Debug from 'debug'
-import { uploadStream, geometricRetry } from '../upload/upload_stream'
 import { StreamActivityMonitor } from '../upload/stream_activity_monitor'
+import { asyncRetry, linearDelay } from '../../util/async_retry'
+import { putFetch, ParseKinds } from './put_fetch'
+import { NetworkError } from './network_error'
+import { HttpError } from './http_error'
 
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 
@@ -13,23 +16,44 @@ const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 const MAX_START_DWELL_TIME = 5000
 const MAX_ACTIVITY_DWELL_TIME = 5000
 
-export const putProtocolArtifact = async (artifactPath: string, maxFileSize: number, destinationUrl: string) => {
-  debug(`Atttempting to upload Test Replay archive from ${artifactPath} to ${destinationUrl})`)
-  const { size } = await fsAsync.stat(artifactPath)
+export const _delay = linearDelay(500)
 
-  if (size > maxFileSize) {
-    throw new Error(`Spec recording too large: artifact is ${size} bytes, limit is ${maxFileSize} bytes`)
-  }
-
-  const activityMonitor = new StreamActivityMonitor(MAX_START_DWELL_TIME, MAX_ACTIVITY_DWELL_TIME)
-  const fileStream = fs.createReadStream(artifactPath)
-
-  await uploadStream(
-    fileStream,
-    destinationUrl,
-    size, {
-      retryDelay: geometricRetry,
-      activityMonitor,
-    },
-  )
+export const _shouldRetry = (error) => {
+  return error ? (
+    NetworkError.isNetworkError(error) ||
+    HttpError.isHttpError(error) && [408, 429, 502, 503, 504].includes(error.status)
+  ) : false
 }
+
+export const putProtocolArtifact = asyncRetry(
+  async (artifactPath: string, maxFileSize: number, destinationUrl: string) => {
+    debug(`Atttempting to upload Test Replay archive from ${artifactPath} to ${destinationUrl})`)
+    const { size } = await fsAsync.stat(artifactPath)
+
+    if (size > maxFileSize) {
+      throw new Error(`Spec recording too large: artifact is ${size} bytes, limit is ${maxFileSize} bytes`)
+    }
+
+    const activityMonitor = new StreamActivityMonitor(MAX_START_DWELL_TIME, MAX_ACTIVITY_DWELL_TIME)
+    const fileStream = fs.createReadStream(artifactPath)
+    const controller = activityMonitor.getController()
+
+    await putFetch(destinationUrl, {
+      parse: ParseKinds.TEXT,
+      headers: {
+        'content-length': String(size),
+        'content-type': 'application/x-tar',
+        'accept': 'application/json',
+      },
+      // ts thinks this is a web fetch, which only expects ReadableStreams.
+      // But, this is a node fetch, which supports ReadStreams.
+      // @ts-expect-error
+      body: activityMonitor.monitor(fileStream),
+      signal: controller.signal,
+    })
+  }, {
+    maxAttempts: 3,
+    retryDelay: _delay,
+    shouldRetry: _shouldRetry,
+  },
+)

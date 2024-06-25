@@ -313,7 +313,7 @@ exports['e2e record passing passes 2'] = [
                 'originalFile': 'cypress/e2e/record_fail.cy.js',
                 'relativeFile': 'cypress/e2e/record_fail.cy.js',
                 'absoluteFile': '/foo/bar/.projects/e2e/cypress/e2e/record_fail.cy.js',
-                'frame': '  1 | describe(\'record fails\', () => {\n  2 |   beforeEach(() => {\n> 3 |     throw new Error(\'foo\')\n    |           ^\n  4 |   })\n  5 |\n  6 |   it(\'fails 1\', () => {})',
+                'frame': '  1 | describe(\'record fails\', () => {\n  2 |   beforeEach(() => {\n> 3 |     throw new Error(\'foo\')\n    |           ^\n  4 |   })\n  5 | \n  6 |   it(\'fails 1\', () => {})',
                 'language': 'js',
               },
             },
@@ -489,7 +489,7 @@ exports['e2e record passing passes 2'] = [
                 'originalFile': 'cypress/e2e/record_uncaught.cy.js',
                 'relativeFile': 'cypress/e2e/record_uncaught.cy.js',
                 'absoluteFile': '/foo/bar/.projects/e2e/cypress/e2e/record_uncaught.cy.js',
-                'frame': '> 1 | throw new Error(\'instantly fails\')\n    |       ^\n  2 |',
+                'frame': '> 1 | throw new Error(\'instantly fails\')\n    |       ^\n  2 | ',
                 'language': 'js',
               },
             },
@@ -3048,6 +3048,14 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Spec recording too large: artifact is 1024 bytes, limit is 200 bytes
+
+Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+undefined responded with HTTP undefined: undefined
 
 ====================================================================================================
 

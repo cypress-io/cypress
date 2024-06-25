@@ -1,10 +1,13 @@
-type RetryOptions<TErr extends any> = {
+type RetryOptions = {
   maxAttempts: number
   retryDelay?: (attempt: number) => number
-  shouldRetry?: (err?: TErr) => boolean
+  shouldRetry?: (err?: Error) => boolean
 }
 
-export function asyncRetry <TArgs extends any[], TResult extends any, TErr extends any> (fn: (...args: TArgs) => Promise<TResult>, options: RetryOptions<TErr>) {
+export function asyncRetry <
+  TArgs extends any[],
+  TResult extends any,
+> (fn: (...args: TArgs) => Promise<TResult>, options: RetryOptions) {
   return async (...args: TArgs): Promise<TResult> => {
     let attempt = 0
     let errors: Error[] = []
@@ -33,5 +36,11 @@ export function asyncRetry <TArgs extends any[], TResult extends any, TErr exten
     } while (attempt < options.maxAttempts)
 
     throw new AggregateError(errors)
+  }
+}
+
+export const linearDelay = (inc: number) => {
+  return (attempt: number) => {
+    return attempt * inc
   }
 }
