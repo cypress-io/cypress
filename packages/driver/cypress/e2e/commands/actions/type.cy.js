@@ -1506,25 +1506,25 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/2613
     describe('input[type=datetime-local]', () => {
       it('can change values', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       // https://github.com/cypress-io/cypress/issues/22884
       it('can use seconds', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13').should('have.value', '1959-09-13T10:12:13')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:12:13').should('have.value', '1959-09-13T10:12:13')
       })
 
       it('can use fractions of a second', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13.456').should('have.value', '1959-09-13T10:12:13.456')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:12:13.456').should('have.value', '1959-09-13T10:12:13.456')
       })
 
       it('overwrites existing value', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05')
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').invoke('val', '2016-01-01T05:05')
+        cy.get('#datetime-local-without-values').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('errors when invalid datetime', (done) => {
@@ -1534,7 +1534,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           done()
         })
 
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13')
+        cy.get('#datetime-local-without-value').invoke('val', '2016-01-01T05:05').type('1959-09-13')
       })
     })
 
