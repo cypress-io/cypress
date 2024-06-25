@@ -253,7 +253,7 @@ const elHasDisplayInline = ($el) => {
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
-  return cssOverflow.includes('hidden') || cssOverflow.includes('clip')
+  return cssOverflow.includes('hidden')
 }
 
 const elHasPositionRelative = ($el) => {
