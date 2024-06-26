@@ -91,7 +91,7 @@
     "log-symbols": "2.2.0",
     "marionette-client": "https://github.com/cypress-io/marionette-client.git#5fc10cdf6c02627e9a2add98ca52de4d0c2fe74d",
     "md5": "2.3.0",
-    "memfs": "3.4.12",
+    "memfs": "3.5.3",
     "mime": "2.4.4",
     "mime-db": "1.45.0",
     "minimatch": "3.0.5",
