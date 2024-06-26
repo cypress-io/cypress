@@ -2,12 +2,12 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import { Response } from 'cross-fetch'
 import proxyquire from 'proxyquire'
-import type { putFetch } from '../../../../lib/cloud/api/put_fetch'
-import { ParseError } from '../../../../lib/cloud/api/parse_error'
-import { HttpError } from '../../../../lib/cloud/api/http_error'
-import { NetworkError } from '../../../../lib/cloud/api/network_error'
+import type { putFetch } from '../../../../lib/cloud/network/put_fetch'
+import { ParseError } from '../../../../lib/cloud/network/parse_error'
+import { HttpError } from '../../../../lib/cloud/network/http_error'
+import { NetworkError } from '../../../../lib/cloud/network/network_error'
 
-describe('cloud/api/put_fetch', () => {
+describe('cloud/network/put_fetch', () => {
   const url = 'https://some.test/url'
   const jsonText = '{ "content": "json" }'
   const jsonObj = JSON.parse(jsonText)
@@ -19,7 +19,7 @@ describe('cloud/api/put_fetch', () => {
 
   beforeEach(() => {
     stubbedCrossFetch = sinon.stub()
-    const importPutFetch = proxyquire.noCallThru()('../../../../lib/cloud/api/put_fetch', {
+    const importPutFetch = proxyquire.noCallThru()('../../../../lib/cloud/network/put_fetch', {
       'cross-fetch': stubbedCrossFetch,
     })
 

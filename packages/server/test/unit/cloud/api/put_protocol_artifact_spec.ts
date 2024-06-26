@@ -7,9 +7,10 @@ import chaiAsPromised from 'chai-as-promised'
 
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
-import { HttpError } from '../../../../lib/cloud/api/http_error'
-import { putFetch, ParseKinds } from '../../../../lib/cloud/api/put_fetch'
+import { HttpError } from '../../../../lib/cloud/network/http_error'
+import { putFetch, ParseKinds } from '../../../../lib/cloud/network/put_fetch'
 import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
+import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 
 chai.use(chaiAsPromised).use(sinonChai)
 
@@ -70,7 +71,7 @@ describe('putProtocolArtifact', () => {
 
     putFetchStub = sinon.stub()
 
-    mockery.registerMock('./put_fetch', {
+    mockery.registerMock('../network/put_fetch', {
       putFetch: putFetchStub,
       ParseKinds,
     })
@@ -119,7 +120,8 @@ describe('putProtocolArtifact', () => {
 
     expect(options.maxAttempts).to.eq(3)
     expect(options.retryDelay).to.be.a('function')
-    expect(options.shouldRetry).to.be.a('function')
+    // because of mockery, the isRetryableError ref here is different than the one imported into put_protocol_artifact_spec
+    expect(options.shouldRetry.toString()).to.eq(isRetryableError.toString())
   })
 
   describe('when provided an artifact path that does not exist', () => {

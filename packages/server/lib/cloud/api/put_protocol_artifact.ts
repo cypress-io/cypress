@@ -3,10 +3,8 @@ import fs from 'fs'
 import Debug from 'debug'
 import { StreamActivityMonitor } from '../upload/stream_activity_monitor'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
-import { putFetch, ParseKinds } from './put_fetch'
-import { NetworkError } from './network_error'
-import { HttpError } from './http_error'
-
+import { putFetch, ParseKinds } from '../network/put_fetch'
+import { isRetryableError } from '../network/is_retryable_error'
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 
 // the upload will get canceled if the source stream does not
@@ -17,13 +15,6 @@ const MAX_START_DWELL_TIME = 5000
 const MAX_ACTIVITY_DWELL_TIME = 5000
 
 export const _delay = linearDelay(500)
-
-export const _shouldRetry = (error) => {
-  return error ? (
-    NetworkError.isNetworkError(error) ||
-    HttpError.isHttpError(error) && [408, 429, 502, 503, 504].includes(error.status)
-  ) : false
-}
 
 export const putProtocolArtifact = asyncRetry(
   async (artifactPath: string, maxFileSize: number, destinationUrl: string) => {
@@ -54,6 +45,6 @@ export const putProtocolArtifact = asyncRetry(
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: _shouldRetry,
+    shouldRetry: isRetryableError,
   },
 )

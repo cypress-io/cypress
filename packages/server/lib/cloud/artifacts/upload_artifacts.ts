@@ -11,8 +11,8 @@ import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
-import { HttpError } from '../api/http_error'
-import { NetworkError } from '../api/network_error'
+import { HttpError } from '../network/http_error'
+import { NetworkError } from '../network/network_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 

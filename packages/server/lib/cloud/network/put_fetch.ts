@@ -3,6 +3,9 @@ import { NetworkError } from './network_error'
 import { HttpError } from './http_error'
 import { ParseError } from './parse_error'
 import { agent } from '@packages/network'
+import Debug from 'debug'
+
+const debug = Debug('cypress-verbose:server:cloud:api:put')
 
 type PutInit = Omit<RequestInit, 'agent' | 'method'>
 
@@ -25,6 +28,7 @@ export async function putFetch <
     ...init
   } = options
 
+  debug('Initiating PUT %s', input)
   try {
     const response = await (crossFetch as typeof crossFetch)(input, {
       ...(init || {}),
@@ -58,6 +62,7 @@ export async function putFetch <
       throw parseError
     }
   } catch (e) {
+    debug('Error: %O', e)
     if (ParseError.isParseError(e)) {
       throw e
     } else if (HttpError.isHttpError(e)) {
