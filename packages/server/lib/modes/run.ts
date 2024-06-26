@@ -482,6 +482,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     debug('waiting for socket to connect and browser to launch...')
 
+    const coreData = require('@packages/data-context').getCtx().coreData
+
+    if (coreData.didBrowserPreviouslyHaveUnexpectedExit) {
+      debug(`browser previously exited. Setting shouldLaunchNewTab=false to recreate the correct browser automation clients.`)
+      options.shouldLaunchNewTab = false
+      coreData.didBrowserPreviouslyHaveUnexpectedExit = false
+    }
+
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type

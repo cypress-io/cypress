@@ -604,7 +604,7 @@
     "./node_modules/ws/lib/validation.js",
     "./node_modules/ws/lib/websocket-server.js",
     "./node_modules/ws/lib/websocket.js",
-    "./node_modules/xdg-trashdir/node_modules/xdg-basedir/index.js",
+    "./node_modules/xdg-basedir/index.js",
     "./node_modules/xml2js/lib/xml2js.js",
     "./packages/config/index.js",
     "./packages/config/src/options.ts",
@@ -2210,6 +2210,7 @@
     "./node_modules/ipaddr.js/lib/ipaddr.js",
     "./node_modules/is-binary-path/index.js",
     "./node_modules/is-buffer/index.js",
+    "./node_modules/is-ci/index.js",
     "./node_modules/is-core-module/core.json",
     "./node_modules/is-core-module/index.js",
     "./node_modules/is-dotfile/index.js",
@@ -4351,5 +4352,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d5fba40067187d94123f2436aff67aba7a4e35da015285bf93f7ed5dce895c0a"
+  "deferredHash": "f7ad8b998e773f23e154b5486d7bc410d7b49da55b20e00c6d43baeff83f4bef"
 }
