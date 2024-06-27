@@ -367,7 +367,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       this.$elOutOfParentBoundsAbove = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
+<div style='width: 100px; height: 100px; overflow: hidden; position: fixed;'>
   <span id='elOutOfParentBoundsAbove' style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
 </div>\
 `)
