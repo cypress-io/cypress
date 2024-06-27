@@ -21,10 +21,6 @@ let optionsObject = {
 const isVisible = (el) => {
   ensureEl(el, 'isVisible()')
 
-  if (isVisibilityVisible(el)) {
-    return false
-  }
-
   const optionIsVisible = checkIsOptionVisible(el)
 
   if (optionIsVisible === true) {
@@ -32,6 +28,10 @@ const isVisible = (el) => {
   }
 
   if (optionIsVisible > 1) {
+    return false
+  }
+
+  if (isStrictlyNotVisibile(el)) {
     return false
   }
 
@@ -145,8 +145,17 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   return false
 }
 
-const isVisibilityVisible = (el) => {
+const isStrictlyNotVisibile = (el) => {
   const $el = $jquery.wrap(el)
+
+  if (elHasNoEffectiveWidthOrHeight($el)) {
+    // https://github.com/cypress-io/cypress/issues/6183
+    if (elHasDisplayInline($el)) {
+      return !elHasVisibleChild($el)
+    }
+
+    return true // not visible because element has no EffectiveWeightOrHeight
+  }
 
   if ($transform.detectVisibility($el) !== 'visible') {
     return true
