@@ -24,11 +24,11 @@ const getProxyForUrlWithNpmConfig = (url) => {
     null
 }
 
-const getBaseUrl = () => {
+const getBaseUrl = (urlPath = '') => {
   if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
     let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
 
-    if (!baseUrl.endsWith('/')) {
+    if (!baseUrl.endsWith('/') && !urlPath.startsWith('?')) {
       baseUrl += '/'
     }
 
@@ -57,7 +57,7 @@ const getCA = () => {
 }
 
 const prepend = (arch, urlPath, version) => {
-  const endpoint = url.resolve(getBaseUrl(), urlPath)
+  const endpoint = url.resolve(getBaseUrl(urlPath), urlPath)
   const platform = os.platform()
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
 
