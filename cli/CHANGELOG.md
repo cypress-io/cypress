@@ -11,6 +11,7 @@ _Released 7/02/2024 (PENDING)_
 
 - Fixed an issue where Chrome launch instances would not recreate the browser CRI client correctly after recovering from an unexpected browser closure. Fixes [#27657](https://github.com/cypress-io/cypress/issues/27657). Fixed in [#29663](https://github.com/cypress-io/cypress/pull/29663).
 - Fixed an issue where Firefox 129 (Firefox Nightly) would not launch with Cypress. Fixes [#29713](https://github.com/cypress-io/cypress/issues/29713). Fixed in [#29720](https://github.com/cypress-io/cypress/pull/29720).
+- Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
 
 **Dependency Updates:**
 
@@ -33,7 +34,6 @@ _Released 6/18/2024_
 - Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
 - When capture protocol script fails verification, an appropriate error is now displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
 - Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
-- Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
 
 **Misc:**
 
