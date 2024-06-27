@@ -1524,7 +1524,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('overwrites existing value input by invoking val', () => {
         cy.get('#datetime-local-without-value').invoke('val', '2016-01-01T05:05')
-        cy.get('#datetime-local-without-values').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('errors when invalid datetime', (done) => {
