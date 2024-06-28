@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.1
+## 13.13.0
 
 _Released 7/02/2024 (PENDING)_
 
 **Performance:**
 
 - Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
+
+**Features:**
+
+- Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
 **Bugfixes:**
 
