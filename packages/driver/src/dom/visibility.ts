@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $jquery from './jquery'
 import $document from './document'
 import $elements from './elements'
@@ -29,6 +28,17 @@ const isVisible = (el) => {
 
   if (optionIsVisible > 1) {
     return false
+  }
+
+  if (Cypress.browser.family === 'webkit') { //webkit before 17.3 not support checkVisibility
+    let webkitVer = Cypress.browser.version
+    let webKitMajorVersion = webkitVer.substring(0, webkitVer.indexOf('.'))
+    let webkitMinorVersion = webkitVer.slice(3)
+    let noOfWebkitVersion = parseInt(webKitMajorVersion)
+
+    if (noOfWebkitVersion < 17 && parseInt(webkitMinorVersion) < 3) {
+      return !isHidden(el, 'isVisible()')
+    }
   }
 
   if (isStrictlyNotVisibile(el)) {
