@@ -14,6 +14,7 @@ _Released 7/02/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
 - Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
 - Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
