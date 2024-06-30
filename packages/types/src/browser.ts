@@ -36,7 +36,7 @@ export type Browser = {
    */
   displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
-  versionRegex?: RegExp
+  versionRegex: RegExp
   /** If set, this is the base path that will be used for setting userDataDir. Useful for creating profiles in snap confinement. */
   profilePath?: string
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
