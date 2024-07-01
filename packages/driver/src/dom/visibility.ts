@@ -178,31 +178,6 @@ const elHasNoEffectiveWidthOrHeight = ($el, parent = false) => {
   const height = elOffsetHeight($el)
   const overflowHidden = elHasOverflowHidden($el)
 
-  return isZeroLengthAndTransformNone(width, height, transform) ||
-  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
-  (el.getClientRects().length <= 0)
-}
-
-const elHasNoEffectiveWidthOrHeight2 = ($el, parent = true) => {
-  // Is the element's CSS width OR height, including any borders,
-  // padding, and vertical scrollbars (if rendered) less than 0?
-  //
-  // elOffsetWidth:
-  // If the element is hidden (for example, by setting style.display
-  // on the element or one of its ancestors to "none"), then 0 is returned.
-
-  // $el[0].getClientRects().length:
-  // For HTML <area> elements, SVG elements that do not render anything themselves,
-  // display:none elements, and generally any elements that are not directly rendered,
-  // an empty list is returned.
-
-  const el = $el[0]
-  const style = getComputedStyle(el)
-  const transform = style.getPropertyValue('transform')
-  const width = elOffsetWidth($el)
-  const height = elOffsetHeight($el)
-  const overflowHidden = elHasOverflowHidden($el)
-
   return ((parent ? elOffsetWidth($el) <= 0 : false)
   && isZeroLengthAndTransformNone(width, height, transform)) ||
   isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
@@ -437,7 +412,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight2($parent)) {
+  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent, true)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
@@ -454,7 +429,7 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   }
 
   // if we have overflow hidden and no effective width or height
-  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight2($el)) {
+  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight($el)) {
     return $el
   }
 
