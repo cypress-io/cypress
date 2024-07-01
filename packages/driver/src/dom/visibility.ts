@@ -36,6 +36,35 @@ const ensureEl = (el, methodName) => {
   }
 }
 
+const checkIsOptionVisible = (el) => {
+  // an option is considered visible if its parent select is visible
+  if (isOption(el) || isOptgroup(el)) {
+    const $el = $jquery.wrap(el)
+
+    if (elHasDisplayNone($el)) {
+      return 2
+    }
+
+    // if its parent select is visible, then it's not hidden
+    const $select = getFirstParentWithTagName($el, 'select')
+
+    if ($select && $select.length) {
+      // if the select is hidden, the options in it are not visible too
+      if (isStrictlyHidden($select)) {
+        return 2 //this signal not visible
+      }
+    } else {
+      if (isStrictlyHidden($el)) {
+        return 2
+      }
+    }
+
+    return true //this signal visible
+  }
+
+  return 0 //this signal not option element
+}
+
 const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { checkOpacity: true }, recurse?) => {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
@@ -45,35 +74,47 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
     return false // is visible
   }
 
-  // an option is considered visible if its parent select is visible
-  if (isOption(el) || isOptgroup(el)) {
-    // they could have just set to hide the option
-    if (elHasDisplayNone($el)) {
-      return true
-    }
+  const optionIsVisible = checkIsOptionVisible(el)
 
-    // if its parent select is visible, then it's not hidden
-    const $select = getFirstParentWithTagName($el, 'select')
+  if (optionIsVisible === true) {
+    return false
+  }
 
-    // check $select.length here first
-    // they may have not put the option into a select el,
-    // in which case it will fall through to regular visibility logic
-    if ($select && $select.length) {
-      // if the select is hidden, the options in it are visible too
-      return recurse ? recurse($select[0], methodName, options) : isStrictlyHidden($select[0], methodName, options)
-    }
+  if (optionIsVisible > 1) {
+    return true
   }
 
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
-  if (elHasNoEffectiveWidthOrHeight($el)) {
+  if (elHasNoEffectiveWidthOrHeight($el, false)) {
     // https://github.com/cypress-io/cypress/issues/6183
     if (elHasDisplayInline($el)) {
       return !elHasVisibleChild($el)
     }
 
-    return true // is hidden
+    if (el.textContent) {
+      //this below should be in function
+      if (elHasVisibilityHiddenOrCollapse($el)) {
+        return true // is hidden
+      }
+
+      // when an element is scaled to 0 in one axis
+      // it is not visible to users.
+      // So, it is hidden.
+      if ($transform.detectVisibility($el) !== 'visible') {
+        return true
+      }
+
+      // a transparent element is hidden
+      if (elHasOpacityZero($el) && options.checkOpacity) {
+        return true
+      }
+
+      return false
+    }
+
+    return true
   }
 
   // additionally if the effective visibility of the element
@@ -118,6 +159,31 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el, parent = false) => {
+  // Is the element's CSS width OR height, including any borders,
+  // padding, and vertical scrollbars (if rendered) less than 0?
+  //
+  // elOffsetWidth:
+  // If the element is hidden (for example, by setting style.display
+  // on the element or one of its ancestors to "none"), then 0 is returned.
+
+  // $el[0].getClientRects().length:
+  // For HTML <area> elements, SVG elements that do not render anything themselves,
+  // display:none elements, and generally any elements that are not directly rendered,
+  // an empty list is returned.
+
+  const el = $el[0]
+  const style = getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+  const width = elOffsetWidth($el)
+  const height = elOffsetHeight($el)
+  const overflowHidden = elHasOverflowHidden($el)
+
+  return isZeroLengthAndTransformNone(width, height, transform) ||
+  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
+  (el.getClientRects().length <= 0)
+}
+
+const elHasNoEffectiveWidthOrHeight2 = ($el, parent = true) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
@@ -371,7 +437,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent, true)) {
+  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight2($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
@@ -388,7 +454,7 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   }
 
   // if we have overflow hidden and no effective width or height
-  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight($el)) {
+  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight2($el)) {
     return $el
   }
 
