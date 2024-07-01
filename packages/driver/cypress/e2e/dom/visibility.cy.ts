@@ -1150,7 +1150,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has a parent with an effective zero width and overflow: hidden', function () {
-        this.reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        this.reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` or `overflow: clip` and an effective width and height of: `100 x 0` pixels.')
       })
 
       it('element sits outside boundaries of parent with overflow clipping', function () {

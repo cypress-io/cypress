@@ -539,7 +539,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     width = elOffsetWidth($parent)
     height = elOffsetHeight($parent)
 
-    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` or \`overflow: clip\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   // nested else --___________--
