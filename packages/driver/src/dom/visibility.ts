@@ -193,6 +193,12 @@ const elHasDisplayInline = ($el) => {
   return $el.css('display') === 'inline'
 }
 
+const elHasOverflowClip = function ($el) {
+  const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
+
+  return cssOverflow.includes('clip')
+}
+
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
@@ -370,7 +376,8 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
+  if ((elHasOverflowHidden($parent) || elHasOverflowClip($parent))
+     && elHasNoEffectiveWidthOrHeight($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
