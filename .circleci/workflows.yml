@@ -32,6 +32,7 @@ mainBuildFilters: &mainBuildFilters
         - 'update-v8-snapshot-cache-on-develop'
         - 'ignore-chrom-prefs'
         - 'publish-binary'
+        - 'angular-signals-ct-harness'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -42,7 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ignore-chrom-prefs', << pipeline.git.branch >> ]
+    - equal: [ 'angular-signals-ct-harness', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,7 +54,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ignore-chrom-prefs', << pipeline.git.branch >> ]
+    - equal: [ 'chore/fix_kitchensink_against_staging_job', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -76,7 +77,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'feat/support_next_14', << pipeline.git.branch >> ]
+    - equal: [ 'angular-signals-ct-harness', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -94,7 +95,7 @@ executors:
   
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node18.20.2-chrome124-ff125
+      - image: cypress/browsers-internal:node20.15.0-chrome126-ff127
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -152,7 +153,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ignore-chrom-prefs" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/fix_kitchensink_against_staging_job" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -2053,6 +2054,15 @@ jobs:
           command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
+  npm-angular-signals:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn lerna run build --scope @cypress/angular-signals
+      - store-npm-logs
+
   npm-puppeteer-unit-tests:
     <<: *defaults
     steps:
@@ -2794,6 +2804,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-angular:
         requires:
           - build
+    - npm-angular-signals:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -2812,6 +2825,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - check-ts
           - npm-angular
+          - npm-angular-signals
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
@@ -3141,6 +3155,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-angular:
         requires:
           - build
+    - npm-angular-signals:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -3158,6 +3175,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - check-ts
           - npm-angular
+          - npm-angular-signals
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
