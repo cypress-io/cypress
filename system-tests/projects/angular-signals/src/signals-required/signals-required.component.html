@@ -1,0 +1,6 @@
+<p data-cy="signals-required-component-title-display">
+  {{ title() }}
+</p>
+<p data-cy="signals-required-component-count-display"> {{ count() }}</p>
+<button data-cy="signals-required-component-count-incr" (click)="count.set(count() + 1)">Increase</button>
+<button data-cy="signals-required-component-count-decr" (click)="count.set(count() - 1)">Decrease</button>

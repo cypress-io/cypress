@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.1
+## 13.13.0
 
-_Released 7/02/2024 (PENDING)_
+_Released 7/01/2024_
 
 **Performance:**
 
 - Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
+
+**Features:**
+
+- Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
 **Bugfixes:**
 
@@ -15,6 +19,7 @@ _Released 7/02/2024 (PENDING)_
 **Dependency Updates:**
 
 - Replaced `json-lint` with `json-parse-even-better-errors`. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
+- Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
 - Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
 - Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
