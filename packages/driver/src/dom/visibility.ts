@@ -45,7 +45,7 @@ const isVisible = (el) => {
     return false
   }
 
-  return el.checkVisibility(optionsObject) && !isHiddenByAncestors(el)
+  return el.checkVisibility(optionsObject) && !isNotVisibleBecauseOfAncestors(el)
 }
 
 const checkIsOptionVisible = (el) => {
@@ -173,6 +173,7 @@ const isStrictlyNotVisibile = (el) => {
 
   return false
 }
+
 const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
   contentVisibilityAuto: true }) => {
   ensureEl(el, methodName)
@@ -181,6 +182,26 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el, options.checkOpacity)) {
+    return true // is hidden
+  }
+
+  if (elOrAncestorIsFixedOrSticky($el)) {
+    return elIsNotElementFromPoint($el)
+  }
+
+  // else check if el is outside the bounds
+  // of its ancestors overflow
+  return elIsOutOfBoundsOfAncestorsOverflow($el)
+}
+
+const isNotVisibleBecauseOfAncestors = (el, methodName = 'isNotVisibleBecauseOfAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
+  contentVisibilityAuto: true }) => {
+  ensureEl(el, methodName)
+  const $el = $jquery.wrap(el)
+
+  // we do some calculations taking into account the parents
+  // to see if its hidden by a parent
+  if (elIsNotVisibleBecauseOfAncestors($el, options.checkOpacity)) {
     return true // is hidden
   }
 
@@ -454,6 +475,32 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
 
   // continue to recursively walk up the chain until we reach body or html
   return elIsHiddenByAncestors($parent, checkOpacity, $origEl)
+}
+
+const elIsNotVisibleBecauseOfAncestors = function ($el, checkOpacity, $origEl = $el) {
+  // walk up to each parent until we reach the body
+  // if any parent has opacity: 0
+  // or has an effective offsetHeight of 0
+  // and its set overflow: hidden then our child element
+  // is effectively hidden
+  // -----UNLESS------
+  // the parent or a descendent has position: absolute|fixed
+  const $parent = getParent($el)
+
+  // stop if we've reached the body or html
+  // in case there is no body
+  // or if parent is the document which can
+  // happen if we already have an <html> element
+  if (isUndefinedOrHTMLBodyDoc($parent)) {
+    return false
+  }
+
+  if ($parent.get(0).checkVisibility(optionsObject) === false) {
+    return true
+  }
+
+  // continue to recursively walk up the chain until we reach body or html
+  return elIsNotVisibleBecauseOfAncestors($parent, checkOpacity, $origEl)
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
