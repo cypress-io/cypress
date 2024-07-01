@@ -144,7 +144,7 @@ export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: Prot
 
 export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
 
-export type OffFn = (eventName: string, cb: (data: any) => void) => void
+export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) => void
 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
