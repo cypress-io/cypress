@@ -393,8 +393,8 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
     return false
   }
 
-  // if we have overflow hidden and no effective width or height
-  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight($el)) {
+  // if we have overflow hidden or clip and no effective width or height
+  if ((elHasOverflowHidden($el) || elHasOverflowClip($el)) && elHasNoEffectiveWidthOrHeight($el)) {
     return $el
   }
 
