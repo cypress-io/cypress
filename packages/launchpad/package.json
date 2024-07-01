@@ -18,13 +18,14 @@
     "test": "yarn cypress:run:ct && yarn types",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@packages/frontend-shared": "0.0.0-development"
+  },
   "devDependencies": {
     "@cypress-design/vue-button": "^0.11.6",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@intlify/unplugin-vue-i18n": "4.0.0",
-    "@packages/frontend-shared": "0.0.0-development",
     "@packages/scaffold-config": "0.0.0-development",
     "@percy/cypress": "^3.1.2",
     "@purge-icons/generated": "0.8.1",
