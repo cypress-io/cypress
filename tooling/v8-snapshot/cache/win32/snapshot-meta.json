@@ -3755,7 +3755,7 @@
     "./packages/data-context/node_modules/fs-extra/lib/util/utimes.js",
     "./packages/data-context/node_modules/get-stream/index.js",
     "./packages/data-context/node_modules/launch-editor/editor-info/linux.js",
-    "./packages/data-context/node_modules/launch-editor/editor-info/osx.js",
+    "./packages/data-context/node_modules/launch-editor/editor-info/macos.js",
     "./packages/data-context/node_modules/launch-editor/editor-info/windows.js",
     "./packages/data-context/node_modules/launch-editor/get-args.js",
     "./packages/data-context/node_modules/launch-editor/guess.js",
@@ -4243,7 +4243,7 @@
     "./packages/server/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js",
     "./packages/server/node_modules/is-fullwidth-code-point/index.js",
     "./packages/server/node_modules/launch-editor/editor-info/linux.js",
-    "./packages/server/node_modules/launch-editor/editor-info/osx.js",
+    "./packages/server/node_modules/launch-editor/editor-info/macos.js",
     "./packages/server/node_modules/launch-editor/editor-info/windows.js",
     "./packages/server/node_modules/launch-editor/get-args.js",
     "./packages/server/node_modules/launch-editor/guess.js",
@@ -4355,5 +4355,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "6875cde904573913ba35e281d8ac7e6d94ca1e04f9b3cadef0ac6965ca2506f2"
+  "deferredHash": "aecb7dbf159f0002b9c16162219a67301440596220a9334151ec7fafaafd6676"
 }
