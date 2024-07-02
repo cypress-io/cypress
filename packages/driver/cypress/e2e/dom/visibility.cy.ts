@@ -1170,7 +1170,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('element is fixed and being covered', function () {
-        this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
+        this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
       })
 
       it('needs scroll', function () {

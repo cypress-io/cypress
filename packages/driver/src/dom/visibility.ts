@@ -569,7 +569,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
       const covered = stringifyElement(elAtCenterPoint($el))
 
       if (covered) {
-        return `This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\`${covered}\``
+        return `This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`${covered}\``
       }
 
       return `This element \`${node}\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`
