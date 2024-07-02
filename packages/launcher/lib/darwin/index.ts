@@ -87,10 +87,11 @@ export const browsers: Detectors = {
       versionProperty: 'CFBundleShortVersionString',
     },
   },
+  // WebKit and Electron have been added here to make testing easier
   webkit: {
     stable: {
       appName: 'WebKit.app',
-      executable: '',
+      executable: 'Stubbed/Executable',
       appId: 'org.webkit.Playwright',
       versionProperty: 'CFBundleShortVersionString',
     },
@@ -98,7 +99,7 @@ export const browsers: Detectors = {
   electron: {
     stable: {
       appName: 'Electron.app',
-      executable: '',
+      executable: 'Stubbed/Executable',
       appId: 'com.electron.cypress',
       versionProperty: 'CFBundleShortVersionString',
     },

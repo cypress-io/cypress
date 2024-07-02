@@ -153,7 +153,9 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Electron',
-    // Neither versionRegex or binary are used
+    // Neither versionRegex or binary are used for Electron
+    // we have just added them here to avoid making versionRegex and binary
+    // optional properties, which would complicate other checks in the codebase
     versionRegex: /^\d+\.\d+\.\d+$/mi,
     binary: ['cypress-binary'],
     info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
@@ -163,7 +165,9 @@ export const knownBrowsers: Browser[] = [
     family: 'webkit',
     channel: 'stable',
     displayName: 'WebKit',
-    // Neither versionRegex or binary are used
+    // versionRegex is not used for WebKit
+    // we have just added it here to avoid making versionRegex
+    // an optional property which would complicate other checks in the codebase
     versionRegex: /BROWSER_VERSION = (\d+(\.\d+){0,2})/gm,
     binary: ['playwright-webkit'],
     warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
