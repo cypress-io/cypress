@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "find-test-names": "^1.19.0",
+    "find-test-names": "^1.28.18",
     "globby": "^11.0.4"
   },
   "devDependencies": {

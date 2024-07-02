@@ -5,7 +5,7 @@ import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
-import { create, CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
@@ -241,7 +241,7 @@ export class BrowserCriClient {
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
 
-      const browserClient = await create({
+      const browserClient = await CriClient.create({
         target: versionInfo.webSocketDebuggerUrl,
         onAsynchronousError,
         onReconnect,
@@ -543,7 +543,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create({
+      this.currentlyAttachedTarget = await CriClient.create({
         target: target.targetId,
         onAsynchronousError: this.onAsynchronousError,
         host: this.host,
@@ -603,7 +603,7 @@ export class BrowserCriClient {
     })
 
     if (target) {
-      this.currentlyAttachedTarget = await create({
+      this.currentlyAttachedTarget = await CriClient.create({
         target: target.targetId,
         onAsynchronousError: this.onAsynchronousError,
         host: this.host,
