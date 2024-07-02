@@ -4,7 +4,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import WebSocket from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
-import * as CriClient from '../../lib/browsers/cri-client'
+import { CriClient } from '../../lib/browsers/cri-client'
 import { expect, nock } from '../spec_helper'
 
 import sinon from 'sinon'
@@ -31,7 +31,7 @@ describe('CDP Clients', () => {
   require('mocha-banner').register()
 
   let wsSrv: WebSocket.Server
-  let criClient: CriClient.CriClient
+  let criClient: CriClient
   let messages: object[]
   let onMessage: sinon.SinonStub
 
@@ -119,9 +119,8 @@ describe('CDP Clients', () => {
           target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
           onReconnect,
+          onReconnectAttempt: stub,
         })
-
-        criClient.onReconnectAttempt = stub
 
         await Promise.all([
           clientDisconnected(),
@@ -149,9 +148,8 @@ describe('CDP Clients', () => {
           target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
           onReconnect,
+          onReconnectAttempt: stub,
         })
-
-        criClient.onReconnectAttempt = stub
 
         await Promise.all([
           clientDisconnected(),
@@ -204,9 +202,8 @@ describe('CDP Clients', () => {
           target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError,
           onReconnect,
+          onReconnectAttempt: stub,
         })
-
-        criClient.onReconnectAttempt = stub
 
         const send = (commands: CDPCommands[]) => {
           commands.forEach(({ command, params }) => {
@@ -298,12 +295,6 @@ describe('CDP Clients', () => {
         const onAsynchronousError = reject
         const onReconnect = reject
 
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError,
-          onReconnect,
-        })
-
         const stub = sinon.stub().onThirdCall().callsFake(async () => {
           criClient.close()
           .finally(() => {
@@ -311,7 +302,12 @@ describe('CDP Clients', () => {
           })
         })
 
-        criClient.onReconnectAttempt = stub
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
+          onAsynchronousError,
+          onReconnect,
+          onReconnectAttempt: stub,
+        })
 
         await Promise.all([
           clientDisconnected(),
