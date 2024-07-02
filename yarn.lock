@@ -13320,10 +13320,10 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-3.0.0.tgz#7b81829f24930605d970efcf0709bdb49f2eab4c"
-  integrity sha512-qqSx7UNRJAGvtv6dANqOr93jzD8ATJyT4aP2+DLgVnuuxYb1ZljeMNWAwX0q5pt1cCqm5umK30Ydh6nczQCiZw==
+cypress-example-kitchensink@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-3.1.0.tgz#8043be0002862fe1873441786766fb220d59f455"
+  integrity sha512-TIUI7To4TPw/OsMDQU1eo5ShJhbQTvTBR1oIAOIEx0PTtcc4YyfNv+487Y8GSSaGqiBwVe+6CBJsc+QpWw24zA==
   dependencies:
     npm-run-all2 "^5.0.0"
     serve "14.2.3"
