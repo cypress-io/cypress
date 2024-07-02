@@ -222,6 +222,11 @@ export = {
     // so that there is a default for each browser but
     // enable the browser to configure the interface
     instance.once('exit', async (code, signal) => {
+      // When the browser has unexpectedly exited, we need to send a signal to the attempt launcher to recreate the browser CRI clients.
+      // We do NOT want to attempt to use existing CRI clients as the previous instance of the browser was terminated.
+      // @see https://github.com/cypress-io/cypress/issues/27657
+      ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit = true
+
       debug('browser instance exit event received %o', { code, signal })
 
       ctx.actions.app.setBrowserStatus('closed')

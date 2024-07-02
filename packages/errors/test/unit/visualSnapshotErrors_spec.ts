@@ -1381,5 +1381,21 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderName: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_VALUE: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
   })
 })

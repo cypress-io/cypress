@@ -1,19 +1,53 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.0
+## 13.13.0
 
-_Released 6/18/2024 (PENDING)_
+_Released 7/01/2024_
+
+**Performance:**
+
+- Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
 
 **Features:**
 
-- Adds Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+- Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
 **Bugfixes:**
 
-- Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
+- Fixed an issue where Chrome launch instances would not recreate the browser CRI client correctly after recovering from an unexpected browser closure. Fixes [#27657](https://github.com/cypress-io/cypress/issues/27657). Fixed in [#29663](https://github.com/cypress-io/cypress/pull/29663).
+- Fixed an issue where Firefox 129 (Firefox Nightly) would not launch with Cypress. Fixes [#29713](https://github.com/cypress-io/cypress/issues/29713). Fixed in [#29720](https://github.com/cypress-io/cypress/pull/29720).
 
 **Dependency Updates:**
 
+- Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
+- Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
+- Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
+- Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
+
+## 13.12.0
+
+_Released 6/18/2024_
+
+**Features:**
+
+- Added Component Testing support for Angular version 18. Addresses [#29309](https://github.com/cypress-io/cypress/issues/29309).
+
+**Bugfixes:**
+
+- We now trigger `input` and `change` events when typing `{upArrow}` and `{downArrow}` via `.type()` on `input[type=number]` elements. Fixes [#29611](https://github.com/cypress-io/cypress/issues/29611)
+- Fixed an issue where auto scrolling the reporter would sometimes be disabled without the user's intent. Fixes [#25084](https://github.com/cypress-io/cypress/issues/25084).
+- Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
+- When capture protocol script fails verification, an appropriate error is now displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
+- Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
+
+**Misc:**
+
+- Report afterSpec durations to Cloud API when running in record mode with Test Replay enabled. Addressed in [#29500](https://github.com/cypress-io/cypress/pull/29500).
+
+**Dependency Updates:**
+
+- Updated firefox-profile from `4.3.1` to `4.6.0`. Addressed in [#29662](https://github.com/cypress-io/cypress/pull/29662).
 - Updated typescript from `4.7.4` to `5.3.3`. Addressed in [#29568](https://github.com/cypress-io/cypress/pull/29568).
+- Updated url-parse from `1.5.9` to `1.5.10`. Addressed in [#29650](https://github.com/cypress-io/cypress/pull/29650).
 
 ## 13.11.0
 

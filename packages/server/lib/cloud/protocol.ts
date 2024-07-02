@@ -7,15 +7,14 @@ import fs from 'fs-extra'
 import Module from 'module'
 import os from 'os'
 import path from 'path'
-
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
-
+import { performance } from 'perf_hooks'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -25,7 +24,7 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-const DB_SIZE_LIMIT = 5000000000
+export const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
@@ -59,6 +58,9 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _protocol: AppCaptureProtocolInterface | undefined
   private _runnableId: string | undefined
   private _captureHash: string | undefined
+  private _afterSpecDurations: AfterSpecDurations & {
+    afterSpecTotal: number
+  } | undefined
 
   get protocolEnabled (): boolean {
     return !!this._protocol
@@ -130,6 +132,8 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   beforeSpec (spec: { instanceId: string }) {
+    this._afterSpecDurations = undefined
+
     if (!this._protocol) {
       return
     }
@@ -170,7 +174,30 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async afterSpec () {
-    await this.invokeAsync('afterSpec', { isEssential: true })
+    const startTime = performance.now() + performance.timeOrigin
+
+    try {
+      const ret = await this.invokeAsync('afterSpec', { isEssential: true })
+      const durations = ret?.durations
+
+      const afterSpecTotal = (performance.now() + performance.timeOrigin) - startTime
+
+      this._afterSpecDurations = {
+        afterSpecTotal,
+        ...(durations ? durations : {}),
+      }
+
+      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
+
+      return undefined
+    } catch (e) {
+      // rethrow; this is try/catch so we can 'finally' ascertain duration
+      this._afterSpecDurations = {
+        afterSpecTotal: (performance.now() + performance.timeOrigin - startTime),
+      }
+
+      throw e
+    }
   }
 
   async beforeTest (test: { id: string } & Record<string, any>) {
@@ -277,11 +304,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact): Promise<{
-    success: boolean
-    fileSize: number | bigint
-    specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
-  } | undefined> {
+  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
     if (!this._protocol || !filePath || !this._db) {
       debug('not uploading due to one of the following being falsy: %O', {
         _protocol: !!this._protocol,
@@ -292,6 +315,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    const captureErrors = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
@@ -301,9 +326,12 @@ export class ProtocolManager implements ProtocolManagerShape {
         fileSize,
         success: true,
         specAccess: this._protocol.getDbMetadata(),
+        ...(this._afterSpecDurations ? {
+          afterSpecDurations: this._afterSpecDurations,
+        } : {}),
       }
     } catch (e) {
-      if (CAPTURE_ERRORS) {
+      if (captureErrors) {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
@@ -403,9 +431,9 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>): Promise<ReturnType<AppCaptureProtocolInterface[K]> | undefined> {
     if (!this._protocol) {
-      return
+      return undefined
     }
 
     try {
@@ -417,6 +445,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       } else {
         throw error
       }
+
+      return undefined
     }
   }
 

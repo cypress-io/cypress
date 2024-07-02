@@ -32,7 +32,13 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
 
     const ast = recast.parse(js, { sourceFileName })
 
-    astTypes.visit(ast, jsRules)
+    const visitor = astTypes.PathVisitor.fromMethodsObject(jsRules)
+
+    visitor.visit(ast)
+
+    if (!visitor.wasChangeReported() && inputSourceMap) {
+      return inputSourceMap
+    }
 
     return recast.print(ast, {
       inputSourceMap,
@@ -50,18 +56,32 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
 export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
   const ast = recast.parse(js)
 
+  let didRewrite: boolean
+
   try {
-    astTypes.visit(ast, jsRules)
+    const visitor = astTypes.PathVisitor.fromMethodsObject(jsRules)
+
+    visitor.visit(ast)
+
+    didRewrite = visitor.wasChangeReported()
   } catch (err: any) {
     // if visiting fails, it points to a bug in our rewriting logic, so raise the error to the driver
     return _generateDriverError(url, err)
   }
 
-  const { code } = recast.print(ast, defaultPrintOpts)
+  let rewritten: string
+
+  if (didRewrite) {
+    const { code } = recast.print(ast, defaultPrintOpts)
+
+    rewritten = code
+  } else {
+    rewritten = js
+  }
 
   if (!deferSourceMapRewrite) {
     // no sourcemaps
-    return sourceMaps.stripMappingUrl(code)
+    return sourceMaps.stripMappingUrl(rewritten)
   }
 
   // get an ID that can be used to lazy-generate the source map later
@@ -71,7 +91,7 @@ export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite
     // using a relative URL ensures that required cookies + other headers are sent along
     // and can be reused if the user's sourcemap requires an HTTP request to be made
     `/__cypress/source-maps/${sourceMapId}.map`,
-    code,
+    rewritten,
   )
 }
 

@@ -8,9 +8,9 @@ Webpack Compilation Error
 Module build failed (from ./node_modules/babel-loader/lib/index.js):
 SyntaxError: <path>/_test-output/syntax_error_spec.js: Unexpected token (1:18)
 
-[0m[31m[1m>[22m[39m[90m 1 |[39m describe([32m'fail'[39m[33m,[39m [33m-[39m[33m>[39m)[0m
-[0m [90m   |[39m                   [31m[1m^[22m[39m[0m
-[0m [90m 2 |[39m[0m
+[0m[31m[1m>[22m[39m[90m 1 |[39m describe([32m'fail'[39m[33m,[39m [33m-[39m[33m>[39m)
+ [90m   |[39m                   [31m[1m^[22m[39m
+ [90m 2 |[39m[0m
 `
 
 exports['webpack preprocessor - e2e has less verbose "Module not found" error 1'] = `

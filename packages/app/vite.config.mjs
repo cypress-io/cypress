@@ -17,9 +17,9 @@ export default makeConfig({
       'p-defer',
       'bluebird',
       'events',
-      '@popperjs/core', 
-      '@opentelemetry/*', 
-    ]
+      '@popperjs/core',
+      '@opentelemetry/*',
+    ],
   },
 }, {
   plugins: [
