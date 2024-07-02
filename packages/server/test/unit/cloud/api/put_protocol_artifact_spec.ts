@@ -173,9 +173,7 @@ describe('putProtocolArtifact', () => {
       it('resolves', async () => {
         putFetchStub.resolves()
 
-        await putProtocolArtifact(filePath, maxFileSize, destinationUrl)
-
-        expect(true).to.be.true
+        expect(putProtocolArtifact(filePath, maxFileSize, destinationUrl)).to.be.fulfilled
       })
     })
 
