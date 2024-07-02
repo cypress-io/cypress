@@ -128,6 +128,10 @@ exports['browsers returns the expected list of browsers 1'] = [
     'family': 'chromium',
     'channel': 'stable',
     'displayName': 'Electron',
+    'versionRegex': {},
+    'binary': [
+      'cypress-binary',
+    ],
     'info': 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
   },
   {
