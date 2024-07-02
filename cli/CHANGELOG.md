@@ -5,7 +5,7 @@ _Released 07/14/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fix for parent overflow and element position absolute visibility detection. Fixed in [#29689](https://github.com/cypress-io/cypress/pull/29689).
+- Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
 
 ## 13.13.0
 
@@ -46,7 +46,6 @@ _Released 6/18/2024_
 - Fixed an issue where `inlineSourceMaps` was still being used when `sourceMaps` was provided in a users typescript config for typescript version 5. Fixes [#26203](https://github.com/cypress-io/cypress/issues/26203).
 - When capture protocol script fails verification, an appropriate error is now displayed. Previously, an error regarding Test Replay archive location was shown. Addressed in [#29603](https://github.com/cypress-io/cypress/pull/29603).
 - Fixed an issue where receiving HTTP responses with invalid headers raised an error. Now cypress removes the invalid headers and gives a warning in the console with debug mode on. Fixes [#28865](https://github.com/cypress-io/cypress/issues/28865).
-- Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
 
 **Misc:**
 
