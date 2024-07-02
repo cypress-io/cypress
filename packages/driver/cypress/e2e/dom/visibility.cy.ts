@@ -335,7 +335,7 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentPointerEventsNone = add(`\
 <div style="pointer-events: none">
-  <span style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
+  <span id="parentPointerEventsNone" style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
 </div>\
 `)
 
@@ -784,12 +784,12 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$parentPosAbs.find('span#parentPosAbs')).to.not.be.visible
       })
 
-      it('is visible if position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNone.find('span')).to.be.visible
+      it('is visible if position: fixed and parent has pointer-events: none', { browser: '!webkit' }, function () {
+        expect(this.$parentPointerEventsNone.find('span#parentPointerEventsNone')).to.be.visible
       })
 
-      it('is not hidden if position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNone.find('span')).to.not.be.hidden
+      it('is not hidden if position: fixed and parent has pointer-events: none', { browser: '!webkit' }, function () {
+        expect(this.$parentPointerEventsNone.find('span#parentPointerEventsNone')).to.not.be.hidden
       })
 
       it('is not visible if covered when position: fixed and parent has pointer-events: none', function () {

@@ -30,15 +30,8 @@ const isVisible = (el) => {
     return false
   }
 
-  if (Cypress.browser.family === 'webkit') { //webkit before 17.3 not support checkVisibility
-    let webkitVer = Cypress.browser.version
-    let webKitMajorVersion = webkitVer.substring(0, webkitVer.indexOf('.'))
-    let webkitMinorVersion = webkitVer.slice(3)
-    let noOfWebkitVersion = parseInt(webKitMajorVersion)
-
-    if (noOfWebkitVersion < 17 && parseInt(webkitMinorVersion) < 3) {
-      return !isHidden(el, 'isVisible()')
-    }
+  if (checkIfOldWebkit()) { //webkit before 17.3 not support checkVisibility
+    return !isHidden(el, 'isVisible()')
   }
 
   if (isStrictlyNotVisibile(el)) {
@@ -479,28 +472,43 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
 
 const elIsNotVisibleBecauseOfAncestors = function ($el, checkOpacity, $origEl = $el) {
   // walk up to each parent until we reach the body
-  // if any parent has opacity: 0
-  // or has an effective offsetHeight of 0
-  // and its set overflow: hidden then our child element
-  // is effectively hidden
-  // -----UNLESS------
-  // the parent or a descendent has position: absolute|fixed
+  // if any parent has invisible no other checks are performed
+  // if it is visible we go above
   const $parent = getParent($el)
 
-  // stop if we've reached the body or html
-  // in case there is no body
-  // or if parent is the document which can
-  // happen if we already have an <html> element
   if (isUndefinedOrHTMLBodyDoc($parent)) {
     return false
   }
 
-  if ($parent.get(0).checkVisibility(optionsObject) === false) {
-    return true
+  if (checkIfOldWebkit()) { //webkit before 17.3 not support checkVisibility
+    if (elHasOpacityZero($parent) && checkOpacity) {
+      return true
+    }
+  } else {
+    if ($parent.get(0).checkVisibility(optionsObject) === false) {
+      return true
+    }
   }
 
   // continue to recursively walk up the chain until we reach body or html
   return elIsNotVisibleBecauseOfAncestors($parent, checkOpacity, $origEl)
+}
+
+const checkIfOldWebkit = () => {
+  if (Cypress.browser.family === 'webkit') { //webkit before 17.3 not support checkVisibility
+    let webkitVer = Cypress.browser.version
+    let webKitMajorVersion = webkitVer.substring(0, webkitVer.indexOf('.'))
+    let webkitMinorVersion = webkitVer.slice(3)
+    let noOfWebkitVersion = parseInt(webKitMajorVersion)
+
+    if (noOfWebkitVersion < 17 && parseInt(webkitMinorVersion) < 3) {
+      return true
+    }
+
+    return false
+  }
+
+  return false
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
