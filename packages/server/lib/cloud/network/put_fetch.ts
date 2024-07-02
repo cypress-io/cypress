@@ -30,7 +30,7 @@ export async function putFetch <
 
   debug('Initiating PUT %s', input)
   try {
-    const response = await (crossFetch as typeof crossFetch)(input, {
+    const response = await crossFetch(input, {
       ...(init || {}),
       method: 'PUT',
       // cross-fetch thinks this is in the browser, so declares
