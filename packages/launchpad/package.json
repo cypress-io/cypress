@@ -75,7 +75,8 @@
   ],
   "nx": {
     "implicitDependencies": [
-      "@packages/graphql"
+      "@packages/graphql",
+      "@packages/frontend-shared"
     ]
   }
 }
