@@ -368,7 +368,7 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$elOutOfParentBoundsAbove = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
+  <span id='elOutOfParentBoundsAbove' style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
 </div>\
 `)
 
@@ -833,7 +833,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is hidden when parent overflow hidden and out of bounds above', function () {
-        expect(this.$elOutOfParentBoundsAbove.find('span')).to.be.hidden
+        expect(this.$elOutOfParentBoundsAbove.find('span#elOutOfParentBoundsAbove')).to.be.hidden
       })
 
       it('is hidden when parent overflow hidden and out of bounds below', function () {

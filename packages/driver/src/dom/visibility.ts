@@ -9,7 +9,7 @@ const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstPare
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
-const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto', 'clip']
+const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
 
 const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
