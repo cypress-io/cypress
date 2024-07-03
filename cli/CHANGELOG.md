@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.1
+
+_Released 07/14/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where overflow: clip in parent html node make child node visibility not correctly detected. Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852). Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778).
+
 ## 13.13.0
 
 _Released 7/01/2024_
@@ -15,7 +23,6 @@ _Released 7/01/2024_
 
 - Fixed an issue where Chrome launch instances would not recreate the browser CRI client correctly after recovering from an unexpected browser closure. Fixes [#27657](https://github.com/cypress-io/cypress/issues/27657). Fixed in [#29663](https://github.com/cypress-io/cypress/pull/29663).
 - Fixed an issue where Firefox 129 (Firefox Nightly) would not launch with Cypress. Fixes [#29713](https://github.com/cypress-io/cypress/issues/29713). Fixed in [#29720](https://github.com/cypress-io/cypress/pull/29720).
-- Fixed an issue where overflow: clip in parent html node make child node visibility not correctly detected. Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852). Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778).
 
 **Dependency Updates:**
 
