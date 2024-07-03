@@ -616,6 +616,10 @@ export const AllCypressErrors = {
     })
     const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
 
+    const fmtUploadError = ({ message, responseBody }: { message: string, responseBody?: string }) => {
+      return `${message}${responseBody ? `:\n${responseBody}\n` : ''}`
+    }
+
     return errTemplate`\
         Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
@@ -623,15 +627,7 @@ export const AllCypressErrors = {
 
         ${recommendation}
 
-        ${fmt.listItems(error.errors.map((error) => {
-      if (error.kind === 'HttpError') {
-        return `
-            ${error.url} responded with HTTP ${error.status}: ${error.statusText}
-            ${error.responseBody}`
-      }
-
-      return error.message
-    }))}`
+        ${fmt.listItems(error.errors.map(fmtUploadError), { prefix: '' })}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
