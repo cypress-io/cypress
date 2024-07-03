@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.0
+
+_(PENDING)_
+
+**Misc:**
+
+- Improved messaging around browser support. Addressed in [#295066](https://github.com/cypress-io/cypress/pull/29066).
+
 ## 13.13.0
 
 _Released 7/01/2024_
