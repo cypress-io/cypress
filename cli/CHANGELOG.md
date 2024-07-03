@@ -9,7 +9,7 @@ _Released 07/14/2024 (PENDING)_
 
 ## 13.13.0
 
-_Released 7/02/2024
+_Released 7/01/2024_
 
 **Performance:**
 
