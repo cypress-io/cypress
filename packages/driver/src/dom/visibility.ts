@@ -30,7 +30,7 @@ const isVisible = (el) => {
     return false
   }
 
-  if (checkIfOldWebkit()) { //webkit before 17.3 not support checkVisibility
+  if (checkIfOldWebkit()) {
     return !isHidden(el, 'isVisible()')
   }
 
@@ -38,7 +38,11 @@ const isVisible = (el) => {
     return false
   }
 
-  return el.checkVisibility(optionsObject) && !isNotVisibleBecauseOfAncestors(el)
+  if (!checkIfOldWebkit()) {
+    return el.checkVisibility(optionsObject) && !isNotVisibleBecauseOfAncestors(el)
+  }
+
+  return isHiddenByAncestors(el, 'isVisible', optionsObject)
 }
 
 const checkIsOptionVisible = (el) => {
