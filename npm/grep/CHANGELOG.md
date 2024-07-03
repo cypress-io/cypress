@@ -1,3 +1,10 @@
+# [@cypress/grep-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.0.2...@cypress/grep-v4.1.0) (2024-07-02)
+
+
+### Features
+
+* **deps:** update dependency find-test-names to ^1.28.18 ([#29672](https://github.com/cypress-io/cypress/issues/29672)) ([c3694a8](https://github.com/cypress-io/cypress/commit/c3694a8835f715c9fb3cd1713dbe60f1b047c2ff))
+
 # [@cypress/grep-v4.0.2](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.0.1...@cypress/grep-v4.0.2) (2024-06-07)
 
 
