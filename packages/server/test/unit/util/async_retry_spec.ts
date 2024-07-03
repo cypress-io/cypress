@@ -64,6 +64,28 @@ describe('asyncRetry', () => {
         expect(asyncFn).to.have.been.calledTwice
       })
     })
+
+    describe('when fails on the first try, and a retry is not warranted', () => {
+      let err
+
+      beforeEach(() => {
+        err = new Error('some error')
+        asyncFn.rejects(err)
+      })
+
+      it('throws a non-aggregate error', async () => {
+        let thrown: Error & { errors?: any[] }
+
+        try {
+          await asyncRetry(asyncFn, { maxAttempts: 1 })()
+        } catch (e) {
+          thrown = e
+        }
+
+        expect(thrown.message).to.eq(err.message)
+        expect(thrown.errors).to.be.undefined
+      })
+    })
   })
 
   describe('retry delay', () => {

@@ -22,6 +22,10 @@ export function asyncRetry <
         errors.push(e as Error)
 
         if (!shouldRetry(e)) {
+          if (errors.length === 1) {
+            throw e
+          }
+
           throw new AggregateError(errors)
         }
 
@@ -34,6 +38,10 @@ export function asyncRetry <
         }
       }
     } while (attempt < options.maxAttempts)
+
+    if (errors.length === 1) {
+      throw errors[0]
+    }
 
     throw new AggregateError(errors)
   }

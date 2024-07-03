@@ -3049,14 +3049,6 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Spec recording too large: artifact is 1024 bytes, limit is 200 bytes
 
-Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
-
-These results will not display Test Replay recordings.
-
-This error will not affect or change the exit code.
-
-undefined responded with HTTP undefined: undefined
-
 ====================================================================================================
 
   (Run Finished)

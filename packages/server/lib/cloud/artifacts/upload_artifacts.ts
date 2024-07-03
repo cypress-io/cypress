@@ -216,6 +216,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
       const error = postUploadProtocolFatalError.error
 
+      debug('protocol error: %O', error)
       if ((error as AggregateError).errors) {
         // eslint-disable-next-line no-console
         console.log('')
