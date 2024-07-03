@@ -56,7 +56,8 @@
   },
   "nx": {
     "implicitDependencies": [
-      "@packages/graphql"
+      "@packages/graphql",
+      "@packages/data-context"
     ]
   }
 }
