@@ -15,7 +15,7 @@ describe('isRetryableError', () => {
     expect(isRetryableError(new NetworkError(new Error(), url))).to.be.true
   })
 
-  it('returns true with retriable http errors', () => {
+  it('returns true with retryable http errors', () => {
     [408, 429, 502, 503, 504].forEach((status) => {
       const err = new HttpError('some error', url, status, 'status text', sinon.createStubInstance(Response))
 
