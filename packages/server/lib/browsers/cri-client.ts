@@ -2,6 +2,8 @@ import CDP from 'chrome-remote-interface'
 import debugModule from 'debug'
 import _ from 'lodash'
 import * as errors from '../errors'
+import { CDPCommandQueue } from './cdp-command-queue'
+import { asyncRetry }
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
@@ -185,6 +187,8 @@ export class CriClient implements ICriClient {
   private enableCommands: EnableCommand[] = []
   private enqueuedCommands: EnqueuedCommand[] = []
 
+  private _commandQueue: CDPCommandQueue = new CDPCommandQueue()
+
   private _closed = false
   private _connected = false
   private crashed = false
@@ -242,7 +246,67 @@ export class CriClient implements ICriClient {
     return newClient
   }
 
-  private async reconnect (retryIndex: number = 0) {
+  private async restoreState () {
+    // resubscribe
+    this.subscriptions.forEach((sub) => {
+      this.cri?.on(sub.eventName, sub.cb as any)
+    })
+
+    // re-enable
+    // '*.enable' commands need to be resent on reconnect or any events in
+    // that namespace will no longer be received
+    await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
+      // these commands may have been enqueued, so we need to resolve those promises and remove
+      // them from the queue when we send here
+
+      const inFlightCommand = this._commandQueue.extract({ command, params, sessionId })
+
+      try {
+        const response = await this.cri?.send(command, params, sessionId)
+
+        inFlightCommand?.deferred.resolve(response)
+      } catch (err) {
+        if (this._isConnectionError(err)) {
+          // if this is a connection error, state restoration should be halted
+          // and reconnection attempted. Otherwise, rejecting the original
+          // command promise is warranted.
+          throw err
+        } else {
+          inFlightCommand?.deferred.reject(err)
+        }
+      }
+    }))
+  }
+
+  private async drainCommandQueue () {
+    for (const enqueued of this._commandQueue) {
+      try {
+        const response = await this.cri!.send(enqueued.command, enqueued.params, enqueued.sessionId)
+
+        this._commandQueue.extract(enqueued)
+        enqueued.deferred.resolve(response)
+      } catch (e) {
+        if (this._isConnectionError(e)) {
+          throw e
+        } else {
+          enqueued.deferred.reject(e)
+        }
+      }
+    }
+  }
+
+  private async reconnect () {
+    this._connected = false
+
+    if (this._closed) {
+      debug('Target %s disconnected, not reconnecting because client is closed.', this.targetId)
+      this._commandQueue.clear()
+
+      return
+    }
+  }
+
+  private async reconnect_deprecated (retryIndex: number = 0) {
     this._connected = false
 
     if (this.closed) {
@@ -269,21 +333,16 @@ export class CriClient implements ICriClient {
     await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
       // these commands may have been enqueued, so we need to resolve those promises and remove
       // them from the queue when we send here
-      const isInFlightCommand = (candidate: EnqueuedCommand) => {
-        return candidate.command === command && candidate.params === params && candidate.sessionId === sessionId
-      }
-      const enqueued = this.enqueuedCommands.find(isInFlightCommand)
+
+      const inFlightCommand = this._commandQueue.extract({ command, params, sessionId })
 
       try {
-        const response = await this.cri?.send(command, params, sessionId)
+        // re-use this.send because it will re-enqueue on failure
+        const response = await this.send(command, params, sessionId)
 
-        enqueued?.p.resolve(response)
-      } catch (e) {
-        enqueued?.p.reject(e)
-      } finally {
-        this.enqueuedCommands = this.enqueuedCommands.filter((candidate) => {
-          return !isInFlightCommand(candidate)
-        })
+        inFlightCommand?.deferred.resolve(response)
+      } catch (err) {
+        inFlightCommand?.deferred.reject(err)
       }
     }))
 
@@ -303,7 +362,7 @@ export class CriClient implements ICriClient {
     await this.protocolManager?.cdpReconnect()
   }
 
-  private retryReconnect = async () => {
+  private retryReconnect_deprecated = async () => {
     if (this.reconnection) {
       debug('reconnection in progress; not starting new process, returning promise for in-flight reconnection attempt')
 
@@ -316,7 +375,7 @@ export class CriClient implements ICriClient {
       retryIndex++
 
       try {
-        const attempt = await this.reconnect(retryIndex)
+        const attempt = await this.reconnect_deprecated(retryIndex)
 
         this.reconnection = undefined
 
@@ -356,23 +415,13 @@ export class CriClient implements ICriClient {
     command: TCmd,
     params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
     sessionId?: string,
+    preventDuplicate?: boolean,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
-    return new Promise((resolve, reject) => {
-      const obj: EnqueuedCommand = {
-        command,
-        p: { resolve, reject },
-      }
+    return this._commandQueue.add(command, params, sessionId, preventDuplicate)
+  }
 
-      if (params) {
-        obj.params = params
-      }
-
-      if (sessionId) {
-        obj.sessionId = sessionId
-      }
-
-      this.enqueuedCommands.push(obj)
-    })
+  private _isConnectionError (error: Error) {
+    return WEBSOCKET_NOT_OPEN_RE.test(error.message)
   }
 
   public connect = async () => {
@@ -412,7 +461,7 @@ export class CriClient implements ICriClient {
       // that we don't want to reconnect on
       && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     ) {
-      this.cri.on('disconnect', this.retryReconnect)
+      this.cri.on('disconnect', this.retryReconnect_deprecated)
     }
 
     // We're only interested in child target traffic. Browser cri traffic is
@@ -500,7 +549,7 @@ export class CriClient implements ICriClient {
 
         const p = this.enqueueCommand(command, params, sessionId)
 
-        await this.retryReconnect()
+        await this.retryReconnect_deprecated()
 
         // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
         if (this.enqueuedCommands.length === 0 && this.closed) {
