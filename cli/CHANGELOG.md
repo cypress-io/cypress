@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.1
+
+_Released 7/16/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Replaced `json-lint` with `json-parse-even-better-errors`. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
+
 ## 13.13.0
 
 _Released 7/01/2024_
