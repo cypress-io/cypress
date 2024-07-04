@@ -5,7 +5,7 @@ _Released 7/17/2024 (PENDING)_
 
 **Misc:**
 
-- Improved messaging around browser support. Addressed in [#295066](https://github.com/cypress-io/cypress/pull/29066).
+- Improved messaging around browser support. Addressed in [#29066](https://github.com/cypress-io/cypress/pull/29066).
 
 ## 13.13.0
 
