@@ -87,7 +87,7 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
-  if (elHasNoEffectiveWidthOrHeight($el, false)) {
+  if (elHasNoEffectiveWidthOrHeight($el)) {
     // https://github.com/cypress-io/cypress/issues/6183
     if (elHasDisplayInline($el)) {
       return !elHasVisibleChild($el)
@@ -158,7 +158,7 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
 
-const elHasNoEffectiveWidthOrHeight = ($el, parent = false) => {
+const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
@@ -178,8 +178,7 @@ const elHasNoEffectiveWidthOrHeight = ($el, parent = false) => {
   const height = elOffsetHeight($el)
   const overflowHidden = elHasOverflowHidden($el)
 
-  return ((parent ? elOffsetWidth($el) <= 0 : false)
-  && isZeroLengthAndTransformNone(width, height, transform)) ||
+  return isZeroLengthAndTransformNone(width, height, transform) ||
   isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
   (el.getClientRects().length <= 0)
 }
@@ -412,7 +411,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent, true)) {
+  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
