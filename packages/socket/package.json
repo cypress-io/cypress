@@ -29,7 +29,7 @@
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "devtools-protocol": "0.0.927104",
-    "mocha": "3.5.3",
+    "mocha": "4.1.0",
     "resolve-pkg": "2.0.0"
   },
   "files": [

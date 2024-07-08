@@ -24,7 +24,7 @@
     "@types/mocha": "8.0.3",
     "@types/node": "^18.17.5",
     "chai": "4.2.0",
-    "mocha": "3.5.3",
+    "mocha": "4.1.0",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
