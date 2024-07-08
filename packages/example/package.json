@@ -20,7 +20,6 @@
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rev-all": "2.0.2",
-    "mocha": "4.1.0",
     "resolve-pkg": "2.0.0"
   },
   "files": [
