@@ -30,7 +30,7 @@ const isVisible = (el) => {
     return false
   }
 
-  if (checkIfOldWebkit()) {
+  if (!(typeof el.checkVisibility === 'function')) {
     return !isHidden(el, 'isVisible()')
   }
 
@@ -38,7 +38,7 @@ const isVisible = (el) => {
     return false
   }
 
-  if (!checkIfOldWebkit()) {
+  if (typeof el.checkVisibility === 'function') {
     return el.checkVisibility(optionsObject) && !isNotVisibleBecauseOfAncestors(el)
   }
 
@@ -484,7 +484,7 @@ const elIsNotVisibleBecauseOfAncestors = function ($el, checkOpacity, $origEl = 
     return false
   }
 
-  if (checkIfOldWebkit()) { //webkit before 17.3 not support checkVisibility
+  if (typeof $parent.get(0).checkVisibility !== 'function') {
     if (elHasOpacityZero($parent) && checkOpacity) {
       return true
     }
@@ -496,23 +496,6 @@ const elIsNotVisibleBecauseOfAncestors = function ($el, checkOpacity, $origEl = 
 
   // continue to recursively walk up the chain until we reach body or html
   return elIsNotVisibleBecauseOfAncestors($parent, checkOpacity, $origEl)
-}
-
-const checkIfOldWebkit = () => {
-  if (Cypress.browser.family === 'webkit') { //webkit before 17.3 not support checkVisibility
-    let webkitVer = Cypress.browser.version
-    let webKitMajorVersion = webkitVer.substring(0, webkitVer.indexOf('.'))
-    let webkitMinorVersion = webkitVer.slice(3)
-    let noOfWebkitVersion = parseInt(webKitMajorVersion)
-
-    if (noOfWebkitVersion < 17 && parseInt(webkitMinorVersion) < 3) {
-      return true
-    }
-
-    return false
-  }
-
-  return false
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
