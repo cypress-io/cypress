@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.1
+
+_Released 7/16/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227)
+
 ## 13.13.0
 
 _Released 7/01/2024_
