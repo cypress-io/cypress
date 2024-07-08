@@ -1,4 +1,4 @@
-import { scrubUrl } from './scrub_url'
+import { scrubUrl } from '../api/scrub_url'
 
 export const HttpErrorKind = 'HttpError'
 
