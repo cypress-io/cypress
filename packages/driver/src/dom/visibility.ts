@@ -84,6 +84,10 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
     return true
   }
 
+  if (elHasDisplayNone($el)) {
+    return true
+  }
+
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
