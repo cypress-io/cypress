@@ -20,11 +20,6 @@ type CDPCommands = {
   params?: object
 }
 
-type CDPSubscriptions = {
-  eventName: CdpEvent
-  cb: () => void
-}
-
 type OnWSConnection = (wsClient: WebSocket) => void
 
 describe('CDP Clients', () => {
@@ -235,8 +230,8 @@ describe('CDP Clients', () => {
 
       reconnectOnThirdTry.resetHistory()
 
-      await reconnectPromise.promise
       await commandSent.promise
+
       await Promise.all([clientDisconnected(), closeWsServer()])
 
       reconnectOnThirdTry.resetHistory()
@@ -248,140 +243,138 @@ describe('CDP Clients', () => {
 
       neverAck = false
 
-      await reconnectPromise.promise
-
       messageResponse.resolve({ response: true })
 
       const res: any = await cmdExecution
 
       expect(res.response).to.eq(true)
+
+      expect(reconnectPromise.promise).to.be.fulfilled
     })
 
-    it('restores sending enqueued commands, subscriptions, and enable commands on reconnect', () => {
-      const enableCommands: CDPCommands[] = [
+    it('reattaches subscriptions, reenables enablements, and sends pending commands on reconnect', async () => {
+      let reconnectPromise = pDefer()
+      let commandSent = pDefer()
+      let wsClient
+      const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
+        wsSrv = await startWsServer((ws) => {
+          wsClient = ws
+        })
+      })
+
+      const onReconnect = sinon.stub().callsFake(() => {
+        reconnectPromise.resolve()
+      })
+
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: (e) => commandSent.reject(e),
+        onReconnect,
+        onReconnectAttempt: reconnectOnThirdTry,
+      })
+
+      onMessage.callsFake(() => {
+        commandSent.resolve()
+      })
+
+      const enablements: CDPCommands[] = [
         { command: 'Page.enable', params: {} },
         { command: 'Network.enable', params: {} },
         { command: 'Runtime.addBinding', params: { name: 'foo' } },
         { command: 'Target.setDiscoverTargets', params: { discover: true } },
       ]
 
-      const enqueuedCommands: CDPCommands[] = [
-        { command: 'Page.navigate', params: { url: 'about:blank' } },
-        { command: 'Performance.getMetrics', params: {} },
+      const networkRequestSubscription = {
+        eventName: 'Network.requestWillBeSent',
+        cb: sinon.stub(),
+        mockEvent: { foo: 'bar' },
+      }
+      const networkResponseSubscription = {
+        eventName: 'Network.responseReceived',
+        cb: sinon.stub(),
+        mockEvent: { baz: 'quux' },
+      }
+
+      const subscriptions = [
+        networkRequestSubscription,
+        networkResponseSubscription,
       ]
 
-      const cb = sinon.stub()
+      // initialize state
 
-      const subscriptions: CDPSubscriptions[] = [
-        { eventName: 'Network.requestWillBeSent', cb },
-        { eventName: 'Network.responseReceived', cb },
+      for (const { command, params } of enablements) {
+        await criClient.send(command, params)
+      }
+      for (const { eventName, cb } of subscriptions) {
+        criClient.on(eventName as CdpEvent, cb)
+      }
+
+      const commandsToEnqueue: (CDPCommands & { promise?: Promise<any> })[] = [
+        { command: 'Page.navigate', params: { url: 'about:blank' }, promise: undefined },
+        { command: 'Performance.getMetrics', params: {}, promise: undefined },
       ]
 
-      let wsClient
+      // prevent commands from resolving, for now
+      neverAck = true
+      // send each command, and wait for them to be sent (but not responded to)
+      for (let i = 0; i < commandsToEnqueue.length; i++) {
+        commandSent = pDefer()
+        const command = commandsToEnqueue[i]
 
-      const stub = sinon.stub().onThirdCall().callsFake(async () => {
-        wsSrv = await startWsServer((ws) => {
-          wsClient = ws
-        })
-      })
+        commandsToEnqueue[i].promise = criClient.send(command.command, command.params)
 
-      const onReconnect = sinon.stub()
+        await commandSent.promise
+      }
 
-      return new Promise<void>(async (resolve, reject) => {
-        const onAsynchronousError = reject
+      onMessage.resetHistory()
+      // disconnect the websocket, causing enqueued commands to be enqueued
+      await Promise.all([clientDisconnected(), closeWsServer()])
 
-        criClient = await CriClient.create({
-          target: `ws://127.0.0.1:${wsServerPort}`,
-          onAsynchronousError,
-          onReconnect,
-          onReconnectAttempt: stub,
-        })
+      // re-enable responses from underlying CDP
+      neverAck = false
 
-        const send = (commands: CDPCommands[]) => {
-          commands.forEach(({ command, params }) => {
-            criClient.send(command, params)
-          })
-        }
+      // CriClient should now retry to connect, and succeed on the third try. Wait for reconnect.
+      // this promise is resolved when: CDP is reconnected, state is restored, and queue is drained
+      await reconnectPromise.promise
 
-        const on = (subscriptions: CDPSubscriptions[]) => {
-          subscriptions.forEach(({ eventName, cb }) => {
-            criClient.on(eventName, cb)
-          })
-        }
-
-        // send these in before we disconnect
-        send(enableCommands)
-        // expect 5 message calls
-        onMessage.reset()
-        onMessage.onCall(4).callsFake(() => {
-          resolve()
+      // onMessage call history was reset prior to reconnection - these are assertions about
+      // calls made after that reset
+      for (const { command, params } of enablements) {
+        /**
+         * sinon/sinon-chai's expect(stub).to.have.been.calledWith({
+         *    partial: object
+         * })
+         * does not work as advertised, at least with our version of sinon/chai/sinon-chai.
+         * because the message id has the potential to be brittle, we want to assert that
+         * onmessage was called with a specific command and params, regardless of message id
+         */
+        const sentArgs = onMessage.args.filter(([arg]) => {
+          return arg.method === command && _.isEqual(arg.params, params)
         })
 
-        await Promise.all([
-          clientDisconnected(),
-          closeWsServer(),
-        ])
+        expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)
+      }
+      for (const { command, params } of commandsToEnqueue) {
+        const sentArgs = onMessage.args.filter(([{ method, params: p }]) => {
+          return method === command && _.isEqual(p, params)
+        })
 
-        // now enqueue these commands
-        send(enqueuedCommands)
-        on(subscriptions)
+        expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)
+      }
+      // for full integration, send events that should be subscribed to, and expect that subscription
+      // callback to be called
+      for (const { eventName, cb, mockEvent } of subscriptions) {
+        const deferred = pDefer()
 
-        const { queue } = criClient
-
-        // assert they're in the queue
-        expect(queue.enqueuedCommands).to.containSubset(enqueuedCommands)
-        expect(queue.enableCommands).to.containSubset(enableCommands)
-        expect(queue.subscriptions).to.containSubset(subscriptions.map(({ eventName, cb }) => {
-          return {
-            eventName,
-            cb: _.isFunction,
-          }
+        cb.onFirstCall().callsFake(deferred.resolve)
+        wsClient.send(JSON.stringify({
+          method: eventName,
+          params: mockEvent,
         }))
-      })
-      .then(() => {
-        const { queue } = criClient
 
-        expect(queue.enqueuedCommands).to.be.empty
-        expect(queue.enableCommands).not.to.be.empty
-        expect(queue.subscriptions).not.to.be.empty
-
-        const messageCalls = _
-        .chain(onMessage.args)
-        .flatten()
-        .map(({ method, params }) => {
-          return {
-            command: method,
-            params: params ?? {},
-          }
-        })
-        .value()
-
-        expect(onMessage).to.have.callCount(6)
-        expect(messageCalls).to.deep.eq(
-          _.concat(
-            enableCommands,
-            enqueuedCommands,
-          ),
-        )
-
-        return new Promise((resolve) => {
-          cb.onSecondCall().callsFake(resolve)
-
-          wsClient.send(JSON.stringify({
-            method: 'Network.requestWillBeSent',
-            params: { foo: 'bar' },
-          }))
-
-          wsClient.send(JSON.stringify({
-            method: 'Network.responseReceived',
-            params: { baz: 'quux' },
-          }))
-        })
-      })
-      .then(() => {
-        expect(cb.firstCall).to.be.calledWith({ foo: 'bar' })
-        expect(cb.secondCall).to.be.calledWith({ baz: 'quux' })
-      })
+        await deferred.promise
+        expect(cb).to.have.been.calledWith(mockEvent)
+      }
     })
 
     it('stops reconnecting after close is called', () => {

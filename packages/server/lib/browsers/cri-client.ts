@@ -288,18 +288,25 @@ export class CriClient implements ICriClient {
 
   private async drainCommandQueue () {
     debug('sending %d enqueued commands', this._commandQueue.length)
-    for (const enqueued of this._commandQueue) {
+    while (this._commandQueue.length) {
+      const enqueued = this._commandQueue.shift()
+
+      if (!enqueued) {
+        return
+      }
+
       try {
+        debug('sending enqueued command %s', enqueued.command)
         const response = await this.cri!.send(enqueued.command, enqueued.params, enqueued.sessionId)
 
         debug('sent command, received ', { response })
-        this._commandQueue.extract(enqueued)
-        debug('removed command from queue')
         enqueued.deferred.resolve(response)
         debug('resolved enqueued promise')
       } catch (e) {
         debug('enqueued command %s failed:', enqueued.command, e)
         if (this._isConnectionError(e)) {
+          debug('re-enqueuing command and re-throwing')
+          this._commandQueue.unshift(enqueued)
           throw e
         } else {
           enqueued.deferred.reject(e)
@@ -372,10 +379,6 @@ export class CriClient implements ICriClient {
       return
     }
 
-    if (this.onReconnect) {
-      this.onReconnect(this)
-    }
-
     try {
       await this.restoreState()
       await this.drainCommandQueue()
@@ -387,6 +390,12 @@ export class CriClient implements ICriClient {
       }
 
       throw e
+    }
+
+    // previous timing of this had it happening before subscriptions/enablements were restored,
+    // and before any enqueued commands were sent. This was probably incorrect.
+    if (this.onReconnect) {
+      this.onReconnect(this)
     }
   }
 

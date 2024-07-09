@@ -1,6 +1,9 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import pDefer, { DeferredPromise } from 'p-defer'
 import type { CdpCommand } from './cdp_automation'
+import Debug from 'debug'
+
+const debug = Debug('cypress:server:browsers:cdp-command-queue')
 
 type CommandReturn<T extends CdpCommand> = ProtocolMapping.Commands[T]['returnType']
 
@@ -36,7 +39,9 @@ export class CDPCommandQueue {
       return true
     })
 
-    if (index === undefined) {
+    debug('extracting %o from commands at index %d', search, index)
+
+    if (index === -1) {
       return undefined
     }
 
@@ -51,6 +56,7 @@ export class CDPCommandQueue {
     sessionId?: string,
     preventDuplicate?: boolean,
   ): Promise<CommandReturn<TCmd>> {
+    debug('enqueing command %s with params %o', command, params)
     if (preventDuplicate) {
       const duplicateCommand = this.queue.find((enqueued) => {
         return (
@@ -76,33 +82,21 @@ export class CDPCommandQueue {
 
     this.queue.push(commandPackage)
 
+    debug('Queue: %O', this.queue)
+
     return deferred.promise
   }
 
   public clear () {
+    debug('clearing command queue')
     this.queue = []
   }
 
-  public [Symbol.iterator] (): Iterator<Command<any>> {
-    let cursor = 0
+  public shift () {
+    return this.queue.shift()
+  }
 
-    return {
-      next: (): IteratorResult<Command<any>> => {
-        const value = this.queue[cursor]
-
-        cursor++
-        if (value) {
-          return {
-            done: false,
-            value,
-          }
-        }
-
-        return {
-          done: true,
-          value: null,
-        }
-      },
-    }
+  public unshift (value: Command<any>) {
+    return this.queue.unshift(value)
   }
 }
