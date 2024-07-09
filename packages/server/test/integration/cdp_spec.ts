@@ -62,14 +62,18 @@ describe('CDP Clients', () => {
 
           // ACK back if we have a msg.id
           if (msg.id) {
+            if (messageResponse) {
+              const message = await messageResponse.promise
+
+              ws.send(JSON.stringify({ id: msg.id, result: message }))
+
+              return
+            }
+
             ws.send(JSON.stringify({
               id: msg.id,
               result: {},
             }))
-          } else if (messageResponse) {
-            const message = await messageResponse.promise
-
-            ws.send(JSON.stringify(message))
           }
         })
       })
@@ -214,11 +218,10 @@ describe('CDP Clients', () => {
         target: `ws://127.0.0.1:${wsServerPort}`,
         onAsynchronousError: (e) => commandSent.reject(e),
         onReconnect,
+        onReconnectAttempt: reconnectOnThirdTry,
       })
 
-      criClient.onReconnectAttempt = reconnectOnThirdTry
-
-      onMessage = sinon.stub().callsFake(() => {
+      onMessage.callsFake(() => {
         commandSent.resolve()
       })
 
@@ -236,19 +239,22 @@ describe('CDP Clients', () => {
       await commandSent.promise
       await Promise.all([clientDisconnected(), closeWsServer()])
 
+      reconnectOnThirdTry.resetHistory()
+
       reconnectPromise = pDefer()
 
       // set up response value
       messageResponse = pDefer()
-      messageResponse.resolve({ response: true })
+
       neverAck = false
 
-      // wait for reconnection to server
       await reconnectPromise.promise
 
-      const res = await cmdExecution
+      messageResponse.resolve({ response: true })
 
-      expect(res).to.eq({ response: true })
+      const res: any = await cmdExecution
+
+      expect(res.response).to.eq(true)
     })
 
     it('restores sending enqueued commands, subscriptions, and enable commands on reconnect', () => {
@@ -281,7 +287,7 @@ describe('CDP Clients', () => {
 
       const onReconnect = sinon.stub()
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise<void>(async (resolve, reject) => {
         const onAsynchronousError = reject
 
         criClient = await CriClient.create({
@@ -305,14 +311,16 @@ describe('CDP Clients', () => {
 
         // send these in before we disconnect
         send(enableCommands)
+        // expect 5 message calls
+        onMessage.reset()
+        onMessage.onCall(4).callsFake(() => {
+          resolve()
+        })
 
         await Promise.all([
           clientDisconnected(),
           closeWsServer(),
         ])
-
-        // expect 5 message calls
-        onMessage = sinon.stub().onCall(5).callsFake(resolve)
 
         // now enqueue these commands
         send(enqueuedCommands)

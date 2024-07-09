@@ -5,7 +5,7 @@ import type { CdpCommand } from './cdp_automation'
 type CommandReturn<T extends CdpCommand> = ProtocolMapping.Commands[T]['returnType']
 
 //type DeferredPromise = { resolve: Function, reject: Function }
-type Command<T extends CdpCommand> = {
+export type Command<T extends CdpCommand> = {
   command: T
   params?: object
   deferred: DeferredPromise<CommandReturn<T>>
@@ -14,6 +14,14 @@ type Command<T extends CdpCommand> = {
 
 export class CDPCommandQueue {
   private queue: Command<any>[] = []
+
+  public get length () {
+    return this.queue.length
+  }
+
+  public get entries () {
+    return [...this.queue]
+  }
 
   public extract<T extends CdpCommand> (search: Partial<Command<T>>): Command<T> | undefined {
     // this should find, remove, and return if found a given command

@@ -3,7 +3,7 @@ import debugModule from 'debug'
 import _ from 'lodash'
 import * as errors from '../errors'
 import { CDPCommandQueue } from './cdp-command-queue'
-import { asyncRetry }
+import { asyncRetry } from '../util/async_retry'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
@@ -215,7 +215,12 @@ export class CriClient implements ICriClient {
   get queue () {
     return {
       enableCommands: this.enableCommands,
-      enqueuedCommands: this.enqueuedCommands,
+      enqueuedCommands: this._commandQueue.entries.map((entry) => {
+        return {
+          ...entry,
+          p: entry.deferred,
+        }
+      }),
       subscriptions: this.subscriptions,
     }
   }
@@ -247,6 +252,7 @@ export class CriClient implements ICriClient {
   }
 
   private async restoreState () {
+    debug('resubscribing to %d subscriptions', this.subscriptions.length)
     // resubscribe
     this.subscriptions.forEach((sub) => {
       this.cri?.on(sub.eventName, sub.cb as any)
@@ -255,6 +261,7 @@ export class CriClient implements ICriClient {
     // re-enable
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
+    debug('re-enabling %d enablements', this.enableCommands.length)
     await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
       // these commands may have been enqueued, so we need to resolve those promises and remove
       // them from the queue when we send here
@@ -266,6 +273,7 @@ export class CriClient implements ICriClient {
 
         inFlightCommand?.deferred.resolve(response)
       } catch (err) {
+        debug('error re-enabling %s: ', command, err)
         if (this._isConnectionError(err)) {
           // if this is a connection error, state restoration should be halted
           // and reconnection attempted. Otherwise, rejecting the original
@@ -279,13 +287,18 @@ export class CriClient implements ICriClient {
   }
 
   private async drainCommandQueue () {
+    debug('sending %d enqueued commands', this._commandQueue.length)
     for (const enqueued of this._commandQueue) {
       try {
         const response = await this.cri!.send(enqueued.command, enqueued.params, enqueued.sessionId)
 
+        debug('sent command, received ', { response })
         this._commandQueue.extract(enqueued)
+        debug('removed command from queue')
         enqueued.deferred.resolve(response)
+        debug('resolved enqueued promise')
       } catch (e) {
+        debug('enqueued command %s failed:', enqueued.command, e)
         if (this._isConnectionError(e)) {
           throw e
         } else {
@@ -295,7 +308,14 @@ export class CriClient implements ICriClient {
     }
   }
 
-  private async reconnect () {
+  private reconnect = async () => {
+    debug('preparing to reconnect')
+    if (this.reconnection) {
+      debug('not reconnecting as there is an active reconnection attempt')
+
+      return this.reconnection
+    }
+
     this._connected = false
 
     if (this._closed) {
@@ -304,111 +324,70 @@ export class CriClient implements ICriClient {
 
       return
     }
-  }
 
-  private async reconnect_deprecated (retryIndex: number = 0) {
-    this._connected = false
+    let attempt = 1
+    let retryHaltedDueToClosed = false
 
-    if (this.closed) {
-      debug('disconnected, not reconnecting because client is closed %o', { closed: this.closed, target: this.targetId })
-      this.enqueuedCommands = []
+    try {
+      this.reconnection = asyncRetry(() => {
+        this.onReconnectAttempt?.(attempt)
+        attempt++
 
+        return this.connect()
+      }, {
+        maxAttempts: 20,
+        retryDelay: () => 100,
+        shouldRetry: (err) => {
+          debug('error while reconnecting to Target %s: %o', this.targetId, err)
+          if (this.closed) {
+            retryHaltedDueToClosed = true
+            debug('could not reconnect to Target %s because client is closed. halting retries. ', this.targetId)
+            this._commandQueue.clear()
+
+            return false
+          }
+
+          debug('Retying reconnection attempt')
+
+          return true
+        },
+      })()
+
+      await this.reconnection
+      this.reconnection = undefined
+      debug('reconnected')
+    } catch (err) {
+      debug('error on reconnecting. halted: %s', retryHaltedDueToClosed, err)
+      const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
+
+      if (!retryHaltedDueToClosed) {
+        const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', significantError)
+
+        cdpError.isFatalApiErr = true
+        this.reconnection = undefined
+        this.onAsynchronousError(cdpError)
+      }
+
+      // do not re-throw; error handling is done via onAsynchronousError
       return
     }
-
-    this.onReconnectAttempt?.(retryIndex)
-
-    debug('disconnected, attempting to reconnect... %o', { retryIndex, closed: this.closed, target: this.targetId })
-
-    await this.connect()
-
-    debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions: this.subscriptions, enableCommands: this.enableCommands, enqueuedCommands: this.enqueuedCommands, target: this.targetId })
-
-    this.subscriptions.forEach((sub) => {
-      this.cri?.on(sub.eventName, sub.cb as any)
-    })
-
-    // '*.enable' commands need to be resent on reconnect or any events in
-    // that namespace will no longer be received
-    await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
-      // these commands may have been enqueued, so we need to resolve those promises and remove
-      // them from the queue when we send here
-
-      const inFlightCommand = this._commandQueue.extract({ command, params, sessionId })
-
-      try {
-        // re-use this.send because it will re-enqueue on failure
-        const response = await this.send(command, params, sessionId)
-
-        inFlightCommand?.deferred.resolve(response)
-      } catch (err) {
-        inFlightCommand?.deferred.reject(err)
-      }
-    }))
-
-    this.enqueuedCommands.forEach((cmd) => {
-      this.cri!.send(cmd.command, cmd.params, cmd.sessionId).then(cmd.p.resolve as any, cmd.p.reject as any)
-    })
-
-    this.enqueuedCommands = []
 
     if (this.onReconnect) {
       this.onReconnect(this)
     }
 
-    // When CDP disconnects, it will automatically reconnect and re-apply various subscriptions
-    // (e.g. DOM.enable, Network.enable, etc.). However, we need to restart tracking DOM mutations
-    // from scratch. We do this by capturing a brand new full snapshot of the DOM.
-    await this.protocolManager?.cdpReconnect()
-  }
+    try {
+      await this.restoreState()
+      await this.drainCommandQueue()
 
-  private retryReconnect_deprecated = async () => {
-    if (this.reconnection) {
-      debug('reconnection in progress; not starting new process, returning promise for in-flight reconnection attempt')
-
-      return this.reconnection
-    }
-
-    debug('disconnected, starting retries to reconnect... %o', { closed: this.closed, target: this.targetId })
-
-    const retry = async (retryIndex = 0) => {
-      retryIndex++
-
-      try {
-        const attempt = await this.reconnect_deprecated(retryIndex)
-
-        this.reconnection = undefined
-
-        return attempt
-      } catch (err) {
-        if (this.closed) {
-          debug('could not reconnect because client is closed %o', { closed: this.closed, target: this.targetId })
-
-          this.enqueuedCommands = []
-
-          return
-        }
-
-        debug('could not reconnect, retrying... %o', { closed: this.closed, target: this.targetId, err })
-
-        if (retryIndex < 20) {
-          await new Promise((resolve) => setTimeout(resolve, 100))
-
-          return retry(retryIndex)
-        }
-
-        const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
-
-        // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
-        cdpError.isFatalApiErr = true
-        this.reconnection = undefined
-        this.onAsynchronousError(cdpError)
+      await this.protocolManager?.cdpReconnect()
+    } catch (e) {
+      if (this._isConnectionError(e)) {
+        return this.reconnect()
       }
+
+      throw e
     }
-
-    this.reconnection = retry()
-
-    return this.reconnection
   }
 
   private enqueueCommand <TCmd extends CdpCommand> (
@@ -461,7 +440,7 @@ export class CriClient implements ICriClient {
       // that we don't want to reconnect on
       && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     ) {
-      this.cri.on('disconnect', this.retryReconnect_deprecated)
+      this.cri.on('disconnect', this.reconnect)
     }
 
     // We're only interested in child target traffic. Browser cri traffic is
@@ -549,7 +528,7 @@ export class CriClient implements ICriClient {
 
         const p = this.enqueueCommand(command, params, sessionId)
 
-        await this.retryReconnect_deprecated()
+        await this.reconnect()
 
         // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
         if (this.enqueuedCommands.length === 0 && this.closed) {
@@ -590,6 +569,7 @@ export class CriClient implements ICriClient {
   }
 
   public close = async () => {
+    debug('closing')
     if (this._closed) {
       debug('not closing, cri client is already closed %o', { closed: this._closed, target: this.targetId })
 

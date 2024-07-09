@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
-import type { CriClient } from '../../../lib/browsers/cri-client'
 import { ProtocolManagerShape } from '@packages/types'
+import type { CriClient } from '../../../lib/browsers/cri-client'
+
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
@@ -123,7 +124,7 @@ describe('lib/browsers/cri-client', function () {
             const client = await getClient()
 
             await client.send('DOM.getDocument', { depth: -1 })
-            expect(send).to.be.called.times(3)
+            expect(send).to.have.callCount(3)
           })
         })
       })
