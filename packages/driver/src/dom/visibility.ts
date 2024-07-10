@@ -13,7 +13,7 @@ const { wrap } = $jquery
 let optionsObject = {
   checkOpacity: true,
   checkVisibilityCSS: true,
-  opacityPropert: true,
+  opacityProperty: true,
   contentVisibilityAuto: true,
 }
 
