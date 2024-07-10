@@ -34,7 +34,7 @@ const isVisible = (el) => {
     return !isHidden(el, 'isVisible()')
   }
 
-  if (isStrictlyNotVisibile(el)) {
+  if (isStrictlyNotVisible(el)) {
     return false
   }
 
@@ -152,7 +152,7 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   return false
 }
 
-const isStrictlyNotVisibile = (el) => {
+const isStrictlyNotVisible = (el) => {
   const $el = $jquery.wrap(el)
 
   if (elHasNoEffectiveWidthOrHeight($el)) {
