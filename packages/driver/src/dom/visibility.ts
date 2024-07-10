@@ -75,7 +75,7 @@ const checkIsOptionVisible = (el) => {
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
-const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
+const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true,
   contentVisibilityAuto: true }) => {
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
     return true
