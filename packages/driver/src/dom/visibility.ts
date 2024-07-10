@@ -171,7 +171,7 @@ const isStrictlyNotVisibile = (el) => {
   return false
 }
 
-const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityPropert: true,
+const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true,
   contentVisibilityAuto: true }) => {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
