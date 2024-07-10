@@ -78,10 +78,6 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true,
     return true
   }
 
-  if (Cypress.browser.family === 'webkit') {
-    return isHiddenByAncestors(el, methodName, { checkOpacity: true })
-  }
-
   return isHiddenByAncestors(el, methodName, options)
 }
 
