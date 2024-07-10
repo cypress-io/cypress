@@ -18,12 +18,36 @@ export type Command<T extends CdpCommand> = {
 export class CDPCommandQueue {
   private queue: Command<any>[] = []
 
-  public get length () {
-    return this.queue.length
-  }
-
   public get entries () {
     return [...this.queue]
+  }
+
+  public add <TCmd extends CdpCommand> (
+    command: TCmd,
+    params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
+    sessionId?: string,
+  ): Promise<CommandReturn<TCmd>> {
+    debug('enqueing command %s with params %o', command, params)
+
+    const deferred = pDefer<CommandReturn<TCmd>>()
+
+    const commandPackage: Command<TCmd> = {
+      command,
+      params,
+      deferred,
+      sessionId,
+    }
+
+    this.queue.push(commandPackage)
+
+    debug('Queue: %O', this.queue)
+
+    return deferred.promise
+  }
+
+  public clear () {
+    debug('clearing command queue')
+    this.queue = []
   }
 
   public extract<T extends CdpCommand> (search: Partial<Command<T>>): Command<T> | undefined {
@@ -48,48 +72,6 @@ export class CDPCommandQueue {
     const [extracted] = this.queue.splice(index, 1)
 
     return extracted
-  }
-
-  public add <TCmd extends CdpCommand> (
-    command: TCmd,
-    params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
-    sessionId?: string,
-    preventDuplicate?: boolean,
-  ): Promise<CommandReturn<TCmd>> {
-    debug('enqueing command %s with params %o', command, params)
-    if (preventDuplicate) {
-      const duplicateCommand = this.queue.find((enqueued) => {
-        return (
-          enqueued.command === command &&
-          enqueued.params === params &&
-          enqueued.sessionId === sessionId
-        )
-      })
-
-      if (duplicateCommand) {
-        return duplicateCommand.deferred.promise
-      }
-    }
-
-    const deferred = pDefer<CommandReturn<TCmd>>()
-
-    const commandPackage: Command<TCmd> = {
-      command,
-      params,
-      deferred,
-      sessionId,
-    }
-
-    this.queue.push(commandPackage)
-
-    debug('Queue: %O', this.queue)
-
-    return deferred.promise
-  }
-
-  public clear () {
-    debug('clearing command queue')
-    this.queue = []
   }
 
   public shift () {

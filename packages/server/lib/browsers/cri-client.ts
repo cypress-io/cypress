@@ -287,8 +287,8 @@ export class CriClient implements ICriClient {
   }
 
   private async drainCommandQueue () {
-    debug('sending %d enqueued commands', this._commandQueue.length)
-    while (this._commandQueue.length) {
+    debug('sending %d enqueued commands', this._commandQueue.entries.length)
+    while (this._commandQueue.entries.length) {
       const enqueued = this._commandQueue.shift()
 
       if (!enqueued) {
@@ -403,9 +403,8 @@ export class CriClient implements ICriClient {
     command: TCmd,
     params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
     sessionId?: string,
-    preventDuplicate?: boolean,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
-    return this._commandQueue.add(command, params, sessionId, preventDuplicate)
+    return this._commandQueue.add(command, params, sessionId)
   }
 
   private _isConnectionError (error: Error) {
