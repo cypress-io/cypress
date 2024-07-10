@@ -78,6 +78,10 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true,
     return true
   }
 
+  if (Cypress.browser.family === 'webkit') {
+    return isHiddenByAncestors(el, methodName, { checkOpacity: true })
+  }
+
   return isHiddenByAncestors(el, methodName, options)
 }
 
@@ -168,8 +172,7 @@ const isStrictlyNotVisible = (el) => {
   return false
 }
 
-const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true,
-  contentVisibilityAuto: true }) => {
+const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true }) => {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
 
