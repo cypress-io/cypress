@@ -219,6 +219,8 @@ export class CriClient implements ICriClient {
     return this.cri!._ws
   }
 
+  // this property is accessed in a couple different places, but should be refactored to be
+  // private - queues are internal to this class, and should not be exposed
   get queue () {
     return {
       enableCommands: this.enableCommands,
