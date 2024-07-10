@@ -61,6 +61,13 @@ interface CDPClient extends CDP.Client {
   _ws: WebSocket
 }
 
+class ConnectionClosedError extends Error {
+  static kind: 'CONNECTION_CLOSED'
+  static isConnectionClosedError (err: Error & { kind?: any }): err is ConnectionClosedError {
+    return err.kind === ConnectionClosedError.kind
+  }
+}
+
 export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
   maxTotalBufferSize: 0,
   maxResourceBufferSize: 0,
@@ -253,19 +260,17 @@ export class CriClient implements ICriClient {
 
   private async restoreState () {
     debug('resubscribing to %d subscriptions', this.subscriptions.length)
-    // resubscribe
+
     this.subscriptions.forEach((sub) => {
       this.cri?.on(sub.eventName, sub.cb as any)
     })
 
-    // re-enable
     // '*.enable' commands need to be resent on reconnect or any events in
     // that namespace will no longer be received
     debug('re-enabling %d enablements', this.enableCommands.length)
     await Promise.all(this.enableCommands.map(async ({ command, params, sessionId }) => {
       // these commands may have been enqueued, so we need to resolve those promises and remove
       // them from the queue when we send here
-
       const inFlightCommand = this._commandQueue.extract({ command, params, sessionId })
 
       try {
@@ -275,11 +280,11 @@ export class CriClient implements ICriClient {
       } catch (err) {
         debug('error re-enabling %s: ', command, err)
         if (this._isConnectionError(err)) {
-          // if this is a connection error, state restoration should be halted
-          // and reconnection attempted. Otherwise, rejecting the original
-          // command promise is warranted.
+          // Connection errors are thrown here so that a reconnection attempt
+          // can be made.
           throw err
         } else {
+          // non-connection errors are appropriate for rejecting the original command promise
           inFlightCommand?.deferred.reject(err)
         }
       }
@@ -305,6 +310,9 @@ export class CriClient implements ICriClient {
       } catch (e) {
         debug('enqueued command %s failed:', enqueued.command, e)
         if (this._isConnectionError(e)) {
+          // similar to restoring state, connection errors are re-thrown so that
+          // the connection can be restored. The command is queued for re-delivery
+          // upon reconnect.
           debug('re-enqueuing command and re-throwing')
           this._commandQueue.unshift(enqueued)
           throw e
@@ -333,10 +341,13 @@ export class CriClient implements ICriClient {
     }
 
     let attempt = 1
-    let retryHaltedDueToClosed = false
 
     try {
       this.reconnection = asyncRetry(() => {
+        if (this.closed) {
+          throw new ConnectionClosedError('Reconnection halted due to a closed client.')
+        }
+
         this.onReconnectAttempt?.(attempt)
         attempt++
 
@@ -346,11 +357,7 @@ export class CriClient implements ICriClient {
         retryDelay: () => 100,
         shouldRetry: (err) => {
           debug('error while reconnecting to Target %s: %o', this.targetId, err)
-          if (this.closed) {
-            retryHaltedDueToClosed = true
-            debug('could not reconnect to Target %s because client is closed. halting retries. ', this.targetId)
-            this._commandQueue.clear()
-
+          if (err && ConnectionClosedError.isConnectionClosedError(err)) {
             return false
           }
 
@@ -364,14 +371,18 @@ export class CriClient implements ICriClient {
       this.reconnection = undefined
       debug('reconnected')
     } catch (err) {
-      debug('error on reconnecting. halted: %s', retryHaltedDueToClosed, err)
+      debug('error(s) on reconnecting: ', err)
       const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
 
-      if (!retryHaltedDueToClosed) {
+      const retryHaltedDueToClosed = ConnectionClosedError.isConnectionClosedError(err) ||
+       (err as AggregateError)?.errors?.find((predicate) => ConnectionClosedError.isConnectionClosedError(predicate))
+
+      if (retryHaltedDueToClosed) {
         const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', significantError)
 
         cdpError.isFatalApiErr = true
         this.reconnection = undefined
+        this._commandQueue.clear()
         this.onAsynchronousError(cdpError)
       }
 
@@ -393,7 +404,10 @@ export class CriClient implements ICriClient {
     }
 
     // previous timing of this had it happening before subscriptions/enablements were restored,
-    // and before any enqueued commands were sent. This was probably incorrect.
+    // and before any enqueued commands were sent. This made testing problematic. Changing the
+    // timing may have implications for browsers that wish to update frame tree - that process
+    // will now be kicked off after state restoration & pending commands, rather then before.
+    // This warrants extra scrutiny in tests. (convert to PR comment)
     if (this.onReconnect) {
       this.onReconnect(this)
     }
