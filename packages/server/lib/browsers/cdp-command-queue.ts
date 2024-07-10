@@ -7,7 +7,6 @@ const debug = Debug('cypress:server:browsers:cdp-command-queue')
 
 type CommandReturn<T extends CdpCommand> = ProtocolMapping.Commands[T]['returnType']
 
-//type DeferredPromise = { resolve: Function, reject: Function }
 export type Command<T extends CdpCommand> = {
   command: T
   params?: object

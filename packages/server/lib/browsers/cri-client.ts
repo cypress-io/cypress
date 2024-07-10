@@ -61,10 +61,12 @@ interface CDPClient extends CDP.Client {
   _ws: WebSocket
 }
 
+const ConnectionClosedKind: 'CONNECTION_CLOSED' = 'CONNECTION_CLOSED'
+
 class ConnectionClosedError extends Error {
-  static kind: 'CONNECTION_CLOSED'
+  public readonly kind = ConnectionClosedKind
   static isConnectionClosedError (err: Error & { kind?: any }): err is ConnectionClosedError {
-    return err.kind === ConnectionClosedError.kind
+    return err.kind === ConnectionClosedKind
   }
 }
 
