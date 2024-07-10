@@ -34,16 +34,6 @@ describe('src/cypress/dom/visibility_css_position', () => {
   </div>
 </div>`)
 
-      this.$parentNoHeight = add(`\
-<div style='width: 100px; height: 0px; overflow: hidden;'>
-  <span id='parentNoHeight'>parent height: 0</span>
-</div>`)
-
-      this.$parentNoWidthHeightOverflowAuto = add(`\
-<div style='width: 0; height: 0px; overflow: auto;'>
-  <span id='parentNoWidthHeightOverflowAuto'>parent no size, overflow: auto</span>
-</div>`)
-
       this.$parentWithWidthHeightNoOverflow = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden;'>
   <div style='height: 100px; width: 100px;'>
@@ -109,12 +99,6 @@ describe('src/cypress/dom/visibility_css_position', () => {
     <span id='parentPosAbs'>parent position: absolute</span>
   </div>
 </div>`)
-
-      this.$parentDisplayNone = add(`\
-<div id="none" style='display: none;'>
-  <span>parent display: none</span>
-</div>\
-`)
 
       this.$parentPointerEventsNone = add(`\
 <div style="pointer-events: none">
