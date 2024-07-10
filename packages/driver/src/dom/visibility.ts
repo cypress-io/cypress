@@ -20,14 +20,8 @@ let optionsObject = {
 const isVisible = (el) => {
   ensureEl(el, 'isVisible()')
 
-  const optionIsVisible = checkIsOptionVisible(el)
-
-  if (optionIsVisible === true) {
-    return true
-  }
-
-  if (optionIsVisible > 1) {
-    return false
+  if (checkIsOption(el) === true) {
+    return isOptionVisible(el)
   }
 
   if (!(typeof el.checkVisibility === 'function')) {
@@ -45,31 +39,34 @@ const isVisible = (el) => {
   return isHiddenByAncestors(el, 'isVisible', optionsObject)
 }
 
-const checkIsOptionVisible = (el) => {
+const checkIsOption = (el) => {
   // an option is considered visible if its parent select is visible
   if (isOption(el) || isOptgroup(el)) {
-    const $el = $jquery.wrap(el)
-
-    if (elHasDisplayNone($el)) {
-      return 2
-    }
-
-    // if its parent select is visible, then it's not hidden
-    const $select = getFirstParentWithTagName($el, 'select')
-
-    if ($select && $select.length) {
-      // if the select is hidden, the options in it are not visible too
-      if (isStrictlyHidden($select)) {
-        return 2 //this signal not visible
-      }
-    }
-
-    return true //this signal visible
+    return true
   }
 
-  return 0 //this signal not option element
+  return false
 }
 
+const isOptionVisible = (el: any) => {
+  const $el = $jquery.wrap(el)
+
+  if (elHasDisplayNone($el)) {
+    return false
+  }
+
+  // if its parent select is visible, then it's not hidden
+  const $select = getFirstParentWithTagName($el, 'select')
+
+  if ($select && $select.length) {
+    // if the select is hidden, the options in it are not visible too
+    if (isStrictlyHidden($select)) {
+      return false
+    }
+  }
+
+  return true
+}
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
