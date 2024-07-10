@@ -10,6 +10,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
   const { nextVersion } = await getNextVersionForBinary()
 
   const body = JSON.stringify({
+    branch: 'cole/fix-centos-package-mirrors',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
