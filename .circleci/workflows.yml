@@ -2635,9 +2635,7 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install:
-        # NOTE: Centos reached EOL on July 1st, 2024. The centos7-builder.Dockerfile no longer works in the manner in which we are using to rebuild better-sqlite3, so for now to unblock
-        # develop we will not be rebuilding better-sqlite3. However, a solution to this is likely needed as it can be considered a breaking change due to centos 7 extended support.
-        build-better-sqlite3: false
+        build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
         requires:
