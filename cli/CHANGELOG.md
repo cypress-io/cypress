@@ -5,7 +5,11 @@ _Released 7/16/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227)
+- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227).
+
+**Dependency Updates:**
+
+- Updated `jquery` from `3.1.1` to `3.4.1`. Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
 
 ## 13.13.0
 
