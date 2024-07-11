@@ -179,7 +179,23 @@ $scrollTo.max = function (elem, axis) {
   let scroll = `scroll${Dim}`
 
   if (!isWin(elem)) {
-    return elem[scroll] - $(elem)[Dim.toLowerCase()]()
+    // THIS LINES BELOW WERE CHANGED FOR CYPRESS AND IS NOT ORIGINAL TO JQUERY SCROLLTO
+    // original code is: `return elem[scroll] - $(elem)[Dim.toLowerCase()]()`
+    // which would call into jQuery's .width() or .height() methods
+    //
+    // Starting in jQuery 3.2.0, the width and height functions return the
+    // width and height of an element minus the width/height of any scrollbars
+    // (there is some lamenting of the scrollbars with width/height in this issue:
+    // https://github.com/jquery/jquery/issues/4255)
+    // so we need to use innerWidth/innerHeight and manually subtracting the padding
+    // to match the previous behavior of our scrollTo method.
+    // https://github.com/jquery/jquery/pull/3656
+    //
+    // TODO: Honestly, the new width/height calc in jQuery 3.2+ with scrollTo would be more accurate
+    // and we should switch to it when we have a breaking change, but breaking things is hard to do.
+    const getNumAttrValue = (elem, attr) => parseInt($(elem).css(attr).replace(/[^0-9\.-]+/, ''))
+
+    return elem[scroll] - $(elem)[`inner${Dim}`]() - getNumAttrValue(elem, 'padding-left') - getNumAttrValue(elem, 'padding-right')
   }
 
   let size = `client${ Dim}`
