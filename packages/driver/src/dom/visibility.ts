@@ -28,6 +28,11 @@ const isVisible = (el) => {
     return !isHidden(el, 'isVisible()')
   }
 
+  // the body and html are always visible
+  if (isBody(el) || isHTML(el)) {
+    return true // is visible
+  }
+
   if (isStrictlyNotVisible(el)) {
     return false
   }

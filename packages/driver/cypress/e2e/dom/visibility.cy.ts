@@ -528,10 +528,10 @@ describe('src/cypress/dom/visibility', () => {
         cy.$$('body').css('display', 'none')
 
         expect(cy.$$('html')).not.to.be.hidden
-        // expect(cy.$$('html')).to.be.visible
+        expect(cy.$$('html')).to.be.visible
 
         expect(cy.$$('body')).not.to.be.hidden
-        // expect(cy.$$('body')).to.be.visible
+        expect(cy.$$('body')).to.be.visible
       })
     })
 
