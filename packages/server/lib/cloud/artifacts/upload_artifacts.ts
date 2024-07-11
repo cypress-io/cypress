@@ -16,7 +16,7 @@ import { NetworkError } from '../network/network_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
-const rmWspAndTrim = (str: string) => {
+const removeWhitespaceAndTrim = (str: string) => {
   return str.split(/\n/)
   .map((line) => {
     return line.trim()
