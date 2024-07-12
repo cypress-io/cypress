@@ -1138,6 +1138,9 @@ describe('lib/util/ci_provider', () => {
       BUILD_CONTAINERID: 'containerId',
       BUILD_REPOSITORY_URI: 'buildRepositoryUri',
       SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: 'systemPullrequestPullrequestnumber',
+      SYSYSTEM_PULLREQUEST_TARGETBRANCH: 'defaultBranch',
+      SYSTEM_JOBID: 'jobid',
+      SYSTEM_JOBATTEMPT: 'attempt',
 
       BUILD_SOURCEVERSION: 'commit',
       BUILD_SOURCEBRANCHNAME: 'branch',
@@ -1153,11 +1156,14 @@ describe('lib/util/ci_provider', () => {
       buildContainerid: 'containerId',
       buildRepositoryUri: 'buildRepositoryUri',
       systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
+      systemJobid: 'jobid',
+      systemJobattempt: 'attempt',
     })
 
     return expectsCommitParams({
       sha: 'commit',
       branch: 'branch',
+      defaultBranch: 'defaultBranch',
       message: 'message',
       authorName: 'name',
       authorEmail: 'email',

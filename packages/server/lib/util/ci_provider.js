@@ -159,6 +159,8 @@ const _providerCiParams = () => {
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
+      'SYSTEM_JOBID',
+      'SYSTEM_JOBATTEMPT',
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
     ]),
     awsCodeBuild: extract([
@@ -465,6 +467,7 @@ const _providerCommitParams = () => {
     azure: {
       sha: env.BUILD_SOURCEVERSION,
       branch: env.BUILD_SOURCEBRANCHNAME,
+      defaultBranch: env.SYSYSTEM_PULLREQUEST_TARGETBRANCH,
       message: env.BUILD_SOURCEVERSIONMESSAGE,
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
       authorEmail: env.BUILD_REQUESTEDFOREMAIL,
