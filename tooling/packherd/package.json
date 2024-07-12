@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-integration",
-    "test-integration": "mocha --config ./test/.mocharc.js",
+    "test-integration": "mocha --config ./test/.mocharc.js --exit",
     "watch": "tsc --watch"
   },
   "dependencies": {

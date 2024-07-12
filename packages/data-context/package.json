@@ -12,7 +12,7 @@
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --exit --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {

@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
-    "test-unit": "mocha --config ./test/.mocharc.js",
+    "test-unit": "mocha --config ./test/.mocharc.js --exit",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },

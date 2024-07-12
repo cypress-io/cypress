@@ -14,7 +14,7 @@
     "dev": "tsc --watch",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "find-up": "6.3.0",
