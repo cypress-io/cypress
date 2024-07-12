@@ -279,7 +279,7 @@ describe('src/cypress/dom/visibility', () => {
       this.$ancestorNoHeight = add(`\
       <div style='width: 100px; height: 0px; overflow: hidden;'>
         <div>
-          <span>ancestor width: 0</span>
+          <span>ancestor height: 0</span>
         </div>
       </div>`)
 
