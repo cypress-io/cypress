@@ -762,7 +762,7 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$ancestorNoWidth.find('span')).to.not.be.visible
       })
 
-      it('is hidden if ancestor has overflow:hidden and no height', () => {
+      it('is hidden if ancestor has overflow:hidden and no height', function () {
         expect(this.$ancestorNoHeight.find('span')).to.be.hidden
         expect(this.$ancestorNoHeight.find('span')).to.not.be.visible
       })
