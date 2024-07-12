@@ -11,6 +11,7 @@ _Released 7/16/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Updated `jquery` from `3.1.1` to `3.4.1`. Addresses [#29822](https://github.com/cypress-io/cypress/issues/29822). Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
 
 ## 13.13.0
