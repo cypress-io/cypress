@@ -113,6 +113,7 @@ describe('CDP Clients', () => {
   })
 
   afterEach(async () => {
+    debug('after each,', !!wsSrv)
     await criClient.close().catch(() => { })
     await closeWsServer()
   })
@@ -173,6 +174,32 @@ describe('CDP Clients', () => {
         expect(stub).to.be.calledWith(20)
         expect(stub.callCount).to.be.eq(20)
       })
+    })
+
+    it('stops trying to reconnect if .close() is called, and does not trigger an async error', async () => {
+      const stub = sinon.stub()
+      const onCriConnectionClosed = sinon.stub()
+      const haltedReconnection = new Promise<void>(async (resolve, reject) => {
+        onCriConnectionClosed.callsFake(resolve)
+        criClient = await CriClient.create({
+          target: `ws://127.0.0.1:${wsServerPort}`,
+          onAsynchronousError: reject,
+          onReconnect: reject,
+          onReconnectAttempt: stub,
+          onCriConnectionClosed,
+        })
+
+        await Promise.all([
+          clientDisconnected(),
+          closeWsServer(),
+        ])
+
+        criClient.close()
+      })
+
+      await haltedReconnection
+
+      expect(onCriConnectionClosed).to.have.been.called
     })
 
     it('continuously re-sends commands that fail due to disconnect, until target is closed', async () => {

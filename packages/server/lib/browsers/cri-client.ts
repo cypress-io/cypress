@@ -189,6 +189,7 @@ type CreateParams = {
   fullyManageTabs?: boolean
   browserClient?: ICriClient
   onReconnectAttempt?: (retryIndex: number) => void
+  onCriConnectionClosed?: () => void
 }
 
 export class CriClient implements ICriClient {
@@ -215,6 +216,7 @@ export class CriClient implements ICriClient {
     private fullyManageTabs?: boolean,
     private browserClient?: ICriClient,
     private onReconnectAttempt?: (retryIndex: number) => void,
+    private onCriConnectionClosed?: () => void,
   ) {}
 
   static async create ({
@@ -227,8 +229,9 @@ export class CriClient implements ICriClient {
     fullyManageTabs,
     browserClient,
     onReconnectAttempt,
+    onCriConnectionClosed,
   }: CreateParams): Promise<CriClient> {
-    const newClient = new CriClient(target, onAsynchronousError, host, port, onReconnect, protocolManager, fullyManageTabs, browserClient, onReconnectAttempt)
+    const newClient = new CriClient(target, onAsynchronousError, host, port, onReconnect, protocolManager, fullyManageTabs, browserClient, onReconnectAttempt, onCriConnectionClosed)
 
     await newClient.connect()
 
@@ -445,6 +448,9 @@ export class CriClient implements ICriClient {
       debug('error closing cri client targeting %s: %o', this.targetId, e)
     } finally {
       debug('closed cri client %o', { closed: this._closed, target: this.targetId })
+      if (this.onCriConnectionClosed) {
+        this.onCriConnectionClosed()
+      }
     }
   }
 
@@ -481,7 +487,7 @@ export class CriClient implements ICriClient {
 
     try {
       this.reconnection = asyncRetry(() => {
-        if (this.closed) {
+        if (this._closed) {
           throw new ConnectionClosedError('Reconnection halted due to a closed client.')
         }
 
@@ -514,7 +520,7 @@ export class CriClient implements ICriClient {
       const retryHaltedDueToClosed = ConnectionClosedError.isConnectionClosedError(err) ||
        (err as AggregateError)?.errors?.find((predicate) => ConnectionClosedError.isConnectionClosedError(predicate))
 
-      if (retryHaltedDueToClosed) {
+      if (!retryHaltedDueToClosed) {
         const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', significantError)
 
         cdpError.isFatalApiErr = true
