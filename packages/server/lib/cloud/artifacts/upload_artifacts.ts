@@ -37,7 +37,7 @@ const toUploadReportPayload = (acc: {
     if (allErrors) {
       const messages = allErrors.map((error) => {
         return (HttpError.isHttpError(error) && error.responseBody) ?
-      `${error.message}: ${rmWspAndTrim(error.responseBody)}` :
+      `${error.message}: ${removeWhitespaceAndTrim(error.responseBody)}` :
           error.message
       })
 
