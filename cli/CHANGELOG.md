@@ -5,7 +5,8 @@ _Released 07/16/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227)
+- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227).
+- Fixed an issue where command snapshots were not being captured within the `cy.origin()` command within Test Replay. Addressed in [#29828](https://github.com/cypress-io/cypress/pull/29828).
 - Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
 
 ## 13.13.0
