@@ -4001,7 +4001,6 @@
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/lib/uri.ts",
-    "./packages/network/node_modules/brace-expansion/index.js",
     "./packages/network/node_modules/proxy-from-env/index.js",
     "./packages/proxy/lib/http/error-middleware.ts",
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
@@ -4217,7 +4216,6 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/legacy-streams.js",
     "./packages/server/node_modules/@benmalka/foxdriver/package.json",
     "./packages/server/node_modules/ansi-regex/index.js",
-    "./packages/server/node_modules/brace-expansion/index.js",
     "./packages/server/node_modules/cli-table3/index.js",
     "./packages/server/node_modules/cli-table3/src/cell.js",
     "./packages/server/node_modules/cli-table3/src/layout-manager.js",
@@ -4348,5 +4346,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8327ad15454db8b5cbaf0dfa8484e418279a74d64e434c0d8a3c210276b37141"
+  "deferredHash": "8761f5ef513e3eb56db5c26ff6eb649cbf668cda25c910efbbc42ac27af745d0"
 }
