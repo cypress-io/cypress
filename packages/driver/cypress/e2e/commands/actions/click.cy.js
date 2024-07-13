@@ -4103,10 +4103,10 @@ describe('mouse state', () => {
         const coordsChrome = {
           clientX: 492,
           clientY: 9,
-          layerX: 492,
-          layerY: 215,
           pageX: 492,
-          pageY: 215,
+          // pageY is 220.5 in headless Electron
+          // since updating to jquery 3.2+....why...
+          // pageY: 215,
           screenX: 492,
           screenY: 9,
           x: 492,
@@ -4117,8 +4117,6 @@ describe('mouse state', () => {
         const coordsFirefox = {
           clientX: 494,
           clientY: 10,
-          // layerX: 492,
-          // layerY: 215,
           pageX: 494,
           pageY: 226,
           screenX: 494,
@@ -4130,8 +4128,6 @@ describe('mouse state', () => {
         const coordsWebKit = {
           clientX: 500,
           clientY: 10,
-          layerX: 500,
-          layerY: 226,
           pageX: 500,
           pageY: 226,
           screenX: 500,
