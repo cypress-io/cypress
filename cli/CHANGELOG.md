@@ -12,6 +12,7 @@ _Released 7/16/2024 (PENDING)_
 **Dependency Updates:**
 
 - Updated `jquery` from `3.1.1` to `3.4.1`. Addresses [#29822](https://github.com/cypress-io/cypress/issues/29822). Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
+- Replaced `json-lint` with `json-parse-even-better-errors`. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
 
 ## 13.13.0
@@ -33,6 +34,7 @@ _Released 7/01/2024_
 
 **Dependency Updates:**
 
+- Replaced `json-lint` with `json-parse-even-better-errors`. This removes the CVE-2021-23358 vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
 - Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
 - Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
