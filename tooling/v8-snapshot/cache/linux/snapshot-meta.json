@@ -2316,7 +2316,6 @@
     "./node_modules/json5/lib/stringify.js",
     "./node_modules/json5/lib/unicode.js",
     "./node_modules/json5/lib/util.js",
-    "./node_modules/jsonlint/lib/jsonlint.js",
     "./node_modules/jsprim/lib/jsprim.js",
     "./node_modules/launch-editor/editor-info/linux.js",
     "./node_modules/launch-editor/editor-info/macos.js",
@@ -4242,6 +4241,7 @@
     "./packages/server/node_modules/http-proxy/lib/http-proxy/passes/web-outgoing.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js",
     "./packages/server/node_modules/is-fullwidth-code-point/index.js",
+    "./packages/server/node_modules/json-parse-even-better-errors/lib/index.js",
     "./packages/server/node_modules/mime-db/db.json",
     "./packages/server/node_modules/mime-db/index.js",
     "./packages/server/node_modules/mime/Mime.js",
@@ -4349,5 +4349,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8761f5ef513e3eb56db5c26ff6eb649cbf668cda25c910efbbc42ac27af745d0"
+  "deferredHash": "c11df6600a1f3e67f3153adc488af6469cddc95152f39b7d4f076b45bd786172"
 }
