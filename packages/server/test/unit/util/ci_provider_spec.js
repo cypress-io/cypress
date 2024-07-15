@@ -353,7 +353,6 @@ describe('lib/util/ci_provider', () => {
   it('circle', () => {
     resetEnv = mockedEnv({
       CIRCLECI: 'true',
-
       CIRCLE_JOB: 'circleJob',
       CIRCLE_BUILD_NUM: 'circleBuildNum',
       CIRCLE_BUILD_URL: 'circleBuildUrl',
@@ -361,7 +360,9 @@ describe('lib/util/ci_provider', () => {
       CIRCLE_PR_REPONAME: 'circlePrReponame',
       CIRCLE_PR_USERNAME: 'circlePrUsername',
       CIRCLE_COMPARE_URL: 'circleCompareUrl',
+      CIRCLE_PIPELINE_ID: 'circlePipelineId',
       CIRCLE_WORKFLOW_ID: 'circleWorkflowId',
+      CIRCLE_WORKFLOW_JOB_ID: 'circleWorkflowJobId',
       CIRCLE_PULL_REQUEST: 'circlePullRequest',
       CIRCLE_REPOSITORY_URL: 'circleRepositoryUrl',
       CI_PULL_REQUEST: 'ciPullRequest',
@@ -380,7 +381,9 @@ describe('lib/util/ci_provider', () => {
       circlePrReponame: 'circlePrReponame',
       circlePrUsername: 'circlePrUsername',
       circleCompareUrl: 'circleCompareUrl',
+      circlePipelineId: 'circlePipelineId',
       circleWorkflowId: 'circleWorkflowId',
+      circleWorkflowJobId: 'circleWorkflowJobId',
       circlePullRequest: 'circlePullRequest',
       circleRepositoryUrl: 'circleRepositoryUrl',
       ciPullRequest: 'ciPullRequest',
@@ -1153,6 +1156,7 @@ describe('lib/util/ci_provider', () => {
       BUILD_BUILDNUMBER: 'buildNumber',
       BUILD_CONTAINERID: 'containerId',
       BUILD_REPOSITORY_URI: 'buildRepositoryUri',
+      SYSTEM_PLANID: 'planId',
       SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: 'systemPullrequestPullrequestnumber',
       SYSTEM_PULLREQUEST_TARGETBRANCH: 'targetBranch',
       SYSTEM_PULLREQUEST_TARGETBRANCHNAME: 'targetBranchName',
@@ -1174,6 +1178,7 @@ describe('lib/util/ci_provider', () => {
       buildBuildnumber: 'buildNumber',
       buildContainerid: 'containerId',
       buildRepositoryUri: 'buildRepositoryUri',
+      systemPlanid: 'planId',
       systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
       systemPullrequestTargetbranch: 'targetBranch',
       systemPullrequestTargetbranchname: 'targetBranchName',
