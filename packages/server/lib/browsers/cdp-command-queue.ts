@@ -4,6 +4,7 @@ import type { CdpCommand } from './cdp_automation'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:browsers:cdp-command-queue')
+const debugVerbose = Debug('cypress:server:browsers:cd-command-queue')
 
 type CommandReturn<T extends CdpCommand> = ProtocolMapping.Commands[T]['returnType']
 
@@ -26,7 +27,8 @@ export class CDPCommandQueue {
     params: ProtocolMapping.Commands[TCmd]['paramsType'][0],
     sessionId?: string,
   ): Promise<CommandReturn<TCmd>> {
-    debug('enqueing command %s with params %o', command, params)
+    debug('enqueing command %s', command)
+    debugVerbose('enqueing command %s with params %o', command, params)
 
     const deferred = pDefer<CommandReturn<TCmd>>()
 
@@ -39,7 +41,8 @@ export class CDPCommandQueue {
 
     this.queue.push(commandPackage)
 
-    debug('Queue: %O', this.queue)
+    debug('Command enqueued; new length: %d', this.queue.length)
+    debugVerbose('Queue Contents: %O', this.queue)
 
     return deferred.promise
   }
