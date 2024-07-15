@@ -444,6 +444,8 @@ describe('lib/util/ci_provider', () => {
       CI_COMMIT_MESSAGE: 'ciCommitMessage',
       CI_COMMITTER_NAME: 'ciCommitterName',
       CI_COMMITTER_EMAIL: 'ciCommitterEmail',
+      CI_PR_NUMBER: 'prNumber',
+      CI_PULL_REQUEST: 'pullRequest',
     }, { clear: true })
 
     expectsName('codeshipPro')
@@ -451,6 +453,8 @@ describe('lib/util/ci_provider', () => {
       ciBuildId: 'ciBuildId',
       ciRepoName: 'ciRepoName',
       ciProjectId: 'ciProjectId',
+      ciPrNumber: 'prNumber',
+      ciPullRequest: 'pullRequest',
     })
 
     return expectsCommitParams({
@@ -568,6 +572,7 @@ describe('lib/util/ci_provider', () => {
       GITHUB_ACTION: 'ciGitHubActionId',
       GITHUB_EVENT_NAME: 'ciEventName',
       GITHUB_RUN_ID: 'ciGithubRunId',
+      GITHUB_JOB: 'jobName',
       GITHUB_RUN_ATTEMPT: 'ciGithubRunAttempt',
       GITHUB_REPOSITORY: 'ciGithubRepository',
       GITHUB_SHA: 'ciCommitSha',
@@ -586,6 +591,7 @@ describe('lib/util/ci_provider', () => {
       githubRepository: 'ciGithubRepository',
       githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
+      githubJob: 'jobName',
       githubBaseRef: 'ciBaseRef',
       githubHeadRef: 'ciHeadRef',
       githubRefName: 'ciRefName',
@@ -653,6 +659,8 @@ describe('lib/util/ci_provider', () => {
       CI_COMMIT_MESSAGE: 'ciCommitMessage',
       GITLAB_USER_NAME: 'gitlabUserName',
       GITLAB_USER_EMAIL: 'gitlabUserEmail',
+      CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: 'sourceBranchName',
+      CI_MERGE_REQUEST_SOURCE_BRANCH_SHA: 'sourceBranchSha',
     }, { clear: true })
 
     expectsName('gitlab')
@@ -669,6 +677,8 @@ describe('lib/util/ci_provider', () => {
       ciRepositoryUrl: 'ciRepositoryUrl',
       ciEnvironmentUrl: 'ciEnvironmentUrl',
       ciDefaultBranch: 'ciDefaultBranch',
+      ciMergeRequestSourceBranchName: 'sourceBranchName',
+      ciMergeRequestSourceBranchSha: 'sourceBranchSha',
     })
 
     expectsCommitParams({
@@ -741,6 +751,9 @@ describe('lib/util/ci_provider', () => {
 
       COMMIT_SHA: 'commitSha',
       BRANCH_NAME: 'branchName',
+      _HEAD_BRANCH: 'headBranch',
+      _BASE_BRANCH: 'baseBranch',
+      _PR_NUMBER: 'prNumber',
     }, { clear: true })
 
     expectsName('googleCloud')
@@ -749,6 +762,9 @@ describe('lib/util/ci_provider', () => {
       projectId: 'projectId',
       commitSha: 'commitSha',
       branchName: 'branchName',
+      headBranch: 'headBranch',
+      baseBranch: 'baseBranch',
+      prNumber: 'prNumber',
     })
 
     expectsCommitParams({
@@ -1138,9 +1154,12 @@ describe('lib/util/ci_provider', () => {
       BUILD_CONTAINERID: 'containerId',
       BUILD_REPOSITORY_URI: 'buildRepositoryUri',
       SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: 'systemPullrequestPullrequestnumber',
-      SYSYSTEM_PULLREQUEST_TARGETBRANCH: 'defaultBranch',
+      SYSTEM_PULLREQUEST_TARGETBRANCH: 'targetBranch',
+      SYSTEM_PULLREQUEST_TARGETBRANCHNAME: 'targetBranchName',
       SYSTEM_JOBID: 'jobid',
-      SYSTEM_JOBATTEMPT: 'attempt',
+      SYSTEM_STAGEATTEMPT: 'stageAttempt',
+      SYSTEM_PHASEATTEMPT: 'phaseAttempt',
+      SYSTEM_JOBATTEMPT: 'jobAttempt',
 
       BUILD_SOURCEVERSION: 'commit',
       BUILD_SOURCEBRANCHNAME: 'branch',
@@ -1156,14 +1175,17 @@ describe('lib/util/ci_provider', () => {
       buildContainerid: 'containerId',
       buildRepositoryUri: 'buildRepositoryUri',
       systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
+      systemPullrequestTargetbranch: 'targetBranch',
+      systemPullrequestTargetbranchname: 'targetBranchName',
       systemJobid: 'jobid',
-      systemJobattempt: 'attempt',
+      systemStageattempt: 'stageAttempt',
+      systemPhaseattempt: 'phaseAttempt',
+      systemJobattempt: 'jobAttempt',
     })
 
     return expectsCommitParams({
       sha: 'commit',
       branch: 'branch',
-      defaultBranch: 'defaultBranch',
       message: 'message',
       authorName: 'name',
       authorEmail: 'email',

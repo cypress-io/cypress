@@ -154,14 +154,19 @@ const _providerCiParams = () => {
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
     ]),
+    // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
     azure: extract([
       'BUILD_BUILDID',
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
       'SYSTEM_JOBID',
+      'SYSTEM_STAGEATTEMPT',
+      'SYSTEM_PHASEATTEMPT',
       'SYSTEM_JOBATTEMPT',
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
+      'SYSTEM_PULLREQUEST_TARGETBRANCH',
+      'SYSTEM_PULLREQUEST_TARGETBRANCHNAME',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
@@ -226,6 +231,8 @@ const _providerCiParams = () => {
       'CI_BUILD_ID',
       'CI_REPO_NAME',
       'CI_PROJECT_ID',
+      'CI_PR_NUMBER',
+      'CI_PULL_REQUEST',
     ]),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
     concourse: extract([
@@ -268,6 +275,7 @@ const _providerCiParams = () => {
       'GITHUB_HEAD_REF',
       'GITHUB_REF_NAME',
       'GITHUB_REF',
+      'GITHUB_JOB',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -286,7 +294,9 @@ const _providerCiParams = () => {
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
       'CI_DEFAULT_BRANCH',
-    // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME',
+      'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA',
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
@@ -314,6 +324,9 @@ const _providerCiParams = () => {
       'TAG_NAME',
       'COMMIT_SHA',
       'SHORT_SHA',
+      '_HEAD_BRANCH',
+      '_BASE_BRANCH',
+      '_PR_NUMBER',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
     /**
@@ -467,7 +480,6 @@ const _providerCommitParams = () => {
     azure: {
       sha: env.BUILD_SOURCEVERSION,
       branch: env.BUILD_SOURCEBRANCHNAME,
-      defaultBranch: env.SYSYSTEM_PULLREQUEST_TARGETBRANCH,
       message: env.BUILD_SOURCEVERSIONMESSAGE,
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
       authorEmail: env.BUILD_REQUESTEDFOREMAIL,
