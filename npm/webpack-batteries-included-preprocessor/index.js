@@ -97,28 +97,6 @@ const addTypeScriptConfig = (file, options) => {
   return options
 }
 
-/**
- * Config yarn pnp plugin for webpack 4
- * @param {*} file file to be processed
- * @param {*} options
- */
-const addYarnPnpConfig = (file, options) => {
-  const { makeResolver } = require('pnp-webpack-plugin/resolver')
-  const findPnpApi = require('module').findPnpApi
-
-  if (findPnpApi && file.filePath) {
-    const pnpapi = findPnpApi(file.filePath)
-
-    if (pnpapi) {
-      const PnpPlugin = {
-        apply: makeResolver({ pnpapi }),
-      }
-
-      options.webpackOptions.resolve.plugins.push(PnpPlugin)
-    }
-  }
-}
-
 const getDefaultWebpackOptions = () => {
   return {
     mode: 'development',
@@ -238,11 +216,6 @@ const preprocessor = (options = {}) => {
 
     if (options.typescript) {
       options = addTypeScriptConfig(file, options)
-    }
-
-    if (process.versions.pnp) {
-      // pnp path
-      addYarnPnpConfig(file, options)
     }
 
     return webpackPreprocessor(options)(file)
