@@ -9,7 +9,6 @@ export class HttpError extends Error {
     public readonly url: string,
     public readonly status: number,
     public readonly statusText: string,
-    public readonly responseBody: string,
     public readonly originalResponse: Response,
   ) {
     super(message)
@@ -21,16 +20,16 @@ export class HttpError extends Error {
 
   public static async fromResponse (response: Response): Promise<HttpError> {
     const status = response.status
-    const statusText = response.statusText
-    const responseBody = await response.text()
+    const statusText = await (response.json().catch(() => {
+      return response.statusText
+    }))
     const scrubbedUrl = scrubUrl(response.url)
 
     return new HttpError(
-      `${scrubUrl(response.url)} responded with ${status} ${statusText}`,
+      `${status} ${statusText} (${scrubUrl(response.url)})`,
       scrubbedUrl,
       status,
       statusText,
-      responseBody,
       response,
     )
   }

@@ -574,7 +574,7 @@ export const AllCypressErrors = {
         This error will not affect or change the exit code.
     `
   },
-  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string, responseBody: string }) => {
+  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
     return errTemplate`\
         Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
 
@@ -582,9 +582,7 @@ export const AllCypressErrors = {
 
         This error will not affect or change the exit code.
 
-        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}
-        
-        ${fmt.highlightTertiary(error.responseBody)}`
+        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}`
   },
   CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error & { url: string }) => {
     return errTemplate`\
@@ -599,26 +597,20 @@ export const AllCypressErrors = {
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
-    errors: (Error & { kind?: 'NetworkError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
+    errors: (Error & { kind?: 'NetworkError' | 'HttpError', url: string })[]
   }) => {
     if (error.errors.length === 1) {
-      const firstError = error.errors[0]
-
-      if (firstError?.kind === 'NetworkError') {
-        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(firstError as Error & { url: string })
+      if (error.errors[0]?.kind === 'NetworkError') {
+        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(error.errors[0])
       }
 
-      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string})
+      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string})
     }
 
     let networkErr = error.errors.find((err) => {
       return err.kind === 'NetworkError'
     })
     const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
-
-    const fmtUploadError = ({ message, responseBody }: { message: string, responseBody?: string }) => {
-      return `${message}${responseBody ? `:\n${responseBody}\n` : ''}`
-    }
 
     return errTemplate`\
         Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
@@ -627,7 +619,7 @@ export const AllCypressErrors = {
 
         ${recommendation}
 
-        ${fmt.listItems(error.errors.map(fmtUploadError), { prefix: '' })}`
+        ${fmt.listItems(error.errors.map((error) => error.message))}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
