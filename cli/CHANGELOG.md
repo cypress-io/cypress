@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.2
+
+_Released 7/30/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `mime` from `2.4.4` to `2.6.0`. Addressed in [#29870](https://github.com/cypress-io/cypress/pull/29870).
+
 ## 13.13.1
 
 _Released 7/16/2024_
