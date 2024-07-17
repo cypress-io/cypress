@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.2
+
+_Released <RELEASE_DATE> (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where intercept could not be called when DevServerPublicPathRoute is used. Addressed in [#29798](
+
 ## 13.13.1
 
 _Released 7/16/2024_
