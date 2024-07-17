@@ -7,8 +7,5 @@
   },
   "rules": {
     "mocha/no-global-tests": "off"
-  },
-  "extends": [
-    "plugin:vue/vue3-recommended"
-  ]
+  }
 }
