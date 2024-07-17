@@ -1,17 +1,17 @@
 <script setup>
-import { ref } from "vue"
+import { ref } from "vue";
 
 defineProps({
   msg: String,
-})
+});
 
-const count = ref(0)
+const count = ref(0);
 
 function handleClick () {
-  count.value++
+  count.value++;
   fetch("http://localhost:3000/hello", {
     method: "GET",
-  })
+  });
 }
 </script>
 
