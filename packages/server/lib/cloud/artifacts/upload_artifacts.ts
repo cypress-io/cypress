@@ -17,6 +17,8 @@ import { NetworkError } from '../network/network_error'
 const debug = Debug('cypress:server:cloud:artifacts')
 
 const removeWhitespaceAndTrim = (str: string) => {
+  console.log(`trimming white space on ${str}`)
+
   return str.split(/\n/)
   .map((line) => {
     return line.trim()
@@ -29,22 +31,32 @@ const toUploadReportPayload = (acc: {
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
 }, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
+  console.log(`inside toUploadReportPayload`)
   const reportWithoutOriginalError = _.omit(report, 'originalError')
 
   if (key === ArtifactKinds.PROTOCOL) {
     let { error, errorStack, allErrors } = reportWithoutOriginalError
 
-    if (allErrors) {
-      const messages = allErrors.map((error) => {
-        return (HttpError.isHttpError(error) && error.responseBody) ?
-      `${error.message}: ${removeWhitespaceAndTrim(error.responseBody)}` :
-          error.message
-      })
+    try {
+      if (allErrors) {
+      // eslint-disable-next-line no-console
+        console.log(`allErrors is ${JSON.stringify(allErrors)}`)
 
-      error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${messages.join(', ')}`
-      errorStack = allErrors.map((error) => error.stack).join('')
-    } else if (error) {
-      error = `Failed to upload Test Replay: ${error}`
+        const messages = allErrors.map((error) => {
+          return (HttpError.isHttpError(error) && error.responseBody) ?
+      `${error.message}: ${removeWhitespaceAndTrim(error.responseBody)}` :
+            error.message
+        })
+
+        error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${messages.join(', ')}`
+        errorStack = allErrors.map((error) => error.stack).join('')
+      } else if (error) {
+        error = `Failed to upload Test Replay: ${error}`
+      }
+    } catch (e) {
+      console.log(`WE HAD AN EXCEPTION!`)
+      console.log(JSON.stringify(e))
+      throw e
     }
 
     debug('protocol report %O', reportWithoutOriginalError)

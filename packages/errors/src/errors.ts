@@ -575,6 +575,9 @@ export const AllCypressErrors = {
     `
   },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string, responseBody: string }) => {
+    console.log(`inside CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE`)
+    console.log(`error is ${JSON.stringify(error)}`)
+
     return errTemplate`\
         Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
 
@@ -601,6 +604,8 @@ export const AllCypressErrors = {
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
     errors: (Error & { kind?: 'NetworkError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
   }) => {
+    console.log(`inside CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR`)
+    console.log(`error is ${JSON.stringify(error)}`)
     if (error.errors.length === 1) {
       const firstError = error.errors[0]
 

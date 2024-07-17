@@ -22,16 +22,23 @@ export class HttpError extends Error {
   public static async fromResponse (response: Response): Promise<HttpError> {
     const status = response.status
     const statusText = response.statusText
-    const responseBody = await response.text()
-    const scrubbedUrl = scrubUrl(response.url)
 
-    return new HttpError(
-      `${scrubUrl(response.url)} responded with ${status} ${statusText}`,
-      scrubbedUrl,
-      status,
-      statusText,
-      responseBody,
-      response,
-    )
+    try {
+      const responseBody = await response.text()
+      const scrubbedUrl = scrubUrl(response.url)
+
+      return new HttpError(
+        `${scrubUrl(response.url)} responded with ${status} ${statusText}`,
+        scrubbedUrl,
+        status,
+        statusText,
+        responseBody,
+        response,
+      )
+    } catch (e) {
+      console.log(`WE HAD AN EXCEPTION IN fromResponse`)
+      console.log(JSON.stringify(e))
+      throw e
+    }
   }
 }
