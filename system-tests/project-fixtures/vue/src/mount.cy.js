@@ -23,4 +23,18 @@ describe('mount', () => {
       cy.get('[data-cy-root]').children().should('have.length', 1)
     })
   })
+
+  it('should succeed to intercept with devServerPublicPathRoute', () => {
+    cy.intercept('GET', 'http://localhost:3000/hello', (req) => {
+      req.reply({
+        statusCode: 200,
+        body: { hello: 'world' },
+      })
+    }).as('helloRequest')
+
+    cy.mount(HelloWorld)
+
+    cy.get('#button').click()
+    cy.wait('@helloRequest')
+  })
 })
