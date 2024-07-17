@@ -5,7 +5,7 @@ _Released 00/00/0000 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where intercept could not be called when DevServerPublicPathRoute is used. Addressed in [#29798](
+- Fixed an issue where intercept could not be called when DevServerPublicPathRoute is used. Fixed in [#29874](https://github.com/cypress-io/cypress/pull/29874)
 
 ## 13.13.1
 
