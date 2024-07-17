@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.13.2
 
-_Released xx/xx/xxxx (PENDING)_
+_Released 00/00/0000 (PENDING)_
 
 **Bugfixes:**
 
