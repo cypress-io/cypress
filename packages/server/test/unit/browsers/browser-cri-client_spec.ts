@@ -1,5 +1,5 @@
-import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
-import { CriClient } from '../../../lib/browsers/cri-client'
+import { BrowserCriClient } from '../../../lib/browsers/remote-interface/browser-cri-client'
+import { CriClient } from '../../../lib/browsers/remote-interface/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
@@ -55,7 +55,7 @@ describe('lib/browsers/browser-cri-client', function () {
       close,
     })
 
-    browserCriClient = proxyquire('../lib/browsers/browser-cri-client', {
+    browserCriClient = proxyquire('../lib/browsers/remote-interface/browser-cri-client', {
       'chrome-remote-interface': criImport,
     })
 

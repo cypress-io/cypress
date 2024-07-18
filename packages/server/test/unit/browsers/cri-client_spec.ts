@@ -1,7 +1,8 @@
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
-import type { CriClient } from '../../../lib/browsers/cri-client'
-
+import type { CriClient } from '../../../lib/browsers/remote-interface/cri-client'
+import pDefer from 'p-defer'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
@@ -11,24 +12,40 @@ const PORT = 50505
 describe('lib/browsers/cri-client', function () {
   let send: sinon.SinonStub
   let on: sinon.SinonStub
+  let off: sinon.SinonStub
+
   let criImport: sinon.SinonStub & {
     New: sinon.SinonStub
   }
   let criStub: {
     send: typeof send
     on: typeof on
+    off: typeof off
     close: sinon.SinonStub
     _notifier: EventEmitter
   }
   let onError: sinon.SinonStub
-  let getClient: (options?: { host?: string, fullyManageTabs?: boolean, protocolManager?: ProtocolManagerShape }) => ReturnType<typeof create>
+  let onReconnect: sinon.SinonStub
+
+  let getClient: (options?: { host?: string, fullyManageTabs?: boolean, protocolManager?: ProtocolManagerShape }) => ReturnType<typeof CriClient.create>
+
+  const fireCDPEvent = <T extends keyof ProtocolMapping.Events>(method: T, params: Partial<ProtocolMapping.Events[T][0]>, sessionId?: string) => {
+    criStub.on.withArgs('event').args[0][1]({
+      method,
+      params,
+      sessionId,
+    })
+  }
 
   beforeEach(function () {
     send = sinon.stub()
     onError = sinon.stub()
+    onReconnect = sinon.stub()
     on = sinon.stub()
+    off = sinon.stub()
     criStub = {
       on,
+      off,
       send,
       close: sinon.stub().resolves(),
       _notifier: new EventEmitter(),
@@ -43,12 +60,16 @@ describe('lib/browsers/cri-client', function () {
 
     criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-    const { CriClient } = proxyquire('../lib/browsers/cri-client', {
+    const { CDPConnection } = proxyquire('../lib/browsers/remote-interface/cdp-connection', {
       'chrome-remote-interface': criImport,
     })
 
+    const { CriClient } = proxyquire('../lib/browsers/remote-interface/cri-client', {
+      './cdp-connection': { CDPConnection },
+    })
+
     getClient = ({ host, fullyManageTabs, protocolManager } = {}): Promise<CriClient> => {
-      return CriClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager })
+      return CriClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager, onReconnect })
     }
   })
 
@@ -82,7 +103,8 @@ describe('lib/browsers/cri-client', function () {
         const command = 'DOM.getDocument'
         const client = await getClient({ host: '127.0.0.1', fullyManageTabs: true })
 
-        await criStub.on.withArgs('Target.targetCrashed').args[0][1]({ targetId: DEBUGGER_URL })
+        fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
+
         await expect(client.send(command, { depth: -1 })).to.be.rejectedWith(`${command} will not run as the target browser or tab CRI connection has crashed`)
       })
 
@@ -91,7 +113,7 @@ describe('lib/browsers/cri-client', function () {
         await getClient({ host: '127.0.0.1', fullyManageTabs: true })
 
         // This would throw if the error was not caught
-        await criStub.on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })
+        await fireCDPEvent('Target.attachedToTarget', { targetInfo: { type: 'worker', targetId: DEBUGGER_URL, title: '', url: 'https://some_url', attached: true, canAccessOpener: true } })
       })
 
       context('retries', () => {
@@ -109,8 +131,10 @@ describe('lib/browsers/cri-client', function () {
 
             const client = await getClient()
 
-            await client.send('DOM.getDocument', { depth: -1 })
+            const p = client.send('DOM.getDocument', { depth: -1 })
 
+            await criStub.on.withArgs('disconnect').args[0][1]()
+            await p
             expect(send).to.be.calledTwice
           })
 
@@ -123,7 +147,11 @@ describe('lib/browsers/cri-client', function () {
 
             const client = await getClient()
 
-            await client.send('DOM.getDocument', { depth: -1 })
+            const getDocumentPromise = client.send('DOM.getDocument', { depth: -1 })
+
+            await criStub.on.withArgs('disconnect').args[0][1]()
+            await criStub.on.withArgs('disconnect').args[0][1]()
+            await getDocumentPromise
             expect(send).to.have.callCount(3)
           })
         })
@@ -182,6 +210,11 @@ describe('lib/browsers/cri-client', function () {
 
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
+
+      const reconnection = pDefer()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
 
       expect(criStub.send).to.be.calledTwice
       expect(criStub.send).to.be.calledWith('Page.enable')
