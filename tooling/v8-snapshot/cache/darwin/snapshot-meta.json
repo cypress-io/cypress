@@ -4076,6 +4076,7 @@
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/automation/util.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
+    "./packages/server/lib/browsers/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp_automation.ts",
     "./packages/server/lib/browsers/cri-client.ts",
     "./packages/server/lib/browsers/electron.ts",
