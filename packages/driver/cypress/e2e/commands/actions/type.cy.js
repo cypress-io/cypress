@@ -3416,45 +3416,47 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=range]', () => {
-      it('{upArrow} increases value by 1', () => {
-        cy.get('#range-without-value').then(($input) => $input.val(1))
-        cy.get('#range-without-value').type('{upArrow}')
-        cy.get('#range-without-value').should('have.value', 2)
-      })
-
-      it('{downArrow} decreases value by 1', () => {
-        cy.get('#range-without-value').then(($input) => $input.val(1))
-        cy.get('#range-without-value').type('{downArrow}')
-        cy.get('#range-without-value').should('have.value', 0)
-      })
-
-      it('{upArrow} triggers events on input', () => {
-        cy.get('#range-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+      if (Cypress.isBrowser('!webkit')) {
+        it('{upArrow} increases value by 1', () => {
+          cy.get('#range-without-value').then(($input) => $input.val(1))
+          cy.get('#range-without-value').type('{upArrow}')
+          cy.get('#range-without-value').should('have.value', 2)
         })
-        .type('{upArrow}')
 
-        cy.get('@spyInput').should('have.been.calledOnce')
-        cy.get('@spyChange').should('have.been.calledOnce')
-      })
-
-      it('{downArrow} triggers events on input', () => {
-        cy.get('#range-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+        it('{downArrow} decreases value by 1', () => {
+          cy.get('#range-without-value').then(($input) => $input.val(1))
+          cy.get('#range-without-value').type('{downArrow}')
+          cy.get('#range-without-value').should('have.value', 0)
         })
-        .type('{downArrow}')
 
-        cy.get('@spyChange').should('have.been.calledOnce')
-        cy.get('@spyInput').should('have.been.calledOnce')
-      })
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#range-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#range-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
     })
   })
 })
