@@ -1,14 +1,14 @@
 import CDP from 'chrome-remote-interface'
 import debugModule from 'debug'
 import _ from 'lodash'
-import * as errors from '../errors'
+import * as errors from '../../errors'
 import { CDPCommandQueue } from './cdp-command-queue'
-import { asyncRetry } from '../util/async_retry'
+import { asyncRetry } from '../../util/async_retry'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
 
-import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from './cdp_automation'
+import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from '../cdp_automation'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')

@@ -1,4 +1,4 @@
-import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { BrowserCriClient } from '../../../lib/browsers/remote-interface/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
