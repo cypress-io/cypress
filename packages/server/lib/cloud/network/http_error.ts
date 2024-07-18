@@ -1,4 +1,4 @@
-import { scrubUrl } from './scrub_url'
+import { scrubUrl } from '../api/scrub_url'
 
 export const HttpErrorKind = 'HttpError'
 
@@ -9,6 +9,7 @@ export class HttpError extends Error {
     public readonly url: string,
     public readonly status: number,
     public readonly statusText: string,
+    public readonly responseBody: string,
     public readonly originalResponse: Response,
   ) {
     super(message)
@@ -20,16 +21,16 @@ export class HttpError extends Error {
 
   public static async fromResponse (response: Response): Promise<HttpError> {
     const status = response.status
-    const statusText = await (response.json().catch(() => {
-      return response.statusText
-    }))
+    const statusText = response.statusText
+    const responseBody = await response.text()
     const scrubbedUrl = scrubUrl(response.url)
 
     return new HttpError(
-      `${status} ${statusText} (${scrubUrl(response.url)})`,
+      `${scrubUrl(response.url)} responded with ${status} ${statusText}`,
       scrubbedUrl,
       status,
       statusText,
+      responseBody,
       response,
     )
   }
