@@ -16,6 +16,10 @@ _Released 7/16/2024_
 - Replaced `json-lint` with `json-parse-even-better-errors`. This removes the [CVE-2021-23358](https://nvd.nist.gov/vuln/detail/CVE-2021-23358) vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
 
+**Performance:**
+
+- Improved performance `reduce` in csp-header. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
 ## 13.13.0
 
 _Released 7/01/2024_
