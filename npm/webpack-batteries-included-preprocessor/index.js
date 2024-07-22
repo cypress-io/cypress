@@ -156,7 +156,13 @@ const getDefaultWebpackOptions = () => {
         // resolve to include the full file extension if a file resolution is provided.
         // @see https://github.com/cypress-io/cypress/issues/27599
         // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
-        process: 'process/browser.js',
+
+        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
+        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
+        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
+        // and not in the user's node_modules directory as it may not exist.
+        // @see https://github.com/cypress-io/cypress/issues/27947.
+        process: require.resolve('process/browser.js'),
       }),
     ],
     resolve: {
