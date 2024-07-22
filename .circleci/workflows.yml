@@ -1725,6 +1725,39 @@ jobs:
     steps:
       - maybe_skip_binary_jobs
       - run-binary-system-tests
+  yarn-pnp-preprocessor-system-test:
+    parallelism: 1
+    working_directory: ~/cypress
+    docker:
+      # we need an image with yarn 4 berry installed on it to run this test
+      - image: cypress/base-internal:18.17.1-yarn-4.1.1
+    environment:
+      # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
+      REPO_DIR: /root/cypress
+      TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.1.1-pnp-dep-resolution
+      USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
+    steps:
+      - maybe_skip_binary_jobs
+      - attach_workspace:
+          at: ~/
+      # required node is set in the docker container already with yarn 4
+      - run:
+          name: Install monorepo dependencies with yarn v1.22.22
+          command: |
+            # we need to install the monorepo dependencies here in a fresh manner.
+            # set to the expected version of yarn and install the dependencies
+            yarn set version 1.22.22
+            yarn install --ignore-scripts
+      - run:
+          name: install dependencies in yarn-v4.1.1-pnp-dep-resolution with yarn berry 4.1.1
+          command: |
+            yarn set version 4.1.1
+            cd ./system-tests/projects/yarn-v4.1.1-pnp-dep-resolution && yarn
+      - run:
+          name: Bootstrap the Cypress binary and run binary system test
+          command: |
+            # we need to bootstrap the binary into our project directory and run the tests
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run'
 
   system-tests-chrome:
     <<: *defaults
@@ -2862,6 +2895,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-binary-against-kitchensink
           - test-npm-module-on-minimum-node-version
           - binary-system-tests
+          - yarn-pnp-preprocessor-system-test
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
@@ -2972,6 +3006,11 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - get-published-artifacts
     - binary-system-tests:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+          - system-tests-node-modules-install
+    - yarn-pnp-preprocessor-system-test:
         context: publish-binary
         requires:
           - get-published-artifacts
