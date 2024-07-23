@@ -27,6 +27,7 @@ export default defineConfig({
     },
   },
   'e2e': {
+    chromeWebSecurity: false,
     experimentalRunAllSpecs: true,
     experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
