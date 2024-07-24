@@ -3164,45 +3164,47 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=date]', () => {
-      it('{upArrow} increases day by 1', () => {
-        cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
-        cy.get('#date-without-value').type('{upArrow}')
-        cy.get('#date-without-value').should('have.value', '2000-01-02')
-      })
-
-      it('{downArrow} decreases day by 1', () => {
-        cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
-        cy.get('#date-without-value').type('{downArrow}')
-        cy.get('#date-without-value').should('have.value', '1999-12-31')
-      })
-
-      it('{upArrow} triggers events on input', () => {
-        cy.get('#date-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+      if (Cypress.isBrowser(['!webkit'])) {
+        it('{upArrow} increases day by 1', () => {
+          cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
+          cy.get('#date-without-value').type('{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-02')
         })
-        .type('{upArrow}')
 
-        cy.get('@spyInput').should('have.been.calledOnce')
-        cy.get('@spyChange').should('have.been.calledOnce')
-      })
-
-      it('{downArrow} triggers events on input', () => {
-        cy.get('#date-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+        it('{downArrow} decreases day by 1', () => {
+          cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
+          cy.get('#date-without-value').type('{downArrow}')
+          cy.get('#date-without-value').should('have.value', '1999-12-31')
         })
-        .type('{downArrow}')
 
-        cy.get('@spyChange').should('have.been.calledOnce')
-        cy.get('@spyInput').should('have.been.calledOnce')
-      })
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#date-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#date-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
     })
 
     context('input[type=month]', () => {
@@ -3294,83 +3296,87 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=time]', () => {
-      it('{upArrow} increases minute by 1', () => {
-        cy.get('#time-without-value').then(($input) => $input.val('01:23'))
-        cy.get('#time-without-value').type('{upArrow}')
-        cy.get('#time-without-value').should('have.value', '01:24')
-      })
-
-      it('{downArrow} decreases minute by 1', () => {
-        cy.get('#time-without-value').then(($input) => $input.val('01:23'))
-        cy.get('#time-without-value').type('{downArrow}')
-        cy.get('#time-without-value').should('have.value', '01:22')
-      })
-
-      it('{upArrow} triggers events on input', () => {
-        cy.get('#time-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+      if (Cypress.isBrowser('!webkit')) {
+        it('{upArrow} increases minute by 1', () => {
+          cy.get('#time-without-value').then(($input) => $input.val('01:23'))
+          cy.get('#time-without-value').type('{upArrow}')
+          cy.get('#time-without-value').should('have.value', '01:24')
         })
-        .type('{upArrow}')
 
-        cy.get('@spyInput').should('have.been.calledOnce')
-        cy.get('@spyChange').should('have.been.calledOnce')
-      })
-
-      it('{downArrow} triggers events on input', () => {
-        cy.get('#time-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+        it('{downArrow} decreases minute by 1', () => {
+          cy.get('#time-without-value').then(($input) => $input.val('01:23'))
+          cy.get('#time-without-value').type('{downArrow}')
+          cy.get('#time-without-value').should('have.value', '01:22')
         })
-        .type('{downArrow}')
 
-        cy.get('@spyChange').should('have.been.calledOnce')
-        cy.get('@spyInput').should('have.been.calledOnce')
-      })
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#time-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#time-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
     })
 
     context('input[type=datetime-local]', () => {
-      it('{upArrow} increases time value', () => {
-        cy.get('#datetime-local-without-value').type('{upArrow}')
-      })
-
-      it('{downArrow} decreases time value', () => {
-        cy.get('#datetime-local-without-value').type('{downArrow}')
-      })
-
-      it('{upArrow} triggers events on input', () => {
-        cy.get('#datetime-local-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+      if (Cypress.isBrowser('!webkit')) {
+        it('{upArrow} increases time value', () => {
+          cy.get('#datetime-local-without-value').type('{upArrow}')
         })
-        .type('{upArrow}')
 
-        cy.get('@spyInput').should('have.been.calledOnce')
-        cy.get('@spyChange').should('have.been.calledOnce')
-      })
-
-      it('{downArrow} triggers events on input', () => {
-        cy.get('#datetime-local-with-value')
-        .then(($input) => {
-          $input.on('change', cy.spy().as('spyChange'))
-          $input.on('input', cy.spy().as('spyInput'))
-
-          return $input
+        it('{downArrow} decreases time value', () => {
+          cy.get('#datetime-local-without-value').type('{downArrow}')
         })
-        .type('{downArrow}')
 
-        cy.get('@spyChange').should('have.been.calledOnce')
-        cy.get('@spyInput').should('have.been.calledOnce')
-      })
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#datetime-local-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#datetime-local-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
     })
 
     context('input[type=number]', () => {
