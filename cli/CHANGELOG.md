@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.0
+
+_Released 7/30/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+
 ## 13.13.1
 
 _Released 7/16/2024_
