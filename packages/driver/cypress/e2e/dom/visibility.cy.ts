@@ -246,9 +246,7 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentNoWidth = add(`\
 <div style='width: 0; height: 100px; overflow: hidden;'>
-  <div style='height: 500px; width: 500px;'>
     <span>parent width: 0</span>
-  </div>
 </div>`)
 
       this.$parentNoHeight = add(`\
@@ -263,10 +261,27 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentWithWidthHeightNoOverflow = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden;'>
-  <div style='height: 100px; width: 100px;'>
     <span>parent with size, overflow: hidden</span>
-  </div>
 </div>`)
+
+      this.$ancestorWithWidthHeightNoOverflow = add(`\
+      <div style='width: 100px; height: 100px'>
+          <div><span>parent with size, overflow: hidden</span></div>
+      </div>`)
+
+      this.$ancestorNoWidth = add(`\
+      <div style='width: 0; height: 100px; overflow: hidden;'>
+        <div>
+          <span>ancestor width: 0</span>
+        </div>
+      </div>`)
+
+      this.$ancestorNoHeight = add(`\
+      <div style='width: 100px; height: 0px; overflow: hidden;'>
+        <div>
+          <span>ancestor height: 0</span>
+        </div>
+      </div>`)
 
       this.$childPosAbs = add(`\
 <div style='width: 0; height: 100px; overflow: hidden;'>
@@ -742,9 +757,24 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$parentNoHeight.find('span')).to.not.be.visible
       })
 
+      it('is hidden if ancestor has overflow:hidden and no width', function () {
+        expect(this.$ancestorNoWidth.find('span')).to.be.hidden
+        expect(this.$ancestorNoWidth.find('span')).to.not.be.visible
+      })
+
+      it('is hidden if ancestor has overflow:hidden and no height', function () {
+        expect(this.$ancestorNoHeight.find('span')).to.be.hidden
+        expect(this.$ancestorNoHeight.find('span')).to.not.be.visible
+      })
+
       it('is visible when parent has positive dimensions even with overflow hidden', function () {
         expect(this.$parentWithWidthHeightNoOverflow.find('span')).to.be.visible
         expect(this.$parentWithWidthHeightNoOverflow.find('span')).to.not.be.hidden
+      })
+
+      it('is visible when ancestor has positive dimensions even with overflow hidden', function () {
+        expect(this.$ancestorWithWidthHeightNoOverflow.find('span')).to.be.visible
+        expect(this.$ancestorWithWidthHeightNoOverflow.find('span')).to.not.be.hidden
       })
     })
 
