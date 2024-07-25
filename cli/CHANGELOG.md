@@ -1,15 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.0
+
+_Released 07/16/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
+
 ## 13.13.1
 
 _Released 7/16/2024_
 
-**Bugfixes:**
 
 - Fixed an issue where unhandled `WebSocket connection closed` exceptions would be thrown when CDP connections rapidly connect, disconnect, and connect again while there are pending commands. Fixes [#29572](https://github.com/cypress-io/cypress/issues/29572).
 - CLI output properly displays non-JSON response bodies when a Test Replay upload attempt returns a non-JSON response body for a non-200 status code. Addressed in [#29801](https://github.com/cypress-io/cypress/pull/29801).
 - Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227).
 - Fixed an issue where command snapshots were not being captured within the `cy.origin()` command within Test Replay. Addressed in [#29828](https://github.com/cypress-io/cypress/pull/29828).
-- Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
 
 **Dependency Updates:**
 
