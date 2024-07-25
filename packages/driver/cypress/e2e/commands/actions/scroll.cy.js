@@ -27,6 +27,10 @@ describe('src/cy/commands/actions/scroll', () => {
 
       this.scrollBoth.scrollTop = 0
       this.scrollBoth.scrollLeft = 0
+
+      // width/height of scrollable container - width of parent viewport (minux scrollbars) / 2 to get the center
+      // browsers round up the pixel value so we need to round it
+      this.halfScrollPixels = Math.round((500 - 100) / 2)
     })
 
     describe('subject', () => {
@@ -86,7 +90,7 @@ describe('src/cy/commands/actions/scroll', () => {
           // in the percentage of the scroll (since going the height
           // of the container wouldn't scroll at all...)
           expect(this.scrollHoriz.get(0).scrollTop).to.eq(0)
-          expect(this.scrollHoriz.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollHoriz.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
     })
@@ -108,7 +112,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('top').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -127,7 +131,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('left').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -137,8 +141,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('center').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -147,7 +151,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('right').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100))
         })
       })
@@ -168,7 +172,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('bottom').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100))
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -229,8 +233,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('50%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -239,7 +243,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('0%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -250,7 +254,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('50%', '0%').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
     })

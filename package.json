@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.13.0",
+  "version": "13.13.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -266,7 +266,7 @@
     "**/@types/cheerio": "0.22.21",
     "**/@types/enzyme": "3.10.5",
     "**/@types/react": "16.9.50",
-    "**/jquery": "3.1.1",
+    "**/jquery": "3.4.1",
     "**/pretty-format": "26.4.0",
     "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.5",
