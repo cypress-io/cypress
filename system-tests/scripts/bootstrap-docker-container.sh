@@ -35,7 +35,7 @@ cd $TEST_PROJECT_DIR
 export CYPRESS_INSTALL_BINARY=$ZIP_PATH
 export CYPRESS_CACHE_FOLDER=/tmp/CYPRESS_CACHE_FOLDER/
 
-if [ ! -d "$USE_YARN_TO_INSTALL_CYPRESS_BINARY" ]; then
+if [ "$USE_YARN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
   # if using yarn to install the built cypress binary, we can just install the tarball that is in the monorepo root directory
   yarn add cypress@file:$TARBALL_PATH
 else
