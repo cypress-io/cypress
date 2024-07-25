@@ -2316,7 +2316,6 @@
     "./node_modules/json5/lib/stringify.js",
     "./node_modules/json5/lib/unicode.js",
     "./node_modules/json5/lib/util.js",
-    "./node_modules/jsonlint/lib/jsonlint.js",
     "./node_modules/jsprim/lib/jsprim.js",
     "./node_modules/launch-editor/editor-info/linux.js",
     "./node_modules/launch-editor/editor-info/macos.js",
@@ -4004,7 +4003,6 @@
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/lib/uri.ts",
-    "./packages/network/node_modules/brace-expansion/index.js",
     "./packages/network/node_modules/proxy-from-env/index.js",
     "./packages/proxy/lib/http/error-middleware.ts",
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
@@ -4081,6 +4079,7 @@
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/automation/util.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
+    "./packages/server/lib/browsers/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp_automation.ts",
     "./packages/server/lib/browsers/cri-client.ts",
     "./packages/server/lib/browsers/electron.ts",
@@ -4220,7 +4219,6 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/legacy-streams.js",
     "./packages/server/node_modules/@benmalka/foxdriver/package.json",
     "./packages/server/node_modules/ansi-regex/index.js",
-    "./packages/server/node_modules/brace-expansion/index.js",
     "./packages/server/node_modules/cli-table3/index.js",
     "./packages/server/node_modules/cli-table3/src/cell.js",
     "./packages/server/node_modules/cli-table3/src/layout-manager.js",
@@ -4244,6 +4242,7 @@
     "./packages/server/node_modules/http-proxy/lib/http-proxy/passes/web-outgoing.js",
     "./packages/server/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js",
     "./packages/server/node_modules/is-fullwidth-code-point/index.js",
+    "./packages/server/node_modules/json-parse-even-better-errors/lib/index.js",
     "./packages/server/node_modules/mime-db/db.json",
     "./packages/server/node_modules/mime-db/index.js",
     "./packages/server/node_modules/mime/Mime.js",
@@ -4351,5 +4350,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8327ad15454db8b5cbaf0dfa8484e418279a74d64e434c0d8a3c210276b37141"
+  "deferredHash": "07373eb1748952a20dea40e23e008a9a5edbcbd1fa47423e21f89a7c4f28fff9"
 }
