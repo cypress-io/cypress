@@ -1730,11 +1730,11 @@ jobs:
     working_directory: ~/cypress
     docker:
       # we need an image with yarn 4 berry installed on it to run this test
-      - image: cypress/base-internal:18.17.1-yarn-4.1.1
+      - image: cypress/base-internal:18.17.1-yarn-berry-4.3.1
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
-      TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.1.1-pnp-dep-resolution
+      TEST_PROJECT_DIR: ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution
       USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
     steps:
       - maybe_skip_binary_jobs
@@ -1749,10 +1749,10 @@ jobs:
             yarn set version 1.22.22
             yarn install --ignore-scripts
       - run:
-          name: install dependencies in yarn-v4.1.1-pnp-dep-resolution with yarn berry 4.1.1
+          name: install dependencies in yarn-v4.3.1-pnp-dep-resolution with yarn berry 4.3.1
           command: |
-            yarn set version 4.1.1
-            cd ./system-tests/projects/yarn-v4.1.1-pnp-dep-resolution && yarn
+            yarn set version 4.3.1
+            cd ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution && yarn
       - run:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
