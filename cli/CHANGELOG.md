@@ -3,6 +3,10 @@
 
 _Released 7/30/2024 (PENDING)_
 
+**Performance:**
+
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
 **Dependency Updates:**
 
 - Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
@@ -23,10 +27,6 @@ _Released 7/16/2024_
 - Updated `jquery` from `3.1.1` to `3.4.1`. Addresses [#29822](https://github.com/cypress-io/cypress/issues/29822). Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
 - Replaced `json-lint` with `json-parse-even-better-errors`. This removes the [CVE-2021-23358](https://nvd.nist.gov/vuln/detail/CVE-2021-23358) vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
-
-**Performance:**
-
-- Improved performance `reduce` in csp-header. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
 
 ## 13.13.0
 
