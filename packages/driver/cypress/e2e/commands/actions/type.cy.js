@@ -3296,7 +3296,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=time]', () => {
-      if (Cypress.isBrowser('!webkit')) {
+      if (!isWebKit) {
         it('{upArrow} increases minute by 1', () => {
           cy.get('#time-without-value').then(($input) => $input.val('01:23'))
           cy.get('#time-without-value').type('{upArrow}')
@@ -3340,7 +3340,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=datetime-local]', () => {
-      if (Cypress.isBrowser('!webkit')) {
+      if (!isWebKit) {
         it('{upArrow} increases time value', () => {
           cy.get('#datetime-local-without-value').type('{upArrow}')
         })
@@ -3422,7 +3422,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=range]', () => {
-      if (Cypress.isBrowser('!webkit')) {
+      if (!isWebKit) {
         it('{upArrow} increases value by 1', () => {
           cy.get('#range-without-value').then(($input) => $input.val(1))
           cy.get('#range-without-value').type('{upArrow}')
