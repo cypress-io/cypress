@@ -118,8 +118,7 @@ const launch = async () => {
 }
 
 const launchIfBrowserSetInCli = async () => {
-  await lsQuery
-  const shouldLaunchBrowser = lsQuery.data.value?.localSettings.preferences.shouldLaunchBrowserFromOpenBrowser
+  const shouldLaunchBrowser = (await lsQuery).data.value?.localSettings.preferences.shouldLaunchBrowserFromOpenBrowser
 
   if (shouldLaunchBrowser) {
     await launch()
