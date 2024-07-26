@@ -46,9 +46,7 @@ gql`
 query OpenBrowser_LocalSettings {
   localSettings {
     preferences {
-      wasBrowserSetInCLI
-      isValidBrowser
-      globalLaunchCount
+      shouldLaunchBrowserFromOpenBrowser
     }
   }
 }
@@ -121,11 +119,9 @@ const launch = async () => {
 
 const launchIfBrowserSetInCli = async () => {
   await lsQuery
-  const isValidBrowser = lsQuery.data.value?.localSettings.preferences.isValidBrowser
-  const wasBrowserSetInCli = lsQuery.data.value?.localSettings.preferences.wasBrowserSetInCLI
-  const globalLaunchCount = lsQuery.data.value?.localSettings.preferences.globalLaunchCount
+  const shouldLaunchBrowser = lsQuery.data.value?.localSettings.preferences.shouldLaunchBrowserFromOpenBrowser
 
-  if (wasBrowserSetInCli && isValidBrowser && (globalLaunchCount === 0)) {
+  if (shouldLaunchBrowser) {
     await launch()
   }
 
