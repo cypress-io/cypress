@@ -1,0 +1,8 @@
+{
+  "name": "cypress-pnp-webpack-preprocessor-test",
+  "devDependencies": {
+    "axe-core": "4.9.1",
+    "cypress-axe": "1.5.0"
+  },
+  "packageManager": "yarn@4.3.1"
+}
