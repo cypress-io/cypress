@@ -3,6 +3,10 @@
 
 _Released 7/30/2024 (PENDING)_
 
+**Performance:**
+
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
 **Bugfixes:**
 
 - Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
