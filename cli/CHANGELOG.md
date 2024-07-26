@@ -7,6 +7,18 @@ _Released 08/16/2024 (PENDING)_
 
 - Fixed an issue where overflow: clip in parent html node make child node visibility not correctly detected. Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852). Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778).
 
+## 13.13.2
+
+_Released 7/30/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
+
+**Dependency Updates:**
+
+- Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+
 ## 13.13.1
 
 _Released 7/16/2024_
