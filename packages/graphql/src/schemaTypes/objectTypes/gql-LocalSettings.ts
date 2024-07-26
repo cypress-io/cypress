@@ -33,26 +33,25 @@ export const LocalSettingsPreferences = objectType({
       },
     })
 
-    t.boolean('isValidBrowser', {
+    t.boolean('shouldLaunchBrowserFromOpenBrowser', {
+      description: 'Determine if the browser should launch when the browser flag is passed alone',
       resolve: async (_source, _args, ctx) => {
         try {
-          if (!ctx.coreData.cliBrowser) {
+          const cliBrowser = ctx.coreData.cliBrowser
+
+          if (!cliBrowser) {
             return false
           }
 
-          const browser = await ctx._apis.browserApi.ensureAndGetByNameOrPath(ctx.coreData.cliBrowser)
+          const browser = await ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
+          const shouldLaunch = Boolean(browser) && (ctx.actions.project.launchCount === 0)
 
-          return Boolean(browser)
+          return shouldLaunch
         } catch (e) {
-          // if error is thrown browser doesn't exist
+          // if error is thrown, browser doesn't exist
           return false
         }
       },
-    })
-
-    t.int('globalLaunchCount', {
-      description: 'A launch count to keep track of launchProject calls from projectActions',
-      resolve: (_source, _args, ctx) => ctx.actions.project.launchCount,
     })
 
     t.boolean('debugSlideshowComplete')
