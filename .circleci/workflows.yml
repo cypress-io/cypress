@@ -522,8 +522,16 @@ commands:
   # not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
     description: Build better-sqlite3 for CentOS 7
+    parameters:
+      ci_docker:
+        default: CI_DOCKER
+        type: env_var_name
     steps:
-      - setup_remote_docker
+      - when:
+          condition: 
+            equal: [ 'true', <<parameters.ci_docker>> ]
+          steps:
+            - setup_remote_docker
       - restore_cache:
           keys:
             - cypress-centos7-builder-{{ checksum "centos7-builder.Dockerfile" }}
@@ -3363,6 +3371,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
+        build-better-sqlite3: true
 
     - build:
         name: linux-arm64-build
