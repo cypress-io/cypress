@@ -7,6 +7,18 @@ _Released 08/16/2024 (PENDING)_
 
 - Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
 
+## 13.13.2
+
+_Released 7/30/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
+
+**Dependency Updates:**
+
+- Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+
 ## 13.13.1
 
 _Released 7/16/2024_
