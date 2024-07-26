@@ -7,6 +7,10 @@ _Released 7/30/2024 (PENDING)_
 
 - Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
+**Performance:**
+
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
 **Bugfixes:**
 
 - Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
