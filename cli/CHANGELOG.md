@@ -18,7 +18,7 @@ _Released 7/16/2024_
 
 **Misc:**
 
-- Added `CYPRESS_NO_VERIFY` flag to enable suppression of Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243)
+- Added `CYPRESS_SKIP_VERIFY` flag to enable suppression of Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243)
 
 ## 13.13.0
 
