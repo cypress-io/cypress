@@ -330,7 +330,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    if (!config.baseUrl && testingType === 'component') {
+    if (!config.baseUrl && testingType === 'component' && !config.experimentalJITComponentTesting) {
       throw new Error('Server#open called without config.baseUrl.')
     }
 

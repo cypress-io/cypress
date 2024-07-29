@@ -220,7 +220,9 @@ export const createCommonRoutes = ({
       iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
-    if (testingType === 'component') {
+    debugger
+    if (testingType === 'component' && !config.experimentalJITComponentTesting) {
+      debugger
       iframesController.component({ config, nodeProxy }, req, res)
     }
   })

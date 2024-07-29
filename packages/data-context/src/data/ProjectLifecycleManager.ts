@@ -235,7 +235,9 @@ export class ProjectLifecycleManager {
           })
         }
 
-        if (this._currentTestingType === 'component') {
+        debugger
+        finalConfig.experimentalJITComponentTesting
+        if (this._currentTestingType === 'component' && !finalConfig.experimentalJITComponentTesting) {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
           // starts the dev server. passes in every single spec which makes the massive entry point if a user has 100s of CT tests
@@ -260,6 +262,8 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        } else {
+          this.ctx.debug(`not starting dev server as "experimentalJITComponentTesting" is ${finalConfig.experimentalJITComponentTesting}`)
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl
@@ -373,7 +377,11 @@ export class ProjectLifecycleManager {
     await this.initializeConfig()
 
     if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
-      if (this._currentTestingType === 'component') {
+      debugger
+      const a = this._configManager.getConfigFileContents()
+
+      debugger
+      if (this._currentTestingType === 'component' && !this._configManager.getConfigFileContents) {
         // THIS IS WHAT KILLS THE DEV SERVER
         // Since we refresh the dev-server on config changes, we need to close it and clean up it's listeners
         // before we can start a new one. This needs to happen before we have registered the events of the child process
