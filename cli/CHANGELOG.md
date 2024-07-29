@@ -11,6 +11,10 @@ _Released 08/02/2024 (PENDING)_
 
 _Released 7/30/2024 (PENDING)_
 
+**Performance:**
+
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
 **Bugfixes:**
 
 - Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
@@ -18,6 +22,7 @@ _Released 7/30/2024 (PENDING)_
 **Dependency Updates:**
 
 - Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+- Updated `mime` from `2.4.4` to `2.6.0`. Addressed in [#29870](https://github.com/cypress-io/cypress/pull/29870).
 
 ## 13.13.1
 
