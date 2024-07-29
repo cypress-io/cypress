@@ -171,6 +171,13 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
 devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   const { frameworkConfig, sourceWebpackModulesResult } = await getPreset(devServerConfig)
 
+  // creates webpack dev server here based off config
+  console.log(JSON.stringify({
+    devServerConfig,
+    frameworkConfig,
+    sourceWebpackModulesResult,
+  }))
+
   const { server, compiler } = await createWebpackDevServer({
     devServerConfig,
     frameworkConfig,

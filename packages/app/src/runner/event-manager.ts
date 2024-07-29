@@ -161,6 +161,7 @@ export class EventManager {
       rerun()
     })
 
+    // HERE
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()

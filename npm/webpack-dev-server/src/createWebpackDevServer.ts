@@ -44,6 +44,7 @@ export async function createWebpackDevServer (
     },
   } = config
 
+  // passes config here
   const finalWebpackConfig = await makeWebpackConfig(config)
   const webpackCompiler = webpack(finalWebpackConfig)
 

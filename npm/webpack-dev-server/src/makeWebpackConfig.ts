@@ -121,6 +121,7 @@ export async function makeWebpackConfig (
   )
 
   debug(`User passed in user and framework webpack config with values %o`, userAndFrameworkWebpackConfig)
+  // this is where all the entries are passed
   debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)

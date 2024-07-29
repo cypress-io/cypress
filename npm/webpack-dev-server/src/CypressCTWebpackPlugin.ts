@@ -148,6 +148,7 @@ export class CypressCTWebpackPlugin {
    * The plugin's entrypoint, called once by webpack when the compiler is initialized.
    */
   apply (compiler: unknown): void {
+    // THIS IS THE EVENT BUS
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)

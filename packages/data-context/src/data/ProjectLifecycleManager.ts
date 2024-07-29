@@ -238,6 +238,7 @@ export class ProjectLifecycleManager {
         if (this._currentTestingType === 'component') {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
+          // starts the dev server. passes in every single spec which makes the massive entry point if a user has 100s of CT tests
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           // If we received a cypressConfig.port we want to null it out
@@ -373,6 +374,7 @@ export class ProjectLifecycleManager {
 
     if (this._currentTestingType && this.isTestingTypeConfigured(this._currentTestingType)) {
       if (this._currentTestingType === 'component') {
+        // THIS IS WHAT KILLS THE DEV SERVER
         // Since we refresh the dev-server on config changes, we need to close it and clean up it's listeners
         // before we can start a new one. This needs to happen before we have registered the events of the child process
         this.ctx._apis.projectApi.getDevServer().close()

@@ -5,6 +5,7 @@ const wrap = (ipc, invoke, ids, args) => {
   const [options] = args
   const devServerEvents = new EE()
 
+  // HERE
   ipc.on('dev-server:specs:changed', (specs) => {
     devServerEvents.emit('dev-server:specs:changed', specs)
   })

@@ -4,11 +4,12 @@ const EE = require('events')
 const debug = require('debug')('cypress:ct:dev-server')
 const plugins = require('../plugins')
 const errors = require('../errors')
-
+// HERE
 const baseEmitter = new EE()
 
 plugins.registerHandler((ipc) => {
   baseEmitter.on('dev-server:specs:changed', (specs) => {
+    // ipc emitter
     ipc.send('dev-server:specs:changed', specs)
   })
 

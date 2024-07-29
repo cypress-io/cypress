@@ -349,6 +349,7 @@ export class ProjectActions {
     })
 
     if (this.ctx.coreData.currentTestingType === 'component') {
+      // update sspecs
       this.api.getDevServer().updateSpecs(specs)
     }
 
