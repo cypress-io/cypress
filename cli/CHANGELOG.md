@@ -19,6 +19,7 @@ _Released 7/30/2024 (PENDING)_
 
 - Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
 - Updated `mime` from `2.4.4` to `2.6.0`. Addressed in [#29870](https://github.com/cypress-io/cypress/pull/29870).
+- Updated `strip-ansi` from `6.0.0` to `6.0.1`. Addressed in [#29931](https://github.com/cypress-io/cypress/pull/29931).
 
 ## 13.13.1
 
