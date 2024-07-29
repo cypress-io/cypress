@@ -45,6 +45,7 @@ export const iframesController = {
     // requests to the index.html are from initializing the iframe. They include the specPath as query parameter
     const specPath = req.query.specPath
 
+    debugger
     if (typeof specPath === 'string') {
       // for those requests we need to provide the spec-path via this header
       req.headers.__cypress_spec_path = encodeURI(specPath)
@@ -59,6 +60,8 @@ export const iframesController = {
     // to avoid the user accidentally intercepting and modifying
     // our internal index.html handler
 
+    debugger
+    // this is failing
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line

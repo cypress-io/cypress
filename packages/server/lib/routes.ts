@@ -221,9 +221,24 @@ export const createCommonRoutes = ({
     }
 
     debugger
-    if (testingType === 'component' && !config.experimentalJITComponentTesting) {
-      debugger
-      iframesController.component({ config, nodeProxy }, req, res)
+    if (testingType === 'component') {
+    // if (testingType === 'component' && !config.experimentalJITComponentTesting) {
+
+      if (config.experimentalJITComponentTesting) {
+        const ctx = getCtx()
+
+        // @ts-ignore
+        config.baseUrl = ctx.lifecycleManager._cachedFullConfig.baseUrl
+        debugger
+        const proxy = httpProxy.createProxyServer({
+          // @ts-ignore
+          target: config.baseUrl,
+        })
+
+        iframesController.component({ config, nodeProxy: proxy }, req, res)
+      } else {
+        iframesController.component({ config, nodeProxy }, req, res)
+      }
     }
   })
 

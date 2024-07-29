@@ -159,22 +159,59 @@ function run (ipc, file, projectRoot) {
               ))
             }
 
+            // console.log('setting up node events')
+
+            let devS
+
             on('dev-server:start', (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
-                return devServer({
+                devS = devServer({
                   cypressConfig: config,
                   onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
                 })
+
+                // console.log('setting up dev-server stop')
+                // on('dev-server:stop', async () => {
+                //   console.log('inside stop fn run_require_async_child')
+
+                //   debugger
+                //   await devS.stop()
+                //   ipc.send('dev-server:stopped')
+                // })
+
+                return devS
               }
 
               devServerOpts.cypressConfig = config
 
-              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+              devS = devServer(devServerOpts, result.component && result.component.devServerConfig)
+
+              // console.log('setting up dev-server stop')
+
+              // on('dev-server:stop', async () => {
+              //   console.log('inside stop fn run_require_async_child')
+
+              //   debugger
+              //   await devS.stop()
+              //   ipc.send('dev-server:stopped')
+              // })
+
+              return devS
+            })
+
+            console.log('setting up dev-server stop')
+            ipc.on('dev-server:stop', async () => {
+              console.log('inside stop fn run_require_async_child')
+
+              debugger
+              console.log(JSON.stringify(devS))
+              await devS.stop()
+              ipc.send('dev-server:stopped')
             })
 
             return setupNodeEvents(on, config)

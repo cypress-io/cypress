@@ -336,6 +336,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const app = this.createExpressApp(config)
 
+    debugger
     this._nodeProxy = httpProxy.createProxyServer({
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
@@ -358,6 +359,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.createHosts(config.hosts)
 
+    debugger
     const routeOptions: InitializeRoutes = {
       config,
       remoteStates: this._remoteStates,

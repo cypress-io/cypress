@@ -283,6 +283,8 @@ export class ProjectActions {
       this.api.resetServer()
     }
 
+    // Can't plug it here, this only gets called on first launch
+    debugger
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
 
     return

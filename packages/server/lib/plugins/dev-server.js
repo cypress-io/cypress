@@ -13,8 +13,30 @@ plugins.registerHandler((ipc) => {
     ipc.send('dev-server:specs:changed', specs)
   })
 
+  // baseEmitter.on('dev-server:close', (specs) => {
+  //   debugger
+  //   // ipc emitter
+  //   ipc.once('dev-server:closed', () => {
+  //     debugger
+  //     baseEmitter.on('dev-server:closed')
+  //   })
+
+  //   debugger
+  //   ipc.send('dev-server:close', specs)
+  // })
+
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
+  })
+
+  baseEmitter.on('dev-server:stop', () => {
+    ipc.send('dev-server:stop')
+  })
+
+  ipc.on('dev-server:stopped', () => {
+    debugger
+    console.log('stopped from ipc, broadcasting to baseEmitter')
+    baseEmitter.emit('dev-server:stopped')
   })
 })
 
@@ -38,6 +60,41 @@ const API = {
     debug('close dev-server')
     baseEmitter.removeAllListeners()
   },
+
+  closeExperimental () {
+    // if (!plugins.has('dev-server:stop')) {
+    //   throw 'foobar'
+    // }
+
+    //  console.log('plugin is defined')
+
+    return new Promise((resolve, reject) => {
+      baseEmitter.once('dev-server:stopped', () => {
+        console.log('stopped... resolving')
+
+        debugger
+        resolve()
+      })
+
+      console.log('execute stop')
+
+      baseEmitter.emit('dev-server:stop')
+      // plugins.execute('dev-server:stop')
+    })
+  },
+
+  // closeExperimental () {
+  //   return new Promise((resolve, reject) => {
+  //     baseEmitter.once('dev-server:closed', () => {
+  //       debugger
+  //       resolve()
+  //     })
+
+  //     debugger
+  //     baseEmitter.emit('dev-server:close')
+  //   })
+  //   // we need to actually send an ack to close the dev server if the experimental flag is configured
+  // },
 }
 
 module.exports = API

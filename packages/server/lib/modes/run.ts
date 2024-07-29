@@ -404,6 +404,8 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
     },
   }
 
+  debugger
+
   return openProject.launch(browser, spec, browserOpts)
 }
 
@@ -782,7 +784,55 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
+    // PLUG HERE?
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      debugger
+      // TODO: hoist this out
+      const ctx = require('@packages/data-context').getCtx()
+
+      debugger
+      const a = ctx._apis.projectApi.getDevServer()
+
+      debugger
+      await a.closeExperimental()
+      debugger
+      const devServerOptions = await ctx._apis.projectApi.getDevServer().start({ specs: [spec], spec, config })
+
+      // If we received a cypressConfig.port we want to null it out
+      // because we propagated it into the devServer.port and it is
+      // later set as baseUrl which cypress is launched into
+      //
+      // The special case is cypress in cypress testing. If that's the case, we still need
+      // the wrapper cypress to be running on 4455
+      if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        config.port = null
+      } else {
+        config.port = 4455
+      }
+
+      // if (!devServerOptions?.port) {
+      //   throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
+      // }
+
+      debugger
+      config.baseUrl = `http://localhost:${devServerOptions?.port}`
+      ctx.lifecycleManager._cachedFullConfig = config
+      debugger
+    }
+
+    debugger
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      debugger
+      // TODO: hoist this out
+      const ctx = require('@packages/data-context').getCtx()
+
+      debugger
+      await ctx._apis.projectApi.getDevServer().closeExperimental()
+
+      debugger
+    }
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
       // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
@@ -876,6 +926,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 }
 
 async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpecInBrowser, isLastSpec) {
+  debugger
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
