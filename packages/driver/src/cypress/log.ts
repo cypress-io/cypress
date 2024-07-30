@@ -256,7 +256,7 @@ export class Log {
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
 
     if (config('protocolEnabled')) {
-      Cypress.on('test:after:run', () => {
+      Cypress.once('test:after:run', () => {
         this.fireChangeEvent.flush()
       })
     }
