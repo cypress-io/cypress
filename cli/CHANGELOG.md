@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.3
+
+_Released 8/13/2024 (PENDING)_
+
+**Bugfixes:**
+
+- A console error will no longer display in Chrome around a deprecated upload call originating from jQuery. Addressed in [#29944](https://github.com/cypress-io/cypress/pull/29944).
+
 ## 13.13.2
 
 _Released 7/30/2024_
