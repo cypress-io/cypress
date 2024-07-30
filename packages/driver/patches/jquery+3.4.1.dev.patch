@@ -72,10 +72,32 @@ index 411a859..0000000
 -});
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 773ad95..9e6076f 100644
+index 773ad95..843bf56 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -6534,69 +6534,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+@@ -1100,21 +1100,6 @@ setDocument = Sizzle.setDocument = function( node ) {
+ 	docElem = document.documentElement;
+ 	documentIsHTML = !isXML( document );
+ 
+-	// Support: IE 9-11, Edge
+-	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
+-	if ( preferredDoc !== document &&
+-		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
+-
+-		// Support: IE 11, Edge
+-		if ( subWindow.addEventListener ) {
+-			subWindow.addEventListener( "unload", unloadHandler, false );
+-
+-		// Support: IE 9 - 10 only
+-		} else if ( subWindow.attachEvent ) {
+-			subWindow.attachEvent( "onunload", unloadHandler );
+-		}
+-	}
+-
+ 	/* Attributes
+ 	---------------------------------------------------------------------- */
+ 
+@@ -6534,69 +6519,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
  }
  
@@ -83,12 +105,24 @@ index 773ad95..9e6076f 100644
 +function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
 +	var i,
 +		val = 0;
- 
--	// Start with computed style
--	var styles = getStyles( elem ),
++
 +	// If we already have the right measurement, avoid augmentation
 +	if ( extra === ( isBorderBox ? "border" : "content" ) ) {
 +		i = 4;
++
++	// Otherwise initialize for horizontal or vertical properties
++	} else {
++		i = name === "width" ? 1 : 0;
++	}
++
++	for ( ; i < 4; i += 2 ) {
+ 
+-	// Start with computed style
+-	var styles = getStyles( elem ),
++		// Both box models exclude margin, so add it if we want it
++		if ( extra === "margin" ) {
++			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
++		}
  
 -		// To avoid forcing a reflow, only fetch boxSizing if we need it (gh-4322).
 -		// Fake content-box until we know it's needed to know the true value.
@@ -96,32 +130,20 @@ index 773ad95..9e6076f 100644
 -		isBorderBox = boxSizingNeeded &&
 -			jQuery.css( elem, "boxSizing", false, styles ) === "border-box",
 -		valueIsBorderBox = isBorderBox,
-+	// Otherwise initialize for horizontal or vertical properties
-+	} else {
-+		i = name === "width" ? 1 : 0;
-+	}
++		if ( isBorderBox ) {
  
 -		val = curCSS( elem, dimension, styles ),
 -		offsetProp = "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 );
-+	for ( ; i < 4; i += 2 ) {
++			// border-box includes padding, so remove it if we want content
++			if ( extra === "content" ) {
++				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
++			}
  
 -	// Support: Firefox <=54
 -	// Return a confounding non-pixel value or feign ignorance, as appropriate.
 -	if ( rnumnonpx.test( val ) ) {
 -		if ( !extra ) {
 -			return val;
-+		// Both box models exclude margin, so add it if we want it
-+		if ( extra === "margin" ) {
-+			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
-+		}
-+
-+		if ( isBorderBox ) {
-+
-+			// border-box includes padding, so remove it if we want content
-+			if ( extra === "content" ) {
-+				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
-+			}
-+
 +			// At this point, extra isn't border nor margin, so remove border
 +			if ( extra !== "margin" ) {
 +				val -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
@@ -155,7 +177,7 @@ index 773ad95..9e6076f 100644
 -		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
 -		elem.getClientRects().length ) {
 +function getWidthOrHeight( elem, name, extra ) {
- 	
+ 
 +	// Start with offset property, which is equivalent to the border-box value
 +	var val,
 +		valueIsBorderBox = true,
@@ -182,8 +204,7 @@ index 773ad95..9e6076f 100644
 +	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
 +	// MathML - https://bugzilla.mozilla.org/show_bug.cgi?id=491668
 +	if ( val <= 0 || val == null ) {
- 
--	// Adjust for the element's box model
++
 +		// Fall back to computed then uncomputed css if necessary
 +		val = curCSS( elem, name, styles );
 +		if ( val < 0 || val == null ) {
@@ -194,7 +215,8 @@ index 773ad95..9e6076f 100644
 +		if ( rnumnonpx.test( val ) ) {
 +			return val;
 +		}
-+
+ 
+-	// Adjust for the element's box model
 +		// Check for style in case a browser which returns unreliable values
 +		// for getComputedStyle silently falls back to the reliable elem.style
 +		valueIsBorderBox = isBorderBox &&
