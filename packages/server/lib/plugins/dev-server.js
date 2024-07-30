@@ -30,6 +30,7 @@ plugins.registerHandler((ipc) => {
   })
 
   baseEmitter.on('dev-server:stop', () => {
+    console.log('sending dev server stop')
     ipc.send('dev-server:stop')
   })
 

@@ -144,6 +144,8 @@ function run (ipc, file, projectRoot) {
         if (testingType === 'component') {
           const devServerInfo = getValidDevServer(result.component || {})
 
+          console.log('DEV SERVER')
+          console.log(devServerInfo)
           if (!devServerInfo) {
             return
           }
@@ -163,11 +165,12 @@ function run (ipc, file, projectRoot) {
 
             let devS
 
-            on('dev-server:start', (devServerOpts) => {
+            console.log('set up dev-server:start')
+            on('dev-server:start', async (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
-                devS = devServer({
+                const devS = await devServer({
                   cypressConfig: config,
                   onConfigNotFound,
                   ...result.component.devServer,
@@ -175,44 +178,61 @@ function run (ipc, file, projectRoot) {
                   devServerEvents,
                 })
 
-                // console.log('setting up dev-server stop')
-                // on('dev-server:stop', async () => {
-                //   console.log('inside stop fn run_require_async_child')
+                console.log('setting up dev-server stop')
+                console.log(devS)
+                let j = 0
 
-                //   debugger
-                //   await devS.stop()
-                //   ipc.send('dev-server:stopped')
-                // })
+                // console.log('setting up dev-server stop')
+                ipc.on('dev-server:stop', async () => {
+                  j++
+                  console.log('stacking?')
+                  console.log(j)
+                  console.log('inside stop fn run_require_async_child')
+                  console.log(devS)
+                  debugger
+                  await devS.close()
+                  ipc.send('dev-server:stopped')
+                })
 
                 return devS
               }
 
               devServerOpts.cypressConfig = config
 
-              devS = devServer(devServerOpts, result.component && result.component.devServerConfig)
+              devS = await devServer(devServerOpts, result.component && result.component.devServerConfig)
 
-              // console.log('setting up dev-server stop')
+              console.log('setting up dev-server stop')
+              console.log(devS)
+              let i = 0
 
-              // on('dev-server:stop', async () => {
-              //   console.log('inside stop fn run_require_async_child')
-
-              //   debugger
-              //   await devS.stop()
-              //   ipc.send('dev-server:stopped')
-              // })
+              ipc.on('dev-server:stop', async () => {
+                i++
+                console.log('stacking?')
+                console.log(i)
+                console.log('inside stop fn run_require_async_child')
+                console.log(devS)
+                debugger
+                await devS.close()
+                ipc.send('dev-server:stopped')
+              })
 
               return devS
             })
 
-            console.log('setting up dev-server stop')
-            ipc.on('dev-server:stop', async () => {
-              console.log('inside stop fn run_require_async_child')
+            console.log('set up dev-server:stop')
+            // ipc.on('dev-server:stop', async () => {
+            //   console.log('HERE')
+            // })
 
-              debugger
-              console.log(JSON.stringify(devS))
-              await devS.stop()
-              ipc.send('dev-server:stopped')
-            })
+            // console.log('setting up dev-server stop')
+            // ipc.on('dev-server:stop', async () => {
+            //   console.log('inside stop fn run_require_async_child')
+
+            //   debugger
+            //   console.log(JSON.stringify(devS))
+            //   await devS.stop()
+            //   ipc.send('dev-server:stopped')
+            // })
 
             return setupNodeEvents(on, config)
           })
