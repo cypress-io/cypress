@@ -674,11 +674,12 @@ describe('visual error templates', () => {
     },
     CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
       // @ts-expect-error
-      const err: Error & { status: number, statusText: string, url: string } = makeErr()
+      const err: Error & { status: number, statusText: string, url: string, message: string, responseBody: string } = makeErr()
 
       err.status = 500
       err.statusText = 'Internal Server Error'
       err.url = 'https://some/url'
+      err.responseBody = '{ status: 500, reason: \'unknown\'}'
 
       return {
         default: [err],

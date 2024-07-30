@@ -1,11 +1,51 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.12.1
+## 13.13.2
 
-_Released 7/02/2024 (PENDING)_
+_Released 7/30/2024_
+
+**Performance:**
+
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
+**Bugfixes:**
+
+- Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
+
+**Dependency Updates:**
+
+- Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+- Updated `chrome-remote-interface` from `0.33.0` to `0.33.2`. Addressed in [#29932](https://github.com/cypress-io/cypress/pull/29932).
+- Updated `mime` from `2.4.4` to `2.6.0`. Addressed in [#29870](https://github.com/cypress-io/cypress/pull/29870).
+- Updated `strip-ansi` from `6.0.0` to `6.0.1`. Addressed in [#29931](https://github.com/cypress-io/cypress/pull/29931).
+
+## 13.13.1
+
+_Released 7/16/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where unhandled `WebSocket connection closed` exceptions would be thrown when CDP connections rapidly connect, disconnect, and connect again while there are pending commands. Fixes [#29572](https://github.com/cypress-io/cypress/issues/29572).
+- CLI output properly displays non-JSON response bodies when a Test Replay upload attempt returns a non-JSON response body for a non-200 status code. Addressed in [#29801](https://github.com/cypress-io/cypress/pull/29801).
+- Fixed an issue where the ReadStream used to upload a Test Replay recording could erroneously be re-used when retrying in cases of retryable upload failures. Fixes [#29227](https://github.com/cypress-io/cypress/issues/29227).
+- Fixed an issue where command snapshots were not being captured within the `cy.origin()` command within Test Replay. Addressed in [#29828](https://github.com/cypress-io/cypress/pull/29828).
+
+**Dependency Updates:**
+
+- Updated `jquery` from `3.1.1` to `3.4.1`. Addresses [#29822](https://github.com/cypress-io/cypress/issues/29822). Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
+- Replaced `json-lint` with `json-parse-even-better-errors`. This removes the [CVE-2021-23358](https://nvd.nist.gov/vuln/detail/CVE-2021-23358) vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
+- Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
+
+## 13.13.0
+
+_Released 7/01/2024_
 
 **Performance:**
 
 - Improved performance of `experimentalSourceRewriting` option. Fixed in [#29540](https://github.com/cypress-io/cypress/pull/29540).
+
+**Features:**
+
+- Adds Signal support for Angular Component Testing versions 17.2 and up. Addresses [#29264](https://github.com/cypress-io/cypress/issues/29264).
 
 **Bugfixes:**
 
@@ -14,6 +54,8 @@ _Released 7/02/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
+- Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
 - Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
 
