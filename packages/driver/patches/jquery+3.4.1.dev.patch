@@ -72,10 +72,32 @@ index 411a859..0000000
 -});
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 773ad95..9e6076f 100644
+index 773ad95..843bf56 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -6534,69 +6534,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+@@ -1100,21 +1100,6 @@ setDocument = Sizzle.setDocument = function( node ) {
+ 	docElem = document.documentElement;
+ 	documentIsHTML = !isXML( document );
+ 
+-	// Support: IE 9-11, Edge
+-	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
+-	if ( preferredDoc !== document &&
+-		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
+-
+-		// Support: IE 11, Edge
+-		if ( subWindow.addEventListener ) {
+-			subWindow.addEventListener( "unload", unloadHandler, false );
+-
+-		// Support: IE 9 - 10 only
+-		} else if ( subWindow.attachEvent ) {
+-			subWindow.attachEvent( "onunload", unloadHandler );
+-		}
+-	}
+-
+ 	/* Attributes
+ 	---------------------------------------------------------------------- */
+ 
+@@ -6534,69 +6519,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
  }
  
