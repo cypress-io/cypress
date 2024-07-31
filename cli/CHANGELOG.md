@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.13.2
 
-_Released 7/30/2024_
+_Released 7/31/2024_
 
 **Performance:**
 
@@ -10,7 +10,7 @@ _Released 7/30/2024_
 
 **Bugfixes:**
 
-- Fixed an issue where yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
+- Fixed an issue where Yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
 
 **Dependency Updates:**
 
