@@ -189,6 +189,7 @@ describe('putProtocolArtifact', () => {
           destinationUrl,
           403,
           'Forbidden',
+          'Response Body',
           res,
         )
 
