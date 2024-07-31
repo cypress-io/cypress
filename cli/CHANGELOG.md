@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.0
+
+_Released 8/13/2024 (PENDING)_
+
+**Misc:**
+
+- Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
+
 ## 13.13.2
 
 _Released 7/31/2024_
@@ -35,10 +43,6 @@ _Released 7/16/2024_
 - Updated `jquery` from `3.1.1` to `3.4.1`. Addresses [#29822](https://github.com/cypress-io/cypress/issues/29822). Addressed in [#29837](https://github.com/cypress-io/cypress/pull/29837).
 - Replaced `json-lint` with `json-parse-even-better-errors`. This removes the [CVE-2021-23358](https://nvd.nist.gov/vuln/detail/CVE-2021-23358) vulnerability being reported in security scans. Addresses [#28207](https://github.com/cypress-io/cypress/issues/28207).
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
-
-**Misc:**
-
-- Added `CYPRESS_SKIP_VERIFY` flag to enable suppression of Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243)
 
 ## 13.13.0
 
