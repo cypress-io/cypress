@@ -2521,7 +2521,6 @@
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/opts-arg.js",
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/path-arg.js",
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/use-native.js",
-    "./node_modules/mocha-junit-reporter/node_modules/strip-ansi/index.js",
     "./node_modules/mocha/lib/browser/progress.js",
     "./node_modules/mocha/lib/context.js",
     "./node_modules/mocha/lib/interfaces/bdd.js",
@@ -3326,7 +3325,6 @@
     "./node_modules/stream-parser/node_modules/ms/index.js",
     "./node_modules/stream-shift/index.js",
     "./node_modules/string-width/index.js",
-    "./node_modules/string-width/node_modules/strip-ansi/index.js",
     "./node_modules/stringify-object/index.js",
     "./node_modules/stringify-object/node_modules/is-obj/index.js",
     "./node_modules/strip-ansi/index.js",
@@ -4350,5 +4348,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "07373eb1748952a20dea40e23e008a9a5edbcbd1fa47423e21f89a7c4f28fff9"
+  "deferredHash": "03dceaab60cc614ea3b89f34cf598572b00079db281542613cf8cc7857f944eb"
 }
