@@ -72,10 +72,10 @@ index 411a859..0000000
 -});
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 773ad95..843bf56 100644
+index 773ad95..b9e0f58 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -1100,21 +1100,6 @@ setDocument = Sizzle.setDocument = function( node ) {
+@@ -1100,31 +1100,24 @@ setDocument = Sizzle.setDocument = function( node ) {
  	docElem = document.documentElement;
  	documentIsHTML = !isXML( document );
  
@@ -83,11 +83,17 @@ index 773ad95..843bf56 100644
 -	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
 -	if ( preferredDoc !== document &&
 -		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
--
++	// Support: IE 9 - 11+, Edge 12 - 18+
++	// Accessing iframe documents after unload throws "permission denied" errors
+ 
 -		// Support: IE 11, Edge
 -		if ( subWindow.addEventListener ) {
 -			subWindow.addEventListener( "unload", unloadHandler, false );
--
++	// (see trac-13936).
++	// Limit the fix to IE & Edge Legacy; despite Edge 15+ implementing `matches`,
++	// all IE 9+ and Edge Legacy versions implement `msMatchesSelector` as well.
++	if ( documentElement.msMatchesSelector &&
+ 
 -		// Support: IE 9 - 10 only
 -		} else if ( subWindow.attachEvent ) {
 -			subWindow.attachEvent( "onunload", unloadHandler );
@@ -96,6 +102,9 @@ index 773ad95..843bf56 100644
 -
  	/* Attributes
  	---------------------------------------------------------------------- */
+@@ -1135,18 +1128,6 @@ setDocument = Sizzle.setDocument = function( node ) {
+ 		return !el.getElementsByTagName("*").length;
+ 	});
  
 @@ -6534,69 +6519,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
