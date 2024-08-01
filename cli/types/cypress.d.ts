@@ -3125,6 +3125,10 @@ declare namespace Cypress {
      */
     experimentalSkipDomainInjection: string[] | null
     /**
+     * TODO: description
+     */
+    experimentalJITComponentTesting: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -3522,14 +3526,17 @@ declare namespace Cypress {
     | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
+    port?: number,
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
+    port?: number,
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
+    port?: number,
     bundler: 'webpack'
     framework: 'angular'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
@@ -6107,6 +6114,7 @@ declare namespace Cypress {
     (action: 'before:browser:launch', fn: (browser: Browser, afterBrowserLaunchOptions: BeforeBrowserLaunchOptions) => void | Promise<void> | BeforeBrowserLaunchOptions | Promise<BeforeBrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
+    (action: 'dev-server:stop', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 

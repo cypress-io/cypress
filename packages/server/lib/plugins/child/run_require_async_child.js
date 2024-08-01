@@ -1,5 +1,6 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
+const merge = require('lodash/merge')
 const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
@@ -159,22 +160,45 @@ function run (ipc, file, projectRoot) {
               ))
             }
 
-            on('dev-server:start', (devServerOpts) => {
+            on('dev-server:start', async (devServerOpts) => {
+              debugLib('starting the CT dev server')
               if (objApi) {
-                const { specs, devServerEvents } = devServerOpts
+                const { specs, devServerEvents, config: serializedConfig } = devServerOpts
 
-                return devServer({
-                  cypressConfig: config,
+                const devS = await devServer({
+                  // we need to merge the serialized config through the node plugin with the default config
+                  // as the initial user config is missing the baseUrl set for CT, which is critical for experimentalJITComponentTesting
+                  cypressConfig: merge({}, config, serializedConfig),
                   onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
                 })
+
+                ipc.once('dev-server:stop', async () => {
+                  debugLib('stopping the CT dev server...')
+                  await devS.close()
+                  debugLib('CT dev server stopped.')
+                  debugLib('ipc: dev-server:stop')
+                  ipc.send('dev-server:stopped')
+                })
+
+                return devS
               }
 
               devServerOpts.cypressConfig = config
 
-              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+              const devS = await devServer(devServerOpts, result.component && result.component.devServerConfig)
+
+              ipc.once('dev-server:stop', async () => {
+                debugLib('stopping the CT dev server...')
+                await devS.close()
+                debugLib('CT dev server stopped.')
+                debugLib('ipc: dev-server:stop')
+                ipc.send('dev-server:stopped')
+              })
+
+              return devS
             })
 
             return setupNodeEvents(on, config)

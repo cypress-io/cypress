@@ -8,6 +8,7 @@
  */
 import path from 'path'
 import _ from 'lodash'
+import portfinder from 'portfinder'
 import resolve from 'resolve'
 import fs from 'fs'
 
@@ -235,7 +236,7 @@ export class ProjectLifecycleManager {
           })
         }
 
-        if (this._currentTestingType === 'component') {
+        if (this._currentTestingType === 'component' && !finalConfig.experimentalJITComponentTesting) {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
@@ -259,6 +260,26 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        }
+
+        if (this._currentTestingType === 'component' && finalConfig.experimentalJITComponentTesting) {
+          const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
+
+          try {
+            // assign a port to the dev server. if the user doesn't provide one, find a free one to bind the dev server to throughout the test
+            // TODO: come back and fix types
+            // @ts-expect-error
+            finalConfig.devServer.port = finalConfig.devServer.port || await portfinder.getPortPromise()
+          } catch (e) {
+            // TODO: come up with a better error
+            throw new Error('could not find a free port. critical error.')
+          }
+
+          span?.end()
+
+          // set the port on localhost to the "reserved" port
+          // @ts-expect-error
+          finalConfig.baseUrl = `http://localhost:${finalConfig.devServer.port}`
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl

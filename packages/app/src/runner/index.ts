@@ -437,6 +437,29 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+    // open mode:
+    // if running experimentalJITComponentTesting=true, kill the dev server (if one is running)
+    // before attempting to start another on the same port
+    if (config.experimentalJITComponentTesting) {
+      // kill the dev server is if is currently running
+      await new Promise<void>((resolve, reject) => {
+        Cypress.once('dev-server:stopped', () => {
+          resolve()
+        })
+
+        Cypress.emit('dev-server:stop', spec)
+      })
+
+      // then start it with the current spec
+      return new Promise((resolve, reject) => {
+        Cypress.once('dev-server:started', () => {
+          resolve(runSpecCT(config, spec))
+        })
+
+        Cypress.emit('dev-server:start', spec)
+      })
+    }
+
     return runSpecCT(config, spec)
   }
 

@@ -782,7 +782,24 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
+    const ctx = require('@packages/data-context').getCtx()
+
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      const devServerOptions = await ctx._apis.projectApi.getDevServer().start({ specs: [spec], spec, config })
+
+      // if user defined a port, but the port the dev server is running on is different, throw an error
+      // TODO: go back and fix this
+      // @ts-expect-error
+      if (config.devServer.port && (config.devServer.port !== devServerOptions.port)) {
+        throw new Error('Ports do not match!')
+      }
+    }
+
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      await ctx._apis.projectApi.getDevServer().stop()
+    }
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
       // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching

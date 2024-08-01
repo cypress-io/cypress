@@ -286,7 +286,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           if (baseUrl) {
             this._baseUrl = baseUrl
 
-            if (config.isTextTerminal) {
+            // skip baseUrl check for when experimentalJITComponentTesting is true,
+            // which means the dev server has not started yet, so we will be unable to ping it.
+            const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJITComponentTesting
+
+            if (config.isTextTerminal && !shouldSkipBaseUrlCheck) {
               return this._retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
               .catch((e) => {
@@ -300,6 +304,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
             .return(null)
             .catch((err) => {
               debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+
+              // if experimental JIT is configured for CT, don't fail if we cannot connect to the base URL
+              if (shouldSkipBaseUrlCheck) {
+                return null
+              }
 
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
@@ -330,7 +339,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    if (!config.baseUrl && testingType === 'component') {
+    if (!config.baseUrl && testingType === 'component' && !config.experimentalJITComponentTesting) {
       throw new Error('Server#open called without config.baseUrl.')
     }
 

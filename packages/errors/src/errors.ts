@@ -1319,6 +1319,9 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
+  EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+    return errTemplate`WRITE ME!`
+  },
   EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
     const code = errPartial`
     {

@@ -49,6 +49,7 @@ export interface ProjectApiShape {
     updateSpecs(specs: SpecWithRelativeRoot[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
+    stop(): Promise<void>
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
@@ -442,7 +443,9 @@ export class ProjectActions {
   }
 
   async pingBaseUrl () {
-    const baseUrl = (await this.ctx.project.getConfig())?.baseUrl
+    const config = await this.ctx.project.getConfig()
+    const baseUrl = config?.baseUrl
+    const experimentalJITComponentTesting = config?.experimentalJITComponentTesting
 
     // Should never happen
     if (!baseUrl) {
@@ -457,7 +460,14 @@ export class ProjectActions {
     }
 
     return this.api.isListening(baseUrl)
-    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
+    .catch(() => {
+      // if experimental JIT is configured for CT, don't fail if we cannot connect to the base URL
+      if (experimentalJITComponentTesting) {
+        return null
+      }
+
+      return this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl))
+    })
   }
 
   async switchTestingTypesAndRelaunch (testingType: Cypress.TestingType): Promise<void> {

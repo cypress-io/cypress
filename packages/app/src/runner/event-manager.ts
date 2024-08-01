@@ -40,10 +40,10 @@ interface AddGlobalListenerOptions {
 }
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:start dev-server:stop'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:started dev-server:stopped'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 /**
@@ -90,7 +90,7 @@ export class EventManager {
       })
     }
 
-    const rerun = () => {
+    const rerun = (isDevServerRecompile = false) => {
       if (!this) {
         // if the tests have been reloaded then there is nothing to rerun
         return
@@ -163,6 +163,11 @@ export class EventManager {
 
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
+        if (Cypress.config('experimentalJITComponentTesting')) {
+          // currently for experimentalJITComponentTesting, ignore the compile event
+          return
+        }
+
         rerun()
       }
     })
