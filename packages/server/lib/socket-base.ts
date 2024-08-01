@@ -382,6 +382,18 @@ export class SocketBase {
           cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
         }
 
+        socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
+          const ctx = await getCtx()
+          const devServer = await ctx._apis.projectApi.getDevServer()
+
+          // update the dev server with the spec running
+          debug(`updating CT dev-server with spec: ${spec.relative}`)
+          // @ts-expect-error
+          await devServer.updateSpecs([spec])
+
+          return socket.emit('dev-server:on-spec-updated')
+        })
+
         socket.on('backend:request', (eventName: string, ...args) => {
           const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
 

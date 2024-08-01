@@ -50,6 +50,7 @@ module.exports = {
       },
 
       on: emitter.on.bind(emitter),
+      once: emitter.once.bind(emitter),
       removeListener: emitter.removeListener.bind(emitter),
     }
   },
