@@ -286,7 +286,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           if (baseUrl) {
             this._baseUrl = baseUrl
 
-            if (config.isTextTerminal) {
+            const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJustInTimeCompile && config.isTextTerminal
+
+            if (config.isTextTerminal && !shouldSkipBaseUrlCheck) {
               return this._retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
               .catch((e) => {
@@ -294,6 +296,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
                 return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
               })
+            }
+
+            // if experimentalJustInTimeCompile is enabled for CT and in run mode, don't fail if we cannot connect to the base URL
+            // as the dev server has not started yet
+            if (shouldSkipBaseUrlCheck) {
+              return null
             }
 
             return ensureUrl.isListening(baseUrl)
@@ -330,7 +338,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    if (!config.baseUrl && testingType === 'component') {
+    // if experimentalJustInTimeCompile is enabled for CT and in run mode, don't fail if we cannot connect to the base URL
+    // as the dev server has not started yet
+    const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJustInTimeCompile && config.isTextTerminal
+
+    if (!config.baseUrl && testingType === 'component' && !shouldSkipBaseUrlCheck) {
       throw new Error('Server#open called without config.baseUrl.')
     }
 

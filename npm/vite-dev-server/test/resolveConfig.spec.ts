@@ -1,4 +1,5 @@
 import Chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import { EventEmitter } from 'events'
 import * as vite4 from 'vite-4'
 import * as vite5 from 'vite-5'
@@ -7,6 +8,8 @@ import { createViteDevServerConfig } from '../src/resolveConfig'
 import sinon from 'sinon'
 import SinonChai from 'sinon-chai'
 import type { ViteDevServerConfig } from '../src/devServer'
+
+Chai.use(chaiAsPromised)
 
 Chai.use(SinonChai)
 
@@ -107,6 +110,49 @@ describe('resolveConfig', function () {
 
         expect(viteConfig.server?.watch?.ignored).to.be.undefined
         expect(viteConfig.server?.hmr).to.be.undefined
+      })
+    })
+
+    describe('experimentalJustInTimeCompile', () => {
+      let viteDevServerConfig: ViteDevServerConfig
+
+      beforeEach(async () => {
+        const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
+
+        viteDevServerConfig = getViteDevServerConfig(projectRoot)
+        viteDevServerConfig.cypressConfig.experimentalJustInTimeCompile = true
+      })
+
+      describe('open mode', () => {
+        beforeEach(() => {
+          viteDevServerConfig.cypressConfig.isTextTerminal = false
+        })
+
+        it('does not assign the port', async () => {
+          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
+
+          expect(viteConfig.server.port).to.be.undefined
+        })
+      })
+
+      describe('run mode', () => {
+        beforeEach(() => {
+          viteDevServerConfig.cypressConfig.isTextTerminal = true
+        })
+
+        it('throws an error if baseUrl is null', () => {
+          viteDevServerConfig.cypressConfig.baseUrl = null
+
+          expect(createViteDevServerConfig(viteDevServerConfig, discoveredVite)).to.be.rejected
+        })
+
+        it('assigns the port of the dev server based on ', async () => {
+          viteDevServerConfig.cypressConfig.baseUrl = 'http://localhost:1234'
+
+          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
+
+          expect(viteConfig.server.port).to.equal(1234)
+        })
       })
     })
   })

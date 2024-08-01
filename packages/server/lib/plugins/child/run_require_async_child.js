@@ -1,5 +1,6 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
+const merge = require('lodash/merge')
 const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
@@ -160,21 +161,49 @@ function run (ipc, file, projectRoot) {
             }
 
             on('dev-server:start', (devServerOpts) => {
+              debug('starting the CT dev server')
               if (objApi) {
-                const { specs, devServerEvents } = devServerOpts
+                const { specs, devServerEvents, config: serializedConfig } = devServerOpts
 
-                return devServer({
-                  cypressConfig: config,
+                const devS = devServer({
+                  // we need to merge the serialized config through the node plugin with the default config
+                  // as the initial user config is missing the baseUrl set for CT, which is critical for experimentalJustInTimeCompile
+                  cypressConfig: merge({}, config, serializedConfig),
                   onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
                 })
+
+                // TODO: can we wrap this in the experimental flag to determine if this is a memory leak?
+                ipc.once('dev-server:stop', async () => {
+                  debug('stopping the CT dev server...')
+                  // this promise should already be resolved
+                  const server = await devS
+
+                  await server.close()
+                  debug('CT dev server stopped.')
+                  ipc.send('dev-server:stopped')
+                })
+
+                return devS
               }
 
               devServerOpts.cypressConfig = config
 
-              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+              const devS = devServer(devServerOpts, result.component && result.component.devServerConfig)
+
+              ipc.once('dev-server:stop', async () => {
+                debug('stopping the CT dev server...')
+                // this promise should already be resolved
+                const server = await devS
+
+                await server.close()
+                debug('CT dev server stopped.')
+                ipc.send('dev-server:stopped')
+              })
+
+              return devS
             })
 
             return setupNodeEvents(on, config)

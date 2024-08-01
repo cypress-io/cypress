@@ -437,4 +437,100 @@ describe('makeWebpackConfig', () => {
       })
     })
   })
+
+  describe('experimentalJustInTimeCompile', () => {
+    let devServerConfig: WebpackDevServerConfig
+
+    const WEBPACK_MATRIX: {
+      webpack: 4 | 5
+      wds: 3 | 4 | 5
+    }[] = [
+      {
+        webpack: 4,
+        wds: 3,
+      },
+      {
+        webpack: 4,
+        wds: 4,
+      },
+      {
+        webpack: 5,
+        wds: 4,
+      },
+      {
+        webpack: 5,
+        wds: 5,
+      },
+    ]
+
+    beforeEach(() => {
+      devServerConfig = {
+        specs: [],
+        cypressConfig: {
+          projectRoot: '.',
+          devServerPublicPathRoute: '/test-public-path',
+          experimentalJustInTimeCompile: true,
+          baseUrl: null,
+        } as Cypress.PluginConfigOptions,
+        webpackConfig: {
+          entry: { main: 'src/index.js' },
+        },
+        devServerEvents: new EventEmitter(),
+      }
+    })
+
+    WEBPACK_MATRIX.forEach(({ webpack, wds }) => {
+      describe(`webpack: v${webpack} with webpack-dev-server v${wds}`, () => {
+        describe('open mode', () => {
+          beforeEach(() => {
+            devServerConfig.cypressConfig.isTextTerminal = false
+          })
+
+          it('does not assign the port', async () => {
+            const actual = await makeWebpackConfig({
+              devServerConfig,
+              sourceWebpackModulesResult: createModuleMatrixResult({
+                webpack,
+                webpackDevServer: wds,
+              }),
+            })
+
+            expect(actual.devServer.port).to.be.undefined
+          })
+        })
+
+        describe('run mode', () => {
+          beforeEach(() => {
+            devServerConfig.cypressConfig.isTextTerminal = true
+          })
+
+          it('throws an error if baseUrl is null', () => {
+            devServerConfig.cypressConfig.baseUrl = null
+
+            expect(makeWebpackConfig({
+              devServerConfig,
+              sourceWebpackModulesResult: createModuleMatrixResult({
+                webpack,
+                webpackDevServer: wds,
+              }),
+            })).to.be.rejected
+          })
+
+          it('assigns the port of the dev server based on ', async () => {
+            devServerConfig.cypressConfig.baseUrl = 'http://localhost:1234'
+
+            const actual = await makeWebpackConfig({
+              devServerConfig,
+              sourceWebpackModulesResult: createModuleMatrixResult({
+                webpack,
+                webpackDevServer: wds,
+              }),
+            })
+
+            expect(actual.devServer.port).to.equal('1234')
+          })
+        })
+      })
+    })
+  })
 })

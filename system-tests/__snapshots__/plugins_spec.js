@@ -365,6 +365,7 @@ The following are valid events:
  - before:run
  - before:spec
  - dev-server:start
+ - dev-server:stop
  - file:preprocessor
  - task
 

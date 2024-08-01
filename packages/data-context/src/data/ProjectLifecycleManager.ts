@@ -8,6 +8,7 @@
  */
 import path from 'path'
 import _ from 'lodash'
+import portfinder from 'portfinder'
 import resolve from 'resolve'
 import fs from 'fs'
 
@@ -74,6 +75,14 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
   isProjectUsingESModules: false,
+}
+
+class PortUnavailableError extends Error {
+  constructor (message: string) {
+    super()
+    this.message = message
+    this.name = 'PortUnavailableError'
+  }
 }
 
 export class ProjectLifecycleManager {
@@ -238,27 +247,52 @@ export class ProjectLifecycleManager {
         if (this._currentTestingType === 'component') {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
-          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          // if experimentalJustInTimeCompile is enabled we are in run mode, we do not need to start the dev server
+          // this early. That will occur in @packages/server/lib/modes/run.ts
+          if (finalConfig.isTextTerminal && finalConfig.experimentalJustInTimeCompile) {
+            try {
+              // We are NOT starting the dev server. However, the Cypress app needs to have a baseUrl to proceed, so we need to generate a baseUrl.
+              // Assign a port to the dev server. If the user doesn't provide one, find a free one to bind the dev server to throughout the run.
+              const port = await portfinder.getPortPromise()
 
-          // If we received a cypressConfig.port we want to null it out
-          // because we propagated it into the devServer.port and it is
-          // later set as baseUrl which cypress is launched into
-          //
-          // The special case is cypress in cypress testing. If that's the case, we still need
-          // the wrapper cypress to be running on 4455
-          if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-            finalConfig.port = null
+              finalConfig.baseUrl = `http://localhost:${port}`
+            } catch (e) {
+              const portUnavailableError = new PortUnavailableError('Unable to discover available port on your machine for use with experimentalJustInTimeCompile. Cypress cannot run with this option and must be able to leverage a free port.')
+
+              this.ctx.debug(`critical failure: unable to find port due to: ${e.message}. Exiting Cypress...`)
+              throw portUnavailableError
+            }
           } else {
-            finalConfig.port = 4455
+            /**
+             * We need to start the dev server in the ProjectLifecycleManager when:
+             *   1. GA component testing is running so we can compile the dev server will all specs matching the specPattern
+             *   2. experimentalJustInTimeCompile is enabled and running in open mode. In this case, we start a dev server
+             *      with an empty specs list to initially compile the support file and related dependencies in order to hopefully
+             *      leverage the dev server cache for recompiling for when we actually have a spec to add to the dev server entry.
+             */
+            const specsToStartDevServer = finalConfig.experimentalJustInTimeCompile ? [] : this.ctx.project.specs
+            const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: specsToStartDevServer, config: finalConfig })
+
+            // If we received a cypressConfig.port we want to null it out
+            // because we propagated it into the devServer.port and it is
+            // later set as baseUrl which cypress is launched into
+            //
+            // The special case is cypress in cypress testing. If that's the case, we still need
+            // the wrapper cypress to be running on 4455
+            if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+              finalConfig.port = null
+            } else {
+              finalConfig.port = 4455
+            }
+
+            if (!devServerOptions?.port) {
+              throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
+            }
+
+            finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
           }
 
           span?.end()
-
-          if (!devServerOptions?.port) {
-            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
-          }
-
-          finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl
