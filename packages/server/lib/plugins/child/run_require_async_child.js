@@ -159,22 +159,38 @@ function run (ipc, file, projectRoot) {
               ))
             }
 
-            on('dev-server:start', (devServerOpts) => {
+            let devS
+
+            on('dev-server:start', async (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
-                return devServer({
+                const devS = await devServer({
                   cypressConfig: config,
                   onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
                 })
+
+                ipc.on('dev-server:stop', async () => {
+                  await devS.close()
+                  ipc.send('dev-server:stopped')
+                })
+
+                return devS
               }
 
               devServerOpts.cypressConfig = config
 
-              return devServer(devServerOpts, result.component && result.component.devServerConfig)
+              devS = await devServer(devServerOpts, result.component && result.component.devServerConfig)
+
+              ipc.on('dev-server:stop', async () => {
+                await devS.close()
+                ipc.send('dev-server:stopped')
+              })
+
+              return devS
             })
 
             return setupNodeEvents(on, config)

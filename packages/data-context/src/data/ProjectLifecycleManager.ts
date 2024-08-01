@@ -259,8 +259,33 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
-        } else {
-          this.ctx.debug(`not starting dev server as "experimentalJITComponentTesting" is ${finalConfig.experimentalJITComponentTesting}`)
+        }
+
+        if (this._currentTestingType === 'component' && finalConfig.experimentalJITComponentTesting) {
+          const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
+
+          // start an empty dev server to get a port?
+          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: [], config: finalConfig })
+
+          // If we received a cypressConfig.port we want to null it out
+          // because we propagated it into the devServer.port and it is
+          // later set as baseUrl which cypress is launched into
+          //
+          // The special case is cypress in cypress testing. If that's the case, we still need
+          // the wrapper cypress to be running on 4455
+          if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+            finalConfig.port = null
+          } else {
+            finalConfig.port = 4455
+          }
+
+          span?.end()
+
+          if (!devServerOptions?.port) {
+            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
+          }
+
+          finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl

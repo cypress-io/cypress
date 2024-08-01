@@ -782,7 +782,43 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      // TODO: hoist this out
+      const ctx = require('@packages/data-context').getCtx()
+
+      const devServer = ctx._apis.projectApi.getDevServer()
+
+      await devServer.closeExperimental()
+      const devServerOptions = await ctx._apis.projectApi.getDevServer().start({ specs: [spec], spec, config })
+
+      // If we received a cypressConfig.port we want to null it out
+      // because we propagated it into the devServer.port and it is
+      // later set as baseUrl which cypress is launched into
+      //
+      // The special case is cypress in cypress testing. If that's the case, we still need
+      // the wrapper cypress to be running on 4455
+      if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        config.port = null
+      } else {
+        config.port = 4455
+      }
+
+      // if (!devServerOptions?.port) {
+      //   throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
+      // }
+
+      config.baseUrl = `http://localhost:${devServerOptions?.port}`
+      ctx.lifecycleManager._cachedFullConfig = config
+    }
+
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      // TODO: hoist this out
+      const ctx = require('@packages/data-context').getCtx()
+
+      await ctx._apis.projectApi.getDevServer().closeExperimental()
+    }
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
       // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching

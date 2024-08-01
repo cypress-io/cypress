@@ -220,8 +220,21 @@ export const createCommonRoutes = ({
       iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
-    if (testingType === 'component' && !config.experimentalJITComponentTesting) {
-      iframesController.component({ config, nodeProxy }, req, res)
+    if (testingType === 'component') {
+      if (config.experimentalJITComponentTesting) {
+        const ctx = getCtx()
+
+        // @ts-ignore
+        config.baseUrl = ctx.lifecycleManager._cachedFullConfig.baseUrl
+        const proxy = httpProxy.createProxyServer({
+          // @ts-ignore
+          target: config.baseUrl,
+        })
+
+        iframesController.component({ config, nodeProxy: proxy }, req, res)
+      } else {
+        iframesController.component({ config, nodeProxy }, req, res)
+      }
     }
   })
 

@@ -35,6 +35,7 @@ const eventValidators = {
   'before:run': isFunction,
   'before:spec': isFunction,
   'dev-server:start': isFunction,
+  'dev-server:stop': isFunction,
   'file:preprocessor': isFunction,
   'task': isObject,
 }

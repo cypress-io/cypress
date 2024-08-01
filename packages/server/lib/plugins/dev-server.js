@@ -15,6 +15,14 @@ plugins.registerHandler((ipc) => {
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
+
+  baseEmitter.on('dev-server:stop', () => {
+    ipc.send('dev-server:stop')
+  })
+
+  ipc.on('dev-server:stopped', () => {
+    baseEmitter.emit('dev-server:stopped')
+  })
 })
 
 // for simpler stubbing from unit tests
@@ -36,6 +44,16 @@ const API = {
   close () {
     debug('close dev-server')
     baseEmitter.removeAllListeners()
+  },
+
+  closeExperimental () {
+    return new Promise((resolve, reject) => {
+      baseEmitter.once('dev-server:stopped', () => {
+        resolve()
+      })
+
+      baseEmitter.emit('dev-server:stop')
+    })
   },
 }
 
