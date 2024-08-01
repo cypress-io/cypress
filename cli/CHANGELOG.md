@@ -5,7 +5,7 @@ _Released 8/13/2024_
 
 **Bugfixes:**
 
-- Fixed an issue where Test Replay upload error messages were too vague. Connection failures now report the precise system error, and the stall error message is reported rather than the vague, "The user aborted a request." Addressed in [#29959](https://github.com/cypress-io/cypress/pull/29959).
+- Fixed an issue where certain Test Replay upload error messages were too vague. Connection failures now report the precise system error, and the stall error message is reported rather than the vague, "The user aborted a request." Addressed in [#29959](https://github.com/cypress-io/cypress/pull/29959).
 
 ## 13.13.2
 

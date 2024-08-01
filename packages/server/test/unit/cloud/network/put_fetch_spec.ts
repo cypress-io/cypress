@@ -107,14 +107,18 @@ describe('cloud/network/put_fetch', () => {
     })
   })
 
-  describe('when fetch rejects with a network error', () => {
+  describe('when fetch rejects with a system error', () => {
     const networkErrMsg = 'Error: ECONNRESET'
+    let err: Error & { code?: string } | undefined
 
     beforeEach(() => {
-      stubbedCrossFetch.rejects(new Error(networkErrMsg))
+      err = new Error(networkErrMsg)
+
+      err.code = 'ECONNRESET'
+      stubbedCrossFetch.rejects(err)
     })
 
-    it('throws a NetworkError', async () => {
+    it('throws a SystemError', async () => {
       let err
 
       try {
