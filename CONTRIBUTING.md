@@ -353,6 +353,10 @@ Leveraged only for internal cy-in-cy type tests to access the Cypress instance f
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
 ###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT`
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
+
+#### Internal Vite/Webpack Environment Variables
+###### `CYPRESS_INTERNAL_FORCED_CT_PORT`
+Leveraged only in system-tests to test the negative case of `experimentalJustInTimeCompile` to force an error.
 #### Debug Logs
 
 Many Cypress packages print out debugging information to console via the `debug` module. See ["Debug logs"](./guides/debug-logs.md) for more information.

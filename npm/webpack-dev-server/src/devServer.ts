@@ -97,7 +97,7 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
         return reject(new Error(`Expected port ${result.server.options.port} to be a number`))
       }
 
-      debug('Component testing webpack server 4 started on port %s', result.server.options.port)
+      debug(`Component testing webpack server ${result.version} started on port %s`, result.server.options.port)
 
       resolve({
         port: result.server.options.port as number,
