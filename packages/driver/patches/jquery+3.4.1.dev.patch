@@ -101,6 +101,27 @@ index 773ad95..b9e0f58 100644
 -	}
 -
  	/* Attributes
+-	/* Attributes
+-	---------------------------------------------------------------------- */
++		// Support: IE 11+, Edge 17 - 18+
++		// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
++		// two documents; shallow comparisons work.
++		// eslint-disable-next-line eqeqeq
++		preferredDoc != document &&
++		( subWindow = document.defaultView ) && subWindow.top !== subWindow ) {
+ 
+-	// Support: IE<8
+-	// Verify that getAttribute really returns attributes and not properties
+-	// (excepting IE8 booleans)
+-	support.attributes = assert(function( el ) {
+-		el.className = "i";
+-		return !el.getAttribute("className");
+-	});
++		// Support: IE 9 - 11+, Edge 12 - 18+
++		subWindow.addEventListener( "unload", unloadHandler );
++	}
+ 
+ 	/* getElement(s)By*
  	---------------------------------------------------------------------- */
 @@ -1135,18 +1128,6 @@ setDocument = Sizzle.setDocument = function( node ) {
  		return !el.getElementsByTagName("*").length;
