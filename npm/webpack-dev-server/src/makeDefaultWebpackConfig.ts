@@ -17,6 +17,8 @@ export function makeCypressWebpackConfig (
   const {
     devServerConfig: {
       cypressConfig: {
+        baseUrl,
+        experimentalJustInTimeCompile,
         port,
         projectRoot,
         devServerPublicPathRoute,
@@ -44,7 +46,23 @@ export function makeCypressWebpackConfig (
     },
   } = config
 
-  const webpackDevServerPort = port ?? undefined
+  let webpackDevServerPort: number | string | undefined = port ?? undefined
+
+  // if experimentalJITComponentTesting is enabled, we can imply that the base URL is set to the url with the expected port.
+  // start the dev server on the port specified in the base URL.
+  if (experimentalJustInTimeCompile && isRunMode) {
+    try {
+      // if the baseUrl is null, something critically wrong has occurred...
+      // @ts-expect-error
+      const baseURL = new URL(baseUrl)
+
+      debugLib(`experimentalJustInTimeCompile is set to ${experimentalJustInTimeCompile}. Setting the webpack-dev-server port to ${baseURL.port}.`)
+      webpackDevServerPort = baseURL.port
+    } catch (e) {
+      debugLib(`attempted to set baseUrl port for experimentalJustInTimeCompile, but error occurred: ${e}`)
+      throw e
+    }
+  }
 
   debug(`Using HtmlWebpackPlugin version ${htmlWebpackPluginVersion} from ${htmlWebpackPluginImportPath}`)
 

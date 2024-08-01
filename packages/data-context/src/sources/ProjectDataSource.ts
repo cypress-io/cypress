@@ -372,7 +372,7 @@ export class ProjectDataSource {
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
-    const onProjectFileSystemChange = _.debounce(async () => {
+    const onProjectFileSystemChange = _.debounce(async (_type, _filePath) => {
       const specs = await this.findSpecs({
         projectRoot,
         testingType,
@@ -382,7 +382,12 @@ export class ProjectDataSource {
         additionalIgnorePattern,
       })
 
-      if (_.isEqual(this.specs, specs)) {
+      const config = await this.ctx.project.getConfig()
+
+      // If running the experimentalJustInTimeCompile for CT,
+      // ignore this watcher since we only handle one spec at a time and do not need to recompile any time the file system changes.
+      // @ts-expect-error
+      if (_.isEqual(this.specs, specs) || (config.experimentalJustInTimeCompile && config.testingType === 'component')) {
         this.ctx.actions.project.refreshSpecs(specs)
 
         // If no differences are found, we do not need to emit events

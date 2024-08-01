@@ -49,6 +49,7 @@ export interface ProjectApiShape {
     updateSpecs(specs: SpecWithRelativeRoot[]): void
     start(options: {specs: Cypress.Spec[], config: FullConfig}): Promise<{port: number}>
     close(): void
+    stop(): Promise<void>
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
