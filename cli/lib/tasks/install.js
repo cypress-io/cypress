@@ -58,6 +58,7 @@ const displayCompletionMsg = () => {
     'You can now open Cypress by running one of the following, depending on your package manager:',
   )
 
+  logger.log()
   logger.log(chalk.cyan('npx cypress open'))
   logger.log(chalk.cyan('yarn cypress open'))
   logger.log(chalk.cyan('pnpm cypress open'))
