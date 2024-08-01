@@ -64,13 +64,13 @@ export async function putFetch <
   } catch (e) {
     const err = options.signal?.aborted ? options.signal.reason : e
 
-    debug('Error: %O', err)
+    debug('Error (sys error? %s) %O', err.errno || err.code, err)
     if (ParseError.isParseError(err) || HttpError.isHttpError(err)) {
       throw err
     }
 
     // if the error has a syscall, it's a system error
-    if (err.syscall) {
+    if (err.errno || err.code) {
       const url = typeof input === 'string' ? input :
         input instanceof URL ? input.href :
           input instanceof Request ? input.url : 'UNKNOWN_URL'
