@@ -238,7 +238,9 @@ export class ProjectLifecycleManager {
         if (this._currentTestingType === 'component') {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
-          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          const specsToStartDevServer = finalConfig.experimentalJITComponentTesting ? [] : this.ctx.project.specs
+
+          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: specsToStartDevServer, config: finalConfig })
 
           // If we received a cypressConfig.port we want to null it out
           // because we propagated it into the devServer.port and it is

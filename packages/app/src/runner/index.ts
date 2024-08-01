@@ -437,6 +437,18 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+    if (config.experimentalJITComponentTesting) {
+      // If running experimentalJITComponentTesting, send the signal to the dev server to load the spec before running
+      // since it isn't compiled
+      await new Promise<void>((resolve, _reject) => {
+        Cypress.once('dev-server:on-spec-updated', () => {
+          resolve()
+        })
+
+        Cypress.emit('dev-server:on-spec-update', spec)
+      })
+    }
+
     return runSpecCT(config, spec)
   }
 

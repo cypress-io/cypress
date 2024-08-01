@@ -237,6 +237,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'experimentalJITComponentTesting',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalOriginDependencies',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -734,6 +740,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   },
+  {
+    name: 'experimentalJITComponentTesting',
+    errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+    isWarning: false,
+    testingTypes: ['component'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
@@ -746,6 +758,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'indexHtmlFile',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalJITComponentTesting',
+      errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
       isWarning: false,
     },
   ],

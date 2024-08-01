@@ -782,6 +782,14 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
+    const ctx = require('@packages/data-context').getCtx()
+
+    if (options.testingType === 'component' && config.experimentalJITComponentTesting) {
+      // since the dev server is already compiled/compiling with the user's support file and other project details,
+      // we just need to update the server with the single spec entry to run the server
+      await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
+    }
+
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {

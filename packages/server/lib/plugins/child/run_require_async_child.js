@@ -159,7 +159,7 @@ function run (ipc, file, projectRoot) {
               ))
             }
 
-            on('dev-server:start', (devServerOpts) => {
+            on('dev-server:start', async (devServerOpts) => {
               if (objApi) {
                 const { specs, devServerEvents } = devServerOpts
 
