@@ -235,7 +235,7 @@ export class ProjectLifecycleManager {
           })
         }
 
-        if (this._currentTestingType === 'component') {
+        if (this._currentTestingType === 'component' && !finalConfig.experimentalJITComponentTesting) {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
@@ -259,6 +259,8 @@ export class ProjectLifecycleManager {
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+        } else {
+          this.ctx.debug(`not starting dev server as "experimentalJITComponentTesting" is ${finalConfig.experimentalJITComponentTesting}`)
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl
