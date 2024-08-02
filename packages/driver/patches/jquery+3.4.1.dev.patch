@@ -160,6 +160,7 @@ index 773ad95..84ca2f6 100644
  	}
  
  	// Tag
+@@ -6534,69 +6491,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
  }
  
