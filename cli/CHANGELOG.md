@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.3
+
+_Released 8/13/2024 (PENDING)_
+
+**Misc:**
+
+- Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
 ## 13.13.2
 
 _Released 7/31/2024_
