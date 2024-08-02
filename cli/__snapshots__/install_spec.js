@@ -20,9 +20,9 @@ Installing Cypress (version: 1.2.3)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -54,9 +54,9 @@ Installing Cypress (version: 1.2.3)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -88,9 +88,9 @@ Installing Cypress (version: 1.2.3)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -108,9 +108,9 @@ Installing Cypress (version: 1.2.3)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -139,9 +139,9 @@ Installing Cypress (version: 1.2.3)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -209,9 +209,9 @@ Installing Cypress (version: 0.12.1)
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 
@@ -313,9 +313,9 @@ Installing Cypress (version: https://cdn.cypress.io/beta/binary/0.0.0-developmen
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
-npx cypress open
-yarn cypress open
-pnpm cypress open
+- npx cypress open
+- yarn cypress open
+- pnpm cypress open
 
 https://on.cypress.io/opening-the-app
 

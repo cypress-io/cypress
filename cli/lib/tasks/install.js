@@ -59,9 +59,9 @@ const displayCompletionMsg = () => {
   )
 
   logger.log()
-  logger.log(chalk.cyan('npx cypress open'))
-  logger.log(chalk.cyan('yarn cypress open'))
-  logger.log(chalk.cyan('pnpm cypress open'))
+  logger.log(chalk.cyan('- npx cypress open'))
+  logger.log(chalk.cyan('- yarn cypress open'))
+  logger.log(chalk.cyan('- pnpm cypress open'))
 
   logger.log()
   logger.log(chalk.grey('https://on.cypress.io/opening-the-app'))
