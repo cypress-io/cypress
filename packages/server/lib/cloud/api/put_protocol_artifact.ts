@@ -27,23 +27,19 @@ export const putProtocolArtifact = asyncRetry(
     const fileStream = fs.createReadStream(artifactPath)
     const controller = activityMonitor.getController()
 
-    try {
-      await putFetch(destinationUrl, {
-        parse: ParseKinds.TEXT,
-        headers: {
-          'content-length': String(size),
-          'content-type': 'application/x-tar',
-          'accept': 'application/json',
-        },
-        // ts thinks this is a web fetch, which only expects ReadableStreams.
-        // But, this is a node fetch, which supports ReadStreams.
-        // @ts-expect-error
-        body: activityMonitor.monitor(fileStream),
-        signal: controller.signal,
-      })
-    } catch (e) {
-      throw e
-    }
+    await putFetch(destinationUrl, {
+      parse: ParseKinds.TEXT,
+      headers: {
+        'content-length': String(size),
+        'content-type': 'application/x-tar',
+        'accept': 'application/json',
+      },
+      // ts thinks this is a web fetch, which only expects ReadableStreams.
+      // But, this is a node fetch, which supports ReadStreams.
+      // @ts-expect-error
+      body: activityMonitor.monitor(fileStream),
+      signal: controller.signal,
+    })
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
