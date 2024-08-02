@@ -8,6 +8,7 @@
  */
 import path from 'path'
 import _ from 'lodash'
+import portfinder from 'portfinder'
 import resolve from 'resolve'
 import fs from 'fs'
 
@@ -264,28 +265,20 @@ export class ProjectLifecycleManager {
         if (this._currentTestingType === 'component' && finalConfig.experimentalJITComponentTesting) {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
-          // start an empty dev server to get a port?
-          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: [], config: finalConfig })
-
-          // If we received a cypressConfig.port we want to null it out
-          // because we propagated it into the devServer.port and it is
-          // later set as baseUrl which cypress is launched into
-          //
-          // The special case is cypress in cypress testing. If that's the case, we still need
-          // the wrapper cypress to be running on 4455
-          if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-            finalConfig.port = null
-          } else {
-            finalConfig.port = 4455
+          try {
+            // assign a port to the dev server. if the user doesn't provide one, find a free one to bind the dev server to throughout the test
+            // TODO: come back and fix types
+            // @ts-expect-error
+            finalConfig.devServer.port = finalConfig.devServer.port || await portfinder.getPortPromise()
+          } catch (e) {
+            // TODO: come up with a better error
+            throw new Error('could not find a free port. critical error.')
           }
 
           span?.end()
 
-          if (!devServerOptions?.port) {
-            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
-          }
-
-          finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
+          // set the port on localhost to the "reserved" port
+          finalConfig.baseUrl = `http://localhost:${finalConfig.devServer.port}`
         }
 
         const pingBaseUrl = this._cachedFullConfig && this._cachedFullConfig.baseUrl !== finalConfig.baseUrl

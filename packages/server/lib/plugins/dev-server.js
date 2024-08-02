@@ -17,10 +17,12 @@ plugins.registerHandler((ipc) => {
   })
 
   baseEmitter.on('dev-server:stop', () => {
+    debug('baseEmitter: dev-server:stop')
     ipc.send('dev-server:stop')
   })
 
   ipc.on('dev-server:stopped', () => {
+    debug('ipc: dev-server:stopped')
     baseEmitter.emit('dev-server:stopped')
   })
 })
@@ -46,9 +48,10 @@ const API = {
     baseEmitter.removeAllListeners()
   },
 
-  closeExperimental () {
+  stop () {
     return new Promise((resolve, reject) => {
       baseEmitter.once('dev-server:stopped', () => {
+        debug('baseEmitter: dev-server:stopped')
         resolve()
       })
 

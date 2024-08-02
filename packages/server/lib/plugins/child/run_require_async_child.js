@@ -1,5 +1,6 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
+const merge = require('lodash/merge')
 const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
@@ -159,22 +160,26 @@ function run (ipc, file, projectRoot) {
               ))
             }
 
-            let devS
-
             on('dev-server:start', async (devServerOpts) => {
+              debugLib('starting the CT dev server')
               if (objApi) {
-                const { specs, devServerEvents } = devServerOpts
+                const { specs, devServerEvents, config: serializedConfig } = devServerOpts
 
                 const devS = await devServer({
-                  cypressConfig: config,
+                  // we need to merge the serialized config through the node plugin with the default config
+                  // as the initial user config is missing the baseUrl set for CT, which is critical for experimentalJITComponentTesting
+                  cypressConfig: merge({}, config, serializedConfig),
                   onConfigNotFound,
                   ...result.component.devServer,
                   specs,
                   devServerEvents,
                 })
 
-                ipc.on('dev-server:stop', async () => {
+                ipc.once('dev-server:stop', async () => {
+                  debugLib('stopping the CT dev server...')
                   await devS.close()
+                  debugLib('CT dev server stopped.')
+                  debugLib('ipc: dev-server:stop')
                   ipc.send('dev-server:stopped')
                 })
 
@@ -183,10 +188,13 @@ function run (ipc, file, projectRoot) {
 
               devServerOpts.cypressConfig = config
 
-              devS = await devServer(devServerOpts, result.component && result.component.devServerConfig)
+              const devS = await devServer(devServerOpts, result.component && result.component.devServerConfig)
 
-              ipc.on('dev-server:stop', async () => {
+              ipc.once('dev-server:stop', async () => {
+                debugLib('stopping the CT dev server...')
                 await devS.close()
+                debugLib('CT dev server stopped.')
+                debugLib('ipc: dev-server:stop')
                 ipc.send('dev-server:stopped')
               })
 

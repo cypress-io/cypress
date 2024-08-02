@@ -286,7 +286,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           if (baseUrl) {
             this._baseUrl = baseUrl
 
-            if (config.isTextTerminal) {
+            // skip baseUrl check for when experimentalJITComponentTesting is true,
+            // which means the dev server has not started yet, so we will be unable to ping it.
+            const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJITComponentTesting
+
+            if (config.isTextTerminal && !shouldSkipBaseUrlCheck) {
               return this._retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
               .catch((e) => {

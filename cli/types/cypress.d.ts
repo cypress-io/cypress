@@ -3526,14 +3526,17 @@ declare namespace Cypress {
     | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
+    port?: number,
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
+    port?: number,
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
+    port?: number,
     bundler: 'webpack'
     framework: 'angular'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
