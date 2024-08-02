@@ -105,61 +105,6 @@ index 773ad95..84ca2f6 100644
  	}
  
  	/* Attributes
-@@ -1135,18 +1133,6 @@ setDocument = Sizzle.setDocument = function( node ) {
- 		return !el.getElementsByTagName("*").length;
- 	});
- 
--	// Support: IE<9
--	support.getElementsByClassName = rnative.test( document.getElementsByClassName );
--
--	// Support: IE<10
--	// Check if getElementById returns elements by name
--	// The broken getElementById methods don't pick up programmatically-set names,
--	// so use a roundabout getElementsByName test
--	support.getById = assert(function( el ) {
--		docElem.appendChild( el ).id = expando;
--		return !document.getElementsByName || !document.getElementsByName( expando ).length;
--	});
--
- 	// ID filter and find
- 	if ( support.getById ) {
- 		Expr.filter["ID"] = function( id ) {
-@@ -1171,35 +1157,6 @@ setDocument = Sizzle.setDocument = function( node ) {
- 			};
- 		};
- 
--		// Support: IE 6 - 7 only
--		// getElementById is not reliable as a find shortcut
--		Expr.find["ID"] = function( id, context ) {
--			if ( typeof context.getElementById !== "undefined" && documentIsHTML ) {
--				var node, i, elems,
--					elem = context.getElementById( id );
--
--				if ( elem ) {
--
--					// Verify the id attribute
--					node = elem.getAttributeNode("id");
--					if ( node && node.value === id ) {
--						return [ elem ];
--					}
--
--					// Fall back on getElementsByName
--					elems = context.getElementsByName( id );
--					i = 0;
--					while ( (elem = elems[i++]) ) {
--						node = elem.getAttributeNode("id");
--						if ( node && node.value === id ) {
--							return [ elem ];
--						}
--					}
--				}
--
--				return [];
--			}
--		};
- 	}
- 
- 	// Tag
 @@ -6534,69 +6491,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
  }
