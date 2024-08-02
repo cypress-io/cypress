@@ -130,7 +130,7 @@ describe('cloud/network/put_fetch', () => {
     })
   })
 
-  describe('when fetch is provided an abort signal, and rejects via signal', () => {
+  describe('when fetch is provided with an abort signal, and rejects via signal', () => {
     let abortError
     let fetchError
     let mockAbortController
