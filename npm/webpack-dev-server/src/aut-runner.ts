@@ -1,4 +1,5 @@
 /* eslint-env browser */
+import 'core-js'
 
 export function init (importPromises: Array<() => Promise<void>>, parent: Window = (window.opener || window.parent)) {
   // @ts-expect-error

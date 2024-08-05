@@ -285,8 +285,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           // and make sure the server is connectable!
           if (baseUrl) {
             this._baseUrl = baseUrl
+            const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJITComponentTesting && config.isTextTerminal
 
-            if (config.isTextTerminal) {
+            if (config.isTextTerminal && !shouldSkipBaseUrlCheck) {
               return this._retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
               .catch((e) => {
@@ -300,6 +301,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
             .return(null)
             .catch((err) => {
               debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+
+              // if experimental JIT is configured for CT, don't fail if we cannot connect to the base URL
+              if (shouldSkipBaseUrlCheck) {
+                return null
+              }
 
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
@@ -330,7 +336,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    if (!config.baseUrl && testingType === 'component') {
+    const shouldSkipBaseUrlCheck = config.testingType === 'component' && config.experimentalJITComponentTesting && config.isTextTerminal
+
+    if (!config.baseUrl && testingType === 'component' && !shouldSkipBaseUrlCheck) {
       throw new Error('Server#open called without config.baseUrl.')
     }
 

@@ -252,6 +252,7 @@
       "**/webpack-preprocessor/babel-loader",
       "**/webpack-preprocessor/**/merge-source-map",
       "**/webpack-preprocessor/**/patch-package",
+      "**/webpack-dev-server/**/core-js",
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",

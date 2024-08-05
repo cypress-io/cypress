@@ -65,6 +65,8 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
 function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig | InlineConfig {
   const {
     cypressConfig: {
+      baseUrl,
+      experimentalJITComponentTesting,
       port,
       projectRoot,
       devServerPublicPathRoute,
@@ -75,7 +77,23 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     specs,
   } = config
 
-  const vitePort = port ?? undefined
+  let vitePort: number | undefined = port ?? undefined
+
+  // if experimental JIT is configured, we can imply that the base URL is set to the url with the expected port.
+  // start the dev server on the port specified in the base URL
+  if (experimentalJITComponentTesting && isTextTerminal) {
+    try {
+      // if the baseUrl is null, something critically wrong has occurred
+      // @ts-expect-error
+      const baseURL = new URL(baseUrl)
+
+      debug(`experimentalJITComponentTesting is set to ${experimentalJITComponentTesting}. Setting the vite-dev-server port to ${baseURL.port}.`)
+      vitePort = parseInt(baseURL.port)
+    } catch (e) {
+      debug(`attempted to set baseUrl port for experimentalJITComponentTesting, but error occurred: ${e}`)
+      throw e
+    }
+  }
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list

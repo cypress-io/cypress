@@ -382,6 +382,29 @@ export class SocketBase {
           cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
         }
 
+        socket.on('dev-server:start', async (spec: Cypress.Spec) => {
+          const ctx = await getCtx()
+          const devServer = await ctx._apis.projectApi.getDevServer()
+
+          const results = await devServer.start({ specs: [spec], config })
+
+          if (config.devServer.port && (config.devServer.port !== results.port)) {
+            // TODO: come up with a better error
+            throw new Error('Ports do not match!')
+          }
+
+          return socket.emit('dev-server:started')
+        })
+
+        socket.on('dev-server:stop', async (spec: Cypress.Spec) => {
+          const ctx = await getCtx()
+          const devServer = await ctx._apis.projectApi.getDevServer()
+
+          await devServer.stop()
+
+          return socket.emit('dev-server:stopped')
+        })
+
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
           const ctx = await getCtx()
           const devServer = await ctx._apis.projectApi.getDevServer()
