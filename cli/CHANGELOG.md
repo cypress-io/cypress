@@ -7,6 +7,10 @@ _Released 8/13/2024 (PENDING)_
 
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
 
+**Misc:**
+
+- Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
 ## 13.13.2
 
 _Released 7/31/2024_
