@@ -2521,7 +2521,6 @@
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/opts-arg.js",
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/path-arg.js",
     "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/use-native.js",
-    "./node_modules/mocha-junit-reporter/node_modules/strip-ansi/index.js",
     "./node_modules/mocha/lib/browser/progress.js",
     "./node_modules/mocha/lib/context.js",
     "./node_modules/mocha/lib/interfaces/bdd.js",
@@ -3326,7 +3325,6 @@
     "./node_modules/stream-parser/node_modules/ms/index.js",
     "./node_modules/stream-shift/index.js",
     "./node_modules/string-width/index.js",
-    "./node_modules/string-width/node_modules/strip-ansi/index.js",
     "./node_modules/stringify-object/index.js",
     "./node_modules/stringify-object/node_modules/is-obj/index.js",
     "./node_modules/strip-ansi/index.js",
@@ -4079,6 +4077,7 @@
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/automation/util.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
+    "./packages/server/lib/browsers/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp_automation.ts",
     "./packages/server/lib/browsers/cri-client.ts",
     "./packages/server/lib/browsers/electron.ts",
@@ -4349,5 +4348,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "07373eb1748952a20dea40e23e008a9a5edbcbd1fa47423e21f89a7c4f28fff9"
+  "deferredHash": "fc709ba2d58cf0929c40f08d9f9a7bba9fc2478d6883093ad8e402d9e566ce88"
 }
