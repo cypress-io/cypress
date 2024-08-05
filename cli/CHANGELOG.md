@@ -5,7 +5,7 @@ _Released 8/13/2024 (PENDING)_
 
 **Bugfixes:**
 
-- A console error will no longer display in Chrome about a deprecated upload call originating from jQuery. Addressed in [#29944](https://github.com/cypress-io/cypress/pull/29944).
+- A console error will no longer display in Chrome about a deprecated unload call originating from jQuery. Addressed in [#29944](https://github.com/cypress-io/cypress/pull/29944).
 
 **Misc:**
 
