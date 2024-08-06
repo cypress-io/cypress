@@ -9,7 +9,7 @@ const DEBUGGER_URL = 'http://foo'
 const HOST = '127.0.0.1'
 const PORT = 50505
 
-describe('lib/browsers/cri-client', function () {
+describe('lib/browsers/remote-interface/cri-client', function () {
   let send: sinon.SinonStub
   let on: sinon.SinonStub
   let off: sinon.SinonStub
@@ -223,12 +223,14 @@ describe('lib/browsers/cri-client', function () {
     })
 
     it('errors if reconnecting fails', async () => {
-      criStub._notifier.on = sinon.stub()
-      criStub.close.throws(new Error('could not reconnect'))
-
       await getClient()
+
+      criImport.rejects()
+
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
+
+      await (new Promise((resolve) => setImmediate(resolve)))
 
       expect(onError).to.be.called
 

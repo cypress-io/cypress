@@ -5,7 +5,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type WebSocket from 'ws'
 import type { CypressError } from '@packages/errors'
 import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from '../cdp_automation'
-import { CdpDisconnectedError } from './errors'
+import { CDPDisconnectedError } from './errors'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
@@ -263,7 +263,7 @@ export class CriClient implements ICriClient {
         // time and/or the user's computer has been put to sleep. The
         // socket disconnects and we need to recreate the socket and
         // connection
-        if (!CdpDisconnectedError.isCdpDisconnectedError(err)) {
+        if (!CDPDisconnectedError.isCDPDisconnectedError(err)) {
           throw err
         }
 
@@ -400,7 +400,7 @@ export class CriClient implements ICriClient {
         inFlightCommand?.deferred.resolve(response)
       } catch (err) {
         debug('error re-enabling %s: ', command, err)
-        if (CdpDisconnectedError.isCdpDisconnectedError(err)) {
+        if (CDPDisconnectedError.isCDPDisconnectedError(err)) {
           // below comment is no longer accurate - ephemeral connection is wrapped by
           // CDPConnection class
 
@@ -433,7 +433,7 @@ export class CriClient implements ICriClient {
         debug('resolved enqueued promise')
       } catch (e) {
         debug('enqueued command %s failed:', enqueued.command, e)
-        if (CdpDisconnectedError.isCdpDisconnectedError(e)) {
+        if (CDPDisconnectedError.isCDPDisconnectedError(e)) {
           // below comment is no longer accurate - ephemeral connection is wrapped by
           // CDPConnection class
 

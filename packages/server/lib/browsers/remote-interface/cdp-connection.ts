@@ -5,7 +5,7 @@ import CDP from 'chrome-remote-interface'
 import type { CypressError } from '@packages/errors'
 import { debugCdpConnection, DebuggableCDPClient } from './debug-cdp-connection'
 import type { CdpEvent, CdpCommand } from '../cdp_automation'
-import { CdpDisconnectedError, CdpTerminatedError } from './errors'
+import { CDPDisconnectedError, CDPTerminatedError, CDPAlreadyConnectedError } from './errors'
 import { asyncRetry } from '../../util/async_retry'
 import * as errors from '../../errors'
 import type WebSocket from 'ws'
@@ -16,7 +16,7 @@ export type CDPListener<T extends keyof ProtocolMapping.Events> = (params: Proto
 
 // CDPClient extends EventEmitter, but does not export that type information from its
 // definitelytyped module
-type CdpClient = Exclude<EventEmitter, CDP.Client> & CDP.Client
+export type CdpClient = Exclude<EventEmitter, CDP.Client> & CDP.Client
 
 /**
  * There are three error messages we can encounter which should not be re-thrown, but
@@ -30,7 +30,7 @@ const isWebsocketClosedErrorMessage = (message: string) => {
   return /^WebSocket (?:connection closed|is (?:not open|already in CLOSING or CLOSED state))/.test(message)
 }
 
-type CDPConnectionOptions = {
+export type CDPConnectionOptions = {
   automaticallyReconnect: boolean
 }
 
@@ -40,7 +40,7 @@ type CDPConnectionEventListeners = {
   'cdp-connection-closed': () => void
   'cdp-connection-reconnect-attempt': (attemptNumber: number) => void
 }
-type CDPConnectionEvent = keyof CDPConnectionEventListeners
+export type CDPConnectionEvent = keyof CDPConnectionEventListeners
 
 type CDPConnectionEventListener<T extends CDPConnectionEvent> = CDPConnectionEventListeners[T]
 
@@ -51,8 +51,8 @@ export class CDPConnection {
   private _terminated: boolean = false
   private _reconnection: Promise<void> | undefined
 
-  constructor (private readonly _options: CDP.Options, connectionoptions: CDPConnectionOptions) {
-    this._autoReconnect = connectionoptions.automaticallyReconnect
+  constructor (private readonly _options: CDP.Options, connectionOptions: CDPConnectionOptions) {
+    this._autoReconnect = connectionOptions.automaticallyReconnect
   }
 
   get terminated () {
@@ -69,22 +69,23 @@ export class CDPConnection {
     this._emitter.on(event, callback)
   }
   addConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
+    debug('adding connection event listener for ', event)
     this._emitter.on(event, callback)
   }
   off<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
     this._emitter.off(event, callback)
   }
   removeConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
-    this._emitter.on(event, callback)
+    this._emitter.off(event, callback)
   }
 
   async connect (): Promise<void> {
     if (this._terminated) {
-      throw new CdpTerminatedError(`Cannot reconnect to CDP. Client target ${this._options.target} has been terminated.`)
+      throw new CDPTerminatedError(`Cannot connect to CDP. Client target ${this._options.target} has been terminated.`)
     }
 
     if (this._connection) {
-      await this._gracefullyDisconnect()
+      throw new CDPAlreadyConnectedError(`Cannot connect to CDP. Client target ${this._options.target} is already connected. Did you disconnect first?`)
     }
 
     this._connection = await CDP(this._options) as CdpClient
@@ -105,9 +106,11 @@ export class CDPConnection {
 
     this._terminated = true
 
-    await this._gracefullyDisconnect()
+    if (this._connection) {
+      await this._gracefullyDisconnect()
 
-    this._emitter.emit('cdp-connection-closed')
+      this._emitter.emit('cdp-connection-closed')
+    }
   }
 
   private _gracefullyDisconnect = async () => {
@@ -122,9 +125,12 @@ export class CDPConnection {
     data?: ProtocolMapping.Commands[T]['paramsType'][0],
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
-    // TODO: what if in the middle of a reconnection attempt?
-    if (!this._connection || this._terminated) {
-      throw new CdpDisconnectedError(`${command} will not run as the CRI connection is not available`)
+    if (this.terminated) {
+      throw new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this._options.target} has been terminated.`)
+    }
+
+    if (!this._connection) {
+      throw new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this._options.target} has not been established.`)
     }
 
     try {
@@ -133,7 +139,7 @@ export class CDPConnection {
       // Clients may wish to determine if the command should be enqueued
       // should enqueue logic live in this class tho??
       if (isWebsocketClosedErrorMessage(e.message)) {
-        throw new CdpDisconnectedError(`${command} failed due to the websocket being disconnected.`, e)
+        throw new CDPDisconnectedError(`${command} failed due to the websocket being disconnected.`, e)
       }
 
       throw e
@@ -164,8 +170,11 @@ export class CDPConnection {
     this._reconnection = asyncRetry(async () => {
       attempt++
 
+      debug('Reconnection attempt %d for Target %s', attempt, this._options.target)
+
       if (this._terminated) {
-        throw new CdpTerminatedError(`Cannot reconnect to CDP. Client target ${this._options.target} has been terminated.`)
+        debug('Not reconnecting, connection to %s has been terminated', this._options.target)
+        throw new CDPTerminatedError(`Cannot reconnect to CDP. Client target ${this._options.target} has been terminated.`)
       }
 
       this._emitter.emit('cdp-connection-reconnect-attempt', attempt)
@@ -177,7 +186,7 @@ export class CDPConnection {
         return 100
       },
       shouldRetry (err) {
-        return !(err && CdpTerminatedError.isCdpTerminatedError(err))
+        return !(err && CDPTerminatedError.isCDPTerminatedError(err))
       },
     })()
 
@@ -188,8 +197,8 @@ export class CDPConnection {
       debug('error(s) on reconnecting: ', err)
       const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
 
-      const retryHaltedDueToClosed = CdpTerminatedError.isCdpTerminatedError(err) ||
-       (err as AggregateError)?.errors?.find((predicate) => CdpTerminatedError.isCdpTerminatedError(predicate))
+      const retryHaltedDueToClosed = CDPTerminatedError.isCDPTerminatedError(err) ||
+       (err as AggregateError)?.errors?.find((predicate) => CDPTerminatedError.isCDPTerminatedError(predicate))
 
       if (!retryHaltedDueToClosed) {
         const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', significantError)
@@ -203,6 +212,7 @@ export class CDPConnection {
   }
 
   private _broadcastEvent = ({ method, params, sessionId }: { method: CdpEvent, params: Record<string, any>, sessionId?: string }) => {
+    debug('rebroadcasting event', method, params, sessionId)
     this._emitter.emit(method, params, sessionId)
   }
 }
