@@ -384,8 +384,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // set the cypress config from the cypress.config.{js,ts,mjs,cjs} file
     app.set('view engine', 'html')
 
-    // since we use absolute paths, configure express-handlebars to not automatically find layouts
-    // https://github.com/cypress-io/cypress/issues/2891
     app.engine('html', templateEngine.render)
 
     // handle the proxied url in case
