@@ -149,6 +149,16 @@ export class CDPConnection {
       return this._reconnection
     }
 
+    if (this._connection) {
+      try {
+        await this._gracefullyDisconnect()
+      } catch (e) {
+        debug('Error cleaning up existing CDP connection before creating a new connection: ', e)
+      } finally {
+        this._connection = undefined
+      }
+    }
+
     let attempt = 0
 
     this._reconnection = asyncRetry(async () => {

@@ -99,6 +99,9 @@ type CreateParams = {
 }
 
 export class CriClient implements ICriClient {
+  // subscriptions are recorded, but this may no longer be necessary. cdp event listeners
+  // need only be added to the connection instance, not the (ephemeral) underlying
+  // CDP.Client instances
   private subscriptions: Subscription[] = []
   private enableCommands: EnableCommand[] = []
   private enqueuedCommands: EnqueuedCommand[] = []
@@ -285,9 +288,6 @@ export class CriClient implements ICriClient {
   public on = <T extends CdpEvent> (eventName: T, cb: CDPListener<T>) => {
     this.cdpConnection?.on<T>(eventName, cb)
 
-    // subscriptions are recorded, but this may no longer be necessary. cdp event listeners
-    // need only be added to the connection instance, not the (ephemeral) underlying
-    // CDP.Client instances
     this.subscriptions.push({ eventName, cb })
     debug('registering CDP on event %o', { eventName })
 
