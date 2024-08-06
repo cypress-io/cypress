@@ -3,6 +3,10 @@
 
 _Released 8/13/2024 (PENDING)_
 
+**Performance:**
+
+- Fixed a potential memory leak when re-connecting to an unintentionally disconnected CDP connection. Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
+
 **Misc:**
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
@@ -15,7 +19,6 @@ _Released 7/31/2024_
 
 - Fixed a memory leak with command logs with Test Replay enabled. Addressed in [#29939](https://github.com/cypress-io/cypress/pull/29939).
 - Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887). 
-- Fixed a potential memory leak when re-connecting to an unintentionally disconnected CDP connection. Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
 
 **Bugfixes:**
 
