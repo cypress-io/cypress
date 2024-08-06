@@ -7,6 +7,10 @@ _Released 8/13/2024 (PENDING)_
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
 
+**Dependency Updates:**
+
+- Updated `squirrelly` from `7.9.2` to `9.1.0`. Addressed in [#29981](https://github.com/cypress-io/cypress/pull/29981).
+
 ## 13.13.2
 
 _Released 7/31/2024_
