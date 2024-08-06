@@ -43,22 +43,25 @@ When testing with `dtslint`, you may need to remove existing typescript installa
 
 ### Manual
 
-To build and test an NPM package:
+To build and test an npm package, execute the following from the repo's root directory:
 
-- `yarn`
-- `yarn build`
+```shell
+yarn
+yarn build
+```
 
-This creates `build` folder.
+This creates the `cli/build` folder.
 
-- `cd build; yarn pack`
+```shell
+cd cli/build
+yarn pack
+```
 
 This creates an archive, usually named `cypress-v<version>.tgz`. You can install this archive from other projects, but because there is no corresponding binary yet (probably), skip binary download. For example from inside `cypress-example-kitchensink` folder
 
 ```shell
-yarn add ~/{your-dirs}/cypress/cli/build/cypress-3.3.1.tgz --ignore-scripts
+yarn add ~/{your-dirs}/cypress/cli/build/cypress-v13.13.2.tgz --ignore-scripts
 ```
-
-Which installs the `tgz` file we have just built from folder `Users/jane-lane/{your-dirs}/cypress/cli/build`.
 
 #### Sub-package API
 
