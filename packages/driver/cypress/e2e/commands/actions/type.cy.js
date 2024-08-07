@@ -3298,6 +3298,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=time]', () => {
+      // In Playwright Webkit implementation, these are shown as plain text input
       if (!isWebKit) {
         it('{upArrow} increases minute by 1', () => {
           cy.get('#time-without-value').then(($input) => $input.val('01:23'))
