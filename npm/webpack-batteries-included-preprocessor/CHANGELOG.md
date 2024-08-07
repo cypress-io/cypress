@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.3...@cypress/webpack-batteries-included-preprocessor-v3.0.4) (2024-07-30)
+
+
+### Bug Fixes
+
+* allow yarn 4 berry to work with cypress webpack preprocessor ([#29901](https://github.com/cypress-io/cypress/issues/29901)) ([1521399](https://github.com/cypress-io/cypress/commit/1521399bc8375da30370d33ec17317975bb6b63a))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.2...@cypress/webpack-batteries-included-preprocessor-v3.0.3) (2024-06-07)
 
 
