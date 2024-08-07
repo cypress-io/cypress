@@ -14,7 +14,7 @@ import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
-import { BrowserCriClient } from './remote-interface/browser-cri-client'
+import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
 
 // TODO: unmix these two types

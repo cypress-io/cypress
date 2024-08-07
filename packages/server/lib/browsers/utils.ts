@@ -8,7 +8,7 @@ import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
-import type { CriClient } from './remote-interface/cri-client'
+import type { CriClient } from './cri-client'
 
 declare global {
   interface Window {
