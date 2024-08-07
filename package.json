@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.13.1",
+  "version": "13.13.2",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -90,7 +90,7 @@
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",
     "@graphql-tools/wrap": "8.1.1",
-    "@nrwl/nx-cloud": "16.5.2",
+    "@nrwl/nx-cloud": "17.0.0",
     "@octokit/auth-app": "6.0.3",
     "@octokit/core": "5.0.2",
     "@percy/cli": "1.27.4",
@@ -198,7 +198,7 @@
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.10",
     "stop-only": "3.0.1",
-    "strip-ansi": "6.0.0",
+    "strip-ansi": "6.0.1",
     "tar": "6.1.15",
     "term-to-html": "1.2.0",
     "terminal-banner": "1.1.0",
