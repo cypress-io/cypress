@@ -9,7 +9,7 @@ const plugins = require(`../../../lib/plugins`)
 const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
-const { BrowserCriClient } = require('../../../lib/browsers/remote-interface/browser-cri-client')
+const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 const { expect } = require('chai')
 
 const openOpts = {

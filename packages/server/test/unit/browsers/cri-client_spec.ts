@@ -1,7 +1,7 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
-import type { CriClient } from '../../../lib/browsers/remote-interface/cri-client'
+import type { CriClient } from '../../../lib/browsers/cri-client'
 import pDefer from 'p-defer'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -9,7 +9,7 @@ const DEBUGGER_URL = 'http://foo'
 const HOST = '127.0.0.1'
 const PORT = 50505
 
-describe('lib/browsers/remote-interface/cri-client', function () {
+describe('lib/browsers/cri-client', function () {
   let send: sinon.SinonStub
   let on: sinon.SinonStub
   let off: sinon.SinonStub
@@ -60,11 +60,11 @@ describe('lib/browsers/remote-interface/cri-client', function () {
 
     criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-    const { CDPConnection } = proxyquire('../lib/browsers/remote-interface/cdp-connection', {
+    const { CDPConnection } = proxyquire('../lib/browsers/cdp-connection', {
       'chrome-remote-interface': criImport,
     })
 
-    const { CriClient } = proxyquire('../lib/browsers/remote-interface/cri-client', {
+    const { CriClient } = proxyquire('../lib/browsers/cri-client', {
       './cdp-connection': { CDPConnection },
     })
 

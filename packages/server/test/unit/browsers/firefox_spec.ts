@@ -11,8 +11,8 @@ import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
-import { BrowserCriClient } from '../../../lib/browsers/remote-interface/browser-cri-client'
-import { ICriClient } from '../../../lib/browsers/remote-interface/cri-client'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { ICriClient } from '../../../lib/browsers/cri-client'
 
 const path = require('path')
 const _ = require('lodash')

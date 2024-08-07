@@ -11,7 +11,7 @@ const Windows = require(`../../../lib/gui/windows`)
 const electron = require(`../../../lib/browsers/electron`)
 const savedState = require(`../../../lib/saved_state`)
 const { Automation } = require(`../../../lib/automation`)
-const { BrowserCriClient } = require('../../../lib/browsers/remote-interface/browser-cri-client')
+const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 const electronApp = require('../../../lib/util/electron-app')
 const utils = require('../../../lib/browsers/utils')
 
