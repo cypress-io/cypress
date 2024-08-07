@@ -3253,6 +3253,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=week]', () => {
+      // week inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/week#browser_compatibility
       if (Cypress.isBrowser(['!webkit', '!firefox'])) {
         it('{upArrow} increases week by 1', () => {
           cy.get('#week-without-value').then(($input) => $input.val('2017-W05'))
