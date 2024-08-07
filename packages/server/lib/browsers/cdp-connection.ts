@@ -4,10 +4,10 @@ import EventEmitter from 'events'
 import CDP from 'chrome-remote-interface'
 import type { CypressError } from '@packages/errors'
 import { debugCdpConnection, DebuggableCDPClient } from './debug-cdp-connection'
-import type { CdpEvent, CdpCommand } from '../cdp_automation'
+import type { CdpEvent, CdpCommand } from './cdp_automation'
 import { CDPDisconnectedError, CDPTerminatedError, CDPAlreadyConnectedError } from './cri-errors'
-import { asyncRetry } from '../../util/async_retry'
-import * as errors from '../../errors'
+import { asyncRetry } from '../util/async_retry'
+import * as errors from '../errors'
 import type WebSocket from 'ws'
 
 const debug = Debug('cypress:server:browsers:cdp-connection')

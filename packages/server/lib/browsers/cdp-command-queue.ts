@@ -1,6 +1,6 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import pDefer, { DeferredPromise } from 'p-defer'
-import type { CdpCommand } from '../cdp_automation'
+import type { CdpCommand } from './cdp_automation'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:browsers:cdp-command-queue')

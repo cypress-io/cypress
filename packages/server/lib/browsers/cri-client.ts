@@ -4,7 +4,7 @@ import { CDPConnection, type CDPListener } from './cdp-connection'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type WebSocket from 'ws'
 import type { CypressError } from '@packages/errors'
-import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from '../cdp_automation'
+import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from './cdp_automation'
 import { CDPDisconnectedError } from './cri-errors'
 import type { ProtocolManagerShape } from '@packages/types'
 
