@@ -599,22 +599,22 @@ export const AllCypressErrors = {
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
-    errors: (Error & { kind?: 'NetworkError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
+    errors: (Error & { kind?: 'SystemError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
   }) => {
     if (error.errors.length === 1) {
       const firstError = error.errors[0]
 
-      if (firstError?.kind === 'NetworkError') {
+      if (firstError?.kind === 'SystemError') {
         return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(firstError as Error & { url: string })
       }
 
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string})
     }
 
-    let networkErr = error.errors.find((err) => {
-      return err.kind === 'NetworkError'
+    let systemErr = error.errors.find((err) => {
+      return err.kind === 'SystemError'
     })
-    const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
+    const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null
 
     const fmtUploadError = ({ message, responseBody }: { message: string, responseBody?: string }) => {
       return `${message}${responseBody ? `:\n${responseBody}\n` : ''}`
