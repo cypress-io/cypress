@@ -1,5 +1,5 @@
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
-import { NetworkError } from '../../../../lib/cloud/network/network_error'
+import { SystemError } from '../../../../lib/cloud/network/system_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 
 import sinon from 'sinon'
@@ -12,7 +12,7 @@ describe('isRetryableError', () => {
   const url = 'http://some/url'
 
   it('returns true with a NetworkError', () => {
-    expect(isRetryableError(new NetworkError(new Error(), url))).to.be.true
+    expect(isRetryableError(new SystemError(new Error(), url))).to.be.true
   })
 
   it('returns true with retryable http errors', () => {
