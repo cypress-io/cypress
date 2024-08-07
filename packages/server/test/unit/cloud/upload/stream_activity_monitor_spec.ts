@@ -1,6 +1,6 @@
 const { sinon, expect } = require('../../../spec_helper')
 
-import { StreamActivityMonitor, StreamStalledError, StreamStartTimedOutError } from '../../../../lib/cloud/upload/stream_activity_monitor'
+import { StreamActivityMonitor, StreamStalledError } from '../../../../lib/cloud/upload/stream_activity_monitor'
 import { Readable, Writable } from 'stream'
 
 describe('StreamTimeoutController', () => {
@@ -18,7 +18,7 @@ describe('StreamTimeoutController', () => {
 
   beforeEach(() => {
     writtenValues = ''
-    monitor = new StreamActivityMonitor(maxStartDwellTime, maxActivityDwellTime)
+    monitor = new StreamActivityMonitor(maxActivityDwellTime)
     clock = sinon.useFakeTimers()
 
     // oddly, it's easier to asynchronously emit data from a ReadableStream than
@@ -49,10 +49,16 @@ describe('StreamTimeoutController', () => {
       monitor.monitor(fakeNodeReadableStream).pipe(streamSink)
     })
 
-    it('signals an abort if no initial activity happens within maxStartDwellTime', async () => {
+    /**
+     * This logic was changed: previously, the activity monitor would abort if a connection could
+     * not be established within 5 seconds. This was pre-empting certain system errors from reporting
+     * properly, resulting in confusing stream stall / abort messaging. The default timeout for DNS
+     * queries in Windows, for example, is 15 seconds.
+     */
+    it('does not signal an abort if no initial activity happens within maxStartDwellTime', async () => {
       await clock.tickAsync(maxStartDwellTime + 1)
-      expect(monitor.getController().signal.aborted).to.be.true
-      expect(monitor.getController().signal.reason).to.be.an.instanceOf(StreamStartTimedOutError)
+      expect(monitor.getController().signal.aborted).to.be.false
+      expect(monitor.getController().signal.reason).to.be.undefined
     })
 
     it('signals an abort if activity fails to happen after maxActivityDwellTime', async () => {
