@@ -3208,6 +3208,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=month]', () => {
+      // month inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/month#browser_compatibility
       if (Cypress.isBrowser(['!webkit', '!firefox'])) {
         it('{upArrow} increases month by 1', () => {
           cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
