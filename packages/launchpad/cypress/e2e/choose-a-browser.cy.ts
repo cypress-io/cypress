@@ -58,6 +58,10 @@ describe('Choose a browser page', () => {
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
       cy.skipWelcome()
@@ -76,6 +80,9 @@ describe('Choose a browser page', () => {
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).not.to.be.called
+      })
     })
 
     it('shows warning when launched with --browser path option that cannot be matched to found browsers', () => {
