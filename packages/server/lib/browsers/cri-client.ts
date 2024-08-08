@@ -155,7 +155,7 @@ export class CriClient implements ICriClient {
     debug('attaching crash event listener')
 
     this.cdpConnection.on('Target.targetCrashed', async (event) => {
-      debug('crash event detected')
+      debug('crash event detected', event)
       if (event.targetId !== this.targetId) {
         return
       }
@@ -286,6 +286,10 @@ export class CriClient implements ICriClient {
   }
 
   public on = <T extends CdpEvent> (eventName: T, cb: CDPListener<T>) => {
+    if (eventName === 'Target.targetCrashed') {
+      debug('attaching crash listener')
+    }
+
     this.cdpConnection?.on<T>(eventName, cb)
 
     this.subscriptions.push({ eventName, cb })

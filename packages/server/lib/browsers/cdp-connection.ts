@@ -10,8 +10,7 @@ import { asyncRetry } from '../util/async_retry'
 import * as errors from '../errors'
 import type WebSocket from 'ws'
 
-const debug = Debug('cypress:server:browsers:cdp-connection')
-const verboseDebug = Debug('cypress-verbose:server:browsers:cdp-connection')
+const verboseDebugNs = 'cypress-verbose:server:browsers:cdp-connection'
 
 export type CDPListener<T extends keyof ProtocolMapping.Events> = (params: ProtocolMapping.Events[T][0], sessionId?: string) => void
 
@@ -51,9 +50,13 @@ export class CDPConnection {
   private _autoReconnect: boolean
   private _terminated: boolean = false
   private _reconnection: Promise<void> | undefined
+  private debug: Debug.Debugger
+  private verboseDebug: Debug.Debugger
 
   constructor (private readonly _options: CDP.Options, connectionOptions: CDPConnectionOptions) {
     this._autoReconnect = connectionOptions.automaticallyReconnect
+    this.debug = Debug(`cypress:server:browsers:cdp-connection:${_options.target}`)
+    this.verboseDebug = Debug(`${verboseDebugNs}:${_options.target}`)
   }
 
   get terminated () {
@@ -66,11 +69,11 @@ export class CDPConnection {
   }
 
   on<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
-    debug('attaching event listener to cdp connection', event)
+    this.debug('attaching event listener to cdp connection', event)
     this._emitter.on(event, callback)
   }
   addConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
-    debug('adding connection event listener for ', event)
+    this.debug('adding connection event listener for ', event)
     this._emitter.on(event, callback)
   }
   off<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
@@ -91,7 +94,7 @@ export class CDPConnection {
 
     this._connection = await CDP(this._options) as CdpClient
 
-    debugCdpConnection(verboseDebug.namespace, this._connection as DebuggableCDPClient)
+    debugCdpConnection(this.verboseDebug.namespace, this._connection as DebuggableCDPClient)
 
     this._connection.on('event', this._broadcastEvent)
 
@@ -101,7 +104,7 @@ export class CDPConnection {
   }
 
   async disconnect () {
-    debug('disconnect of target %s requested.', this._options.target, { terminated: this._terminated, connection: !!this._connection, reconnection: !!this._reconnection })
+    this.debug('disconnect of target %s requested.', this._options.target, { terminated: this._terminated, connection: !!this._connection, reconnection: !!this._reconnection })
     if (this._terminated && !this._connection) {
       return
     }
@@ -126,7 +129,7 @@ export class CDPConnection {
     data?: ProtocolMapping.Commands[T]['paramsType'][0],
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
-    debug('preparing to send CDP command:', command, data)
+    this.debug('preparing to send CDP command:', command)
     if (this.terminated) {
       throw new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this._options.target} has been terminated.`)
     }
@@ -149,7 +152,7 @@ export class CDPConnection {
   }
 
   private _reconnect = async () => {
-    debug('Reconnection requested')
+    this.debug('Reconnection requested')
     if (this._terminated) {
       return
     }
@@ -162,7 +165,7 @@ export class CDPConnection {
       try {
         await this._gracefullyDisconnect()
       } catch (e) {
-        debug('Error cleaning up existing CDP connection before creating a new connection: ', e)
+        this.debug('Error cleaning up existing CDP connection before creating a new connection: ', e)
       } finally {
         this._connection = undefined
       }
@@ -173,10 +176,10 @@ export class CDPConnection {
     this._reconnection = asyncRetry(async () => {
       attempt++
 
-      debug('Reconnection attempt %d for Target %s', attempt, this._options.target)
+      this.debug('Reconnection attempt %d for Target %s', attempt, this._options.target)
 
       if (this._terminated) {
-        debug('Not reconnecting, connection to %s has been terminated', this._options.target)
+        this.debug('Not reconnecting, connection to %s has been terminated', this._options.target)
         throw new CDPTerminatedError(`Cannot reconnect to CDP. Client target ${this._options.target} has been terminated.`)
       }
 
@@ -197,7 +200,7 @@ export class CDPConnection {
       await this._reconnection
       this._emitter.emit('cdp-connection-reconnect')
     } catch (err) {
-      debug('error(s) on reconnecting: ', err)
+      this.debug('error(s) on reconnecting: ', err)
       const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
 
       const retryHaltedDueToClosed = CDPTerminatedError.isCDPTerminatedError(err) ||
@@ -220,7 +223,11 @@ export class CDPConnection {
   }
 
   private _broadcastEvent = ({ method, params, sessionId }: { method: CdpEvent, params: Record<string, any>, sessionId?: string }) => {
-    verboseDebug('rebroadcasting event', method, params, sessionId)
+    this.verboseDebug('rebroadcasting event', method, params, sessionId)
+    if (method === 'Target.targetCrashed') {
+      this.debug('broadcasting crash event')
+    }
+
     this._emitter.emit(method, params, sessionId)
   }
 }
