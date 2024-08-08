@@ -1,6 +1,6 @@
 import debugModule from 'debug'
 import { CDPCommandQueue } from './cdp-command-queue'
-import { CDPConnection, type CDPListener } from './cdp-connection'
+import { CDPConnection, CDPListener } from './cdp-connection'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type WebSocket from 'ws'
 import type { CypressError } from '@packages/errors'
