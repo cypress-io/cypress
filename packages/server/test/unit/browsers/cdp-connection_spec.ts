@@ -1,12 +1,12 @@
 import type CDP from 'chrome-remote-interface'
-import type { CdpClient, CDPConnection, CDPConnectionOptions } from '../../../../lib/browsers/cdp-connection'
-import type { debugCdpConnection } from '../../../../lib/browsers/debug-cdp-connection'
-import type { CdpEvent, CdpCommand } from '../../../../lib/browsers/cdp_automation'
+import type { CdpClient, CDPConnection, CDPConnectionOptions } from '../../../lib/browsers/cdp-connection'
+import type { debugCdpConnection } from '../../../lib/browsers/debug-cdp-connection'
+import type { CdpEvent, CdpCommand } from '../../../lib/browsers/cdp_automation'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../../lib/browsers/cri-errors'
+import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../lib/browsers/cri-errors'
 import WebSocket from 'ws'
 import pDefer, { DeferredPromise } from 'p-defer'
-const { expect, proxyquire, sinon } = require('../../../spec_helper')
+const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
 

@@ -29,7 +29,7 @@ describe('CDP Clients', () => {
   let criClient: CriClient
   let messages: object[]
   let onMessage: sinon.SinonStub
-  let messageResponse: ReturnType<typeof pDefer>
+  let messageResponse: ReturnType<typeof pDefer> | undefined
   let neverAck: boolean
 
   const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
@@ -97,7 +97,7 @@ describe('CDP Clients', () => {
 
   const clientDisconnected = () => {
     return new Promise((resolve, reject) => {
-      criClient.ws.once('close', resolve)
+      criClient.ws?.once('close', resolve)
     })
   }
 
@@ -198,7 +198,8 @@ describe('CDP Clients', () => {
       })
 
       await haltedReconnection
-
+      // onCriConnectionClosed
+      await (new Promise((resolve) => setImmediate(resolve)))
       expect(onCriConnectionClosed).to.have.been.called
     })
 

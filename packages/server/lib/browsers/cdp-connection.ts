@@ -100,6 +100,7 @@ export class CDPConnection {
   }
 
   async disconnect () {
+    debug('disconnect of target %s requested.', this._options.target, { terminated: this._terminated, connection: !!this._connection, reconnection: !!this._reconnection })
     if (this._terminated && !this._connection) {
       return
     }
@@ -108,7 +109,6 @@ export class CDPConnection {
 
     if (this._connection) {
       await this._gracefullyDisconnect()
-
       this._emitter.emit('cdp-connection-closed')
     }
   }
@@ -198,9 +198,14 @@ export class CDPConnection {
       const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
 
       const retryHaltedDueToClosed = CDPTerminatedError.isCDPTerminatedError(err) ||
-       (err as AggregateError)?.errors?.find((predicate) => CDPTerminatedError.isCDPTerminatedError(predicate))
+        (err as AggregateError)?.errors?.find((predicate) => CDPTerminatedError.isCDPTerminatedError(predicate))
 
-      if (!retryHaltedDueToClosed) {
+      // if .disconnect() was called while trying to reconnect, there will be no active connection
+      // so the .disconnect() method will not emit the connection closed event. However, we do
+      // want to emit that once the reconnection attempts cease due to being closed.
+      if (retryHaltedDueToClosed) {
+        this._emitter.emit('cdp-connection-closed')
+      } else {
         const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', significantError)
 
         cdpError.isFatalApiErr = true
