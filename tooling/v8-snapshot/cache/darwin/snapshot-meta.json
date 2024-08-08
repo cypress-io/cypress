@@ -4093,9 +4093,9 @@
     "./packages/server/lib/cloud/machine_id.js",
     "./packages/server/lib/cloud/network/http_error.ts",
     "./packages/server/lib/cloud/network/is_retryable_error.ts",
-    "./packages/server/lib/cloud/network/network_error.ts",
     "./packages/server/lib/cloud/network/parse_error.ts",
     "./packages/server/lib/cloud/network/put_fetch.ts",
+    "./packages/server/lib/cloud/network/system_error.ts",
     "./packages/server/lib/cloud/protocol.ts",
     "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
     "./packages/server/lib/cohorts.ts",
@@ -4345,5 +4345,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "fc709ba2d58cf0929c40f08d9f9a7bba9fc2478d6883093ad8e402d9e566ce88"
+  "deferredHash": "15ca2069e1e415e1ac66762a9fa22f5a255aaaa2769b8c29f0b0ebeec09885c6"
 }
