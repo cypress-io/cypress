@@ -1,0 +1,20 @@
+
+<div>
+  <div data-cy="signals-complex-user-display">
+    <h1> User Display </h1>
+    <p data-cy="firstName"> {{ user().firstName }} </p>
+    <p data-cy="lastName"> {{ user().lastName }} </p>
+    <p data-cy="age"> {{ user().age }} </p>
+  </div>
+  
+  <div data-cy="signals-complex-acquaintances-display" *ngIf="acquaintances().length">
+    <h1> Acquaintance Display </h1>
+    <ul data-cy="signals-complex-acquaintances-list" >
+      <li *ngFor="let acquaintance of acquaintances(); index as i;" [attr.data-index]="i">
+          <p data-cy="firstName"> {{ acquaintance.firstName }} </p>
+          <p data-cy="lastName"> {{ acquaintance.lastName }} </p>
+          <p data-cy="age"> {{ acquaintance.age }} </p>
+      </li>
+    </ul>
+  </div>
+</div>

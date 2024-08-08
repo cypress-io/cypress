@@ -256,7 +256,7 @@ export class Log {
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
 
     if (config('protocolEnabled')) {
-      Cypress.on('test:after:run', () => {
+      Cypress.once('test:after:run', () => {
         this.fireChangeEvent.flush()
       })
     }
@@ -569,7 +569,11 @@ export class Log {
       const expectedProperties = ['name', 'type', 'error', 'snapshot', 'args', 'groups', 'table', 'props']
       const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
         // don't include properties with undefined values
-        return value === undefined ? memo : _.extend(memo, { [key]: value })
+        if (value !== undefined) {
+          memo[key] = value
+        }
+
+        return memo
       }, consoleObj)
       // any other key/value pairs need to be added to the `props` property
       const rest = _.omit(consoleObjResult, expectedProperties)

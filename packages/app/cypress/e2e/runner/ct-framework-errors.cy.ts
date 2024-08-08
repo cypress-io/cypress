@@ -136,12 +136,12 @@ describe('Next.js', {
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
-    cy.scaffoldProject('next-12')
+    cy.scaffoldProject('next-14')
   })
 
   it('error conditions', () => {
     const verify = loadErrorSpec({
-      projectName: 'next-12',
+      projectName: 'next-14',
       configFile: 'cypress.config.js',
       filePath: 'cypress/Errors.cy.jsx',
       failCount: 4,

@@ -62,6 +62,8 @@ function resolveLocationReference () {
   )
 }
 
+const replaceableProps = ['parent', 'top', 'location']
+
 /**
  * Given an Identifier or a Literal, return a property name that should use `resolveWindowReference`.
  * @param node
@@ -70,12 +72,12 @@ function getReplaceablePropOfMemberExpression (node: n.MemberExpression) {
   const { property } = node
 
   // something.(top|parent)
-  if (n.Identifier.check(property) && ['parent', 'top', 'location'].includes(property.name)) {
+  if (n.Identifier.check(property) && replaceableProps.includes(property.name)) {
     return property.name
   }
 
   // something['(top|parent)']
-  if (n.Literal.check(property) && ['parent', 'top', 'location'].includes(String(property.value))) {
+  if (n.Literal.check(property) && replaceableProps.includes(String(property.value))) {
     return String(property.value)
   }
 
@@ -104,6 +106,7 @@ export const jsRules: Visitor<{}> = {
     }
 
     path.replace(resolveWindowReference(path.get('object').node, prop))
+    this.reportChanged()
 
     return false
   },
@@ -120,6 +123,7 @@ export const jsRules: Visitor<{}> = {
       if (isAssignee && node.name === 'location') {
         // `location = 'something'`, rewrite to intercepted href setter since relative urls can break this
         path.replace(b.memberExpression(resolveLocationReference(), b.identifier('href')))
+        this.reportChanged()
 
         return false
       }
@@ -147,40 +151,38 @@ export const jsRules: Visitor<{}> = {
       }
     }
 
-    if (path.scope.declares(node.name)) {
-      // identifier has been declared in local scope, don't care about replacing
+    // identifier has been declared in local scope, don't care about replacing
+    if (!replaceableProps.includes(node.name) || path.scope.declares(node.name)) {
       return this.traverse(path)
     }
 
-    if (node.name === 'location') {
-      path.replace(resolveLocationReference())
+    switch (node.name) {
+      case 'location':
+        path.replace(resolveLocationReference())
+        this.reportChanged()
 
-      return false
+        return false
+      case 'parent':
+      case 'top':
+        path.replace(resolveWindowReference(globalIdentifier, node.name))
+        this.reportChanged()
+
+        return false
+      default:
+        return this.traverse(path)
     }
-
-    if (['parent', 'top'].includes(node.name)) {
-      path.replace(resolveWindowReference(globalIdentifier, node.name))
-
-      return false
-    }
-
-    this.traverse(path)
   },
   visitAssignmentExpression (path) {
     const { node } = path
 
-    const finish = () => {
-      this.traverse(path)
-    }
-
     if (!n.MemberExpression.check(node.left)) {
-      return finish()
+      return this.traverse(path)
     }
 
     const propBeingSet = getReplaceablePropOfMemberExpression(node.left)
 
     if (!propBeingSet) {
-      return finish()
+      return this.traverse(path)
     }
 
     if (node.operator !== '=') {
@@ -194,6 +196,7 @@ export const jsRules: Visitor<{}> = {
     const objBeingSetOn = node.left.object
 
     path.replace(resolveWindowReference(objBeingSetOn, propBeingSet, node.right))
+    this.reportChanged()
 
     return false
   },

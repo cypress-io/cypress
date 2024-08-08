@@ -72,4 +72,5 @@ export default [
   'packages/server/node_modules/is-ci/index.js',
   'packages/server/node_modules/ci-info/index.js',
   'node_modules/@babel/traverse/lib/index.js',
+  'node_modules/@babel/types/lib/definitions/index.js',
 ]

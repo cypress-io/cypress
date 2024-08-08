@@ -565,7 +565,16 @@ export const AllCypressErrors = {
         
         ${fmt.highlightSecondary(error)}`
   },
-  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string }) => {
+  CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: (error: Error) => {
+    return errTemplate`\
+        Warning: We are unable to upload the Test Replay recording of this spec due to a missing or invalid upload URL.
+
+        These results will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+    `
+  },
+  CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string, responseBody: string }) => {
     return errTemplate`\
         Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
 
@@ -573,7 +582,9 @@ export const AllCypressErrors = {
 
         This error will not affect or change the exit code.
 
-        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}`
+        ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}
+        
+        ${fmt.highlightTertiary(error.responseBody)}`
   },
   CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error & { url: string }) => {
     return errTemplate`\
@@ -588,20 +599,26 @@ export const AllCypressErrors = {
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
-    errors: (Error & { kind?: 'NetworkError' | 'HttpError', url: string })[]
+    errors: (Error & { kind?: 'SystemError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
   }) => {
     if (error.errors.length === 1) {
-      if (error.errors[0]?.kind === 'NetworkError') {
-        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(error.errors[0])
+      const firstError = error.errors[0]
+
+      if (firstError?.kind === 'SystemError') {
+        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(firstError as Error & { url: string })
       }
 
-      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string})
+      return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string})
     }
 
-    let networkErr = error.errors.find((err) => {
-      return err.kind === 'NetworkError'
+    let systemErr = error.errors.find((err) => {
+      return err.kind === 'SystemError'
     })
-    const recommendation = networkErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(networkErr.url)}` : null
+    const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null
+
+    const fmtUploadError = ({ message, responseBody }: { message: string, responseBody?: string }) => {
+      return `${message}${responseBody ? `:\n${responseBody}\n` : ''}`
+    }
 
     return errTemplate`\
         Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
@@ -610,7 +627,7 @@ export const AllCypressErrors = {
 
         ${recommendation}
 
-        ${fmt.listItems(error.errors.map((error) => error.message))}`
+        ${fmt.listItems(error.errors.map(fmtUploadError), { prefix: '' })}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
@@ -1797,6 +1814,26 @@ export const AllCypressErrors = {
       ${fmt.listItems(deps, { prefix: ' - ' })}
 
       If you're experiencing problems, downgrade dependencies and restart Cypress.
+    `
+  },
+
+  PROXY_ENCOUNTERED_INVALID_HEADER_NAME: (header: any, method: string, url: string, error: Error) => {
+    return errTemplate`
+    Warning: While proxying a ${fmt.highlight(method)} request to ${fmt.url(url)}, an HTTP header did not pass validation, and was removed. This header will not be present in the response received by the application under test.
+
+    Invalid header name: ${fmt.code(JSON.stringify(header, undefined, 2))}
+    
+    ${fmt.highlightSecondary(error)}
+    `
+  },
+
+  PROXY_ENCOUNTERED_INVALID_HEADER_VALUE: (header: any, method: string, url: string, error: Error) => {
+    return errTemplate`
+    Warning: While proxying a ${fmt.highlight(method)} request to ${fmt.url(url)}, an HTTP header value did not pass validation, and was removed. This header will not be present in the response received by the application under test.
+
+    Invalid header value: ${fmt.code(JSON.stringify(header, undefined, 2))}
+    
+    ${fmt.highlightSecondary(error)}
     `
   },
 } as const

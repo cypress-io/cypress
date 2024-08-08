@@ -27,6 +27,7 @@ const {
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
   routeHandlers,
+  enableInvalidProtocolSignature,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
@@ -2353,6 +2354,34 @@ describe('e2e record', () => {
             expect(artifactReport?.protocol).to.an('object')
             expect(artifactReport?.protocol?.url).to.be.a('string')
             expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
+            expect(artifactReport?.protocol).to.containSubset({
+              afterSpecDurations: {
+                drainCDPEvents: 1,
+                drainAUTEvents: 5,
+                resolveBodyPromises: 7,
+                closeDb: 11,
+                teardownBindings: 13,
+              },
+            })
+
+            expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
+          })
+        })
+      })
+
+      describe('when capture protocol script returns with an invalid signature', () => {
+        enableCaptureProtocol()
+        enableInvalidProtocolSignature()
+
+        it('displays an appropriate error message', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            browser: 'chrome',
+            spec: 'record_pass*',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 0,
           })
         })
       })
@@ -2584,6 +2613,35 @@ describe('e2e record', () => {
       })
     })
   })
+
+  describe('capture-protocol enabled but missing upload url', () => {
+    enableCaptureProtocol()
+    setupStubbedServer(createRoutes({
+      postInstanceResults: {
+        res: (req, res) => {
+          res.status(200).json({
+            screenshotUploadUrls: [],
+            videoUploadUrl: undefined,
+            captureUloadUrl: undefined,
+          })
+        },
+      },
+    }))
+
+    it('Does not try to upload the protocol artifact to the capture protocol script url', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const requestUrls = getRequestUrls()
+
+        expect(requestUrls.find((url) => url.includes('PUT /capture-protocol/script/'))).to.be.undefined
+      })
+    })
+  })
 })
 
 describe('capture-protocol api errors', () => {
@@ -2594,7 +2652,7 @@ describe('capture-protocol api errors', () => {
 
   enableCaptureProtocol()
 
-  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER, status = 500, statusText = 'Internal Server Error') => {
+  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER, status = 500, mimeType = 'text/plain', responseBody = '') => {
     let failures = 0
 
     return setupStubbedServer(createRoutes({
@@ -2602,7 +2660,8 @@ describe('capture-protocol api errors', () => {
         res: (req, res) => {
           if (failures < numberOfFailuresBeforeSuccess) {
             failures += 1
-            res.status(status).send(`${status} - ${statusText}`)
+            res.set('Content-Type', mimeType)
+            res.status(status).send(responseBody)
           } else {
             routeHandlers[endpoint].res(req, res)
           }
@@ -2631,14 +2690,24 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol).to.exist()
         expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload Test Replay: 500 Internal Server Error (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
+          'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
         )
       })
     })
   })
 
   describe('upload 503 - tries 3 times and fails', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, 'Service Unavailable')
+    const errorResponseBody = `<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>ServiceUnavailable</Code>
+  <Message>Service is unable to handle request.</Message>
+  <Resource>/test_replay/archive.tar</Resource> 
+  <RequestId>4442587FB7D0A2F9</RequestId>
+</Error>`
+    const wspTrimmedResponse = `<?xml version="1.0" encoding="UTF-8"?><Error><Code>ServiceUnavailable</Code><Message>Service is unable to handle request.</Message><Resource>/test_replay/archive.tar</Resource><RequestId>4442587FB7D0A2F9</RequestId></Error>`
+    const errorResponseMimeType = 'application/xml'
+
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, errorResponseMimeType, errorResponseBody)
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -2656,17 +2725,28 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist()
-        expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload Test Replay after 3 attempts. Errors: 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX), 503 Service Unavailable (http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX)',
-        )
 
+        const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
+
+        const expectedErrorMessage = `${expectedUrl} responded with 503 Service Unavailable: ${wspTrimmedResponse}`
+
+        expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
         expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
       })
     })
   })
 
-  describe('upload 503 - retries 2 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2, 503, 'Internal Server Error')
+  describe('upload 400 - does not retry, as 400 is not a retryable error', () => {
+    const errorResponseMimeType = 'application/xml'
+    const errorResponseBody = `<?xml version="1.0" encoding="UTF-8"?>
+    <Error>
+      <Code>RequestTimeTooSkewed</Code>
+      <Message>The difference between the request time and the server's time is too large.</Message>
+      <Resource>/test_replay/archive.tar</Resource> 
+      <RequestId>4442587FB7D0A2F9</RequestId>
+    </Error>`
+
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2, 400, errorResponseMimeType, errorResponseBody)
 
     let archiveFile = ''
 
@@ -2724,7 +2804,7 @@ describe('capture-protocol api errors', () => {
   })
 
   describe('fetch script 500', () => {
-    stubbedServerWithErrorOn('getCaptureScript')
+    stubbedServerWithErrorOn('getCaptureScript', Infinity, 500, 'text/plain', '500 - Internal Server Error')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 

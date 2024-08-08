@@ -11,10 +11,18 @@ import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
-import { HttpError } from '../api/http_error'
-import { NetworkError } from '../api/network_error'
+import { HttpError } from '../network/http_error'
+import { SystemError } from '../network/system_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
+
+const removeWhitespaceAndTrim = (str: string) => {
+  return str.split(/\n/)
+  .map((line) => {
+    return line.trim()
+  })
+  .join('')
+}
 
 const toUploadReportPayload = (acc: {
   screenshots: ArtifactMetadata[]
@@ -27,8 +35,14 @@ const toUploadReportPayload = (acc: {
     let { error, errorStack, allErrors } = reportWithoutOriginalError
 
     if (allErrors) {
-      error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
-      errorStack = allErrors.map((error) => error.stack).join(', ')
+      const messages = allErrors.map((error) => {
+        return (HttpError.isHttpError(error) && error.responseBody) ?
+      `${error.message}: ${removeWhitespaceAndTrim(error.responseBody)}` :
+          error.message
+      })
+
+      error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${messages.join(', ')}`
+      errorStack = allErrors.map((error) => error.stack).join('')
     } else if (error) {
       error = `Failed to upload Test Replay: ${error}`
     }
@@ -106,25 +120,27 @@ const extractArtifactsFromOptions = async ({
   try {
     const protocolFilePath = protocolManager?.getArchivePath()
 
-    const protocolUploadUrl = captureUploadUrl || protocolCaptureMeta.url
-
-    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && protocolUploadUrl && !protocolManager.hasFatalError()
+    const shouldAddProtocolArtifact = protocolManager && protocolFilePath && captureUploadUrl && !protocolManager.hasFatalError()
 
     debug('should add protocol artifact? %o', {
       protocolFilePath,
-      protocolUploadUrl,
+      captureUploadUrl,
       protocolManager: !!protocolManager,
       fatalError: protocolManager?.hasFatalError(),
       shouldAddProtocolArtifact,
     })
 
     if (shouldAddProtocolArtifact) {
-      const protocolArtifact = await createProtocolArtifact(protocolFilePath, protocolUploadUrl, protocolManager)
+      const protocolArtifact = await createProtocolArtifact(protocolFilePath, captureUploadUrl, protocolManager)
 
       debug(protocolArtifact)
       if (protocolArtifact) {
         artifacts.push(protocolArtifact)
       }
+    } else if (protocolCaptureMeta.url && !captureUploadUrl) {
+      const err = new Error('Invalid or missing Test Replay upload URL')
+
+      protocolManager?.addFatalError('protocolUploadUrl', err)
     }
   } catch (e) {
     debug('Error creating protocol artifact: %O', e)
@@ -171,7 +187,9 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   const postArtifactExtractionFatalError = protocolManager?.getFatalError()
 
   if (postArtifactExtractionFatalError) {
-    if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
+    if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
+      errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
+    } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
       errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
     } else {
       errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
@@ -212,6 +230,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
       const error = postUploadProtocolFatalError.error
 
+      debug('protocol error: %O', error)
       if ((error as AggregateError).errors) {
         // eslint-disable-next-line no-console
         console.log('')
@@ -220,7 +239,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
         // eslint-disable-next-line no-console
         console.log('')
         errors.warning('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
-      } else if (NetworkError.isNetworkError(error)) {
+      } else if (SystemError.isSystemError(error)) {
         // eslint-disable-next-line no-console
         console.log('')
         errors.warning('CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE', error)

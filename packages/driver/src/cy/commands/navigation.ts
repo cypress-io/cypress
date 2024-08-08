@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import whatIsCircular from '@cypress/what-is-circular'
 import UrlParse from 'url-parse'
 import Promise from 'bluebird'
 
@@ -9,6 +8,7 @@ import { LogUtils, Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
+import { whatIsCircular } from '../../util/what-is-circular'
 
 import type { RunState } from '@packages/types'
 

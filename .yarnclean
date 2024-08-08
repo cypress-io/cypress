@@ -4,9 +4,6 @@ test
 tests
 powered-test
 
-# asset directories
-docs
-doc
 # yaml package has a `doc` folder that we need
 !yaml/**/doc/*
 website

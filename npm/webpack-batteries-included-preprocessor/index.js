@@ -1,6 +1,11 @@
 const path = require('path')
+const fs = require('fs-extra')
+const JSON5 = require('json5')
 const webpack = require('webpack')
+const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -10,6 +15,38 @@ const hasTsLoader = (rules) => {
       return use.loader && use.loader.includes('ts-loader')
     })
   })
+}
+
+const getTSCompilerOptionsForUser = (configFilePath) => {
+  const compilerOptions = {
+    sourceMap: false,
+    inlineSourceMap: true,
+    inlineSources: true,
+    downlevelIteration: true,
+  }
+
+  if (!configFilePath) {
+    return compilerOptions
+  }
+
+  try {
+    // If possible, try to read the user's tsconfig.json and see if sourceMap is configured
+    // eslint-disable-next-line no-restricted-syntax
+    const tsconfigJSON = fs.readFileSync(configFilePath, 'utf8')
+    // file might have trailing commas, new lines, etc. JSON5 can parse those correctly
+    const parsedJSON = JSON5.parse(tsconfigJSON)
+
+    // if the user has sourceMap's configured, set the option to true and turn off inlineSourceMaps
+    if (parsedJSON?.compilerOptions?.sourceMap) {
+      compilerOptions.sourceMap = true
+      compilerOptions.inlineSourceMap = false
+      compilerOptions.inlineSources = false
+    }
+  } catch (e) {
+    debug(`error in getTSCompilerOptionsForUser. Returning default...`, e)
+  } finally {
+    return compilerOptions
+  }
 }
 
 const addTypeScriptConfig = (file, options) => {
@@ -30,6 +67,8 @@ const addTypeScriptConfig = (file, options) => {
   // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
   const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
+  const compilerOptions = getTSCompilerOptionsForUser(configFile)
+
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
     exclude: [/node_modules/],
@@ -38,11 +77,7 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions: {
-            inlineSourceMap: true,
-            inlineSources: true,
-            downlevelIteration: true,
-          },
+          compilerOptions,
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -60,28 +95,6 @@ const addTypeScriptConfig = (file, options) => {
   options.__typescriptSupportAdded = true
 
   return options
-}
-
-/**
- * Config yarn pnp plugin for webpack 4
- * @param {*} file file to be processed
- * @param {*} options
- */
-const addYarnPnpConfig = (file, options) => {
-  const { makeResolver } = require('pnp-webpack-plugin/resolver')
-  const findPnpApi = require('module').findPnpApi
-
-  if (findPnpApi && file.filePath) {
-    const pnpapi = findPnpApi(file.filePath)
-
-    if (pnpapi) {
-      const PnpPlugin = {
-        apply: makeResolver({ pnpapi }),
-      }
-
-      options.webpackOptions.resolve.plugins.push(PnpPlugin)
-    }
-  }
 }
 
 const getDefaultWebpackOptions = () => {
@@ -143,7 +156,13 @@ const getDefaultWebpackOptions = () => {
         // resolve to include the full file extension if a file resolution is provided.
         // @see https://github.com/cypress-io/cypress/issues/27599
         // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
-        process: 'process/browser.js',
+
+        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
+        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
+        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
+        // and not in the user's node_modules directory as it may not exist.
+        // @see https://github.com/cypress-io/cypress/issues/27947.
+        process: require.resolve('process/browser.js'),
       }),
     ],
     resolve: {
@@ -203,11 +222,6 @@ const preprocessor = (options = {}) => {
 
     if (options.typescript) {
       options = addTypeScriptConfig(file, options)
-    }
-
-    if (process.versions.pnp) {
-      // pnp path
-      addYarnPnpConfig(file, options)
     }
 
     return webpackPreprocessor(options)(file)

@@ -482,6 +482,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     debug('waiting for socket to connect and browser to launch...')
 
+    const coreData = require('@packages/data-context').getCtx().coreData
+
+    if (coreData.didBrowserPreviouslyHaveUnexpectedExit) {
+      debug(`browser previously exited. Setting shouldLaunchNewTab=false to recreate the correct browser automation clients.`)
+      options.shouldLaunchNewTab = false
+      coreData.didBrowserPreviouslyHaveUnexpectedExit = false
+    }
+
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type
@@ -1061,8 +1069,6 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
-      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
-      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,
