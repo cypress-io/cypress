@@ -110,7 +110,9 @@ export class CriClient implements ICriClient {
 
   private _closed = false
   private _connected = false
-  private crashed = false
+  private _isChildTarget = false
+
+  private _crashed = false
   private cdpConnection: CDPConnection
 
   private constructor (
@@ -125,6 +127,10 @@ export class CriClient implements ICriClient {
     onReconnectAttempt?: (retryIndex: number) => void,
     onCriConnectionClosed?: () => void,
   ) {
+    debug('creating cri client with', {
+      host, port, targetId,
+    })
+
     // refactor opportunity:
     // due to listeners passed in along with connection options, the fns that instantiate this
     // class should instantiate and listen to the connection directly rather than having this
@@ -152,20 +158,24 @@ export class CriClient implements ICriClient {
       this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-attempt', onReconnectAttempt)
     }
 
-    debug('attaching crash event listener')
+    this._isChildTarget = !!this.host
 
-    this.cdpConnection.on('Target.targetCrashed', async (event) => {
-      debug('crash event detected', event)
-      if (event.targetId !== this.targetId) {
-        return
+    if (this._isChildTarget) {
+      // If crash listeners are added at the browser level, tabs/page connections do not
+      // emit them.
+      this.cdpConnection.on('Target.targetCrashed', async (event) => {
+        debug('crash event detected', event)
+        if (event.targetId !== this.targetId) {
+          return
+        }
+
+        debug('crash detected')
+        this._crashed = true
+      })
+
+      if (fullyManageTabs) {
+        this.cdpConnection.on('Target.attachedToTarget', this._onAttachedToTarget)
       }
-
-      debug('crash detected')
-      this.crashed = true
-    })
-
-    if (!!this.host && fullyManageTabs) {
-      this.cdpConnection.on('Target.attachedToTarget', this._onAttachedToTarget)
     }
   }
 
@@ -216,12 +226,22 @@ export class CriClient implements ICriClient {
     return this._connected
   }
 
+  get crashed () {
+    return this._crashed
+  }
+
   public connect = async () => {
     debug('connecting %o', { connected: this._connected, target: this.targetId })
 
     await this.cdpConnection.connect()
 
     this._connected = true
+
+    if (this._isChildTarget) {
+    // Ideally we could use filter rather than checking the type above, but that was added relatively recently
+      await this.cdpConnection.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
+      await this.cdpConnection.send('Target.setDiscoverTargets', { discover: true })
+    }
 
     debug('connected %o', { connected: this._connected, target: this.targetId })
   }
@@ -231,7 +251,7 @@ export class CriClient implements ICriClient {
     params?: CmdParams<TCmd>,
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> => {
-    if (this.crashed) {
+    if (this._crashed) {
       return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
     }
 
@@ -356,10 +376,6 @@ export class CriClient implements ICriClient {
       // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
       debug('error attaching to target cri', error)
     }
-
-    // Ideally we could use filter rather than checking the type above, but that was added relatively recently
-    await this.cdpConnection.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true })
-    await this.cdpConnection.send('Target.setDiscoverTargets', { discover: true })
   }
 
   private _enqueueCommand <TCmd extends CdpCommand> (

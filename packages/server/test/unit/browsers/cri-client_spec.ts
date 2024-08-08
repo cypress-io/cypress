@@ -60,12 +60,12 @@ describe('lib/browsers/cri-client', function () {
 
     criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-    const { CDPConnection } = proxyquire('../lib/browsers/cdp-connection', {
+    const CDPConnectionRef = proxyquire('../lib/browsers/cdp-connection', {
       'chrome-remote-interface': criImport,
-    })
+    }).CDPConnection
 
     const { CriClient } = proxyquire('../lib/browsers/cri-client', {
-      './cdp-connection': { CDPConnection },
+      './cdp-connection': { CDPConnection: CDPConnectionRef },
     })
 
     getClient = ({ host, fullyManageTabs, protocolManager } = {}): Promise<CriClient> => {
@@ -78,6 +78,76 @@ describe('lib/browsers/cri-client', function () {
       const client = await getClient()
 
       expect(client.send).to.be.instanceOf(Function)
+    })
+
+    describe('when it has a host', () => {
+      it('adds a crash listener', async () => {
+        const client = await getClient({ host: HOST })
+
+        fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
+        expect(client.crashed).to.be.true
+      })
+    })
+
+    describe('when it does not have a host', () => {
+      it('does not add a crash listener', async () => {
+        const client = await getClient()
+
+        fireCDPEvent('Target.targetCrashed', { targetId: DEBUGGER_URL })
+        expect(client.crashed).to.be.false
+      })
+    })
+
+    describe('when it has a host and is fully managed and receives an attachedToTarget event', () => {
+      beforeEach(async () => {
+        await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      describe('target type is service worker, page, or other', async () => {
+        it('does not enable network', async () => {
+          await Promise.all(['service_worker', 'page', 'other'].map((type) => {
+            return fireCDPEvent('Target.attachedToTarget', {
+              // do not need entire event payload for this test
+              // @ts-ignore
+              targetInfo: {
+                type,
+              },
+            })
+          }))
+
+          expect(criStub.send).not.to.have.been.calledWith('Network.enable')
+        })
+      })
+
+      describe('target type is something other than service worker, page, or other', () => {
+        it('enables network', async () => {
+          await fireCDPEvent('Target.attachedToTarget', {
+          // do not need entire event payload for this test
+          // @ts-ignore
+            targetInfo: {
+              type: 'somethin else',
+            },
+          })
+
+          expect(criStub.send).to.have.been.calledWith('Network.enable')
+        })
+      })
+
+      describe('target is waiting for debugger', () => {
+        it('sends Runtime.runIfWaitingForDebugger', async () => {
+          const sessionId = 'abc123'
+
+          await fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            // @ts-ignore
+            targetInfo: { type: 'service_worker' },
+          })
+
+          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+      })
     })
 
     context('#send', function () {
