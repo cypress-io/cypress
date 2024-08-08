@@ -699,7 +699,7 @@ describe('visual error templates', () => {
       // @ts-expect-error
       const aggregateError: Error & { errors: any[] } = makeErr()
       // @ts-expect-error
-      const aggregateErrorWithNetworkError: Error & { errors: any[] } = makeErr()
+      const aggregateErrorWithSystemError: Error & { errors: any[] } = makeErr()
 
       const errOne = makeErr()
       const errTwo = makeErr()
@@ -708,15 +708,15 @@ describe('visual error templates', () => {
       aggregateError.errors = [errOne, errTwo, errThree]
 
       // @ts-expect-error
-      const errNetworkErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
+      const errSystemErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
 
-      errNetworkErr.kind = 'NetworkError'
-      errNetworkErr.url = 'http://some/url'
-      aggregateErrorWithNetworkError.errors = [errNetworkErr, errTwo, errThree]
+      errSystemErr.kind = 'SystemError'
+      errSystemErr.url = 'http://some/url'
+      aggregateErrorWithSystemError.errors = [errSystemErr, errTwo, errThree]
 
       return {
         default: [aggregateError],
-        withNetworkError: [aggregateErrorWithNetworkError],
+        withSystemError: [aggregateErrorWithSystemError],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
