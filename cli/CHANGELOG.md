@@ -3,7 +3,6 @@
 
 _Released 8/13/2024 (PENDING)_
 
-
 **Features:**
 
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
