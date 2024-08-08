@@ -121,7 +121,7 @@ describe('putProtocolArtifact', () => {
     expect(options.maxAttempts).to.eq(3)
     expect(options.retryDelay).to.be.a('function')
     // because of mockery, the isRetryableError ref here is different than the one imported into put_protocol_artifact_spec
-    expect(options.shouldRetry.toString()).to.eq(isRetryableError.toString())
+    expect(options.shouldRetry?.toString()).to.eq(isRetryableError.toString())
   })
 
   describe('when provided an artifact path that does not exist', () => {
@@ -189,6 +189,7 @@ describe('putProtocolArtifact', () => {
           destinationUrl,
           403,
           'Forbidden',
+          'Response Body',
           res,
         )
 
