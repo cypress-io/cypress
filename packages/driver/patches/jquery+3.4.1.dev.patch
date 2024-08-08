@@ -72,10 +72,40 @@ index 411a859..0000000
 -});
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 773ad95..9e6076f 100644
+index 773ad95..84ca2f6 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -6534,69 +6534,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+@@ -1100,19 +1100,17 @@ setDocument = Sizzle.setDocument = function( node ) {
+ 	docElem = document.documentElement;
+ 	documentIsHTML = !isXML( document );
+ 
+-	// Support: IE 9-11, Edge
+-	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
+-	if ( preferredDoc !== document &&
+-		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
++	// Support: IE 9 - 11+, Edge 12 - 18+
++	// Accessing iframe documents after unload throws "permission denied" errors (see trac-13936)
++	// Support: IE 11+, Edge 17 - 18+
++	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
++	// two documents; shallow comparisons work.
++	// eslint-disable-next-line eqeqeq
++	if ( preferredDoc != document &&
++		( subWindow = document.defaultView ) && subWindow.top !== subWindow ) {
+ 
+-		// Support: IE 11, Edge
+-		if ( subWindow.addEventListener ) {
+-			subWindow.addEventListener( "unload", unloadHandler, false );
+-
+-		// Support: IE 9 - 10 only
+-		} else if ( subWindow.attachEvent ) {
+-			subWindow.attachEvent( "onunload", unloadHandler );
+-		}
++		// Support: IE 9 - 11+, Edge 12 - 18+
++		subWindow.addEventListener( "unload", unloadHandler );
+ 	}
+ 
+ 	/* Attributes
+@@ -6534,69 +6491,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta;
  }
  
