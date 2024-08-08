@@ -4096,9 +4096,9 @@
     "./packages/server/lib/cloud/machine_id.js",
     "./packages/server/lib/cloud/network/http_error.ts",
     "./packages/server/lib/cloud/network/is_retryable_error.ts",
-    "./packages/server/lib/cloud/network/network_error.ts",
     "./packages/server/lib/cloud/network/parse_error.ts",
     "./packages/server/lib/cloud/network/put_fetch.ts",
+    "./packages/server/lib/cloud/network/system_error.ts",
     "./packages/server/lib/cloud/protocol.ts",
     "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
     "./packages/server/lib/cohorts.ts",
@@ -4348,5 +4348,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "beb86c3f2ce24fc3f631fda3b14849bd7ebdb335bec9218e162e90d9a406834c"
+  "deferredHash": "982c890e15484176175099a4c3c6e5372f2b304a675fea68a6229c31a2c46242"
 }
