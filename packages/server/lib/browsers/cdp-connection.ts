@@ -11,6 +11,7 @@ import * as errors from '../errors'
 import type WebSocket from 'ws'
 
 const debug = Debug('cypress:server:browsers:cdp-connection')
+const verboseDebug = Debug('cypress-verbose:server:browsers:cdp-connection')
 
 export type CDPListener<T extends keyof ProtocolMapping.Events> = (params: ProtocolMapping.Events[T][0], sessionId?: string) => void
 
@@ -90,7 +91,7 @@ export class CDPConnection {
 
     this._connection = await CDP(this._options) as CdpClient
 
-    debugCdpConnection(debug.namespace, this._connection as DebuggableCDPClient)
+    debugCdpConnection(verboseDebug.namespace, this._connection as DebuggableCDPClient)
 
     this._connection.on('event', this._broadcastEvent)
 
@@ -125,6 +126,7 @@ export class CDPConnection {
     data?: ProtocolMapping.Commands[T]['paramsType'][0],
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
+    debug('preparing to send CDP command:', command, data)
     if (this.terminated) {
       throw new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this._options.target} has been terminated.`)
     }
@@ -147,6 +149,7 @@ export class CDPConnection {
   }
 
   private _reconnect = async () => {
+    debug('Reconnection requested')
     if (this._terminated) {
       return
     }
@@ -217,7 +220,7 @@ export class CDPConnection {
   }
 
   private _broadcastEvent = ({ method, params, sessionId }: { method: CdpEvent, params: Record<string, any>, sessionId?: string }) => {
-    debug('rebroadcasting event', method, params, sessionId)
+    verboseDebug('rebroadcasting event', method, params, sessionId)
     this._emitter.emit(method, params, sessionId)
   }
 }
