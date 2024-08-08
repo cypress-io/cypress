@@ -198,7 +198,7 @@ describe('CDP Clients', () => {
       })
 
       await haltedReconnection
-      // onCriConnectionClosed
+      // Macrotask queue needs to flush for the event to trigger
       await (new Promise((resolve) => setImmediate(resolve)))
       expect(onCriConnectionClosed).to.have.been.called
     })
