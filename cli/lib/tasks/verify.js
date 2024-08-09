@@ -262,6 +262,7 @@ const start = (options = {}) => {
   })
 
   if (options.skipVerify) {
+    debug('skipping verification of the Cypress app')
     return Promise.resolve()
   }
 
