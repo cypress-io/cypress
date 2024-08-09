@@ -11,6 +11,7 @@ _Released 8/13/2024 (PENDING)_
 **Misc:**
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+- Allow HiDPI Screen running wayland to use cypress window/browser by adding `--ozone-platform=auto` flag to the electron's runtime argument. Addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
 
 ## 13.13.2
 
@@ -161,7 +162,6 @@ _Released 5/7/2024_
 **Misc:**
 
 - Improved accessibility of the Cypress App in some areas. Addressed in [#29322](https://github.com/cypress-io/cypress/pull/29322).
-- Allow HiDPI Screen running wayland to use cypress window/browser by adding `--ozone-platform=auto` flag to the electron's runtime argument. This change addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
 
 **Dependency Updates:**
 
