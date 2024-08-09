@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
-import { create } from '../../../lib/browsers/cri-client'
 import { ProtocolManagerShape } from '@packages/types'
+import type { CriClient } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -9,9 +9,6 @@ const HOST = '127.0.0.1'
 const PORT = 50505
 
 describe('lib/browsers/cri-client', function () {
-  let criClient: {
-    create: typeof create
-  }
   let send: sinon.SinonStub
   let on: sinon.SinonStub
   let criImport: sinon.SinonStub & {
@@ -46,12 +43,12 @@ describe('lib/browsers/cri-client', function () {
 
     criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-    criClient = proxyquire('../lib/browsers/cri-client', {
+    const { CriClient } = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = ({ host, fullyManageTabs, protocolManager } = {}) => {
-      return criClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager })
+    getClient = ({ host, fullyManageTabs, protocolManager } = {}): Promise<CriClient> => {
+      return CriClient.create({ target: DEBUGGER_URL, host, onAsynchronousError: onError, fullyManageTabs, protocolManager })
     }
   })
 
@@ -102,8 +99,9 @@ describe('lib/browsers/cri-client', function () {
           'WebSocket is not open',
           // @see https://github.com/cypress-io/cypress/issues/7180
           'WebSocket is already in CLOSING or CLOSED state',
+          'WebSocket connection closed',
         ]).forEach((msg) => {
-          it(`with '${msg}'`, async function () {
+          it(`with one '${msg}' message it retries once`, async function () {
             const err = new Error(msg)
 
             send.onFirstCall().rejects(err)
@@ -114,6 +112,19 @@ describe('lib/browsers/cri-client', function () {
             await client.send('DOM.getDocument', { depth: -1 })
 
             expect(send).to.be.calledTwice
+          })
+
+          it(`with two '${msg}' message it retries twice`, async () => {
+            const err = new Error(msg)
+
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().rejects(err)
+            send.onThirdCall().resolves()
+
+            const client = await getClient()
+
+            await client.send('DOM.getDocument', { depth: -1 })
+            expect(send).to.have.callCount(3)
           })
         })
       })

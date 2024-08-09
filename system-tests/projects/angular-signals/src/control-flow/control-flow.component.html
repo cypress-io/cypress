@@ -1,0 +1,36 @@
+
+<div>
+  <div data-cy="control-flow-superheroes-display">
+    <h1> SuperHeroes</h1>
+    <ul data-cy="control-flow-superheroes-list" >
+      @for (superHero of superHeroes(); track superHero.name; let idx = $index) {
+      <li [attr.data-index]="idx">
+        <p data-cy="name"> Name: {{ superHero.name }} </p>
+        <p data-cy="nickname">Nickname: {{ superHero.nickname }} </p>
+        <p data-cy="age">
+          @if (superHero.age > 30) {
+            {{ superHero.age }} is older than 30
+          } @else if (30 > superHero.age) {
+            {{ superHero.age }} is younger than 30
+          } @else {
+            Age is unknown
+          }
+        </p>
+        <p data-cy="mortality">
+          @switch (superHero.isMortal) {
+            @case (true) {
+              I am mortal. I will eventually die
+            }
+            @case (false) {
+              I am immortal and will live forever
+            }
+            @default {
+              Mortality status unknown
+            }
+          }
+        </p>
+      </li>
+    }
+    </ul>
+  </div>
+</div>

@@ -164,7 +164,7 @@ describe('js rewriter', function () {
 
         err.stack = 'stack'
 
-        sinon.stub(astTypes, 'visit').throws(err)
+        sinon.stub(astTypes.PathVisitor, 'fromMethodsObject').throws(err)
 
         const actual = _rewriteJsUnsafe(URL, 'console.log()')
 

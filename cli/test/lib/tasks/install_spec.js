@@ -78,7 +78,7 @@ describe('/lib/tasks/install', function () {
         stable: false,
         commitSha: '3b7f0b5c59def1e9b5f385bd585c9b2836706c29',
         commitBranch: 'aBranchName',
-        commitDate: new Date('11-27-1996').toISOString(),
+        commitDate: new Date('1996-11-27').toISOString(),
       }
 
       function runInstall () {
