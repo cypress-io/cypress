@@ -13,6 +13,7 @@ const npmModulesToCopy = [
   'vue',
   'vue2',
   'angular',
+  'angular-signals',
   'svelte',
 ]
 

@@ -29,7 +29,6 @@ import {
  * Additional module configurations needed while mounting the component, like
  * providers, declarations, imports and even component @Inputs()
  *
- *
  * @interface MountConfig
  * @see https://angular.io/api/core/testing/TestModuleMetadata
  */
