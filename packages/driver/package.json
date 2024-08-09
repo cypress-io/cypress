@@ -67,7 +67,7 @@
     "mime-types": "2.1.27",
     "minimatch": "3.1.2",
     "mocha": "7.0.1",
-    "multer": "1.4.2",
+    "multer": "1.4.4",
     "ordinal": "1.0.3",
     "react-15.6.1": "npm:react@15.6.1",
     "react-16.0.0": "npm:react@16.0.0",
