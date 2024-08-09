@@ -52,6 +52,7 @@ export class CDPConnection {
   private _reconnection: Promise<void> | undefined
   private debug: Debug.Debugger
   private verboseDebug: Debug.Debugger
+  private _bindingCalledListeners: { event: string, callback: CDPListener<any>}[] = []
 
   constructor (private readonly _options: CDP.Options, connectionOptions: CDPConnectionOptions) {
     this._autoReconnect = connectionOptions.automaticallyReconnect
@@ -70,14 +71,29 @@ export class CDPConnection {
 
   on<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
     this.debug('attaching event listener to cdp connection', event)
-    this._emitter.on(event, callback)
+
+    if (event.startsWith('Runtime.bindingCalled')) {
+      // these events do not get emitted by cdp clients primary 'event' hook, and must be
+      // registered separately
+      this._connection?.on(event, callback)
+      this._bindingCalledListeners.push({ event, callback })
+    } else {
+      this._emitter.on(event, callback)
+    }
   }
   addConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
     this.debug('adding connection event listener for ', event)
     this._emitter.on(event, callback)
   }
   off<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
-    this._emitter.off(event, callback)
+    if (event.startsWith('Runtime.bindingCalled')) {
+      this._connection?.off(event, callback)
+      this._bindingCalledListeners = this._bindingCalledListeners.filter((pair) => {
+        return pair.callback !== callback && pair.event !== event
+      })
+    } else {
+      this._emitter.off(event, callback)
+    }
   }
   removeConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
     this._emitter.off(event, callback)
@@ -120,6 +136,14 @@ export class CDPConnection {
   private _gracefullyDisconnect = async () => {
     this._connection?.off('event', this._broadcastEvent)
     this._connection?.off('disconnect', this._reconnect)
+    while (this._bindingCalledListeners.length) {
+      const pair = this._bindingCalledListeners.pop()
+
+      if (pair) {
+        this._connection?.off(pair.event, pair.callback)
+      }
+    }
+
     await this._connection?.close()
     this._connection = undefined
   }
@@ -129,7 +153,6 @@ export class CDPConnection {
     data?: ProtocolMapping.Commands[T]['paramsType'][0],
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
-    this.debug('preparing to send CDP command:', command)
     if (this.terminated) {
       throw new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this._options.target} has been terminated.`)
     }
