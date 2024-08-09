@@ -261,7 +261,7 @@ const start = (options = {}) => {
     skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
   })
 
-  if (options.skipVerify === 'true') {
+  if (options.skipVerify) {
     return Promise.resolve()
   }
 
