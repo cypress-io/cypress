@@ -258,7 +258,7 @@ const start = (options = {}) => {
     force: false,
     welcomeMessage: true,
     smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
-    skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') || 'false',
+    skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
   })
 
   if (options.skipVerify === 'true') {
