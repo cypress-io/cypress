@@ -11,10 +11,18 @@ import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
-import { HttpError } from '../api/http_error'
-import { NetworkError } from '../api/network_error'
+import { HttpError } from '../network/http_error'
+import { NetworkError } from '../network/network_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
+
+const removeWhitespaceAndTrim = (str: string) => {
+  return str.split(/\n/)
+  .map((line) => {
+    return line.trim()
+  })
+  .join('')
+}
 
 const toUploadReportPayload = (acc: {
   screenshots: ArtifactMetadata[]
@@ -27,8 +35,14 @@ const toUploadReportPayload = (acc: {
     let { error, errorStack, allErrors } = reportWithoutOriginalError
 
     if (allErrors) {
-      error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${allErrors.map((error) => error.message).join(', ')}`
-      errorStack = allErrors.map((error) => error.stack).join(', ')
+      const messages = allErrors.map((error) => {
+        return (HttpError.isHttpError(error) && error.responseBody) ?
+      `${error.message}: ${removeWhitespaceAndTrim(error.responseBody)}` :
+          error.message
+      })
+
+      error = `Failed to upload Test Replay after ${allErrors.length} attempts. Errors: ${messages.join(', ')}`
+      errorStack = allErrors.map((error) => error.stack).join('')
     } else if (error) {
       error = `Failed to upload Test Replay: ${error}`
     }
@@ -216,6 +230,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
       const error = postUploadProtocolFatalError.error
 
+      debug('protocol error: %O', error)
       if ((error as AggregateError).errors) {
         // eslint-disable-next-line no-console
         console.log('')
