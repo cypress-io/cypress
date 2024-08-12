@@ -12,6 +12,10 @@ _Released 8/13/2024 (PENDING)_
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
 
+**Dependency Updates:**
+
+- Updated `recast` from `0.20.4` to `0.23.9`. Addressed in [#30022](https://github.com/cypress-io/cypress/pull/30022).
+
 ## 13.13.2
 
 _Released 7/31/2024_
