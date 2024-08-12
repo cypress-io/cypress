@@ -323,7 +323,12 @@ export class BrowserCriClient {
     try {
       // attach a binding to the runtime so that we can listen for service worker events
       if (event.targetInfo.type === 'service_worker') {
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
+        debug(`adding Runtime.bindingCalled.${event.sessionId} callback`)
+        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', (payload, sessionId) => {
+          debug('Runtime.bindinCalled.%s %o', sessionId, payload)
+          serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent)(payload)
+        })
+
         await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {

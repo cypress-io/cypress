@@ -31,6 +31,7 @@ describe('CDP Clients', () => {
   let onMessage: sinon.SinonStub
   let messageResponse: ReturnType<typeof pDefer> | undefined
   let neverAck: boolean
+  let webSocket: WebSocket
 
   const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
     return new Promise((resolve, reject) => {
@@ -39,6 +40,7 @@ describe('CDP Clients', () => {
       })
 
       srv.on('connection', (ws) => {
+        webSocket = ws
         if (onConnection) {
           onConnection(ws)
         }
@@ -433,6 +435,47 @@ describe('CDP Clients', () => {
         expect(criClient.closed).to.be.true
         expect((stub as sinon.SinonStub).callCount).to.be.eq(3)
       })
+    })
+  })
+
+  /**
+   * Service worker bindings emit a Runtime.bindingCalled.${session_id} event;
+   * this event is integral to request correlation, but the `method.session_id` pattern
+   * is not emitted via the 'event' event
+   */
+  context('nonstandard event listeners', () => {
+    it('calls the callback when emitted', async () => {
+      const deferred = pDefer<void>()
+      const sessionId = 'abc123'
+      const bindingCalledCallback = sinon.stub().callsFake(deferred.resolve)
+
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        onAsynchronousError: deferred.reject.bind(deferred),
+      })
+
+      criClient.on(`Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled', bindingCalledCallback)
+
+      await new Promise<void>((resolve, reject) => {
+        webSocket.send(JSON.stringify({
+          method: 'Runtime.bindingCalled',
+          params: {
+            name: '__cypressServiceWorkerClientEvent',
+            payload: {},
+            executionContextId: 1,
+          },
+          sessionId,
+        }), (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      })
+
+      await (deferred.promise)
+      expect(bindingCalledCallback).to.have.been.called
     })
   })
 })
