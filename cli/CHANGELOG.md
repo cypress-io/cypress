@@ -3,7 +3,7 @@
 
 _Released 8/13/2024 (PENDING)_
 
-**Features**
+**Features:**
 
 - `.type({upArrow})` and `.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
 
