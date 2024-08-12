@@ -1,0 +1,24 @@
+{
+  "name": "ct-webpack-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-jsx": "^7.23.3",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "babel-loader": "^8.3.0",
+    "html-webpack-plugin": "^4.5.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^5.0.4"
+  },
+  "license": "ISC",
+  "author": ""
+}
