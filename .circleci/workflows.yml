@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'remove-json-lint'
+        - 'jquery-patch-remove-unload'
         - 'publish-binary'
         - 'chore/use_build_docker_file_for_centos7'
 
@@ -55,6 +55,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/use_build_docker_file_for_centos7', << pipeline.git.branch >> ]
+    - equal: [ 'jquery-patch-remove-unload', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
