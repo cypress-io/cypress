@@ -382,12 +382,23 @@ export class ProjectDataSource {
         additionalIgnorePattern,
       })
 
-      const config = await this.ctx.project.getConfig()
+      try {
+        const config = await this.ctx.project.getConfig()
 
-      // If running the experimentalJustInTimeCompile for CT,
-      // ignore this watcher since we only handle one spec at a time and do not need to recompile any time the file system changes.
-      // @ts-expect-error
-      if (_.isEqual(this.specs, specs) || (config.experimentalJustInTimeCompile && config.testingType === 'component')) {
+        // If running the experimentalJustInTimeCompile for CT,
+        // ignore this watcher since we only handle one spec at a time and do not need to recompile any time the file system changes.
+        if (config.experimentalJustInTimeCompile && testingType === 'component') {
+          this.ctx.actions.project.refreshSpecs(specs)
+
+          // If no differences are found, we do not need to emit events
+          return
+        }
+      } catch (e) {
+        // for cy-in-cy tests the config is the second instance of cypress isn't considered initialized yet.
+        // in this case since we only need it for experimental JIT in open mode, swallow the error
+      }
+
+      if (_.isEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 
         // If no differences are found, we do not need to emit events
