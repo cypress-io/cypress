@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.13.3
 
-_Released 8/13/2024 (PENDING)_
+_Released 8/13/2024_
 
 **Performance:**
 
@@ -15,6 +15,10 @@ _Released 8/13/2024 (PENDING)_
 **Misc:**
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
+**Dependency Updates:**
+
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
 
