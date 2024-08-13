@@ -121,6 +121,7 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--ozone-platform=auto',
           '--',
           '--foo',
           '--cwd',
@@ -148,6 +149,7 @@ describe('lib/exec/spawn', function () {
         const args = cp.spawn.firstCall.args.slice(0, 2)
         // it is important for "--no-sandbox" to appear before "--" separator
         const expectedCliArgs = [
+          '--ozone-platform=auto',
           '--no-sandbox',
           '--',
           '--foo',
@@ -173,6 +175,7 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
+          '--ozone-platform=auto',
           '--',
           '--foo',
           '--cwd',
@@ -198,6 +201,7 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
+          '--ozone-platform=auto',
           '--',
           '--foo',
           '--cwd',
