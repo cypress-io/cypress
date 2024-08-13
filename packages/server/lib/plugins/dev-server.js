@@ -6,8 +6,6 @@ const plugins = require('../plugins')
 const errors = require('../errors')
 
 const baseEmitter = new EE()
-// used for experimentalJustInTimeCompile for CT to keep track of whether there is an active dev server instance or not
-let hasActiveDevServer = false
 
 plugins.registerHandler((ipc) => {
   baseEmitter.on('dev-server:specs:changed', (specs) => {
@@ -38,11 +36,7 @@ const API = {
       throw errors.get('CONFIG_FILE_INVALID_DEV_START_EVENT', config.pluginsFile)
     }
 
-    if (!hasActiveDevServer) {
-      hasActiveDevServer = true
-
-      return plugins.execute('dev-server:start', { specs, config })
-    }
+    return plugins.execute('dev-server:start', { specs, config })
   },
 
   updateSpecs (specs) {
@@ -51,20 +45,14 @@ const API = {
 
   close () {
     debug('close dev-server')
-    hasActiveDevServer = false
     baseEmitter.removeAllListeners()
   },
 
   // currently stop() is only used by experimentalJustInTimeCompile
   stop () {
-    if (!hasActiveDevServer) {
-      return
-    }
-
     return new Promise((resolve, reject) => {
       baseEmitter.once('dev-server:stopped', () => {
         debug('baseEmitter: dev-server:stopped')
-        hasActiveDevServer = false
         resolve()
       })
 
