@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `recast` from `0.20.4` to `0.23.9`. Addressed in [#30022](https://github.com/cypress-io/cypress/pull/30022).
+
 ## 13.13.3
 
-_Released 8/13/2024 (PENDING)_
+_Released 8/13/2024_
 
 **Bugfixes:**
 
@@ -14,7 +22,7 @@ _Released 8/13/2024 (PENDING)_
 
 **Dependency Updates:**
 
-- Updated `recast` from `0.20.4` to `0.23.9`. Addressed in [#30022](https://github.com/cypress-io/cypress/pull/30022).
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
 
