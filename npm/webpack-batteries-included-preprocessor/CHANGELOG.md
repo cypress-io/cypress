@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.4...@cypress/webpack-batteries-included-preprocessor-v3.0.5) (2024-08-14)
+
+
+### Bug Fixes
+
+* Upgrade elliptic to address security vulnerability ([#30037](https://github.com/cypress-io/cypress/issues/30037)) ([07bc653](https://github.com/cypress-io/cypress/commit/07bc6534d7e0af90f66cf87b25754936afea4b8b))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.3...@cypress/webpack-batteries-included-preprocessor-v3.0.4) (2024-07-30)
 
 
