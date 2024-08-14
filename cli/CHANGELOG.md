@@ -7,6 +7,10 @@ _Released 8/27/2024 (PENDING)_
 
 - Fixed a potential memory leak in Cypress server when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
 
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
 ## 13.13.3
 
 _Released 8/13/2024_
