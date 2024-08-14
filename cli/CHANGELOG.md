@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.13.3
+## 13.13.4
 
-_Released 8/13/2024_
+_Released 8/27/2024 (PENDING)_
 
 **Performance:**
 
 - Fixed a potential memory leak when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
+
+## 13.13.3
+
+_Released 8/13/2024_
 
 **Bugfixes:**
 
