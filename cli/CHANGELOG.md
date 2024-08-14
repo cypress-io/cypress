@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `recast` from `0.20.4` to `0.23.9`. Addressed in [#30022](https://github.com/cypress-io/cypress/pull/30022).
+
 ## 13.13.3
 
 _Released 8/13/2024_
@@ -74,6 +82,7 @@ _Released 7/01/2024_
 
 - Updated `launch-editor` from `2.3.0` to `2.8.0`. Addressed in [#29770](https://github.com/cypress-io/cypress/pull/29770).
 - Updated `memfs` from `3.4.12` to `3.5.3`. Addressed in [#29746](https://github.com/cypress-io/cypress/pull/29746).
+- Updated `recast` from `0.20.4` to `0.23.9`. Addressed in [#29757](https://github.com/cypress-io/cypress/pull/29757).
 - Updated `tmp` from `0.2.1` to `0.2.3`. Addresses [#29693](https://github.com/cypress-io/cypress/issues/29693).
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
 

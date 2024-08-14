@@ -28,7 +28,7 @@
     "debug": "^4.3.4",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
-    "recast": "0.20.4",
+    "recast": "0.23.9",
     "return-deep-diff": "0.4.0"
   },
   "devDependencies": {

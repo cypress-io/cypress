@@ -50,8 +50,8 @@ describe('js rewriter', function () {
           ['window[\'topfoo\']'],
           ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
           ['window.top.foo', `${match('window', 'top')}.foo`],
-          ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
-          ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
+          ['window.top["foo"]', `${match('window', 'top')}['foo']`],
+          ['window[\'top\']["foo"]', `${match('window', 'top')}['foo']`],
           [
             'if (window["top"] != window["parent"]) run()',
             `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
@@ -88,7 +88,7 @@ describe('js rewriter', function () {
           // test that double quotes remain double-quoted
           [
             'a = "b"; window.top',
-            `a = "b"; ${match('window', 'top')}`,
+            `a = 'b'; ${match('window', 'top')}`,
           ],
           ['({ top: "foo", parent: "bar" })'],
           ['top: "foo"; parent: "bar";'],
@@ -124,11 +124,11 @@ describe('js rewriter', function () {
           ],
           [
             'location.href = "bar"',
-            `${matchLocation()}.href = "bar"`,
+            `${matchLocation()}.href = \'bar\'`,
           ],
           [
             'location = "bar"',
-            `${matchLocation()}.href = "bar"`,
+            `${matchLocation()}.href = \'bar\'`,
           ],
           [
             'window.location.href = "bar"',
@@ -136,7 +136,7 @@ describe('js rewriter', function () {
           ],
           [
             'window.location = "bar"',
-            `globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'location', "bar")`,
+            `globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'location', \'bar\')`,
           ],
           [
             'document.location.href = "bar"',
@@ -144,7 +144,7 @@ describe('js rewriter', function () {
           ],
           [
             'document.location = "bar"',
-            `globalThis.top.Cypress.resolveWindowReference(globalThis, document, 'location', "bar")`,
+            `globalThis.top.Cypress.resolveWindowReference(globalThis, document, 'location', \'bar\')`,
           ],
         ]
         .forEach(([string, expected]) => {
@@ -179,7 +179,7 @@ describe('js rewriter', function () {
   `
 
         const jira2 = `\
-  (function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l})\
+  (function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1;}catch(l){return!1;}return!0;}(l.parent);)l=l.parent;return l})\
   `
 
         const jira3 = `\
