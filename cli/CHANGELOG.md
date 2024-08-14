@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
 ## 13.13.3
 
 _Released 8/13/2024_
