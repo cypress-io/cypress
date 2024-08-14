@@ -224,6 +224,23 @@ describe('lib/browsers/cri-client', function () {
             await getDocumentPromise
             expect(send).to.have.callCount(3)
           })
+
+          it(`with two '${msg}' message it retries enablements twice`, async () => {
+            const err = new Error(msg)
+
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().rejects(err)
+            send.onThirdCall().resolves()
+
+            const client = await getClient()
+
+            const enableNetworkPromise = client.send('Network.enable')
+
+            await criStub.on.withArgs('disconnect').args[0][1]()
+            await criStub.on.withArgs('disconnect').args[0][1]()
+            await enableNetworkPromise
+            expect(send).to.have.callCount(3)
+          })
         })
       })
 
@@ -290,6 +307,8 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledWith('Page.enable')
       expect(criStub.send).to.be.calledWith('Network.enable')
       expect(protocolManager.cdpReconnect).to.be.called
+
+      await criStub.on.withArgs('disconnect').args[0][1]()
     })
 
     it('errors if reconnecting fails', async () => {

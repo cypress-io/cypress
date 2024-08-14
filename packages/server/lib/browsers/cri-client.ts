@@ -387,6 +387,7 @@ export class CriClient implements ICriClient {
   }
 
   private _onCdpConnectionReconnect = async () => {
+    debug('cdp connection reconnected')
     try {
       await this._restoreState()
       await this._drainCommandQueue()
@@ -421,11 +422,14 @@ export class CriClient implements ICriClient {
       } catch (err) {
         debug('error re-enabling %s: ', command, err)
         if (CDPDisconnectedError.isCDPDisconnectedError(err)) {
-          // below comment is no longer accurate - ephemeral connection is wrapped by
-          // CDPConnection class
+          // this error is caught in _onCdpConnectionReconnect
+          // because this is a connection error, the enablement will be re-attempted
+          // when _onCdpConnectionReconnect is called again. We do need to ensure the
+          // original in-flight command, if present, is re-enqueued.
+          if (inFlightCommand) {
+            this._commandQueue.unshift(inFlightCommand)
+          }
 
-          // Connection errors are thrown here so that a reconnection attempt
-          // can be made.
           throw err
         } else {
           // non-connection errors are appropriate for rejecting the original command promise
@@ -454,13 +458,7 @@ export class CriClient implements ICriClient {
       } catch (e) {
         debug('enqueued command %s failed:', enqueued.command, e)
         if (CDPDisconnectedError.isCDPDisconnectedError(e)) {
-          // below comment is no longer accurate - ephemeral connection is wrapped by
-          // CDPConnection class
-
-          // similar to restoring state, connection errors are re-thrown so that
-          // the connection can be restored. The command is queued for re-delivery
-          // upon reconnect.
-          debug('re-enqueuing command and re-throwing')
+          debug('command failed due to disconnection; enqueuing for resending once reconnected')
           this._commandQueue.unshift(enqueued)
           throw e
         } else {
