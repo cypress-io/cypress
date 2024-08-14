@@ -77,7 +77,7 @@
     "graceful-fs": "4.2.9",
     "http-proxy": "1.18.1",
     "human-interval": "1.0.0",
-    "image-size": "1.1.1",
+    "image-size": "0.8.3",
     "is-ci": "^3.0.1",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",

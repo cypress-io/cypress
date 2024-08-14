@@ -66,7 +66,7 @@
     "glob": "7.2.0",
     "https-proxy-agent": "3.0.1",
     "human-interval": "1.0.0",
-    "image-size": "1.1.1",
+    "image-size": "0.8.3",
     "lazy-ass": "1.6.0",
     "lodash": "^4.17.21",
     "mocha": "7.1.0",
