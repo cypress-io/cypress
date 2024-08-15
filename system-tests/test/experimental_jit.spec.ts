@@ -28,25 +28,21 @@ describe('component testing: experimentalJustInTimeCompile', function () {
     onRun: async (exec) => {
       const { stderr } = await exec({
         processEnv: {
-          // print debug logs from @cypress/vite-dev-server to see how many times the server is created
+          // print debug logs from @cypress/vite-dev-server to see how many times specs are updated
           DEBUG: 'cypress:vite*',
         },
       })
 
-      const serverCreationRegex = /Vite server created/g
-      const serverPortRegex = /Successfully launched the vite server on port 8000/g
-      const serverClosedRegex = /closed dev server/g
+      const serverPortRegex = /Successfully launched the vite server on port 5173/g
+      const componentsCompiledSeparatelyRegex = /dev\-server\:secs\:changed\: src\/Component\-[1-3]\.cy\.jsx/g
 
-      const totalServers = getAllMatches(stderr, serverCreationRegex).length
-      const totalServersSamePort8000 = getAllMatches(stderr, serverPortRegex).length
-      const totalClosedServers = getAllMatches(stderr, serverClosedRegex).length
+      const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
+      const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length
 
-      // expect a total of 3 servers created (1 per spec)
-      expect(totalServers).to.equal(3)
-      // expect servers to be created on same port so baseUrl is consistent
-      expect(totalServersSamePort8000).to.equal(3)
-      //expect servers to be shut down when finished
-      expect(totalClosedServers).to.equal(3)
+      // expect 1 server to be created
+      expect(totalServersSamePort).to.equal(1)
+      // expect each component compiled individually
+      expect(totalComponentsCompiledSeparately).to.equal(3)
     },
   })
 
@@ -58,48 +54,20 @@ describe('component testing: experimentalJustInTimeCompile', function () {
     onRun: async (exec) => {
       const { stderr } = await exec({
         processEnv: {
-          // print debug logs from @cypress/webpack-dev-server to see how many times the server is created
+          // print debug logs from @cypress/webpack-dev-server to see how many times specs are updated
           DEBUG: 'cypress:webpack*',
         },
       })
+      const serverPortRegex = /Component testing webpack server 5 started on port 8080/g
+      const componentsCompiledSeparatelyRegex = /experimental-JIT\/webpack\/src\/Component\-[1-3].cy.jsx/g
 
-      const serverCreationRegex = /Component testing webpack server 5 started/g
-      const serverPortRegex = /Component testing webpack server 5 started on port 8000/g
-      const serverClosedRegex = /closed dev server/g
+      const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
+      const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length
 
-      const totalServers = getAllMatches(stderr, serverCreationRegex).length
-      const totalServersSamePort8000 = getAllMatches(stderr, serverPortRegex).length
-      const totalClosedServers = getAllMatches(stderr, serverClosedRegex).length
-
-      // expect a total of 3 servers created (1 per spec)
-      expect(totalServers).to.equal(3)
-      // expect servers to be created on same port so baseUrl is consistent
-      expect(totalServersSamePort8000).to.equal(3)
-      //expect servers to be shut down when finished
-      expect(totalClosedServers).to.equal(3)
+      // expect 1 server to be created
+      expect(totalServersSamePort).to.equal(1)
+      // expect each component compiled individually (3 occurrences total, the first occurs twice due to file writes)
+      expect(totalComponentsCompiledSeparately).to.equal(4)
     },
-  })
-
-  ;['vite', 'webpack'].forEach((bundler) => {
-    systemTests.it(`PortMismatch in run mode: ${bundler}`, {
-      project: `experimental-JIT/${bundler}`,
-      testingType: 'component',
-      browser: 'electron',
-      expectedExitCode: 1,
-      onRun: async (exec) => {
-        const { stdout } = await exec({
-          processEnv: {
-            //pForce the dev server to launch on a port that isnt the baseUrl, which should throw an error
-            CYPRESS_INTERNAL_FORCED_CT_PORT: '1234',
-          },
-        })
-
-        const portMismatchRegex = /PortMismatch: baseUrl is expecting port 8000 but dev-server is running on port 1234/
-
-        const totalPortMismatchErrors = getAllMatches(stdout, portMismatchRegex).length
-
-        expect(totalPortMismatchErrors).to.equal(1)
-      },
-    })
   })
 })

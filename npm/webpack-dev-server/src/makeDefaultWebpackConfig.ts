@@ -17,7 +17,6 @@ export function makeCypressWebpackConfig (
   const {
     devServerConfig: {
       cypressConfig: {
-        baseUrl,
         experimentalJustInTimeCompile,
         port,
         projectRoot,
@@ -47,32 +46,6 @@ export function makeCypressWebpackConfig (
   } = config
 
   let webpackDevServerPort: number | string | undefined = port ?? undefined
-
-  // if experimentalJITComponentTesting is enabled, we can imply that the base URL is set to the url with the expected port.
-  // start the dev server on the port specified in the base URL.
-  if (experimentalJustInTimeCompile && isRunMode) {
-    try {
-      // if the baseUrl is null, something critically wrong has occurred...
-      // @ts-expect-error
-      const baseURL = new URL(baseUrl)
-
-      debug(`experimentalJustInTimeCompile is set to ${experimentalJustInTimeCompile}. Setting the webpack-dev-server port to ${baseURL.port}.`)
-      webpackDevServerPort = baseURL.port
-
-      if (process.env.CYPRESS_INTERNAL_FORCED_CT_PORT) {
-        // there currently is not a great way to test the negative cases of experimentalJustInTimeCompile compile since
-        // there are only a handful of integration/unit tests with full scaffolding set up in the data-context/server packages
-        // to work around this, we will use an internal env variable to force a port on the dev server to cause an error to test the error state
-        const FORCED_PORT = process.env.CYPRESS_INTERNAL_FORCED_CT_PORT
-
-        debug(`experimentalJustInTimeCompile detected with CYPRESS_INTERNAL_FORCED_CT_PORT:${process.env.CYPRESS_INTERNAL_FORCED_CT_PORT}. Forcing port for webpack-dev-server...`)
-        webpackDevServerPort = FORCED_PORT
-      }
-    } catch (e) {
-      debug(`attempted to set baseUrl port for experimentalJustInTimeCompile, but error occurred: ${e}`)
-      throw e
-    }
-  }
 
   debug(`Using HtmlWebpackPlugin version ${htmlWebpackPluginVersion} from ${htmlWebpackPluginImportPath}`)
 
@@ -126,7 +99,8 @@ export function makeCypressWebpackConfig (
     devtool: 'inline-source-map',
   } as any
 
-  if (isRunMode) {
+  // if experimentalJustInTimeCompile is configured, we need to watch for file changes as the spec entries are going to be updated per test
+  if (isRunMode && !experimentalJustInTimeCompile) {
     // Disable file watching when executing tests in `run` mode
     finalConfig.watchOptions = {
       ignored: '**/*',

@@ -128,10 +128,10 @@ describe('resolveConfig', function () {
           viteDevServerConfig.cypressConfig.isTextTerminal = false
         })
 
-        it('does not assign the port', async () => {
+        it('enables hmr and watching', async () => {
           const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
-          expect(viteConfig.server.port).to.be.undefined
+          expect(viteConfig.server.watch).to.be.undefined
         })
       })
 
@@ -140,18 +140,10 @@ describe('resolveConfig', function () {
           viteDevServerConfig.cypressConfig.isTextTerminal = true
         })
 
-        it('throws an error if baseUrl is null', () => {
-          viteDevServerConfig.cypressConfig.baseUrl = null
-
-          expect(createViteDevServerConfig(viteDevServerConfig, discoveredVite)).to.be.rejected
-        })
-
-        it('assigns the port of the dev server based on ', async () => {
-          viteDevServerConfig.cypressConfig.baseUrl = 'http://localhost:1234'
-
+        it('enables hmr and watching', async () => {
           const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
-          expect(viteConfig.server.port).to.equal(1234)
+          expect(viteConfig.server.watch).to.be.undefined
         })
       })
     })

@@ -28,7 +28,6 @@ import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
-import { verifyPortsMatch } from '../util/dev-server'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -788,25 +787,13 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     if (isExperimentalJustInTimeCompile) {
       const ctx = require('@packages/data-context').getCtx()
 
-      // If in run mode, we need to start the dev server with our first spec.
-      // Open mode starts the dev server in the ProjectLifecycleManager and updates it in the socket @packages/server/lib/socket-base.ts.
-      const results = await ctx._apis.projectApi.getDevServer().start({ specs: [spec], spec, config })
-
-      // We need to make sure the dev-server is running on the expected port of the baseUrl that Cypress is expecting.
-      // Otherwise, the test will time out on a visit.
-      verifyPortsMatch(config.baseUrl, results.port)
+      // If in run mode, we need to update the dev server with our spec.
+      // in open mode, this happens in the browser through the web socket, but we do it here in run mode
+      // to try and have it happen as early as possible to make the test run as fast as possible
+      await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
-
-    if (isExperimentalJustInTimeCompile) {
-      const ctx = require('@packages/data-context').getCtx()
-
-      // If in run mode, we need to stop the dev server before the next spec runs so we can relaunch it.
-      // Open mode starts the dev server in the ProjectLifecycleManager and updates it in the socket @packages/server/lib/socket-base.ts.
-      // The dev server in open mode is ultimately killed when the process dies.
-      await ctx._apis.projectApi.getDevServer().stop()
-    }
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
       // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching

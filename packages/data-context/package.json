@@ -46,7 +46,6 @@
     "node-machine-id": "1.1.12",
     "p-defer": "^3.0.0",
     "parse-glob": "3.0.4",
-    "portfinder": "1.0.32",
     "prettier": "2.5.1",
     "randexp": "0.5.3",
     "randomstring": "1.3.0",

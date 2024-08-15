@@ -481,44 +481,12 @@ describe('makeWebpackConfig', () => {
 
     WEBPACK_MATRIX.forEach(({ webpack, wds }) => {
       describe(`webpack: v${webpack} with webpack-dev-server v${wds}`, () => {
-        describe('open mode', () => {
-          beforeEach(() => {
-            devServerConfig.cypressConfig.isTextTerminal = false
-          })
-
-          it('does not assign the port', async () => {
-            const actual = await makeWebpackConfig({
-              devServerConfig,
-              sourceWebpackModulesResult: createModuleMatrixResult({
-                webpack,
-                webpackDevServer: wds,
-              }),
-            })
-
-            expect(actual.devServer.port).to.be.undefined
-          })
-        })
-
         describe('run mode', () => {
           beforeEach(() => {
             devServerConfig.cypressConfig.isTextTerminal = true
           })
 
-          it('throws an error if baseUrl is null', () => {
-            devServerConfig.cypressConfig.baseUrl = null
-
-            expect(makeWebpackConfig({
-              devServerConfig,
-              sourceWebpackModulesResult: createModuleMatrixResult({
-                webpack,
-                webpackDevServer: wds,
-              }),
-            })).to.be.rejected
-          })
-
-          it('assigns the port of the dev server based on ', async () => {
-            devServerConfig.cypressConfig.baseUrl = 'http://localhost:1234'
-
+          it('enables watching', async () => {
             const actual = await makeWebpackConfig({
               devServerConfig,
               sourceWebpackModulesResult: createModuleMatrixResult({
@@ -527,7 +495,7 @@ describe('makeWebpackConfig', () => {
               }),
             })
 
-            expect(actual.devServer.port).to.equal('1234')
+            expect(actual.watchOptions?.ignored).to.be.undefined
           })
         })
       })
