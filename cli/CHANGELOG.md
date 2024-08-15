@@ -1,7 +1,19 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Features:**
+
+- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
 ## 13.13.3
 
-_Released 8/13/2024 (PENDING)_
+_Released 8/14/2024_
 
 **Bugfixes:**
 
@@ -12,9 +24,9 @@ _Released 8/13/2024 (PENDING)_
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
 
-**Features:**
+**Dependency Updates:**
 
-- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
 
