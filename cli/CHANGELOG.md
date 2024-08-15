@@ -13,7 +13,7 @@ _Released 8/27/2024 (PENDING)_
 
 ## 13.13.3
 
-_Released 8/13/2024_
+_Released 8/14/2024_
 
 **Bugfixes:**
 
