@@ -82,7 +82,7 @@ export function makeCypressWebpackConfig (
     // dropped during testing in production mode.
     sideEffects: false,
     splitChunks: {
-      chunks: 'all',
+      chunks: 'initial',
     },
   }
 
