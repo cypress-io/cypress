@@ -1,9 +1,12 @@
 import type { Compiler, Compilation } from 'webpack'
+import debugLib from 'debug'
 import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
 import _ from 'lodash'
 import fs, { PathLike } from 'fs-extra'
 import path from 'path'
+let debug = debugLib('cypress:webpack-dev-server:ct-webpack-plugin')
+let instanceCount = 0
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -52,9 +55,11 @@ export class CypressCTWebpackPlugin {
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
+  private instanceCount: number
 
   constructor (options: CypressCTWebpackPluginOptions) {
     this.files = options.files
+    this.instanceCount = ++instanceCount
     this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
@@ -72,6 +77,8 @@ export class CypressCTWebpackPlugin {
   }
 
   private beforeCompile = async (compilationParams: object, callback: Function) => {
+    debug(`beforeCompile from instance ${this.instanceCount}`)
+
     if (!this.compilation) {
       callback()
 
@@ -109,6 +116,7 @@ export class CypressCTWebpackPlugin {
    * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async (specs: Cypress.Cypress['spec'][]) => {
+    debug(`onSpecChange from instance ${this.instanceCount}`)
     if (!this.compilation || _.isEqual(specs, this.files)) {
       return
     }
@@ -130,6 +138,8 @@ export class CypressCTWebpackPlugin {
    *   `Compilation`
    */
   private addCompilationHooks = (compilation: Webpack45Compilation) => {
+    debug(`addCompilationHooks from instance ${this.instanceCount}`)
+
     this.compilation = compilation
 
     /* istanbul ignore next */
@@ -154,6 +164,7 @@ export class CypressCTWebpackPlugin {
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
     _compiler.hooks.done.tap('CypressCTPlugin', () => {
+      debug(`CypressCTPlugin done from instance ${this.instanceCount}`)
       this.devServerEvents.emit('dev-server:compile:success')
     })
   }
