@@ -5,7 +5,7 @@ import proxyquire from 'proxyquire'
 import type { putFetch } from '../../../../lib/cloud/network/put_fetch'
 import { ParseError } from '../../../../lib/cloud/network/parse_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
-import { NetworkError } from '../../../../lib/cloud/network/network_error'
+import { SystemError } from '../../../../lib/cloud/network/system_error'
 
 describe('cloud/network/put_fetch', () => {
   const url = 'https://some.test/url'
@@ -107,14 +107,18 @@ describe('cloud/network/put_fetch', () => {
     })
   })
 
-  describe('when fetch rejects with a network error', () => {
+  describe('when fetch rejects with a system error', () => {
     const networkErrMsg = 'Error: ECONNRESET'
+    let err: Error & { code?: string } | undefined
 
     beforeEach(() => {
-      stubbedCrossFetch.rejects(new Error(networkErrMsg))
+      err = new Error(networkErrMsg)
+
+      err.code = 'ECONNRESET'
+      stubbedCrossFetch.rejects(err)
     })
 
-    it('throws a NetworkError', async () => {
+    it('throws a SystemError', async () => {
       let err
 
       try {
@@ -122,7 +126,46 @@ describe('cloud/network/put_fetch', () => {
       } catch (e) {
         err = e
       }
-      expect(NetworkError.isNetworkError(err)).to.be.true
+      expect(SystemError.isSystemError(err)).to.be.true
+    })
+  })
+
+  describe('when fetch is provided with an abort signal, and rejects via signal', () => {
+    let abortError
+    let fetchError
+    let mockAbortController
+    let mockSignal
+
+    beforeEach(() => {
+      abortError = new Error('connection stall')
+      fetchError = new Error('User aborted the request')
+      mockAbortController = sinon.createStubInstance(AbortController)
+      mockSignal = sinon.createStubInstance(AbortSignal)
+      sinon.stub(mockAbortController, 'signal').get(() => {
+        return mockSignal
+      })
+
+      sinon.stub(mockSignal, 'aborted').get(() => {
+        return true
+      })
+
+      sinon.stub(mockSignal, 'reason').get(() => {
+        return abortError
+      })
+
+      stubbedCrossFetch.rejects(fetchError)
+    })
+
+    it('rethrows the signal reason', async () => {
+      let error: Error | undefined
+
+      try {
+        await fetch(url, { parse: 'text', signal: mockSignal })
+      } catch (e) {
+        error = e
+      }
+
+      expect(error).to.eq(abortError)
     })
   })
 })
