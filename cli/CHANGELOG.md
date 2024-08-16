@@ -1,15 +1,23 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.0
 
-_Released 08/30/2024 (PENDING)_
+_Released 10/30/2024 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
 
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
 ## 13.13.3
 
-_Released 8/13/2024 (PENDING)_
+_Released 8/14/2024_
 
 **Bugfixes:**
 
@@ -19,6 +27,10 @@ _Released 8/13/2024 (PENDING)_
 **Misc:**
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
+**Dependency Updates:**
+
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
 
