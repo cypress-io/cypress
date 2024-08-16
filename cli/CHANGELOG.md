@@ -1,15 +1,23 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.0
 
-_Released 08/16/2024 (PENDING)_
+_Released 10/16/2024 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed an issue where overflow: clip in parent html node make child node visibility not correctly detected. Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852). Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778).
 
+## 13.13.4
+
+_Released 8/27/2024 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
 ## 13.13.3
 
-_Released 8/13/2024 (PENDING)_
+_Released 8/14/2024_
 
 **Bugfixes:**
 
@@ -19,6 +27,10 @@ _Released 8/13/2024 (PENDING)_
 **Misc:**
 
 - Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
+**Dependency Updates:**
+
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
 
