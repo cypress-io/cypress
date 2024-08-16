@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.13.4
+## 13.14.0
 
 _Released 8/27/2024 (PENDING)_
+
+**Performance:**
+
+- Fixed a potential memory leak in the Cypress server when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
+
+**Features:**
+
+- Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
 
 **Dependency Updates:**
 
