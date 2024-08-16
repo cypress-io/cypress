@@ -27,9 +27,10 @@ describe('CDP Clients', () => {
 
   let wsSrv: WebSocket.Server
   let criClient: CriClient
+  let wsClient: WebSocket
   let messages: object[]
   let onMessage: sinon.SinonStub
-  let messageResponse: ReturnType<typeof pDefer>
+  let messageResponse: ReturnType<typeof pDefer> | undefined
   let neverAck: boolean
 
   const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
@@ -97,7 +98,7 @@ describe('CDP Clients', () => {
 
   const clientDisconnected = () => {
     return new Promise((resolve, reject) => {
-      criClient.ws.once('close', resolve)
+      criClient.ws?.once('close', resolve)
     })
   }
 
@@ -109,13 +110,56 @@ describe('CDP Clients', () => {
 
     nock.enableNetConnect()
 
-    wsSrv = await startWsServer()
+    wsSrv = await startWsServer((client) => {
+      wsClient = client
+    })
   })
 
   afterEach(async () => {
     debug('after each,', !!wsSrv)
     await criClient.close().catch(() => { })
     await closeWsServer()
+  })
+
+  it('properly handles various ways to add event listeners', async () => {
+    const sessionId = 'abc123'
+    const method = `Network.responseReceived`
+    const sessionDeferred = pDefer<void>()
+    const sessionCb = sinon.stub().callsFake(sessionDeferred.resolve)
+    const eventDeferred = pDefer<void>()
+    const eventCb = sinon.stub().callsFake(eventDeferred.resolve)
+    const globalDeferred = pDefer<void>()
+    const globalCb = sinon.stub().callsFake(globalDeferred.resolve)
+    const params = { foo: 'bar' }
+
+    criClient = await CriClient.create({
+      target: `ws://127.0.0.1:${wsServerPort}`,
+      onAsynchronousError: (err) => {
+        sessionDeferred.reject(err)
+        eventDeferred.reject(err)
+        globalDeferred.reject(err)
+      },
+    })
+
+    criClient.on(`${method}.${sessionId}` as CdpEvent, sessionCb)
+    criClient.on(method, eventCb)
+    criClient.on('event' as CdpEvent, globalCb)
+
+    wsClient.send(JSON.stringify({
+      method,
+      params,
+      sessionId,
+    }))
+
+    await Promise.all([
+      sessionDeferred.promise,
+      eventDeferred.promise,
+      globalDeferred.promise,
+    ])
+
+    expect(sessionCb).to.have.been.calledWith(params)
+    expect(eventCb).to.have.been.calledWith(params, sessionId)
+    expect(globalCb).to.have.been.calledWith({ method, params, sessionId })
   })
 
   context('reconnect after disconnect', () => {
@@ -198,7 +242,8 @@ describe('CDP Clients', () => {
       })
 
       await haltedReconnection
-
+      // Macrotask queue needs to flush for the event to trigger
+      await (new Promise((resolve) => setImmediate(resolve)))
       expect(onCriConnectionClosed).to.have.been.called
     })
 
