@@ -258,7 +258,14 @@ const start = (options = {}) => {
     force: false,
     welcomeMessage: true,
     smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
+    skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
   })
+
+  if (options.skipVerify) {
+    debug('skipping verification of the Cypress app')
+
+    return Promise.resolve()
+  }
 
   if (options.dev) {
     return runSmokeTest('', options)
