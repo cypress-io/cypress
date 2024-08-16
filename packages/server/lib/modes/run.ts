@@ -500,6 +500,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
     .catch(Bluebird.TimeoutError, async (err) => {
+      debug('Catch on waitForBrowserToConnect')
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
       console.log('')
 
@@ -936,7 +937,10 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       browser,
       screenshots,
-      onError,
+      onError: (...args) => {
+        debug('onError from runSpec')
+        onError(...args)
+      },
       videoRecording,
       socketId: options.socketId,
       webSecurity: options.webSecurity,
@@ -996,7 +1000,7 @@ async function ready (options: ReadyOptions) {
   // TODO: refactor this so we don't need to extend options
 
   const onError = options.onError = (err) => {
-    debug('onError')
+    debug('onError', new Error().stack)
     earlyExitTerminator.exitEarly(err)
   }
 
