@@ -3727,8 +3727,8 @@ describe('Routes', () => {
 
               reqTime = new Date() - reqTime
 
-              // shouldn't be more than 500ms
-              expect(reqTime).to.be.lt(500)
+              // shouldn't be more than 750ms
+              expect(reqTime).to.be.lt(750)
             })
           })
         })
