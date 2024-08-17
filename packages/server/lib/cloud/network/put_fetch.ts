@@ -1,5 +1,5 @@
 import crossFetch from 'cross-fetch'
-import { NetworkError } from './network_error'
+import { SystemError } from './system_error'
 import { HttpError } from './http_error'
 import { ParseError } from './parse_error'
 import { agent } from '@packages/network'
@@ -62,21 +62,24 @@ export async function putFetch <
       throw parseError
     }
   } catch (e) {
-    debug('Error: %O', e)
-    if (ParseError.isParseError(e)) {
-      throw e
-    } else if (HttpError.isHttpError(e)) {
-      throw e
+    const err = options.signal?.aborted ? options.signal.reason : e
+
+    debug('Error (sys error? %s) %O', err.errno || err.code, err)
+    if (ParseError.isParseError(err) || HttpError.isHttpError(err)) {
+      throw err
     }
 
-    // if the error wasn't a parsing error, it's probably a Network error
-    const url = typeof input === 'string' ? input :
-      input instanceof URL ? input.href :
-        input instanceof Request ? input.url : 'UNKNOWN_URL'
+    // if the error has a syscall, it's a system error
+    if (err.errno || err.code) {
+      const url = typeof input === 'string' ? input :
+        input instanceof URL ? input.href :
+          input instanceof Request ? input.url : 'UNKNOWN_URL'
+      const sysError = new SystemError(err, url)
 
-    const networkError = new NetworkError(e, url)
+      sysError.stack = err.stack
+      throw sysError
+    }
 
-    networkError.stack = e.stack
-    throw networkError
+    throw err
   }
 }

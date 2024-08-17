@@ -1,9 +1,57 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## _Released 7/30/2024 (PENDING)_
+## 13.14.0
 
-**Features**
+_Released 8/27/2024 (PENDING)_
+
+**Performance:**
+
+- Fixed a potential memory leak in the Cypress server when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
+
+**Features:**
 
 - `.type({upArrow})` and `.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
+- Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
+
+**Dependency Updates:**
+
+- Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+
+## 13.13.3
+
+_Released 8/14/2024_
+
+**Bugfixes:**
+
+- A console error will no longer display in Chrome about a deprecated unload call originating from jQuery. Addressed in [#29944](https://github.com/cypress-io/cypress/pull/29944).
+- Fixed an issue where certain Test Replay upload error messages were too vague. Connection failures now report the precise system error, and the stall error message is reported rather than the vague, "The user aborted a request." Addressed in [#29959](https://github.com/cypress-io/cypress/pull/29959).
+
+**Misc:**
+
+- Updated `cypress open` hints displayed after Cypress binary install. Addresses [#29935](https://github.com/cypress-io/cypress/issues/29935).
+
+**Dependency Updates:**
+
+- Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
+
+## 13.13.2
+
+_Released 7/31/2024_
+
+**Performance:**
+
+- Fixed a memory leak with command logs with Test Replay enabled. Addressed in [#29939](https://github.com/cypress-io/cypress/pull/29939).
+- Improved performance of `reduce` in a method within our proxy. Addressed in [#29887](https://github.com/cypress-io/cypress/pull/29887).
+
+**Bugfixes:**
+
+- Fixed an issue where Yarn PnP was not working correctly with Cypress and `@cypress/webpack-batteries-included-preprocessor`. Fixes [#27947](https://github.com/cypress-io/cypress/issues/27947).
+
+**Dependency Updates:**
+
+- Updated `@cypress/request` from `3.0.0` to `3.0.1`. Addresses [#29863](https://github.com/cypress-io/cypress/issues/29863).
+- Updated `chrome-remote-interface` from `0.33.0` to `0.33.2`. Addressed in [#29932](https://github.com/cypress-io/cypress/pull/29932).
+- Updated `mime` from `2.4.4` to `2.6.0`. Addressed in [#29870](https://github.com/cypress-io/cypress/pull/29870).
+- Updated `strip-ansi` from `6.0.0` to `6.0.1`. Addressed in [#29931](https://github.com/cypress-io/cypress/pull/29931).
 
 ## 13.13.1
 

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "ansi_up": "5.0.0",
-    "strip-ansi": "6.0.0"
+    "strip-ansi": "6.0.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

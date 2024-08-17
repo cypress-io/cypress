@@ -467,9 +467,9 @@ describe('src/cypress/log', function () {
     let resolveDep
     let changeEventsFlushed
     let resolveChangeEventsFlushed
+    let timesFlushed = 0
 
     before(function () {
-      changeEventsFlushed = false
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
@@ -494,6 +494,7 @@ describe('src/cypress/log', function () {
       // spies / stubs get cleared between tests, so
       // a wholesale fn replacement is called for
       log.fireChangeEvent.flush = function () {
+        timesFlushed++
         resolveChangeEventsFlushed(true)
       }
 
@@ -501,11 +502,18 @@ describe('src/cypress/log', function () {
     })
 
     it('flushes change events on test:after:run', function () {
-      cy.wrap(dependency).then((prevLog) => {
+      cy.wrap(dependency).then(() => {
         cy.wrap(changeEventsFlushed).then((flushed) => {
           expect(flushed).to.be.true
+          expect(timesFlushed).to.eq(1)
         })
       })
+    })
+
+    it('does not flush again on test:after:run', function () {
+      // flush should not have been called again
+      // since the test:after:run listener should've been removed
+      expect(timesFlushed).to.eq(1)
     })
   })
 
