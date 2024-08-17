@@ -3208,6 +3208,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=month]', () => {
+      // month inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/month#browser_compatibility
       if (Cypress.isBrowser(['!webkit', '!firefox'])) {
         it('{upArrow} increases month by 1', () => {
           cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
@@ -3252,6 +3253,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=week]', () => {
+      // week inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/week#browser_compatibility
       if (Cypress.isBrowser(['!webkit', '!firefox'])) {
         it('{upArrow} increases week by 1', () => {
           cy.get('#week-without-value').then(($input) => $input.val('2017-W05'))
@@ -3296,6 +3298,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=time]', () => {
+      // In Playwright Webkit implementation, these are shown as plain text input
       if (!isWebKit) {
         it('{upArrow} increases minute by 1', () => {
           cy.get('#time-without-value').then(($input) => $input.val('01:23'))
@@ -3340,6 +3343,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     context('input[type=datetime-local]', () => {
+      // In Playwright Webkit implementation, these are shown as plain text input
       if (!isWebKit) {
         it('{upArrow} increases time value', () => {
           cy.get('#datetime-local-without-value').type('{upArrow}')
