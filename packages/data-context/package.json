@@ -25,7 +25,7 @@
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
     "ast-types": "^0.14.2",
-    "chokidar": "3.5.1",
+    "chokidar": "3.6.0",
     "common-path-prefix": "3.0.0",
     "cross-fetch": "^3.1.8",
     "dataloader": "^2.0.0",
