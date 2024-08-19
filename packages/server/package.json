@@ -45,7 +45,7 @@
     "bundle-require": "3.0.4",
     "chalk": "2.4.2",
     "check-more-types": "2.24.0",
-    "chokidar": "3.5.1",
+    "chokidar": "3.6.0",
     "chrome-remote-interface": "0.33.2",
     "cli-table3": "0.5.1",
     "coffeescript": "2.6.0",
