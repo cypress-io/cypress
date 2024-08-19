@@ -72,7 +72,7 @@ describe('FileDataSource', () => {
           await fs.mkdirs(nestedScriptPath)
           await fs.writeFile(path.join(nestedScriptPath, 'nested-script.js'), '')
 
-          // Verify that the glob pattern is not impacted if if contains directories equivalent
+          // Verify that the glob pattern is not impacted if it contains directories equivalent
           // to the working directory
           let files = await fileDataSource.getFilesByGlob(
             projectPath,
