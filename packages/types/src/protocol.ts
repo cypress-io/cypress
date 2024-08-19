@@ -3,7 +3,6 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
 import type { ProxyTimings } from './proxy'
-import { ReceivedCypressOptions } from './config'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -87,19 +86,7 @@ export type CaptureArtifact = {
 export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
-  mountVersion?: number
-  groupId: string
-  machineId: string
-  projectRoot: string
-  ci: string
-  ciBuildId: string
   projectId: string
-  recordKey: string
-  commit: string
-  group: string
-  platform: string
-  parallel: boolean
-  config: ReceivedCypressOptions
   // TODO: do we need the preflightResult or can we just use the apiRoutes?
   preflightResult: {
     apiUrl?: string
@@ -107,10 +94,11 @@ export type ProtocolManagerOptions = {
   }
   cloudApi: {
     retryWithBackoff (fn: (attemptIndex: number) => Promise<any>): Promise<any>
-    rp: {
+    requestPromise: {
       get (options: any): Promise<any>
     }
   }
+  mountVersion?: number
 }
 
 type UploadCaptureArtifactResult = {
