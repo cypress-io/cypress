@@ -202,6 +202,19 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
+    it('can focus element in nested shadow dom', () => {
+      const onFocus = cy.stub()
+
+      cy.visit('/fixtures/shadow-dom.html')
+      cy.get('.shadow-5 + input', { includeShadowDom: true }).as('shadow-input').then(($el) => {
+        $el.on('focus', onFocus)
+      })
+
+      cy.get('@shadow-input').focus().then(() => {
+        expect(onFocus).to.be.calledOnce
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
@@ -240,8 +253,39 @@ describe('src/cy/commands/actions/focus', () => {
             this.logs.push(log)
           }
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('focus')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs immediately before resolving', () => {
@@ -642,12 +686,25 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    it('can focus svg elements', () => {
+    it('can blur svg elements', () => {
       const onBlur = cy.stub()
 
       cy.$$('[data-cy=rect]').blur(onBlur)
 
       cy.get('[data-cy=rect]').focus().blur().then(() => {
+        expect(onBlur).to.be.calledOnce
+      })
+    })
+
+    it('can blur element in nested shadow dom', () => {
+      const onBlur = cy.stub()
+
+      cy.visit('/fixtures/shadow-dom.html')
+      cy.get('.shadow-5 + input', { includeShadowDom: true }).as('shadow-input').then(($el) => {
+        $el.on('blur', onBlur).get(0).focus()
+      })
+
+      cy.get('@shadow-input').blur().then(() => {
         expect(onBlur).to.be.calledOnce
       })
     })
@@ -691,8 +748,39 @@ describe('src/cy/commands/actions/focus', () => {
             return this.logs.push(log)
           }
         })
+      })
 
-        return null
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus().blur({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('input:first').focus().blur({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('blur')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs immediately before resolving', () => {

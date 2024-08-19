@@ -1,3 +1,17 @@
+# [@cypress/vue2-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v2.1.0...@cypress/vue2-v2.1.1) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+# [@cypress/vue2-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v2.0.1...@cypress/vue2-v2.1.0) (2024-03-12)
+
+
+### Features
+
+* supported type of vue@2.7+ ([#28818](https://github.com/cypress-io/cypress/issues/28818)) ([854a649](https://github.com/cypress-io/cypress/commit/854a6497be2315881b8ad9c92674d3c29a76d581))
+
 # [@cypress/vue2-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v2.0.0...@cypress/vue2-v2.0.1) (2022-11-14)
 
 

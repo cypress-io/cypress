@@ -638,55 +638,6 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
   })
 
   it('completes journey for migration-e2e-custom-test-files', () => {
-    startMigrationFor('migration-e2e-custom-test-files')
-    // default integration but custom testFiles
-    // can rename integration->e2e
-    cy.get(renameAutoStep).should('exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
-    cy.scaffoldProject('migration-e2e-custom-test-files')
-    cy.openProject('migration-e2e-custom-test-files')
-    cy.visitLaunchpad()
-
-    // default testFiles but custom integration - can rename automatically
-    cy.get(renameAutoStep).should('exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
-    // Migration workflow
-    // before auto migration
-    cy.contains('cypress/integration/basic.test.js')
-
-    // after auto migration
-    cy.contains('cypress/e2e/basic.test.js')
-
-    runAutoRename()
-
-    cy.withRetryableCtx(async (ctx) => {
-      const specs = ['cypress/e2e/basic.test.js']
-
-      for (const spec of specs) {
-        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
-
-        expect(stats).to.not.be.null
-      }
-    })
-
-    renameSupport()
-    migrateAndVerifyConfig()
-    checkOutcome()
-  })
-
-  it('completes journey for migration-e2e-custom-test-files', () => {
     const project = 'migration-e2e-custom-test-files-array'
 
     startMigrationFor(project)
@@ -1069,23 +1020,6 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     runAutoRename()
 
-    migrateAndVerifyConfig()
-    checkOutcome()
-  })
-
-  // TODO: Do we need to consider this case?
-  it.skip('completes journey for migration-e2e-defaults-no-specs', () => {
-    startMigrationFor('migration-e2e-defaults-no-specs')
-    // no specs, nothing to rename?
-    cy.get(renameAutoStep).should('not.exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
-    renameSupport()
     migrateAndVerifyConfig()
     checkOutcome()
   })

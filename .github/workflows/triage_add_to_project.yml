@@ -39,7 +39,7 @@ jobs:
             } ' -f org=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f user=${{ github.event.pull_request.user.login || github.event.issue.user.login }} > collaborators.json
 
           echo 'IS_COLLABORATOR='$(jq -r '.data.repository.collaborators.totalCount' collaborators.json) >> $GITHUB_ENV
-      - uses: actions/add-to-project@v0.4.1
+      - uses: actions/add-to-project@v1.0.2
         # only add issues/prs from outside contributors to the project
         if: ${{ env.IS_COLLABORATOR == 0 || github.event.repository.name == 'cypress-support-internal' || github.event.pull_request.user.login == 'github-actions[bot]' || github.event.issue.user.login == 'github-actions[bot]' }}
         with:
@@ -49,17 +49,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'cypress-io/release-automations'
           ref: 'master'
           ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
       - name: Run comment_workflow.js Script
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |

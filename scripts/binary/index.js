@@ -11,7 +11,6 @@ const minimist = require('minimist')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
-const questionsRemain = require('@cypress/questions-remain')
 const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
@@ -19,10 +18,22 @@ const ask = require('./ask')
 const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
+const questionsRemain = require('./util/questions-remain')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
+const xvfb = require('../../cli/lib/exec/xvfb')
+const smoke = require('./smoke')
+const verify = require('../../cli/lib/tasks/verify')
+const execa = require('execa')
+
+const log = function (msg) {
+  const time = new Date()
+  const timeStamp = time.toLocaleTimeString()
+
+  console.log(timeStamp, chalk.yellow(msg), chalk.blue(meta.PLATFORM))
+}
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -48,6 +59,29 @@ const askMissingOptions = function (properties = []) {
   const pickedQuestions = _.pick(questions, properties)
 
   return questionsRemain(pickedQuestions)
+}
+
+async function testExecutableVersion (buildAppExecutable, version) {
+  log('#testVersion')
+
+  console.log('testing built app executable version')
+  console.log(`by calling: ${buildAppExecutable} --version`)
+
+  const args = ['--version']
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  const result = await execa(buildAppExecutable, args)
+
+  la(result.stdout, 'missing output when getting built version', result)
+
+  console.log('built app version', result.stdout)
+  la(result.stdout.trim() === version.trim(), 'different version reported',
+    result.stdout, 'from input version to build', version)
+
+  console.log('✅ using --version on the Cypress binary works')
 }
 
 // hack for @packages/server modifying cwd
@@ -212,6 +246,38 @@ const deploy = {
 
       return build.packageElectronApp(options)
     })
+  },
+
+  async smoke (options) {
+    console.log('#smoke')
+
+    if (options == null) {
+      options = this.parseOptions(process.argv)
+    }
+
+    debug('parsed build options %o', options)
+
+    await askMissingOptions(['version'])(options)
+
+    // runSmokeTests
+    let usingXvfb = xvfb.isNeeded()
+
+    try {
+      if (usingXvfb) {
+        await xvfb.start()
+      }
+
+      log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+      await testExecutableVersion(meta.buildAppExecutable(), options.version)
+
+      const executablePath = meta.buildAppExecutable()
+
+      await smoke.test(executablePath, meta.buildAppDir())
+    } finally {
+      if (usingXvfb) {
+        await xvfb.stop()
+      }
+    }
   },
 
   zip (options) {

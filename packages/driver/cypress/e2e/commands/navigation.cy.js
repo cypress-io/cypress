@@ -97,13 +97,15 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('removes listeners', () => {
+      cy.log(Cypress.browser)
+      const unloadEvent = Cypress.browser.family === 'chromium' ? 'pagehide' : 'unload'
       const win = cy.state('window')
 
       const rel = cy.stub(win, 'removeEventListener')
 
       cy.reload().then(() => {
         expect(rel).to.be.calledWith('beforeunload')
-        expect(rel).to.be.calledWith('unload')
+        expect(rel).to.be.calledWith(unloadEvent)
       })
     })
 
@@ -219,8 +221,6 @@ describe('src/cy/commands/navigation', () => {
 
           this.logs.push(log)
         })
-
-        return null
       })
 
       it('logs reload', () => {
@@ -229,9 +229,31 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.reload({ log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.reload({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('reload')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
       })
 
@@ -391,8 +413,10 @@ describe('src/cy/commands/navigation', () => {
         const rel = cy.stub(win, 'removeEventListener')
 
         cy.go('back').then(() => {
+          const unloadEvent = cy.browser.family === 'chromium' ? 'pagehide' : 'unload'
+
           expect(rel).to.be.calledWith('beforeunload')
-          expect(rel).to.be.calledWith('unload')
+          expect(rel).to.be.calledWith(unloadEvent)
         })
       })
     })
@@ -520,11 +544,35 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy
         .visit('/fixtures/jquery.html')
         .go('back', { log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy
+        .visit('/fixtures/jquery.html')
+        .go('back', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('go')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
         })
       })
 
@@ -1121,9 +1169,31 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.visit('/timeout?ms=0', { log: false }).then(function () {
-          expect(this.lastLog).not.to.exist
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.visit('/timeout?ms=0', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('visit')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -2708,6 +2778,20 @@ describe('src/cy/commands/navigation', () => {
             },
           })
         })
+      })
+    })
+  })
+
+  context('resets state', () => {
+    it('resets the server state', () => {
+      cy.stub(Cypress, 'backend').log(false).callThrough()
+
+      Cypress.emitThen('test:before:run:async', {
+        id: 'r1',
+        currentRetry: 1,
+      })
+      .then(() => {
+        expect(Cypress.backend).to.be.calledWith('reset:server:state')
       })
     })
   })

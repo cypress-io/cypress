@@ -7,13 +7,13 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "check-ts": "tsc --noEmit"
+    "check-ts": "tsc --noEmit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "svelte": "^3.49.0",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=10.6.0",

@@ -231,6 +231,7 @@ export class WebKitAutomation {
         headers: request.headers(),
         resourceType: normalizeResourceType(request.resourceType()),
         originalResourceType: request.resourceType(),
+        documentURL: request.frame().url(),
         cdpRequestWillBeSentTimestamp: request.timing().requestStart,
         cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
       }
@@ -372,7 +373,7 @@ export class WebKitAutomation {
         debug('stubbed reset:browser:state')
 
         return
-      case 'reset:browser:tabs:for:next:test':
+      case 'reset:browser:tabs:for:next:spec':
         if (data.shouldKeepTabOpen) return await this.reset({})
 
         return await this.context.browser()?.close()

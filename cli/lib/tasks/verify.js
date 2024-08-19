@@ -102,7 +102,10 @@ const runSmokeTest = (binaryDir, options) => {
     debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
     const stdioOptions = _.extend({}, {
-      env: process.env,
+      env: {
+        ...process.env,
+        FORCE_COLOR: 0,
+      },
       timeout: options.smokeTestTimeout,
     })
 
@@ -255,7 +258,14 @@ const start = (options = {}) => {
     force: false,
     welcomeMessage: true,
     smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
+    skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
   })
+
+  if (options.skipVerify) {
+    debug('skipping verification of the Cypress app')
+
+    return Promise.resolve()
+  }
 
   if (options.dev) {
     return runSmokeTest('', options)

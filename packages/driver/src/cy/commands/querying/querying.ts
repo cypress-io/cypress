@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { isEmpty } from 'lodash'
 
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
@@ -15,6 +15,8 @@ type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withi
 
 type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
 type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
+
+type QueryCommandOptions = 'get' | 'contains' | 'shadow' | ''
 
 function getAlias (selector, log, cy) {
   const alias = selector.slice(1)
@@ -59,7 +61,7 @@ function getAlias (selector, log, cy) {
 
     const { command } = aliasObj
 
-    log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
+    cy.state('current') === this && log?.set('referencesAlias', { name: alias })
 
     /*
      * There are two cases for aliases, each explained in more detail below:
@@ -84,7 +86,7 @@ function getAlias (selector, log, cy) {
       const index = match ? match[1] : requests.length
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10) - 1] || null)
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
@@ -141,6 +143,14 @@ function getAlias (selector, log, cy) {
   }
 }
 
+function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+    $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
+      args: { timeout: options.timeout },
+    })
+  }
+}
+
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
@@ -149,12 +159,15 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    const log = userOptions.log !== false && (userOptions._log || Cypress.log({
+    validateTimeoutFromOpts(userOptions, 'get')
+
+    const log = userOptions._log || Cypress.log({
       message: selector,
       type: 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
-    }))
+    })
 
     this.set('timeout', userOptions.timeout)
     this.set('_log', log)
@@ -204,7 +217,7 @@ export default (Commands, Cypress, cy, state) => {
         throw err
       }
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         $el,
         consoleProps: () => {
           return {
@@ -252,13 +265,16 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
+    validateTimeoutFromOpts(userOptions, 'contains')
+
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
       message: $utils.stringify(_.compact([filter, text])),
       type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
@@ -353,10 +369,13 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
-    const log = userOptions.log !== false && Cypress.log({
+    const log = Cypress.log({
+      hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
+
+    validateTimeoutFromOpts(userOptions, 'shadow')
 
     this.set('timeout', userOptions.timeout)
     this.set('onFail', (err) => {

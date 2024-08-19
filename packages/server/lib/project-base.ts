@@ -23,6 +23,8 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
+import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -49,6 +51,7 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
+const debugVerbose = Debug('cypress-verbose:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -153,7 +156,6 @@ export class ProjectBase extends EE {
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
-      exit: this.options.args?.exit,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
@@ -322,19 +324,15 @@ export class ProjectBase extends EE {
       projectRoot,
     })
 
-    const onBrowserPreRequest = (browserPreRequest) => {
-      this.server.addBrowserPreRequest(browserPreRequest)
+    const onBrowserPreRequest = async (browserPreRequest) => {
+      await this.server.addBrowserPreRequest(browserPreRequest)
     }
 
     const onRequestEvent = (eventName, data) => {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    const onRequestServedFromCache = (requestId: string) => {
-      this.server.removeBrowserPreRequest(requestId)
-    }
-
-    const onRequestFailed = (requestId: string) => {
+    const onRemoveBrowserPreRequest = (requestId: string) => {
       this.server.removeBrowserPreRequest(requestId)
     }
 
@@ -342,7 +340,35 @@ export class ProjectBase extends EE {
       this.server.addPendingUrlWithoutPreRequest(downloadUrl)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed, onDownloadLinkClicked)
+    const onServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+      this.server.updateServiceWorkerRegistrations(data)
+    }
+
+    const onServiceWorkerVersionUpdated = (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+      this.server.updateServiceWorkerVersions(data)
+    }
+
+    const onServiceWorkerClientSideRegistrationUpdated = (data: { scriptURL: string, initiatorOrigin: string }) => {
+      this.server.updateServiceWorkerClientSideRegistrations(data)
+    }
+
+    const onServiceWorkerClientEvent = (event: ServiceWorkerClientEvent) => {
+      this.server.handleServiceWorkerClientEvent(event)
+    }
+
+    this._automation = new Automation({
+      cyNamespace: namespace,
+      cookieNamespace: socketIoCookie,
+      screenshotsFolder,
+      onBrowserPreRequest,
+      onRequestEvent,
+      onRemoveBrowserPreRequest,
+      onDownloadLinkClicked,
+      onServiceWorkerRegistrationUpdated,
+      onServiceWorkerVersionUpdated,
+      onServiceWorkerClientSideRegistrationUpdated,
+      onServiceWorkerClientEvent,
+    })
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
@@ -390,11 +416,15 @@ export class ProjectBase extends EE {
         reporterInstance.emit(event, runnable)
 
         if (event === 'test:before:run') {
+          debugVerbose('browserPreRequests prior to running %s: %O', runnable.title, this.server.getBrowserPreRequests())
+
           this.emit('test:before:run', {
             runnable,
             previousResults: reporterInstance?.results() || {},
           })
         } else if (event === 'end') {
+          debugVerbose('browserPreRequests at the end: %O', this.server.getBrowserPreRequests())
+
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
@@ -410,8 +440,8 @@ export class ProjectBase extends EE {
     this.ctx.actions.servers.setAppSocketServer(ios)
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+  async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
+    return this.server.socket.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
   }
 
   async resetBrowserState () {

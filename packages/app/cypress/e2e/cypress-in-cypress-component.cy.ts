@@ -14,6 +14,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('test component', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -64,6 +65,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('navigation between specs and other parts of the app works', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -88,6 +90,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
     it('redirects to the specs list with error if a spec is not found', { retries: 15 }, () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       const { title, intro, explainer } = defaultMessages.specPage.noSpecError
       const badFilePath = 'src/DoesNotExist.spec.js'
 
@@ -129,6 +132,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('browser picker in runner calls mutation with current spec path', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
@@ -158,6 +162,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
     it('restarts server on devServer config change', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get('[data-cy="spec-item"]')
 
       cy.withCtx(async (ctx, { sinon }) => {
@@ -191,6 +196,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.startAppServer('component')
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
 
       cy.get('#unified-runner').should('have.css', 'width', '333px')

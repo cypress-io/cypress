@@ -72,7 +72,7 @@ describe('FileDataSource', () => {
           await fs.mkdirs(nestedScriptPath)
           await fs.writeFile(path.join(nestedScriptPath, 'nested-script.js'), '')
 
-          // Verify that the glob pattern is not impacted if if contains directories equivalent
+          // Verify that the glob pattern is not impacted if it contains directories equivalent
           // to the working directory
           let files = await fileDataSource.getFilesByGlob(
             projectPath,
@@ -100,7 +100,7 @@ describe('FileDataSource', () => {
           expect(files).to.have.length(3)
         })
 
-        it('always ignores files within node_modules', async () => {
+        it('by default ignores files within node_modules', async () => {
           const nodeModulesPath = path.join(projectPath, 'node_modules')
 
           await fs.mkdir(nodeModulesPath)
@@ -116,6 +116,40 @@ describe('FileDataSource', () => {
           // only scripts at root should be found, as node_modules is implicitly ignored
           // and ./scripts is explicitly ignored
           expect(files).to.have.length(2)
+        })
+
+        it('does not ignores files within node_modules, if node_modules is in the glob path', async () => {
+          const nodeModulesPath = path.join(projectPath, 'node_modules')
+
+          await fs.mkdir(nodeModulesPath)
+          await fs.writeFile(path.join(nodeModulesPath, 'module-script-1.js'), '')
+          await fs.writeFile(path.join(nodeModulesPath, 'module-script-2.js'), '')
+          const files = await fileDataSource.getFilesByGlob(
+            projectPath,
+            '**/(node_modules/)?*script-*.js',
+            { ignore: ['./scripts/**/*'] },
+          )
+
+          // scripts at root (2 of them) and scripts at node_modules should be found
+          // and ./scripts is explicitly ignored
+          expect(files).to.have.length(4)
+        })
+
+        it('does not ignores files within node_modules, if node_modules is in the project path', async () => {
+          const nodeModulesPath = path.join(projectPath, 'node_modules')
+
+          await fs.mkdir(nodeModulesPath)
+          await fs.writeFile(path.join(nodeModulesPath, 'module-script-1.js'), '')
+          await fs.writeFile(path.join(nodeModulesPath, 'module-script-2.js'), '')
+          await fs.writeFile(path.join(nodeModulesPath, 'module-script-3.js'), '')
+          const files = await fileDataSource.getFilesByGlob(
+            nodeModulesPath,
+            '**/*script-*.js',
+            { ignore: ['./scripts/**/*'] },
+          )
+
+          // only scripts at node_modules should be found, since it is the project path
+          expect(files).to.have.length(3)
         })
 
         it('converts globs to POSIX paths on windows', async () => {
@@ -250,6 +284,64 @@ describe('FileDataSource', () => {
             ...defaultGlobbyOptions,
             cwd: '/',
             ignore: ['ignore/foo.*', '/ignore/bar.*', ...defaultGlobbyOptions.ignore],
+          },
+        )
+      })
+
+      it('does not ignore node_modules, if the working dir is located inside node_modules', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/node_modules/project/',
+          '/cypress/e2e/**.cy.js',
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          ['/cypress/e2e/**.cy.js'],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/node_modules/project/',
+            ignore: [],
+          },
+        )
+      })
+
+      it('does not ignore node_modules, if one of glob paths contains node_modules', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/',
+          [
+            '/node_modules/cypress/e2e/**.cy.js',
+            '/cypress/e2e/**.cy.js',
+          ],
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          [
+            'node_modules/cypress/e2e/**.cy.js',
+            'cypress/e2e/**.cy.js',
+          ],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/',
+            ignore: [],
+          },
+        )
+      })
+
+      it('uses supplied ignore options, when node_modules are not ignored', async () => {
+        const files = await fileDataSource.getFilesByGlob(
+          '/node_modules/project/',
+          '/node_modules/test_package/e2e/**.cy.js',
+          { ignore: ['ignore/foo.*', '/ignore/bar.*'] },
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.been.calledWith(
+          ['/node_modules/test_package/e2e/**.cy.js'],
+          {
+            ...defaultGlobbyOptions,
+            cwd: '/node_modules/project/',
+            ignore: ['ignore/foo.*', '/ignore/bar.*'],
           },
         )
       })

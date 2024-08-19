@@ -7,8 +7,8 @@
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
@@ -22,7 +22,7 @@
     "react-dom": "^16",
     "rollup": "3.7.3",
     "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "@types/react": "^18",

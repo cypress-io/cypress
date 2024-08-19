@@ -27,11 +27,11 @@ context('lib/browsers/cdp_automation', () => {
           networkEnableOptions: enabledObject,
         } as ProtocolManagerShape
 
-        const localCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
+        const localNetworkCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
         await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
-        expect(localCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
+        expect(localNetworkCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
 
       it('networkEnabledOptions - protocol disabled', async function () {
@@ -72,8 +72,9 @@ context('lib/browsers/cdp_automation', () => {
       this.automation = {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
-        onRequestServedFromCache: sinon.stub(),
-        onRequestFailed: sinon.stub(),
+        onRemoveBrowserPreRequest: sinon.stub(),
+        onServiceWorkerRegistrationUpdated: sinon.stub(),
+        onServiceWorkerVersionUpdated: sinon.stub(),
       }
 
       cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation)
@@ -161,9 +162,11 @@ context('lib/browsers/cdp_automation', () => {
       it('ignore events with data urls', function () {
         this.onFn
         .withArgs('Network.requestWillBeSent')
-        .yield({ request: { url: 'data:font;base64' } })
+        .yield({ requestId: '0', request: { url: 'data:font;base64' } })
 
         expect(this.automation.onBrowserPreRequest).to.not.be.called
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.true
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 1)
       })
     })
 
@@ -174,6 +177,30 @@ context('lib/browsers/cdp_automation', () => {
           response: {
             status: 200,
             headers: {},
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).to.have.been.calledWith(
+          'response:received', {
+            requestId: browserResponseReceived.requestId,
+            status: browserResponseReceived.response.status,
+            headers: browserResponseReceived.response.headers,
+          },
+        )
+      })
+
+      it('triggers onRequestEvent when response is cached from service worker but data length is > 0', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromServiceWorker: true,
+            encodedDataLength: 1,
           },
         }
 
@@ -206,10 +233,28 @@ context('lib/browsers/cdp_automation', () => {
 
         expect(this.automation.onRequestEvent).not.to.have.been.called
       })
+
+      it('cleans up prerequests when response is cached from service worker and data length is <= 0', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromServiceWorker: true,
+            encodedDataLength: -1,
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).not.to.have.been.called
+      })
     })
 
     describe('.onRequestServedFromCache', function () {
-      it('triggers onRequestServedFromCache', function () {
+      it('triggers onRemoveBrowserPreRequest', function () {
         const browserRequestServedFromCache = {
           requestId: '0',
         }
@@ -218,12 +263,29 @@ context('lib/browsers/cdp_automation', () => {
         .withArgs('Network.requestServedFromCache')
         .yield(browserRequestServedFromCache)
 
-        expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
+        expect(this.automation.onRemoveBrowserPreRequest).to.have.been.calledWith(browserRequestServedFromCache.requestId)
+      })
+
+      it('ignores cached data url request ids', function () {
+        this.onFn
+        .withArgs('Network.requestWillBeSent')
+        .yield({ requestId: '0', request: { url: 'data:font;base64' } })
+
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.true
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 1)
+
+        this.onFn
+        .withArgs('Network.requestServedFromCache')
+        .yield({ requestId: '0' })
+
+        expect(this.automation.onRemoveBrowserPreRequest).to.not.have.been.called
+        expect(cdpAutomation['cachedDataUrlRequestIds'].has('0')).to.be.false
+        expect(cdpAutomation['cachedDataUrlRequestIds']).to.have.property('size', 0)
       })
     })
 
     describe('.onRequestFailed', function () {
-      it('triggers onRequestFailed', function () {
+      it('triggers onRemoveBrowserPreRequest', function () {
         const browserRequestFailed = {
           requestId: '0',
         }
@@ -232,7 +294,42 @@ context('lib/browsers/cdp_automation', () => {
         .withArgs('Network.loadingFailed')
         .yield(browserRequestFailed)
 
-        expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
+        expect(this.automation.onRemoveBrowserPreRequest).to.have.been.calledWith(browserRequestFailed.requestId)
+      })
+    })
+
+    describe('.onWorkerRegistrationUpdated', function () {
+      it('triggers onServiceWorkerRegistrationUpdated', function () {
+        const browserWorkerRegistrationUpdated = {
+          registrations: [{
+            registrationId: '0',
+            scopeURL: 'https://www.google.com',
+          }],
+        }
+
+        this.onFn
+        .withArgs('ServiceWorker.workerRegistrationUpdated')
+        .yield(browserWorkerRegistrationUpdated)
+
+        expect(this.automation.onServiceWorkerRegistrationUpdated).to.have.been.calledWith(browserWorkerRegistrationUpdated)
+      })
+    })
+
+    describe('.onWorkerVersionUpdated', function () {
+      it('triggers onServiceWorkerVersionUpdated', function () {
+        const browserWorkerVersionUpdated = {
+          versions: [{
+            registrationId: '0',
+            versionId: '1',
+            scriptURL: 'https://www.google.com',
+          }],
+        }
+
+        this.onFn
+        .withArgs('ServiceWorker.workerVersionUpdated')
+        .yield(browserWorkerVersionUpdated)
+
+        expect(this.automation.onServiceWorkerVersionUpdated).to.have.been.calledWith(browserWorkerVersionUpdated)
       })
     })
 
@@ -386,20 +483,78 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('take:screenshot', () => {
-      it('resolves with base64 data URL', function () {
+      beforeEach(function () {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
-
-        return expect(this.onRequest('take:screenshot'))
-        .to.eventually.equal('data:image/png;base64,foo')
       })
 
-      it('rejects nicely if Page.captureScreenshot fails', function () {
-        this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+      describe('when tab focus behavior default (disabled)', function () {
+        it('resolves with base64 data URL', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
-        return expect(this.onRequest('take:screenshot'))
-        .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+          return expect(this.onRequest('take:screenshot'))
+          .to.eventually.equal('data:image/png;base64,foo')
+        })
+
+        it('rejects nicely if Page.captureScreenshot fails', function () {
+          this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
+
+          return expect(this.onRequest('take:screenshot'))
+          .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+        })
+      })
+
+      describe('when tab focus behavior is enabled', function () {
+        let requireTabFocus
+        let isHeadless
+
+        beforeEach(() => {
+          requireTabFocus = true
+        })
+
+        describe('when headless', () => {
+          beforeEach(() => {
+            isHeadless = true
+          })
+
+          it('does not try to comm with extension, simply brings page to front', async function () {
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+
+            expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            expect(this.sendDebuggerCommand).not.to.be.calledWith('Runtime.evaluate')
+            expect(this.sendDebuggerCommand).to.be.calledWith('Page.bringToFront')
+          })
+        })
+
+        describe('when not headless', () => {
+          beforeEach(async function () {
+            isHeadless = false
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+          })
+
+          describe('and the extension activates the tab', function () {
+            beforeEach(function () {
+              this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves()
+              this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+            })
+
+            it('captures the screenshot', function () {
+              expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            })
+          })
+
+          describe('and the extension fails to activate the tab', function () {
+            beforeEach(function () {
+              this.sendDebuggerCommand.withArgs('Runtime.evaluate').rejects(new Error('Unable to communicate with Cypress Extension'))
+              this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
+            })
+
+            it('captures the screenshot', function () {
+              expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
+            })
+          })
+        })
       })
     })
 
@@ -415,11 +570,11 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('reset:browser:tabs:for:next:test', function () {
+    describe('reset:browser:tabs:for:next:spec', function () {
       it('sends the close target message for the attached target tabs', async function () {
         this.sendCloseTargetCommand.resolves()
 
-        await this.onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+        await this.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
         expect(this.sendCloseTargetCommand).to.be.calledWith(true)
       })

@@ -12,7 +12,7 @@ import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
-import { CriClient } from '../../../lib/browsers/cri-client'
+import { ICriClient } from '../../../lib/browsers/cri-client'
 
 const path = require('path')
 const _ = require('lodash')
@@ -334,6 +334,23 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    // CDP is deprecated in Firefox 129 and up.
+    // In order to enable CDP, we need to set
+    // remote.active-protocol=2
+    // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+    // @see https://github.com/cypress-io/cypress/issues/29713
+    it('sets "remote.active-protocols"=2 to keep CDP enabled for firefox versions 129 and up', function () {
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            'remote.active-protocols': 2,
+          },
+        }), this.options)
+      })
+    })
+
     it('updates the preferences', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
@@ -557,7 +574,7 @@ describe('lib/browsers/firefox', () => {
 
     context('#setupRemote', function () {
       it('correctly sets up the remote agent', async function () {
-        const criClientStub: CriClient = {
+        const criClientStub: ICriClient = {
           targetId: '',
           send: sinon.stub(),
           on: sinon.stub(),
@@ -573,6 +590,10 @@ describe('lib/browsers/firefox', () => {
           connected: false,
         }
 
+        const automationStub = {
+          onServiceWorkerClientEvent: sinon.stub(),
+        }
+
         const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
 
         browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
@@ -580,17 +601,17 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, null, null)
+        const actual = await firefoxUtil.setupRemote(port, automationStub, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
-        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null })
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port, browserName: 'Firefox', onAsynchronousError: null, onServiceWorkerClientEvent: automationStub.onServiceWorkerClientEvent })
         expect(CdpAutomation.create).to.be.calledWith(
           criClientStub.send,
           criClientStub.on,
           criClientStub.off,
           browserCriClient.resetBrowserTargets,
-          null,
+          automationStub,
         )
       })
     })

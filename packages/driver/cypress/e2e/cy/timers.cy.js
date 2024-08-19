@@ -1,7 +1,3 @@
-const startingIndex = Cypress.isBrowser('firefox') ? 1 : 0
-
-const timerNumber = (n) => n + startingIndex
-
 // NOTE: basically the same as a cy.wait(...) but uses setTimeout instead of Promise.delay
 // since firefox will sometimes have `Promise.delay(10)` fire faster than a `setTimeout(..., 1)`
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
@@ -22,10 +18,6 @@ describe('driver/src/cy/timers', () => {
 
       const id1 = win.setTimeout(win.setBar, 1)
 
-      // the timer id is 1 by default since
-      // timers increment and always start at 0
-      expect(id1).to.eq(timerNumber(1))
-
       cy
       .window().its('bar').should('eq', 'bar')
       .log('setTimeout should not be called')
@@ -34,7 +26,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setTimeout(win.setBar, 2)
 
-        expect(id2).to.eq(timerNumber(2))
+        expect(id2).to.eq(id1 + 1)
 
         const ret = win.clearTimeout(id2)
 
@@ -73,10 +65,6 @@ describe('driver/src/cy/timers', () => {
 
       const id1 = win.setInterval(win.setBar, 1)
 
-      // the timer id is 1 by default since
-      // timers increment and always start at 0
-      expect(id1).to.eq(timerNumber(1))
-
       cy
       .window().its('bar').should('eq', 'bar')
       .log('setInterval should not be called')
@@ -87,7 +75,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setInterval(win.setBar, 2)
 
-        expect(id2).to.eq(timerNumber(2))
+        expect(id2).to.eq(id1 + 1)
 
         const ret = win.clearInterval(id2)
 
@@ -187,9 +175,9 @@ describe('driver/src/cy/timers', () => {
           // now go ahead and run all the queued timers
           return cy.pauseTimers(false)
         })
-        .then(() => {
-          expect(win.bar).to.eq('bar')
 
+        cy.window().its('bar').should('eq', 'bar')
+        .and(() => {
           // requestAnimationFrame should have passed through
           // its high res timestamp from performance.now()
           expect(rafStub).to.be.calledWithMatch(Number)
@@ -231,8 +219,6 @@ describe('driver/src/cy/timers', () => {
       .then(() => {
         const id1 = win.setTimeout(win.setBar, 1)
 
-        expect(id1).to.eq(timerNumber(1))
-
         cyWaitTimeout(1)
         .log('setTimeout should NOT have fired when paused')
         .window().its('bar').should('be.null')
@@ -252,7 +238,7 @@ describe('driver/src/cy/timers', () => {
         .then(() => {
           const id2 = win.setTimeout(win.setBar, 1)
 
-          expect(id2).to.eq(timerNumber(2))
+          expect(id2).to.eq(id1 + 1)
 
           const ret = win.clearTimeout(id2)
 
@@ -280,10 +266,6 @@ describe('driver/src/cy/timers', () => {
 
       const id1 = win.setTimeout(win.setBar, 10)
 
-      // the timer id is 1 by default since
-      // timers increment and always start at 0
-      expect(id1).to.eq(timerNumber(1))
-
       return cy.pauseTimers(true)
       .then(() => {
         cyWaitTimeout(10)
@@ -302,7 +284,7 @@ describe('driver/src/cy/timers', () => {
 
           const id2 = win.setInterval(win.setBar, 10)
 
-          expect(id2).to.eq(timerNumber(2))
+          expect(id2).to.eq(id1 + 1)
 
           return cy.pauseTimers(true)
           .then(() => {

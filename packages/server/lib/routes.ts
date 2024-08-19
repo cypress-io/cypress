@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
+import { cors } from '@packages/network'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -46,6 +47,62 @@ export const createCommonRoutes = ({
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
+
+  // When a test visits an http:// site and we load our main app page,
+  // (e.g. test has cy.visit('http://example.com'), we load http://example.com/__/)
+  // Chrome will make a request to the the https:// version (i.e. https://example.com/__/)
+  // to check if it's valid. If it is valid, it will load the https:// version
+  // instead. This leads to an infinite loop of Cypress trying to load
+  // the http:// version because that's what the test wants and Chrome
+  // loading the https:// version. Then since it doesn't match what the test
+  // is visiting, Cypress attempts to the load the http:// version and the loop
+  // continues.
+  // See https://blog.chromium.org/2023/08/towards-https-by-default.html for
+  // more info about Chrome's automatic https upgrades.
+  //
+  // The fix for Cypress is to signal to Chrome that the https:// version is
+  // not valid by replying with a 301 redirect when we detect that it's
+  // an https upgrade, which is when an https:// request comes through
+  // one of your own proxied routes, but the the primary domain (a.k.a remote state)
+  // is the http:// version of that domain
+  //
+  // https://github.com/cypress-io/cypress/issues/25891
+  // @ts-expect-error - TS doesn't like the Request intersection
+  router.use('/', (req: Request & { proxiedUrl: string }, res, next) => {
+    if (
+      // only these paths will receive the relevant https upgrade check
+      (req.path !== '/' && req.path !== clientRoute)
+      // not an https upgrade request if not https protocol
+      || req.protocol !== 'https'
+      // primary has not been established by a cy.visit() yet
+      || !remoteStates.hasPrimary()
+    ) {
+      return next()
+    }
+
+    const primary = remoteStates.getPrimary()
+
+    // props can be null in certain circumstances even if the primary is established
+    if (!primary.props) {
+      return next()
+    }
+
+    const primaryHostname = cors.domainPropsToHostname(primary.props)
+
+    // domain matches (example.com === example.com), but incoming request is
+    // https:// (established above), while the domain the user is trying to
+    // visit (a.k.a primary origin) is http://
+    if (
+      primaryHostname === req.hostname
+      && primary.origin.startsWith('http:')
+    ) {
+      res.status(301).redirect(req.proxiedUrl.replace('https://', 'http://'))
+
+      return
+    }
+
+    next()
+  })
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster

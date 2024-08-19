@@ -117,6 +117,8 @@ class $Cypress {
   log: any
   isBrowser: any
   browserMajorVersion: any
+  // This is NodeEventEmitter['emit'], but typescript cannot determine that it is
+  // definitively initialized due to being initialized with $Events.extend(this)
   emit: any
   emitThen: any
   emitMap: any
@@ -611,11 +613,23 @@ class $Cypress {
         return this.emit('after:all:screenshots', ...args)
 
       case 'command:log:added':
+        if (args[0].hidden) {
+          this.emit('_log:added', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
+        if (args[0].hidden) {
+          this.emit('_log:changed', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         // Cypress logs will only trigger an update every 4 ms so there is a
         // chance the runner has been torn down when the update is triggered.
         this.runner?.addLog(args[0], this.config('isInteractive'))

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import webpack from 'webpack'
+import type webpack from 'webpack'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()

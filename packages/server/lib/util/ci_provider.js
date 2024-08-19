@@ -113,7 +113,7 @@ const CI_PROVIDERS = {
   'travis': 'TRAVIS',
   'wercker': isWercker,
   netlify: 'NETLIFY',
-  layerci: 'LAYERCI',
+  webappio: 'WEBAPPIO',
 }
 
 const _detectProviderName = () => {
@@ -154,12 +154,20 @@ const _providerCiParams = () => {
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
     ]),
+    // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
     azure: extract([
       'BUILD_BUILDID',
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
+      'SYSTEM_JOBID',
+      'SYSTEM_STAGEATTEMPT',
+      'SYSTEM_PHASEATTEMPT',
+      'SYSTEM_JOBATTEMPT',
+      'SYSTEM_PLANID',
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
+      'SYSTEM_PULLREQUEST_TARGETBRANCH',
+      'SYSTEM_PULLREQUEST_TARGETBRANCHNAME',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
@@ -206,6 +214,8 @@ const _providerCiParams = () => {
       'CIRCLE_PR_USERNAME',
       'CIRCLE_COMPARE_URL',
       'CIRCLE_WORKFLOW_ID',
+      'CIRCLE_WORKFLOW_JOB_ID',
+      'CIRCLE_PIPELINE_ID',
       'CIRCLE_PULL_REQUEST',
       'CIRCLE_REPOSITORY_URL',
       'CI_PULL_REQUEST',
@@ -224,6 +234,8 @@ const _providerCiParams = () => {
       'CI_BUILD_ID',
       'CI_REPO_NAME',
       'CI_PROJECT_ID',
+      'CI_PR_NUMBER',
+      'CI_PULL_REQUEST',
     ]),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
     concourse: extract([
@@ -266,6 +278,7 @@ const _providerCiParams = () => {
       'GITHUB_HEAD_REF',
       'GITHUB_REF_NAME',
       'GITHUB_REF',
+      'GITHUB_JOB',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -284,7 +297,9 @@ const _providerCiParams = () => {
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
       'CI_DEFAULT_BRANCH',
-    // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME',
+      'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA',
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
@@ -312,6 +327,9 @@ const _providerCiParams = () => {
       'TAG_NAME',
       'COMMIT_SHA',
       'SHORT_SHA',
+      '_HEAD_BRANCH',
+      '_BASE_BRANCH',
+      '_PR_NUMBER',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
     /**
@@ -340,6 +358,7 @@ const _providerCiParams = () => {
       'SEMAPHORE_EXECUTABLE_UUID',
       'SEMAPHORE_GIT_BRANCH',
       'SEMAPHORE_GIT_DIR',
+      'SEMAPHORE_GIT_PR_NUMBER',
       'SEMAPHORE_GIT_REF',
       'SEMAPHORE_GIT_REF_TYPE',
       'SEMAPHORE_GIT_REPO_SLUG',
@@ -418,15 +437,15 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
-    // https://layerci.com/docs/layerfile-reference/build-env
-    layerci: extract([
-      'LAYERCI_JOB_ID',
-      'LAYERCI_RUNNER_ID',
+    // https://docs.webapp.io/layerfile-reference/build-env
+    webappio: extract([
+      'JOB_ID',
+      'RUNNER_ID',
       'RETRY_INDEX',
-      'LAYERCI_PULL_REQUEST',
-      'LAYERCI_REPO_NAME',
-      'LAYERCI_REPO_OWNER',
-      'LAYERCI_BRANCH',
+      'PULL_REQUEST_URL',
+      'REPOSITORY_NAME',
+      'REPOSITORY_OWNER',
+      'GIT_BRANCH',
       'GIT_TAG', // short hex for commits
     ]),
   }
@@ -621,9 +640,9 @@ const _providerCommitParams = () => {
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
     },
-    layerci: {
+    webappio: {
       sha: env.GIT_COMMIT,
-      branch: env.LAYERCI_BRANCH,
+      branch: env.GIT_BRANCH,
       message: env.GIT_COMMIT_TITLE,
     },
   }

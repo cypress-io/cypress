@@ -482,6 +482,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     debug('waiting for socket to connect and browser to launch...')
 
+    const coreData = require('@packages/data-context').getCtx().coreData
+
+    if (coreData.didBrowserPreviouslyHaveUnexpectedExit) {
+      debug(`browser previously exited. Setting shouldLaunchNewTab=false to recreate the correct browser automation clients.`)
+      options.shouldLaunchNewTab = false
+      coreData.didBrowserPreviouslyHaveUnexpectedExit = false
+    }
+
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type
@@ -492,6 +500,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
     .catch(Bluebird.TimeoutError, async (err) => {
+      debug('Catch on waitForBrowserToConnect')
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
       console.log('')
 
@@ -554,22 +563,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   debug('received project end')
 
-  // https://github.com/cypress-io/cypress/issues/2370
-  // delay 1 second if we're recording a video to give
-  // the browser padding to render the final frames
-  // to avoid chopping off the end of the video
-  const videoController = videoRecording?.controller
-
-  debug('received videoController %o', { videoController })
-
-  if (videoController) {
-    const span = telemetry.startSpan({ name: 'video:capture:delayToLetFinish' })
-
-    debug('delaying to extend video %o', { DELAY_TO_LET_VIDEO_FINISH_MS })
-    await Bluebird.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
-    span?.end()
-  }
-
   _.defaults(results, {
     error: null,
     hooks: null,
@@ -581,6 +574,22 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   // Cypress Cloud told us to skip this spec
   const skippedSpec = results.skippedSpec
+
+  // https://github.com/cypress-io/cypress/issues/2370
+  // delay 1 second if we're recording a video to give
+  // the browser padding to render the final frames
+  // to avoid chopping off the end of the video
+  const videoController = videoRecording?.controller
+
+  debug('received videoController %o', { videoController })
+
+  if (videoController && !skippedSpec) {
+    const span = telemetry.startSpan({ name: 'video:capture:delayToLetFinish' })
+
+    debug('delaying to extend video %o', { DELAY_TO_LET_VIDEO_FINISH_MS })
+    await Bluebird.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
+    span?.end()
+  }
 
   if (screenshots) {
     results.screenshots = screenshots
@@ -603,7 +612,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     }
 
     try {
-      await videoController.endVideoCapture()
+      await videoController.endVideoCapture(!skippedSpec)
       debug('ended video capture')
     } catch (err) {
       videoCaptureFailed = true
@@ -652,7 +661,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
-    await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
 
     debug('resetting server state')
 
@@ -928,7 +937,10 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       browser,
       screenshots,
-      onError,
+      onError: (...args) => {
+        debug('onError from runSpec')
+        onError(...args)
+      },
       videoRecording,
       socketId: options.socketId,
       webSecurity: options.webSecurity,
@@ -988,7 +1000,7 @@ async function ready (options: ReadyOptions) {
   // TODO: refactor this so we don't need to extend options
 
   const onError = options.onError = (err) => {
-    debug('onError')
+    debug('onError', new Error().stack)
     earlyExitTerminator.exitEarly(err)
   }
 
@@ -1061,8 +1073,6 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
-      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
-      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,

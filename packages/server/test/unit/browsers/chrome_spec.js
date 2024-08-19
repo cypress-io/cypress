@@ -61,7 +61,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
-      sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
+      sinon.stub(utils, 'initializeCDP').resolves()
 
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -82,15 +82,16 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
 
-        expect(this.pageCriClient.send.callCount).to.equal(6)
+        expect(this.pageCriClient.send.callCount).to.equal(7)
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('ServiceWorker.enable')
 
-        expect(utils.handleDownloadLinksViaCDP).to.be.calledOnce
+        expect(utils.initializeCDP).to.be.calledOnce
       })
     })
 
@@ -188,6 +189,38 @@ describe('lib/browsers/chrome', () => {
         expect(args).to.include.members([
           `--user-data-dir=${fullPath}`,
         ])
+      })
+    })
+
+    context('when IGNORE_CHROME_PREFERENCES env is set', () => {
+      let oldPref
+      let writeJson
+
+      beforeEach(function () {
+        oldPref = process.env.IGNORE_CHROME_PREFERENCES
+        process.env.IGNORE_CHROME_PREFERENCES = true
+        this.readJson.rejects({ code: 'ENOENT' })
+        writeJson = sinon.stub(fs, 'outputJson').resolves()
+      })
+
+      afterEach(() => {
+        process.env.IGNORE_CHROME_PREFERENCES = oldPref
+        writeJson.restore()
+      })
+
+      it('does not read or write preferences', async function () {
+        chrome._writeExtension.restore()
+        utils.getProfileDir.restore()
+
+        await chrome.open({
+          isHeadless: true,
+          isHeaded: false,
+          name: 'chromium',
+          channel: 'stable',
+        }, 'http://', openOpts, this.automation)
+
+        expect(writeJson).not.to.be.called
+        expect(this.readJson).not.to.be.called
       })
     })
 

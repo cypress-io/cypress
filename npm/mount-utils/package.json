@@ -7,8 +7,8 @@
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
-    "watch": "tsc -w",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "lint": "eslint --ext .js,.ts,.json, .",
+    "watch": "tsc -w"
   },
   "dependencies": {},
   "devDependencies": {
@@ -17,7 +17,7 @@
     "rollup": "3.7.3",
     "rollup-plugin-dts": "5.0.0",
     "rollup-plugin-typescript2": "^0.29.0",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "files": [
     "dist"

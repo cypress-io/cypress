@@ -8,6 +8,7 @@ import path from 'path'
 import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 import { convertHtmlToImage } from '../support/utils'
+import os from 'os'
 
 // For importing the files below
 process.env.CYPRESS_INTERNAL_ENV = 'test'
@@ -67,6 +68,7 @@ const sanitize = (str: string) => {
   return str
   .split(lineAndColNumsRe).join('')
   .split(cypressRootPath).join('cypress')
+  .split(os.tmpdir()).join('/os/tmpdir')
 }
 
 const snapshotAndTestErrorConsole = async function (errorFileName: string) {
@@ -637,7 +639,7 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: () => {
+    CLOUD_CANNOT_CONFIRM_ARTIFACTS: () => {
       return {
         default: [makeErr()],
       }
@@ -647,6 +649,74 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_INITIALIZATION_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { status: number, statusText: string, url: string, message: string, responseBody: string } = makeErr()
+
+      err.status = 500
+      err.statusText = 'Internal Server Error'
+      err.url = 'https://some/url'
+      err.responseBody = '{ status: 500, reason: \'unknown\'}'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { url: string } = makeErr()
+
+      err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
+      // @ts-expect-error
+      const aggregateError: Error & { errors: any[] } = makeErr()
+      // @ts-expect-error
+      const aggregateErrorWithSystemError: Error & { errors: any[] } = makeErr()
+
+      const errOne = makeErr()
+      const errTwo = makeErr()
+      const errThree = makeErr()
+
+      aggregateError.errors = [errOne, errTwo, errThree]
+
+      // @ts-expect-error
+      const errSystemErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
+
+      errSystemErr.kind = 'SystemError'
+      errSystemErr.url = 'http://some/url'
+      aggregateErrorWithSystemError.errors = [errSystemErr, errTwo, errThree]
+
+      return {
+        default: [aggregateError],
+        withSystemError: [aggregateErrorWithSystemError],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
@@ -1261,7 +1331,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0 || ^=5.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',
@@ -1305,6 +1375,22 @@ describe('visual error templates', () => {
     EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderName: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_VALUE: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
       }
     },
   })

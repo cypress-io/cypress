@@ -36,7 +36,12 @@ describe('lib/browsers/electron', () => {
       onError: () => {},
     }
 
-    this.automation = new Automation('foo', 'bar', 'baz')
+    this.automation = new Automation({
+      cyNamespace: 'foo',
+      cookieNamespace: 'bar',
+      screenshotsFolder: 'baz',
+    })
+
     this.win = _.extend(new EE(), {
       isDestroyed () {
         return false
@@ -68,7 +73,7 @@ describe('lib/browsers/electron', () => {
     sinon.stub(Windows, 'installExtension').returns()
     sinon.stub(Windows, 'removeAllExtensions').returns()
     sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves(1234)
-    sinon.stub(utils, 'handleDownloadLinksViaCDP').resolves()
+    sinon.stub(utils, 'initializeCDP').resolves()
 
     // mock CRI client during testing
     this.pageCriClient = {
@@ -257,6 +262,33 @@ describe('lib/browsers/electron', () => {
     })
   })
 
+  context('.kill', () => {
+    beforeEach(async function () {
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+    })
+
+    it('does not terminate the browserCriClient if the instance is an orphaned process', async function () {
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.isOrphanedBrowserProcess = true
+      instance.kill()
+
+      expect(this.browserCriClient.close).not.to.be.called
+    })
+
+    it('terminates the browserCriClient otherwise', async function () {
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.kill()
+
+      expect(this.browserCriClient.close).to.be.called
+    })
+  })
+
   context('._launch', () => {
     beforeEach(() => {
       sinon.stub(menu, 'set')
@@ -396,7 +428,7 @@ describe('lib/browsers/electron', () => {
     it('handles download links via cdp', function () {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
-        expect(utils.handleDownloadLinksViaCDP).to.be.calledWith(this.pageCriClient, this.automation)
+        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
       })
     })
 
@@ -430,7 +462,7 @@ describe('lib/browsers/electron', () => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
 
-        await this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+        await this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
 
         expect(this.win.destroy).to.be.called
       })

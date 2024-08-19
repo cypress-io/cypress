@@ -183,6 +183,7 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
+  | [angular signals](./npm/angular-signals)                               | `@cypress/angular-signals`                   | Cypress component testing for Angular 17/18 including support for signals.     |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -205,8 +206,33 @@ You must have the following installed on your system to contribute locally:
 
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
-- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
-  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make cmake` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements. Use Python `3.11` or lower.)
+
+#### Debian/Ubuntu
+
+`sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+`python` is pre-installed on Debian-based systems including Ubuntu.
+The Python versions shipped with Ubuntu versions `20.04`, `23.10` and `22.04` are compatible with Cypress requirements.
+
+Only on Ubuntu `24.04` install Python `3.11` by executing the following commands:
+
+```shell
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.11
+```
+
+Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
+
+```shell
+export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
+```
+
+For Ubuntu `24.04` refer also to the [Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section [Unprivileged user namespace restrictions](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890#unprivileged-user-namespace-restrictions-15) and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on this version of Ubuntu after building Cypress from source.
+
+#### Windows
+
+When installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
 
 ### Getting Started
 
@@ -334,7 +360,7 @@ Many Cypress packages print out debugging information to console via the `debug`
 ### Coding Style
 
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
-[@cypress/eslint-plugin-dev](./npm/eslint-plugin-cypress) plugin.
+[@cypress/eslint-plugin-dev](./npm/eslint-plugin-dev) plugin.
 
 This project uses a Git pre-commit hook to lint staged files before committing. See the [`lint-staged` project](https://github.com/okonet/lint-staged) for details.
 `lint-staged` will try to auto-fix any lint errors with `eslint --fix`, so if it fails, you must manually fix the lint errors before committing.
@@ -439,14 +465,14 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format using one of the following definitions. Once committed to develop, this prefix will determine the appropriate 'next version' of Cypress or the corresponding npm module.
   - Changes has user-facing impact:
-    - `breaking` - A breaking change that will require a MVB
-    - `dependency` - A change to a dependency that impact the user
+    - `breaking` - A breaking change that will require an MVB
+    - `dependency` - A change to a dependency that impacts the user
     - `deprecation` - An API deprecation notice for users
     - `feat` - A new feature
-    - `fix` - A bug fix or regression fix.
-    - `misc` - a misc user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
+    - `fix` - A bug fix or regression fix
+    - `misc` - A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
     - `perf` - A code change that improves performance
-  - Changes that improves the codebase or system but has no user-facing impact:
+  - Change that improves the codebase or system but has no user-facing impact:
     - `chore` - Changes to the build process or auxiliary tools and libraries such as documentation generation
     - `docs` -  Documentation only changes
     - `refactor` - A code change that neither fixes a bug nor adds a feature
@@ -456,6 +482,11 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+- After you have submitted a PR you may see that GitHub shows a status message "This branch has conflicts that must be resolved" or "This branch is out-of-date with the base branch".
+- It is the submitter's responsibility to resolve any conflicts by rebasing on the base branch (usually `develop`).
+- In the case of an out-of-date branch, the submitter may use the GitHub PR "Update branch" button which merges the base branch into the submitter's branch and starts a new CircleCI test run.
+  External contributors should use this option sparingly if the PR has been approved and is close to merging. The Cypress.io team will generally make sure that the PR is updated before merging.
+  Each push from an external contributor requires a manual CI workflow approval from the Cypress.io team and multiple updates over a short period of time may slow down the approval and merge process.
 - All Pull Requests require a minimum of **two** approvals.
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
 - When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit.

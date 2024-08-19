@@ -9,7 +9,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '.'
+import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -21,6 +21,9 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
+import { injectIntoServiceWorker } from './util/service-worker-injector'
+import { validateHeaderName, validateHeaderValue } from 'http'
+import error from '@packages/errors'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -305,7 +308,42 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'connection',
   ])
 
-  this.res.set(headers)
+  this.debug('The headers are %o', headers)
+
+  // Filter for invalid headers
+  const filteredHeaders = Object.fromEntries(
+    Object.entries(headers).filter(([key, value]) => {
+      try {
+        validateHeaderName(key)
+        if (Array.isArray(value)) {
+          value.forEach((v) => validateHeaderValue(key, v))
+        } else if (value !== undefined) {
+          validateHeaderValue(key, value)
+        } else {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, new TypeError('Header value is undefined while expecting string'))
+
+          return false
+        }
+
+        return true
+      } catch (err) {
+        if (err.code === 'ERR_INVALID_HTTP_TOKEN') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_NAME', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else if (err.code === 'ERR_INVALID_CHAR') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else {
+          // rethrow any other errors
+          throw err
+        }
+
+        return false
+      }
+    }),
+  )
+
+  this.res.set(filteredHeaders)
+
+  this.debug('the new response headers are %o', this.res.getHeaderNames())
 
   span?.setAttributes({
     experimentalCspAllowList: this.config.experimentalCspAllowList,
@@ -340,6 +378,28 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
   }
 
   span?.end()
+
+  this.next()
+}
+
+const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    const origin = new URL(this.req.proxiedUrl).origin
+
+    if (process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS && process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS === origin) {
+      // For cypress-in-cypress tests exclusively, we need to bucket all origin-agent-cluster requests
+      // from HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS to include Origin-Agent-Cluster=false. This has to do with changed
+      // behavior starting in Chrome 119. The new behavior works like the following:
+      //    - If the first page from an origin does not set the header,
+      //      then no other pages from that origin will be origin-keyed, even if those other pages do set the header.
+      //    - If the first page from an origin sets the header and is made origin-keyed,
+      //      then all other pages from that origin will be origin-keyed whether they ask for it or not.
+      // To work around this, any request that matches the origin of HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      // should set the Origin-Agent-Cluster=false header to avoid origin-keyed agent clusters.
+      // @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin-Agent-Cluster for more details.
+      this.res.setHeader('Origin-Agent-Cluster', '?0')
+    }
+  }
 
   this.next()
 }
@@ -832,6 +892,39 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeInjectServiceWorker: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:inject:service:worker', parentSpan: this.resMiddlewareSpan, isVerbose })
+  const hasHeader = hasServiceWorkerHeader(this.req.headers)
+
+  span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
+
+  // skip if we don't have the header or we're not in chromium
+  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium') {
+    span?.end()
+
+    return this.next()
+  }
+
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.setEncoding('utf8')
+
+  this.incomingResStream.pipe(concatStream(async (body) => {
+    const updatedBody = injectIntoServiceWorker(body)
+
+    const pt = new PassThrough
+
+    pt.write(updatedBody)
+    pt.end()
+
+    this.incomingResStream = pt
+
+    this.next()
+  })).on('error', this.onError).once('close', () => {
+    span?.end()
+  })
+}
+
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
@@ -899,6 +992,7 @@ export default {
   InterceptResponse,
   PatchExpressSetHeader,
   OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
+  MaybeSetOriginAgentClusterHeader, // NOTE: only used in cypress-in-cypress testing. this is otherwise a no-op
   SetInjectionLevel,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
@@ -909,6 +1003,7 @@ export default {
   MaybeEndWithEmptyBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
+  MaybeInjectServiceWorker,
   GzipBody,
   SendResponseBodyToClient,
 }

@@ -94,6 +94,16 @@ class QueueMap<T> {
   }
 }
 
+const tryDecodeURI = (url: string) => {
+  // decodeURI can throw if the url is malformed
+  // in this case, we just return the original url
+  try {
+    return decodeURI(url)
+  } catch (e) {
+    return url
+  }
+}
+
 // This class' purpose is to match up incoming "requests" (requests from the browser received by the http proxy)
 // with "pre-requests" (events received by our browser extension indicating that the browser is about to make a request).
 // Because these come from different sources, they can be out of sync, arriving in either order.
@@ -106,6 +116,7 @@ export class PreRequests {
   pendingPreRequests = new QueueMap<PendingPreRequest>()
   pendingRequests = new QueueMap<PendingRequest>()
   pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+  pendingPreRequestsToRemove: Map<string, number> = new Map()
   sweepIntervalTimer: NodeJS.Timeout
   protocolManager?: ProtocolManagerShape
 
@@ -134,10 +145,18 @@ export class PreRequests {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
+          this.pendingPreRequestsToRemove.delete(browserPreRequest.requestId)
+
           return false
         }
 
         return true
+      })
+
+      this.pendingPreRequestsToRemove.forEach((timestamp, requestId) => {
+        if (timestamp + this.sweepInterval < now) {
+          this.pendingPreRequestsToRemove.delete(requestId)
+        }
       })
 
       this.pendingUrlsWithoutPreRequests.removeMatching(({ timestamp }) => {
@@ -146,9 +165,24 @@ export class PreRequests {
     }, this.sweepInterval)
   }
 
+  checkAndRemovePendingPreRequest (requestId: string) {
+    return this.pendingPreRequestsToRemove.delete(requestId)
+  }
+
   addPending (browserPreRequest: BrowserPreRequest) {
+    const key = `${browserPreRequest.method}-${tryDecodeURI(browserPreRequest.url)}`
+
+    // if we have a pending request to remove, we should remove it now and return
+    // since we don't want to proceed with this pre-request anymore. In practice,
+    // this typically happens when we receive a cached response while executing
+    // the async function to add the pre-request
+    if (this.checkAndRemovePendingPreRequest(browserPreRequest.requestId)) {
+      debugVerbose('Received previous request to remove pre-request %s, skipping adding', browserPreRequest.requestId)
+
+      return
+    }
+
     metrics.browserPreRequestsReceived++
-    const key = `${browserPreRequest.method}-${decodeURI(browserPreRequest.url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -193,7 +227,7 @@ export class PreRequests {
   }
 
   addPendingUrlWithoutPreRequest (url: string) {
-    const key = `GET-${decodeURI(url)}`
+    const key = `GET-${tryDecodeURI(url)}`
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
@@ -214,34 +248,43 @@ export class PreRequests {
   }
 
   removePendingPreRequest (requestId: string) {
+    let removed = false
+
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
-      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
+      const matches = (browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId.startsWith(`${requestId}-`)) ||
+        (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId === requestId)
+
+      if (matches && !removed) {
+        removed = true
+      }
+
+      return !matches
     })
+
+    // if we didn't find a pre-request to remove, add it to the pending list so we can remove it later,
+    // this typically happens when we receive a cached response while executing
+    // the async function to add the pre-request
+    if (!removed) {
+      debugVerbose('No pre-request found to remove, adding to pending list: %s', requestId)
+      this.pendingPreRequestsToRemove.set(requestId, Date.now())
+    } else {
+      debugVerbose('Removed pre-request %s', requestId)
+    }
+
+    return removed
   }
 
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
-    // The initial request that loads the service worker does not get sent to CDP and it happens prior
-    // to the service worker target being added. Thus, we need to explicitly ignore it. We determine
-    // it's the service worker request via the `sec-fetch-dest` header
-    if (req.headers['sec-fetch-dest'] === 'serviceworker') {
-      ctxDebug('Ignoring request with sec-fetch-dest: serviceworker', req.proxiedUrl)
-
-      callback({
-        noPreRequestExpected: true,
-      })
-
-      return
-    }
-
     const proxyRequestReceivedTimestamp = performance.now() + performance.timeOrigin
 
     metrics.proxyRequestsReceived++
-    const key = `${req.method}-${decodeURI(req.proxiedUrl)}`
+    const key = `${req.method}-${tryDecodeURI(req.proxiedUrl)}`
     const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
       ctxDebug('Incoming request %s matches known pre-request: %o', key, pendingPreRequest)
+
       callback({
         browserPreRequest: {
           ...pendingPreRequest.browserPreRequest,
@@ -276,6 +319,7 @@ export class PreRequests {
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
         ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -309,7 +353,10 @@ export class PreRequests {
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue
-    this.pendingRequests.forEach(({ callback, timeout }) => {
+    this.pendingRequests.forEach(({ callback, timeout, timedOut }) => {
+      // If the request has already timed out, just return
+      if (timedOut) return
+
       clearTimeout(timeout)
       metrics.unmatchedRequests++
       callback?.({
@@ -319,5 +366,6 @@ export class PreRequests {
 
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
+    this.pendingPreRequestsToRemove = new Map()
   }
 }

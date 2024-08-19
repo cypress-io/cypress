@@ -27,6 +27,10 @@ describe('src/cy/commands/actions/scroll', () => {
 
       this.scrollBoth.scrollTop = 0
       this.scrollBoth.scrollLeft = 0
+
+      // width/height of scrollable container - width of parent viewport (minux scrollbars) / 2 to get the center
+      // browsers round up the pixel value so we need to round it
+      this.halfScrollPixels = Math.round((500 - 100) / 2)
     })
 
     describe('subject', () => {
@@ -86,7 +90,7 @@ describe('src/cy/commands/actions/scroll', () => {
           // in the percentage of the scroll (since going the height
           // of the container wouldn't scroll at all...)
           expect(this.scrollHoriz.get(0).scrollTop).to.eq(0)
-          expect(this.scrollHoriz.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollHoriz.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
     })
@@ -108,7 +112,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('top').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -127,7 +131,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('left').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -137,8 +141,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('center').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -147,7 +151,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('right').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100))
         })
       })
@@ -168,7 +172,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('bottom').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100))
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -229,8 +233,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('50%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
 
@@ -239,7 +243,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('0%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollPixels)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -250,7 +254,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('50%', '0%').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((500 - 100) / 2)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollPixels)
         })
       })
     })
@@ -560,6 +564,39 @@ describe('src/cy/commands/actions/scroll', () => {
         })
 
         return null
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-to-both').scrollTo(25, 0, { log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollTo')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollTo')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs out scrollTo', () => {
@@ -958,6 +995,39 @@ describe('src/cy/commands/actions/scroll', () => {
         })
 
         return null
+      })
+
+      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.get('#scroll-into-view-both h5').scrollIntoView({ log: false })
+
+        cy.then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog.get('name'), 'log name').to.not.eq('scrollIntoView')
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('scrollIntoView')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+        })
       })
 
       it('logs out scrollIntoView', () => {

@@ -568,15 +568,14 @@ export default function (Commands, Cypress, cy, state, config) {
         consoleProps.name = name
       }
 
-      if (options.log) {
-        options._log = Cypress.log({
-          message: name,
-          timeout: options.timeout,
-          consoleProps () {
-            return { props: consoleProps }
-          },
-        })
-      }
+      options._log = Cypress.log({
+        hidden: !options.log,
+        message: name,
+        timeout: options.timeout,
+        consoleProps () {
+          return { props: consoleProps }
+        },
+      })
 
       if (!isWin && subject && subject.length > 1) {
         $errUtils.throwErrByPath('screenshot.multiple_elements', {

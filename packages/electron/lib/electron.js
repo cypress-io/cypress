@@ -56,7 +56,7 @@ module.exports = {
 
     const options = {
       preferLocal: true, // finds the "node_modules/.bin/electron"
-      timeout: 5000, // prevents hanging Electron if there is an error for some reason
+      timeout: 10000, // prevents hanging Electron if there is an error for some reason
     }
 
     debug('Running Electron with %o %o', args, options)

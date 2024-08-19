@@ -8,6 +8,7 @@ import { RemoteStates } from '@packages/server/lib/remote_states'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
+import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -18,6 +19,7 @@ describe('http/response-middleware', function () {
       'InterceptResponse',
       'PatchExpressSetHeader',
       'OmitProblematicHeaders',
+      'MaybeSetOriginAgentClusterHeader',
       'SetInjectionLevel',
       'MaybePreventCaching',
       'MaybeStripDocumentDomainFeaturePolicy',
@@ -28,6 +30,7 @@ describe('http/response-middleware', function () {
       'MaybeEndWithEmptyBody',
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
+      'MaybeInjectServiceWorker',
       'GzipBody',
       'SendResponseBodyToClient',
     ])
@@ -125,7 +128,7 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(ctx.res.set).to.be.calledWith(headers)
 
-        expect(ctx.onlyRunMiddleware).to.be.calledWith([
+        expect(ctx['onlyRunMiddleware']).to.be.calledWith([
           'AttachPlainTextStreamFn',
           'PatchExpressSetHeader',
           'MaybeSendRedirectToClient',
@@ -142,7 +145,7 @@ describe('http/response-middleware', function () {
 
       return testMiddleware([FilterNonProxiedResponse], ctx)
       .then(() => {
-        expect(ctx.onlyRunMiddleware).not.to.be.called
+        expect(ctx['onlyRunMiddleware']).not.to.be.called
       })
     })
   })
@@ -269,6 +272,41 @@ describe('http/response-middleware', function () {
             return actual[prop] === undefined
           }))
         })
+      })
+    })
+
+    let badHeaders = {
+      'bad-header ': 'value', //(contains trailling space)
+      'Content Type': 'value', //(contains a space)
+      'User-Agent:': 'value', //(contains a colon)
+      'Accept-Encoding;': 'value', //(contains a semicolon)
+      '@Origin': 'value', //(contains an at symbol)
+      'Authorization?': 'value', //(contains a question mark)
+      'X-My-Header/Version': 'value', //(contains a slash)
+      'Referer[1]': 'value', //(contains square brackets)
+      'If-None-Match{1}': 'value', //(contains curly braces)
+      'X-Forwarded-For<1>': 'value', //(contains angle brackets)
+    }
+
+    it('removes invalid headers and leaves valid headers', function () {
+      prepareContext({ ...badHeaders, 'good-header': 'value' })
+
+      return testMiddleware([OmitProblematicHeaders], ctx)
+      .then(() => {
+        expect(ctx.res.set).to.have.been.calledOnce
+        expect(ctx.res.set).to.be.calledWith(sinon.match(function (actual) {
+          // Check if the invalid headers are removed
+          for (let header in actual) {
+            if (header in badHeaders) {
+              throw new Error(`Unexpected header "${header}"`)
+            }
+          }
+
+          // Check if the valid header is present
+          expect(actual['good-header']).to.equal('value')
+
+          return true
+        }))
       })
     })
 
@@ -441,9 +479,69 @@ describe('http/response-middleware', function () {
           setHeader: sinon.stub(),
           on: (event, listener) => {},
           off: (event, listener) => {},
+          getHeaderNames: () => Object.keys(ctx.incomingRes.headers),
         },
       }
     }
+  })
+
+  describe('MaybeSetOriginAgentClusterHeader', function () {
+    const { MaybeSetOriginAgentClusterHeader } = ResponseMiddleware
+
+    let CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+    let PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+    let ctx
+
+    beforeEach(function () {
+      CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+      PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      ctx = {
+        req: {
+          proxiedUrl: 'http://localhost:4455',
+        },
+        res: {
+          setHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+    })
+
+    afterEach(function () {
+      beforeEach(function () {
+        process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+        process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = PREVIOUS_HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      })
+    })
+
+    it('doesn\'t set the Origin-Agent-Cluster for the request if cypress-in-cypress testing is off', function () {
+      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.called
+      })
+    })
+
+    it('doesn\'t set the Origin-Agent-Cluster for the request if cypress-in-cypress testing is on but url does NOT match http proxy', function () {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+      process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = 'http://localhost:4456'
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.called
+      })
+    })
+
+    it('sets the Origin-Agent-Cluster for the request if cypress-in-cypress testing is on and url matches http proxy', function () {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+      process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = 'http://localhost:4455'
+
+      return testMiddleware([MaybeSetOriginAgentClusterHeader], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
   })
 
   describe('SetInjectionLevel', function () {
@@ -2287,6 +2385,110 @@ describe('http/response-middleware', function () {
         },
         onError (error) {
           throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+  })
+
+  describe('MaybeInjectServiceWorker', function () {
+    const { MaybeInjectServiceWorker } = ResponseMiddleware
+    let ctx
+    let injectIntoServiceWorkerStub
+
+    beforeEach(() => {
+      injectIntoServiceWorkerStub = sinon.spy(serviceWorkerInjector, 'injectIntoServiceWorker')
+    })
+
+    afterEach(() => {
+      injectIntoServiceWorkerStub.restore()
+    })
+
+    it('does not rewrite the service worker if the request does not have the service worker header', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/not-service-worker.js',
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(injectIntoServiceWorkerStub).not.to.be.called
+      })
+    })
+
+    it('does not rewrite the service worker if the browser is non-chromium', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        getCurrentBrowser: () => {
+          return {
+            family: 'firefox',
+          }
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(injectIntoServiceWorkerStub).not.to.be.called
+      })
+    })
+
+    it('rewrites the service worker in chromium based browsers', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+      })
+
+      return testMiddleware([MaybeInjectServiceWorker], ctx)
+      .then(() => {
+        expect(injectIntoServiceWorkerStub).to.be.calledOnce
+        expect(injectIntoServiceWorkerStub).to.be.calledWith('foo')
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          ...props.res,
+        },
+        req: {
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {},
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        getCurrentBrowser: () => {
+          return {
+            family: 'chromium',
+          }
         },
         ..._.omit(props, 'incomingRes', 'res', 'req'),
       }

@@ -144,7 +144,7 @@ export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: Prot
 
 export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
 
-export type OffFn = (eventName: string, cb: (data: any) => void) => void
+export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) => void
 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
@@ -165,14 +165,17 @@ export class CdpAutomation implements CDPClient {
   on: OnFn
   off: OffFn
   send: SendDebuggerCommand
-  private frameTree: any
-  private gettingFrameTree: any
+  private frameTree: Protocol.Page.FrameTree | undefined
+  private gettingFrameTree: Promise<void> | undefined | null
+  private cachedDataUrlRequestIds: Set<string> = new Set()
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
     onFn('Network.loadingFailed', this.onRequestFailed)
+    onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
+    onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
 
     this.on = onFn
     this.off = offFn
@@ -195,16 +198,65 @@ export class CdpAutomation implements CDPClient {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
     return cdpAutomation
   }
 
-  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private async activateMainTab () {
+    const ActivationTimeoutMessage = 'Unable to communicate with Cypress Extension'
+
+    const sendActivationMessage = `
+      (() => {
+        if (document.defaultView !== top) { return Promise.resolve() }
+        return new Promise((res) => {
+          const onMessage = (ev) => {
+            if (ev.data.message === 'cypress:extension:main:tab:activated') {
+              window.removeEventListener('message', onMessage)
+              res()
+            }
+          }
+
+          window.addEventListener('message', onMessage)
+          window.postMessage({ message: 'cypress:extension:activate:main:tab' })
+        })
+      })()`
+
+    if (this.isHeadless) {
+      debugVerbose('Headless, so bringing page to front instead of negotiating with extension')
+      await this.sendDebuggerCommandFn('Page.bringToFront')
+    } else {
+      try {
+        debugVerbose('sending activation message ', sendActivationMessage)
+        await Promise.race([
+          this.sendDebuggerCommandFn('Runtime.evaluate', {
+            expression: sendActivationMessage,
+            awaitPromise: true,
+          }),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(ActivationTimeoutMessage)), 500)
+          }),
+        ])
+      } catch (e) {
+        debugVerbose('Error occurred while attempting to activate main tab: ', e)
+        // If rejected due to timeout, fall back to bringing the main tab to focus -
+        // this will steal window focus, so it is a last resort. If any other error
+        // was thrown, re-throw as it was unexpected.
+        if ((e as Error).message === ActivationTimeoutMessage) {
+          await this.sendDebuggerCommandFn('Page.bringToFront')
+        } else {
+          throw e
+        }
+      }
+    }
+  }
+
+  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
+
     let url = params.request.url
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
@@ -214,7 +266,8 @@ export class CdpAutomation implements CDPClient {
     // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
     // Example data url: "data:font/woff;base64,<base64 encoded string>"
     if (url.startsWith('data:')) {
-      debugVerbose('skipping `data:` url %s', url)
+      debugVerbose('skipping data: url %s', url)
+      this.cachedDataUrlRequestIds.add(params.requestId)
 
       return
     }
@@ -228,26 +281,40 @@ export class CdpAutomation implements CDPClient {
       headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
+      initiator: params.initiator,
+      documentURL: params.documentURL,
+      hasRedirectResponse: params.redirectResponse != null,
       // wallTime is in seconds: https://vanilla.aslushnikov.com/?Network.TimeSinceEpoch
       // normalize to milliseconds to be comparable to everything else we're gathering
       cdpRequestWillBeSentTimestamp: params.wallTime * 1000,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin,
     }
 
-    this.automation.onBrowserPreRequest?.(browserPreRequest)
+    await this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
-    this.automation.onRequestServedFromCache?.(params.requestId)
+    debugVerbose('received onRequestServedFromCache %o', params)
+
+    // Filter out "data:" urls; they don't have a stored browserPreRequest
+    // since they're not actually fetched
+    if (this.cachedDataUrlRequestIds.has(params.requestId)) {
+      this.cachedDataUrlRequestIds.delete(params.requestId)
+      debugVerbose('skipping data: request %s', params.requestId)
+
+      return
+    }
+
+    this.automation.onRemoveBrowserPreRequest?.(params.requestId)
   }
 
   private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
-    this.automation.onRequestFailed?.(params.requestId)
+    this.automation.onRemoveBrowserPreRequest?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
-    if (params.response.fromDiskCache) {
-      this.automation.onRequestServedFromCache?.(params.requestId)
+    if (params.response.fromDiskCache || (params.response.fromServiceWorker && params.response.encodedDataLength <= 0)) {
+      this.automation.onRemoveBrowserPreRequest?.(params.requestId)
 
       return
     }
@@ -259,6 +326,14 @@ export class CdpAutomation implements CDPClient {
     }
 
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+  }
+
+  private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
+    this.automation.onServiceWorkerRegistrationUpdated?.(params)
+  }
+
+  private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
+    this.automation.onServiceWorkerVersionUpdated?.(params)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
@@ -407,7 +482,7 @@ export class CdpAutomation implements CDPClient {
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
-  onRequest = (message, data) => {
+  onRequest = async (message, data) => {
     let setCookie
 
     switch (message) {
@@ -479,8 +554,18 @@ export class CdpAutomation implements CDPClient {
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
-        return this.sendDebuggerCommandFn(data.command, data.params)
+        return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
       case 'take:screenshot':
+        debugVerbose('capturing screenshot')
+
+        if (this.focusTabOnScreenshot) {
+          try {
+            await this.activateMainTab()
+          } catch (e) {
+            debugVerbose('Error while attempting to activate main tab: %O', e)
+          }
+        }
+
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         .catch((err) => {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
@@ -493,7 +578,7 @@ export class CdpAutomation implements CDPClient {
           this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
-      case 'reset:browser:tabs:for:next:test':
+      case 'reset:browser:tabs:for:next:spec':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')

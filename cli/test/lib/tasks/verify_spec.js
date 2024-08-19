@@ -97,6 +97,16 @@ context('lib/tasks/verify', () => {
     expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
+  it('returns early when `CYPRESS_SKIP_VERIFY` is set to true', () => {
+    process.env.CYPRESS_SKIP_VERIFY = 'true'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    return newVerifyInstance.start().then((result) => {
+      expect(result).to.eq(undefined)
+    })
+  })
+
   it('logs error and exits when no version of Cypress is installed', () => {
     return verify
     .start()
@@ -275,6 +285,44 @@ context('lib/tasks/verify', () => {
     })
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
+    })
+  })
+
+  describe('FORCE_COLOR', () => {
+    let previousForceColors
+
+    beforeEach(() => {
+      previousForceColors = process.env.FORCE_COLOR
+
+      process.env.FORCE_COLOR = true
+    })
+
+    afterEach(() => {
+      process.env.FORCE_COLOR = previousForceColors
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/28982
+    it('sets FORCE_COLOR to 0 when piping stdioOptions to to the smoke test to avoid ANSI in binary smoke test', () => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      util.exec.resolves({
+        stdout: '222',
+        stderr: '',
+      })
+
+      return verify.start()
+      .then(() => {
+        expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'],
+          sinon.match({
+            env: {
+              FORCE_COLOR: 0,
+            },
+          }))
+      })
     })
   })
 

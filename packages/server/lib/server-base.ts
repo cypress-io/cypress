@@ -40,6 +40,8 @@ import statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
+import type Protocol from 'devtools-protocol'
+import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -131,16 +133,13 @@ export interface OpenServerOptions {
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
-  exit?: boolean
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
-  protocolManager?: ProtocolManagerShape
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
-  private _protocolManager?: ProtocolManagerShape
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
@@ -212,8 +211,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
-    this._protocolManager = protocolManager
-
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
   }
@@ -327,8 +324,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     shouldCorrelatePreRequests,
     testingType,
     SocketCtor,
-    exit,
-    protocolManager,
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
@@ -354,6 +349,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates: this._remoteStates,
       resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       shouldCorrelatePreRequests,
+      getCurrentBrowser,
     })
 
     if (config.experimentalSourceRewriting) {
@@ -441,7 +437,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests, getCurrentBrowser }) {
     const getFileServerToken = () => {
       return this._fileServer?.token
     }
@@ -459,6 +455,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       request: this.request,
       serverBus: this._eventBus,
       resourceTypeAndCredentialManager,
+      getCurrentBrowser,
     })
   }
 
@@ -472,7 +469,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset()
+      this.networkProxy.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.resourceTypeAndCredentialManager.clear()
@@ -491,12 +488,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
     this.networkProxy.removePendingBrowserPreRequest(requestId)
+  }
+
+  getBrowserPreRequests () {
+    return this._networkProxy?.getPendingBrowserPreRequests()
   }
 
   emitRequestEvent (eventName, data) {
@@ -505,6 +506,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
     this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+  }
+
+  updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerRegistrations(data)
+  }
+
+  updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
+    this.networkProxy.updateServiceWorkerVersions(data)
+  }
+
+  updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
+    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+  }
+
+  handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
+    this.networkProxy.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -617,7 +634,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   reset () {
-    this._networkProxy?.reset()
+    this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
@@ -863,7 +880,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
               if (fp) {
                 // if so we know this is a local file request
-                details.filePath = fp
+                details.filePath = decodeURI(fp)
               }
 
               debug('setting details resolving url %o', details)

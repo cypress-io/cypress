@@ -1,31 +1,29 @@
 const _ = require('lodash')
 const path = require('path')
 const la = require('lazy-ass')
-const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
 const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+const { telemetry } = require('@packages/telemetry')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../cloud/api')
+const api = require('../cloud/api').default
 const exception = require('../cloud/exception')
-const upload = require('../cloud/upload')
 
 const errors = require('../errors')
 const capture = require('../capture')
 const Config = require('../config')
 const env = require('../util/env')
-const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
-const { printPendingArtifactUpload, printCompletedArtifactUpload, beginUploadActivityOutput } = require('../util/print-run')
+
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
-const { fs } = require('../util/fs')
-const { performance } = require('perf_hooks')
+
+const { uploadArtifacts } = require('../cloud/artifacts/upload_artifacts')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -137,338 +135,7 @@ returns:
 ]
 */
 
-const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
-  const priority = {
-    'video': 0,
-    'screenshots': 1,
-    'protocol': 2,
-  }
-  const labels = {
-    'video': 'Video',
-    'screenshots': 'Screenshot',
-    'protocol': 'Test Replay',
-  }
-
-  artifacts.sort((a, b) => {
-    return priority[a.reportKey] - priority[b.reportKey]
-  })
-
-  const preparedArtifacts = await Promise.all(artifacts.map(async (artifact) => {
-    if (artifact.skip) {
-      return artifact
-    }
-
-    if (artifact.reportKey === 'protocol') {
-      try {
-        if (protocolManager.hasFatalError()) {
-          const error = protocolManager.getFatalError().error
-
-          debug('protocol fatal error encountered', {
-            message: error.message,
-            stack: error.stack,
-          })
-
-          return {
-            ...artifact,
-            skip: true,
-            error: error.message || error.stack || 'Unknown Error',
-          }
-        }
-
-        const archiveInfo = await protocolManager.getArchiveInfo()
-
-        if (archiveInfo === undefined) {
-          return {
-            ...artifact,
-            skip: true,
-            error: 'No test data recorded',
-          }
-        }
-
-        return {
-          ...artifact,
-          fileSize: archiveInfo.fileSize,
-          payload: archiveInfo.stream,
-        }
-      } catch (err) {
-        debug('failed to prepare protocol artifact', {
-          error: err.message,
-          stack: err.stack,
-        })
-      }
-    }
-
-    if (artifact.filePath) {
-      try {
-        const { size } = await fs.statAsync(artifact.filePath)
-
-        return {
-          ...artifact,
-          fileSize: size,
-        }
-      } catch (err) {
-        debug('failed to get stats for upload artifact %o', {
-          file: artifact.filePath,
-          stack: err.stack,
-        })
-      }
-    }
-
-    return artifact
-  }))
-
-  if (!quiet) {
-    // eslint-disable-next-line no-console
-    console.log('')
-
-    terminal.header('Uploading Cloud Artifacts', {
-      color: ['blue'],
-    })
-
-    // eslint-disable-next-line no-console
-    console.log('')
-  }
-
-  preparedArtifacts.forEach((artifact) => {
-    debug('preparing to upload artifact %O', {
-      ...artifact,
-      payload: typeof artifact.payload,
-    })
-
-    if (!quiet) {
-      printPendingArtifactUpload(artifact, labels)
-    }
-  })
-
-  let stopUploadActivityOutput
-
-  if (!quiet && preparedArtifacts.filter(({ skip }) => !skip).length) {
-    stopUploadActivityOutput = beginUploadActivityOutput()
-  }
-
-  const uploadResults = await Promise.all(
-    preparedArtifacts.map(async (artifact) => {
-      if (artifact.skip) {
-        debug('nothing to upload for artifact %O', artifact)
-
-        return {
-          key: artifact.reportKey,
-          skipped: true,
-          url: artifact.uploadUrl,
-          ...(artifact.error && { error: artifact.error, success: false }),
-        }
-      }
-
-      const startTime = performance.now()
-
-      debug('uploading artifact %O', {
-        ...artifact,
-        payload: typeof artifact.payload,
-      })
-
-      try {
-        if (artifact.reportKey === 'protocol') {
-          const res = await protocolManager.uploadCaptureArtifact(artifact)
-
-          return {
-            ...res,
-            pathToFile: 'Test Replay',
-            url: artifact.uploadUrl,
-            fileSize: artifact.fileSize,
-            key: artifact.reportKey,
-            uploadDuration: performance.now() - startTime,
-          }
-        }
-
-        const res = await upload.send(artifact.filePath, artifact.uploadUrl)
-
-        return {
-          ...res,
-          success: true,
-          url: artifact.uploadUrl,
-          pathToFile: artifact.filePath,
-          fileSize: artifact.fileSize,
-          key: artifact.reportKey,
-          uploadDuration: performance.now() - startTime,
-        }
-      } catch (err) {
-        debug('failed to upload artifact %o', {
-          file: artifact.filePath,
-          url: artifact.uploadUrl,
-          stack: err.stack,
-        })
-
-        if (err.errors) {
-          const lastError = _.last(err.errors)
-
-          return {
-            key: artifact.reportKey,
-            success: false,
-            error: lastError.message,
-            allErrors: err.errors,
-            url: artifact.uploadUrl,
-            pathToFile: artifact.filePath,
-            uploadDuration: performance.now() - startTime,
-          }
-        }
-
-        return {
-          key: artifact.reportKey,
-          success: false,
-          error: err.message,
-          url: artifact.uploadUrl,
-          pathToFile: artifact.filePath,
-          uploadDuration: performance.now() - startTime,
-        }
-      }
-    }),
-  ).finally(() => {
-    if (stopUploadActivityOutput) {
-      stopUploadActivityOutput()
-    }
-  })
-
-  const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
-    return !skipped
-  })
-
-  if (!quiet && attemptedUploadResults.length) {
-    // eslint-disable-next-line no-console
-    console.log('')
-
-    terminal.header('Uploaded Cloud Artifacts', {
-      color: ['blue'],
-    })
-
-    // eslint-disable-next-line no-console
-    console.log('')
-
-    attemptedUploadResults.forEach(({ key, skipped, ...report }, i, { length }) => {
-      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
-    })
-  }
-
-  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
-    if (key === 'protocol') {
-      const error = report.allErrors ? `Failed to upload after ${report.allErrors.length} attempts. Errors: ${report.allErrors.map((error) => error.message).join(', ')}` : report.error
-
-      return skipped && !report.error ? acc : {
-        ...acc,
-        [key]: {
-          ...report,
-          error,
-        },
-      }
-    }
-
-    return skipped ? acc : {
-      ...acc,
-      [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
-    }
-  }, {
-    video: undefined,
-    screenshots: [],
-    protocol: undefined,
-  })
-}
-
-const uploadArtifacts = async (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
-
-  const artifacts = []
-
-  if (videoUploadUrl) {
-    artifacts.push({
-      reportKey: 'video',
-      uploadUrl: videoUploadUrl,
-      filePath: video,
-    })
-  } else {
-    artifacts.push({
-      reportKey: 'video',
-      skip: true,
-    })
-  }
-
-  if (screenshotUploadUrls.length) {
-    screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
-      const screenshot = _.find(screenshots, { screenshotId })
-
-      debug('screenshot: %o', screenshot)
-
-      return {
-        reportKey: 'screenshots',
-        uploadUrl,
-        filePath: screenshot.path,
-      }
-    }).forEach((screenshotArtifact) => {
-      artifacts.push(screenshotArtifact)
-    })
-  } else {
-    artifacts.push({
-      reportKey: 'screenshots',
-      skip: true,
-    })
-  }
-
-  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
-  if (protocolManager && (captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url))) {
-    artifacts.push({
-      reportKey: 'protocol',
-      uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
-    })
-  } else if (protocolCaptureMeta && protocolCaptureMeta.disabledMessage) {
-    artifacts.push({
-      reportKey: 'protocol',
-      message: protocolCaptureMeta.disabledMessage,
-      skip: true,
-    })
-  }
-
-  let uploadReport
-
-  try {
-    uploadReport = await uploadArtifactBatch(artifacts, protocolManager, quiet)
-  } catch (err) {
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
-
-    return exception.create(err)
-  }
-
-  debug('checking for protocol errors', protocolManager?.hasErrors())
-  if (protocolManager) {
-    try {
-      await protocolManager.reportNonFatalErrors({
-        specName: spec.name,
-        osName: platform.osName,
-        projectSlug: projectId,
-      })
-    } catch (err) {
-      debug('Failed to send protocol errors %O', err)
-    }
-  }
-
-  try {
-    debug('upload reprt: %O', uploadReport)
-    const res = await api.updateInstanceArtifacts({
-      runId, instanceId,
-    }, uploadReport)
-
-    return res
-  } catch (err) {
-    debug('failed updating artifact status %o', {
-      stack: err.stack,
-    })
-
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
-
-    if (err.statusCode !== 503) {
-      return exception.create(err)
-    }
-  }
-}
-
-const updateInstanceStdout = (options = {}) => {
+const updateInstanceStdout = async (options = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -914,6 +581,8 @@ const createRunAndRecordSpecs = (options = {}) => {
       browserVersion: browser.version,
     }
 
+    telemetry.startSpan({ name: 'record:createRun' })
+
     return createRun({
       projectRoot,
       git,
@@ -932,6 +601,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       project,
     })
     .then((resp) => {
+      telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -947,6 +617,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
+        telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
@@ -966,7 +637,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
+          const result = _
           .chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
@@ -974,6 +645,10 @@ const createRunAndRecordSpecs = (options = {}) => {
             instanceId,
           })
           .value()
+
+          telemetry.getSpan('record:beforeSpecRun')?.end()
+
+          return result
         })
       }
 
@@ -983,6 +658,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (!instanceId || results.skippedSpec) {
           return
         }
+
+        telemetry.startSpan({ name: 'record:afterSpecRun' })
 
         debug('after spec run %o', { spec })
 
@@ -1028,6 +705,8 @@ const createRunAndRecordSpecs = (options = {}) => {
             return updateInstanceStdout({
               captured,
               instanceId,
+            }).finally(() => {
+              telemetry.getSpan('record:afterSpecRun')?.end()
             })
           })
         })

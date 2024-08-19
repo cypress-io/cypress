@@ -105,7 +105,7 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
     ))
 
     cy.contains('a', 'test').should('not.have.attr', 'href')
-    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'disabled')
+    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'true')
     cy.contains('a', 'test').should('have.attr', 'role', 'link')
   })
 

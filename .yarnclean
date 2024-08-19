@@ -4,15 +4,16 @@ test
 tests
 powered-test
 
-# asset directories
-docs
-doc
 # yaml package has a `doc` folder that we need
 !yaml/**/doc/*
 website
 images
 assets
 !mochawesome-report-generator/dist/assets
+
+# Do NOT clean out app assets from cypress-example-kitchensink to avoid broken deployments
+# Needed for https://example.cypress.io/
+!cypress-example-kitchensink/app/assets
 
 # examples
 example

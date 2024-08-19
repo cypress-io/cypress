@@ -171,6 +171,7 @@ export interface CoreDataShape {
   } | null
   cloudProject: CloudDataShape
   eventCollectorSource: EventCollectorSource | null
+  didBrowserPreviouslyHaveUnexpectedExit: boolean
 }
 
 /**
@@ -251,6 +252,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       testsForRunResults: {},
     },
     eventCollectorSource: null,
+    didBrowserPreviouslyHaveUnexpectedExit: false,
   }
 
   async function machineId (): Promise<string | null> {

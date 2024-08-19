@@ -1305,6 +1305,54 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('100{enter}')
         .should('have.value', '100')
       })
+
+      context('can utilize up and down arrow keys', () => {
+        beforeEach(() => {
+          cy.get('#number-with-value').then(($input) => $input.val(1))
+        })
+
+        it('can utilize {upArrow}', () => {
+          cy.get('#number-with-value')
+          .type('{upArrow}')
+          .should('have.value', 2)
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#number-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('can utilize {downArrow}', () => {
+          cy.get('#number-with-value').then(($input) => $input.val(1))
+
+          cy.get('#number-with-value')
+          .type('{downArrow}')
+          .should('have.value', 0)
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#number-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      })
     })
 
     describe('input[type=email]', () => {
@@ -2845,8 +2893,38 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
+    })
 
-      null
+    it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').type('foobar', { log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.get('input:first').type('foobar', { log: false })
+      .then(function () {
+        const { lastLog, hiddenLog } = this
+
+        expect(lastLog.get('name')).to.eq('get')
+
+        expect(hiddenLog).to.be.ok
+        expect(hiddenLog.get('name'), 'log name').to.eq('type')
+        expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(2)
+      })
     })
 
     it('passes in $el', () => {
@@ -2998,9 +3076,31 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      it('has a table of mouse events', () => {
+        cy.get(':text:first').type('hi')
+        .then(function ($input) {
+          const table = this.lastLog.invoke('consoleProps').table[1]()
+
+          expect(table).to.containSubset({
+            'name': 'Mouse Events',
+            'data': [
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'mouseover' },
+              { 'Event Type': 'pointermove' },
+              { 'Event Type': 'pointerdown' },
+              { 'Event Type': 'mousedown' },
+              { 'Event Type': 'pointerover' },
+              { 'Event Type': 'pointerup' },
+              { 'Event Type': 'mouseup' },
+              { 'Event Type': 'click' },
+            ],
+          })
+        })
+      })
+
       // Updated not to input text when non-shift modifier is pressed
       // https://github.com/cypress-io/cypress/issues/5424
-      it('has a table of keys', () => {
+      it('has a table of keyboard events', () => {
         cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
         .then(function ($input) {
           const table = this.lastLog.invoke('consoleProps').table[2]()

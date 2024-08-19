@@ -344,7 +344,12 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('unload', () => {
+    // While we must move to pagehide for Chromium, it does not work for our
+    // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
+    // event as a proxy for AUT unloads.
+    const unloadEvent = this.isBrowser({ family: 'chromium' }) ? 'pagehide' : 'unload'
+
+    $window.on(unloadEvent, (e) => {
       this._clearAllCookies()
     })
 
@@ -617,6 +622,7 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
+      crossOriginLogs = {}
       const [attributes, test] = args
 
       this.reporterBus.emit('test:before:run:async', attributes)
@@ -660,35 +666,6 @@ export class EventManager {
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
     Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, responseEvent }) => {
       Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
-    })
-
-    Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
-      log: Cypress.Log
-      name?: string
-      options?: any
-      specBridge: string
-      addSnapshot: (snapshot: any, options: any, shouldRebindSnapshotFn: boolean) => Cypress.Log
-    }) => {
-      const eventID = log.get('id')
-
-      const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
-          origin: specBridge,
-          event: 'snapshot:generate:for:log',
-          data: {
-            name,
-            id: eventID,
-          },
-        }).then((crossOriginSnapshot) => {
-          const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
-
-          addSnapshot.apply(log, [snapshot, options, false])
-        })
-      }
-
-      requestSnapshot().catch(() => {
-        // If a spec bridge isn't present to respond this isn't an error and there is nothing to do.
-      })
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
@@ -860,7 +837,6 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-
     this.studioStore.setInactive()
   }
 

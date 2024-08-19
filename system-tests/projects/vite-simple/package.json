@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -12,8 +12,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^3.0.1",
-    "vite": "^4.0.4"
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.2.8"
   },
   "type": "module"
 }

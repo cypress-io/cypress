@@ -209,6 +209,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
 
@@ -262,6 +263,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
   })
@@ -394,6 +396,31 @@ describe('lib/browsers/index', () => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
           expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
         })
+      })
+    })
+  })
+
+  context('didBrowserPreviouslyHaveUnexpectedExit', () => {
+    it('sets didBrowserPreviouslyHaveUnexpectedExit when the browser unexpectedly closes', () => {
+      const url = 'http://localhost:3000'
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+        expect(ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit).eq(true)
       })
     })
   })
