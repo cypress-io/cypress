@@ -10,11 +10,38 @@ const { fs } = require('../util/fs')
 const cwd = require('../cwd')
 const md5 = require('md5')
 const sanitize = require('sanitize-filename')
+const replace = require('lodash/replace')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
-const OS_DATA_PATH = ospath.data()
 
-const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+// original source code: https://github.com/isaacs/common-ancestor-path
+// but modified to be more testable
+const findCommonAncestor = (a, b) => {
+  const sep = os.platform() === 'win32' ? '\\' : '/'
+
+  function* commonArrayMembers (a, b) {
+    const [l, s] = a.length > b.length ? [a, b] : [b, a]
+
+    for (const x of s) {
+      if (x === l.shift()) {
+        yield x
+      } else {
+        break
+      }
+    }
+  }
+
+  return a === b ? a
+    : path.parse(a).root !== path.parse(b).root ? null
+      : [...commonArrayMembers(path.normalize(a).split(sep), path.normalize(b).split(sep))].join(sep)
+}
+
+const getElectronAppDataPath = () => {
+  const OS_DATA_PATH = ospath.data()
+  const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  return ELECTRON_APP_DATA_PATH
+}
 
 if (!PRODUCT_NAME) {
   throw new Error('Root package is missing name')
@@ -47,11 +74,45 @@ const toHashName = (projectRoot) => {
   return `${name}-${hash}`
 }
 
+const modifyFileIfOutsideProjectDirectory = (projectRoot, filePath) => {
+  /**
+   * files that live outside of the project directory
+   * do not resolve correctly on Windows as we are trying to resolve the file to the project directory.
+   * This issue is only noticeable on windows since the absolute path gets appended to the project bundle
+   * path. In Unix based systems, this goes unnoticed because:
+   *     /Users/foo/project/nested/hash-bundle/Users/foo/project/file.js
+   * is a valid path in Unix, but
+   *     C:\\Users\\foo\\project\\nested\\hash-bundleC:\\Users\\foo\\project\\file.js
+   * is not a valid path in Windows
+   *
+   * To resolve this issue, we find the common ancestor directory between the project and file,
+   * take the path AFTER the common ancestor directory of the file, and append it to the project bundle directory.
+   * Effectively:
+   *     C:\\Users\\foo\\project\\nested\\hash-bundleC:\\Users\\foo\\project\\file.js
+   * will become
+   *     C:\\Users\\foo\\project\\nested\\hash-bundle\\file.js
+   * @see https://github.com/cypress-io/cypress/issues/8599
+   */
+
+  const relative = path.relative(projectRoot, filePath)
+  const isSubDirectory = relative && !relative.startsWith('..') && !path.isAbsolute(relative)
+
+  // if the file does NOT live inside the project directory,
+  // find the common ancestor of the project and file to get the file subpath to append to the project bundle directory
+  if (!isSubDirectory) {
+    const commonDirectoryPath = findCommonAncestor(projectRoot, filePath)
+
+    filePath = replace(filePath, commonDirectoryPath, '')
+  }
+
+  return filePath
+}
+
 module.exports = {
   toHashName,
-
+  findCommonAncestor,
   getBundledFilePath (projectRoot, filePath) {
-    return this.projectsPath(toHashName(projectRoot), 'bundles', filePath)
+    return this.projectsPath(toHashName(projectRoot), 'bundles', modifyFileIfOutsideProjectDirectory(projectRoot, filePath))
   },
 
   ensure () {
@@ -98,7 +159,7 @@ module.exports = {
       folder = `${folder}-e2e-test`
     }
 
-    const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+    const p = path.join(getElectronAppDataPath(), 'cy', folder, ...paths)
 
     log('path: %s', p)
 
@@ -106,7 +167,7 @@ module.exports = {
   },
 
   electronPartitionsPath () {
-    return path.join(ELECTRON_APP_DATA_PATH, 'Partitions')
+    return path.join(getElectronAppDataPath(), 'Partitions')
   },
 
   projectsPath (...paths) {
