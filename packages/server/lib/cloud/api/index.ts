@@ -307,7 +307,10 @@ type UpdateInstanceArtifactsOptions = {
   timeout?: number
 }
 
-let preflightResult = {
+let preflightResult: {
+  encrypt: boolean
+  apiUrl?: string
+} = {
   encrypt: true,
 }
 
@@ -426,12 +429,26 @@ export default {
       }
 
       if (script) {
-        const { testingType } = options
-        const { runId } = result
-
         await options.project.protocolManager.setupProtocol(script, {
-          runId,
-          testingType,
+          runId: result.runId,
+          groupId: result.groupId,
+          machineId: result.machineId,
+          projectRoot: options.projectRoot,
+          ci: options.ci,
+          ciBuildId: options.ciBuildId,
+          projectId: options.projectId,
+          recordKey: options.recordKey,
+          commit: options.commit,
+          group: options.group,
+          platform: options.platform,
+          parallel: options.parallel,
+          testingType: options.testingType,
+          config: options.project.getConfig(),
+          cloudApi: {
+            retryWithBackoff: this.retryWithBackoff,
+            rp: this.rp,
+          },
+          preflightResult,
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }
