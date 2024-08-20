@@ -87,12 +87,8 @@ export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
   projectId: string
-  // TODO: do we need the preflightResult or can we just use the apiRoutes?
-  preflightResult: {
-    apiUrl?: string
-    encrypt: boolean
-  }
   cloudApi: {
+    url: string
     retryWithBackoff (fn: (attemptIndex: number) => Promise<any>): Promise<any>
     requestPromise: {
       get (options: any): Promise<any>

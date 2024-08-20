@@ -307,10 +307,7 @@ type UpdateInstanceArtifactsOptions = {
   timeout?: number
 }
 
-let preflightResult: {
-  encrypt: boolean
-  apiUrl?: string
-} = {
+let preflightResult = {
   encrypt: true,
 }
 
@@ -434,10 +431,10 @@ export default {
           projectId: options.projectId,
           testingType: options.testingType,
           cloudApi: {
+            url: apiUrl,
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
-          preflightResult,
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }
