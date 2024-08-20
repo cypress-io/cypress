@@ -10,6 +10,7 @@ _Released 8/27/2024 (PENDING)_
 **Features:**
 
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
+- Updated the protocol to allow making Cloud API requests. Addressed in [#30066](https://github.com/cypress-io/cypress/pull/30066).
 
 **Dependency Updates:**
 
