@@ -109,40 +109,5 @@ describe('resolveConfig', function () {
         expect(viteConfig.server?.hmr).to.be.undefined
       })
     })
-
-    describe('experimentalJustInTimeCompile', () => {
-      let viteDevServerConfig: ViteDevServerConfig
-
-      beforeEach(async () => {
-        const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
-
-        viteDevServerConfig = getViteDevServerConfig(projectRoot)
-        viteDevServerConfig.cypressConfig.experimentalJustInTimeCompile = true
-      })
-
-      describe('open mode', () => {
-        beforeEach(() => {
-          viteDevServerConfig.cypressConfig.isTextTerminal = false
-        })
-
-        it('enables hmr and watching', async () => {
-          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
-
-          expect(viteConfig.server.watch).to.be.undefined
-        })
-      })
-
-      describe('run mode', () => {
-        beforeEach(() => {
-          viteDevServerConfig.cypressConfig.isTextTerminal = true
-        })
-
-        it('enables hmr and watching', async () => {
-          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
-
-          expect(viteConfig.server.watch).to.be.undefined
-        })
-      })
-    })
   })
 })

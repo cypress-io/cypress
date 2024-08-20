@@ -59,16 +59,10 @@ describe('component testing: experimentalJustInTimeCompile', function () {
         },
       })
       const serverPortRegex = /Component testing webpack server 5 started on port 8080/g
-      const componentsCompiledSeparatelyRegex = /experimental-JIT\/webpack\/src\/Component\-[1-3].cy.jsx/g
-
       const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
-      const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length
 
       // expect 1 server to be created
       expect(totalServersSamePort).to.equal(1)
-      // expect each component compiled individually (3 occurrences total, the first occurs twice due to file writes)
-      // sometimes, the first output does not get logged. This is not of concern, hence the greaterThan assertion
-      expect(totalComponentsCompiledSeparately).to.be.greaterThan(3)
     },
   })
 })
