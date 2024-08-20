@@ -16,7 +16,8 @@ export default defineConfig({
   experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   component: {
-    experimentalSingleTabRunMode: true,
+    experimentalJustInTimeCompile: true,
+    // experimentalSingleTabRunMode: true,
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
