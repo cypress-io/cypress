@@ -38,6 +38,7 @@ type AfterSpecRun = any
 type Project = NonNullable<ReturnType<typeof openProject['getProject']>>
 
 let currentSetScreenshotMetadata: SetScreenshotMetadata
+let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
@@ -417,6 +418,12 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
       new Promise((res) => {
         project.once('end', (results) => {
           debug('project ended with results %O', results)
+          // If the project ends and the spec is skipped, treat the run as cancelled
+          // as we do not want to update the dev server unnecessarily for experimentalJustInTimeCompile.
+          if (results?.skippedSpec) {
+            isRunCancelled = true
+          }
+
           res(results)
         })
       }),
@@ -785,13 +792,18 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
     const isExperimentalJustInTimeCompile = options.testingType === 'component' && config.experimentalJustInTimeCompile
 
+    // Only update the dev server if the run is not cancelled
     if (isExperimentalJustInTimeCompile) {
-      const ctx = require('@packages/data-context').getCtx()
+      if (isRunCancelled) {
+        debug(`isExperimentalJustInTimeCompile=true and run is cancelled. Not updating dev server with spec ${spec.absolute}.`)
+      } else {
+        const ctx = require('@packages/data-context').getCtx()
 
-      // If in run mode, we need to update the dev server with our spec.
-      // in open mode, this happens in the browser through the web socket, but we do it here in run mode
-      // to try and have it happen as early as possible to make the test run as fast as possible
-      await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
+        // If in run mode, we need to update the dev server with our spec.
+        // in open mode, this happens in the browser through the web socket, but we do it here in run mode
+        // to try and have it happen as early as possible to make the test run as fast as possible
+        await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
+      }
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
