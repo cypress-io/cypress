@@ -495,7 +495,7 @@ describe('makeWebpackConfig', () => {
               }),
             })
 
-            expect(actual.watchOptions?.ignored).to.be.undefined
+            expect(actual.watchOptions?.ignored).to.deep.equal(/node_modules/)
           })
         })
       })
