@@ -255,7 +255,8 @@
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",
-      "**/expect"
+      "**/expect",
+      "**/tar"
     ]
   },
   "lint-staged": {
