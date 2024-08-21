@@ -348,7 +348,7 @@ export class EventManager {
     // While we must move to pagehide for Chromium, it does not work for our
     // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
     // event as a proxy for AUT unloads.
-    const unloadEvent = this.isBrowserFamily({ family: 'chromium' }) ? 'pagehide' : 'unload'
+    const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
 
     $window.on(unloadEvent, (e) => {
       this._clearAllCookies()
@@ -401,7 +401,7 @@ export class EventManager {
     this._addListeners()
   }
 
-  isBrowserFamily (family) {
+  isBrowserFamily (family: string) {
     return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
