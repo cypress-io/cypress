@@ -485,7 +485,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             echo "Installing Yarn"
-            npm install yarn@1.22.22 --location=global # ensure yarn is installed with the correct node engine
+            npm install yarn@1.19.0 --location=global # ensure yarn is installed with the correct node engine
             yarn check-node-version
       - run:
           name: Check Node
@@ -1350,7 +1350,7 @@ jobs:
       - run:
           command: corepack enable
       - run:
-          command: yarn set version 1.22.22
+          command: yarn set version 1.19.0
       - run: 
           command: yarn
       - verify-build-setup:
@@ -1381,7 +1381,7 @@ jobs:
       - run:
           command: corepack enable
       - run:
-          command: yarn set version 1.22.22
+          command: yarn set version 1.19.0
       - run: 
           command: yarn
       - run:
@@ -1631,7 +1631,7 @@ jobs:
       - run:
           command: corepack enable
       - run:
-          command: yarn set version 1.22.22
+          command: yarn set version 1.19.0
       - run: 
           command: yarn
       - run:
@@ -1738,11 +1738,11 @@ jobs:
           at: ~/
       # required node is set in the docker container already with yarn 4
       - run:
-          name: Install monorepo dependencies with yarn v1.22.22
+          name: Install monorepo dependencies with yarn v1.19.0
           command: |
             # we need to install the monorepo dependencies here in a fresh manner.
             # set to the expected version of yarn and install the dependencies
-            yarn set version 1.22.22
+            yarn set version 1.19.0
             yarn install --ignore-scripts
       - run:
           name: install dependencies in yarn-v4.3.1-pnp-dep-resolution with yarn berry 4.3.1
