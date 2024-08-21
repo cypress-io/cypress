@@ -261,6 +261,7 @@ export class ProjectLifecycleManager {
           }
 
           if (!devServerOptions?.port) {
+            span?.end()
             throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
           }
 
