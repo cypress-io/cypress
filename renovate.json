@@ -26,6 +26,9 @@
       ]
     }
   ],
+  "postUpdateOptions": [
+    "yarnDedupeHighest"
+  ],
   "prConcurrentLimit": 4,
   "prHourlyLimit": 1,
   "rangeStrategy": "bump",
