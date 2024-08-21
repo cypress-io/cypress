@@ -14,6 +14,7 @@ _Released 8/27/2024 (PENDING)_
 **Dependency Updates:**
 
 - Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
+- Updated `simple-git` from `3.16.0` to `3.25.0`. Addressed in [#30076](https://github.com/cypress-io/cypress/pull/30076).
 
 ## 13.13.3
 
