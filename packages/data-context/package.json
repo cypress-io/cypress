@@ -51,7 +51,7 @@
     "randomstring": "1.3.0",
     "react-docgen": "6.0.4",
     "semver": "7.3.2",
-    "simple-git": "3.16.0",
+    "simple-git": "3.25.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.6",
     "wonka": "^4.0.15"
