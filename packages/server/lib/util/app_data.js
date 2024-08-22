@@ -14,26 +14,25 @@ const replace = require('lodash/replace')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
 
-// original source code: https://github.com/isaacs/common-ancestor-path
-// but modified to be more testable
-const findCommonAncestor = (a, b) => {
+const findCommonAncestor = (path1, path2) => {
   const sep = os.platform() === 'win32' ? '\\' : '/'
 
-  function* commonArrayMembers (a, b) {
-    const [l, s] = a.length > b.length ? [a, b] : [b, a]
+  function* commonArrayMembersGenerator (path1, path2) {
+    const [longer, shorter] = path1.length > path2.length ? [path1, path2] : [path2, path1]
 
-    for (const x of s) {
-      if (x === l.shift()) {
-        yield x
+    // find when the paths eventually differ.
+    for (const pathSegment of shorter) {
+      if (pathSegment === longer.shift()) {
+        yield pathSegment
       } else {
         break
       }
     }
   }
 
-  return a === b ? a
-    : path.parse(a).root !== path.parse(b).root ? null
-      : [...commonArrayMembers(path.normalize(a).split(sep), path.normalize(b).split(sep))].join(sep)
+  return path1 === path2 ? path1
+    : path.parse(path1).root !== path.parse(path2).root ? null
+      : [...commonArrayMembersGenerator(path.normalize(path1).split(sep), path.normalize(path2).split(sep))].join(sep)
 }
 
 const getElectronAppDataPath = () => {
