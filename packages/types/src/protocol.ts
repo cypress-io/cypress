@@ -86,6 +86,14 @@ export type CaptureArtifact = {
 export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
+  projectId: string
+  cloudApi: {
+    url: string
+    retryWithBackoff (fn: (attemptIndex: number) => Promise<any>): Promise<any>
+    requestPromise: {
+      get (options: any): Promise<any>
+    }
+  }
   mountVersion?: number
 }
 
