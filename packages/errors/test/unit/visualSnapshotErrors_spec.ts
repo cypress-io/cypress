@@ -1259,6 +1259,11 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+      return {
+        default: [],
+      }
+    },
     CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: () => {
       return {
         default: ['/path/to/config.ts', {}],

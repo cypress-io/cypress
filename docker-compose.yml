@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   dev:
     image: cypress/browsers:latest

@@ -5,11 +5,18 @@ _Released 8/27/2024 (PENDING)_
 
 **Performance:**
 
-- Fixed a potential memory leak in the Cypress server when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988)
+- Fixed a potential memory leak in the Cypress server when re-connecting to an unintentionally disconnected CDP connection. Fixes [#29744](https://github.com/cypress-io/cypress/issues/29744). Addressed in [#29988](https://github.com/cypress-io/cypress/pull/29988).
+
+**Features:**
+
+- Added new
+  [`experimentalJustInTimeCompile`](/guides/references/experiments#Configuration)
+  configuration option for component testing. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. [`experimentalJustInTimeCompile`](/guides/references/experiments#Configuration) is currently supported for [`webpack`](https://www.npmjs.com/package/webpack) and [`vite`](https://www.npmjs.com/package/vite). Addresses [#29244](https://github.com/cypress-io/cypress/issues/29244).
 
 **Features:**
 
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
+- Updated the protocol to allow making Cloud API requests. Addressed in [#30066](https://github.com/cypress-io/cypress/pull/30066).
 
 **Dependency Updates:**
 

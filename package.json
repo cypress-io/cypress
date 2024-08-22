@@ -267,6 +267,7 @@
     "**/@types/enzyme": "3.10.5",
     "**/@types/react": "16.9.50",
     "**/jquery": "3.4.1",
+    "**/nx-cloud/**/tar": "6.1.15",
     "**/pretty-format": "26.4.0",
     "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.5",
