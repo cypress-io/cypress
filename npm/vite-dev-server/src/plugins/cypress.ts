@@ -43,6 +43,7 @@ export const Cypress = (
   let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
+    debug(`dev-server:secs:changed: ${specs.map((spec) => spec.relative)}`)
     specsPathsSet = getSpecsPathsSet(specs)
   })
 

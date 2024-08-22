@@ -392,6 +392,18 @@ async function initialize () {
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
+async function updateDevServerWithSpec (spec: SpecFile) {
+  return new Promise<void>((resolve, _reject) => {
+    // currently, we don't have criteria to reject the promise
+    // as the dev-server can take a long time to compile, which is variable per user.
+    Cypress.once('dev-server:on-spec-updated', () => {
+      resolve()
+    })
+
+    Cypress.emit('dev-server:on-spec-update', spec)
+  })
+}
+
 /**
  * This wraps all of the required interactions to run a spec.
  * Here are the things that happen:
@@ -437,6 +449,13 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+    if (config.experimentalJustInTimeCompile && !config.isTextTerminal) {
+      // If running with experimentalJustInTimeCompile enabled and in open mode,
+      // send a signal to the dev server to load the spec before running
+      // since the spec and related resources are not yet compiled.
+      await updateDevServerWithSpec(spec)
+    }
+
     return runSpecCT(config, spec)
   }
 
