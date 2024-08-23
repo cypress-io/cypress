@@ -41,10 +41,12 @@ describe('ProjectConfigIpc', () => {
     let forkSpy
 
     beforeEach(() => {
+      process.env.CYPRESS_INTERNAL_MOCK_TYPESCRIPT_INSTALL = 'true'
       forkSpy = sinon.spy(childProcess, 'fork')
     })
 
     afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_MOCK_TYPESCRIPT_INSTALL
       forkSpy.restore()
       projectConfigIpc.cleanupIpc()
     })
