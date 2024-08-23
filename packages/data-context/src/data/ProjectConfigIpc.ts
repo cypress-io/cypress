@@ -308,7 +308,7 @@ export class ProjectConfigIpc extends EventEmitter {
         // in nodejs 22.7.0, the --experimental-detect-module option is now enabled by default.
         // We need to disable it with the --no-experimental-detect-module flag.
         // @see https://github.com/cypress-io/cypress/issues/30084
-        if (semver.gte(this.nodeVersion || '', '22.7.0')) {
+        if (this.nodeVersion && semver.gte(this.nodeVersion, '22.7.0')) {
           debug(`detected node version ${this.nodeVersion}, adding --no-experimental-detect-module option to child_process NODE_OPTIONS.`)
           tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-detect-module`
         }
