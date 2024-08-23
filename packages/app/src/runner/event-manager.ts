@@ -16,6 +16,7 @@ import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -347,7 +348,7 @@ export class EventManager {
     // While we must move to pagehide for Chromium, it does not work for our
     // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
     // event as a proxy for AUT unloads.
-    const unloadEvent = this.isBrowser({ family: 'chromium' }) ? 'pagehide' : 'unload'
+    const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
 
     $window.on(unloadEvent, (e) => {
       this._clearAllCookies()
@@ -400,10 +401,8 @@ export class EventManager {
     this._addListeners()
   }
 
-  isBrowser (browserName) {
-    if (!this.Cypress) return false
-
-    return this.Cypress.isBrowser(browserName)
+  isBrowserFamily (family: string) {
+    return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
   initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
