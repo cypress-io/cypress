@@ -2503,6 +2503,7 @@
     "./node_modules/lodash/keys.js",
     "./node_modules/lodash/memoize.js",
     "./node_modules/lodash/property.js",
+    "./node_modules/lodash/replace.js",
     "./node_modules/lodash/stubArray.js",
     "./node_modules/lodash/stubFalse.js",
     "./node_modules/lodash/toFinite.js",
@@ -4336,5 +4337,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "2fd2d797a8e75a605032d6dbe2f64317d2d6edc22d3134d14d90e2482d3b5212"
+  "deferredHash": "45db00afcffffb9b14e8fc701c1f1b4cbffa26a675ba4a7a72540073059af5d4"
 }
