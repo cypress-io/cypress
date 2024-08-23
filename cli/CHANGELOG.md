@@ -18,7 +18,7 @@ _Released 8/27/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where files outside the Cypress project directory were not calculating the bundle output path correctly for the `file:preprocessor`. Addresses [#8599](https://github.com/cypress-io/cypress/issues/8599).
-- Fixed an issue where Cypress would not run if Nodejs version `22.7.0` was being used with Typescript and ES Modules. Fixes [#30084](https://github.com/cypress-io/cypress/issues/30084).
+- Fixed an issue where Cypress would not run if Node.js version `22.7.0` was being used with TypeScript and ES Modules. Fixes [#30084](https://github.com/cypress-io/cypress/issues/30084).
 
 **Dependency Updates:**
 
