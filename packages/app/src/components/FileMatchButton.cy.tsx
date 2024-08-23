@@ -2,7 +2,7 @@
 // Defining emits for "Button.vue" removes the native handler on the
 // <button> element. vue-tsc just can't handle this yet.
 import FileMatchButton from './FileMatchButton.vue'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 import { ref } from 'vue'
 const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
