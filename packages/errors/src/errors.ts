@@ -1319,6 +1319,12 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
+  EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+    return errTemplate`\
+    The ${fmt.highlight(`experimentalJustInTimeCompile`)} experiment is currently only supported for Component Testing.
+
+    If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/just-in-time-compile`
+  },
   EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
     const code = errPartial`
     {
