@@ -1,14 +1,17 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import Marionette from 'marionette-client'
-import { Command } from 'marionette-client/lib/marionette/message.js'
+// @ts-ignore
+import Marionette from './marionette/marionette'
+// @ts-ignore
+import { Command } from './marionette/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
+import WebSocket from 'ws'
 
 const errors = require('../errors')
 
@@ -23,7 +26,7 @@ let timings = {
 }
 
 let driver
-
+let ws
 const sendMarionette = (data) => {
   return driver.send(new Command(data))
 }
@@ -131,6 +134,7 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
   await browserCriClient.currentlyAttachedTarget?.close().catch(() => {})
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
+  // we would replace this with Bidi here
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)
 
   await options.onInitializeNewBrowserTab()
@@ -348,8 +352,41 @@ export default {
 
       sendMarionette({
         name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
-      }).then(() => {
+        // https://w3c.github.io/webdriver-bidi/#establishing
+        parameters: {
+          acceptInsecureCerts: true,
+          webSocketUrl: true,
+        },
+      }).then(({ capabilities, ...a }) => {
+        const wsUrl = capabilities.webSocketUrl
+
+        // create a new websocket from the weboscket url created through marionette
+        ws = new WebSocket(wsUrl)
+
+        ws.on('error', (e) => {
+          debugger
+          console.log(`an error happened: ${e}`)
+        })
+
+        ws.on('message', function message (data) {
+          debugger
+          // bidi events should now be streaming in
+          console.log('received: %s', data)
+        })
+
+        ws.on('open', async function open (a) {
+          // to create a new session, will not work currently as marionette has created this for us
+          // const mockPayloadNew = { 'id': 1, 'method': 'session.new', 'params': { 'capabilities': { 'alwaysMatch': { 'acceptInsecureCerts': true, 'unhandledPromptBehavior': { 'default': 'ignore' }, 'webSocketUrl': true } } } }
+          // ws.send(JSON.stringify(mockPayloadNew))
+
+          // subscribe to bidi events and send it off
+          const mockPayloadSubscribe = { 'id': 4, 'method': 'session.subscribe', 'params': { 'events': ['browsingContext', 'network', 'log', 'script'] } }
+
+          ws.send(JSON.stringify(mockPayloadSubscribe))
+
+          debugger
+        })
+
         return Bluebird.all(_.map(extensions, (path) => {
           return sendMarionette({
             name: 'Addon:Install',

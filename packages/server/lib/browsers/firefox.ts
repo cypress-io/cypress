@@ -204,7 +204,10 @@ const defaultPreferences = {
   // remote.active-protocol=2
   // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
   // @see https://github.com/cypress-io/cypress/issues/29713
-  'remote.active-protocols': 2,
+  // 'remote.active-protocols': 2,
+  // for BiDi
+  // 'remote.active-protocols': 1,
+  'remote.active-protocols': 3,
   // Enable Remote Agent
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1544393
   'remote.enabled': true,
@@ -427,6 +430,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
+
+  // bidi
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
