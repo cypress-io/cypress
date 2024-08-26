@@ -1437,6 +1437,20 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # verify accessibility scores from Cypress
+  get-accessibility-results:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - run:
+          name: Install extract-cloud-results package
+          command: |
+            npm install --force https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz
+      - run:
+          name: Verify Accessibility Results
+          command: |
+            node ./scripts/verify-accessibility-results.js
+
   ready-to-release:
     <<: *defaults
     resource_class: small
@@ -2658,6 +2672,18 @@ linux-x64-workflow: &linux-x64-workflow
     - percy-finalize:
         context: test-runner:percy
         required_env_var: PERCY_TOKEN
+        requires:
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+    - get-accessibility-results:
         requires:
           - cli-visual-tests
           - reporter-integration-tests
