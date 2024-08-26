@@ -21,6 +21,10 @@ _Released 8/27/2024 (PENDING)_
 - Fixed an issue where files outside the Cypress project directory were not calculating the bundle output path correctly for the `file:preprocessor`. Addresses [#8599](https://github.com/cypress-io/cypress/issues/8599).
 - Correctly determines current browser family when choosing between `unload` and `pagehide` options in App Runner. Fixes [#29880](https://github.com/cypress-io/cypress/issues/29880).
 
+**Misc:**
+
+- Allow HiDPI Screen running wayland to use cypress window/browser by adding `--ozone-platform-hint=auto` flag to the electron's runtime argument. Addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
+
 **Dependency Updates:**
 
 - Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
