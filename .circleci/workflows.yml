@@ -2292,6 +2292,11 @@ jobs:
 
   test-kitchensink-against-staging:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
     steps:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
