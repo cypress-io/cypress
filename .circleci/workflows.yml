@@ -2685,16 +2685,11 @@ linux-x64-workflow: &linux-x64-workflow
           - run-vite-dev-server-integration-tests
     - get-accessibility-results:
         requires:
-          - cli-visual-tests
-          - reporter-integration-tests
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
     - lint-types:
         requires:
           - build
