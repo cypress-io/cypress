@@ -31,6 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
         - 'publish-binary'
+        - 'chore/support_hidpi_wayland'
         - 'ryanm/chore/fix-kitchensink-against-staging'
 
 # usually we don't build Mac app - it takes a long time
@@ -2292,12 +2293,6 @@ jobs:
 
   test-kitchensink-against-staging:
     <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium+
-    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
@@ -2305,7 +2300,7 @@ jobs:
       - install-required-node
       - run:
           name: Install prod dependencies
-          command: yarn --production --ignore-engines
+          command: yarn --production
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
