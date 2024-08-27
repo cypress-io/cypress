@@ -2305,7 +2305,7 @@ jobs:
       - install-required-node
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: yarn --production --ignore-engines
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
