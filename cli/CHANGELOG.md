@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.1
+
+_Released 8/29/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where no description was available for the `experimentalJustInTimeCompile` feature inside the Cypress application settings page. Addresses [#30126](https://github.com/cypress-io/cypress/issues/30126).
+
 ## 13.14.0
 
 _Released 8/27/2024_
