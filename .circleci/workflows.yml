@@ -1451,6 +1451,8 @@ jobs:
           name: Verify Accessibility Results
           command: |
             node ./scripts/verify-accessibility-results.js
+      - persist_to_workspace:
+          root: ~/
 
   ready-to-release:
     <<: *defaults
