@@ -1,5 +1,5 @@
 import JustMyLuck from 'just-my-luck'
-import faker from 'faker'
+import faker from '@faker-js/faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

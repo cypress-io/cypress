@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.0
 
-_Released 8/27/2024 (PENDING)_
+_Released 8/27/2024_
 
 **Performance:**
 
@@ -15,11 +15,17 @@ _Released 8/27/2024 (PENDING)_
 - `.type({upArrow})` and `.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
 - Updated the protocol to allow making Cloud API requests. Addressed in [#30066](https://github.com/cypress-io/cypress/pull/30066).
+- Passing the browser without the testing type (i.e. `cypress open --browser <browser-name-or-path>`) will now directly launch the browser after the testing type is selected. Addresses [#22003](https://github.com/cypress-io/cypress/issues/22003). Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
 - Fixed an issue where files outside the Cypress project directory were not calculating the bundle output path correctly for the `file:preprocessor`. Addresses [#8599](https://github.com/cypress-io/cypress/issues/8599).
+- Fixed an issue where Cypress would not run if Node.js version `22.7.0` was being used with TypeScript and ES Modules. Fixes [#30084](https://github.com/cypress-io/cypress/issues/30084).
 - Correctly determines current browser family when choosing between `unload` and `pagehide` options in App Runner. Fixes [#29880](https://github.com/cypress-io/cypress/issues/29880).
+
+**Misc:**
+
+- Allow HiDPI Screen running wayland to use cypress window/browser by adding `--ozone-platform-hint=auto` flag to the electron's runtime argument. Addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
 
 **Dependency Updates:**
 

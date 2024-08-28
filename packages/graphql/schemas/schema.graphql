@@ -1444,6 +1444,11 @@ type LocalSettingsPreferences {
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
+
+  """
+  Determine if the browser should launch when the browser flag is passed alone
+  """
+  shouldLaunchBrowserFromOpenBrowser: Boolean
   specListWidth: Int
   wasBrowserSetInCLI: Boolean
 }
