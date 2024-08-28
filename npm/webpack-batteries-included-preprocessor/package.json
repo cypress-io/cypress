@@ -46,7 +46,7 @@
     "url": "^0.11.1",
     "util": "^0.12.5",
     "vm-browserify": "^1.1.2",
-    "webpack": "^5.88.2"
+    "webpack": "^5.94.0"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
