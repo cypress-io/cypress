@@ -1443,6 +1443,7 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - restore_cached_workspace
       - run:
           name: Install extract-cloud-results package
           command: |
@@ -1451,8 +1452,6 @@ jobs:
           name: Verify Accessibility Results
           command: |
             node ./scripts/verify-accessibility-results.js
-      - persist_to_workspace:
-          root: ~/
 
   ready-to-release:
     <<: *defaults
