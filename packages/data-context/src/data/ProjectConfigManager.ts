@@ -567,6 +567,7 @@ export class ProjectConfigManager {
       this.reloadCypressEnvFile(),
     ])
 
+    debug('building base full config')
     this._cachedFullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
 
     return this._cachedFullConfig

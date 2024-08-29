@@ -1,9 +1,12 @@
 import execa from 'execa'
 import _ from 'lodash'
 import os from 'os'
+import Debug from 'debug'
 
 import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
+
+const debug = Debug('cypress:data-context:browser-data-source')
 
 let isPowerShellAvailable: undefined | boolean
 let powerShellPromise: Promise<void> | undefined
@@ -47,13 +50,21 @@ export class BrowserDataSource {
    */
   async allBrowsers () {
     if (this.ctx.coreData.allBrowsers) {
+      debug('found allBrowsers in coreData ctx, returning early')
+
       return this.ctx.coreData.allBrowsers
     }
 
+    debug('waiting for config to load')
     const p = await this.ctx.project.getConfig()
+
+    debug('waiting for machineBrowsers')
+
     const machineBrowsers = await this.machineBrowsers()
 
+    debug('machine browsers loaded')
     if (!p.browsers) {
+      debug('no browsers set in config')
       this.ctx.coreData.allBrowsers = Promise.resolve(machineBrowsers)
 
       return this.ctx.coreData.allBrowsers
@@ -70,6 +81,8 @@ export class BrowserDataSource {
     }, [])
 
     this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
+
+    debug('returning browsers w/ custom (config) browser entry')
 
     return this.ctx.coreData.allBrowsers
   }
