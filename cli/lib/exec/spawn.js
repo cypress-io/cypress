@@ -155,7 +155,7 @@ module.exports = {
 
         const { onStderrData } = overrides
         const envOverrides = util.getEnvOverrides(options)
-        const electronArgs = []
+        const electronArgs = ['--ozone-platform-hint=auto']
         const node11WindowsFix = isPlatform('win32')
 
         let startScriptPath
