@@ -146,7 +146,7 @@
     "electron-builder": "^23.6.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
-    "eslint-plugin-cypress": "2.11.2",
+    "eslint-plugin-cypress": "3.5.0",
     "eslint-plugin-graphql": "4.0.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-json-format": "2.0.1",
