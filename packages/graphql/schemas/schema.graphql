@@ -1185,6 +1185,7 @@ enum ErrorTypeEnum {
   ERROR_READING_FILE
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
+  EXPERIMENTAL_JIT_COMPONENT_TESTING
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
@@ -1443,6 +1444,11 @@ type LocalSettingsPreferences {
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
+
+  """
+  Determine if the browser should launch when the browser flag is passed alone
+  """
+  shouldLaunchBrowserFromOpenBrowser: Boolean
   specListWidth: Int
   wasBrowserSetInCLI: Boolean
 }

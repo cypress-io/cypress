@@ -5,6 +5,7 @@ import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
+import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { ProtocolManagerShape } from '@packages/types'
@@ -23,7 +24,7 @@ type BrowserCriClientOptions = {
   host: string
   port: number
   browserName: string
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
@@ -33,7 +34,7 @@ type BrowserCriClientCreateOptions = {
   browserName: string
   fullyManageTabs?: boolean
   hosts: string[]
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
@@ -181,7 +182,7 @@ export class BrowserCriClient {
   private host: string
   private port: number
   private browserName: string
-  private onAsynchronousError: Function
+  private onAsynchronousError: (err: CypressError) => void
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
@@ -479,7 +480,7 @@ export class BrowserCriClient {
       browserCriClient.onClose = resolve
 
       // or when the browser's CDP ws connection is closed
-      browserClient.ws.once('close', () => {
+      browserClient.ws?.once('close', () => {
         resolve(false)
       })
     })

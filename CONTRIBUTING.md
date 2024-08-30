@@ -212,7 +212,7 @@ You must have the following installed on your system to contribute locally:
 
 `sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The Python versions shipped with Ubuntu versions `20.04`, `23.10` and `22.04` are compatible with Cypress requirements.
+The Python versions shipped with Ubuntu versions `20.04` and `22.04` are compatible with Cypress requirements.
 
 Only on Ubuntu `24.04` install Python `3.11` by executing the following commands:
 
@@ -405,24 +405,6 @@ $ yarn docker
 There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [CircleCI config](.circleci/config.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
-
-#### Docker for built binary
-
-You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
-
-```shell
-$ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
-```
-
-Point the installation at a specific beta binary and NPM package archive (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
-
-```shell
-$ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
-$ export CYPRESS_CACHE_FOLDER=./cypress-cache
-$ yarn add https://cdn.cypress.io/beta/npm/.../cypress.tgz
-```
-
-Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
 
 #### Docker as a performance constrained environment
 

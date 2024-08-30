@@ -64,8 +64,8 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.24.5",
-    "@babel/preset-env": "7.24.5",
+    "@babel/cli": "7.24.8",
+    "@babel/preset-env": "7.25.3",
     "@cypress/angular": "0.0.0-development",
     "@cypress/angular-signals": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
@@ -91,7 +91,7 @@
     "chai-string": "1.5.0",
     "cross-env": "7.0.3",
     "dependency-check": "4.1.0",
-    "dtslint": "4.0.7",
+    "dtslint": "4.2.1",
     "execa-wrap": "1.4.0",
     "hasha": "5.2.2",
     "mocha": "6.2.2",

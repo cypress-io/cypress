@@ -426,12 +426,15 @@ export default {
       }
 
       if (script) {
-        const { testingType } = options
-        const { runId } = result
-
         await options.project.protocolManager.setupProtocol(script, {
-          runId,
-          testingType,
+          runId: result.runId,
+          projectId: options.projectId,
+          testingType: options.testingType,
+          cloudApi: {
+            url: apiUrl,
+            retryWithBackoff: this.retryWithBackoff,
+            requestPromise: this.rp,
+          },
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }
