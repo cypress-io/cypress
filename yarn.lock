@@ -8050,13 +8050,6 @@
   resolved "https://registry.yarnpkg.com/@types/stringify-object/-/stringify-object-3.3.1.tgz#9ee394931e63468de0412a8e19c9f021a7d1d24d"
   integrity sha512-bpCBW0O+QrMLNFBY/+rkZtGzcYRmc2aTD8qYHOMNUmednqETfEZtFcGEA11l9xqbIeiT1PgXG0eq3zqayVzZSQ==
 
-"@types/strip-ansi@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@types/strip-ansi/-/strip-ansi-5.2.1.tgz#acd97f1f091e332bb7ce697c4609eb2370fa2a92"
-  integrity sha512-1l5iM0LBkVU8JXxnIoBqNvg+yyOXxPeN6DNoD+7A9AN1B8FhYPSeIXgyNqwIqg1uzipTgVC2hmuDzB0u9qw/PA==
-  dependencies:
-    strip-ansi "*"
-
 "@types/strip-bom@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/strip-bom/-/strip-bom-3.0.0.tgz#14a8ec3956c2e81edb7520790aecf21c290aebd2"
@@ -29033,13 +29026,6 @@ stringify-object@^3.0.0, stringify-object@^3.3.0:
   dependencies:
     ansi-regex "^5.0.1"
 
-strip-ansi@*, strip-ansi@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-7.0.1.tgz#61740a08ce36b61e50e65653f07060d000975fb2"
-  integrity sha512-cXNxvT8dFNRVfhVME3JAe98mkXDYN2O1l7jmcwMnOslDeESg1rF/OZMtK0nRAhiari1unG5cD4jG3rapUAkLbw==
-  dependencies:
-    ansi-regex "^6.0.1"
-
 strip-ansi@4.0.0, strip-ansi@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-4.0.0.tgz#a8479022eb1ac368a871389b635262c505ee368f"
@@ -29060,6 +29046,13 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   integrity sha1-ajhfuIU9lS1f8F0Oiq+UJ43GPc8=
   dependencies:
     ansi-regex "^2.0.0"
+
+strip-ansi@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-7.0.1.tgz#61740a08ce36b61e50e65653f07060d000975fb2"
+  integrity sha512-cXNxvT8dFNRVfhVME3JAe98mkXDYN2O1l7jmcwMnOslDeESg1rF/OZMtK0nRAhiari1unG5cD4jG3rapUAkLbw==
+  dependencies:
+    ansi-regex "^6.0.1"
 
 strip-bom@^2.0.0:
   version "2.0.0"
