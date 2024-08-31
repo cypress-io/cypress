@@ -1,5 +1,5 @@
 import gulp from 'gulp'
-import rimraf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import cp from 'child_process'
 import * as path from 'path'
