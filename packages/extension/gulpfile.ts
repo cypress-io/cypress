@@ -13,7 +13,7 @@ async function cypressIcons () {
 }
 
 const clean = (done) => {
-  rimraf('dist', done)
+  rimraf('dist').then(() => done())
 }
 
 const manifest = (v: 'v2' | 'v3') => {
