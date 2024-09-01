@@ -42,8 +42,8 @@ describe('FileDataSource', () => {
           )
 
           expect(files).to.have.length(2)
-          expect(files[0]).to.eq(path.join(projectPath, 'root-script-1.js'))
-          expect(files[1]).to.eq(path.join(projectPath, 'root-script-2.js'))
+          expect(files[0]).to.eq(fileUtil.toPosix(path.join(projectPath, 'root-script-1.js')))
+          expect(files[1]).to.eq(fileUtil.toPosix(path.join(projectPath, 'root-script-2.js')))
         })
 
         it('finds files matching relative patterns in working dir', async () => {
@@ -213,7 +213,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['cypress/e2e/**.cy.js'],
+          ['/cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/' },
         )
       })
@@ -279,7 +279,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['cypress/e2e/**.cy.js'],
+          ['/cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
             cwd: '/',
@@ -317,8 +317,8 @@ describe('FileDataSource', () => {
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
           [
-            'node_modules/cypress/e2e/**.cy.js',
-            'cypress/e2e/**.cy.js',
+            '/node_modules/cypress/e2e/**.cy.js',
+            '/cypress/e2e/**.cy.js',
           ],
           {
             ...defaultGlobbyOptions,
@@ -355,7 +355,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['cypress/e2e/**.cy.js'],
+          ['/cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
             cwd: '/',
