@@ -1,8 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.2
+
 _Released 9/10/2024 (PENDING)_
 
-- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Addresses [30174](https://github.com/cypress-io/cypress/pull/30174).
+**Bugfixes:**
+
+- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Fixes [#30100](https://github.com/cypress-io/cypress/issues/30100).
 
 ## 13.14.1
 
