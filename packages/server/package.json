@@ -12,7 +12,7 @@
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "rebuild-better-sqlite3": "electron-rebuild -o better-sqlite3",
+    "rebuild-better-sqlite3": "electron-rebuild -f -o better-sqlite3",
     "repl": "node repl.js",
     "start": "node ../../scripts/cypress open --dev --global",
     "test": "node ./test/scripts/run.js",
