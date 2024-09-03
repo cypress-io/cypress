@@ -278,7 +278,7 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
-    it('does not throw if Fetch.enable on extra target throws', async () => {
+    it('does not throw if Fetch.enable on extra target throws', () => {
       const extraTargetCriClient = {
         send: sinon.stub().withArgs('Fetch.enable').rejects('Fetch.enable failed'),
         on: sinon.stub(),
