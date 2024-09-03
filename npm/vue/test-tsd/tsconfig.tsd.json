@@ -11,6 +11,6 @@
   ],
   "include": [
     "../dist",
-    "../test-dts"
+    "../test-tsd"
   ]
 }
