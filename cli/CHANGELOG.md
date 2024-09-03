@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.2
+_Released 9/10/2024 (PENDING)_
+
+- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Addresses [30174](https://github.com/cypress-io/cypress/pull/30174).
+
 ## 13.14.1
 
 _Released 8/29/2024_
 
 **Bugfixes:**
 
-- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Addresses [30174](https://github.com/cypress-io/cypress/pull/30174).
 - Fixed an issue where no description was available for the `experimentalJustInTimeCompile` feature inside the Cypress application settings page. Addresses [#30126](https://github.com/cypress-io/cypress/issues/30126).
 
 ## 13.14.0
