@@ -403,7 +403,10 @@ export class BrowserCriClient {
 
     browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 
-    await extraTargetCriClient.send('Fetch.enable')
+    await extraTargetCriClient.send('Fetch.enable').catch((err) => {
+      // swallow this error so it doesn't crash Cypress
+      debug('Fetch.enable failed on extra target#%s: %s', targetId, err)
+    })
 
     // we mark extra targets with this header, so that the proxy can recognize
     // where they came from and run only the minimal middleware necessary
