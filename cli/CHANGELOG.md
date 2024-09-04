@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## <RELEASE_VERSION>
+## 13.14.3
 
-_Released <RELEASE_DATE> (PENDING)_
+_Released 10/1/2024 (PENDING)_
 
 **Bugfixes:**
 
