@@ -1,7 +1,24 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.2
+
+_Released 9/4/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Fixes [#30100](https://github.com/cypress-io/cypress/issues/30100).
+- Fixed an issue where `cy.screenshot()` was timing out and Cypress was failing to start due to `GLib-GIO-ERROR` error. Reverts [#30109](https://github.com/cypress-io/cypress/pull/30109), the change to allow HiDPI screen for Wayland users. Fixes [#30172](https://github.com/cypress-io/cypress/issues/30172) and [#30160](https://github.com/cypress-io/cypress/issues/30160).
+
+## 13.14.1
+
+_Released 8/29/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where no description was available for the `experimentalJustInTimeCompile` feature inside the Cypress application settings page. Addresses [#30126](https://github.com/cypress-io/cypress/issues/30126).
+
 ## 13.14.0
 
-_Released 8/27/2024 (PENDING)_
+_Released 8/27/2024_
 
 **Performance:**
 
@@ -10,16 +27,22 @@ _Released 8/27/2024 (PENDING)_
 **Features:**
 
 - Added new
-  [`experimentalJustInTimeCompile`](/guides/references/experiments#Configuration)
-  configuration option for component testing. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. [`experimentalJustInTimeCompile`](/guides/references/experiments#Configuration) is currently supported for [`webpack`](https://www.npmjs.com/package/webpack) and [`vite`](https://www.npmjs.com/package/vite). Addresses [#29244](https://github.com/cypress-io/cypress/issues/29244).
+  [`experimentalJustInTimeCompile`](https://docs.cypress.io/guides/references/experiments#Configuration)
+  configuration option for component testing. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. [`experimentalJustInTimeCompile`](https://docs.cypress.io/guides/references/experiments#Configuration) is currently supported for [`webpack`](https://www.npmjs.com/package/webpack) and [`vite`](https://www.npmjs.com/package/vite). Addresses [#29244](https://github.com/cypress-io/cypress/issues/29244).
 - `.type({upArrow})` and `.type({downArrow})` now also works for date, month, week, time, datetime-local and range input types. Addresses [#29665](https://github.com/cypress-io/cypress/issues/29665).
 - Added a `CYPRESS_SKIP_VERIFY` flag to enable suppressing Cypress verification checks. Addresses [#22243](https://github.com/cypress-io/cypress/issues/22243).
 - Updated the protocol to allow making Cloud API requests. Addressed in [#30066](https://github.com/cypress-io/cypress/pull/30066).
+- Passing `--browser` flag alone will automatically launch browser after being guided through project and/or testing type selection. Addressed in [#28538](https://github.com/cypress-io/cypress/pull/28538).
 
 **Bugfixes:**
 
 - Fixed an issue where files outside the Cypress project directory were not calculating the bundle output path correctly for the `file:preprocessor`. Addresses [#8599](https://github.com/cypress-io/cypress/issues/8599).
+- Fixed an issue where Cypress would not run if Node.js version `22.7.0` was being used with TypeScript and ES Modules. Fixes [#30084](https://github.com/cypress-io/cypress/issues/30084).
 - Correctly determines current browser family when choosing between `unload` and `pagehide` options in App Runner. Fixes [#29880](https://github.com/cypress-io/cypress/issues/29880).
+
+**Misc:**
+
+- Allow HiDPI screen running Wayland to use Cypress window/browser by adding `--ozone-platform-hint=auto` flag to Electron's runtime argument. Addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
 
 **Dependency Updates:**
 

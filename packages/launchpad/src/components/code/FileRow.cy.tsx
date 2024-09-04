@@ -1,6 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 import { defaultMessages } from '@cy/i18n'
 
 const content = `import { defineConfig } from 'cypress'
