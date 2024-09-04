@@ -25,6 +25,7 @@ let timings = {
 
 let driver
 let bidiAutomation
+let foxdriver
 
 const sendMarionette = (data) => {
   return driver.send(new Command(data))
@@ -221,22 +222,29 @@ export default {
     return forceGcCc()
   },
 
-  setup ({
+  async setup ({
     automation,
     extensions,
     onError,
     url,
     marionettePort,
+    biDiWebSocketUrl,
     foxdriverPort,
     remotePort,
   }): Bluebird<BrowserCriClient> {
     debugger
 
+    await this.setupWebDriverBiDi(biDiWebSocketUrl)
+
+    await this.setupFoxdriver(foxdriverPort, extensions)
+
+    await this.setupMarionette(extensions, url, marionettePort)
+
     return Bluebird.all([
-      this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
+      // this.setupFoxdriver(foxdriverPort, extensions),
+      // this.setupMarionette(extensions, url, marionettePort),
       remotePort && setupRemote(remotePort, automation, onError),
-    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
+    ]).then(([browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
   connectToNewSpec,
@@ -245,14 +253,14 @@ export default {
 
   setupRemote,
 
-  async setupFoxdriver (port) {
+  async setupFoxdriver (port, extensions) {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
       getDelayMsForRetry,
     })
 
-    const foxdriver = await Foxdriver.attach('127.0.0.1', port)
+    foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
     // await foxdriver.tabs[0].console.startListeners()
     // // wait until page is loaded
@@ -264,13 +272,24 @@ export default {
 
     const { browser } = foxdriver
 
+    // extensions.forEach((extension) => {
+    //   debugger
+    //   browser.addons.installTemporaryAddon
+    //   // debugger
+    //   // launchOptions.args = launchOptions.args.concat([
+    //   //   '-install-global-extension',
+    //   //   extension,
+    //   // ])
+    // })
+    // write the extension???
+    // const a = [0, 5, 'Addon:Install', {
+    //   path: extensions[0],
+    //   temporary: true,
+    // }]
+
+    // browser.client.socket.write(JSON.stringify(a), 'utf8')
     browser.on('error', (err) => {
       debug('received error from foxdriver connection, ignoring %o', err)
-    })
-
-    browser.on('stdout', (a, b, c) => {
-      debug('thing %o', a)
-      debugger
     })
 
     forceGcCc = () => {
@@ -323,6 +342,13 @@ export default {
     }
   },
 
+  async setupWebDriverBiDi (webSocketUrl: string) {
+    bidiAutomation = await BidiAutomation.create(webSocketUrl)
+    debugger
+    await bidiAutomation.createNewSession()
+    debugger
+  },
+
   async setupMarionette (extensions, url, port) {
     const host = '127.0.0.1'
 
@@ -358,33 +384,32 @@ export default {
     .catch(onError('connection'))
 
     debugger
-    // await bidiAutomation.createNewSession()
+    // await new Bluebird((resolve, reject) => {
+    // const _onError = (from) => {
+    //   return onError(from, reject)
+    // }
 
-    debugger
-    await new Bluebird((resolve, reject) => {
-      const _onError = (from) => {
-        return onError(from, reject)
-      }
+    // const { tcp } = driver
 
-      const { tcp } = driver
+    // tcp.socket.on('error', _onError('Socket'))
+    // tcp.client.on('error', _onError('CommandStream'))
 
-      tcp.socket.on('error', _onError('Socket'))
-      tcp.client.on('error', _onError('CommandStream'))
+    // sendMarionette({
+    //   name: 'WebDriver:NewSession',
+    //   parameters: { acceptInsecureCerts: true },
+    // }).then(() => {
+    //   return Bluebird.all(_.map(extensions, (path) => {
+    //     debugger
 
-      sendMarionette({
-        name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
-      }).then(() => {
-        return Bluebird.all(_.map(extensions, (path) => {
-          return sendMarionette({
-            name: 'Addon:Install',
-            parameters: { path, temporary: true },
-          })
-        }))
-      })
-      .then(resolve)
-      .catch(_onError('commands'))
-    })
+    //     // return sendMarionette({
+    //     //   name: 'Addon:Install',
+    //     //   parameters: { path, temporary: true },
+    //     // })
+    //   }))
+    // })
+    // .then(resolve)
+    // .catch(_onError('commands'))
+    // })
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.

@@ -51,11 +51,13 @@ export function launch (
   }).timeout(30000)
 
   if (!waitForBiDiWebsocketUrl) {
+    // if we aren't using webdriver BiDi, then resolve this promise as we don't need to wait
     BiDiResolver('')
   }
 
   debug('spawning browser with opts %o', { browser, url, spawnOpts })
 
+  debugger
   const proc = utils.spawnWithArch(browser.path, args, spawnOpts)
 
   proc.stdout.on('data', (buf) => {
@@ -66,7 +68,6 @@ export function launch (
     const line = String(buf).trim()
 
     debug('%s stder-r: %s', browser.name, line)
-    debugger
     if (waitForBiDiWebsocketUrl && BiDiWebsocketUrlPromise.isPending()) {
       const lines = line.split('\n')
 
@@ -74,14 +75,12 @@ export function launch (
         const match = l.match(WEBDRIVER_BIDI_WEBSOCKET_ENDPOINT_REGEX)
 
         if (!match) {
-          debugger
           continue
         }
 
         const wsUrl = match[1]!
 
         debug(`found match for WebdriverBidi websocketUrl: ${wsUrl}`)
-        debugger
         BiDiResolver(wsUrl)
         break
       }

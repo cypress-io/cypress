@@ -21,6 +21,7 @@ import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import webExt from 'web-ext'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -412,7 +413,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
     args: [
-      '-marionette',
+      // '-marionette',
       '-new-instance',
       '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
@@ -481,6 +482,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     launchOptions,
   ] = await Promise.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
+    // HERE
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     options.videoApi && recordVideo(options.videoApi),
@@ -550,7 +552,61 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     profile.path(),
   ])
 
+  // here?
+  // https://kb.mozillazine.org/Installing_extensions
+  // launchOptions.extensions.forEach((extension) => {
+  //   debugger
+  //   launchOptions.args = launchOptions.args.concat([
+  //     '-install-global-extension',
+  //     extension,
+  //   ])
+  // })
+
+  debugger
   debug('launch in firefox', { url, args: launchOptions.args })
+  debugger
+  /**
+   * export type ExtensionBuildResult = {|
+  extensionPath: string,
+|};
+
+export type PackageCreatorParams = {|
+  manifestData?: ExtensionManifest,
+  sourceDir: string,
+  fileFilter: FileFilter,
+  artifactsDir: string,
+  overwriteDest: boolean,
+  showReadyMessage: boolean,
+  filename?: string,
+|};
+   */
+  const extensionRunner = await webExt.cmd
+  .build(
+    {
+    // These are command options derived from their CLI conterpart.
+    // In this example, --source-dir is specified as sourceDir.
+      sourceDir: launchOptions.extensions[0],
+      artifactsDir: launchOptions.extensions[0],
+      overwriteDest: true,
+      filename: 'CypressExtension.zip',
+    },
+    {
+    // These are non CLI related options for each function.
+    // You need to specify this one so that your NodeJS application
+    // can continue running after web-ext is finished.
+      shouldExitProgram: false,
+    },
+  )
+
+  // here?
+  // https://kb.mozillazine.org/Installing_extensions
+  // launchOptions.extensions.forEach((extension) => {
+  //   debugger
+  //   launchOptions.args = launchOptions.args.concat([
+  //     '-install-global-extension',
+  //     `${extension}/CypressExtension.zip`,
+  //   ])
+  // })
 
   const { proc: browserInstance, waitingForBiDiWebsocketUrl } = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
@@ -565,11 +621,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
-    debugger
-    const BidiWebsocketUrl = await waitingForBiDiWebsocketUrl
+    const biDiWebSocketUrl = await waitingForBiDiWebsocketUrl
 
     debugger
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, biDiWebSocketUrl, remotePort, onError: options.onError })
+
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
       // @see https://github.com/cypress-io/cypress/issues/6392

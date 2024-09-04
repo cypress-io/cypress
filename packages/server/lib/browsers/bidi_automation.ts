@@ -39,7 +39,7 @@ class BidiSocket {
   }
 
   request (params: any) {
-    new Promise((resolve, reject) => {
+    const callbackPromise = new Promise((resolve, reject) => {
       const callback = (data: any) => {
         debugger
         resolve(data)
@@ -54,10 +54,12 @@ class BidiSocket {
 
     params.id = ++this.#requestIdIncrementor
     this.#ws.send(JSON.stringify(params))
+
+    return callbackPromise
   }
 
-  static async create (host: string, port: number): Promise<BidiSocket> {
-    const ws = await WebdriverWebSocket.create(`ws://${host}:${port}/session`)
+  static async create (biDiWebSocketUrl: string): Promise<BidiSocket> {
+    const ws = await WebdriverWebSocket.create(`${biDiWebSocketUrl}/session`)
     const socketWrapper = new BidiSocket(ws)
 
     return socketWrapper
@@ -90,17 +92,22 @@ export class BidiAutomation {
 
   async createNewSession (capabilities: any = {}) {
     const method = 'session.new'
-    const params = { ...capabilities, acceptInsecureCerts: true }
-
+    const params = {
+      capabilities: {
+        firstMatch: capabilities?.firstMatch,
+        alwaysMatch: {
+          ...capabilities?.alwaysMatch,
+          // Capabilities that come from Puppeteer's API take precedence.
+          acceptInsecureCerts: true,
+          // webSocketUrl: true,
+        },
+      },
+    }
     const payload = {
       method,
       params,
     }
-
-    debugger
     const session = await this.#ws.request(payload)
-
-    debugger
 
     return session
   }
@@ -108,8 +115,8 @@ export class BidiAutomation {
   // possibly could do this to fix recording in firefox
   // https://w3c.github.io/webdriver-bidi/#command-browsingContext-captureScreenshot
 
-  static async create (host: string, port: number): Promise<any> {
-    const ws = await BidiSocket.create(host, port)
+  static async create (biDiWebSocketUrl: string): Promise<any> {
+    const ws = await BidiSocket.create(biDiWebSocketUrl)
     const bidiAutomation = new BidiAutomation(ws)
 
     return bidiAutomation
