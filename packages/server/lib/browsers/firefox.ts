@@ -468,11 +468,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     foxdriverPort,
     marionettePort,
   ] = await Promise.all([getPort(), getPort()])
+  // const foxdriverPort = await getPort()
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  // debug('available ports: %o', { foxdriverPort, marionettePort })
 
   const [
     cacheDir,
@@ -551,17 +552,24 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  const { proc: browserInstance, waitingForBiDiWebsocketUrl } = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
     ...launchOptions.env,
+
+  }, {
+    // TODO: gate this
+    waitForBiDiWebsocketUrl: true,
   })
 
   try {
     browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    debugger
+    const BidiWebsocketUrl = await waitingForBiDiWebsocketUrl
 
+    debugger
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
       // @see https://github.com/cypress-io/cypress/issues/6392

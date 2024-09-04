@@ -10,9 +10,6 @@ export class WebdriverWebSocket {
         perMessageDeflate: false,
         allowSynchronousEvents: false,
         maxPayload: 256 * 1024 * 1024, // 256Mb
-        headers: {
-          'User-Agent': `Puppeteer 123`,
-        },
       })
 
       ws.addEventListener('open', () => {

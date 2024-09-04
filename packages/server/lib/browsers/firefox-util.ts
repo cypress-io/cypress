@@ -230,6 +230,8 @@ export default {
     foxdriverPort,
     remotePort,
   }): Bluebird<BrowserCriClient> {
+    debugger
+
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
@@ -252,10 +254,23 @@ export default {
 
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
+    // await foxdriver.tabs[0].console.startListeners()
+    // // wait until page is loaded
+    // await new Promise((resolve) => setTimeout(resolve, 3000))
+    // // receive logs and page errors
+    // const logs = await foxdriver.tabs[0].console.getCachedMessages()
+
+    // console.log(logs)
+
     const { browser } = foxdriver
 
     browser.on('error', (err) => {
       debug('received error from foxdriver connection, ignoring %o', err)
+    })
+
+    browser.on('stdout', (a, b, c) => {
+      debug('thing %o', a)
+      debugger
     })
 
     forceGcCc = () => {
@@ -317,7 +332,7 @@ export default {
       getDelayMsForRetry,
     })
 
-    // bidiAutomation = await BidiAutomation.create(host, port)
+    //  bidiAutomation = await BidiAutomation.create(host, port)
 
     driver = new Marionette.Drivers.Promises({
       port,
