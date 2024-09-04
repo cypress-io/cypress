@@ -817,7 +817,7 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
+      expect(defaultSpecFileName).to.equal(toOS('cypress/component-tests/foo/ComponentName.spec.js'))
     })
 
     describe('jsx/tsx handling', () => {
