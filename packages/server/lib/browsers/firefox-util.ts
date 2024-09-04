@@ -9,6 +9,7 @@ import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
+import { BidiAutomation } from './bidi_automation'
 
 const errors = require('../errors')
 
@@ -23,6 +24,7 @@ let timings = {
 }
 
 let driver
+let bidiAutomation
 
 const sendMarionette = (data) => {
   return driver.send(new Command(data))
@@ -307,11 +309,15 @@ export default {
   },
 
   async setupMarionette (extensions, url, port) {
+    const host = '127.0.0.1'
+
     await protocol._connectAsync({
-      host: '127.0.0.1',
+      host,
       port,
       getDelayMsForRetry,
     })
+
+    bidiAutomation = await BidiAutomation.create(host, port)
 
     driver = new Marionette.Drivers.Promises({
       port,
@@ -333,33 +339,37 @@ export default {
       }
     }
 
-    await driver.connect()
-    .catch(onError('connection'))
+    // await driver.connect()
+    // .catch(onError('connection'))
 
-    await new Bluebird((resolve, reject) => {
-      const _onError = (from) => {
-        return onError(from, reject)
-      }
+    debugger
+    await bidiAutomation.createNewSession()
 
-      const { tcp } = driver
+    debugger
+    // await new Bluebird((resolve, reject) => {
+    //   const _onError = (from) => {
+    //     return onError(from, reject)
+    //   }
 
-      tcp.socket.on('error', _onError('Socket'))
-      tcp.client.on('error', _onError('CommandStream'))
+    //   const { tcp } = driver
 
-      sendMarionette({
-        name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
-      }).then(() => {
-        return Bluebird.all(_.map(extensions, (path) => {
-          return sendMarionette({
-            name: 'Addon:Install',
-            parameters: { path, temporary: true },
-          })
-        }))
-      })
-      .then(resolve)
-      .catch(_onError('commands'))
-    })
+    //   tcp.socket.on('error', _onError('Socket'))
+    //   tcp.client.on('error', _onError('CommandStream'))
+
+    //   sendMarionette({
+    //     name: 'WebDriver:NewSession',
+    //     parameters: { acceptInsecureCerts: true },
+    //   }).then(() => {
+    //     return Bluebird.all(_.map(extensions, (path) => {
+    //       return sendMarionette({
+    //         name: 'Addon:Install',
+    //         parameters: { path, temporary: true },
+    //       })
+    //     }))
+    //   })
+    //   .then(resolve)
+    //   .catch(_onError('commands'))
+    // })
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
