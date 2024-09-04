@@ -1,4 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## <RELEASE_VERSION>
+
+_Released <RELEASE_DATE> (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where run Cypress internal unit test cases error on Windows. Addressed in [#30157](https://github.com/cypress-io/cypress/pull/30157)
+
+- <CHANGELOG_ENTRY>
+
 ## 13.14.2
 
 _Released 9/4/2024_
