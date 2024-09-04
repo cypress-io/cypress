@@ -10,7 +10,7 @@
     "@babel/preset-typescript": "^7.17.8",
     "css-loader": "^6.5.1",
     "esbuild": "^0.17.11",
-    "mini-css-extract-plugin": "^2.7.6",
+    "mini-css-extract-plugin": "^2.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "style-loader": "^3.3.1",
