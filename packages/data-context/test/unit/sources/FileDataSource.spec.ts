@@ -254,7 +254,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['cypress/e2e/**.cy.js'],
+          ['/my/project/cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
       })
@@ -267,7 +267,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['cypress/my/project/e2e/**.cy.js'],
+          ['/my/project/cypress/my/project/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
       })
