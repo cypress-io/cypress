@@ -138,7 +138,7 @@ module.exports = {
      * our mksnapshot. Requiring the package in this way, dynamically, will
      * make it undiscoverable by mksnapshot, which is OK since electron-packager
      * is a build dependency.
-     * Converted to use @electron/packaer for >= v18.x.x.
+     * Converted to use @electron/packager for >= v18.x.x.
      * This is the renamed electron-packager.
      */
     const e = 'electron'
