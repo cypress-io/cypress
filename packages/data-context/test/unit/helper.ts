@@ -17,6 +17,8 @@ import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { RelevantRunInfo } from '../../src/gen/graphcache-config.gen'
+import dedent from 'dedent'
+import os from 'os'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
@@ -121,4 +123,8 @@ export function createRelevantRun (runNumber: number): RelevantRunInfo {
     sha: 'sha-123',
     totalFailed: 0,
   }
+}
+
+export function dedentWithOSLineWrap (literals: string|TemplateStringsArray, ...placeholders: any[]): string {
+  return dedent(literals, ...placeholders).replace(/\n/g, os.EOL)
 }

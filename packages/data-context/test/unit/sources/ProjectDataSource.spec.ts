@@ -14,7 +14,7 @@ import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
 import FixturesHelper from '@tooling/system-tests'
-import { toPosix } from '../../../src/util'
+import { toPosix, toOS } from '../../../src/util'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -43,7 +43,7 @@ describe('matchedSpecs', () => {
         fileExtension: '.js',
         fileName: 'screenshot_element_capture_spec',
         name: 'cypress/integration/screenshot_element_capture_spec.js',
-        relative: 'cypress/integration/screenshot_element_capture_spec.js',
+        relative: toOS('cypress/integration/screenshot_element_capture_spec.js'),
         relativeToCommonRoot: 'screenshot_element_capture_spec.js',
         specFileExtension: '.js',
         specType: 'integration',
@@ -130,7 +130,7 @@ describe('transformSpec', () => {
       specType: 'integration',
       baseName: 'spec.cy.js',
       fileName: 'spec',
-      relative: 'src/spec.cy.js',
+      relative: toOS('src/spec.cy.js'),
       name: 'src/spec.cy.js',
       relativeToCommonRoot: 'C:/Windows/Project/src/spec.cy.js',
     }
