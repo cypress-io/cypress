@@ -13701,15 +13701,10 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.1159816:
-  version "0.0.1159816"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1159816.tgz#b5848e8597de01e4738589e7553674c7312c8d2a"
-  integrity sha512-2cZlHxC5IlgkIWe2pSDmCrDiTzbSJWywjbDDnupOImEBcG31CQgBLV8wWE+5t+C4rimcjHsbzy7CBzf9oFjboA==
-
-devtools-protocol@0.0.927104:
-  version "0.0.927104"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
-  integrity sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==
+devtools-protocol@0.0.1159816, devtools-protocol@0.0.1346313, devtools-protocol@0.0.927104:
+  version "0.0.1346313"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1346313.tgz#c17f16f635b6d7c624714e76ba0396a5de42fe0c"
+  integrity sha512-HKuV7Vzhyyi8xj23Lcyacuk3CTo/NGrYBOrshND4/q38NyJzG7EziEWps8mtFv8txTnSw5/e2htLUi8vioPNpQ==
 
 dicer@0.2.5:
   version "0.2.5"
