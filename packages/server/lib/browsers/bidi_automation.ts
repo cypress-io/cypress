@@ -41,19 +41,14 @@ class BidiSocket {
   request (params: any) {
     const callbackPromise = new Promise((resolve, reject) => {
       const callback = (data: any) => {
-        debugger
         resolve(data)
         // TODO: add rejection after time
       }
 
-      debugger
       params.id = ++this.#requestIdIncrementor
       this.#callbackMap.set(params.id, callback)
       this.#ws.send(JSON.stringify(params))
     })
-
-    params.id = ++this.#requestIdIncrementor
-    this.#ws.send(JSON.stringify(params))
 
     return callbackPromise
   }
@@ -97,7 +92,6 @@ export class BidiAutomation {
         firstMatch: capabilities?.firstMatch,
         alwaysMatch: {
           ...capabilities?.alwaysMatch,
-          // Capabilities that come from Puppeteer's API take precedence.
           acceptInsecureCerts: true,
           // webSocketUrl: true,
         },

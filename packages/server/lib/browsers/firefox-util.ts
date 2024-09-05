@@ -232,12 +232,9 @@ export default {
     foxdriverPort,
     remotePort,
   }): Bluebird<BrowserCriClient> {
-    debugger
-
     await this.setupWebDriverBiDi(biDiWebSocketUrl)
-
     await this.setupFoxdriver(foxdriverPort, extensions)
-
+    debugger
     await this.setupMarionette(extensions, url, marionettePort)
 
     return Bluebird.all([
@@ -344,14 +341,13 @@ export default {
 
   async setupWebDriverBiDi (webSocketUrl: string) {
     bidiAutomation = await BidiAutomation.create(webSocketUrl)
-    debugger
     await bidiAutomation.createNewSession()
-    debugger
   },
 
   async setupMarionette (extensions, url, port) {
     const host = '127.0.0.1'
 
+    debugger
     await protocol._connectAsync({
       host,
       port,
@@ -380,6 +376,7 @@ export default {
       }
     }
 
+    debugger
     await driver.connect()
     .catch(onError('connection'))
 
@@ -398,14 +395,14 @@ export default {
     //   name: 'WebDriver:NewSession',
     //   parameters: { acceptInsecureCerts: true },
     // }).then(() => {
-    //   return Bluebird.all(_.map(extensions, (path) => {
-    //     debugger
+    return Bluebird.all(_.map(extensions, (path) => {
+      debugger
 
-    //     // return sendMarionette({
-    //     //   name: 'Addon:Install',
-    //     //   parameters: { path, temporary: true },
-    //     // })
-    //   }))
+      return sendMarionette({
+        name: 'Addon:Install',
+        parameters: { path, temporary: true },
+      })
+    }))
     // })
     // .then(resolve)
     // .catch(_onError('commands'))

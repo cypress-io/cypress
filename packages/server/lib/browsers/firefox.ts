@@ -413,7 +413,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
     args: [
-      // '-marionette',
+      '-marionette',
       '-new-instance',
       '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
@@ -588,7 +588,7 @@ export type PackageCreatorParams = {|
       sourceDir: launchOptions.extensions[0],
       artifactsDir: launchOptions.extensions[0],
       overwriteDest: true,
-      filename: 'CypressExtension.zip',
+      filename: 'CypressExtensionBillTest.xpi',
     },
     {
     // These are non CLI related options for each function.
@@ -598,15 +598,35 @@ export type PackageCreatorParams = {|
     },
   )
 
+  debugger
+  // const es = await webExt.cmd.sign({
+  //   // These are command options derived from their CLI conterpart.
+  //   // In this example, --source-dir is specified as sourceDir.
+  //   sourceDir: launchOptions.extensions[0],
+  //   artifactsDir: launchOptions.extensions[0],
+  //   overwriteDest: true,
+  //   filename: 'CypressExtensionBillTest.xpi',
+  //   apiKey: 'user:18582231:670',
+  //   apiSecret: 'ab73652d3899910597c7feba9c74839b87219f658a3bee1ac4c0d2fa4ef5b179',
+  // },
+  // {
+  //   // These are non CLI related options for each function.
+  //   // You need to specify this one so that your NodeJS application
+  //   // can continue running after web-ext is finished.
+  //   shouldExitProgram: false,
+  // })
+
+  debugger
+
   // here?
   // https://kb.mozillazine.org/Installing_extensions
-  // launchOptions.extensions.forEach((extension) => {
-  //   debugger
-  //   launchOptions.args = launchOptions.args.concat([
-  //     '-install-global-extension',
-  //     `${extension}/CypressExtension.zip`,
-  //   ])
-  // })
+  launchOptions.extensions.forEach((extension) => {
+    debugger
+    launchOptions.args = launchOptions.args.concat([
+      '-install-global-extension',
+      `${extension}/CypressExtensionBillTest.xpi`,
+    ])
+  })
 
   const { proc: browserInstance, waitingForBiDiWebsocketUrl } = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
