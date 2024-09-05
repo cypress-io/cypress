@@ -13,7 +13,6 @@ Thanks for taking the time to contribute! :smile:
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- [Help triage existing issues](#triaging-issues).
 - Write code to address an issue. We have some issues labeled as [`good first issue`](https://github.com/cypress-io/cypress/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) that are a good place to start. Please thoroughly read our [Writing Code guide](#writing-code).
 
 ## Table of Contents
@@ -26,7 +25,7 @@ Thanks for taking the time to contribute! :smile:
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
-  - [Adding links within code](#Adding-links-within-code)
+  - [Adding links within code](#adding-links-within-code)
   - [Tests](#tests)
   - [Packages](#packages)
 - [Committing Code](#committing-code)
@@ -34,11 +33,11 @@ Thanks for taking the time to contribute! :smile:
   - [Pull Requests](#pull-requests)
   - [Dependencies](#dependencies)
 - [Reviewing Code](#reviewing-code)
-  - [Some rules about Code Review](#Some-rules-about-Code-Review)
-  - [Steps to take during Code Review](#Steps-to-take-during-Code-Review)
-  - [Code Review Checklist](#Code-Review-Checklist)
-  - [Code Review of Dependency Updates](#Code-Review-of-Dependency-Updates)
-- [Deployment](#deployment)
+  - [Some rules about Code Review](#some-rules-about-code-review)
+  - [Steps to take during Code Review](#steps-to-take-during-code-review)
+  - [Code Review Checklist](#code-review-checklist)
+  - [Code Review of Dependency Updates](#code-review-of-dependency-updates)
+- [Releases](#releases)
 
 ## Code of Conduct
 
@@ -172,7 +171,7 @@ Here is a list of the packages in this repository with a short description, loca
 
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
- | [electron-mksnapshot](./electron-mksnapshot) | `electron-mksnapshot` | A rewrite of [electron/mksnapshot](https://github.com/electron/mksnapshot) to support multiple versions. |
+ | [electron-mksnapshot](./tooling/electron-mksnapshot) | `electron-mksnapshot` | A rewrite of [electron/mksnapshot](https://github.com/electron/mksnapshot) to support multiple versions. |
  | [packherd](./tooling/packherd)        | `packherd`              | Herds all dependencies reachable from an entry and packs them.               |
  | [v8-snapshot](./tooling/v8-snapshot)  | `v8-snapshot`           | Tool to create a snapshot for Electron applications.                         |
 
