@@ -12,8 +12,8 @@ async function cypressIcons () {
   return require('@packages/icons')
 }
 
-const clean = (done) => {
-  rimraf('dist').then(() => done())
+function clean (): Promise<boolean> {
+  return rimraf('dist')
 }
 
 const manifest = (v: 'v2' | 'v3') => {
