@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.2
+
+_Released 9/4/2024_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Fixes [#30100](https://github.com/cypress-io/cypress/issues/30100).
+- Fixed an issue where `cy.screenshot()` was timing out and Cypress was failing to start due to `GLib-GIO-ERROR` error. Reverts [#30109](https://github.com/cypress-io/cypress/pull/30109), the change to allow HiDPI screen for Wayland users. Fixes [#30172](https://github.com/cypress-io/cypress/issues/30172) and [#30160](https://github.com/cypress-io/cypress/issues/30160).
+
 ## 13.14.1
 
 _Released 8/29/2024_

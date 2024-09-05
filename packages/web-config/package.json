@@ -28,7 +28,7 @@
     "css-loader": "6.8.1",
     "css-modules-typescript-loader": "4.0.1",
     "html-webpack-plugin": "5.5.3",
-    "mini-css-extract-plugin": "2.7.6",
+    "mini-css-extract-plugin": "2.9.1",
     "node-sass-glob-importer": "5.3.3",
     "os-browserify": "0.3.0",
     "path-browserify": "1.0.1",
