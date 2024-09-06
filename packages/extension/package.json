@@ -16,7 +16,7 @@
     "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

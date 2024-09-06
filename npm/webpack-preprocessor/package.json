@@ -20,7 +20,7 @@
     "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
-    "bluebird": "3.7.1",
+    "bluebird": "3.7.2",
     "debug": "^4.3.4",
     "lodash": "^4.17.20"
   },

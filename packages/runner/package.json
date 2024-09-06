@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "babel-plugin-prismjs": "1.0.2",
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "cross-env": "6.0.3",
     "rimraf": "^5.0.10",
     "webpack": "^5.88.2",
