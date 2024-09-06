@@ -34,7 +34,7 @@
     "is-ci": "^3.0.1",
     "mocha": "7.0.1",
     "pngjs": "^6.0.0",
-    "rimraf": "3.0.2",
+    "rimraf": "5.0.10",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",
     "xvfb-maybe": "^0.2.1"
