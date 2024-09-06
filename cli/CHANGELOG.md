@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.3
 
-_Released 10/1/2024 (PENDING)_
+_Released 9/10/2024 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed an issue where run Cypress internal unit test cases error on Windows. Addressed in [#30157](https://github.com/cypress-io/cypress/pull/30157)
+
+**Dependency Updates:**
+
+- Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
 ## 13.14.2
 
