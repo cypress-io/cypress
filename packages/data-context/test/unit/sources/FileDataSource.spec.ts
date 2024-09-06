@@ -215,7 +215,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['/cypress/e2e/**.cy.js'],
+          ['cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/' },
         )
       })
@@ -254,7 +254,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['/my/project/cypress/e2e/**.cy.js'],
+          ['cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
       })
@@ -267,7 +267,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['/my/project/cypress/my/project/e2e/**.cy.js'],
+          ['cypress/my/project/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
       })
@@ -281,7 +281,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['/cypress/e2e/**.cy.js'],
+          ['cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
             cwd: '/',
@@ -319,8 +319,8 @@ describe('FileDataSource', () => {
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
           [
-            '/node_modules/cypress/e2e/**.cy.js',
-            '/cypress/e2e/**.cy.js',
+            'node_modules/cypress/e2e/**.cy.js',
+            'cypress/e2e/**.cy.js',
           ],
           {
             ...defaultGlobbyOptions,
@@ -357,7 +357,7 @@ describe('FileDataSource', () => {
 
         expect(files).to.eq(mockMatches)
         expect(matchGlobsStub).to.have.been.calledWith(
-          ['/cypress/e2e/**.cy.js'],
+          ['cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
             cwd: '/',
