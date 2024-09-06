@@ -224,15 +224,15 @@ export default {
     extensions,
     onError,
     url,
-    marionettePort,
+    //  marionettePort,
     foxdriverPort,
     remotePort,
   }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
+      //this.setupMarionette(extensions, url, marionettePort),
       remotePort && setupRemote(remotePort, automation, onError),
-    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
+    ]).then(([, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
   connectToNewSpec,

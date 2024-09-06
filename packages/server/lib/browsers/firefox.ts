@@ -21,6 +21,10 @@ import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import { start as startGeckoDriver } from 'geckodriver'
+import ws from 'ws'
+import Bluebird from 'bluebird'
+import waitPort from 'wait-port'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -204,7 +208,7 @@ const defaultPreferences = {
   // remote.active-protocol=2
   // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
   // @see https://github.com/cypress-io/cypress/issues/29713
-  'remote.active-protocols': 2,
+  'remote.active-protocols': 3,
   // Enable Remote Agent
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1544393
   'remote.enabled': true,
@@ -311,7 +315,7 @@ const defaultPreferences = {
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
 
-  'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,
+  // 'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,
 
   // where to download files
   // 0: desktop
@@ -464,6 +468,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     defaultLaunchOptions.preferences['general.useragent.override'] = ua
   }
 
+  // const foxdriverPort = getPort()
+
   const [
     foxdriverPort,
     marionettePort,
@@ -472,7 +478,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  // debug('available ports: %o', { foxdriverPort, marionettePort })
+
+  debug('available ports: %o', { foxdriverPort })
 
   const [
     cacheDir,
@@ -559,14 +567,157 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     ...launchOptions.env,
   })
 
-  try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+  const geckoDriverPort = await getPort()
 
-    if (os.platform() === 'win32') {
-      // override the .kill method for Windows so that the detached Firefox process closes between specs
-      // @see https://github.com/cypress-io/cypress/issues/6392
-      return _createDetachedInstance(browserInstance, browserCriClient)
+  const DEFAULT_HOST = '127.0.01'
+  const cp = await startGeckoDriver({
+    // connectExisting: true,
+    host: DEFAULT_HOST,
+    port: geckoDriverPort,
+    marionetteHost: DEFAULT_HOST,
+    marionettePort,
+    websocketPort: remotePort,
+    // TODO: these need to be escaped properly
+    // profileRoot: `\"${profile.path()}\"`,
+    jsdebugger: true,
+    log: 'debug',
+    // TODO: these need to be escaped properly
+    //  binary: `\"${browser.path}\"` as unknown as string,
+  })
+
+  await waitPort({
+    port: geckoDriverPort,
+  })
+
+  cp.stdout.on('data', (buf) => {
+    console.log('%s stdout: %s', browser.name, String(buf).trim())
+  })
+
+  cp.stderr.on('data', (buf) => {
+    console.log('%s stderr: %s', browser.name, String(buf).trim())
+  })
+
+  cp.on('exit', (code, signal) => {
+    console.log('%s exited: %o', browser.name, { code, signal })
+  })
+
+  const createWebdriverSession: () => Promise<{
+    capabilities: {
+      acceptInsecureCerts: boolean
+      browserName: string
+      browserVersion: string
+      pageLoadStrategy: 'normal'
+      // TODO: check this type
+      platformName: 'mac' | 'linux' | 'windows'
+      proxy: Object
+      setWindowRect: boolean
+      strictFileInteractability: boolean
+      timeouts: {
+        implicit: number
+        pageLoad: number
+        script: number
+      }
+      unhandledPromptBehavior: 'ignore'
+      userAgent: string
+      webSocketUrl: string
+      'moz:accessibilityChecks': boolean
+      'moz:buildID': string
+      'moz:geckodriverVersion': string
+      'moz:headless': boolean
+      'moz:platformVersion': string
+      'moz:processID': number
+      'moz:profile': string
+      'moz:shutdownTimeout': number
+      'moz:webdriverClick': boolean
+      'moz:windowless': boolean
     }
+    sessionId: string
+  }> = async () => {
+    const getSessionUrl = `http://${DEFAULT_HOST}:${geckoDriverPort}/session`
+
+    const headers = new Headers()
+
+    headers.append('Content-Type', 'application/json')
+
+    const body = {
+      capabilities: {
+        alwaysMatch: {
+          acceptInsecureCerts: true,
+          unhandledPromptBehavior: {
+            default: 'ignore',
+          },
+          webSocketUrl: true,
+        },
+      },
+    }
+
+    const createSessionResp = await fetch(getSessionUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    })
+
+    const createSessionRespBody = await createSessionResp.json()
+
+    return createSessionRespBody.value
+  }
+
+  // /session/{sessionId}/moz/addon/install
+  const installAddon = async (sessionId, extension, isTemporary) => {
+    const body = {
+      path: extension,
+      temporary: isTemporary,
+    }
+
+    // webdriver session created. install the extension through geckodriver
+    const url = `http://${DEFAULT_HOST}:${geckoDriverPort}/session/${sessionId}/moz/addon/install`
+
+    const headers = new Headers()
+
+    headers.append('Content-Type', 'application/json')
+
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    })
+
+    if (!resp.ok) {
+      throw new Error('something bad happened!')
+    }
+  }
+
+  const webdriverSessionDetails = await createWebdriverSession()
+
+  const websocket = new ws(webdriverSessionDetails.capabilities.webSocketUrl)
+
+  websocket.on('error', (a) => {
+    console.error(a)
+  })
+
+  websocket.on('open', function open () {
+    const mockSubscribe = { id: 4, method: 'session.subscribe', params: { events: ['browsingContext', 'network', 'log', 'script', 'storage', 'input'] } }
+
+    // subscribe to BiDi events
+    websocket.send(JSON.stringify(mockSubscribe))
+  })
+
+  websocket.on('message', function message (data) {
+    // watch BiDi events stream in!
+    console.log('received: %s', data)
+  })
+
+  // cant install addon before socket connection for whatever reason it 404s the socket request
+  await installAddon(webdriverSessionDetails.sessionId, launchOptions.extensions[0], true)
+
+  try {
+    // browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, remotePort, onError: options.onError })
+
+    // if (os.platform() === 'win32') {
+    //   // override the .kill method for Windows so that the detached Firefox process closes between specs
+    //   // @see https://github.com/cypress-io/cypress/issues/6392
+    //   return _createDetachedInstance(browserInstance, browserCriClient)
+    // }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = browserInstance.kill
@@ -574,15 +725,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     browserInstance.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
       clearInstanceState({ gracefulShutdown: true })
-
+      cp.kill()
       debug('closing firefox')
 
       return originalBrowserKill.apply(browserInstance, args)
     }
 
-    await utils.executeAfterBrowserLaunch(browser, {
-      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
-    })
+    // await utils.executeAfterBrowserLaunch(browser, {
+    //   webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    // })
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
