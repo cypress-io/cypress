@@ -7,7 +7,6 @@ import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
 import stripAnsi from 'strip-ansi'
-import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
@@ -28,8 +27,6 @@ describe('lib/browsers/firefox', () => {
   const port = 3333
   let marionetteDriver: any
   let marionetteSendCb: any
-  let foxdriver: any
-  let foxdriverTab: any
 
   const stubMarionette = () => {
     marionetteSendCb = null
@@ -60,32 +57,6 @@ describe('lib/browsers/firefox', () => {
     sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
   }
 
-  const stubFoxdriver = () => {
-    foxdriverTab = {
-      data: '',
-      memory: {
-        isAttached: false,
-        getState: sinon.stub().resolves(),
-        attach: sinon.stub().resolves(),
-        on: sinon.stub(),
-        forceGarbageCollection: sinon.stub().resolves(),
-        forceCycleCollection: sinon.stub().resolves(),
-      },
-    }
-
-    const browser = {
-      listTabs: sinon.stub().resolves([foxdriverTab]),
-      request: sinon.stub().withArgs('listTabs').resolves({ tabs: [foxdriverTab] }),
-      on: sinon.stub(),
-    }
-
-    foxdriver = {
-      browser,
-    }
-
-    sinon.stub(Foxdriver, 'attach').resolves(foxdriver)
-  }
-
   afterEach(() => {
     return mockfs.restore()
   })
@@ -100,7 +71,6 @@ describe('lib/browsers/firefox', () => {
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
     stubMarionette()
-    stubFoxdriver()
   })
 
   context('#connectToNewSpec', () => {
@@ -339,13 +309,13 @@ describe('lib/browsers/firefox', () => {
     // remote.active-protocol=2
     // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
     // @see https://github.com/cypress-io/cypress/issues/29713
-    it('sets "remote.active-protocols"=2 to keep CDP enabled for firefox versions 129 and up', function () {
+    it('sets "remote.active-protocols"=2 to keep CDP enabled for firefox versions 129 and up and turns on BiDi', function () {
       const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
           preferences: {
-            'remote.active-protocols': 2,
+            'remote.active-protocols': 3,
           },
         }), this.options)
       })
@@ -537,38 +507,6 @@ describe('lib/browsers/firefox', () => {
           expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
           expect(err.details).to.include('Error: not connectable')
         })
-      })
-    })
-
-    context('#setupFoxdriver', () => {
-      it('attaches foxdriver after testing connection', async () => {
-        await firefoxUtil.setupFoxdriver(port)
-
-        expect(Foxdriver.attach).to.be.calledWith('127.0.0.1', port)
-        expect(protocol._connectAsync).to.be.calledWith({
-          host: '127.0.0.1',
-          port,
-          getDelayMsForRetry: sinon.match.func,
-        })
-      })
-
-      it('sets the collectGarbage callback which can be used to force GC+CC', async () => {
-        await firefoxUtil.setupFoxdriver(port)
-
-        const { memory } = foxdriverTab
-
-        expect(memory.forceCycleCollection).to.not.be.called
-        expect(memory.forceGarbageCollection).to.not.be.called
-
-        await firefoxUtil.collectGarbage()
-
-        expect(memory.forceCycleCollection).to.be.calledOnce
-        expect(memory.forceGarbageCollection).to.be.calledOnce
-
-        await firefoxUtil.collectGarbage()
-
-        expect(memory.forceCycleCollection).to.be.calledTwice
-        expect(memory.forceGarbageCollection).to.be.calledTwice
       })
     })
 

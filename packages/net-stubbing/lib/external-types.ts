@@ -69,7 +69,7 @@ type Method =
   | 'unlock'
   | 'unsubscribe'
 
-export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'preflight' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
 export namespace CyHttpMessages {
   export interface BaseMessage<T = any> {
