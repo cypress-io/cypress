@@ -9,6 +9,7 @@ import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
+import { GeckoDriver } from './geckodriver'
 
 const errors = require('../errors')
 
@@ -219,20 +220,37 @@ export default {
     return forceGcCc()
   },
 
-  setup ({
+  async setup ({
     automation,
     extensions,
     onError,
     url,
     marionettePort,
+    geckoDriverPort,
     foxdriverPort,
     remotePort,
+    binaryPath,
+    browserName,
+    profileRoot,
+    useWebdriverBiDi,
+    // @ts-expect-error
   }): Bluebird<BrowserCriClient> {
-    return Bluebird.all([
-      this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError),
-    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
+    await this.setupGeckoDriver({
+      port: geckoDriverPort,
+      marionettePort,
+      remotePort,
+      binary: binaryPath,
+      profileRoot,
+      browserName,
+      extensions,
+      useWebdriverBiDi,
+    })
+
+    // return Bluebird.all([
+    //   this.setupFoxdriver(foxdriverPort),
+    //   this.setupMarionette(extensions, url, marionettePort),
+    //   remotePort && setupRemote(remotePort, automation, onError),
+    // ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
   connectToNewSpec,
@@ -304,6 +322,43 @@ export default {
         debug('firefox RDP error while forcing GC and CC %o', err)
       })
     }
+  },
+
+  async setupGeckoDriver (opts: {
+    port: number
+    marionettePort: number
+    remotePort: number
+    binary: string
+    profileRoot: string
+    browserName: string
+    extensions: string[]
+    useWebdriverBiDi: boolean
+  }) {
+    // await protocol._connectAsync({
+    //   host: '127.0.0.1',
+    //   port: opts.port,
+    //   getDelayMsForRetry,
+    // })
+
+    const geckoDriver = await GeckoDriver.create({
+      host: '127.0.0.1',
+      port: opts.port,
+      marionetteHost: '127.0.0.1',
+      marionettePort: opts.marionettePort,
+      remotePort: opts.remotePort,
+      binary: opts.binary,
+      profileRoot: opts.profileRoot,
+      browserName: opts.browserName,
+      extensions: opts.extensions,
+      useWebdriverBiDi: opts.useWebdriverBiDi,
+    })
+
+    await geckoDriver.bidiAutomationClient?.session.subscribe()
+
+    // TODO: to test events
+    // geckoDriver.bidiAutomationClient?.browsingContext.onContextCreated(({ method, params }) => {
+    //   debugger
+    // })
   },
 
   async setupMarionette (extensions, url, port) {
