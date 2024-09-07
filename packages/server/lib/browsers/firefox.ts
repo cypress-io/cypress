@@ -24,6 +24,8 @@ import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@pac
 
 const debug = Debug('cypress:server:browsers:firefox')
 
+const USE_WEBDRIVER_BIDI = true
+
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
 // discover more, open Firefox DevTools, download the file yourself
@@ -204,7 +206,7 @@ const defaultPreferences = {
   // remote.active-protocol=2
   // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
   // @see https://github.com/cypress-io/cypress/issues/29713
-  'remote.active-protocols': 2,
+  'remote.active-protocols': 3,
   // Enable Remote Agent
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1544393
   'remote.enabled': true,
@@ -467,12 +469,13 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+    geckoDriverPort,
+  ] = await Promise.all([getPort(), getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  debug('available ports: %o', { foxdriverPort, marionettePort, geckoDriverPort })
 
   const [
     cacheDir,
@@ -560,7 +563,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, geckoDriverPort, remotePort, profileRoot: profile.path(), browserName: browser.name, browserPath: browser.path, useWebdriverBiDi: USE_WEBDRIVER_BIDI, onError: options.onError })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
@@ -580,9 +583,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       return originalBrowserKill.apply(browserInstance, args)
     }
 
-    await utils.executeAfterBrowserLaunch(browser, {
-      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
-    })
+    // await utils.executeAfterBrowserLaunch(browser, {
+    //   webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    // })
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
