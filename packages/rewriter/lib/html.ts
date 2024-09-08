@@ -1,4 +1,4 @@
-import RewritingStream from 'parse5-html-rewriting-stream'
+import { RewritingStream } from 'parse5-html-rewriting-stream'
 import * as htmlRules from './html-rules'
 import type stream from 'stream'
 import type { DeferSourceMapRewriteFn } from './js'

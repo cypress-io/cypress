@@ -1,5 +1,5 @@
 import find from 'lodash/find'
-import type RewritingStream from 'parse5-html-rewriting-stream'
+import type { RewritingStream } from 'parse5-html-rewriting-stream'
 import { STRIPPED_INTEGRITY_TAG } from './constants.json'
 import * as js from './js'
 
