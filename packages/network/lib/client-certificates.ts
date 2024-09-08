@@ -101,6 +101,7 @@ export class ClientCertificates {
   cert: Buffer[] = []
   key: PemKey[] = []
   pfx: PfxCertificate[] = []
+  group?: string
 }
 
 export class PemKey {
@@ -125,6 +126,7 @@ export class PfxCertificate {
 
 export class ClientCertificateStore {
   private _urlClientCertificates: UrlClientCertificates[] = []
+  private certGroup: string | null = null
 
   addClientCertificatesForUrl (cert: UrlClientCertificates) {
     debug(
@@ -142,6 +144,14 @@ export class ClientCertificateStore {
     this._urlClientCertificates.push(cert)
   }
 
+  selectCertGroup (group: string | null) {
+    this.certGroup = group
+  }
+
+  clearCertGroup () {
+    this.certGroup = null
+  }
+
   getClientCertificateAgentOptionsForUrl (requestUrl: Url): ClientCertificates | null {
     if (
       !this._urlClientCertificates ||
@@ -150,9 +160,13 @@ export class ClientCertificateStore {
       return null
     }
 
+    const certGroup = this.certGroup
     const port = !requestUrl.port ? undefined : parseInt(requestUrl.port)
     const matchingCerts = this._urlClientCertificates.filter((cert) => {
-      return UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
+      const urlMatch = UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
+      const groupMatch = !certGroup || cert.clientCertificates.group === certGroup
+
+      return urlMatch && groupMatch
     })
 
     switch (matchingCerts.length) {
@@ -186,6 +200,14 @@ export class ClientCertificateStore {
   clear (): void {
     this._urlClientCertificates = []
   }
+}
+
+export function chooseClientCertificateGroup (group: string | null) {
+  clientCertificateStore.selectCertGroup(group)
+}
+
+export function clearClientCertificateGroup () {
+  clientCertificateStore.clearCertGroup()
 }
 
 /**

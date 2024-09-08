@@ -108,6 +108,7 @@
     'selectFile',
     'writeFile',
     'task',
+    'chooseCert',
   ]
 
   const callbackCommands = [

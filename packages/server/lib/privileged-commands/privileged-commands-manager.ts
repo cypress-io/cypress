@@ -8,6 +8,8 @@ import files from '../files'
 import { fs } from '../util/fs'
 import task from '../task'
 
+import { clientCertificates } from '@packages/network'
+
 export interface SpecChannelOptions {
   isSpecBridge: boolean
   url: string
@@ -111,6 +113,18 @@ class PrivilegedCommandsManager {
           : path.join(config.projectRoot, config.configFile)
 
         return task.run(configFile ?? null, options)
+      }
+      case 'chooseCert': {
+        // Make the server choose the certificate group
+        const group = options.group
+
+        if (!group || group === '') {
+          clientCertificates.clearClientCertificateGroup()
+        } else {
+          clientCertificates.chooseClientCertificateGroup(group)
+        }
+
+        return
       }
       default:
         throw new Error(`You requested a secure backend event for a command we cannot handle: ${commandName}`)
