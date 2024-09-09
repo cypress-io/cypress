@@ -5,6 +5,7 @@ _Released 9/10/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Updated `bluebird` to `3.7.2`. Addressed in [#30201](https://github.com/cypress-io/cypress/pull/30201).
 - Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
 ## 13.14.2
