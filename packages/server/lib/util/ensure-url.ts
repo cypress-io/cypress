@@ -2,7 +2,6 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import rp from '@cypress/request-promise'
-import * as url from 'url'
 import { agent, connect } from '@packages/network'
 
 const debug = debugModule('cypress:server:ensure-url')
@@ -50,9 +49,9 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
 export const isListening = (urlStr: string) => {
   // takes a urlStr and verifies the hostname + port is listening
-  let { hostname, protocol, port } = url.parse(urlStr)
+  let { hostname, protocol, port } = new URL(urlStr)
 
-  if (port == null) {
+  if (port.length === 0) {
     port = protocol === 'https:' ? '443' : '80'
   }
 

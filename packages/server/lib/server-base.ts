@@ -605,7 +605,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the protocol using req.connection.encrypted
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
-      const { hostname, protocol } = url.parse(fullUrl)
+      const { hostname, protocol } = new URL(fullUrl)
       const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
@@ -766,9 +766,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // nuke any hashes from our url since
     // those those are client only and do
     // not apply to http requests
-    urlStr = url.parse(urlStr)
+    urlStr = new URL(urlStr)
     urlStr.hash = null
-    urlStr = urlStr.format()
+    urlStr = urlStr.href
 
     const originalUrl = urlStr
 

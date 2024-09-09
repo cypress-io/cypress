@@ -551,7 +551,7 @@ module.exports = function (options = {}) {
         cookies = [cookies]
       }
 
-      const parsedUrl = url.parse(resUrl)
+      const parsedUrl = new URL(resUrl)
       const defaultDomain = parsedUrl.hostname
 
       debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })

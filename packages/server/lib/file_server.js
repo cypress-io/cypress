@@ -2,7 +2,6 @@
 
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:file_server')
-const url = require('url')
 const http = require('http')
 const path = require('path')
 const send = require('send')
@@ -27,16 +26,19 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
     req.url,
   ])
 
+  const fileServerUrl = new URL(path.join(...args))
+  const reqUrl = new URL(req.url)
+
   // strip off any query params from our req's url
   // since we're pulling this from the file system
   // it does not understand query params
   // and make sure we decode the uri which swaps out
   // %20 with white space
-  const file = decodeURI(url.parse(path.join(...args)).pathname)
+  const file = decodeURI(fileServerUrl.pathname)
 
   res.setHeader('x-cypress-file-path', encodeURI(file))
 
-  return send(req, url.parse(req.url).pathname, {
+  return send(req, reqUrl.pathname, {
     root: path.resolve(fileServerFolder),
   })
   .on('error', (err) => {

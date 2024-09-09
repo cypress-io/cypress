@@ -32,7 +32,7 @@ describe('lib/fixture', () => {
   })
 
   context('file not found', () => {
-    it('throws when file cannot be found', function () {
+    it('throws when file cannot be found', async function () {
       const p = 'does-not-exist.json'
 
       return fixture.get(this.fixturesFolder, p)

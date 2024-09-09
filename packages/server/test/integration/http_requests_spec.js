@@ -7,7 +7,6 @@ const compression = require('compression')
 const dns = require('dns')
 const express = require('express')
 const http = require('http')
-const url = require('url')
 let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
@@ -4416,15 +4415,15 @@ describe('Routes', () => {
         Fixtures.scaffoldProject('e2e')
         .then(() => {
           this.httpSrv = http.createServer((req, res) => {
-            const { query } = url.parse(req.url, true)
+            const { search } = new URL(req.url, true)
 
-            if (_.has(query, 'chunked')) {
+            if (_.has(search, 'chunked')) {
               res.setHeader('tranfer-encoding', 'chunked')
             } else {
               res.setHeader('content-length', '0')
             }
 
-            res.writeHead(Number(query.status), {
+            res.writeHead(Number(search.status), {
               'x-foo': 'bar',
             })
 
