@@ -24,7 +24,7 @@ import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@pac
 
 const debug = Debug('cypress:server:browsers:firefox')
 
-const USE_WEBDRIVER_BIDI = false
+const USE_WEBDRIVER_BIDI = true
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
