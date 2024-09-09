@@ -1,4 +1,10 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.14.4
+
+**Features:**
+
+ - Client certificate selector option during e2e tests. Addresses [#27302](https://github.com/cypress-io/cypress/issues/27302).
+
 ## 13.14.3
 
 _Released 9/10/2024 (PENDING)_
