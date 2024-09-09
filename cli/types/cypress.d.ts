@@ -2142,6 +2142,11 @@ declare namespace Cypress {
     task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
+     * Choose a cert in the system's cert store based on group.
+     */
+    chooseCert(group: string): void
+    
+    /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
