@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, ClientCertificates, loadClientCertificateConfig } from '../../lib/client-certificates'
+import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, loadClientCertificateConfig } from '../../lib/client-certificates'
 import { clientCertificateStore } from '../../lib/agent'
 import urllib from 'url'
 import fs from 'fs-extra'
@@ -23,7 +23,7 @@ function urlShouldNotMatch (url: string, matcher: string) {
   expect(UrlMatcher.matchUrl(parsedUrl.host, parsedUrl.path, parsedUrl.port, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
 }
 
-function checkParsed (parsed: ParsedUrl, host: string, path: string | undefined, port: number | undefined) {
+function checkParsed (parsed: ParsedUrl, host: string, path?: string, port?: number) {
   expect(parsed.host, `'host ${parsed.host}' should be '${host}'`).to.eq(host)
   expect(parsed.path, `'path ${parsed.path}' should be '${path}'`).to.eq(path)
   expect(parsed.port, `'port ${parsed.port}' should be '${port}'`).to.eq(port)
@@ -34,7 +34,7 @@ describe('lib/client-certificates', () => {
     it('parses clean URLs', () => {
       let parsed = new ParsedUrl('https://a.host.com')
 
-      checkParsed(parsed, 'a.host.com', undefined, undefined)
+      checkParsed(parsed, 'a.host.com')
 
       parsed = new ParsedUrl('https://a.host.com:1234')
       expect(parsed.host).to.eq('a.host.com')
@@ -137,13 +137,11 @@ describe('lib/client-certificates', () => {
 
       const certs1 = new UrlClientCertificates(url1.href)
 
-      certs1.clientCertificates = new ClientCertificates()
-      certs1.clientCertificates.ca.push(Buffer.from([1, 2, 3, 4]))
+      certs1.addCA(Buffer.from([1, 2, 3, 4]))
 
       const certs2 = new UrlClientCertificates(url2.href)
 
-      certs2.clientCertificates = new ClientCertificates()
-      certs2.clientCertificates.ca.push(Buffer.from([4, 3, 2, 1]))
+      certs2.addCA(Buffer.from([4, 3, 2, 1]))
 
       store.addClientCertificatesForUrl(certs1)
       expect(store.getCertCount()).to.eq(1)
@@ -160,8 +158,8 @@ describe('lib/client-certificates', () => {
       const options1 = store.getClientCertificateAgentOptionsForUrl(url1)
       const options2 = store.getClientCertificateAgentOptionsForUrl(url2)
 
-      expect(options1.ca).to.eq(certs1.clientCertificates.ca)
-      expect(options2.ca).to.eq(certs2.clientCertificates.ca)
+      expect(options1?.ca).to.eq(certs1.getCA())
+      expect(options2?.ca).to.eq(certs2.getCA())
     })
   })
 })
@@ -189,7 +187,7 @@ describe('lib/client-certificates', () => {
 //
 // Neither PEM nor PFX supplied
 
-function createCertAndKey (): [object, object] {
+function createCertAndKey (): [Forge.pki.Certificate, Forge.pki.rsa.PrivateKey] {
   let keys = pki.rsa.generateKeyPair(2048)
   let cert = pki.createCertificate()
 
@@ -236,8 +234,8 @@ function createCertAndKey (): [object, object] {
 function createPemFiles (
   certFilepath: string,
   keyFilepath: string,
-  passphraseFilepath: string | undefined,
-  passphrase: string | undefined,
+  passphraseFilepath?: string,
+  passphrase?: string,
 ) {
   const certInfo = createCertAndKey()
 
@@ -248,23 +246,23 @@ function createPemFiles (
 
   fs.writeFileSync(keyFilepath, key)
 
-  if (passphraseFilepath) {
+  if (passphraseFilepath && passphrase) {
     fs.writeFileSync(passphraseFilepath, passphrase)
   }
 }
 
 function createPfxFiles (
   certFilepath: string,
-  passphraseFilepath: string | undefined,
-  passphrase: string | undefined,
+  passphraseFilepath?: string,
+  passphrase?: string,
 ) {
   const certInfo = createCertAndKey()
 
-  let p12Asn1 = pkcs12.toPkcs12Asn1(certInfo[1], [certInfo[0]], passphrase)
+  let p12Asn1 = pkcs12.toPkcs12Asn1(certInfo[1], [certInfo[0]], passphrase ?? null)
 
   fs.writeFileSync(certFilepath, asn1.toDer(p12Asn1).getBytes(), { encoding: 'binary' })
 
-  if (passphraseFilepath) {
+  if (passphraseFilepath && passphrase) {
     fs.writeFileSync(passphraseFilepath, passphrase)
   }
 }
@@ -356,7 +354,7 @@ describe('lib/client-certificates', () => {
 
   context('loads cert files', () => {
     it('loads valid single PEM (no passphrase) and CA via absolute pathing', () => {
-      createPemFiles(pemFilepath, pemKeyFilepath, undefined, undefined)
+      createPemFiles(pemFilepath, pemKeyFilepath)
       createCaFile(caFilepath)
 
       const url = createUniqueUrl()
@@ -377,14 +375,14 @@ describe('lib/client-certificates', () => {
       )
 
       expect(options).not.to.be.null
-      expect(options.ca.length).to.eq(1)
-      expect(options.ca[0]).to.deep.equal(caFileData)
-      expect(options.pfx).to.be.empty
-      expect(options.cert.length).to.eq(1)
-      expect(options.cert[0]).to.deep.equal(pemFileData)
-      expect(options.key.length).to.eq(1)
-      expect(options.key[0].passphrase).to.be.undefined
-      expect(options.key[0].pem).to.deep.equal(keyFileData)
+      expect(options?.ca.length).to.eq(1)
+      expect(options?.ca[0]).to.deep.equal(caFileData)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(1)
+      expect(options?.cert[0]).to.deep.equal(pemFileData)
+      expect(options?.key.length).to.eq(1)
+      expect(options?.key[0].passphrase).to.be.undefined
+      expect(options?.key[0].pem).to.deep.equal(keyFileData)
     })
 
     it('loads valid multiple PEMs (no passphrase) and CAs', () => {
@@ -398,9 +396,9 @@ describe('lib/client-certificates', () => {
       const keyFilepath3 = path.join(tempDirPath, 'testpem3.key')
       const caFilepath3 = path.join(tempDirPath, 'testca3.crt')
 
-      createPemFiles(pemFilepath1, keyFilepath1, undefined, undefined)
-      createPemFiles(pemFilepath2, keyFilepath2, undefined, undefined)
-      createPemFiles(pemFilepath3, keyFilepath3, undefined, undefined)
+      createPemFiles(pemFilepath1, keyFilepath1)
+      createPemFiles(pemFilepath2, keyFilepath2)
+      createPemFiles(pemFilepath3, keyFilepath3)
       createCaFile(caFilepath1)
       createCaFile(caFilepath2)
       createCaFile(caFilepath3)
@@ -446,20 +444,20 @@ describe('lib/client-certificates', () => {
       )
 
       expect(options).not.to.be.null
-      expect(options.ca.length).to.eq(3)
-      expect(options.ca[0]).to.deep.equal(caFileData1)
-      expect(options.ca[1]).to.deep.equal(caFileData2)
-      expect(options.ca[2]).to.deep.equal(caFileData3)
-      expect(options.pfx).to.be.empty
-      expect(options.cert.length).to.eq(3)
-      expect(options.cert[0]).to.deep.equal(pemFileData1)
-      expect(options.cert[1]).to.deep.equal(pemFileData2)
-      expect(options.cert[2]).to.deep.equal(pemFileData3)
-      expect(options.key.length).to.eq(3)
-      expect(options.key[0].passphrase).to.be.undefined
-      expect(options.key[0].pem).to.deep.equal(keyFileData1)
-      expect(options.key[1].pem).to.deep.equal(keyFileData2)
-      expect(options.key[2].pem).to.deep.equal(keyFileData3)
+      expect(options?.ca.length).to.eq(3)
+      expect(options?.ca[0]).to.deep.equal(caFileData1)
+      expect(options?.ca[1]).to.deep.equal(caFileData2)
+      expect(options?.ca[2]).to.deep.equal(caFileData3)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(3)
+      expect(options?.cert[0]).to.deep.equal(pemFileData1)
+      expect(options?.cert[1]).to.deep.equal(pemFileData2)
+      expect(options?.cert[2]).to.deep.equal(pemFileData3)
+      expect(options?.key.length).to.eq(3)
+      expect(options?.key[0].passphrase).to.be.undefined
+      expect(options?.key[0].pem).to.deep.equal(keyFileData1)
+      expect(options?.key[1].pem).to.deep.equal(keyFileData2)
+      expect(options?.key[2].pem).to.deep.equal(keyFileData3)
     })
 
     it('loads valid single PEM (with passphrase)', () => {
@@ -489,17 +487,17 @@ describe('lib/client-certificates', () => {
       )
 
       expect(options).not.to.be.null
-      expect(options.ca.length).to.eq(0)
-      expect(options.pfx).to.be.empty
-      expect(options.cert.length).to.eq(1)
-      expect(options.cert[0]).to.deep.equal(pemFileData)
-      expect(options.key.length).to.eq(1)
-      expect(options.key[0].passphrase).to.equal(passphrase)
-      expect(options.key[0].pem).to.deep.equal(keyFileData)
+      expect(options?.ca.length).to.eq(0)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(1)
+      expect(options?.cert[0]).to.deep.equal(pemFileData)
+      expect(options?.key.length).to.eq(1)
+      expect(options?.key[0].passphrase).to.equal(passphrase)
+      expect(options?.key[0].pem).to.deep.equal(keyFileData)
     })
 
     it('loads valid single PEM and CA via relative pathing', () => {
-      createPemFiles(pemFilepath, pemKeyFilepath, undefined, undefined)
+      createPemFiles(pemFilepath, pemKeyFilepath)
       createCaFile(caFilepath)
 
       const relativeCaFilepath = path.relative(__dirname, caFilepath)
@@ -521,11 +519,11 @@ describe('lib/client-certificates', () => {
       )
 
       expect(options).not.to.be.null
-      expect(options.ca.length).to.eq(1)
-      expect(options.pfx).to.be.empty
-      expect(options.cert.length).to.eq(1)
-      expect(options.key.length).to.eq(1)
-      expect(options.key[0].passphrase).to.be.undefined
+      expect(options?.ca.length).to.eq(1)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(1)
+      expect(options?.key.length).to.eq(1)
+      expect(options?.key[0].passphrase).to.be.undefined
     })
 
     // TODO: fix this flaky test
@@ -559,7 +557,7 @@ describe('lib/client-certificates', () => {
     })
 
     it('detects invalid PEM key file (no passphrase)', () => {
-      createPemFiles(pemFilepath, pemKeyFilepath, undefined, undefined)
+      createPemFiles(pemFilepath, pemKeyFilepath)
       fs.writeFileSync(pemKeyFilepath, 'not-a-key')
 
       const url = createUniqueUrl()
@@ -762,10 +760,10 @@ describe('lib/client-certificates', () => {
       )
 
       expect(options).not.to.be.null
-      expect(options.cert).to.be.empty
-      expect(options.pfx.length).to.eq(1)
-      expect(options.pfx[0].buf).to.deep.equal(pfxFileData)
-      expect(options.pfx[0].passphrase).to.equal(passphrase)
+      expect(options?.cert).to.be.empty
+      expect(options?.pfx.length).to.eq(1)
+      expect(options?.pfx[0].buf).to.deep.equal(pfxFileData)
+      expect(options?.pfx[0].passphrase).to.equal(passphrase)
     })
 
     it('detects invalid PFX passphrase', () => {
@@ -857,6 +855,82 @@ describe('lib/client-certificates', () => {
       }
 
       expect(act).to.throw('Either PEM or PFX must be supplied')
+    })
+
+    it('loads two PEM certificates with groups (user and admin) for same domain', () => {
+      const caFilepath = path.join(tempDirPath, 'test2ca.crt')
+      const group1 = 'user'
+      const pemFilepath1 = path.join(tempDirPath, 'test2pem1.crt')
+      const keyFilepath1 = path.join(tempDirPath, 'test2pem1.key')
+      const group2 = 'admin'
+      const pemFilepath2 = path.join(tempDirPath, 'test2pem2.crt')
+      const keyFilepath2 = path.join(tempDirPath, 'test2pem2.key')
+
+      createCaFile(caFilepath)
+      createPemFiles(pemFilepath1, keyFilepath1, group1)
+      createPemFiles(pemFilepath2, keyFilepath2, group2)
+
+      const url = createUniqueUrl()
+      const config = {
+        projectRoot: __dirname,
+        clientCertificates: [
+          {
+            url,
+            ca: [caFilepath],
+            certs: [
+              {
+                group: group1,
+                cert: pemFilepath1,
+                key: keyFilepath1,
+              },
+              {
+                group: group2,
+                cert: pemFilepath2,
+                key: keyFilepath2,
+              },
+            ],
+          },
+        ],
+      }
+
+      const caFileData = fs.readFileSync(caFilepath)
+      const pemFileData1 = fs.readFileSync(pemFilepath1)
+      const keyFileData1 = fs.readFileSync(keyFilepath1)
+      const pemFileData2 = fs.readFileSync(pemFilepath2)
+      const keyFileData2 = fs.readFileSync(keyFilepath2)
+
+      loadClientCertificateConfig(config)
+
+      const parsedURL = urllib.parse(url)
+      let options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(parsedURL)
+
+      expect(options).to.be.null
+
+      clientCertificateStore.selectCertGroup(group1)
+      options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(parsedURL)
+
+      expect(options).not.to.be.null
+      expect(options?.ca.length).to.eq(1)
+      expect(options?.ca[0]).to.deep.equal(caFileData)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(1)
+      expect(options?.cert[0]).to.deep.equal(pemFileData1)
+      expect(options?.key.length).to.eq(1)
+      expect(options?.key[0].pem).to.deep.equal(keyFileData1)
+
+      clientCertificateStore.selectCertGroup(group2)
+      options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(parsedURL)
+
+      expect(options).not.to.be.null
+      expect(options?.ca.length).to.eq(1)
+      expect(options?.ca[0]).to.deep.equal(caFileData)
+      expect(options?.pfx).to.be.empty
+      expect(options?.cert.length).to.eq(1)
+      expect(options?.cert[0]).to.deep.equal(pemFileData2)
+      expect(options?.key.length).to.eq(1)
+      expect(options?.key[0].pem).to.deep.equal(keyFileData2)
+
+      clientCertificateStore.clearCertGroup()
     })
   })
 })

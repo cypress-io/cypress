@@ -363,10 +363,9 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
       }
     }
 
-    // TODO: Ignore validation of same urls due to different groups.
-    // if (urls.includes(certsForUrl.url)) {
-    //   return `clientCertificates has duplicate client certificate URL: ${certsForUrl.url}`
-    // }
+    if (urls.includes(certsForUrl.url)) {
+      return `clientCertificates has duplicate client certificate URL: ${certsForUrl.url}`
+    }
 
     urls.push(certsForUrl.url)
 

@@ -71,23 +71,51 @@ export class UrlMatcher {
  * Defines the certificates that should be used for the specified URL
  */
 export class UrlClientCertificates {
-  constructor (url: string) {
-    this.subjects = ''
-    this.url = url
-    this.pathnameLength = new URL(url).pathname.length
-    this.clientCertificates = new ClientCertificates()
+  clientCertificates: Record<'default' | string, ClientCertificates> = {
+    default: new ClientCertificates(),
   }
-  clientCertificates: ClientCertificates
   url: string
-  subjects: string
+  subjects: string = ''
   pathnameLength: number
   matchRule: ParsedUrl | undefined
+
+  constructor (url: string) {
+    this.url = url
+    this.pathnameLength = new URL(url).pathname.length
+  }
 
   addSubject (subject: string) {
     if (!this.subjects) {
       this.subjects = subject
     } else {
       this.subjects = `${this.subjects} - ${subject}`
+    }
+  }
+
+  addCA (ca: Buffer) {
+    this.clientCertificates.default.ca.push(ca)
+  }
+
+  getCA () {
+    return this.clientCertificates.default.ca
+  }
+
+  addCertGroup (group: string) {
+    if (!this.clientCertificates[group]) {
+      this.clientCertificates[group] = new ClientCertificates()
+    }
+  }
+
+  getCertificates (group: string | null): ClientCertificates {
+    group = group || 'default'
+
+    if (!this.clientCertificates[group]) {
+      debug(`no client certificates found for url '${this.url}' and group '${group}'`)
+    }
+
+    return {
+      ...this.clientCertificates[group],
+      ca: this.clientCertificates.default.ca,
     }
   }
 }
@@ -101,7 +129,6 @@ export class ClientCertificates {
   cert: Buffer[] = []
   key: PemKey[] = []
   pfx: PfxCertificate[] = []
-  group?: string
 }
 
 export class PemKey {
@@ -163,10 +190,7 @@ export class ClientCertificateStore {
     const certGroup = this.certGroup
     const port = !requestUrl.port ? undefined : parseInt(requestUrl.port)
     const matchingCerts = this._urlClientCertificates.filter((cert) => {
-      const urlMatch = UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
-      const groupMatch = !certGroup || cert.clientCertificates.group === certGroup
-
-      return urlMatch && groupMatch
+      return UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
     })
 
     switch (matchingCerts.length) {
@@ -179,7 +203,7 @@ export class ClientCertificateStore {
           `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
         )
 
-        return matchingCerts[0].clientCertificates
+        return matchingCerts[0].getCertificates(certGroup)
       default:
         matchingCerts.sort((a, b) => {
           return b.pathnameLength - a.pathnameLength
@@ -189,7 +213,7 @@ export class ClientCertificateStore {
           `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
         )
 
-        return matchingCerts[0].clientCertificates
+        return matchingCerts[0].getCertificates(certGroup)
     }
   }
 
@@ -244,7 +268,7 @@ export function loadClientCertificateConfig (config) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
               }
 
-              urlClientCertificates.clientCertificates.ca.push(caRaw)
+              urlClientCertificates.addCA(caRaw)
             }
           })
         }
@@ -254,6 +278,8 @@ export function loadClientCertificateConfig (config) {
         }
 
         item.certs.forEach((cert) => {
+          const certGroup = cert.group
+
           if (!cert || (!cert.cert && !cert.pfx)) {
             throw new Error('Either PEM or PFX must be supplied')
           }
@@ -277,7 +303,7 @@ export function loadClientCertificateConfig (config) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
 
-            urlClientCertificates.clientCertificates.cert.push(pemRaw)
+            urlClientCertificates.clientCertificates[certGroup].cert.push(pemRaw)
 
             let passphrase: string | undefined = undefined
 
@@ -305,15 +331,18 @@ export function loadClientCertificateConfig (config) {
               throw new Error(`Cannot parse PEM key: ${error.message}`)
             }
 
-            urlClientCertificates.clientCertificates.key.push(
+            urlClientCertificates.addCertGroup(certGroup)
+            urlClientCertificates.clientCertificates[certGroup].key.push(
               new PemKey(pemKeyRaw, passphrase),
             )
 
             const subject = extractSubjectFromPem(pemParsed)
 
             urlClientCertificates.addSubject(subject)
+
             debug(
               `loaded client PEM certificate: ${subject} for url: ${urlClientCertificates.url}`,
+              certGroup !== 'default' ? `(group: ${certGroup})` : '',
             )
           }
 
@@ -333,15 +362,18 @@ export function loadClientCertificateConfig (config) {
             const pfxRaw = loadBinaryFromFile(cert.pfx)
             const pfxParsed = loadPfx(pfxRaw, passphrase)
 
-            urlClientCertificates.clientCertificates.pfx.push(
+            urlClientCertificates.addCertGroup(certGroup)
+            urlClientCertificates.clientCertificates[certGroup].pfx.push(
               new PfxCertificate(pfxRaw, passphrase),
             )
 
             const subject = extractSubjectFromPfx(pfxParsed)
 
             urlClientCertificates.addSubject(subject)
+
             debug(
               `loaded client PFX certificate: ${subject} for url: ${urlClientCertificates.url}`,
+              certGroup !== 'default' ? `(group: ${certGroup})` : '',
             )
           }
         })
