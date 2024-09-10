@@ -2,7 +2,6 @@
 import Emitter from 'component-emitter'
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from './utils'
-import type { SocketShape } from './types'
 
 type CDPSocketNamespaceKey = `cypressSocket-${string}`
 type CDPSendToServerNamespaceKey = `cypressSendToServer-${string}`
@@ -14,7 +13,7 @@ declare global {
   }
 }
 
-export class CDPBrowserSocket extends Emitter implements SocketShape {
+export class CDPBrowserSocket extends Emitter {
   private _namespace: string
 
   constructor (namespace: string) {
