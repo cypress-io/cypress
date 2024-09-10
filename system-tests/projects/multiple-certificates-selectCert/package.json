@@ -1,0 +1,26 @@
+{
+  "name": "multiple-certificates-selector-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "npx tsx ./src/index.ts",
+    "test": "cypress run"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "https": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.2"
+  },
+  "license": "ISC",
+  "author": {
+    "name": "Abhishek Karmakar",
+    "url": "https://github.com/alienkarma"
+  },
+  "keywords": []
+}

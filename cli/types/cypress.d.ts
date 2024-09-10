@@ -2821,6 +2821,10 @@ declare namespace Cypress {
 
   interface PEMCert {
     /**
+     * Group for filtering certificates (Optional)
+     */
+    group?: string
+    /**
      * Path to the certificate file, relative to project root.
      */
     cert: string
@@ -2835,6 +2839,10 @@ declare namespace Cypress {
   }
 
   interface PFXCert {
+    /**
+     * Group for filtering certificates (Optional)
+     */
+    group?: string
     /**
      * Path to the certificate container, relative to project root.
      */
