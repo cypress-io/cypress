@@ -74,13 +74,13 @@ type FamilyCache = {
   [host: string]: 4 | 6
 }
 
-export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
+export function buildConnectReqHead (hostname: string, port: string, proxyAuth?: string | null) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
 
-  if (proxy.auth) {
-    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
+  if (proxyAuth) {
+    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxyAuth).toString('base64')}`)
   }
 
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
@@ -430,7 +430,7 @@ class HttpsAgent extends https.Agent {
       proxySocket.once('error', onError)
       proxySocket.once('data', onData)
 
-      const connectReq = buildConnectReqHead(hostname, port, proxy)
+      const connectReq = buildConnectReqHead(hostname, port, proxy.auth)
 
       proxySocket.setNoDelay(true)
       proxySocket.write(connectReq)

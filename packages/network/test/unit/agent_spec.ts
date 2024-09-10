@@ -420,6 +420,7 @@ describe('lib/agent', function () {
       })
 
       it('#createUpstreamProxyConnection calls to super for caching, TLS-ifying', function () {
+        // @ts-ignore
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -733,9 +734,9 @@ describe('lib/agent', function () {
             this.clientCert = pemCert
             const testCerts = new UrlClientCertificates(`https://localhost`)
 
-            testCerts.clientCertificates = new ClientCertificates()
-            testCerts.clientCertificates.cert.push(Buffer.from(pemCert, 'utf-8'))
-            testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
+            testCerts.clientCertificates.default = new ClientCertificates()
+            testCerts.clientCertificates.default.cert.push(Buffer.from(pemCert, 'utf-8'))
+            testCerts.clientCertificates.default.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
             clientCertificateStore.addClientCertificatesForUrl(testCerts)
           }
 
@@ -834,7 +835,7 @@ describe('lib/agent', function () {
 
   context('.buildConnectReqHead', function () {
     it('builds the correct request', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {})
+      const head = buildConnectReqHead('foo.bar', '1234')
 
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -844,9 +845,7 @@ describe('lib/agent', function () {
     })
 
     it('can do Proxy-Authorization', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {
-        auth: 'baz:quux',
-      })
+      const head = buildConnectReqHead('foo.bar', '1234', 'baz:quux')
 
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -902,6 +901,7 @@ describe('lib/agent', function () {
       },
     ].map((testCase) => {
       it(`detects correctly from ${testCase.protocol} requests`, () => {
+        // @ts-ignore
         const spy = sinon.spy(testCase.agent, 'addRequest')
 
         return request({
@@ -919,6 +919,7 @@ describe('lib/agent', function () {
       })
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
+        // @ts-ignore
         const spy = sinon.spy(testCase.agent, 'addRequest')
         const socket = socketIo.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
           agent: <any>testCase.agent,
@@ -958,6 +959,7 @@ describe('lib/agent', function () {
 
   context('.regenerateRequestHead', function () {
     it('regenerates changed request head', () => {
+      // @ts-ignore
       const spy = sinon.spy(http.globalAgent, 'createSocket')
 
       return request({
