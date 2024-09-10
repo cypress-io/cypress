@@ -197,6 +197,12 @@ export default {
     },
   },
 
+  chooseCert: {
+    invalid_argument: {
+      message: `${cmd('chooseCert')} must be passed with a valid string (used in certificate groups) or null. You passed: \`{{group}}\`.`,
+    },
+  },
+
   clear: {
     invalid_element: {
       message: stripIndent`\

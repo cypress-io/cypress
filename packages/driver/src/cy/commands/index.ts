@@ -6,6 +6,8 @@ import * as Aliasing from './aliasing'
 
 import * as Asserting from './asserting'
 
+import * as ChooseCert from './chooseCert'
+
 import * as Clock from './clock'
 
 import * as Commands from './commands'
@@ -57,6 +59,7 @@ export const allCommands = {
   Agents,
   Aliasing,
   Asserting,
+  ChooseCert,
   Clock,
   Commands,
   Connectors,

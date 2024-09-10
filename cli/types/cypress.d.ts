@@ -2145,7 +2145,7 @@ declare namespace Cypress {
      * Choose a cert in the system's cert store based on group.
      */
     chooseCert(group: string): void
-    
+
     /**
      * Enables you to work with the subject yielded from the previous command.
      *

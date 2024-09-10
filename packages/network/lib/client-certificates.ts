@@ -303,6 +303,7 @@ export function loadClientCertificateConfig (config) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
 
+            urlClientCertificates.addCertGroup(certGroup)
             urlClientCertificates.clientCertificates[certGroup].cert.push(pemRaw)
 
             let passphrase: string | undefined = undefined
@@ -331,7 +332,6 @@ export function loadClientCertificateConfig (config) {
               throw new Error(`Cannot parse PEM key: ${error.message}`)
             }
 
-            urlClientCertificates.addCertGroup(certGroup)
             urlClientCertificates.clientCertificates[certGroup].key.push(
               new PemKey(pemKeyRaw, passphrase),
             )
