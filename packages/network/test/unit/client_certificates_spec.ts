@@ -844,8 +844,7 @@ describe('lib/client-certificates', () => {
           {
             url: createUniqueUrl(),
             ca: [],
-            certs: [
-            ],
+            certs: [],
           },
         ],
       }
@@ -899,12 +898,16 @@ describe('lib/client-certificates', () => {
       const pemFileData2 = fs.readFileSync(pemFilepath2)
       const keyFileData2 = fs.readFileSync(keyFilepath2)
 
+      clientCertificateStore.clear()
       loadClientCertificateConfig(config)
-
       const parsedURL = urllib.parse(url)
       let options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(parsedURL)
 
-      expect(options).to.be.null
+      expect(options).not.to.be.null
+      expect(options?.ca.length).to.eq(1)
+      expect(options?.key).to.be.empty
+      expect(options?.cert).to.be.empty
+      expect(options?.pfx).to.be.empty
 
       clientCertificateStore.selectCertGroup(group1)
       options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(parsedURL)

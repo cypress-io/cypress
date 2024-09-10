@@ -106,17 +106,20 @@ export class UrlClientCertificates {
     }
   }
 
-  getCertificates (group: string | null): ClientCertificates {
-    group = group || 'default'
+  getCertificates (group: string | null): ClientCertificates | null {
+    const certGroup = group || 'default'
+    const isDefault = group === null || group === 'default'
+    const certs = this.clientCertificates[certGroup]
 
-    if (!this.clientCertificates[group]) {
-      debug(`no client certificates found for url '${this.url}' and group '${group}'`)
+    if (!certs || (!isDefault && certs.cert.length === 0 && certs.pfx.length === 0)) {
+      debug(`no client certificates found for url '${this.url}' and group '${certGroup}'`)
+
+      return null
     }
 
-    return {
-      ...this.clientCertificates[group],
-      ca: this.clientCertificates.default.ca,
-    }
+    certs.ca = this.clientCertificates.default.ca
+
+    return certs
   }
 }
 
@@ -169,6 +172,8 @@ export class ClientCertificateStore {
 
     cert.matchRule = UrlMatcher.buildMatcherRule(cert.url)
     this._urlClientCertificates.push(cert)
+
+    this.clearCertGroup()
   }
 
   selectCertGroup (group: string | null) {
@@ -187,7 +192,7 @@ export class ClientCertificateStore {
       return null
     }
 
-    const certGroup = this.certGroup
+    const certGroup = this.certGroup || 'default'
     const port = !requestUrl.port ? undefined : parseInt(requestUrl.port)
     const matchingCerts = this._urlClientCertificates.filter((cert) => {
       return UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
@@ -223,6 +228,7 @@ export class ClientCertificateStore {
 
   clear (): void {
     this._urlClientCertificates = []
+    this.clearCertGroup()
   }
 }
 
@@ -278,7 +284,7 @@ export function loadClientCertificateConfig (config) {
         }
 
         item.certs.forEach((cert) => {
-          const certGroup = cert.group
+          const certGroup = cert.group ?? 'default'
 
           if (!cert || (!cert.cert && !cert.pfx)) {
             throw new Error('Either PEM or PFX must be supplied')
