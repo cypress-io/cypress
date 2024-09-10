@@ -59,6 +59,11 @@ describe('capture-protocol', () => {
       })
 
       it(`verifies the types of requests match for a preloaded service worker - ${browser}`, function () {
+        // retry the system test up to 10 times
+        // remove the retry logic once the test is stable
+        // see https://github.com/cypress-io/cypress/issues/29950
+        this.retries(10)
+
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           project: 'protocol',
