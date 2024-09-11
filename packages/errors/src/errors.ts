@@ -598,6 +598,19 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(error)}`
   },
+  CLOUD_PROTOCOL_STREAM_STALL_FAILURE: (kbPerSecondThreshold: number, samplingRateMs: number) => {
+    return errTemplate`\
+        Warning: We encountered slow network conditions while uploading the Test Replay recording for this spec.
+
+        The upload transfer rate fell below ${fmt.highlightSecondary(`${kbPerSecondThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${samplingRateMs}ms`)}.
+
+        If this error occurs often, the sampling period may be configured by setting the ${fmt.highlightSecondary('CYPRESS_ENV_UPLOAD_STALL_SAMPLING_INTERVAL')} environment variable to a higher value than ${fmt.stringify(samplingRateMs)}.
+
+        To prevent long CI executing durations, this Test Replay recording will not be uploaded.
+
+        The results for this spec will not display Test Replay recordings.
+    `
+  },
   CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: (error: {
     errors: (Error & { kind?: 'SystemError', url: string } | Error & { kind: 'HttpError', url: string, status?: string, statusText?: string, responseBody?: string })[]
   }) => {

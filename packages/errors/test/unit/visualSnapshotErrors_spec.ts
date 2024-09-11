@@ -695,6 +695,14 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CLOUD_PROTOCOL_STREAM_STALL_FAILURE: () => {
+      const kbPerSecondThreshold = 512
+      const samplingRateMs = 5000
+
+      return {
+        default: [kbPerSecondThreshold, samplingRateMs],
+      }
+    },
     CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR: () => {
       // @ts-expect-error
       const aggregateError: Error & { errors: any[] } = makeErr()
