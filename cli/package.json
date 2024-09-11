@@ -20,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^3.0.0",
+    "@cypress/request": "^3.0.4",
     "@cypress/xvfb": "^1.2.4",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
@@ -59,14 +59,15 @@
     "request-progress": "^3.0.0",
     "semver": "^7.5.3",
     "supports-color": "^8.1.1",
-    "tmp": "~0.2.1",
+    "tmp": "~0.2.3",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.13.0",
-    "@babel/preset-env": "7.13.5",
+    "@babel/cli": "7.24.8",
+    "@babel/preset-env": "7.25.3",
     "@cypress/angular": "0.0.0-development",
+    "@cypress/angular-signals": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
@@ -81,7 +82,7 @@
     "@types/chai-jquery": "1.1.40",
     "@types/jquery": "3.3.31",
     "@types/lodash": "4.14.168",
-    "@types/minimatch": "3.0.3",
+    "@types/minimatch": "3.0.5",
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.5",
@@ -90,7 +91,7 @@
     "chai-string": "1.5.0",
     "cross-env": "7.0.3",
     "dependency-check": "4.1.0",
-    "dtslint": "4.0.7",
+    "dtslint": "4.2.1",
     "execa-wrap": "1.4.0",
     "hasha": "5.2.2",
     "mocha": "6.2.2",
@@ -103,7 +104,7 @@
     "sinon": "7.2.2",
     "snap-shot-it": "7.9.6",
     "spawn-mock": "1.0.0",
-    "strip-ansi": "6.0.0"
+    "strip-ansi": "6.0.1"
   },
   "files": [
     "bin",
@@ -117,7 +118,8 @@
     "vue2",
     "react18",
     "angular",
-    "svelte"
+    "svelte",
+    "angular-signals"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -169,6 +171,11 @@
       "types": "./svelte/dist/index.d.ts",
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
       "require": "./svelte/dist/cypress-svelte.cjs.js"
+    },
+    "./angular-signals": {
+      "types": "./angular-signals/dist/index.d.ts",
+      "import": "./angular-signals/dist/index.js",
+      "require": "./angular-signals/dist/index.js"
     }
   },
   "workspaces": {

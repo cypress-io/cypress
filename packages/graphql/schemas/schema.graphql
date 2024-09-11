@@ -1185,6 +1185,7 @@ enum ErrorTypeEnum {
   ERROR_READING_FILE
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
+  EXPERIMENTAL_JIT_COMPONENT_TESTING
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
@@ -1236,6 +1237,8 @@ enum ErrorTypeEnum {
   PORT_IN_USE_LONG
   PORT_IN_USE_SHORT
   PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION
+  PROXY_ENCOUNTERED_INVALID_HEADER_NAME
+  PROXY_ENCOUNTERED_INVALID_HEADER_VALUE
   RECORDING_FROM_FORK_PR
   RECORD_KEY_MISSING
   RECORD_PARAMS_WITHOUT_RECORDING
@@ -1441,6 +1444,11 @@ type LocalSettingsPreferences {
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
+
+  """
+  Determine if the browser should launch when the browser flag is passed alone
+  """
+  shouldLaunchBrowserFromOpenBrowser: Boolean
   specListWidth: Int
   wasBrowserSetInCLI: Boolean
 }

@@ -1,5 +1,5 @@
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
-import * as CriClient from '../../../lib/browsers/cri-client'
+import { CriClient } from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
@@ -276,6 +276,20 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criClient.send).to.be.calledWith('Fetch.enable')
       expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
+    it('does not throw if Fetch.enable on extra target throws', () => {
+      const extraTargetCriClient = {
+        send: sinon.stub().withArgs('Fetch.enable').rejects('Fetch.enable failed'),
+        on: sinon.stub(),
+      }
+
+      options.CriConstructor.resolves(extraTargetCriClient)
+
+      options.browserClient.send.withArgs('Fetch.enable').resolves()
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      expect(BrowserCriClient._onAttachToTarget(options as any)).to.be.fulfilled
     })
 
     it('adds the service worker fetch event binding', async () => {

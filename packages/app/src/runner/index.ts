@@ -23,10 +23,10 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 
 let _eventManager: EventManager | undefined
 
@@ -343,10 +343,6 @@ function runSpecE2E (config, spec: SpecFile) {
   getEventManager().initialize($autIframe, config)
 }
 
-export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
-}
-
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
@@ -390,6 +386,18 @@ async function initialize () {
   })
 
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
+}
+
+async function updateDevServerWithSpec (spec: SpecFile) {
+  return new Promise<void>((resolve, _reject) => {
+    // currently, we don't have criteria to reject the promise
+    // as the dev-server can take a long time to compile, which is variable per user.
+    Cypress.once('dev-server:on-spec-updated', () => {
+      resolve()
+    })
+
+    Cypress.emit('dev-server:on-spec-update', spec)
+  })
 }
 
 /**
@@ -437,6 +445,13 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+    if (config.experimentalJustInTimeCompile && !config.isTextTerminal) {
+      // If running with experimentalJustInTimeCompile enabled and in open mode,
+      // send a signal to the dev server to load the spec before running
+      // since the spec and related resources are not yet compiled.
+      await updateDevServerWithSpec(spec)
+    }
+
     return runSpecCT(config, spec)
   }
 

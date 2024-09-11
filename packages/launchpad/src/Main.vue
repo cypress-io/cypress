@@ -108,7 +108,7 @@ import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 import MajorVersionWelcome from './migration/MajorVersionWelcome.vue'
 import { useI18n } from '@cy/i18n'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
@@ -132,6 +132,7 @@ fragment MainLaunchpadQueryData on Query {
     preferences {
       majorVersionWelcomeDismissed
       wasBrowserSetInCLI
+      shouldLaunchBrowserFromOpenBrowser
     }
   }
   currentProject {
@@ -193,14 +194,64 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const hasBaseError = computed(() => !!query.data.value?.baseError)
+
+const refetchDelaying = ref(false)
+const refetchCount = ref(0)
+
+/*
+ * Sometimes the config file has not been loaded by the DataContext's config manager by the
+ * time the MainLaunchpadQueryDocument request is sent off. The server ends up resolving
+ * the isLoadingConfigFile field as false. In certain situations, there can be a race between
+ * opening the project and the DataContext completing its retrieval of the configuration.
+ * In these cases, we want to retry the query until the config file is fully loaded.
+ *
+ * If the ProjectConfigIPC encounters an error while loading the config, it will update the
+ * baseError field via subscription, so there is not a limit set here on retries.
+ */
+
+watch(
+  [currentProject, query.fetching],
+  ([currentProject, isFetchingProject]) => {
+    const isLoadingConfig = currentProject?.isLoadingConfigFile
+
+    /*
+     * conditions for refetch are:
+     * - There is a current project, but Config file has not yet loaded
+     * - There are no pending (delayed) refetches, or fetches in progress
+     * - There is no baseError - we don't want to continue to refetch if
+     *   things have errored out.
+     */
+    if (
+      currentProject &&
+      isLoadingConfig &&
+      !isFetchingProject &&
+      !refetchDelaying.value &&
+      !hasBaseError.value
+    ) {
+      refetchDelaying.value = true
+      refetchCount.value++
+      setTimeout(() => {
+        refetchDelaying.value = false
+        if (
+          (currentProject && !isLoadingConfig) || hasBaseError.value
+        ) {
+          return
+        }
+
+        query.executeQuery({ requestPolicy: 'network-only' })
+      }, (refetchCount.value + 1) * 500)
+    }
+  },
+)
 
 function handleClearLandingPage () {
   setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
-  const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+  const shouldLaunchBrowser = query.data?.value?.localSettings?.preferences?.shouldLaunchBrowserFromOpenBrowser
 
   const currentTestingType = currentProject.value?.currentTestingType
 
-  if (wasBrowserSetInCLI && currentTestingType) {
+  if (shouldLaunchBrowser && currentTestingType) {
     launchProject.executeMutation({ testingType: currentTestingType })
   }
 }

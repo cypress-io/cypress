@@ -38,6 +38,7 @@ type AfterSpecRun = any
 type Project = NonNullable<ReturnType<typeof openProject['getProject']>>
 
 let currentSetScreenshotMetadata: SetScreenshotMetadata
+let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
@@ -417,6 +418,12 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
       new Promise((res) => {
         project.once('end', (results) => {
           debug('project ended with results %O', results)
+          // If the project ends and the spec is skipped, treat the run as cancelled
+          // as we do not want to update the dev server unnecessarily for experimentalJustInTimeCompile.
+          if (results?.skippedSpec) {
+            isRunCancelled = true
+          }
+
           res(results)
         })
       }),
@@ -482,6 +489,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     debug('waiting for socket to connect and browser to launch...')
 
+    const coreData = require('@packages/data-context').getCtx().coreData
+
+    if (coreData.didBrowserPreviouslyHaveUnexpectedExit) {
+      debug(`browser previously exited. Setting shouldLaunchNewTab=false to recreate the correct browser automation clients.`)
+      options.shouldLaunchNewTab = false
+      coreData.didBrowserPreviouslyHaveUnexpectedExit = false
+    }
+
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
       // TODO: remove the need to extend options and coerce this type
@@ -492,6 +507,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
     .catch(Bluebird.TimeoutError, async (err) => {
+      debug('Catch on waitForBrowserToConnect')
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
       console.log('')
 
@@ -774,6 +790,23 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
+    const isExperimentalJustInTimeCompile = options.testingType === 'component' && config.experimentalJustInTimeCompile
+
+    // Only update the dev server if the run is not cancelled
+    if (isExperimentalJustInTimeCompile) {
+      if (isRunCancelled) {
+        // TODO: this logic to skip updating the dev-server on cancel needs a system-test before the feature goes generally available.
+        debug(`isExperimentalJustInTimeCompile=true and run is cancelled. Not updating dev server with spec ${spec.absolute}.`)
+      } else {
+        const ctx = require('@packages/data-context').getCtx()
+
+        // If in run mode, we need to update the dev server with our spec.
+        // in open mode, this happens in the browser through the web socket, but we do it here in run mode
+        // to try and have it happen as early as possible to make the test run as fast as possible
+        await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
+      }
+    }
+
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
     if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
@@ -928,7 +961,10 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       project,
       browser,
       screenshots,
-      onError,
+      onError: (...args) => {
+        debug('onError from runSpec')
+        onError(...args)
+      },
       videoRecording,
       socketId: options.socketId,
       webSecurity: options.webSecurity,
@@ -988,7 +1024,7 @@ async function ready (options: ReadyOptions) {
   // TODO: refactor this so we don't need to extend options
 
   const onError = options.onError = (err) => {
-    debug('onError')
+    debug('onError', new Error().stack)
     earlyExitTerminator.exitEarly(err)
   }
 
@@ -1061,8 +1097,6 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
-      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
-      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,

@@ -86,7 +86,7 @@ export function domainPropsToHostname ({ domain, subdomain, tld }: Record<string
 }
 
 /**
- * same-origin: Whether or not a a urls scheme, port, and host match. @see https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
+ * same-origin: Whether or not a urls scheme, port, and host match. @see https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
  * same-super-domain-origin: Whether or not a url's scheme, domain, top-level domain, and port match
  * same-site: Whether or not a url's scheme, domain, and top-level domain match. @see https://developer.mozilla.org/en-US/docs/Glossary/Site
  * @param {Policy} policy - the policy being used
