@@ -5,6 +5,9 @@ _Released 9/10/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `electron` from to `27.3.10` to `29.4.6`.
+- Upgraded bundled Node.js version from `18.17.1` to `18.18.2`.
+- Upgraded bundled Chromium version from `118.0.5993.117` to `120.0.6099.56`.
 - Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
 - Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
@@ -202,9 +205,6 @@ _Released 5/21/2024_
 
 **Dependency Updates:**
 
-- Upgraded `electron` from to `27.3.10` to `28.3.1`.
-- Upgraded bundled Node.js version from `18.17.1` to `18.18.2`.
-- Upgraded bundled Chromium version from `118.0.5993.117` to `120.0.6099.56`.
 - Updated js-cookie from `2.2.1` to `3.0.5`. Addressed in [#29497](https://github.com/cypress-io/cypress/pull/29497).
 - Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
