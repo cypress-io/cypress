@@ -97,6 +97,16 @@ context('lib/tasks/verify', () => {
     expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
+  it('returns early when `CYPRESS_SKIP_VERIFY` is set to true', () => {
+    process.env.CYPRESS_SKIP_VERIFY = 'true'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    return newVerifyInstance.start().then((result) => {
+      expect(result).to.eq(undefined)
+    })
+  })
+
   it('logs error and exits when no version of Cypress is installed', () => {
     return verify
     .start()

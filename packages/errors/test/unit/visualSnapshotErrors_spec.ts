@@ -674,11 +674,12 @@ describe('visual error templates', () => {
     },
     CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: () => {
       // @ts-expect-error
-      const err: Error & { status: number, statusText: string, url: string } = makeErr()
+      const err: Error & { status: number, statusText: string, url: string, message: string, responseBody: string } = makeErr()
 
       err.status = 500
       err.statusText = 'Internal Server Error'
       err.url = 'https://some/url'
+      err.responseBody = '{ status: 500, reason: \'unknown\'}'
 
       return {
         default: [err],
@@ -698,7 +699,7 @@ describe('visual error templates', () => {
       // @ts-expect-error
       const aggregateError: Error & { errors: any[] } = makeErr()
       // @ts-expect-error
-      const aggregateErrorWithNetworkError: Error & { errors: any[] } = makeErr()
+      const aggregateErrorWithSystemError: Error & { errors: any[] } = makeErr()
 
       const errOne = makeErr()
       const errTwo = makeErr()
@@ -707,15 +708,15 @@ describe('visual error templates', () => {
       aggregateError.errors = [errOne, errTwo, errThree]
 
       // @ts-expect-error
-      const errNetworkErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
+      const errSystemErr: Error & { kind: string, url: string } = new Error('http://some/url: ECONNRESET')
 
-      errNetworkErr.kind = 'NetworkError'
-      errNetworkErr.url = 'http://some/url'
-      aggregateErrorWithNetworkError.errors = [errNetworkErr, errTwo, errThree]
+      errSystemErr.kind = 'SystemError'
+      errSystemErr.url = 'http://some/url'
+      aggregateErrorWithSystemError.errors = [errSystemErr, errTwo, errThree]
 
       return {
         default: [aggregateError],
-        withNetworkError: [aggregateErrorWithNetworkError],
+        withSystemError: [aggregateErrorWithSystemError],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
@@ -1258,6 +1259,11 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+      return {
+        default: [],
+      }
+    },
     CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: () => {
       return {
         default: ['/path/to/config.ts', {}],
@@ -1374,6 +1380,22 @@ describe('visual error templates', () => {
     EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderName: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    PROXY_ENCOUNTERED_INVALID_HEADER_VALUE: () => {
+      const err = makeErr()
+
+      return {
+        default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
       }
     },
   })

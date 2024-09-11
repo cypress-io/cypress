@@ -22,6 +22,8 @@ import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
 import { injectIntoServiceWorker } from './util/service-worker-injector'
+import { validateHeaderName, validateHeaderValue } from 'http'
+import error from '@packages/errors'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -306,7 +308,42 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'connection',
   ])
 
-  this.res.set(headers)
+  this.debug('The headers are %o', headers)
+
+  // Filter for invalid headers
+  const filteredHeaders = Object.fromEntries(
+    Object.entries(headers).filter(([key, value]) => {
+      try {
+        validateHeaderName(key)
+        if (Array.isArray(value)) {
+          value.forEach((v) => validateHeaderValue(key, v))
+        } else if (value !== undefined) {
+          validateHeaderValue(key, value)
+        } else {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, new TypeError('Header value is undefined while expecting string'))
+
+          return false
+        }
+
+        return true
+      } catch (err) {
+        if (err.code === 'ERR_INVALID_HTTP_TOKEN') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_NAME', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else if (err.code === 'ERR_INVALID_CHAR') {
+          error.warning('PROXY_ENCOUNTERED_INVALID_HEADER_VALUE', { [key]: value }, this.req.method, this.req.originalUrl, err)
+        } else {
+          // rethrow any other errors
+          throw err
+        }
+
+        return false
+      }
+    }),
+  )
+
+  this.res.set(filteredHeaders)
+
+  this.debug('the new response headers are %o', this.res.getHeaderNames())
 
   span?.setAttributes({
     experimentalCspAllowList: this.config.experimentalCspAllowList,

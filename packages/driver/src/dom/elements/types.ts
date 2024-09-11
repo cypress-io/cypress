@@ -18,7 +18,7 @@ declare global {
   }
 
   interface Selection {
-    modify: Function
+    modify: (alter?: string | undefined, direction?: string | undefined, granularity?: string | undefined) => void
   }
 }
 

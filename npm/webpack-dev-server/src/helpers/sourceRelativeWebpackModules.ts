@@ -222,7 +222,7 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackM
 
     throw new CypressWebpackDevServerError(
       `Incompatible major versions of webpack and webpack-dev-server!
-      webpack-dev-server major version ${webpackDevServer.majorVersion} only works with major versions of webpack ${webpackMajorVersion} - saw webpack-dev-server version ${json.version}.
+      webpack-dev-server major version ${webpackDevServer.majorVersion} only works with major versions of webpack 5 - saw webpack-dev-server version ${json.version}.
       If using webpack major version 4, please install webpack-dev-server version 4 to be used with @cypress/webpack-dev-server or upgrade to webpack 5.`,
     )
   }

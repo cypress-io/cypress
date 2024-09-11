@@ -47,11 +47,8 @@
     "esModuleInterop": true,
     /** Allows us to strip internal types sourced from webpack */
     "stripInternal": true,
-    /* issues with node typings clashing with vite 4.
-     * There are no plans to backport a fix, but might be able to remove this configuration once the repo is on vite version 5.
-     * @see https://github.com/vitejs/vite/issues/15714#issuecomment-1933724182
-     */
-    "skipLibCheck": true
+    /* skips checking declaration types. we skip this because we have multiple versions of vite installed as dev dependencies */
+    "skipLibCheck": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "*.js"]

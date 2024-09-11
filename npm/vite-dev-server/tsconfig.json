@@ -47,6 +47,11 @@
     "esModuleInterop": true,
     /** Allows us to strip internal types sourced from webpack */
     "stripInternal": true,
+    "ignoreDeprecations": "5.0",
+    /* 
+     * TODO: remove importsNotUsedAsValues after typescript 5.5 and up as it will no longer work. If we want the same behavior
+     * as importsNotUsedAsValues, we need to use "verbatimModuleSyntax", which will require this package to be an ES Module.
+     */
     "importsNotUsedAsValues": "error",
     /* issues with node typings clashing with vite 4.
      * There are no plans to backport a fix, but might be able to remove this configuration once the repo is on vite version 5.

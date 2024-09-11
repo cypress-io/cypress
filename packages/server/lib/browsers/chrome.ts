@@ -55,6 +55,15 @@ let browserCriClient: BrowserCriClient | undefined
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  // skip reading the preferences if requested by the user,
+  // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
+  // see https://github.com/cypress-io/cypress/issues/29330
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    debug('ignoring chrome preferences: not reading from chrome preference files')
+
+    return Bluebird.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
+  }
+
   debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
 
   return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
@@ -95,7 +104,16 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
   })
 }
 
-const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences) => {
+const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences): Promise<void> => {
+  // skip writing the preferences if requested by the user,
+  // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
+  // see https://github.com/cypress-io/cypress/issues/29330
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    debug('ignoring chrome preferences: not writing to preference files')
+
+    return Promise.resolve()
+  }
+
   return Bluebird.map(_.keys(originalPrefs), (key) => {
     const originalJson = originalPrefs[key]
     const newJson = newPrefs[key]
@@ -154,6 +172,10 @@ const _removeRootExtension = () => {
 
 // https://github.com/cypress-io/cypress/issues/2048
 const _disableRestorePagesPrompt = function (userDir) {
+  if (process.env.IGNORE_CHROME_PREFERENCES) {
+    return Promise.resolve()
+  }
+
   const prefsPath = path.join(userDir, 'Default', 'Preferences')
 
   return fs.readJson(prefsPath)
@@ -423,7 +445,9 @@ export = {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
+    debug('attaching crash handler to target ', pageCriClient.targetId)
     pageCriClient.on('Target.targetCrashed', async (event) => {
+      debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
         return
       }

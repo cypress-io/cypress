@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "find-test-names": "^1.19.0",
+    "find-test-names": "^1.28.18",
     "globby": "^11.0.4"
   },
   "devDependencies": {
     "cypress-each": "^1.11.0",
     "cypress-expect": "^2.5.3",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=10"

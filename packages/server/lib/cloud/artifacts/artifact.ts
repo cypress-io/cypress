@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { performance } from 'perf_hooks'
-
+import type { AfterSpecDurations } from '@packages/types'
 const debug = Debug('cypress:server:cloud:artifact')
 
 const isAggregateError = (err: any): err is AggregateError => {
@@ -32,12 +32,15 @@ export interface ArtifactUploadResult {
   key: ArtifactKind
   errorStack?: string
   allErrors?: Error[]
+  uploadDuration?: number
+  originalError?: Error
+  afterSpecDurations?: AfterSpecDurations & {
+    afterSpecTotal: number
+  }
   specAccess?: {
     offset: number
     size: number
   }
-  uploadDuration?: number
-  originalError?: Error
 }
 
 export type ArtifactUploadStrategy<T> = (filePath: string, uploadUrl: string, fileSize: number | bigint) => T

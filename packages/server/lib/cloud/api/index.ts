@@ -22,6 +22,7 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
+import type { AfterSpecDurations } from '@packages/types'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -289,6 +290,9 @@ export type ProtocolMetadata = ArtifactMetadata & {
     size: number
     offset: number
   }
+  afterSpecDurations?: AfterSpecDurations & {
+    afterSpecTotal: number
+  }
 }
 
 export type UpdateInstanceArtifactsPayload = {
@@ -422,12 +426,15 @@ export default {
       }
 
       if (script) {
-        const { testingType } = options
-        const { runId } = result
-
         await options.project.protocolManager.setupProtocol(script, {
-          runId,
-          testingType,
+          runId: result.runId,
+          projectId: options.projectId,
+          testingType: options.testingType,
+          cloudApi: {
+            url: apiUrl,
+            retryWithBackoff: this.retryWithBackoff,
+            requestPromise: this.rp,
+          },
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }
@@ -508,6 +515,8 @@ export default {
   },
 
   updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions, body: UpdateInstanceArtifactsPayload) {
+    debug('PUT %s %o', recordRoutes.instanceArtifacts(options.instanceId), body)
+
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
@@ -671,7 +680,7 @@ export default {
     if (!verified) {
       debugProtocol(`Unable to verify protocol signature %s`, url)
 
-      return null
+      throw new Error('Unable to verify protocol signature')
     }
 
     debugProtocol(`Loaded protocol via url %s`, url)
