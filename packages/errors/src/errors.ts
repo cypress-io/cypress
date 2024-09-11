@@ -574,6 +574,17 @@ export const AllCypressErrors = {
         This error will not affect or change the exit code.
     `
   },
+  CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR: (error: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while upload the Test Replay recording of this spec.
+
+        These reults will not display Test Replay recordings.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.highlightSecondary(error)}
+    `
+  },
   CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE: (error: Error & { url: string, status: number, statusText: string, responseBody: string }) => {
     return errTemplate`\
         Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
@@ -586,7 +597,7 @@ export const AllCypressErrors = {
         
         ${fmt.highlightTertiary(error.responseBody)}`
   },
-  CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: (error: Error & { url: string }) => {
+  CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: (error: Error & { url: string }) => {
     return errTemplate`\
         Warning: We encountered a network error while uploading the Test Replay recording for this spec.
         
@@ -598,13 +609,15 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(error)}`
   },
-  CLOUD_PROTOCOL_STREAM_STALL_FAILURE: (kbPerSecondThreshold: number, samplingRateMs: number) => {
+  CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: (error: Error & { chunkSizeKB: number, maxActivityDwellTime: number }) => {
+    const kbpsThreshold = (error.chunkSizeKB * 8) / (error.maxActivityDwellTime / 1000)
+
     return errTemplate`\
         Warning: We encountered slow network conditions while uploading the Test Replay recording for this spec.
 
-        The upload transfer rate fell below ${fmt.highlightSecondary(`${kbPerSecondThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${samplingRateMs}ms`)}.
+        The upload transfer rate fell below ${fmt.highlightSecondary(`${kbpsThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${error.maxActivityDwellTime}ms`)}.
 
-        If this error occurs often, the sampling period may be configured by setting the ${fmt.highlightSecondary('CYPRESS_ENV_UPLOAD_STALL_SAMPLING_INTERVAL')} environment variable to a higher value than ${fmt.stringify(samplingRateMs)}.
+        If this error occurs often, the sampling period may be configured by setting the ${fmt.highlightSecondary('CYPRESS_ENV_UPLOAD_STALL_SAMPLING_INTERVAL')} environment variable to a higher value than ${fmt.stringify(error.maxActivityDwellTime)}.
 
         To prevent long CI executing durations, this Test Replay recording will not be uploaded.
 
@@ -618,7 +631,7 @@ export const AllCypressErrors = {
       const firstError = error.errors[0]
 
       if (firstError?.kind === 'SystemError') {
-        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE(firstError as Error & { url: string })
+        return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE(firstError as Error & { url: string })
       }
 
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string})
