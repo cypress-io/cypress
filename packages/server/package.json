@@ -216,6 +216,7 @@
   "workspaces": {
     "nohoist": [
       "devtools-protocol",
+      "geckodriver",
       "http-proxy",
       "tsconfig-paths"
     ]
