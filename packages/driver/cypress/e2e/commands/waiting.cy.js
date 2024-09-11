@@ -947,8 +947,6 @@ describe('src/cy/commands/waiting', () => {
 
       describe('explicit wait time', function () {
         it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
-          cy.visit('/fixtures/empty.html')
-
           cy.on('_log:added', (attrs, log) => {
             this.hiddenLog = log
           })
@@ -962,8 +960,6 @@ describe('src/cy/commands/waiting', () => {
         })
 
         it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
-          cy.visit('/fixtures/empty.html')
-
           cy.on('_log:added', (attrs, log) => {
             this.hiddenLog = log
           })
@@ -981,8 +977,6 @@ describe('src/cy/commands/waiting', () => {
 
       describe('wait for xhr', function () {
         it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
-          cy.visit('/fixtures/empty.html')
-
           cy.on('_log:added', (attrs, log) => {
             if (attrs.name === 'wait') {
               this.hiddenWaitLog = log
@@ -1010,8 +1004,6 @@ describe('src/cy/commands/waiting', () => {
         })
 
         it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
-          cy.visit('/fixtures/empty.html')
-
           cy.on('_log:added', (attrs, log) => {
             if (attrs.name === 'wait') {
               this.hiddenWaitLog = log
@@ -1043,8 +1035,6 @@ describe('src/cy/commands/waiting', () => {
       })
 
       it('can turn off logging for wait for xhr', { protocolEnabled: true }, function () {
-        cy.visit('/fixtures/empty.html')
-
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'wait') {
             this.hiddenWaitLog = log
