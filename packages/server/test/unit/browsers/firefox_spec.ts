@@ -1,12 +1,9 @@
 require('../../spec_helper')
-
 import 'chai-as-promised'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
-import Marionette from 'marionette-client'
+import { GeckoDriver } from '../../../lib/browsers/geckodriver'
 import os from 'os'
 import sinon from 'sinon'
-import stripAnsi from 'strip-ansi'
 import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
@@ -26,38 +23,19 @@ const specUtil = require('../../specUtils')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
-  let marionetteDriver: any
-  let marionetteSendCb: any
+  let geckoDriver: GeckoDriver
   let foxdriver: any
   let foxdriverTab: any
 
-  const stubMarionette = () => {
-    marionetteSendCb = null
-
-    const connect = sinon.stub()
-
-    connect.resolves()
-
-    const send = sinon.stub().callsFake((opts) => {
-      if (marionetteSendCb) {
-        return marionetteSendCb(opts)
-      }
-
-      return Promise.resolve()
-    })
-
-    const close = sinon.stub()
-
-    const socket = new EventEmitter()
-    const client = new EventEmitter()
-
-    const tcp = { socket, client }
-
-    marionetteDriver = {
-      tcp, connect, send, close,
+  const stubGeckoDriver = () => {
+    // @ts-expect-error
+    geckoDriver = {
+      getWindowHandlesWebDriverClassic: sinon.stub(),
+      switchToWindowWebDriverClassic: sinon.stub(),
+      navigateWebdriverClassic: sinon.stub(),
     }
 
-    sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
+    sinon.stub(GeckoDriver, 'create').resolves(geckoDriver)
   }
 
   const stubFoxdriver = () => {
@@ -99,29 +77,8 @@ describe('lib/browsers/firefox', () => {
 
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
-    stubMarionette()
+    stubGeckoDriver()
     stubFoxdriver()
-  })
-
-  context('#connectToNewSpec', () => {
-    beforeEach(function () {
-      this.browser = { name: 'firefox', channel: 'stable' }
-      this.automation = {
-        use: sinon.stub().returns({}),
-      }
-
-      this.options = {
-        onError: () => {},
-      }
-    })
-
-    it('calls connectToNewSpec in firefoxUtil', function () {
-      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
-
-      firefox.connectToNewSpec(this.browser, this.options, this.automation)
-
-      expect(firefoxUtil.connectToNewSpec).to.be.called
-    })
   })
 
   context('#open', () => {
@@ -165,6 +122,31 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
       sinon.stub(CdpAutomation, 'create').resolves()
+    })
+
+    context('#connectToNewSpec', () => {
+      beforeEach(function () {
+        this.options.onError = () => {}
+        this.options.onInitializeNewBrowserTab = sinon.stub()
+      })
+
+      it('calls connectToNewSpec in firefoxUtil', async function () {
+        // @ts-expect-error
+        geckoDriver.getWindowHandlesWebDriverClassic.resolves(['mock-context-id'])
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        this.options.url = 'next-spec-url'
+        await firefox.connectToNewSpec(this.browser, this.options, this.automation)
+
+        expect(this.options.onInitializeNewBrowserTab).to.have.been.called
+        expect(geckoDriver.getWindowHandlesWebDriverClassic).to.have.been.called
+        expect(geckoDriver.switchToWindowWebDriverClassic).to.have.been.calledWith('mock-context-id')
+
+        // first time when connecting a new tab
+        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('about:blank')
+        // second time when navigating to the spec
+        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('next-spec-url')
+      })
     })
 
     it('executes before:browser:launch if registered', function () {
@@ -215,29 +197,21 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    it('adds extensions returned by before:browser:launch, along with cypress extension', function () {
-      plugins.has.withArgs('before:browser:launch').returns(true)
-      plugins.execute.resolves({
-        extensions: ['/path/to/user/ext'],
-      })
-
+    it('creates an instance of the geckodriver to delegate the creation of the WebDriver session, extension install, and navigation (classic)', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
+        expect(GeckoDriver.create).calledWithMatch(sinon.match({
+          host: '127.0.0.1',
+          port: sinon.match.number,
+          marionetteHost: '127.0.0.1',
+          marionettePort: sinon.match.number,
+          remotePort: 1234,
+          browserName: 'firefox',
+          extensions: ['/path/to/ext'],
+          profilePath: '/path/to/appData/firefox-stable/interactive',
+          binaryPath: undefined,
+        }))
 
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
-      })
-    })
-
-    it('adds only cypress extension if before:browser:launch returns object with non-array extensions', function () {
-      plugins.has.withArgs('before:browser:launch').returns(true)
-      plugins.execute.resolves({
-        extensions: 'not-an-array',
-      })
-
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
-
-        expect(marionetteDriver.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('http://')
       })
     })
 
@@ -489,57 +463,6 @@ describe('lib/browsers/firefox', () => {
   })
 
   context('firefox-util', () => {
-    context('#setupMarionette', () => {
-      // @see https://github.com/cypress-io/cypress/issues/7159
-      it('attaches geckodriver after testing connection', async () => {
-        await firefoxUtil.setupMarionette([], '', port)
-
-        expect(marionetteDriver.connect).to.be.calledOnce
-        expect(protocol._connectAsync).to.be.calledWith({
-          host: '127.0.0.1',
-          port,
-          getDelayMsForRetry: sinon.match.func,
-        })
-      })
-
-      it('rejects on errors on socket', async () => {
-        marionetteSendCb = () => {
-          marionetteDriver.tcp.socket.emit('error', new Error('foo error'))
-
-          return Promise.resolve()
-        }
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
-          expect(err.details).to.include('Error: foo error')
-          expect(err.originalError.message).to.eq('foo error')
-        })
-      })
-
-      it('rejects on errors from marionette commands', async () => {
-        marionetteSendCb = () => {
-          return Promise.reject(new Error('foo error'))
-        }
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
-          expect(err.details).to.include('Error: foo error')
-        })
-      })
-
-      it('rejects on errors during initial Marionette connection', async () => {
-        marionetteDriver.connect.rejects(new Error('not connectable'))
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
-          expect(err.details).to.include('Error: not connectable')
-        })
-      })
-    })
-
     context('#setupFoxdriver', () => {
       it('attaches foxdriver after testing connection', async () => {
         await firefoxUtil.setupFoxdriver(port)
@@ -601,7 +524,7 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, automationStub, null)
+        const actual = await firefoxUtil.setupCDP(port, automationStub, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
