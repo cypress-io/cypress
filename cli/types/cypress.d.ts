@@ -3572,7 +3572,7 @@ declare namespace Cypress {
     hosts?: null | { [key: string]: string }
   }
 
-  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
+  interface PluginConfigOptionsCommon extends Omit<ResolvedConfigOptions, 'component' | 'e2e'>, RuntimeConfigOptions {
     /**
     * Absolute path to the root of the project
     */
@@ -3586,6 +3586,16 @@ declare namespace Cypress {
      */
     version: string
   }
+
+  interface PluginConfigOptionsComponent<ComponentDevServerOpts = any> extends Pick<ComponentConfigOptions<ComponentDevServerOpts>, 'devServer'>, PluginConfigOptionsCommon{
+    testingType: 'component'
+  }
+
+  interface PluginConfigOptionsE2E extends PluginConfigOptionsCommon{
+    testingType: 'component'
+  }
+
+  type PluginConfigOptions = PluginConfigOptionsComponent | PluginConfigOptionsE2E
 
   interface DebugOptions {
     verbose: boolean
