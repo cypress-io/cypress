@@ -389,10 +389,14 @@ describe('lib/cloud/protocol', () => {
 
         describe('when protocol exports a sampling rate', () => {
           beforeEach(() => {
-            expectedSamplingInterval = protocol.uploadStallSamplingInterval = 7500
+            expectedSamplingInterval = 7500
+            protocol.uploadStallSamplingInterval = sinon.stub().callsFake(() => {
+              return expectedSamplingInterval
+            })
           })
 
           afterEach(() => {
+            // @ts-ignore
             protocol.uploadStallSamplingInterval = undefined
           })
 
