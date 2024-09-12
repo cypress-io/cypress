@@ -26,7 +26,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export const DB_SIZE_LIMIT = 5000000000
 
-export const DEFAULT_STREAM_SAMPLING_INTERVAL = 5000
+export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
 
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
