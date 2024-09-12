@@ -1,0 +1,20 @@
+# GeckoDriver
+
+## Purpose
+
+Cypress uses [GeckoDriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to drive [classic WebDriver](https://www.w3.org/TR/webdriver2/) methods, as well as interface with Firefox's [Marionette Protocol](https://firefox-source-docs.mozilla.org/testing/marionette/Intro.html). This is necessary to automate the Firefox browser in such cases:
+
+* Navigating to the current/next spec URL via [WebDriver Classic](https://www.w3.org/TR/webdriver2/)
+* Installing the [Cypress web extension](https://github.com/cypress-io/cypress/tree/develop/packages/extension) via the [Marionette Protocol](https://firefox-source-docs.mozilla.org/testing/marionette/Intro.html), which is critical to automating Firefox.
+
+Currently, [Chrome Devtools Protocol](https://chromedevtools.github.io/devtools-protocol/) automates most of our browser interactions with Firefox. However, [CDP will be removed towards the end of 2024](https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/) now that [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) is fully supported in Firefox 130 and up. [GeckoDriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) will be the entry point in which Cypress implements [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) for Firefox.
+
+## Historical Context
+
+Previously, Cypress was using an older package called the [marionette-client](https://github.com/cypress-io/marionette-client), which is near identical to the [mozilla b2g marionette client](https://github.com/mozilla-b2g/gaia/tree/master/tests/jsmarionette/client/marionette-client/lib/marionette). The b2g client hasn't had active development since 2014 and there have been changes to Marionette's server implementation since then. This means the [marionette-client](https://github.com/cypress-io/marionette-client) could break at any time, hence why we have migrated away from it. See [Cypress' migration to WebDriver BiDi within Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1604723) bugzilla ticket for more details.
+
+## Implementation
+
+To consume [`GeckoDriver`](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html), Cypress installs the [`geckodriver`](https://github.com/webdriverio-community/node-geckodriver#readme) package, a lightweight wrapper around the [geckodriver binary](https://github.com/mozilla/geckodriver), to connect to the Firefox browser. Once connected, `GeckoDriver` is able to send `WebDriver` commands, as well as `Marionette` commands, to the Firefox browser. It is also capable of creating a `WebDriver BiDi` session to send `WebDriver BiDi` commands and receive `WebDriver BiDi` events.
+
+It is worth noting that Cypress patches the [`geckodriver`](https://github.com/webdriverio-community/node-geckodriver#readme) package to coincide with our debug logs in order to not print extraneous messages to the console that could disrupt end user experience as well as impact our system tests. We also need to patch top-level awaits to correctly build the app.
