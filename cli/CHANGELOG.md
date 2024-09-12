@@ -13,6 +13,7 @@ _Released 9/10/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
 - Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
 ## 13.14.2
