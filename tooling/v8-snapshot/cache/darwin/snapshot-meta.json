@@ -1092,11 +1092,6 @@
     "./node_modules/@cypress/request/lib/redirect.js",
     "./node_modules/@cypress/request/lib/tunnel.js",
     "./node_modules/@cypress/request/node_modules/form-data/lib/populate.js",
-    "./node_modules/@cypress/request/node_modules/qs/lib/formats.js",
-    "./node_modules/@cypress/request/node_modules/qs/lib/index.js",
-    "./node_modules/@cypress/request/node_modules/qs/lib/parse.js",
-    "./node_modules/@cypress/request/node_modules/qs/lib/stringify.js",
-    "./node_modules/@cypress/request/node_modules/qs/lib/utils.js",
     "./node_modules/@electron/fuses/dist/config.js",
     "./node_modules/@electron/fuses/dist/constants.js",
     "./node_modules/@electron/fuses/dist/index.js",
@@ -2771,6 +2766,11 @@
     "./node_modules/pump/index.js",
     "./node_modules/pumpify/node_modules/pump/index.js",
     "./node_modules/pupa/index.js",
+    "./node_modules/qs/lib/formats.js",
+    "./node_modules/qs/lib/index.js",
+    "./node_modules/qs/lib/parse.js",
+    "./node_modules/qs/lib/stringify.js",
+    "./node_modules/qs/lib/utils.js",
     "./node_modules/querystringify/index.js",
     "./node_modules/queue-microtask/index.js",
     "./node_modules/ramda/src/F.js",
@@ -4239,5 +4239,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5c6dbcfc278f3f056de61f7789b50d6fbee8f36511fdf4a83193f7a93dedfa56"
+  "deferredHash": "d1dbb0faa876b1d44b80a7efd011d1dc220503a32ee410a97e826bd7ef468373"
 }
