@@ -269,7 +269,6 @@
     "**/ua-parser-js": "0.7.33",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1346313",
-    "node-gyp": "9.0.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }
