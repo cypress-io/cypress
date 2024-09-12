@@ -699,7 +699,7 @@ describe('visual error templates', () => {
       // @ts-expect-error
       const err: Error & { chunkSizeKB: number, maxActivityDwellTime: number } = new Error('stream stall')
 
-      err.chunkSizeKB = 64 * 1024
+      err.chunkSizeKB = 64
       err.maxActivityDwellTime = 5000
 
       return {
