@@ -3,6 +3,10 @@
 
 _Released 9/10/2024 (PENDING)_
 
+**Features:**
+
+- Cypress now displays more actionable errors when a Test Replay upload takes too long, and more verbose messages when uncategorized errors occur during the upload process. Addressed in [#30235](https://github.com/cypress-io/cypress/pull/30235).
+
 **Dependency Updates:**
 
 - Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
