@@ -39,6 +39,7 @@ export interface AppCaptureProtocolCommon {
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   getDbMetadata (): { offset: number, size: number } | undefined
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
+  uploadStallSamplingInterval?: number
 }
 
 export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact' | 'protocolUploadUrl'

@@ -16,7 +16,7 @@ const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
 const mockPutProtocolArtifact = sinon.stub()
 
-const { ProtocolManager, DB_SIZE_LIMIT } = proxyquire('../lib/cloud/protocol', {
+const { ProtocolManager, DB_SIZE_LIMIT, DEFAULT_STREAM_SAMPLING_INTERVAL } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
   './api/put_protocol_artifact': { putProtocolArtifact: mockPutProtocolArtifact },
 }) as typeof import('@packages/server/lib/cloud/protocol')
@@ -347,30 +347,77 @@ describe('lib/cloud/protocol', () => {
       })
 
       describe('when upload succeeds', () => {
+        let expectedSamplingInterval
+
         beforeEach(() => {
-          mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).resolves()
+          expectedSamplingInterval = DEFAULT_STREAM_SAMPLING_INTERVAL
         })
 
-        it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
-          const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-
-          expect(res).not.to.be.undefined
-          expect(res).to.include({
-            fileSize,
-            success: true,
+        describe('with default sampling rate', () => {
+          beforeEach(() => {
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
           })
 
-          expect(res?.afterSpecDurations).to.include({
-            afterSpecTotal: expectedAfterSpecTotal,
-            ...expectedAfterSpecDurations.durations,
+          it('uses 5000ms as the default stream monitoring sample rate', async () => {
+            await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
           })
 
-          // @ts-ignore
-          expect(res?.specAccess.offset).to.eq(offset)
-          // @ts-ignore
-          expect(res?.specAccess.size).to.eq(size)
+          it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
+            const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
-          expect(fs.unlink).to.have.been.called
+            expect(res).not.to.be.undefined
+            expect(res).to.include({
+              fileSize,
+              success: true,
+            })
+
+            expect(res?.afterSpecDurations).to.include({
+              afterSpecTotal: expectedAfterSpecTotal,
+              ...expectedAfterSpecDurations.durations,
+            })
+
+            // @ts-ignore
+            expect(res?.specAccess.offset).to.eq(offset)
+            // @ts-ignore
+            expect(res?.specAccess.size).to.eq(size)
+
+            expect(fs.unlink).to.have.been.called
+          })
+        })
+
+        describe('when protocol exports a sampling rate', () => {
+          beforeEach(() => {
+            expectedSamplingInterval = protocol.uploadStallSamplingInterval = 7500
+          })
+
+          afterEach(() => {
+            protocol.uploadStallSamplingInterval = undefined
+          })
+
+          it('uses the sampling rate defined by protocol', async () => {
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
+            await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
+          })
+
+          describe('and the user specifies a sampling rate env var', () => {
+            beforeEach(() => {
+              expectedSamplingInterval = 10000
+              process.env.CYPRESS_PROTOCOL_UPLOAD_SAMPLING_INTERVAL = '10000'
+            })
+
+            afterEach(() => {
+              process.env.CYPRESS_PROTOCOL_UPLOAD_SAMPLING_INTERVAL = undefined
+            })
+
+            it('uses the override value from the env var', async () => {
+              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
+            })
+          })
         })
       })
 
@@ -380,7 +427,7 @@ describe('lib/cloud/protocol', () => {
         beforeEach(() => {
           err = new Error()
 
-          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).rejects(err)
+          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, DEFAULT_STREAM_SAMPLING_INTERVAL).rejects(err)
         })
 
         describe('and there is no local protocol path in env', () => {
