@@ -531,7 +531,7 @@ commands:
               apt update && apt install -y docker.io
               docker run -d --name centos7-builder cypress/centos7-builder:latest /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 centos7-builder:/better-sqlite3
-              docker exec -it centos7-builder /bin/bash -c "yum install -y wget && yum install -y openssl-devel bzip2-devel libffi-devel zlib-devel && wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz && tar xvf Python-3.8.0.tgz && cd Python-3.8.0 && ./configure --enable-optimizations --prefix=/usr && make altinstall && rm /usr/bin/python3 && ln -s /usr/bin/python3.8 /usr/bin/python3 && cd ../better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 29.4.6 --include-regex 'better_sqlite3.node$'"
+              docker exec -it centos7-builder /bin/bash -c "cd ./better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 29.4.6 --include-regex 'better_sqlite3.node$'"
               docker cp centos7-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f centos7-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
