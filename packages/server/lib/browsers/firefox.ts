@@ -21,6 +21,7 @@ import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import { GeckoDriver } from './geckodriver'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -367,6 +368,9 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
       clearInstanceState({ gracefulShutdown: true })
     }
 
+    // make sure to close geckodriver
+    GeckoDriver.close()
+
     treeKill(browserInstance.pid as number, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
@@ -385,6 +389,9 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
     browserCriClient.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
   }
+
+  // make sure to close geckodriver
+  GeckoDriver.close()
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
@@ -406,8 +413,6 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
-  const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -422,11 +427,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   let remotePort
 
-  if (hasCdp) {
-    remotePort = await getRemoteDebuggingPort()
+  remotePort = await getRemoteDebuggingPort()
 
-    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
-  }
+  defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -467,12 +470,13 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+    geckoDriverPort,
+  ] = await Promise.all([getPort(), getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  debug('available ports: %o', { foxdriverPort, marionettePort, geckoDriverPort })
 
   const [
     cacheDir,
@@ -560,7 +564,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, geckoDriverPort, remotePort, browserName: browser.name, profilePath: profile.path(), binaryPath: browser.path, onError: options.onError })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
