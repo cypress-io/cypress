@@ -581,7 +581,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
+              yarn cypress:run --record --parallel --auto-cancel-after-failures false --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -655,7 +655,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --auto-cancel-after-failures false --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
 
@@ -1942,7 +1942,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter --runner-ui
+            yarn cypress:run --record --parallel --auto-cancel-after-failures false --group reporter --runner-ui
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -1966,7 +1966,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server
+            yarn cypress:run --record --parallel --auto-cancel-after-failures false --group webpack-dev-server
           working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
@@ -1988,7 +1988,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server
+            yarn cypress:run --record --parallel --auto-cancel-after-failures false --group vite-dev-server
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
