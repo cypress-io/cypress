@@ -25,7 +25,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--browser', 'edge'])
       cy.visitLaunchpad()
 
-      cy.skipWelcome()
       cy.get('[data-cy=card]').then(($buttons) => {
         $buttons[0].click()
       })
@@ -44,7 +43,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -64,7 +62,6 @@ describe('Choose a browser page', () => {
 
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
@@ -91,7 +88,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -126,7 +122,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -143,7 +138,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -196,7 +190,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -221,7 +214,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -239,8 +231,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
-
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
@@ -256,7 +246,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
@@ -297,7 +286,6 @@ describe('Choose a browser page', () => {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -310,7 +298,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -342,7 +329,6 @@ describe('Choose a browser page', () => {
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -380,7 +366,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 

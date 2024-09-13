@@ -27,7 +27,6 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
-  cy.skipWelcome()
 }
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
@@ -133,7 +132,6 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('h1').should('contain', 'Migrating')
   })
 
@@ -141,7 +139,6 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('h1').should('contain', 'Migrating')
   })
 
