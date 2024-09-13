@@ -74,6 +74,7 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad({ showWelcome: true })
+      cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.withCtx((ctx, o) => {
         expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
