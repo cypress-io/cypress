@@ -90,8 +90,6 @@ describe('global mode', () => {
       o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves((await ctx.versions.versionData()).current.version)
     })
 
-    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
-
     cy.contains('migration-e2e-export-default').click()
 
     // rename integration->e2e
@@ -145,7 +143,7 @@ describe('Opening unmigrated project', () => {
   it('major version welcome page appears with correct links and can be dismissed', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
 
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
 
@@ -1701,7 +1699,7 @@ describe('v13 migration welcome page with video', () => {
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
     cy.get('[data-cy="video-container"]').should('not.exist')
   })
@@ -1753,7 +1751,7 @@ describe('v13 migration welcome page with video', () => {
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
     cy.contains(cy.i18n.majorVersionWelcome.title, {
       timeout: 8000,
     }).should('be.visible')
@@ -1765,7 +1763,7 @@ describe('v13 migration welcome page with video', () => {
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
     cy.get('[data-cy="video-container"]').should('be.visible')
   })
@@ -1774,10 +1772,10 @@ describe('v13 migration welcome page with video', () => {
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
 
-    cy.visitLaunchpad()
+    cy.visitLaunchpad({ showWelcome: true })
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
     cy.withCtx((ctx, o) => {
       expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v13-video-embed')).length).to.eq(1)
