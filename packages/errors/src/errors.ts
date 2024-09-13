@@ -576,9 +576,9 @@ export const AllCypressErrors = {
   },
   CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR: (error: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while upload the Test Replay recording of this spec.
+        Warning: We encountered an error while uploading the Test Replay recording of this spec.
 
-        These reults will not display Test Replay recordings.
+        These results will not display Test Replay recordings.
 
         This error will not affect or change the exit code.
 
