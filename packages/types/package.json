@@ -12,7 +12,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^18.18.2",
+    "@types/node": "^20.15.0",
     "devtools-protocol": "0.0.1346313",
     "typescript": "^5.4.5"
   },
