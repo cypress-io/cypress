@@ -1068,6 +1068,8 @@
     "./node_modules/@cypress/commit-info/src/index.js",
     "./node_modules/@cypress/commit-info/src/utils.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
     "./node_modules/@cypress/parse-domain/build/tries/icann.complete.json",
     "./node_modules/@cypress/parse-domain/build/tries/private.complete.json",
@@ -3209,6 +3211,8 @@
     "./node_modules/recast/parsers/babel.js",
     "./node_modules/recast/parsers/esprima.js",
     "./node_modules/recast/parsers/typescript.js",
+    "./node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/request-promise-core/configure/request2.js",
     "./node_modules/request-promise-core/errors.js",
     "./node_modules/request-promise-core/lib/errors.js",
@@ -3965,6 +3969,8 @@
     "./packages/server/lib/browsers/protocol.ts",
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
+    "./packages/server/lib/cloud/api/http_error.ts",
+    "./packages/server/lib/cloud/api/network_error.ts",
     "./packages/server/lib/cloud/api/scrub_url.ts",
     "./packages/server/lib/cloud/artifacts/artifact.ts",
     "./packages/server/lib/cloud/artifacts/file_upload_strategy.ts",
@@ -4231,5 +4237,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5c6dbcfc278f3f056de61f7789b50d6fbee8f36511fdf4a83193f7a93dedfa56"
+  "deferredHash": "f07b1d852aef211d7bac44d805a5c741ed96119f2e086ec851a8cc08c53c3485"
 }

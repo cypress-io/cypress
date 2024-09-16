@@ -224,6 +224,7 @@ class SourcemapSupport {
         return pos.column + 1
       }
 
+      // @ts-ignore
       frame.getScriptNameOrSourceURL = function getScriptNameOrSourceURL () {
         return pos.source || pos.name
       }

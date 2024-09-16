@@ -9,7 +9,10 @@ const { getNextVersionForBinary } = require('../get-next-version')
 
   const { nextVersion } = await getNextVersionForBinary()
 
+  // This is the payload that will be sent to the cypress-publish-binary project.
+  // The API is defined here: https://circleci.com/docs/api/v2/index.html#operation/triggerPipeline
   const body = JSON.stringify({
+    branch: 'upgrade-electron-29',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,

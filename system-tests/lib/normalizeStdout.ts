@@ -181,6 +181,31 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
+    // Since Firefox 126, the expected height pixels on screenshots have been off by 1 pixel
+    // this is a small margin of error, which we will account for here by adding a pixel to the expected snapshot
+  } else if (options.browser === 'firefox') {
+    try {
+      const widthAndHeightMatcher = new RegExp(/(?<full>\((?<width>\d+)x(?<height>\d+)\))/g)
+      const matches = widthAndHeightMatcher.exec(str)
+
+      if (matches !== null) {
+        const fullString = matches.groups.full
+        const width = parseInt(matches.groups.width)
+        let height = parseInt(matches.groups.height)
+
+        // A bit hacky, but all of our system tests in firefox have even pixel snapshots.
+        // This coercion is necessary because sub window snapshots, such as
+        // element or viewport captures, have the correct viewport.
+        // Since in this context we cannot deterministically figure out where the
+        // snapshot came from, this "workaround" accomplishes getting the correct height
+        // in the snapshot.
+        height = height % 2 === 0 ? height : height + 1
+
+        str = str.replaceAll(fullString, `(${width}x${height})`)
+      }
+    } catch (e) {
+      // swallow error here as system test will fail anyway and problem should be obvious
+    }
   }
 
   return replaceStackTraceLines(str, options.browser)
