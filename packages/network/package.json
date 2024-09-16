@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@cypress/parse-domain": "2.4.0",
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "concat-stream": "1.6.2",
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",

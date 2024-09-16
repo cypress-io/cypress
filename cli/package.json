@@ -77,7 +77,7 @@
     "@cypress/vue": "0.0.0-development",
     "@cypress/vue2": "0.0.0-development",
     "@packages/root": "0.0.0-development",
-    "@types/bluebird": "3.5.33",
+    "@types/bluebird": "3.5.42",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.40",
     "@types/jquery": "3.3.31",

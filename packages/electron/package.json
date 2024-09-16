@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@packages/icons": "0.0.0-development",
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
