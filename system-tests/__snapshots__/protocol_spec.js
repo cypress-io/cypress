@@ -4410,7 +4410,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4434,7 +4436,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4461,11 +4465,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4493,11 +4494,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4526,20 +4524,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4567,11 +4559,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4599,11 +4588,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4631,11 +4617,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4664,20 +4647,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4705,11 +4682,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4737,11 +4711,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4766,7 +4737,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4793,14 +4766,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": [
-                "#shadow-root",
-                "#in-shadow"
-              ]
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4828,11 +4795,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4861,20 +4825,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4910,11 +4868,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4942,11 +4897,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -4974,11 +4926,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5007,20 +4956,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5048,11 +4991,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5080,11 +5020,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5109,7 +5046,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5136,11 +5075,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5168,14 +5104,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": [
-                "#shadow-root",
-                "#in-shadow"
-              ]
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5203,11 +5133,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5236,20 +5163,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5285,11 +5206,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5317,11 +5235,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5346,7 +5261,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5373,11 +5290,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5406,20 +5320,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5455,11 +5363,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5488,20 +5393,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5534,7 +5433,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5561,11 +5462,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5593,11 +5491,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5626,20 +5521,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5667,11 +5556,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5699,11 +5585,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5731,11 +5614,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5762,7 +5642,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5790,11 +5672,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5819,7 +5698,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5846,11 +5727,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5879,20 +5757,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5920,11 +5792,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5949,7 +5818,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -5973,7 +5844,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -6000,11 +5873,8 @@ exports['e2e events'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "h1:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -6033,20 +5903,14 @@ exports['e2e events'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "h1:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "h1:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -6079,7 +5943,9 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": "Any.Number"
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7450,11 +7316,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7482,11 +7345,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7514,11 +7374,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7546,11 +7403,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7578,11 +7432,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7610,11 +7461,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7642,11 +7490,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7674,11 +7519,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7707,20 +7549,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7757,20 +7593,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7806,11 +7636,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7838,11 +7665,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7870,11 +7694,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7902,11 +7723,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7934,11 +7752,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7966,11 +7781,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -7998,11 +7810,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -8030,11 +7839,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -8063,20 +7869,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -8113,20 +7913,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9385,11 +9179,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9417,11 +9208,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9449,11 +9237,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9481,11 +9266,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9513,11 +9295,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9545,11 +9324,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9577,11 +9353,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9609,11 +9382,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9642,20 +9412,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9692,20 +9456,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9741,11 +9499,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9773,11 +9528,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9805,11 +9557,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9837,11 +9586,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9869,11 +9615,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9901,11 +9644,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "div:nth-child(1) > div:nth-child(1)"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9933,11 +9673,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9965,11 +9702,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "snapshots": [
         {
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -9998,20 +9732,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",
@@ -10048,20 +9776,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         {
           "name": "before",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         },
         {
           "name": "after",
           "timestamp": "Any.Number",
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
+          "htmlAttrs": {},
+          "body": {}
         }
       ],
       "createdAtTimestamp": "Any.Number",

@@ -11,6 +11,10 @@ _Released 9/9/2024 (PENDING)_
 
 _Released 9/10/2024 (PENDING)_
 
+**Misc:**
+
+- Pass along the related log to the `createSnapshot` function for protocol usage. Addressed in [#30244](https://github.com/cypress-io/cypress/pull/30244).
+
 **Dependency Updates:**
 
 - Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
