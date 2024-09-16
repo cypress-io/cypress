@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.14.3
 
-_Released 9/10/2024 (PENDING)_
+_Released 9/24/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Firefox was incorrectly mutating the state of click events on checkboxes after Firefox version `129` and up. Addressed in [#30245](https://github.com/cypress-io/cypress/pull/30245).
 
 **Dependency Updates:**
 
