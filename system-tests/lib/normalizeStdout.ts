@@ -182,7 +182,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   if (options.browser === 'firefox' && process.env.CI) {
     const dimentionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
 
-    const matches = dimentionRegex.exec(str)
+    const matches = dimensionRegex.exec(str)
 
     if (matches?.groups?.height && matches?.groups?.width) {
       const height = parseInt(matches?.groups?.height)
