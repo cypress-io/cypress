@@ -3,6 +3,10 @@
 
 _Released 9/10/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed a regression introduced in 13.13.0 where 'Open in IDE' would not work for filepaths containing spaces and various other characters on Windows. Addresses [#29820](https://github.com/cypress-io/cypress/issues/29820).
+
 **Misc:**
 
 - Pass along the related log to the `createSnapshot` function for protocol usage. Addressed in [#30244](https://github.com/cypress-io/cypress/pull/30244).
@@ -10,6 +14,7 @@ _Released 9/10/2024 (PENDING)_
 **Dependency Updates:**
 
 - Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
+- Update `launch-editor` from `2.8.0` to `2.9.1`. Addressed in [#30247](https://github.com/cypress-io/cypress/pull/30247).
 - Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
 ## 13.14.2
