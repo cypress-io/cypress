@@ -57,7 +57,7 @@
     "dedent": "^0.7.0",
     "dockerode": "3.3.1",
     "esbuild": "^0.15.3",
-    "execa": "4",
+    "execa": "4.1.0",
     "express": "4.19.2",
     "express-session": "1.16.1",
     "express-useragent": "1.0.15",
