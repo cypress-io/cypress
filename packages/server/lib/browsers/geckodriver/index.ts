@@ -118,11 +118,11 @@ export class GeckoDriver {
       capabilities: {
         alwaysMatch: {
           acceptInsecureCerts: true,
-          'moz:firefoxOptions': {
-            // we start the new webdriver session headlessly to prevent a new firefox window from being spawned,
-            // which is ultimately killed anyway
-            args: ['-headless'],
-          },
+          // 'moz:firefoxOptions': {
+          //   // we start the new webdriver session headlessly to prevent a new firefox window from being spawned,
+          //   // which is ultimately killed anyway
+          //   args: ['-headless'],
+          // },
         },
       },
     }
