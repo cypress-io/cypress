@@ -7,8 +7,13 @@ _Released 9/10/2024 (PENDING)_
 
 - Fixed an issue where run Cypress internal unit test cases error on Windows. Addressed in [#30157](https://github.com/cypress-io/cypress/pull/30157)
 
+**Misc:**
+
+- Pass along the related log to the `createSnapshot` function for protocol usage. Addressed in [#30244](https://github.com/cypress-io/cypress/pull/30244).
+
 **Dependency Updates:**
 
+- Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
 - Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
 
 ## 13.14.2
