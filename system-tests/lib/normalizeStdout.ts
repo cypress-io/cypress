@@ -180,7 +180,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
 
   // in Firefox 130, height dimensions are off by 1 pixel in CI, so we need to fix the offset to match common snapshots
   if (options.browser === 'firefox' && process.env.CI) {
-    const dimentionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
+    const dimensionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
 
     const matches = dimensionRegex.exec(str)
 
