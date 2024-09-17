@@ -26,6 +26,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+    cy.visit('/fixtures/empty.html')
   })
 
   context('cy.intercept()', function () {

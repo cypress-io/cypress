@@ -462,7 +462,7 @@ export class SnapshotGenerator {
 
     // 2. Run the `mksnapshot` binary providing it the path to our snapshot
     //    script
-    const args = [this.snapshotScriptPath, '--output_dir', this.snapshotBinDir]
+    const args = [this.snapshotScriptPath, '--output_dir', this.snapshotBinDir, '--no-use_ic']
 
     try {
       const { snapshotBlobFile, v8ContextFile } = await syncAndRun(
