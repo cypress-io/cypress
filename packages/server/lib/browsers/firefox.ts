@@ -415,6 +415,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       '-marionette',
       '-new-instance',
       '-foreground',
+      // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
+      // '-allow-downgrade',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
