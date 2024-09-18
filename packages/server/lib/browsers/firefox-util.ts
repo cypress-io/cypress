@@ -7,8 +7,8 @@ import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
-import { GeckoDriver } from './geckodriver'
 import type { CypressError } from '@packages/errors'
+import type { WebDriverClassic } from './webdriver-classic'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
@@ -20,7 +20,7 @@ let timings = {
   collections: [] as any[],
 }
 
-let geckoDriver: GeckoDriver
+let webDriverClassic: WebDriverClassic
 
 const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
@@ -103,11 +103,11 @@ async function connectToNewTabClassic () {
   // For versions 124 and above, a new tab is not created, so @packages/extension creates one for us.
   // Since the tab is always available on our behalf,
   // we can connect to it here and navigate it to about:blank to set it up for CDP connection
-  const handles = await geckoDriver.getWindowHandlesWebDriverClassic()
+  const handles = await webDriverClassic.getWindowHandles()
 
-  await geckoDriver.switchToWindowWebDriverClassic(handles[0])
+  await webDriverClassic.switchToWindow(handles[0])
 
-  await geckoDriver.navigateWebdriverClassic('about:blank')
+  await webDriverClassic.navigate('about:blank')
 }
 
 async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
@@ -140,7 +140,7 @@ async function setupCDP (remotePort: number, automation: Automation, onError?: (
 }
 
 async function navigateToUrlClassic (url: string) {
-  await geckoDriver.navigateWebdriverClassic(url)
+  await webDriverClassic.navigate(url)
 }
 
 const logGcDetails = () => {
@@ -209,46 +209,23 @@ export default {
 
   async setup ({
     automation,
-    extensions,
     onError,
     url,
     foxdriverPort,
-    marionettePort,
-    geckoDriverPort,
     remotePort,
-    browserName,
-    profilePath,
-    binaryPath,
-    isHeadless,
-    isTextTerminal,
+    webDriverClassic: wdcInstance,
   }: {
     automation: Automation
-    extensions: string[]
     onError?: (err: Error) => void
     url: string
     foxdriverPort: number
-    marionettePort: number
-    geckoDriverPort: number
     remotePort: number
-    browserName: string
-    profilePath: string
-    binaryPath: string
-    isHeadless: boolean
-    isTextTerminal: boolean
+    webDriverClassic: WebDriverClassic
   }): Promise<BrowserCriClient> {
-    const [,, browserCriClient] = await Promise.all([
+    // set the WebDriver classic instance instantiated from geckodriver
+    webDriverClassic = wdcInstance
+    const [, browserCriClient] = await Promise.all([
       this.setupFoxdriver(foxdriverPort),
-      this.setupGeckoDriver({
-        port: geckoDriverPort,
-        marionettePort,
-        remotePort,
-        browserName,
-        extensions,
-        profilePath,
-        binaryPath,
-        isHeadless,
-        isTextTerminal,
-      }),
       setupCDP(remotePort, automation, onError),
     ])
 
@@ -262,32 +239,6 @@ export default {
   navigateToUrlClassic,
 
   setupCDP,
-
-  async setupGeckoDriver (opts: {
-    port: number
-    marionettePort: number
-    remotePort: number
-    browserName: string
-    extensions: string[]
-    profilePath: string
-    binaryPath: string
-    isHeadless: boolean
-    isTextTerminal: boolean
-  }) {
-    geckoDriver = await GeckoDriver.create({
-      host: '127.0.0.1',
-      port: opts.port,
-      marionetteHost: '127.0.0.1',
-      marionettePort: opts.marionettePort,
-      remotePort: opts.remotePort,
-      browserName: opts.browserName,
-      extensions: opts.extensions,
-      profilePath: opts.profilePath,
-      binaryPath: opts.binaryPath,
-      isHeadless: opts.isHeadless,
-      isTextTerminal: opts.isTextTerminal,
-    })
-  },
 
   // NOTE: this is going to be removed in Cypress 14. @see https://github.com/cypress-io/cypress/issues/30222
   async setupFoxdriver (port) {

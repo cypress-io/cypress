@@ -1,7 +1,6 @@
 require('../../spec_helper')
 import 'chai-as-promised'
 import { expect } from 'chai'
-import { GeckoDriver } from '../../../lib/browsers/geckodriver'
 import os from 'os'
 import sinon from 'sinon'
 import Foxdriver from '@benmalka/foxdriver'
@@ -20,23 +19,13 @@ const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
 const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
+const geckoDriver = require('../../../lib/browsers/geckodriver')
+const webDriverClassic = require('../../../lib/browsers/webdriver-classic')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
-  let geckoDriver: GeckoDriver
   let foxdriver: any
   let foxdriverTab: any
-
-  const stubGeckoDriver = () => {
-    // @ts-expect-error
-    geckoDriver = {
-      getWindowHandlesWebDriverClassic: sinon.stub(),
-      switchToWindowWebDriverClassic: sinon.stub(),
-      navigateWebdriverClassic: sinon.stub(),
-    }
-
-    sinon.stub(GeckoDriver, 'create').resolves(geckoDriver)
-  }
 
   const stubFoxdriver = () => {
     foxdriverTab = {
@@ -68,7 +57,7 @@ describe('lib/browsers/firefox', () => {
     return mockfs.restore()
   })
 
-  beforeEach(() => {
+  beforeEach(function () {
     sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox-stable/interactive')
 
     mockfs({
@@ -77,7 +66,22 @@ describe('lib/browsers/firefox', () => {
 
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
-    stubGeckoDriver()
+    this.browserInstance = {
+      // should be high enough to not kill any real PIDs
+      pid: Number.MAX_SAFE_INTEGER,
+    }
+
+    sinon.stub(geckoDriver.GeckoDriver, 'create').returns(this.browserInstance)
+
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'createSession').returns({ capabilities: {
+      'moz:debuggerAddress': '127.0.0.1:12345',
+    } })
+
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'installAddOn')
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'getWindowHandles')
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'switchToWindow')
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'navigate')
+
     stubFoxdriver()
   })
 
@@ -94,11 +98,6 @@ describe('lib/browsers/firefox', () => {
         proxyUrl: 'http://proxy-url',
         socketIoRoute: 'socket/io/route',
         browser: this.browser,
-      }
-
-      this.browserInstance = {
-        // should be high enough to not kill any real PIDs
-        pid: Number.MAX_SAFE_INTEGER,
       }
 
       sinon.stub(process, 'pid').value(1111)
@@ -131,21 +130,20 @@ describe('lib/browsers/firefox', () => {
       })
 
       it('calls connectToNewSpec in firefoxUtil', async function () {
-        // @ts-expect-error
-        geckoDriver.getWindowHandlesWebDriverClassic.resolves(['mock-context-id'])
+        webDriverClassic.WebDriverClassic.prototype.getWindowHandles.resolves(['mock-context-id'])
         await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         this.options.url = 'next-spec-url'
         await firefox.connectToNewSpec(this.browser, this.options, this.automation)
 
         expect(this.options.onInitializeNewBrowserTab).to.have.been.called
-        expect(geckoDriver.getWindowHandlesWebDriverClassic).to.have.been.called
-        expect(geckoDriver.switchToWindowWebDriverClassic).to.have.been.calledWith('mock-context-id')
+        expect(webDriverClassic.WebDriverClassic.prototype.getWindowHandles).to.have.been.called
+        expect(webDriverClassic.WebDriverClassic.prototype.switchToWindow).to.have.been.calledWith('mock-context-id')
 
         // first time when connecting a new tab
-        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('about:blank')
+        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('about:blank')
         // second time when navigating to the spec
-        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('next-spec-url')
+        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('next-spec-url')
       })
     })
 
@@ -197,21 +195,53 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    it('creates an instance of the geckodriver to delegate the creation of the WebDriver session, extension install, and navigation (classic)', function () {
+    it('creates the geckodriver, the creation of the WebDriver session, installs the extension, and passes the correct port to CDP', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(GeckoDriver.create).calledWithMatch(sinon.match({
+        expect(geckoDriver.GeckoDriver.create).to.have.been.calledWith({
           host: '127.0.0.1',
-          port: sinon.match.number,
+          port: sinon.match(Number),
           marionetteHost: '127.0.0.1',
-          marionettePort: sinon.match.number,
-          remotePort: 1234,
-          browserName: 'firefox',
-          extensions: ['/path/to/ext'],
+          marionettePort: sinon.match(Number),
+          webdriverBidiPort: sinon.match(Number),
           profilePath: '/path/to/appData/firefox-stable/interactive',
           binaryPath: undefined,
+          spawnOpts: sinon.match({
+            stdio: ['ignore', 'pipe', 'pipe'],
+            env: {
+              MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
+              MOZ_HEADLESS_WIDTH: '1280',
+              MOZ_HEADLESS_HEIGHT: '806',
+            },
+          }),
+        })
+
+        expect(webDriverClassic.WebDriverClassic.prototype.createSession).to.have.been.calledWith(sinon.match(
+          {
+            capabilities: {
+              alwaysMatch: {
+                acceptInsecureCerts: true,
+                'moz:firefoxOptions': {
+                  args: [
+                    '-new-instance',
+                    '-start-debugger-server',
+                    '-no-remote',
+                  ],
+                },
+                'moz:debuggerAddress': true,
+              },
+            },
+          },
+        ))
+
+        expect(webDriverClassic.WebDriverClassic.prototype.installAddOn).to.have.been.calledWith(sinon.match({
+          extensionPath: '/path/to/ext',
+          isTemporary: true,
         }))
 
-        expect(geckoDriver.navigateWebdriverClassic).to.have.been.calledWith('http://')
+        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('http://')
+
+        // make sure CDP gets the expected port
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
       })
     })
 
@@ -328,21 +358,6 @@ describe('lib/browsers/firefox', () => {
     it('updates the preferences', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
         expect(FirefoxProfile.prototype.updatePreferences).to.be.called
-      })
-    })
-
-    it('launches with the url and args', function () {
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', 1234, [
-          '-marionette',
-          '-new-instance',
-          '-foreground',
-          '-start-debugger-server',
-          '-no-remote',
-          '--remote-debugging-port=1234',
-          '-profile',
-          '/path/to/appData/firefox-stable/interactive',
-        ])
       })
     })
 
