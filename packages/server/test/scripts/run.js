@@ -167,7 +167,7 @@ console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)
 
-const child = execa(cmd, { env, stdio: 'inherit' })
+const child = execa(cmd, { shell: true, env, stdio: 'inherit' })
 
 child.on('exit', (code, signal) => {
   if (signal) {

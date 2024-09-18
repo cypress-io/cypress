@@ -69,7 +69,7 @@ const sourceShellCommand = function (cmd, shell) {
 }
 
 const findBash = () => {
-  return execa('which bash')
+  return execa('which bash', { shell: true })
   .then((val) => val.stdout)
 }
 
