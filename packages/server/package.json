@@ -85,7 +85,7 @@
     "jimp": "0.22.12",
     "jose": "^4.15.5",
     "json-parse-even-better-errors": "^3.0.2",
-    "launch-editor": "2.8.0",
+    "launch-editor": "2.9.1",
     "lazy-ass": "1.6.0",
     "lockfile": "1.0.4",
     "lodash": "^4.17.21",
