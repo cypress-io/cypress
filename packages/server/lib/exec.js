@@ -5,7 +5,7 @@ const _ = require('lodash')
 const log = require('./log')
 const utils = require('./util/shell')
 
-const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'code'])
+const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'exitCode'])
 
 const trimStdio = (val) => {
   const result = { ...val }
