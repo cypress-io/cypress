@@ -34,6 +34,7 @@ const setGlobals = read('set-globals')
  * that are bundled
  * @property includeStrictVerifiers see {@link GenerationOpts} includeStrictVerifiers
  * @property nodeEnv see {@link GenerationOpts} nodeEnv
+ * @property cypressInternalEnv see {@link GenerationOpts} cypressInternalEnv
  * @property basedir the base dir of the project for which we are creating the
  * snapshot
  * @property sourceMap {@link Buffer} with content of raw sourcemaps
@@ -47,6 +48,7 @@ export type BlueprintConfig = {
   customRequireDefinitions: Buffer
   includeStrictVerifiers: boolean
   nodeEnv: string
+  cypressInternalEnv: string
   basedir: string
   sourceMap: Buffer | undefined
   processedSourceMapPath: string | undefined
@@ -99,6 +101,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     customRequireDefinitions,
     includeStrictVerifiers,
     nodeEnv,
+    cypressInternalEnv,
     basedir,
     sourceMap,
     supportTypeScript,
@@ -141,6 +144,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
       env: {
         value: {
           NODE_ENV: '${nodeEnv}',
+          CYPRESS_INTERNAL_ENV: '${cypressInternalEnv}',
         },
         enumerable: false,
       },

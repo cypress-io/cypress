@@ -117,6 +117,7 @@ export function assembleScript (
     baseSourcemapExternalPath: string | undefined
     processedSourcemapExternalPath: string | undefined
     nodeEnv: string
+    cypressInternalEnv: string
     resolverMap?: Record<string, string>
     meta?: Metadata
     supportTypeScript: boolean
@@ -177,6 +178,7 @@ export function assembleScript (
     includeStrictVerifiers,
     sourceMap: opts.sourceMap,
     nodeEnv: opts.nodeEnv,
+    cypressInternalEnv: opts.cypressInternalEnv,
     basedir,
     processedSourceMapPath: opts.processedSourcemapExternalPath,
     supportTypeScript: opts.supportTypeScript,
@@ -233,6 +235,7 @@ export async function createSnapshotScript (
       baseSourcemapExternalPath: opts.baseSourcemapExternalPath,
       processedSourcemapExternalPath: opts.processedSourcemapExternalPath,
       nodeEnv: opts.nodeEnv,
+      cypressInternalEnv: opts.cypressInternalEnv,
       resolverMap: opts.resolverMap,
       meta,
       supportTypeScript: opts.supportTypeScript,
