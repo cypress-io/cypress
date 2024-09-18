@@ -15,6 +15,7 @@ export async function determineDeferred (
     nodeModulesOnly: boolean
     forceNoRewrite: Set<string>
     nodeEnv: string
+    cypressInternalEnv: string
     integrityCheckSource: string | undefined
   },
 ) {
@@ -88,6 +89,7 @@ export async function determineDeferred (
     previousNoRewrite: currentNoRewrite,
     forceNoRewrite: opts.forceNoRewrite,
     nodeEnv: opts.nodeEnv,
+    cypressInternalEnv: opts.cypressInternalEnv,
     supportTypeScript: opts.nodeModulesOnly,
     integrityCheckSource: opts.integrityCheckSource,
   })
