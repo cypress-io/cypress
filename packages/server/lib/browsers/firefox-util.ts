@@ -209,46 +209,23 @@ export default {
 
   async setup ({
     automation,
-    extensions,
     onError,
     url,
     foxdriverPort,
-    marionettePort,
-    geckoDriverPort,
+    geckoDriver: geckoDriverInstance,
     remotePort,
-    browserName,
-    profilePath,
-    binaryPath,
-    isHeadless,
-    isTextTerminal,
   }: {
     automation: Automation
-    extensions: string[]
     onError?: (err: Error) => void
     url: string
     foxdriverPort: number
-    marionettePort: number
-    geckoDriverPort: number
+    geckoDriver: GeckoDriver
     remotePort: number
-    browserName: string
-    profilePath: string
-    binaryPath: string
-    isHeadless: boolean
-    isTextTerminal: boolean
+
   }): Promise<BrowserCriClient> {
-    const [,, browserCriClient] = await Promise.all([
+    geckoDriver = geckoDriverInstance
+    const [, browserCriClient] = await Promise.all([
       this.setupFoxdriver(foxdriverPort),
-      this.setupGeckoDriver({
-        port: geckoDriverPort,
-        marionettePort,
-        remotePort,
-        browserName,
-        extensions,
-        profilePath,
-        binaryPath,
-        isHeadless,
-        isTextTerminal,
-      }),
       setupCDP(remotePort, automation, onError),
     ])
 
@@ -263,31 +240,31 @@ export default {
 
   setupCDP,
 
-  async setupGeckoDriver (opts: {
-    port: number
-    marionettePort: number
-    remotePort: number
-    browserName: string
-    extensions: string[]
-    profilePath: string
-    binaryPath: string
-    isHeadless: boolean
-    isTextTerminal: boolean
-  }) {
-    geckoDriver = await GeckoDriver.create({
-      host: '127.0.0.1',
-      port: opts.port,
-      marionetteHost: '127.0.0.1',
-      marionettePort: opts.marionettePort,
-      remotePort: opts.remotePort,
-      browserName: opts.browserName,
-      extensions: opts.extensions,
-      profilePath: opts.profilePath,
-      binaryPath: opts.binaryPath,
-      isHeadless: opts.isHeadless,
-      isTextTerminal: opts.isTextTerminal,
-    })
-  },
+  // async setupGeckoDriver (opts: {
+  //   port: number
+  //   marionettePort: number
+  //   remotePort: number
+  //   browserName: string
+  //   extensions: string[]
+  //   profilePath: string
+  //   binaryPath: string
+  //   isHeadless: boolean
+  //   isTextTerminal: boolean
+  // }) {
+  //   geckoDriver = await GeckoDriver.create({
+  //     host: '127.0.0.1',
+  //     port: opts.port,
+  //     marionetteHost: '127.0.0.1',
+  //     marionettePort: opts.marionettePort,
+  //     remotePort: opts.remotePort,
+  //     browserName: opts.browserName,
+  //     extensions: opts.extensions,
+  //     profilePath: opts.profilePath,
+  //     binaryPath: opts.binaryPath,
+  //     isHeadless: opts.isHeadless,
+  //     isTextTerminal: opts.isTextTerminal,
+  //   })
+  // },
 
   // NOTE: this is going to be removed in Cypress 14. @see https://github.com/cypress-io/cypress/issues/30222
   async setupFoxdriver (port) {

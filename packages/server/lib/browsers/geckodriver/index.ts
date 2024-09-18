@@ -4,6 +4,7 @@ import errors from '@packages/errors'
 // using cross fetch to make unit testing easier to mock
 import crossFetch from 'cross-fetch'
 import type { ChildProcess } from 'child_process'
+import type { FoundBrowser } from '@packages/types'
 
 const geckoDriverPackageName = 'geckodriver'
 const GECKODRIVER_DEBUG_NAMESPACE = 'cypress:server:browsers:geckodriver'
@@ -16,13 +17,17 @@ export type StartGeckoDriverArgs = {
   port: number
   marionetteHost: string
   marionettePort: number
-  remotePort: number
-  browserName: string
+  bidiPort: number
   extensions: string[]
   profilePath: string
-  binaryPath: string
-  isHeadless: boolean
-  isTextTerminal: boolean
+  browser: FoundBrowser
+  browserArgs: string[]
+  browserEnv: {
+    [key: string]: any
+  }
+  browserPrefs: {
+    [key: string]: any
+  }
 }
 
 type InstallAddOnArgs = {
@@ -51,6 +56,7 @@ namespace WebDriver {
         'moz:shutdownTimeout': number
         'moz:webdriverClick': boolean
         'moz:windowless': boolean
+        'moz:debuggerAddress': number
         sessionId: string
       }
     }
@@ -63,6 +69,7 @@ namespace WebDriver {
 export class GeckoDriver {
   static #instance: GeckoDriver | undefined
   #child_process: ChildProcess
+  #cdp_port: number
   #host: string
   #port: number
   #sessionId: string = ''
@@ -71,6 +78,13 @@ export class GeckoDriver {
     this.#child_process = child_process
     this.#host = host
     this.#port = port
+  }
+
+  get process () {
+    return this.#child_process
+  }
+  get cdpPort () {
+    return this.#cdp_port
   }
 
   // We resolve this package in such a way to packherd can discover it, meaning we are re-declaring the types here to get typings support =(
@@ -109,7 +123,7 @@ export class GeckoDriver {
    * @see https://searchfox.org/mozilla-central/rev/cc01f11adfacca9cd44a75fd140d2fdd8f9a48d4/testing/geckodriver/src/marionette.rs#126
    * @returns {Promise<WebDriver.Session.NewResult>} - the results of the Webdriver Session (enabled through remote.active-protocols)
    */
-  private createWebDriverSession: (args: {isTextTerminal: boolean, isHeadless: boolean}) => Promise<WebDriver.Session.NewResult> = async (args) => {
+  private createWebDriverSession: (opts: { binaryPath: string, args: string[], env: {[key: string]: any}, prefs: {[key: string]: any}}) => Promise<WebDriver.Session.NewResult> = async (opts) => {
     const getSessionUrl = `http://${this.#host}:${this.#port}/session`
 
     const headers = new Headers()
@@ -120,14 +134,14 @@ export class GeckoDriver {
       capabilities: {
         alwaysMatch: {
           acceptInsecureCerts: true,
-          // if we are in run mode but running headful, do NOT send the headless option
-          // main purpose of this is to not show an extra window when in open mode
-          // and possibly prevents redundant windows in run mode running headlessly
-          ...(!args.isTextTerminal || args.isHeadless ? {
-            'moz:firefoxOptions': {
-              args: ['-headless'],
-            },
-          } : {}),
+          'moz:firefoxOptions': {
+            binary: opts.binaryPath,
+            args: opts.args,
+            env: opts.env,
+            prefs: opts.prefs,
+          },
+          // a little bit of major https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
+          'moz:debuggerAddress': true,
         },
       },
     }
@@ -146,6 +160,12 @@ export class GeckoDriver {
       const createSessionRespBody = await createSessionResp.json()
 
       this.#sessionId = createSessionRespBody.value.sessionId
+      //
+      const CDPAddress = createSessionRespBody.value.capabilities['moz:debuggerAddress']
+
+      this.#cdp_port = parseInt(new URL(`ws://${CDPAddress}`).port)
+
+      debugger
 
       return createSessionRespBody.value
     } catch (e) {
@@ -153,6 +173,25 @@ export class GeckoDriver {
       throw e
     }
   }
+
+  // async getInfo () {
+  //   const getInfo = `http://${this.#host}:${this.#port}/json/version`
+
+  //   try {
+  //     const getInfoResp = await crossFetch(getInfo)
+
+  //     if (!getInfoResp.ok) {
+  //       throw new Error(`${getInfoResp.status}: ${getInfoResp.statusText}`)
+  //     }
+
+  //     const resp = await getInfoResp.json()
+
+  //     return resp
+  //   } catch (e) {
+  //     debug(`unable to create new Webdriver session: ${e}`)
+  //     throw e
+  //   }
+  // }
 
   /**
    * Gets available windows handles in the browser. The order in which the window handles are returned is arbitrary.
@@ -305,13 +344,15 @@ export class GeckoDriver {
       try {
         const { start: startGeckoDriver } = GeckoDriver.getGeckoDriverPackage()
         const geckoDriverChildProcess = await startGeckoDriver({
+          //  connectExisting: true,
           host: opts.host,
           port: opts.port,
           marionetteHost: opts.marionetteHost,
           marionettePort: opts.marionettePort,
-          websocketPort: opts.remotePort,
+          websocketPort: opts.bidiPort,
+          // remoteDebuggingPort: opts.remotePort,
           profileRoot: opts.profilePath,
-          binary: opts.binaryPath,
+          binary: opts.browser.path,
           jsdebugger: debugModule.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
           log: debugModule.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
         })
@@ -319,6 +360,7 @@ export class GeckoDriver {
         // using a require statement to make this easier to test with mocha/mockery
         const waitPort = require('wait-port')
 
+        // this needs to throw when it timesout
         await waitPort({
           port: opts.port,
           timeout: 5000,
@@ -328,15 +370,15 @@ export class GeckoDriver {
         debugVerbose('geckodriver started!')
 
         geckoDriverChildProcess.stdout?.on('data', (buf) => {
-          debug('%s stdout: %s', opts.browserName, String(buf).trim())
+          debug('%s stdout: %s', opts.browser.name, String(buf).trim())
         })
 
         geckoDriverChildProcess.stderr?.on('data', (buf) => {
-          debug('%s stderr: %s', opts.browserName, String(buf).trim())
+          debug('%s stderr: %s', opts.browser.name, String(buf).trim())
         })
 
         geckoDriverChildProcess.on('exit', (code, signal) => {
-          debug('%s exited: %o', opts.browserName, { code, signal })
+          debug('%s exited: %o', opts.browser.name, { code, signal })
         })
 
         const geckoDriverInstance = new GeckoDriver(geckoDriverChildProcess, opts.host, opts.port)
@@ -346,8 +388,10 @@ export class GeckoDriver {
         errorSource = 'webdriver:session:create'
 
         await geckoDriverInstance.createWebDriverSession({
-          isHeadless: opts.isHeadless,
-          isTextTerminal: opts.isTextTerminal,
+          binaryPath: opts.browser.path,
+          args: opts.browserArgs,
+          env: opts.browserEnv,
+          prefs: opts.browserPrefs,
         })
 
         debug(`Started new Webdriver Session!`)

@@ -368,8 +368,8 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
       clearInstanceState({ gracefulShutdown: true })
     }
 
-    // make sure to close geckodriver
-    GeckoDriver.close()
+    // // make sure to close geckodriver
+    // GeckoDriver.close()
 
     treeKill(browserInstance.pid as number, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
@@ -390,8 +390,8 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
     browserCriClient = undefined
   }
 
-  // make sure to close geckodriver
-  GeckoDriver.close()
+  // // make sure to close geckodriver
+  // GeckoDriver.close()
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
@@ -417,7 +417,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
     args: [
-      '-marionette',
+      // '-marionette',
       '-new-instance',
       '-foreground',
       // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
@@ -429,9 +429,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   let remotePort
 
-  remotePort = await getRemoteDebuggingPort()
+  // remotePort = await getRemoteDebuggingPort()
 
-  defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
+  // defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -473,10 +473,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     foxdriverPort,
     marionettePort,
     geckoDriverPort,
-  ] = await Promise.all([getPort(), getPort(), getPort()])
+    webDriverBiDiPort,
+  ] = await Promise.all([getPort(), getPort(), getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
+  // defaultLaunchOptions.args.push(`--websocket-port=${webDriverBiDiPort}`)
 
   debug('available ports: %o', { foxdriverPort, marionettePort, geckoDriverPort })
 
@@ -550,23 +552,49 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), userCss)
   }
 
-  launchOptions.args = launchOptions.args.concat([
-    '-profile',
-    profile.path(),
-  ])
+  // launchOptions.args = launchOptions.args.concat([
+  //   '-profile',
+  //   profile.path(),
+  // ])
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
-    // sets headless resolution to 1280x720 by default
-    // user can overwrite this default with these env vars or --height, --width arguments
-    MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '721',
-    ...launchOptions.env,
+  // const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  //   // sets headless resolution to 1280x720 by default
+  //   // user can overwrite this default with these env vars or --height, --width arguments
+  //   MOZ_HEADLESS_WIDTH: '1280',
+  //   MOZ_HEADLESS_HEIGHT: '721',
+  //   ...launchOptions.env,
+  // })
+
+  const geckoDriver = await GeckoDriver.create({
+    host: '127.0.0.1',
+    // geckodriver port is actually the firefox process
+    port: geckoDriverPort,
+    marionetteHost: '127.0.0.1',
+    marionettePort,
+    // remotePort,
+    bidiPort: webDriverBiDiPort,
+    extensions: launchOptions.extensions,
+    profilePath: profile.path(),
+    browser,
+    browserArgs: launchOptions.args,
+    browserPrefs: launchOptions.preferences,
+    browserEnv: {
+      // sets headless resolution to 1280x720 by default
+      // user can overwrite this default with these env vars or --height, --width arguments
+      MOZ_HEADLESS_WIDTH: '1280',
+      MOZ_HEADLESS_HEIGHT: '721',
+      MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
+      ...launchOptions.env,
+    },
   })
 
+  let browserInstance = geckoDriver.process
+  let CDPPort = geckoDriver.cdpPort
+
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, geckoDriverPort, remotePort, browserName: browser.name, profilePath: profile.path(), binaryPath: browser.path, onError: options.onError, isHeadless: options.browser.isHeadless, isTextTerminal: options.isTextTerminal })
+    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, geckoDriver, remotePort: CDPPort, onError: options.onError })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
