@@ -63,7 +63,7 @@ export default (Commands, Cypress, cy) => {
           consoleOutput['Shell Used'] = result.shell
         }
 
-        if ((result.exitCode === 0) || !options.failOnNonZeroExit) {
+        if ((result.code === 0) || !options.failOnNonZeroExit) {
           return result
         }
 
@@ -79,7 +79,7 @@ export default (Commands, Cypress, cy) => {
 
         return $errUtils.throwErrByPath('exec.non_zero_exit', {
           onFail: options._log,
-          args: { cmd, output, code: result.exitCode },
+          args: { cmd, output, code: result.code },
         })
       })
       .catch(Promise.TimeoutError, { timedOut: true }, () => {
