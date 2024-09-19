@@ -2,7 +2,7 @@ const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
 
 describe('src/cy/commands/exec', () => {
-  const okResponse = { code: 0 }
+  const okResponse = { exitCode: 0 }
 
   context('#exec', {
     execTimeout: 2500,
@@ -300,7 +300,7 @@ describe('src/cy/commands/exec', () => {
 
       describe('when error code is non-zero', () => {
         it('throws error that includes useful information and exit code', (done) => {
-          Cypress.backend.resolves({ code: 1 })
+          Cypress.backend.resolves({ exitCode: 1 })
 
           cy.on('fail', (err) => {
             expect(err.message).to.contain('`cy.exec(\'ls\')` failed because the command exited with a non-zero code.\n\nPass `{failOnNonZeroExit: false}` to ignore exit code failures.')
@@ -314,7 +314,7 @@ describe('src/cy/commands/exec', () => {
         })
 
         it('throws error that includes stderr if it exists and is non-empty', (done) => {
-          Cypress.backend.resolves({ code: 1, stderr: 'error output', stdout: '' })
+          Cypress.backend.resolves({ exitCode: 1, stderr: 'error output', stdout: '' })
 
           cy.on('fail', (err) => {
             expect(err.message).to.contain('Stderr:\nerror output')
@@ -327,7 +327,7 @@ describe('src/cy/commands/exec', () => {
         })
 
         it('throws error that includes stdout if it exists and is non-empty', (done) => {
-          Cypress.backend.resolves({ code: 1, stderr: '', stdout: 'regular output' })
+          Cypress.backend.resolves({ exitCode: 1, stderr: '', stdout: 'regular output' })
 
           cy.on('fail', (err) => {
             expect(err.message).to.contain('\nStdout:\nregular output')
@@ -340,7 +340,7 @@ describe('src/cy/commands/exec', () => {
         })
 
         it('throws error that includes stdout and stderr if they exists and are non-empty', (done) => {
-          Cypress.backend.resolves({ code: 1, stderr: 'error output', stdout: 'regular output' })
+          Cypress.backend.resolves({ exitCode: 1, stderr: 'error output', stdout: 'regular output' })
 
           cy.on('fail', (err) => {
             expect(err.message).to.contain('\nStdout:\nregular output\nStderr:\nerror output')
@@ -390,7 +390,7 @@ describe('src/cy/commands/exec', () => {
 
         describe('and failOnNonZeroExit is false', () => {
           it('does not error', () => {
-            const response = { code: 1, stderr: 'error output', stdout: 'regular output' }
+            const response = { exitCode: 1, stderr: 'error output', stdout: 'regular output' }
 
             Cypress.backend.resolves(response)
 

@@ -27,22 +27,22 @@ describe('lib/exec', function () {
   this.timeout(10000)
 
   describe('basic tests', () => {
-    it('returns only stdout, stderr, and exitCode', () => {
+    it('returns only stdout, stderr, and code', () => {
       return runCommand('echo foo')
       .then((result) => {
         const props = Object.keys(result)
 
-        expect(props).to.deep.eq(['stdout', 'stderr', 'exitCode'])
+        expect(props).to.deep.eq(['stdout', 'stderr', 'code'])
       })
     })
 
-    it('reports the stdout, stderr, and exitCode for single word', () => {
+    it('reports the stdout, stderr, and code for single word', () => {
       return runCommand('echo foo')
       .then((result) => {
         const expected = {
           stdout: 'foo',
           stderr: '',
-          exitCode: 0,
+          code: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -58,26 +58,26 @@ describe('lib/exec', function () {
     // Windows command prompt is really limited
     // C:\Windows\system32\cmd.exe
 
-    it('reports the stdout, stderr, and exitCode for single quoted word', () => {
+    it('reports the stdout, stderr, and code for single quoted word', () => {
       return runCommand('echo \'foo\'')
       .then((result) => {
         const expected = {
           stdout: '\'foo\'',
           stderr: '',
-          exitCode: 0,
+          code: 0,
         }
 
         expect(result).to.deep.eq(expected)
       })
     })
 
-    it('reports the stdout, stderr, and exitCode', () => {
+    it('reports the stdout, stderr, and code', () => {
       return runCommand('echo \'foo bar\'')
       .then((result) => {
         const expected = {
           stdout: '\'foo bar\'',
           stderr: '',
-          exitCode: 0,
+          code: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -110,7 +110,7 @@ describe('lib/exec', function () {
     it('test what happens when command is invalid', () => {
       return runCommand('foo')
       .then((result) => {
-        expect(result.exitCode).to.eq(1)
+        expect(result.code).to.eq(1)
 
         expect(result.stderr).to.include('\'foo\' is not recognized as an internal or external command')
       })
@@ -119,19 +119,19 @@ describe('lib/exec', function () {
     it('reports the stderr', () => {
       return runCommand('>&2 echo \'some error\'')
       .then((result) => {
-        expect(result.exitCode).to.eq(0)
+        expect(result.code).to.eq(0)
 
         expect(result.stderr).to.equal('\'some error\'')
       })
     })
 
     describe('when exit code is non-zero', () => {
-      it('reports the stdout, stderr, and exitCode', () => {
+      it('reports the stdout, stderr, and code', () => {
         return runCommand('type nooope')
         .then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('The system cannot find the file specified.')
-          expect(result.exitCode).to.equal(1)
+          expect(result.code).to.equal(1)
 
           // stderr should be trimmed already
           expect(result.stderr.trim()).to.equal(result.stderr)
@@ -159,26 +159,26 @@ describe('lib/exec', function () {
       return
     }
 
-    it('reports the stdout, stderr, and exitCode for single quoted word', () => {
+    it('reports the stdout, stderr, and code for single quoted word', () => {
       return runCommand('echo \'foo\'')
       .then((result) => {
         const expected = {
           stdout: 'foo',
           stderr: '',
-          exitCode: 0,
+          code: 0,
         }
 
         expect(result).to.deep.eq(expected)
       })
     })
 
-    it('reports the stdout, stderr, and exitCode', () => {
+    it('reports the stdout, stderr, and code', () => {
       return runCommand('echo \'foo bar\'')
       .then((result) => {
         const expected = {
           stdout: 'foo bar',
           stderr: '',
-          exitCode: 0,
+          code: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -218,19 +218,19 @@ describe('lib/exec', function () {
     it('reports the stderr', () => {
       return runCommand('>&2 echo \'some error\'')
       .then((result) => {
-        expect(result.exitCode).to.eq(0)
+        expect(result.code).to.eq(0)
 
         expect(result.stderr).to.equal('some error')
       })
     })
 
     describe('when exit code is non-zero', () => {
-      it('reports the stdout, stderr, and exitCode', () => {
+      it('reports the stdout, stderr, and code', () => {
         return runCommand('cat nooope')
         .then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('cat: nooope: No such file or directory')
-          expect(result.exitCode).to.equal(1)
+          expect(result.code).to.equal(1)
 
           // stderr should be trimmed already
           expect(result.stderr.trim()).to.equal(result.stderr)
