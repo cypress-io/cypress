@@ -5,7 +5,7 @@ const _ = require('lodash')
 const log = require('./log')
 const utils = require('./util/shell')
 
-const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'exitCode'])
+const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr'])
 
 const trimStdio = (val) => {
   const result = { ...val }
@@ -37,6 +37,7 @@ module.exports = {
         // do we want to return all fields returned by execa?
         result.shell = shell
         result.cmd = cmd
+        result.code = result.exitCode
 
         return result
       }).then(pickMainProps)
