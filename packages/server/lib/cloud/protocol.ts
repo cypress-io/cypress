@@ -322,8 +322,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      const samplingInterval = process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL ?
-        parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL, 10) :
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
         this._protocol.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : DEFAULT_STREAM_SAMPLING_INTERVAL
 
       await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)

@@ -347,21 +347,21 @@ describe('lib/cloud/protocol', () => {
       })
 
       describe('when upload succeeds', () => {
-        let expectedSamplingInterval
+        let defaultInterval
 
         beforeEach(() => {
-          expectedSamplingInterval = DEFAULT_STREAM_SAMPLING_INTERVAL
+          defaultInterval = DEFAULT_STREAM_SAMPLING_INTERVAL
         })
 
         describe('with default sampling rate', () => {
           beforeEach(() => {
-            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval).resolves()
           })
 
           it('uses 5000ms as the default stream monitoring sample rate', async () => {
             await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
-            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval)
           })
 
           it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
@@ -388,10 +388,13 @@ describe('lib/cloud/protocol', () => {
         })
 
         describe('when protocol exports a sampling rate', () => {
+          let appCaptureProtocolInterval
+
           beforeEach(() => {
-            expectedSamplingInterval = 7500
+            appCaptureProtocolInterval = 7500
+
             protocol.uploadStallSamplingInterval = sinon.stub().callsFake(() => {
-              return expectedSamplingInterval
+              return appCaptureProtocolInterval
             })
           })
 
@@ -401,25 +404,43 @@ describe('lib/cloud/protocol', () => {
           })
 
           it('uses the sampling rate defined by protocol', async () => {
-            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
             await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
           })
 
           describe('and the user specifies a sampling rate env var', () => {
+            let userDefinedInterval
+
             beforeEach(() => {
-              expectedSamplingInterval = 10000
-              process.env.CYPRESS_PROTOCOL_UPLOAD_SAMPLING_INTERVAL = '10000'
+              userDefinedInterval = 10000
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = '10000'
             })
 
             afterEach(() => {
-              process.env.CYPRESS_PROTOCOL_UPLOAD_SAMPLING_INTERVAL = undefined
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
             })
 
             it('uses the override value from the env var', async () => {
-              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval).resolves()
+              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval).resolves()
               await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, expectedSamplingInterval)
+              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval)
+            })
+          })
+
+          describe('and the user specifies a sampling rate env var that parses to NaN', () => {
+            beforeEach(() => {
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = 'not-a-number'
+            })
+
+            afterEach(() => {
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
+            })
+
+            it('uses the value from app capture protocol', async () => {
+              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
             })
           })
         })
