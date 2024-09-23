@@ -731,7 +731,7 @@ describe('visual error templates', () => {
       }
     },
     CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR: () => {
-      const error = new Error('some message')
+      const error = makeErr()
 
       return {
         default: [error],
