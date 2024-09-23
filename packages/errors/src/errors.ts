@@ -617,7 +617,7 @@ export const AllCypressErrors = {
 
         The upload transfer rate fell below ${fmt.highlightSecondary(`${kbpsThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${error.maxActivityDwellTime}ms`)}.
 
-        To prevent long CI executing durations, this Test Replay recording will not be uploaded.
+        To prevent long CI execution durations, this Test Replay recording will not be uploaded.
 
         The results for this spec will not display Test Replay recordings.
 
