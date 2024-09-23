@@ -41,7 +41,12 @@ module.exports = {
 
         return result
       }).then(pickMainProps)
-      .catch(pickMainProps) // transform rejection into an object
+      .catch((result) => {
+        result.code = result.exitCode
+
+        return result
+      })
+      .then(pickMainProps) // transform rejection into an object
       .then(trimStdio)
     }
 
