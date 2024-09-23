@@ -36,7 +36,6 @@ function scaffoldAndOpenE2EProject (opts: {
   }
 
   cy.visitLaunchpad()
-  cy.skipWelcome()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
@@ -71,7 +70,6 @@ function scaffoldAndOpenCTProject (opts: {
   }
 
   cy.visitLaunchpad()
-  cy.skipWelcome()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
@@ -180,7 +178,6 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     })
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.contains('button', cy.i18n.testingType.e2e.name).click()
     cy.contains('button', cy.i18n.setupPage.step.continue).click()
     cy.wait('@mutationScaffoldedFiles')
