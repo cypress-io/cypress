@@ -1640,7 +1640,7 @@ describe('network stubbing', { retries: 15 }, function () {
     it('can add a body to a request that does not have one', { retries: 15 }, function (done) {
       const body = '{"foo":"bar"}'
 
-      cy.intercept('/post-only', function (req) {
+      cy.intercept('/post-only*', function (req) {
         expect(req.body).to.eq('')
         expect(req.method).to.eq('GET')
         req.method = 'POST'
@@ -1648,7 +1648,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         req.body = body
       }).then(function () {
-        $.get('/post-only').done((responseText) => {
+        $.get('/post-only').then((responseText) => {
           expect(responseText).to.contain(body)
           done()
         })
