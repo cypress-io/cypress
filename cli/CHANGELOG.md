@@ -9,7 +9,12 @@ _Released 9/9/2024 (PENDING)_
 
 ## 13.14.3
 
-_Released 9/10/2024 (PENDING)_
+_Released 9/24/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Firefox was incorrectly mutating the state of click events on checkboxes after Firefox version `129` and up. Addressed in [#30245](https://github.com/cypress-io/cypress/pull/30245).
+- Fixed a regression introduced in 13.13.0 where 'Open in IDE' would not work for filepaths containing spaces and various other characters on Windows. Addresses [#29820](https://github.com/cypress-io/cypress/issues/29820).
 
 **Misc:**
 
@@ -18,7 +23,10 @@ _Released 9/10/2024 (PENDING)_
 **Dependency Updates:**
 
 - Update `@cypress/request` from `3.0.1` to `3.0.4`. Addressed in [#30194](https://github.com/cypress-io/cypress/pull/30194).
-- Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addresses [#28208](https://github.com/cypress-io/cypress/issues/28208).
+- Updated `express` from `4.19.2` to `4.21.0`. This removes the [CVE-2024-43796](https://www.cve.org/CVERecord?id=CVE-2024-43796), [CVE-2024-45590](https://www.cve.org/CVERecord?id=CVE-2024-45590), and [CVE-2024-43800](https://www.cve.org/CVERecord?id=CVE-2024-43800) vulnerabilities being reported in security scans. Addresses [#30241](https://github.com/cypress-io/cypress/pull/30241).
+- Update `launch-editor` from `2.8.0` to `2.9.1`. Addressed in [#30247](https://github.com/cypress-io/cypress/pull/30247).
+- Updated `loader-utils` from `1.4.0` to `1.4.2`. This removes the [CVE-2022-37601](https://nvd.nist.gov/vuln/detail/CVE-2022-37601) vulnerability being reported in security scans. Addressed in [#28208](https://github.com/cypress-io/cypress/issues/28208).
+- Updated `send` from `0.17.1` to `0.19.0`. This removes the [CVE-2024-43799](https://www.cve.org/CVERecord?id=CVE-2024-43799) vulnerability being reported in security scans. Addressed in [#30241](https://github.com/cypress-io/cypress/pull/30241).
 
 ## 13.14.2
 
