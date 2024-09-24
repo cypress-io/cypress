@@ -1672,7 +1672,7 @@ describe('network stubbing', { retries: 15 }, function () {
       const delay = 250
       const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
-      cy.intercept('/timeout*', (req) => {
+      cy.intercept('/timeout*', { times: 1 }, (req) => {
         this.start = Date.now()
 
         req.reply({
