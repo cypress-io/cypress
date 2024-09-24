@@ -225,6 +225,7 @@ describe('lib/browsers/firefox', () => {
                     '-new-instance',
                     '-start-debugger-server',
                     '-no-remote',
+                    ...(os.platform() !== 'linux' ? ['-foreground'] : []),
                   ],
                 },
                 'moz:debuggerAddress': true,
@@ -452,21 +453,6 @@ describe('lib/browsers/firefox', () => {
         const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         expect(instance).to.eq(this.browserInstance)
-      })
-
-      // @see https://github.com/cypress-io/cypress/issues/6392
-      it('detached on Windows', async function () {
-        sinon.stub(os, 'platform').returns('win32')
-        const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
-
-        expect(instance).to.not.eq(this.browserInstance)
-        expect(instance.pid).to.eq(this.browserInstance.pid)
-
-        await new Promise((resolve) => {
-          // ensure events are wired as expected
-          instance.on('exit', resolve)
-          instance.kill()
-        })
       })
     })
   })

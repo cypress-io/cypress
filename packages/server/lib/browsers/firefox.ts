@@ -11,9 +11,7 @@ import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
-import { EventEmitter } from 'events'
 import os from 'os'
-import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
@@ -356,27 +354,6 @@ toolbar {
 
 let browserCriClient: BrowserCriClient | undefined
 
-export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
-  const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
-
-  detachedInstance.pid = browserInstance.pid
-
-  // kill the entire process tree, from the spawned instance up
-  detachedInstance.kill = (): void => {
-    // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
-    if (browserCriClient) {
-      clearInstanceState({ gracefulShutdown: true })
-    }
-
-    treeKill(browserInstance.pid as number, (err?, result?) => {
-      debug('force-exit of process tree complete %o', { err, result })
-      detachedInstance.emit('exit')
-    })
-  }
-
-  return detachedInstance
-}
-
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -427,6 +404,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // and the browser will spawn maximized. The user may still supply these args to override
     // defaultLaunchOptions.args.push('--width=1920')
     // defaultLaunchOptions.args.push('--height=1081')
+  } else if (os.platform() === 'win32' || os.platform() === 'darwin') {
+    // lets the browser come into focus. Only works on Windows or Mac
+    defaultLaunchOptions.args.push('-foreground')
   }
 
   debug('firefox open %o', options)
@@ -554,7 +534,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
 
   // create the geckodriver process, which we will use WebDriver Classic to open the browser
-  const browserInstance = await GeckoDriver.create({
+  const geckoDriverInstance = await GeckoDriver.create({
     host: '127.0.0.1',
     port: geckoDriverPort,
     marionetteHost: '127.0.0.1',
@@ -629,16 +609,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     debug('setting up firefox utils')
     browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
 
-    if (os.platform() === 'win32') {
-      // override the .kill method for Windows so that the detached Firefox process closes between specs
-      // @see https://github.com/cypress-io/cypress/issues/6392
-      return _createDetachedInstance(browserInstance, browserCriClient)
-    }
-
     // monkey-patch the .kill method to that the CDP connection is closed
-    const originalBrowserKill = browserInstance.kill
+    const originalGeckoDriverKill = geckoDriverInstance.kill
 
-    browserInstance.kill = (...args) => {
+    geckoDriverInstance.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
       clearInstanceState({ gracefulShutdown: true })
 
@@ -648,7 +622,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       debug('closing geckodriver')
 
-      return originalBrowserKill.apply(browserInstance, args)
+      return originalGeckoDriverKill.apply(geckoDriverInstance, args)
     }
 
     await utils.executeAfterBrowserLaunch(browser, {
@@ -658,7 +632,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
-  return browserInstance
+  return geckoDriverInstance
 }
 
 export async function closeExtraTargets () {
