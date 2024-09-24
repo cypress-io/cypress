@@ -5,7 +5,6 @@ describe('Error handling', () => {
     cy.loginUser()
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('[data-cy-testingType=e2e]').click()
 
@@ -42,7 +41,6 @@ describe('Error handling', () => {
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('body')
     .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
@@ -69,7 +67,6 @@ describe('Error handling', () => {
       cy.scaffoldProject('missing-vite-config')
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts', 'vite.config.cts'].forEach((idiomaticConfigFile) => {
         cy.contains(idiomaticConfigFile)
@@ -107,7 +104,6 @@ describe('Error handling', () => {
         cy.scaffoldProject('react-vite-ts-configured')
         cy.openProject('react-vite-ts-configured', ['--component'])
         cy.visitLaunchpad()
-        cy.skipWelcome()
 
         // should successful start dev server and move to launch screen!
         cy.contains('Choose a browser')
@@ -121,7 +117,6 @@ describe('Error handling', () => {
         cy.scaffoldProject('missing-webpack-config')
         cy.openProject('missing-webpack-config', ['--component'])
         cy.visitLaunchpad()
-        cy.skipWelcome()
 
         ;['webpack.config.js', 'webpack.config.ts', 'webpack.config.mjs', 'webpack.config.cjs'].forEach((idiomaticConfigFile) => {
           cy.contains(idiomaticConfigFile)
@@ -139,7 +134,6 @@ describe('Error handling', () => {
         cy.scaffoldProject('component-tests')
         cy.openProject('component-tests', ['--component'])
         cy.visitLaunchpad()
-        cy.skipWelcome()
 
         // should successful start dev server and move to launch screen!
         cy.contains('Choose a browser')

@@ -4,7 +4,6 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
-  cy.skipWelcome()
 
   cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
@@ -106,7 +105,6 @@ describe('scaffolding component testing', {
       cy.scaffoldProject('react-vite-ts-unconfigured')
       cy.openProject('react-vite-ts-unconfigured')
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx(async (ctx) => {
         const reactPackageFilePath = 'node_modules/react/package.json'
@@ -224,7 +222,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.contains('button', 'Qwik').should('be.visible')
@@ -256,7 +253,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.contains('button', 'Solid').should('be.visible')
@@ -291,7 +287,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.get(`[data-testid="select-framework"]`).click()
@@ -311,7 +306,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
 
