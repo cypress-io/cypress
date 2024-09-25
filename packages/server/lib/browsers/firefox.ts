@@ -402,8 +402,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     defaultLaunchOptions.args.push('-headless')
     // we don't need to specify width/height since MOZ_HEADLESS_ env vars will be set
     // and the browser will spawn maximized. The user may still supply these args to override
-    // defaultLaunchOptions.args.push('--width=1920')
-    // defaultLaunchOptions.args.push('--height=1081')
+    // defaultLaunchOptions.args.push('-width=1920')
+    // defaultLaunchOptions.args.push('-height=1081')
   } else if (os.platform() === 'win32' || os.platform() === 'darwin') {
     // lets the browser come into focus. Only works on Windows or Mac
     defaultLaunchOptions.args.push('-foreground')
@@ -475,18 +475,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
-
-  const xulStorePath = path.join(profile.path(), 'xulstore.json')
-
-  // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
-  if (!await fs.pathExists(xulStorePath)) {
-    // this causes the browser to launch maximized, which chrome does by default
-    // otherwise an arbitrary size will be picked for the window size
-    // this will not have an effect after first launch in 'interactive' mode
-    const sizemode = 'maximized'
-
-    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
-  }
 
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
   for (const pref in launchOptions.preferences) {
@@ -595,6 +583,14 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     // makes it so get getRemoteDebuggingPort() is calculated correctly
     process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+
+    // maximize the window if running headful and no width or height args are provided.
+    // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
+    // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
+    // a base 64 encoded profile.
+    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
+      await wdcInstance.maximizeWindow()
+    }
 
     // install the browser extensions
     await Promise.all(_.map(launchOptions.extensions, (path) => {

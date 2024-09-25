@@ -220,8 +220,8 @@ describe('lib/browsers/webdriver-classic', () => {
     })
   })
 
-  describe('WebDriverClassic.getWindowHandles', () => {
-    it('returns the page contexts when the requests succeeds', async () => {
+  describe('WebDriverClassic.switchToWindow', () => {
+    it('returns null when the requests succeeds', async () => {
       nockContext.post(`/session/${mockSessionId}/window`, {
         handle: 'mock-context-id',
       }).reply(200, {
@@ -255,7 +255,7 @@ describe('lib/browsers/webdriver-classic', () => {
   describe('WebDriverClassic.navigate', () => {
     let mockNavigationUrl = 'http://localhost:8080'
 
-    it('returns the page contexts when the requests succeeds', async () => {
+    it('returns null when the requests succeeds', async () => {
       nockContext.post(`/session/${mockSessionId}/url`, {
         url: mockNavigationUrl,
       }).reply(200, {
@@ -283,6 +283,34 @@ describe('lib/browsers/webdriver-classic', () => {
       wdc.sessionId = mockSessionId
 
       expect(wdc.navigate(mockNavigationUrl)).to.be.rejectedWith('500: Internal Server Error')
+    })
+  })
+
+  describe('WebDriverClassic.maximizeWindow', () => {
+    it('returns null when the requests succeeds', async () => {
+      nockContext.post(`/session/${mockSessionId}/window/maximize`).reply(200, {
+        value: null,
+      })
+
+      const wdc = new WebDriverClassic(mockOpts.host, mockOpts.port)
+
+      // @ts-expect-error
+      wdc.sessionId = mockSessionId
+
+      const payload = await wdc.maximizeWindow()
+
+      expect(payload).to.equal(null)
+    })
+
+    it('throws an error if the request fails', async () => {
+      nockContext.post(`/session/${mockSessionId}/window/maximize`).reply(500)
+
+      const wdc = new WebDriverClassic(mockOpts.host, mockOpts.port)
+
+      // @ts-expect-error
+      wdc.sessionId = mockSessionId
+
+      expect(wdc.maximizeWindow()).to.be.rejectedWith('500: Internal Server Error')
     })
   })
 })

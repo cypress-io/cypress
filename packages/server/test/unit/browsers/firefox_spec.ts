@@ -80,6 +80,7 @@ describe('lib/browsers/firefox', () => {
     sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'installAddOn')
     sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'getWindowHandles')
     sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'switchToWindow')
+    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'maximizeWindow')
     sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'navigate')
 
     stubFoxdriver()
@@ -246,6 +247,35 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
+    it('does not maximize the browser if headless', function () {
+      this.browser.isHeadless = true
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).not.to.have.been.called
+      })
+    })
+
+    it('does not maximize the browser if "-width" or "-height" arg is set', function () {
+      this.browser.isHeadless = false
+      sinon.stub(utils, 'executeBeforeBrowserLaunch').resolves({
+        args: ['-width', '1280', '-height', '720'],
+        extensions: [],
+        preferences: {},
+      })
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).not.to.have.been.called
+      })
+    })
+
+    it('maximizes the browser if headed and no "-width" or "-height" arg is set', function () {
+      this.browser.isHeadless = false
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).to.have.been.called
+      })
+    })
+
     it('sets user-agent preference if specified', function () {
       this.options.userAgent = 'User Agent'
 
@@ -381,15 +411,6 @@ describe('lib/browsers/firefox', () => {
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
-        })
-      })
-    })
-
-    it('creates xulstore.json if not exist', function () {
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
     })
