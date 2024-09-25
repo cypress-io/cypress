@@ -166,6 +166,39 @@ export class WebDriverClassic {
   }
 
   /**
+   * maximizes the current window
+   * @see https://www.w3.org/TR/webdriver2/#maximize-window
+   *
+   * @returns {Promise<null>}
+   */
+  async maximizeWindow (): Promise<null> {
+    const maximizeWindowUrl = `http://${this.#host}:${this.#port}/session/${this.sessionId}/window/maximize`
+
+    const headers = new Headers()
+
+    headers.append('Content-Type', 'application/json')
+
+    try {
+      const maximizeWindowResp = await crossFetch(maximizeWindowUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({}),
+      })
+
+      if (!maximizeWindowResp.ok) {
+        throw new Error(`${maximizeWindowResp.status}: ${maximizeWindowResp.statusText}`)
+      }
+
+      const maximizeWindowRespBody = await maximizeWindowResp.json()
+
+      return maximizeWindowRespBody.value
+    } catch (e) {
+      debug(`unable to maximize window via classic webdriver : ${e}`)
+      throw e
+    }
+  }
+
+  /**
    * causes the user agent to navigate the session's current top-level browsing context to a new location.
    * @see https://www.w3.org/TR/webdriver2/#navigate-to
    *
