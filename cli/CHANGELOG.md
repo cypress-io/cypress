@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.14.3
+## 13.15.0
 
 _Released 9/24/2024 (PENDING)_
+
+**Features:**
+
+- Cypress now displays more actionable errors when a Test Replay upload takes too long, and more verbose messages when uncategorized errors occur during the upload process. Addressed in [#30235](https://github.com/cypress-io/cypress/pull/30235).
 
 **Bugfixes:**
 
