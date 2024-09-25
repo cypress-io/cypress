@@ -22638,10 +22638,10 @@ nanoid@3.3.1:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.1.tgz#6347a18cac88af88f58af0b3594b723d5e99bb35"
   integrity sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==
 
-nanoid@3.3.4:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
-  integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
+nanoid@3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.5.tgz#07ef5fb44ece2bc8574af317015e645d5f681422"
+  integrity sha512-nvgaJGpIANf4+VWJAaDGORQyMzhFkze8aXVdrHq+BaSvzfpOuponEysaVFKV/0Bca5V+3SBiDvRabEPbpalEBg==
 
 nanoid@^3.3.7:
   version "3.3.7"
