@@ -89,6 +89,13 @@ type SetForceReconfigureProjectByTestingType = {
 const debug = debugLib('cypress:data-context:ProjectActions')
 
 export class ProjectActions {
+  /**
+   * @var globalLaunchCount
+   * Used as a read-only in the launchpad to ensure
+   * that launchProject is only called once if
+   * the --browser flag is passed alone.
+   */
+  private globalLaunchCount = 0
   constructor (private ctx: DataContext) {}
 
   private get api () {
@@ -125,6 +132,14 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.app.projects = projects
     })
+  }
+
+  get launchCount () {
+    return this.globalLaunchCount
+  }
+
+  set launchCount (count) {
+    this.globalLaunchCount = count
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -284,6 +299,7 @@ export class ProjectActions {
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.globalLaunchCount++
 
     return
   }

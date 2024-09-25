@@ -28,7 +28,7 @@
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/request": "^3.0.1",
+    "@cypress/request": "^3.0.4",
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
@@ -36,7 +36,7 @@
     "@packages/server": "0.0.0-development",
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.10",
-    "devtools-protocol": "0.0.927104",
+    "devtools-protocol": "0.0.1346313",
     "express": "4.19.2",
     "supertest": "6.0.1",
     "typescript": "^5.4.5"

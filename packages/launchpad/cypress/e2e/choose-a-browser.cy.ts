@@ -3,6 +3,9 @@ import type { FoundBrowser } from '@packages/types'
 describe('Choose a browser page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
+    cy.withCtx((ctx, _) => {
+      ctx.actions.project.launchCount = 0
+    })
   })
 
   describe('System Browsers Detected', () => {
@@ -11,6 +14,23 @@ describe('Choose a browser page', () => {
         filter: (browser) => {
           return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
         },
+      })
+    })
+
+    it('launches when --browser is passed alone through the command line', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
+      cy.openProject('launchpad', ['--browser', 'edge'])
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy=card]').then(($buttons) => {
+        $buttons[0].click()
+      })
+
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
       })
     })
 
@@ -23,7 +43,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -37,9 +56,12 @@ describe('Choose a browser page', () => {
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      })
+
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
@@ -55,6 +77,9 @@ describe('Choose a browser page', () => {
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
+      cy.withRetryableCtx((ctx, o) => {
+        expect(ctx._apis.projectApi.launchProject).not.to.be.called
+      })
     })
 
     it('shows warning when launched with --browser path option that cannot be matched to found browsers', () => {
@@ -63,7 +88,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -98,7 +122,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -115,7 +138,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -168,7 +190,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -193,7 +214,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -211,8 +231,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
-
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
@@ -228,7 +246,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
@@ -269,7 +286,6 @@ describe('Choose a browser page', () => {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -282,7 +298,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -314,7 +329,6 @@ describe('Choose a browser page', () => {
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -352,7 +366,6 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('h1').should('contain', 'Choose a browser')
 

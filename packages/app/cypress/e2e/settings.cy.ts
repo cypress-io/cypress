@@ -219,6 +219,13 @@ describe('App: Settings', () => {
           })
         })
       })
+
+      // makes sure all experiments have an i18n header and description available.
+      // @see https://github.com/cypress-io/cypress/issues/30126.
+      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each((experimentRow) => {
+        cy.wrap(experimentRow[0]).get('[data-cy="experimentName"]').should('not.contain.text', 'settingsPage.')
+        cy.wrap(experimentRow[0]).get('[data-cy="experimentDescription"]').should('not.contain.text', 'settingsPage.')
+      })
     })
 
     it('shows the Resolved Configuration section', () => {

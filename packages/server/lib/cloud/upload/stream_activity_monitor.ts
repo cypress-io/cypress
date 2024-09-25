@@ -1,14 +1,8 @@
 import Debug from 'debug'
 import { Transform, Readable } from 'stream'
-
+import { StreamStalledError } from './stream_stalled_error'
 const debug = Debug('cypress:server:cloud:stream-activity-monitor')
 const debugVerbose = Debug('cypress-verbose:server:cloud:stream-activity-monitor')
-
-export class StreamStalledError extends Error {
-  constructor (maxActivityDwellTime: number) {
-    super(`Stream stalled: no activity detected in the previous ${maxActivityDwellTime}ms`)
-  }
-}
 
 /**
  * `StreamActivityMonitor` encapsulates state with regard to monitoring a stream for flow
@@ -36,6 +30,9 @@ export class StreamStalledError extends Error {
  * }
  *
  */
+
+const DEFAULT_FS_READSTREAM_CHUNK_SIZE = 64 * 1024 // Kilobytes
+
 export class StreamActivityMonitor {
   private streamMonitor: Transform | undefined
   private activityTimeout: NodeJS.Timeout | undefined
@@ -81,7 +78,7 @@ export class StreamActivityMonitor {
     debug('marking activity interval')
     clearTimeout(this.activityTimeout)
     this.activityTimeout = setTimeout(() => {
-      this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime))
+      this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime, DEFAULT_FS_READSTREAM_CHUNK_SIZE))
     }, this.maxActivityDwellTime)
   }
 }

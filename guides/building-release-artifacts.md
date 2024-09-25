@@ -1,12 +1,12 @@
 # Building Release Artifacts
 
-The `cypress` NPM package consists of two main parts:
+The `cypress` npm package consists of two main parts:
 
-1. The `cypress` NPM package `.tgz` (built from [`cli`](../cli))
+1. The `cypress` npm package `.tgz` (built from [`cli`](../cli))
     * Contains the command line tool `cypress`, type definitions, and the [Module API](https://on.cypress.io/module-api).
-    * End users install this via NPM to the project's `node_modules`.
-2. The "binary" `.zip` (built from [`packages/server`](../packages/server))
-    * Contains the Electron app, `ffmpeg`, and built versions of the [`server`](../packages/server), [`desktop-gui`](../packages/desktop-gui), [`runner`](../packages/runner), [`example` project](../packages/example), and [`extension`](../packages/extension)
+    * End users install this via npm to the project's `node_modules` directory or via Yarn or pnpm similarly.
+2. The "binary" `.zip` (built from the [`packages`](../packages) directory)
+    * Contains the Electron app, `ffmpeg`, and built versions of the packages from the [`packages`](../packages) sub-directories (`frontend-shared`, `reporter` and `web-config` are not separately included).
         * Also contains all the production dependencies of the above.
     * This is installed when the `cli` is installed or when `cypress install` is run, to a system cache.
 
