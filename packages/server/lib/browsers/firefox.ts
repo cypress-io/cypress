@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
@@ -18,10 +19,13 @@ import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import { GeckoDriver } from './geckodriver'
-import { WebDriverClassic } from './webdriver-classic'
+import type { RemoteConfig } from 'webdriver'
+import { GeckoDriverOptions, WebDriver } from './webdriver'
 
 const debug = Debug('cypress:server:browsers:firefox')
+
+const WEBDRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:webdriver'
+const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -440,16 +444,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const [
     foxdriverPort,
     marionettePort,
-    geckoDriverPort,
     webDriverBiDiPort,
-  ] = await Promise.all([getPort(), getPort(), getPort(), getPort()])
+  ] = await Promise.all([getPort(), getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
   // NOTE: we get the BiDi port and set it inside of geckodriver, but BiDi is not currently enabled (see remote.active-protocols above).
   // this is so the BiDi websocket port does not get set to 0, which is the default for the geckodriver package.
-  debug('available ports: %o', { foxdriverPort, marionettePort, geckoDriverPort, webDriverBiDiPort })
+  debug('available ports: %o', { foxdriverPort, marionettePort, webDriverBiDiPort })
 
   const [
     cacheDir,
@@ -521,15 +524,16 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
 
-  // create the geckodriver process, which we will use WebDriver Classic to open the browser
-  const geckoDriverInstance = await GeckoDriver.create({
+  debug('launch in firefox', { url, args: launchOptions.args })
+
+  const geckoDriverOptions: GeckoDriverOptions = {
     host: '127.0.0.1',
-    port: geckoDriverPort,
+    // geckodriver port is assigned under the hood by @wdio/utils
+    // @see https://github.com/webdriverio/webdriverio/blob/v9.1.1/packages/wdio-utils/src/node/startWebDriver.ts#L65
     marionetteHost: '127.0.0.1',
     marionettePort,
-    webdriverBidiPort: webDriverBiDiPort,
-    profilePath: profile.path(),
-    binaryPath: browser.path,
+    websocketPort: webDriverBiDiPort,
+    profileRoot: profile.path(),
     // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
     // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
     // pass them to the firefox process
@@ -541,16 +545,16 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         ...process.env,
       },
     },
-  })
+    jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
+    log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
+    logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
+  }
 
-  const wdcInstance = new WebDriverClassic('127.0.0.1', geckoDriverPort)
-
-  debug('launch in firefox', { url, args: launchOptions.args })
-
-  const capabilitiesToSend = {
-    // browser capabilities are going here as exact
+  const newSessionCapabilities: RemoteConfig = {
+    logLevel: Debug.enabled(WEBDRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'info' : 'silent',
     capabilities: {
       alwaysMatch: {
+        browserName: 'firefox',
         acceptInsecureCerts: true,
         // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
         'moz:firefoxOptions': {
@@ -560,26 +564,57 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         },
         // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
         // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+        // @ts-expect-error
         'moz:debuggerAddress': true,
+        // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
+        'wdio:geckodriverOptions': geckoDriverOptions,
       },
+      firstMatch: [],
     },
   }
+  // @ts-expect-error
+  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+
+  browserInstanceWrapper.kill = () => undefined
 
   try {
-    debug(`sending capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
+    debug(`sending capabilities %s`, JSON.stringify(newSessionCapabilities))
+
+    const WD = WebDriver.getWebDriverPackage()
 
     // this command starts the webdriver session and actually opens the browser
-    const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
+    // to debug geckodriver, set the DEBUG=cypress-verbose:server:browsers:geckodriver (debugs a third-party patched package geckodriver)
+    // @see ./WEB_DRIVER.md
+    const webdriverClient = await WD.newSession(newSessionCapabilities)
 
-    debug(`received capabilities %o`, capabilities)
+    debug(`received capabilities %o`, webdriverClient.capabilities)
 
-    const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
+    const cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
 
     debug(`CDP running on port ${cdpPort}`)
 
-    const browserPID = capabilities['moz:processID']
+    const browserPID: number = webdriverClient.capabilities['moz:processID']
 
     debug(`firefox running on pid: ${browserPID}`)
+
+    const driverPID: number = webdriverClient.capabilities['wdio:driverPID'] as number
+
+    debug(`webdriver running on pid: ${driverPID}`)
+
+    // now that we have the driverPID and browser PID
+    browserInstanceWrapper.kill = (...args) => {
+      // Do nothing on failure here since we're shutting down anyway
+      clearInstanceState({ gracefulShutdown: true })
+
+      debug('closing firefox')
+
+      const browserReturnStatus = process.kill(browserPID)
+
+      debug('closing geckodriver and webdriver')
+      const driverReturnStatus = process.kill(driverPID)
+
+      return browserReturnStatus || driverReturnStatus
+    }
 
     // makes it so get getRemoteDebuggingPort() is calculated correctly
     process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
@@ -589,37 +624,21 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
     // a base 64 encoded profile.
     if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
-      await wdcInstance.maximizeWindow()
+      await webdriverClient.maximizeWindow()
     }
 
     // install the browser extensions
-    await Promise.all(_.map(launchOptions.extensions, (path) => {
+    await Promise.all(_.map(launchOptions.extensions, async (path) => {
       debug(`installing extension at path: ${path}`)
+      const id = await webdriverClient.installAddOn(path, true)
 
-      return wdcInstance!.installAddOn({
-        extensionPath: path,
-        isTemporary: true,
-      })
+      debug(`extension with id ${id} installed!`)
+
+      return
     }))
 
     debug('setting up firefox utils')
-    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
-
-    // monkey-patch the .kill method to that the CDP connection is closed
-    const originalGeckoDriverKill = geckoDriverInstance.kill
-
-    geckoDriverInstance.kill = (...args) => {
-      // Do nothing on failure here since we're shutting down anyway
-      clearInstanceState({ gracefulShutdown: true })
-
-      debug('closing firefox')
-
-      process.kill(browserPID)
-
-      debug('closing geckodriver')
-
-      return originalGeckoDriverKill.apply(geckoDriverInstance, args)
-    }
+    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webdriverClient, remotePort: cdpPort, onError: options.onError })
 
     await utils.executeAfterBrowserLaunch(browser, {
       webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
@@ -628,7 +647,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
-  return geckoDriverInstance
+  return browserInstanceWrapper
 }
 
 export async function closeExtraTargets () {
