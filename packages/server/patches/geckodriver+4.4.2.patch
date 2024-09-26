@@ -265,7 +265,7 @@ index 2367e0b..18be0e1 100644
  export const download = downloadDriver;
  export * from './types.js';
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-index c27c805..a992240 100644
+index c27c805..d230983 100644
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
 @@ -4,14 +4,14 @@ import util from 'node:util';
@@ -298,11 +298,13 @@ index c27c805..a992240 100644
      const res = await retryFetch(url, fetchOpts);
      if (res.status !== 200) {
          throw new Error(`Failed to download binary (statusCode ${res.status}): ${res.statusText}`);
-@@ -70,6 +70,6 @@ async function downloadZip(res, cacheDir) {
+@@ -70,6 +70,8 @@ async function downloadZip(res, cacheDir) {
   * download on install
   */
  if (process.argv[1] && process.argv[1].endsWith('/dist/install.js') && process.env.GECKODRIVER_AUTO_INSTALL) {
 -    await download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
++    // removing the await here as packherd cannot bundle with a top-level await.
++    // This only has an impact if invoking from a CLI context, which cypress is not.
 +    download().then(() => debug('Success!'), (err) => debug(`Failed to install Geckodriver: ${err.stack}`));
  }
  //# sourceMappingURL=install.js.map
