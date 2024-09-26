@@ -9,6 +9,8 @@ import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { ICriClient } from '../../../lib/browsers/cri-client'
+import { GeckoDriver } from '../../../lib/browsers/geckodriver'
+import * as webDriverClassicImport from '../../../lib/browsers/webdriver-classic'
 
 const path = require('path')
 const _ = require('lodash')
@@ -19,13 +21,12 @@ const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
 const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
-const geckoDriver = require('../../../lib/browsers/geckodriver')
-const webDriverClassic = require('../../../lib/browsers/webdriver-classic')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
   let foxdriver: any
   let foxdriverTab: any
+  let wdcInstance: sinon.SinonStubbedInstance<webDriverClassicImport.WebDriverClassic>
 
   const stubFoxdriver = () => {
     foxdriverTab = {
@@ -71,17 +72,40 @@ describe('lib/browsers/firefox', () => {
       pid: Number.MAX_SAFE_INTEGER,
     }
 
-    sinon.stub(geckoDriver.GeckoDriver, 'create').returns(this.browserInstance)
+    sinon.stub(GeckoDriver, 'create').resolves(this.browserInstance)
 
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'createSession').returns({ capabilities: {
-      'moz:debuggerAddress': '127.0.0.1:12345',
-    } })
+    wdcInstance = sinon.createStubInstance(webDriverClassicImport.WebDriverClassic)
 
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'installAddOn')
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'getWindowHandles')
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'switchToWindow')
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'maximizeWindow')
-    sinon.stub(webDriverClassic.WebDriverClassic.prototype, 'navigate')
+    wdcInstance.createSession.resolves({
+      capabilities: {
+        'moz:debuggerAddress': '127.0.0.1:12345',
+        acceptInsecureCerts: false,
+        browserName: '',
+        browserVersion: '',
+        platformName: '',
+        pageLoadStrategy: 'normal',
+        strictFileInteractability: false,
+        timeouts: {
+          implicit: 0,
+          pageLoad: 0,
+          script: 0,
+        },
+        'moz:accessibilityChecks': false,
+        'moz:buildID': '',
+        'moz:geckodriverVersion': '',
+        'moz:headless': false,
+        'moz:platformVersion': '',
+        'moz:processID': 0,
+        'moz:profile': '',
+        'moz:shutdownTimeout': 0,
+        'moz:webdriverClick': false,
+        'moz:windowless': false,
+        userAgent: '',
+        sessionId: '',
+      },
+    })
+
+    sinon.stub(webDriverClassicImport, 'WebDriverClassic').callsFake(() => wdcInstance)
 
     stubFoxdriver()
   })
@@ -131,20 +155,20 @@ describe('lib/browsers/firefox', () => {
       })
 
       it('calls connectToNewSpec in firefoxUtil', async function () {
-        webDriverClassic.WebDriverClassic.prototype.getWindowHandles.resolves(['mock-context-id'])
+        wdcInstance.getWindowHandles.resolves(['mock-context-id'])
         await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         this.options.url = 'next-spec-url'
         await firefox.connectToNewSpec(this.browser, this.options, this.automation)
 
         expect(this.options.onInitializeNewBrowserTab).to.have.been.called
-        expect(webDriverClassic.WebDriverClassic.prototype.getWindowHandles).to.have.been.called
-        expect(webDriverClassic.WebDriverClassic.prototype.switchToWindow).to.have.been.calledWith('mock-context-id')
+        expect(wdcInstance.getWindowHandles).to.have.been.called
+        expect(wdcInstance.switchToWindow).to.have.been.calledWith('mock-context-id')
 
         // first time when connecting a new tab
-        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('about:blank')
+        expect(wdcInstance.navigate).to.have.been.calledWith('about:blank')
         // second time when navigating to the spec
-        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('next-spec-url')
+        expect(wdcInstance.navigate).to.have.been.calledWith('next-spec-url')
       })
     })
 
@@ -198,7 +222,7 @@ describe('lib/browsers/firefox', () => {
 
     it('creates the geckodriver, the creation of the WebDriver session, installs the extension, and passes the correct port to CDP', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(geckoDriver.GeckoDriver.create).to.have.been.calledWith({
+        expect(GeckoDriver.create).to.have.been.calledWith({
           host: '127.0.0.1',
           port: sinon.match(Number),
           marionetteHost: '127.0.0.1',
@@ -216,7 +240,7 @@ describe('lib/browsers/firefox', () => {
           }),
         })
 
-        expect(webDriverClassic.WebDriverClassic.prototype.createSession).to.have.been.calledWith(sinon.match(
+        expect(wdcInstance.createSession).to.have.been.calledWith(sinon.match(
           {
             capabilities: {
               alwaysMatch: {
@@ -235,12 +259,12 @@ describe('lib/browsers/firefox', () => {
           },
         ))
 
-        expect(webDriverClassic.WebDriverClassic.prototype.installAddOn).to.have.been.calledWith(sinon.match({
+        expect(wdcInstance.installAddOn).to.have.been.calledWith(sinon.match({
           extensionPath: '/path/to/ext',
           isTemporary: true,
         }))
 
-        expect(webDriverClassic.WebDriverClassic.prototype.navigate).to.have.been.calledWith('http://')
+        expect(wdcInstance.navigate).to.have.been.calledWith('http://')
 
         // make sure CDP gets the expected port
         expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
@@ -251,7 +275,7 @@ describe('lib/browsers/firefox', () => {
       this.browser.isHeadless = true
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).not.to.have.been.called
+        expect(wdcInstance.maximizeWindow).not.to.have.been.called
       })
     })
 
@@ -264,7 +288,7 @@ describe('lib/browsers/firefox', () => {
       })
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).not.to.have.been.called
+        expect(wdcInstance.maximizeWindow).not.to.have.been.called
       })
     })
 
@@ -272,7 +296,7 @@ describe('lib/browsers/firefox', () => {
       this.browser.isHeadless = false
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(webDriverClassic.WebDriverClassic.prototype.maximizeWindow).to.have.been.called
+        expect(wdcInstance.maximizeWindow).to.have.been.called
       })
     })
 
