@@ -1,6 +1,7 @@
 const { sinon, expect } = require('../../../spec_helper')
 
-import { StreamActivityMonitor, StreamStalledError } from '../../../../lib/cloud/upload/stream_activity_monitor'
+import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
+import { StreamStalledError } from '../../../../lib/cloud/upload/stream_stalled_error'
 import { Readable, Writable } from 'stream'
 
 describe('StreamTimeoutController', () => {
