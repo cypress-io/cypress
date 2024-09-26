@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.15.1
+
+_Released 10/1/2024_
+
+**Misc:**
+
+- Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
+
 ## 13.15.0
 
 _Released 9/25/2024_
@@ -14,7 +22,6 @@ _Released 9/25/2024_
 
 **Misc:**
 
-- Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217). Addressed in [#30250](https://github.com/cypress-io/cypress/pull/30250).
 - Pass along the related log to the `createSnapshot` function for protocol usage. Addressed in [#30244](https://github.com/cypress-io/cypress/pull/30244).
 
 **Dependency Updates:**
