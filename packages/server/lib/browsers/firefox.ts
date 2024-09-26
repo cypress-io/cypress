@@ -22,6 +22,7 @@ import { GeckoDriver } from './geckodriver'
 import { WebDriverClassic } from './webdriver-classic'
 
 const debug = Debug('cypress:server:browsers:firefox')
+const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -566,12 +567,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   try {
-    debug(`sending capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
+    debugVerbose(`sending capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
 
     // this command starts the webdriver session and actually opens the browser
     const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
 
-    debug(`received capabilities %o`, capabilities)
+    debugVerbose(`received capabilities %o`, capabilities)
 
     const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
 
