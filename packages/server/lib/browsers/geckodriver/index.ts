@@ -23,10 +23,10 @@ export type StartGeckoDriverArgs = {
 }
 
 /**
- * Class with static methods of the GeckoDriver as it returns a ChildProcess
+ * Class with static methods that serve as a wrapper around GeckoDriver
  */
 export class GeckoDriver {
-  // We resolve this package in such a way to packherd can discover it, meaning we are re-declaring the types here to get typings support =(
+  // We resolve this package in such a way that packherd can discover it, meaning we are re-declaring the types here to get typings support =(
   // the only reason a static method is used here is so we can stub the class method more easily while under unit-test
   private static getGeckoDriverPackage: () => {
     start: (args: {

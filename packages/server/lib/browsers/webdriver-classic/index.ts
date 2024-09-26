@@ -127,7 +127,7 @@ export class WebDriverClassic {
   }
 
   /**
-   * Switching window will select session's current top-level browsing context used as the target for all subsequent commands.
+   * Switching windows will select the session's current top-level browsing context as the target for all subsequent commands.
    * In a tabbed browser, this will typically make the tab containing the browsing context the selected tab.
    * @see https://www.w3.org/TR/webdriver2/#dfn-switch-to-window
    *

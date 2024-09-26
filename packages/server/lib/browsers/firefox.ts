@@ -549,7 +549,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   debug('launch in firefox', { url, args: launchOptions.args })
 
   const capabilitiesToSend = {
-    // browser capabilities are going here as exact
     capabilities: {
       alwaysMatch: {
         acceptInsecureCerts: true,
@@ -567,7 +566,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   try {
-    debugVerbose(`sending capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
+    debugVerbose(`creating session with capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
 
     // this command starts the webdriver session and actually opens the browser
     const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
