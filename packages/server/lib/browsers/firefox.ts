@@ -19,9 +19,12 @@ import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import { GeckoDriver } from './geckodriver'
-import { WebDriverClassic } from './webdriver-classic'
-
+// import { WebDriverClassic } from './webdriver-classic'
+import WebDriver from 'webdriver'
 const debug = Debug('cypress:server:browsers:firefox')
+
+// const GECKODRIVER_DEBUG_NAMESPACE = 'cypress:server:browsers:geckodriver'
+const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -522,88 +525,122 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
 
   // create the geckodriver process, which we will use WebDriver Classic to open the browser
-  const geckoDriverInstance = await GeckoDriver.create({
-    host: '127.0.0.1',
-    port: geckoDriverPort,
-    marionetteHost: '127.0.0.1',
-    marionettePort,
-    webdriverBidiPort: webDriverBiDiPort,
-    profilePath: profile.path(),
-    binaryPath: browser.path,
-    // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
-    // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
-    // pass them to the firefox process
-    // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1604723#c20 for more details
-    spawnOpts: {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: {
-        ...BROWSER_ENVS,
-        ...process.env,
-      },
-    },
-  })
+  // const geckoDriverInstance = await GeckoDriver.create({
+  //   host: '127.0.0.1',
+  //   port: geckoDriverPort,
+  //   marionetteHost: '127.0.0.1',
+  //   marionettePort,
+  //   websocketPort: webDriverBiDiPort,
+  //   profileRoot: profile.path(),
+  //   binary: browser.path,
+  //   // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
+  //   // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
+  //   // pass them to the firefox process
+  //   // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1604723#c20 for more details
+  //   spawnOpts: {
+  //     stdio: ['ignore', 'pipe', 'pipe'],
+  //     env: {
+  //       ...BROWSER_ENVS,
+  //       ...process.env,
+  //     },
+  //   },
+  // })
 
-  const wdcInstance = new WebDriverClassic('127.0.0.1', geckoDriverPort)
+  // const wdcInstance = new WebDriverClassic('127.0.0.1', geckoDriverPort)
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
   const capabilitiesToSend = {
-    // browser capabilities are going here as exact
-    capabilities: {
-      alwaysMatch: {
-        acceptInsecureCerts: true,
-        // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
-        'moz:firefoxOptions': {
-          binary: browser.path,
-          args: launchOptions.args,
-          prefs: launchOptions.preferences,
+    browserName: 'firefox',
+    acceptInsecureCerts: true,
+    // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+    'moz:firefoxOptions': {
+      binary: browser.path,
+      args: launchOptions.args,
+      prefs: launchOptions.preferences,
+    },
+    // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
+    // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+    'moz:debuggerAddress': true,
+    // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
+    wdiogeckodriveroptions: {
+      host: '127.0.0.1',
+      port: geckoDriverPort,
+      marionetteHost: '127.0.0.1',
+      marionettePort,
+      webdriverBidiPort: webDriverBiDiPort,
+      profilePath: profile.path(),
+      binaryPath: browser.path,
+      // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
+      // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
+      // pass them to the firefox process
+      // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1604723#c20 for more details
+      spawnOpts: {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: {
+          ...BROWSER_ENVS,
+          ...process.env,
         },
-        // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
-        // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-        'moz:debuggerAddress': true,
       },
+      jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
+      log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
+      logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
     },
   }
 
   try {
-    debug(`sending capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
+    debug(`sending capabilities %s`, JSON.stringify(capabilitiesToSend))
 
     // this command starts the webdriver session and actually opens the browser
-    const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
+    // const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
 
-    debug(`received capabilities %o`, capabilities)
+    debugger
+    // wdiogeckodriveroptions
+    const client = await WebDriver.newSession({
+      capabilities: {
+        // @ts-expect-error
+        alwaysMatch: {
+          ...capabilitiesToSend,
+        },
+        firstMatch: [],
+      },
+    })
 
-    const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
+    debugger
 
-    debug(`CDP running on port ${cdpPort}`)
+    // debug(`received capabilities %o`, capabilities)
 
-    const browserPID = capabilities['moz:processID']
+    // const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
 
-    debug(`firefox running on pid: ${browserPID}`)
+    // debug(`CDP running on port ${cdpPort}`)
+
+    // const browserPID = capabilities['moz:processID']
+
+    // debug(`firefox running on pid: ${browserPID}`)
 
     // makes it so get getRemoteDebuggingPort() is calculated correctly
-    process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+    //  process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
 
     // maximize the window if running headful and no width or height args are provided.
     // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
     // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
     // a base 64 encoded profile.
-    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
-      await wdcInstance.maximizeWindow()
-    }
+    // if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
+    //   await wdcInstance.maximizeWindow()
+    // }
 
     // install the browser extensions
     await Promise.all(_.map(launchOptions.extensions, (path) => {
       debug(`installing extension at path: ${path}`)
 
-      return wdcInstance!.installAddOn({
-        extensionPath: path,
-        isTemporary: true,
-      })
+      // return wdcInstance!.installAddOn({
+      //   extensionPath: path,
+      //   isTemporary: true,
+      // })
     }))
 
     debug('setting up firefox utils')
-    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
+    //  browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalGeckoDriverKill = geckoDriverInstance.kill
@@ -614,16 +651,16 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       debug('closing firefox')
 
-      process.kill(browserPID)
+      // process.kill(browserPID)
 
       debug('closing geckodriver')
 
       return originalGeckoDriverKill.apply(geckoDriverInstance, args)
     }
 
-    await utils.executeAfterBrowserLaunch(browser, {
-      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
-    })
+    // await utils.executeAfterBrowserLaunch(browser, {
+    //   webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    // })
   } catch (err) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }

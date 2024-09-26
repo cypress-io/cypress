@@ -1,0 +1,506 @@
+diff --git a/node_modules/webdriver/README.md b/node_modules/webdriver/README.md
+deleted file mode 100644
+index c3ed38d..0000000
+--- a/node_modules/webdriver/README.md
++++ /dev/null
+@@ -1,170 +0,0 @@
+-WebDriver
+-=========
+-
+-> A lightweight, non-opinionated implementation of the [WebDriver](https://w3c.github.io/webdriver/webdriver-spec.html) and [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) specification including mobile commands supported by [Appium](http://appium.io/)
+-
+-There are [tons](https://github.com/christian-bromann/awesome-selenium#javascript) of Selenium and WebDriver binding implementations in the Node.js world. Every one of them has an opinionated API and recommended way to use it. This binding is the most non-opinionated you will find as it just represents the [WebDriver specification](https://w3c.github.io/webdriver/webdriver-spec.html) and doesn't come with any extra or higher-level abstraction. It is lightweight and comes with support for the [WebDriver specification](https://w3c.github.io/webdriver/webdriver-spec.html) and Appium's [Mobile JSONWire Protocol](https://github.com/appium/appium-base-driver/blob/master/docs/mjsonwp/protocol-methods.md).
+-
+-The package supports the following protocols:
+-
+-- [WebDriver](https://w3c.github.io/webdriver/)
+-- [WebDriver Bidi](https://w3c.github.io/webdriver-bidi/)
+-- [Appium](http://appium.io/)
+-- [Chromium](http://chromedriver.chromium.org/) (additional Chromedriver specific commands)
+-- [Selenium](https://www.selenium.dev/) (additional Selenium WebDriver specific commands)
+-- [Sauce Labs](https://saucelabs.com/) (Sauce Labs specific WebDriver extensions)
+-- [JSONWireProtocol](https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol) (depcrecated)
+-- [Mobile JSONWireProtocol](https://github.com/SeleniumHQ/mobile-spec/blob/master/spec-draft.md) (depcrecated)
+-
+-Commands are added to the client's protocol based on assumptions of provided capabilities. You can find more details about the commands by checking out the [`@wdio/protocols`](https://www.npmjs.com/package/@wdio/protocols) package. All commands come with TypeScript support.
+-
+-## Install
+-
+-To install this package from NPM run:
+-
+-```sh
+-npm i webdriver
+-```
+-
+-## WebDriver Example
+-
+-The following example demonstrates a simple Google Search scenario:
+-
+-```js
+-import WebDriver from 'webdriver';
+-
+-const client = await WebDriver.newSession({
+-    path: '/',
+-    capabilities: { browserName: 'firefox' }
+-})
+-
+-await client.navigateTo('https://www.google.com/ncr')
+-
+-const searchInput = await client.findElement('css selector', '#lst-ib')
+-await client.elementSendKeys(searchInput['element-6066-11e4-a52e-4f735466cecf'], 'WebDriver')
+-
+-const searchBtn = await client.findElement('css selector', 'input[value="Google Search"]')
+-await client.elementClick(searchBtn['element-6066-11e4-a52e-4f735466cecf'])
+-
+-console.log(await client.getTitle()) // outputs "WebDriver - Google Search"
+-
+-await client.deleteSession()
+-```
+-
+-## WebDriver Bidi Example
+-
+-To connect to the WebDriver Bidi protocol you have to send along a `webSocketUrl` flag to tell the browser driver to opt-in to the protocol:
+-
+-```js
+-import WebDriver from 'webdriver'
+-
+-const browser = await WebDriver.newSession({
+-    capabilities: {
+-        webSocketUrl: true,
+-        browserName: 'firefox'
+-    }
+-})
+-
+-await browser.sessionSubscribe({ events: ['log.entryAdded'] })
+-
+-/**
+- * returns: {"type":"console","method":"log","realm":null,"args":[{"type":"string","value":"Hello Bidi"}],"level":"info","text":"Hello Bidi","timestamp":1657282076037}
+- */
+-browser.on('log.entryAdded', (entryAdded) => console.log('received %s', entryAdded))
+-
+-await browser.executeScript('console.log("Hello Bidi")', [])
+-await browser.deleteSession()
+-```
+-
+-# Configuration
+-
+-To create a WebDriver session call the `newSession` method on the `WebDriver` class and pass in your configurations:
+-
+-```js
+-import WebDriver from 'webdriver'
+-const client = await WebDriver.newSession(options)
+-```
+-
+-The following options are available:
+-
+-### capabilities
+-Defines the [capabilities](https://w3c.github.io/webdriver/webdriver-spec.html#capabilities) you want to run in your WebDriver session. Note: by default, it will automatically set the `webSocketUrl` to establish a [WebDriver Bidi](https://w3c.github.io/webdriver-bidi/) session, if you don't want this, make sure to set `'wdio:enforceWebDriverClassic': true` in your capabilities.
+-
+-Type: `Object`<br />
+-Required: `true`
+-
+-### logLevel
+-Level of logging verbosity.
+-
+-Type: `String`<br />
+-Default: *info*<br />
+-Options: *trace* | *debug* | *info* | *warn* | *error* | *silent*
+-
+-### protocol
+-Protocol to use when communicating with the Selenium standalone server (or driver).
+-
+-Type: `String`<br />
+-Default: *http*
+-Options: *http* | *https*
+-
+-### hostname
+-Host of your WebDriver server.
+-
+-Type: `String`<br />
+-Default: *localhost*
+-
+-### port
+-Port your WebDriver server is on.
+-
+-Type: `Number`<br />
+-Default: `undefined`
+-
+-### path
+-Path to WebDriver endpoint or grid server.
+-
+-Type: `String`<br />
+-Default: */*
+-
+-### queryParams
+-Query parameters that are propagated to the driver server.
+-
+-Type: `Object`
+-Default: `undefined`
+-
+-### connectionRetryTimeout
+-Timeout for any WebDriver request to a driver or grid.
+-
+-Type: `Number`<br />
+-Default: *120000*
+-
+-### connectionRetryCount
+-Count of request retries to the Selenium server.
+-
+-Type: `Number`<br />
+-Default: *3*
+-
+-### agent
+-
+-Allows you to use a custom` http`/`https`/`http2` [agent](https://www.npmjs.com/package/got#agent) to make requests.
+-
+-Type: `Object`<br />
+-Default:
+-
+-```js
+-{
+-    http: new http.Agent({ keepAlive: true }),
+-    https: new https.Agent({ keepAlive: true })
+-}
+-```
+-
+-### transformRequest
+-Function intercepting [HTTP request options](https://github.com/sindresorhus/got#options) before a WebDriver request is made to a driver.
+-
+-Type: `(RequestOptions) => RequestOptions`<br />
+-Default: *none*
+-
+-### transformResponse
+-Function intercepting HTTP response objects after a WebDriver response has arrived.
+-
+-Type: `(Response, RequestOptions) => Response`<br />
+-Default: *none*
+diff --git a/node_modules/webdriver/build/index.js b/node_modules/webdriver/build/index.js
+index 3be438a..43af264 100644
+--- a/node_modules/webdriver/build/index.js
++++ b/node_modules/webdriver/build/index.js
+@@ -1,10 +1,9 @@
+ // src/index.ts
+-import logger5 from "@wdio/logger";
++import debugModule from 'debug'
+ import { webdriverMonad, sessionEnvironmentDetector, startWebDriver } from "@wdio/utils";
+ import { validateConfig } from "@wdio/config";
+ 
+ // src/command.ts
+-import logger4 from "@wdio/logger";
+ import { commandCallStructure, isValidParameter, getArgumentType } from "@wdio/utils";
+ import {
+   WebDriverBidiProtocol as WebDriverBidiProtocol2
+@@ -19,12 +18,10 @@ import path from "node:path";
+ import { EventEmitter } from "node:events";
+ import { WebDriverProtocol as WebDriverProtocol2 } from "@wdio/protocols";
+ import { URL } from "node:url";
+-import logger3 from "@wdio/logger";
+ import { transformCommandLogResult as transformCommandLogResult2 } from "@wdio/utils";
+ 
+ // src/utils.ts
+ import { deepmergeCustom } from "deepmerge-ts";
+-import logger2 from "@wdio/logger";
+ import {
+   WebDriverProtocol,
+   MJsonWProtocol,
+@@ -39,7 +36,21 @@ import { transformCommandLogResult } from "@wdio/utils";
+ import { CAPABILITY_KEYS } from "@wdio/protocols";
+ 
+ // src/bidi/core.ts
+-import logger from "@wdio/logger";
++
++// Cypress cannot support a dynamic await import with packherd.
++// since this is running in a node context, we can just import this directly
++import socket_default from 'ws'
++
++// src/bidi/core.ts
++const debugMain = debugModule('cypress-verbose:server:browsers:webdriver')
++// src/index.ts
++const debugSession = debugModule('cypress-verbose:server:browsers:webdriver:session')
++// src/command.ts
++const debugCommand = debugModule('cypress-verbose:server:browsers:webdriver:command')
++// src/request/index.ts
++const debugRequest = debugModule('cypress-verbose:server:browsers:webdriver:request')
++// src/utils.ts
++const debugUtils = debugModule('cypress-verbose:server:browsers:webdriver:utils')
+ 
+ // src/bidi/socket.ts
+ var BrowserSocket = class {
+@@ -78,15 +89,13 @@ var BrowserSocket = class {
+     this.#ws.close();
+   }
+ };
+-var socket_default = globalThis.window ? BrowserSocket : (await import("ws")).default;
+ 
+ // src/bidi/core.ts
+-var log = logger("webdriver");
+ var RESPONSE_TIMEOUT = 1e3 * 60;
+ var BidiCore = class {
+   constructor(_webSocketUrl, opts) {
+     this._webSocketUrl = _webSocketUrl;
+-    log.info(`Connect to webSocketUrl ${this._webSocketUrl}`);
++    debugMain(`Connect to webSocketUrl ${this._webSocketUrl}`);
+     this.#ws = new socket_default(this._webSocketUrl, opts);
+     this.#ws.on("message", this.#handleResponse.bind(this));
+   }
+@@ -99,7 +108,7 @@ var BidiCore = class {
+       return;
+     }
+     return new Promise((resolve) => this.#ws.on("open", () => {
+-      log.info("Connected session to Bidi protocol");
++      debugMain("Connected session to Bidi protocol");
+       this.#isConnected = true;
+       resolve();
+     }));
+@@ -123,17 +132,17 @@ var BidiCore = class {
+       if (!payload.id) {
+         return;
+       }
+-      log.debug("BIDI RESULT", data.toString());
++      debugMain("BIDI RESULT", data.toString());
+       const resolve = this.#pendingCommands.get(payload.id);
+       if (!resolve) {
+-        log.error(`Couldn't resolve command with id ${payload.id}`);
++        debugMain(`Couldn't resolve command with id ${payload.id}`);
+         return;
+       }
+       this.#pendingCommands.delete(payload.id);
+       resolve(payload);
+     } catch (err) {
+       const error = err instanceof Error ? err : new Error(`Failed parse message: ${String(err)}`);
+-      log.error(`Failed parse message: ${error.message}`);
++      debugMain(`Failed parse message: ${error.message}`);
+     }
+   }
+   async send(params) {
+@@ -166,7 +175,7 @@ ${driverStack}`;
+     if (!this.#isConnected) {
+       throw new Error("No connection to WebDriver Bidi was established");
+     }
+-    log.info("BIDI COMMAND", ...parseBidiCommand(params));
++    debugMain("BIDI COMMAND", ...parseBidiCommand(params));
+     const id = ++this.#id;
+     this.#ws.send(JSON.stringify({ id, ...params }));
+     return id;
+@@ -862,7 +871,6 @@ var ELEMENT_KEY = "element-6066-11e4-a52e-4f735466cecf";
+ var SHADOW_ELEMENT_KEY = "shadow-6066-11e4-a52e-4f735466cecf";
+ 
+ // src/utils.ts
+-var log2 = logger2("webdriver");
+ var deepmerge = deepmergeCustom({ mergeArrays: false });
+ var BROWSER_DRIVER_ERRORS = [
+   "unknown command: wd/hub/session",
+@@ -905,7 +913,7 @@ async function startWebDriverSession(params) {
+   try {
+     response = await sessionRequest.makeRequest(params);
+   } catch (err) {
+-    log2.error(err);
++    debugUtils(err);
+     const message = getSessionError(err, params);
+     throw new Error("Failed to create session.\n" + message);
+   }
+@@ -915,7 +923,7 @@ async function startWebDriverSession(params) {
+ }
+ function isSuccessfulResponse(statusCode, body) {
+   if (!body || typeof body.value === "undefined") {
+-    log2.debug("request failed due to missing body");
++    debugUtils("request failed due to missing body");
+     return false;
+   }
+   if (body.status === 7 && body.value && body.value.message && (body.value.message.toLowerCase().startsWith("no such element") || // Appium
+@@ -924,7 +932,7 @@ function isSuccessfulResponse(statusCode, body) {
+     return true;
+   }
+   if (body.status && body.status !== 0) {
+-    log2.debug(`request failed due to status ${body.status}`);
++    debugUtils(`request failed due to status ${body.status}`);
+     return false;
+   }
+   const hasErrorResponse = body.value && (body.value.error || body.value.stackTrace || body.value.stacktrace);
+@@ -935,7 +943,7 @@ function isSuccessfulResponse(statusCode, body) {
+     return true;
+   }
+   if (hasErrorResponse) {
+-    log2.debug("request failed due to response error:", body.value.error);
++    debugUtils("request failed due to response error:", body.value.error);
+     return false;
+   }
+   return true;
+@@ -1033,7 +1041,7 @@ function setupDirectConnect(client) {
+   const directConnectPath = capabilities["appium:directConnectPath"];
+   const directConnectPort = capabilities["appium:directConnectPort"];
+   if (directConnectProtocol && directConnectHost && directConnectPort && (directConnectPath || directConnectPath === "")) {
+-    log2.info(`Found direct connect information in new session response. Will connect to server at ${directConnectProtocol}://${directConnectHost}:${directConnectPort}${directConnectPath}`);
++    debugUtils(`Found direct connect information in new session response. Will connect to server at ${directConnectProtocol}://${directConnectHost}:${directConnectPort}${directConnectPath}`);
+     client.options.protocol = directConnectProtocol;
+     client.options.hostname = directConnectHost;
+     client.options.port = directConnectPort;
+@@ -1104,7 +1112,7 @@ function initiateBidi(socketUrl, strictSSL = true) {
+   socketUrl = socketUrl.replace("localhost", "127.0.0.1");
+   const bidiReqOpts = strictSSL ? {} : { rejectUnauthorized: false };
+   const handler = new BidiHandler(socketUrl, bidiReqOpts);
+-  handler.connect().then(() => log2.info(`Connected to WebDriver Bidi interface at ${socketUrl}`));
++  handler.connect().then(() => debugUtils(`Connected to WebDriver Bidi interface at ${socketUrl}`));
+   return {
+     _bidiHandler: { value: handler },
+     ...Object.values(WebDriverBidiProtocol).map((def) => def.socket).reduce((acc, cur) => {
+@@ -1123,7 +1131,7 @@ function parseBidiMessage(data) {
+     }
+     this.emit(payload.method, payload.params);
+   } catch (err) {
+-    log2.error(`Failed parse WebDriver Bidi message: ${err.message}`);
++    debugUtils(`Failed parse WebDriver Bidi message: ${err.message}`);
+   }
+ }
+ 
+@@ -1194,7 +1202,6 @@ var DEFAULT_HEADERS = {
+   "Accept": "application/json",
+   "User-Agent": "webdriver/" + package_default.version
+ };
+-var log3 = logger3("webdriver");
+ var WebDriverRequest = class extends EventEmitter {
+   #requestTimeout;
+   body;
+@@ -1265,9 +1272,9 @@ var WebDriverRequest = class extends EventEmitter {
+     throw new Error("This function must be implemented");
+   }
+   async _request(url, fullRequestOptions, transformResponse, totalRetryCount = 0, retryCount = 0) {
+-    log3.info(`[${fullRequestOptions.method}] ${url.href}`);
++    debugRequest(`[${fullRequestOptions.method}] ${url.href}`);
+     if (fullRequestOptions.body && Object.keys(fullRequestOptions.body).length) {
+-      log3.info("DATA", transformCommandLogResult2(fullRequestOptions.body));
++      debugRequest("DATA", transformCommandLogResult2(fullRequestOptions.body));
+     }
+     const { ...requestLibOptions } = fullRequestOptions;
+     const startTime = this._libPerformanceNow();
+@@ -1278,7 +1285,7 @@ var WebDriverRequest = class extends EventEmitter {
+     }
+     const retry = (error2, msg) => {
+       if (retryCount >= totalRetryCount || error2.message.includes("invalid session id")) {
+-        log3.error(`Request failed with status ${response.statusCode} due to ${error2}`);
++        debugRequest(`Request failed with status ${response.statusCode} due to ${error2}`);
+         this.emit("response", { error: error2 });
+         this.emit("performance", { request: fullRequestOptions, durationMillisecond, success: false, error: error2, retryCount });
+         throw error2;
+@@ -1286,8 +1293,8 @@ var WebDriverRequest = class extends EventEmitter {
+       ++retryCount;
+       this.emit("retry", { error: error2, retryCount });
+       this.emit("performance", { request: fullRequestOptions, durationMillisecond, success: false, error: error2, retryCount });
+-      log3.warn(msg);
+-      log3.info(`Retrying ${retryCount}/${totalRetryCount}`);
++      debugRequest(msg);
++      debugRequest(`Retrying ${retryCount}/${totalRetryCount}`);
+       return this._request(url, fullRequestOptions, transformResponse, totalRetryCount, retryCount);
+     };
+     if (response instanceof Error) {
+@@ -1318,7 +1325,7 @@ var WebDriverRequest = class extends EventEmitter {
+       return response.body;
+     }
+     if (error.name === "stale element reference") {
+-      log3.warn("Request encountered a stale element - terminating request");
++      debugRequest("Request encountered a stale element - terminating request");
+       this.emit("response", { error });
+       this.emit("performance", { request: fullRequestOptions, durationMillisecond, success: false, error, retryCount });
+       throw error;
+@@ -1375,7 +1382,6 @@ var FetchRequest = class extends WebDriverRequest {
+ };
+ 
+ // src/command.ts
+-var log4 = logger4("webdriver");
+ var BIDI_COMMANDS = Object.values(WebDriverBidiProtocol2).map((def) => def.socket.command);
+ function command_default(method, endpointUri, commandInfo, doubleEncodeVariables = false) {
+   const { command, deprecated, ref, parameters, variables = [], isHubCommand = false } = commandInfo;
+@@ -1398,7 +1404,7 @@ For more info see ${ref}
+ `;
+     const body = {};
+     if (typeof deprecated === "string") {
+-      log4.warn(deprecated.replace("This command", `The "${command}" command`));
++      debugCommand(deprecated.replace("This command", `The "${command}" command`));
+     }
+     if (isBidiCommand) {
+       throw new Error(
+@@ -1443,7 +1449,7 @@ Actual: ${actual}` + moreInfo
+     const request = new FetchRequest(method, endpoint, body, isHubCommand);
+     request.on("performance", (...args2) => this.emit("request.performance", ...args2));
+     this.emit("command", { command, method, endpoint, body });
+-    log4.info("COMMAND", commandCallStructure(command, args));
++    debugCommand("COMMAND", commandCallStructure(command, args));
+     return request.makeRequest(this.options, this.sessionId).then((result) => {
+       if (typeof result.value !== "undefined") {
+         let resultLog = result.value;
+@@ -1452,16 +1458,16 @@ Actual: ${actual}` + moreInfo
+         } else if (command === "executeScript" && body.script && body.script.includes("(() => window.__wdioEvents__)")) {
+           resultLog = `[${result.value.length} framework events captured]`;
+         }
+-        log4.info("RESULT", resultLog);
++        debugCommand("RESULT", resultLog);
+       }
+       this.emit("result", { command, method, endpoint, body, result });
+       if (command === "deleteSession") {
+         const shutdownDriver = body.deleteSessionOpts?.shutdownDriver !== false;
+         if (shutdownDriver && "wdio:driverPID" in this.capabilities && this.capabilities["wdio:driverPID"]) {
+-          log4.info(`Kill driver process with PID ${this.capabilities["wdio:driverPID"]}`);
++          debugCommand(`Kill driver process with PID ${this.capabilities["wdio:driverPID"]}`);
+           const killedSuccessfully = process.kill(this.capabilities["wdio:driverPID"], "SIGKILL");
+           if (!killedSuccessfully) {
+-            log4.warn("Failed to kill driver process, manually clean-up might be required");
++            debugCommand("Failed to kill driver process, manually clean-up might be required");
+           }
+           setTimeout(() => {
+             for (const handle of process._getActiveHandles()) {
+@@ -1471,9 +1477,6 @@ Actual: ${actual}` + moreInfo
+             }
+           }, 10);
+         }
+-        if (!process.env.WDIO_WORKER_ID) {
+-          logger4.clearLogger();
+-        }
+       }
+       return result.value;
+     });
+@@ -1487,16 +1490,12 @@ var localTypes_exports = {};
+ var remoteTypes_exports = {};
+ 
+ // src/index.ts
+-var log5 = logger5("webdriver");
+ var WebDriver = class _WebDriver {
+   static async newSession(options, modifier, userPrototype = {}, customCommandWrapper) {
+     const envLogLevel = process.env.WDIO_LOG_LEVEL;
+     options.logLevel = envLogLevel ?? options.logLevel;
+     const params = validateConfig(DEFAULTS, options);
+-    if (params.logLevel && (!options.logLevels || !options.logLevels.webdriver)) {
+-      logger5.setLevel("webdriver", params.logLevel);
+-    }
+-    log5.info("Initiate new session using the WebDriver protocol");
++    debugSession("Initiate new session using the WebDriver protocol");
+     const driverProcess = await startWebDriver(params);
+     const requestedCapabilities = { ...params.capabilities };
+     const { sessionId, capabilities } = await startWebDriverSession(params);
+@@ -1508,7 +1507,7 @@ var WebDriver = class _WebDriver {
+     }
+     const bidiPrototype = {};
+     if (capabilities.webSocketUrl) {
+-      log5.info(`Register BiDi handler for session with id ${sessionId}`);
++      debugSession(`Register BiDi handler for session with id ${sessionId}`);
+       Object.assign(bidiPrototype, initiateBidi(capabilities.webSocketUrl, options.strictSSL));
+     }
+     const monad = webdriverMonad(
+@@ -1538,9 +1537,6 @@ var WebDriver = class _WebDriver {
+     if (!options || typeof options.sessionId !== "string") {
+       throw new Error("sessionId is required to attach to existing session");
+     }
+-    if (options.logLevel) {
+-      logger5.setLevel("webdriver", options.logLevel);
+-    }
+     options.capabilities = options.capabilities || {};
+     options.isW3C = options.isW3C === false ? false : true;
+     options.protocol = options.protocol || DEFAULTS.protocol.default;
+@@ -1554,7 +1550,7 @@ var WebDriver = class _WebDriver {
+     const bidiPrototype = {};
+     const webSocketUrl = options.capabilities?.webSocketUrl;
+     if (typeof webSocketUrl === "string") {
+-      log5.info(`Register BiDi handler for session with id ${options.sessionId}`);
++      debugSession(`Register BiDi handler for session with id ${options.sessionId}`);
+       Object.assign(bidiPrototype, initiateBidi(webSocketUrl, options.strictSSL));
+     }
+     const prototype = { ...protocolCommands, ...environmentPrototype, ...userPrototype, ...bidiPrototype };

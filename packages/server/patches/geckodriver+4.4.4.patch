@@ -235,7 +235,7 @@ index 8634875..0000000
 -
 -For more information on WebdriverIO see the [homepage](https://webdriver.io).
 diff --git a/node_modules/geckodriver/dist/index.js b/node_modules/geckodriver/dist/index.js
-index 2367e0b..18be0e1 100644
+index 4898be7..80c1268 100644
 --- a/node_modules/geckodriver/dist/index.js
 +++ b/node_modules/geckodriver/dist/index.js
 @@ -1,11 +1,11 @@
@@ -253,9 +253,9 @@ index 2367e0b..18be0e1 100644
      let geckoDriverPath = (customGeckoDriverPath ||
          process.env.GECKODRIVER_PATH ||
          // deprecated
-@@ -23,8 +23,8 @@ export async function start(params) {
-     // Otherwise all instances try to connect to the default port and fail
-     startArgs.websocketPort = startArgs.websocketPort ?? 0;
+@@ -30,8 +30,8 @@ export async function start(params) {
+         startArgs.websocketPort = 0;
+     }
      const args = parseParams(startArgs);
 -    log.info(`Starting Geckodriver at ${geckoDriverPath} with params: ${args.join(' ')}`);
 -    return cp.spawn(geckoDriverPath, args);
@@ -265,7 +265,7 @@ index 2367e0b..18be0e1 100644
  export const download = downloadDriver;
  export * from './types.js';
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-index c27c805..a992240 100644
+index c27c805..0d1d111 100644
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
 @@ -4,14 +4,14 @@ import util from 'node:util';
@@ -303,7 +303,7 @@ index c27c805..a992240 100644
   */
  if (process.argv[1] && process.argv[1].endsWith('/dist/install.js') && process.env.GECKODRIVER_AUTO_INSTALL) {
 -    await download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
-+    download().then(() => debug('Success!'), (err) => debug(`Failed to install Geckodriver: ${err.stack}`));
++    download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
  }
  //# sourceMappingURL=install.js.map
 \ No newline at end of file
