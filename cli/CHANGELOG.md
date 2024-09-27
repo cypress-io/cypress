@@ -5,7 +5,7 @@ _Released 12/3/2024 (PENDING)_
 
 **Breaking Changes:**
 
-- Support for Node.js 16 and Node.js 21 has been removed. Addressed in [#30307](https://github.com/cypress-io/cypress/pull/30307).
+- Support for Node.js 16 and Node.js 21 has been removed. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
 
 ## 13.15.0
 
