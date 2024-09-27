@@ -97,6 +97,9 @@ export class GeckoDriver {
 
       debug('geckodriver started!')
 
+      // For whatever reason, we NEED to bind to stderr/stdout in order
+      // for the geckodriver process not to hang, even though the event effectively
+      // isn't doing anything without debug logs enabled.
       geckoDriverChildProcess.stdout?.on('data', (buf) => {
         debugVerbose('firefox stdout: %s', String(buf).trim())
       })
