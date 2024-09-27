@@ -35,6 +35,7 @@ namespace WebDriver {
         'moz:shutdownTimeout': number
         'moz:webdriverClick': boolean
         'moz:windowless': boolean
+        unhandledPromptBehavior: string
         userAgent: string
         sessionId: string
       }
@@ -54,7 +55,7 @@ export class WebDriverClassic {
 
   /**
    * Creates a new WebDriver Session through GeckoDriver. Capabilities are predetermined
-   * @see https://www.w3.org/TR/webdriver2/#new-session
+   * @see https://w3c.github.io/webdriver.#new-session
    * @returns {Promise<WebDriver.Session.NewResult>} - the results of the Webdriver Session (enabled through remote.active-protocols)
    */
   async createSession (args: {
@@ -103,7 +104,7 @@ export class WebDriverClassic {
 
   /**
    * Gets available windows handles in the browser. The order in which the window handles are returned is arbitrary.
-   * @see https://www.w3.org/TR/webdriver2/#get-window-handles
+   * @see https://w3c.github.io/webdriver.#get-window-handles
    *
    * @returns {Promise<string[]>} All the available top-level contexts/handles
    */
@@ -129,7 +130,7 @@ export class WebDriverClassic {
   /**
    * Switching windows will select the session's current top-level browsing context as the target for all subsequent commands.
    * In a tabbed browser, this will typically make the tab containing the browsing context the selected tab.
-   * @see https://www.w3.org/TR/webdriver2/#dfn-switch-to-window
+   * @see https://w3c.github.io/webdriver.#dfn-switch-to-window
    *
    * @param {string} handle - the context ID of the window handle
    * @returns {Promise<null>}
@@ -167,7 +168,7 @@ export class WebDriverClassic {
 
   /**
    * maximizes the current window
-   * @see https://www.w3.org/TR/webdriver2/#maximize-window
+   * @see https://w3c.github.io/webdriver.#maximize-window
    *
    * @returns {Promise<null>}
    */
@@ -200,7 +201,7 @@ export class WebDriverClassic {
 
   /**
    * causes the user agent to navigate the session's current top-level browsing context to a new location.
-   * @see https://www.w3.org/TR/webdriver2/#navigate-to
+   * @see https://w3c.github.io/webdriver.#navigate-to
    *
    * @param url - the url of where the context handle is navigating to
    * @returns {Promise<null>}

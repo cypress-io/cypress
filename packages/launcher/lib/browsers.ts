@@ -9,7 +9,7 @@ export const debug = Debug('cypress:launcher:browsers')
 /** starts a found browser and opens URL if given one */
 export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
 
-// NOTE: firefox uses geckodriver to launch the browser
+// NOTE: For Firefox geckodriver is used to launch the browser
 export function launch (
   browser: FoundBrowser,
   url: string,

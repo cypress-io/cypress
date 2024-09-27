@@ -64,7 +64,7 @@ export class GeckoDriver {
    * @returns {ChildProcess} - the child process in which the geckodriver is running
    */
   static async create (opts: StartGeckoDriverArgs, timeout: number = 5000): Promise<ChildProcess> {
-    debugVerbose('no geckodriver instance exists. starting geckodriver...')
+    debug('no geckodriver instance exists. starting geckodriver...')
 
     let geckoDriverChildProcess: ChildProcess | null = null
 
@@ -95,19 +95,22 @@ export class GeckoDriver {
         output: debugModule.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'dots' : 'silent',
       })).timeout(timeout)
 
-      debugVerbose('geckodriver started!')
+      debug('geckodriver started!')
 
-      geckoDriverChildProcess.stdout?.on('data', (buf) => {
-        debugVerbose('firefox stdout: %s', String(buf).trim())
-      })
+      // only bind to stdout/stderr if we have the debug namespace available
+      if (debugModule.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE)) {
+        geckoDriverChildProcess.stdout?.on('data', (buf) => {
+          debugVerbose('firefox stdout: %s', String(buf).trim())
+        })
 
-      geckoDriverChildProcess.stderr?.on('data', (buf) => {
-        debugVerbose('firefox stderr: %s', String(buf).trim())
-      })
+        geckoDriverChildProcess.stderr?.on('data', (buf) => {
+          debugVerbose('firefox stderr: %s', String(buf).trim())
+        })
 
-      geckoDriverChildProcess.on('exit', (code, signal) => {
-        debugVerbose('firefox exited: %o', { code, signal })
-      })
+        geckoDriverChildProcess.on('exit', (code, signal) => {
+          debugVerbose('firefox exited: %o', { code, signal })
+        })
+      }
 
       return geckoDriverChildProcess
     } catch (err) {
