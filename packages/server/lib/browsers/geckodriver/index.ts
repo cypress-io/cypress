@@ -97,20 +97,17 @@ export class GeckoDriver {
 
       debug('geckodriver started!')
 
-      // only bind to stdout/stderr if we have the debug namespace available
-      if (debugModule.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE)) {
-        geckoDriverChildProcess.stdout?.on('data', (buf) => {
-          debugVerbose('firefox stdout: %s', String(buf).trim())
-        })
+      geckoDriverChildProcess.stdout?.on('data', (buf) => {
+        debugVerbose('firefox stdout: %s', String(buf).trim())
+      })
 
-        geckoDriverChildProcess.stderr?.on('data', (buf) => {
-          debugVerbose('firefox stderr: %s', String(buf).trim())
-        })
+      geckoDriverChildProcess.stderr?.on('data', (buf) => {
+        debugVerbose('firefox stderr: %s', String(buf).trim())
+      })
 
-        geckoDriverChildProcess.on('exit', (code, signal) => {
-          debugVerbose('firefox exited: %o', { code, signal })
-        })
-      }
+      geckoDriverChildProcess.on('exit', (code, signal) => {
+        debugVerbose('firefox exited: %o', { code, signal })
+      })
 
       return geckoDriverChildProcess
     } catch (err) {
