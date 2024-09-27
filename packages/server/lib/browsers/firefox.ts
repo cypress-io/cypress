@@ -407,6 +407,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // defaultLaunchOptions.args.push('-height=1081')
   } else if (os.platform() === 'win32' || os.platform() === 'darwin') {
     // lets the browser come into focus. Only works on Windows or Mac
+    // this argument is added automatically to the linux geckodriver,
+    // so adding it is unnecessary and actually causes the browser to fail to launch.
     defaultLaunchOptions.args.push('-foreground')
   }
 
