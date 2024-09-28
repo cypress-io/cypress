@@ -685,11 +685,22 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: () => {
+    CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: () => {
       // @ts-expect-error
       const err: Error & { url: string } = makeErr()
 
       err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { chunkSizeKB: number, maxActivityDwellTime: number } = new Error('stream stall')
+
+      err.chunkSizeKB = 64
+      err.maxActivityDwellTime = 5000
 
       return {
         default: [err],
@@ -717,6 +728,13 @@ describe('visual error templates', () => {
       return {
         default: [aggregateError],
         withSystemError: [aggregateErrorWithSystemError],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR: () => {
+      const error = makeErr()
+
+      return {
+        default: [error],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
