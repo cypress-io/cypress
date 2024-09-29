@@ -120,7 +120,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
 
     // Ensure import comes at start of line *or* is prefixed by a space so we don't capture things like
     // `Refresh.__hmr_import('')
-    const importRegex = /(?<=^|\s)import (.+?) from ['"](.*?)['"]/g
+    const importRegex = /(?<=^|\s)import ([^;'"]+?) from ['"](.*?)['"]/g
 
     return code.replace(
       importRegex,
