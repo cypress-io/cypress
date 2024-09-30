@@ -67,7 +67,7 @@ const rulesThatMustPass = [
   'aria-tooltip-name',
   'aria-treeitem-name',
   'autocomplete-valid', // ignored by config
-  // 'avoid-inline-spacing',  // ignored by config
+  'avoid-inline-spacing', // ignored by config
   'blink',
   'bypass',
   // 'color-contrast',
@@ -94,8 +94,8 @@ const rulesThatMustPass = [
   'td-headers-attr',
   'th-has-data-cells',
   'valid-lang',
-  'audio-caption', // (deprecated) - not applicable
-  'aria-roledescription', // (deprecated) - not applicable
+  'audio-caption',
+  'aria-roledescription',
 ]
 
 getAccessibilityResults({
