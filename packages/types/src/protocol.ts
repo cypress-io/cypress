@@ -3,7 +3,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
 import type { ProxyTimings } from './proxy'
-import { SpecWithRelativeRoot } from './spec'
+import type { SpecWithRelativeRoot } from './spec'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
