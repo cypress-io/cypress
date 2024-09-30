@@ -89,7 +89,7 @@ index 773ad95..84ca2f6 100644
 +	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
 +	// two documents; shallow comparisons work.
 +	// eslint-disable-next-line eqeqeq
-+	if ( preferredDoc != document &&
++	if ( docElem.msMatchesSelector && preferredDoc != document &&
 +		( subWindow = document.defaultView ) && subWindow.top !== subWindow ) {
  
 -		// Support: IE 11, Edge

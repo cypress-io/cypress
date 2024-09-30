@@ -75,6 +75,7 @@ export interface AppDataShape {
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
+  nodeVersion: Maybe<string>
   browserStatus: BrowserStatus
   browserUserAgent: string | null
   relaunchBrowser: boolean
@@ -195,6 +196,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,
+      nodeVersion: modeOptions.userNodeVersion,
       browserStatus: 'closed',
       browserUserAgent: null,
       relaunchBrowser: false,
