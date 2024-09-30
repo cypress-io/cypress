@@ -32,8 +32,7 @@ describe('windowSize', () => {
         // availHeight: top.screen.availHeight,
       }).deep.eq({
         innerWidth: 1280,
-        // NOTE: Firefox 130.0 with the default sizing is a pixel short, which we are accounting for here
-        innerHeight: Cypress.browser.name === 'firefox' ? 719 : 720,
+        innerHeight: 720,
         // screenWidth: 1280,
         // screenHeight: 720,
         // availWidth: 1280,
