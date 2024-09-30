@@ -46,7 +46,7 @@ namespace WebDriver {
 export class WebDriverClassic {
   #host: string
   #port: number
-  private sessionId: string
+  private sessionId: string = ''
 
   constructor (host: string, port: number) {
     this.#host = host
