@@ -19,11 +19,11 @@
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
-    "@babel/core": "7.24.7",
-    "@babel/preset-env": "7.22.9",
+    "@babel/core": "7.25.2",
+    "@babel/preset-env": "7.25.3",
     "@cypress/commit-info": "2.2.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/request": "^3.0.1",
+    "@cypress/request": "^3.0.4",
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-preprocessor": "0.0.0-development",

@@ -525,7 +525,7 @@ Then I expect to see the grep string and the "filter tests" flag in the `env` ob
 
 ### Log messages
 
-This module uses [debug](https://github.com/visionmedia/debug#readme) to log verbose messages. You can enable the debug messages in the plugin file (runs when discovering specs to filter), and inside the browser to see how it determines which tests to run and to skip. When opening a new issue, please provide the debug logs from the plugin (if any) and from the browser.
+This module uses [debug](https://github.com/debug-js/debug#readme) to log verbose messages. You can enable the debug messages in the plugin file (runs when discovering specs to filter), and inside the browser to see how it determines which tests to run and to skip. When opening a new issue, please provide the debug logs from the plugin (if any) and from the browser.
 
 ### Debugging in the plugin
 

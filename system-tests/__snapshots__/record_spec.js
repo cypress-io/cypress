@@ -3049,6 +3049,15 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - Spec recording too large: artifact is 1024 bytes, limit is 200 bytes
 
+Warning: We encountered an error while uploading the Test Replay recording of this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: Spec recording too large: artifact is 1024 bytes, limit is 200 bytes
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -3984,6 +3993,15 @@ Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae31
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+Warning: We encountered an error while uploading the Test Replay recording of this spec.
+
+These results will not display Test Replay recordings.
+
+This error will not affect or change the exit code.
+
+Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
+
 
 ====================================================================================================
 
