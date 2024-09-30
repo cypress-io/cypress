@@ -8,7 +8,7 @@ module.exports = {
       // (height must account for firefox url bar, which we can only shrink to 1px ,
       // and the total size of the window url and tab bar, which is 85 pixels for a total offset of 86 pixels)
       options.args.push(
-        '-width', '1280', '-height', '806',
+        '-width', '1280', '-height', '722',
       )
     } else if (browser.name === 'electron') {
       options.preferences.width = 1280
