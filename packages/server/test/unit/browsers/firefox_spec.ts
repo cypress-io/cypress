@@ -100,6 +100,7 @@ describe('lib/browsers/firefox', () => {
         'moz:shutdownTimeout': 0,
         'moz:webdriverClick': false,
         'moz:windowless': false,
+        unhandledPromptBehavior: '',
         userAgent: '',
         sessionId: '',
       },
@@ -260,8 +261,8 @@ describe('lib/browsers/firefox', () => {
         ))
 
         expect(wdcInstance.installAddOn).to.have.been.calledWith(sinon.match({
-          extensionPath: '/path/to/ext',
-          isTemporary: true,
+          path: '/path/to/ext',
+          temporary: true,
         }))
 
         expect(wdcInstance.navigate).to.have.been.calledWith('http://')

@@ -165,8 +165,8 @@ describe('lib/browsers/webdriver-classic', () => {
       wdc.sessionId = mockSessionId
 
       await wdc.installAddOn({
-        extensionPath: '/path/to/ext',
-        isTemporary: true,
+        path: '/path/to/ext',
+        temporary: true,
       })
 
       installExtensionScope.done()
@@ -184,8 +184,8 @@ describe('lib/browsers/webdriver-classic', () => {
       wdc.sessionId = mockSessionId
 
       expect(wdc.installAddOn({
-        extensionPath: '/path/to/ext',
-        isTemporary: true,
+        path: '/path/to/ext',
+        temporary: true,
       })).to.be.rejectedWith('500: Internal Server Error')
     })
   })

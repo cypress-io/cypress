@@ -5,8 +5,8 @@ import crossFetch from 'cross-fetch'
 const debug = debugModule('cypress:server:browsers:webdriver')
 
 type InstallAddOnArgs = {
-  extensionPath: string
-  isTemporary: boolean
+  path: string
+  temporary: boolean
 }
 
 namespace WebDriver {
@@ -46,7 +46,7 @@ namespace WebDriver {
 export class WebDriverClassic {
   #host: string
   #port: number
-  private sessionId: string | null = null
+  private sessionId: string
 
   constructor (host: string, port: number) {
     this.#host = host
@@ -63,10 +63,6 @@ export class WebDriverClassic {
   }): Promise<WebDriver.Session.NewResult> {
     const getSessionUrl = `http://${this.#host}:${this.#port}/session`
 
-    const headers = new Headers()
-
-    headers.append('Content-Type', 'application/json')
-
     const body = {
       capabilities: args.capabilities,
     }
@@ -74,7 +70,9 @@ export class WebDriverClassic {
     try {
       const createSessionResp = await crossFetch(getSessionUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(body),
       })
 
@@ -138,10 +136,6 @@ export class WebDriverClassic {
   async switchToWindow (handle: string): Promise<null> {
     const switchToWindowUrl = `http://${this.#host}:${this.#port}/session/${this.sessionId}/window`
 
-    const headers = new Headers()
-
-    headers.append('Content-Type', 'application/json')
-
     const body = {
       handle,
     }
@@ -149,7 +143,9 @@ export class WebDriverClassic {
     try {
       const switchToWindowResp = await crossFetch(switchToWindowUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(body),
       })
 
@@ -175,14 +171,12 @@ export class WebDriverClassic {
   async maximizeWindow (): Promise<null> {
     const maximizeWindowUrl = `http://${this.#host}:${this.#port}/session/${this.sessionId}/window/maximize`
 
-    const headers = new Headers()
-
-    headers.append('Content-Type', 'application/json')
-
     try {
       const maximizeWindowResp = await crossFetch(maximizeWindowUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({}),
       })
 
@@ -209,10 +203,6 @@ export class WebDriverClassic {
   async navigate (url: string): Promise<null> {
     const navigateUrl = `http://${this.#host}:${this.#port}/session/${this.sessionId}/url`
 
-    const headers = new Headers()
-
-    headers.append('Content-Type', 'application/json')
-
     const body = {
       url,
     }
@@ -220,7 +210,9 @@ export class WebDriverClassic {
     try {
       const navigateResp = await crossFetch(navigateUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(body),
       })
 
@@ -244,21 +236,19 @@ export class WebDriverClassic {
   */
   async installAddOn (opts: InstallAddOnArgs) {
     const body = {
-      path: opts.extensionPath,
-      temporary: opts.isTemporary,
+      path: opts.path,
+      temporary: opts.temporary,
     }
 
     // If the webdriver session is created, we can now install our extension through geckodriver
     const url = `http://${this.#host}:${this.#port}/session/${this.sessionId}/moz/addon/install`
 
-    const headers = new Headers()
-
-    headers.append('Content-Type', 'application/json')
-
     try {
       const resp = await crossFetch(url, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(body),
       })
 

@@ -599,8 +599,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       debug(`installing extension at path: ${path}`)
 
       return wdcInstance!.installAddOn({
-        extensionPath: path,
-        isTemporary: true,
+        path,
+        temporary: true,
       })
     }))
 
