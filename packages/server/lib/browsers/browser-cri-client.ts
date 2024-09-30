@@ -5,6 +5,7 @@ import Debug from 'debug'
 import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
+import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { ProtocolManagerShape } from '@packages/types'
@@ -23,7 +24,7 @@ type BrowserCriClientOptions = {
   host: string
   port: number
   browserName: string
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
@@ -33,7 +34,7 @@ type BrowserCriClientCreateOptions = {
   browserName: string
   fullyManageTabs?: boolean
   hosts: string[]
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
@@ -181,7 +182,7 @@ export class BrowserCriClient {
   private host: string
   private port: number
   private browserName: string
-  private onAsynchronousError: Function
+  private onAsynchronousError: (err: CypressError) => void
   private protocolManager?: ProtocolManagerShape
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
@@ -402,7 +403,12 @@ export class BrowserCriClient {
 
     browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 
-    await extraTargetCriClient.send('Fetch.enable')
+    try {
+      await extraTargetCriClient.send('Fetch.enable')
+    } catch (err) {
+      // swallow this error so it doesn't crash Cypress
+      debug('Fetch.enable failed on extra target#%s: %s', targetId, err)
+    }
 
     // we mark extra targets with this header, so that the proxy can recognize
     // where they came from and run only the minimal middleware necessary
@@ -479,7 +485,7 @@ export class BrowserCriClient {
       browserCriClient.onClose = resolve
 
       // or when the browser's CDP ws connection is closed
-      browserClient.ws.once('close', () => {
+      browserClient.ws?.once('close', () => {
         resolve(false)
       })
     })

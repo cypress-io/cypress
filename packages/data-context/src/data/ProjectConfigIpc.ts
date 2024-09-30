@@ -11,6 +11,7 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
+import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 
@@ -58,6 +59,7 @@ export class ProjectConfigIpc extends EventEmitter {
 
   constructor (
     readonly nodePath: string | undefined | null,
+    readonly nodeVersion: string | undefined | null,
     readonly projectRoot: string,
     readonly configFilePath: string,
     readonly configFile: string | false,
@@ -301,7 +303,15 @@ export class ProjectConfigIpc extends EventEmitter {
         // best option that leverages the existing modules we bundle in the binary.
         // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        let tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+
+        // in nodejs 22.7.0, the --experimental-detect-module option is now enabled by default.
+        // We need to disable it with the --no-experimental-detect-module flag.
+        // @see https://github.com/cypress-io/cypress/issues/30084
+        if (this.nodeVersion && semver.gte(this.nodeVersion, '22.7.0')) {
+          debug(`detected node version ${this.nodeVersion}, adding --no-experimental-detect-module option to child_process NODE_OPTIONS.`)
+          tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-detect-module`
+        }
 
         if (childOptions.env.NODE_OPTIONS) {
           childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`

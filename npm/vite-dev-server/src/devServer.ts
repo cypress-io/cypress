@@ -50,7 +50,12 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
     port,
     // Close is for unit testing only. We kill this child process which will handle the closing of the server
     close (cb) {
-      return server.close().then(() => cb?.()).catch(cb)
+      debug('closing dev server')
+
+      return server.close().then(() => {
+        debug('closed dev server')
+        cb?.()
+      }).catch(cb)
     },
   }
 }

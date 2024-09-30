@@ -98,7 +98,10 @@ export type CreateBundleOpts = {
  * snapshot
  *
  * @property nodeEnv `process.env.NODE_ENV` will be set to this value during
- * snapshot creation, see src/blueprint.ts:88
+ * snapshot creation, see src/blueprint.ts
+ *
+ * @property cypressInternalEnv `process.env.CYPRESS_INTERNAL_ENV` will be set to this value during
+ * snapshot creation, see src/blueprint.ts
  *
  * @category snapshot
  */
@@ -106,6 +109,7 @@ export type CreateSnapshotScriptOpts = CreateBundleOpts & {
   resolverMap?: Record<string, string>
   auxiliaryData?: Record<string, any>
   nodeEnv: string
+  cypressInternalEnv: string
 }
 
 /**
@@ -121,6 +125,8 @@ export type ProcessScriptOpts = {
   entryPoint: string
 
   nodeEnv: string
+  cypressInternalEnv: string
+
   supportTypeScript: boolean
 
   integrityCheckSource: string | undefined
