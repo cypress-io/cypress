@@ -12,7 +12,7 @@ getAccessibilityResults({
   } = results
   const { total } = summary.violationCounts
 
-  console.log(`Received ${summary.isPartialReport ? 'partial' : ''} results for run #${runNumber}.`).
+  console.log(`Received ${summary.isPartialReport ? 'partial' : ''} results for run #${runNumber}.`)
   console.log(`See full report at ${accessibilityReportUrl}.`)
 
   // write your logic to conditionally fail based on the results
