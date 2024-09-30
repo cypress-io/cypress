@@ -2687,6 +2687,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
     - get-accessibility-results:
+        context: test-runner:cypress-record-key
         requires:
           - run-app-component-tests-chrome
           - run-frontend-shared-component-tests-chrome
