@@ -437,4 +437,68 @@ describe('makeWebpackConfig', () => {
       })
     })
   })
+
+  describe('experimentalJustInTimeCompile', () => {
+    let devServerConfig: WebpackDevServerConfig
+
+    const WEBPACK_MATRIX: {
+      webpack: 4 | 5
+      wds: 3 | 4 | 5
+    }[] = [
+      {
+        webpack: 4,
+        wds: 3,
+      },
+      {
+        webpack: 4,
+        wds: 4,
+      },
+      {
+        webpack: 5,
+        wds: 4,
+      },
+      {
+        webpack: 5,
+        wds: 5,
+      },
+    ]
+
+    beforeEach(() => {
+      devServerConfig = {
+        specs: [],
+        cypressConfig: {
+          projectRoot: '.',
+          devServerPublicPathRoute: '/test-public-path',
+          experimentalJustInTimeCompile: true,
+          baseUrl: null,
+        } as Cypress.PluginConfigOptions,
+        webpackConfig: {
+          entry: { main: 'src/index.js' },
+        },
+        devServerEvents: new EventEmitter(),
+      }
+    })
+
+    WEBPACK_MATRIX.forEach(({ webpack, wds }) => {
+      describe(`webpack: v${webpack} with webpack-dev-server v${wds}`, () => {
+        describe('run mode', () => {
+          beforeEach(() => {
+            devServerConfig.cypressConfig.isTextTerminal = true
+          })
+
+          it('enables watching', async () => {
+            const actual = await makeWebpackConfig({
+              devServerConfig,
+              sourceWebpackModulesResult: createModuleMatrixResult({
+                webpack,
+                webpackDevServer: wds,
+              }),
+            })
+
+            expect(actual.watchOptions?.ignored).to.deep.equal(/node_modules/)
+          })
+        })
+      })
+    })
+  })
 })

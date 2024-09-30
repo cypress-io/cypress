@@ -12,7 +12,7 @@ import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
 import { HttpError } from '../network/http_error'
-import { SystemError } from '../network/system_error'
+import { printProtocolUploadError } from './print_protocol_upload_error'
 
 const debug = Debug('cypress:server:cloud:artifacts')
 
@@ -230,20 +230,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
       const error = postUploadProtocolFatalError.error
 
-      debug('protocol error: %O', error)
-      if ((error as AggregateError).errors) {
-        // eslint-disable-next-line no-console
-        console.log('')
-        errors.warning('CLOUD_PROTOCOL_UPLOAD_AGGREGATE_ERROR', postUploadProtocolFatalError.error as AggregateError)
-      } else if (HttpError.isHttpError(error)) {
-        // eslint-disable-next-line no-console
-        console.log('')
-        errors.warning('CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE', error)
-      } else if (SystemError.isSystemError(error)) {
-        // eslint-disable-next-line no-console
-        console.log('')
-        errors.warning('CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE', error)
-      }
+      printProtocolUploadError(error)
     }
 
     // there is no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error

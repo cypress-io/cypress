@@ -26,7 +26,7 @@ yarn workspace @packages/launcher test
 
 ## Debugging
 
-Uses [debug](https://github.com/visionmedia/debug#readme)
+Uses [debug](https://github.com/debug-js/debug#readme)
 to output debug log messages. To turn on, use
 
 ```sh

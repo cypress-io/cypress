@@ -445,7 +445,9 @@ export = {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
+    debug('attaching crash handler to target ', pageCriClient.targetId)
     pageCriClient.on('Target.targetCrashed', async (event) => {
+      debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
         return
       }
