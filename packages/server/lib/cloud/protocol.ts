@@ -26,6 +26,8 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export const DB_SIZE_LIMIT = 5000000000
 
+export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
+
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
     200 : DB_SIZE_LIMIT
@@ -320,7 +322,12 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
+        this._protocol.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : DEFAULT_STREAM_SAMPLING_INTERVAL
+
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)
 
       return {
         fileSize,

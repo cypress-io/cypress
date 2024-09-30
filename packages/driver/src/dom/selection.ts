@@ -335,7 +335,20 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
     // on an input, instead of moving the cursor
     // we want to perform the native browser action
     // which is to increment the step/interval
-    if ($elements.isInputType(el, 'number')) {
+
+    const validInputTypes = [
+      'number',
+      'datetime-local',
+      'date',
+      'time',
+      'week',
+      'month',
+      'range',
+    ]
+
+    let check = validInputTypes.some((type) => $elements.isInputType(el, type))
+
+    if (check) {
       if (up) {
         if (typeof el.stepUp === 'function') {
           const changeEvent = new Event('change')

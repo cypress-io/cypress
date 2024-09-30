@@ -10,7 +10,8 @@ import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
-import { createWebsocket, getRunnerConfigFromWindow } from './runner'
+import { createWebsocket } from './runner'
+import { getRunnerConfigFromWindow } from './runner/get-runner-config-from-window'
 import { telemetry } from '@packages/telemetry/src/browser'
 
 // Grab the time just before loading config to include that in the cypress:app span

@@ -1305,54 +1305,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('100{enter}')
         .should('have.value', '100')
       })
-
-      context('can utilize up and down arrow keys', () => {
-        beforeEach(() => {
-          cy.get('#number-with-value').then(($input) => $input.val(1))
-        })
-
-        it('can utilize {upArrow}', () => {
-          cy.get('#number-with-value')
-          .type('{upArrow}')
-          .should('have.value', 2)
-        })
-
-        it('{upArrow} triggers events on input', () => {
-          cy.get('#number-with-value')
-          .then(($input) => {
-            $input.on('change', cy.spy().as('spyChange'))
-            $input.on('input', cy.spy().as('spyInput'))
-
-            return $input
-          })
-          .type('{upArrow}')
-
-          cy.get('@spyInput').should('have.been.calledOnce')
-          cy.get('@spyChange').should('have.been.calledOnce')
-        })
-
-        it('can utilize {downArrow}', () => {
-          cy.get('#number-with-value').then(($input) => $input.val(1))
-
-          cy.get('#number-with-value')
-          .type('{downArrow}')
-          .should('have.value', 0)
-        })
-
-        it('{downArrow} triggers events on input', () => {
-          cy.get('#number-with-value')
-          .then(($input) => {
-            $input.on('change', cy.spy().as('spyChange'))
-            $input.on('input', cy.spy().as('spyInput'))
-
-            return $input
-          })
-          .type('{downArrow}')
-
-          cy.get('@spyChange').should('have.been.calledOnce')
-          cy.get('@spyInput').should('have.been.calledOnce')
-        })
-      })
     })
 
     describe('input[type=email]', () => {
@@ -1554,25 +1506,25 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/2613
     describe('input[type=datetime-local]', () => {
       it('can change values', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       // https://github.com/cypress-io/cypress/issues/22884
       it('can use seconds', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13').should('have.value', '1959-09-13T10:12:13')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:12:13').should('have.value', '1959-09-13T10:12:13')
       })
 
       it('can use fractions of a second', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:12:13.456').should('have.value', '1959-09-13T10:12:13.456')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:12:13.456').should('have.value', '1959-09-13T10:12:13.456')
       })
 
       it('overwrites existing value', () => {
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05')
-        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('#datetime-local-without-value').invoke('val', '2016-01-01T05:05')
+        cy.get('#datetime-local-without-value').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('errors when invalid datetime', (done) => {
@@ -1582,7 +1534,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           done()
         })
 
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13')
+        cy.get('#datetime-local-without-value').invoke('val', '2016-01-01T05:05').type('1959-09-13')
       })
     })
 
@@ -3203,6 +3155,318 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get('@input').focus().type('asdf')
 
       cy.get('@clickSpy').should('not.have.been.called')
+    })
+  })
+
+  describe('{upArrow} and {downArrow}', () => {
+    before(() => {
+      cy.visit('fixtures/dom.html')
+    })
+
+    context('input[type=date]', () => {
+      if (Cypress.isBrowser(['!webkit'])) {
+        it('{upArrow} increases day by 1', () => {
+          cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
+          cy.get('#date-without-value').type('{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-02')
+        })
+
+        it('{downArrow} decreases day by 1', () => {
+          cy.get('#date-without-value').then(($input) => $input.val('2000-01-01'))
+          cy.get('#date-without-value').type('{downArrow}')
+          cy.get('#date-without-value').should('have.value', '1999-12-31')
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#date-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#date-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
+    })
+
+    context('input[type=month]', () => {
+      // month inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/month#browser_compatibility
+      if (Cypress.isBrowser(['!webkit', '!firefox'])) {
+        it('{upArrow} increases month by 1', () => {
+          cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
+          cy.get('#month-without-value').type('{upArrow}')
+          cy.get('#month-without-value').should('have.value', '2000-02')
+        })
+
+        it('{downArrow} decreases month by 1', () => {
+          cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
+          cy.get('#month-without-value').type('{downArrow}')
+          cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#month-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#month-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
+    })
+
+    context('input[type=week]', () => {
+      // week inputs are not supported in Safari and Firefox: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/week#browser_compatibility
+      if (Cypress.isBrowser(['!webkit', '!firefox'])) {
+        it('{upArrow} increases week by 1', () => {
+          cy.get('#week-without-value').then(($input) => $input.val('2017-W05'))
+          cy.get('#week-without-value').type('{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W06')
+        })
+
+        it('{downArrow} decreases week by 1', () => {
+          cy.get('#week-without-value').then(($input) => $input.val('2017-W05'))
+          cy.get('#week-without-value').type('{downArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W04')
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#week-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#number-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
+    })
+
+    context('input[type=time]', () => {
+      // In Playwright Webkit implementation, these are shown as plain text input
+      if (!isWebKit) {
+        it('{upArrow} increases minute by 1', () => {
+          cy.get('#time-without-value').then(($input) => $input.val('01:23'))
+          cy.get('#time-without-value').type('{upArrow}')
+          cy.get('#time-without-value').should('have.value', '01:24')
+        })
+
+        it('{downArrow} decreases minute by 1', () => {
+          cy.get('#time-without-value').then(($input) => $input.val('01:23'))
+          cy.get('#time-without-value').type('{downArrow}')
+          cy.get('#time-without-value').should('have.value', '01:22')
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#time-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#time-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
+    })
+
+    context('input[type=datetime-local]', () => {
+      // In Playwright Webkit implementation, these are shown as plain text input
+      if (!isWebKit) {
+        it('{upArrow} increases time value', () => {
+          cy.get('#datetime-local-without-value').type('{upArrow}')
+        })
+
+        it('{downArrow} decreases time value', () => {
+          cy.get('#datetime-local-without-value').type('{downArrow}')
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#datetime-local-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#datetime-local-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
+    })
+
+    context('input[type=number]', () => {
+      it('{upArrow} increases number value', () => {
+        cy.get('#number-without-value').then(($input) => $input.val(0))
+        cy.get('#number-without-value').type('{upArrow}')
+        cy.get('#number-without-value').should('have.value', 1)
+      })
+
+      it('{downArrow} decreases number value', () => {
+        cy.get('#number-without-value').then(($input) => $input.val(1))
+        cy.get('#number-without-value').type('{downArrow}')
+        cy.get('#number-without-value').should('have.value', 0)
+      })
+
+      it('{upArrow} triggers events on input', () => {
+        cy.get('#number-with-value')
+        .then(($input) => {
+          $input.on('change', cy.spy().as('spyChange'))
+          $input.on('input', cy.spy().as('spyInput'))
+
+          return $input
+        })
+        .type('{upArrow}')
+
+        cy.get('@spyInput').should('have.been.calledOnce')
+        cy.get('@spyChange').should('have.been.calledOnce')
+      })
+
+      it('{downArrow} triggers events on input', () => {
+        cy.get('#number-with-value')
+        .then(($input) => {
+          $input.on('change', cy.spy().as('spyChange'))
+          $input.on('input', cy.spy().as('spyInput'))
+
+          return $input
+        })
+        .type('{downArrow}')
+
+        cy.get('@spyChange').should('have.been.calledOnce')
+        cy.get('@spyInput').should('have.been.calledOnce')
+      })
+    })
+
+    context('input[type=range]', () => {
+      if (!isWebKit) {
+        it('{upArrow} increases value by 1', () => {
+          cy.get('#range-without-value').then(($input) => $input.val(1))
+          cy.get('#range-without-value').type('{upArrow}')
+          cy.get('#range-without-value').should('have.value', 2)
+        })
+
+        it('{downArrow} decreases value by 1', () => {
+          cy.get('#range-without-value').then(($input) => $input.val(1))
+          cy.get('#range-without-value').type('{downArrow}')
+          cy.get('#range-without-value').should('have.value', 0)
+        })
+
+        it('{upArrow} triggers events on input', () => {
+          cy.get('#range-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{upArrow}')
+
+          cy.get('@spyInput').should('have.been.calledOnce')
+          cy.get('@spyChange').should('have.been.calledOnce')
+        })
+
+        it('{downArrow} triggers events on input', () => {
+          cy.get('#range-with-value')
+          .then(($input) => {
+            $input.on('change', cy.spy().as('spyChange'))
+            $input.on('input', cy.spy().as('spyInput'))
+
+            return $input
+          })
+          .type('{downArrow}')
+
+          cy.get('@spyChange').should('have.been.calledOnce')
+          cy.get('@spyInput').should('have.been.calledOnce')
+        })
+      }
     })
   })
 })
