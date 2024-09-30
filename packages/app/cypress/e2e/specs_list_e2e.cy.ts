@@ -120,7 +120,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item-link').contains('dom-content.spec.js').click()
 
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
-      cy.findByText('Your tests are loading...').should('not.be.visible')
+      cy.get('.runnable-loading-title', { timeout: 4000 }).should('not.be.exist')
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').contains('dom-content.spec.js')

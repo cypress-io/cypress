@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.01.1
+
+_Released 10/31/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where "isVisible" is incorrectly assessed for the absolutely positioned elements if the ancestor has overflow and static position [#29689](https://github.com/cypress-io/cypress/pull/29689).
+
 ## 13.15.0
 
 _Released 9/25/2024_
