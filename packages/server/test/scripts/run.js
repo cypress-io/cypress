@@ -167,12 +167,12 @@ console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)
 
-const child = execa.shell(cmd, { env, stdio: 'inherit' })
+const child = execa(cmd, { shell: true, env, stdio: 'inherit' })
 
-child.on('exit', (code, signal) => {
+child.on('exit', (exitCode, signal) => {
   if (signal) {
     console.error(`tests exited with signal ${signal}`)
   }
 
-  process.exit(code === null ? 1 : code)
+  process.exit(exitCode === null ? 1 : exitCode)
 })

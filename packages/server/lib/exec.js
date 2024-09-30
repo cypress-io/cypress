@@ -32,15 +32,21 @@ module.exports = {
       log('and is running command:', options.cmd)
       log('in folder:', projectRoot)
 
-      return execa.shell(cmd, { cwd, env, shell })
+      return execa(cmd, { cwd, env, shell })
       .then((result) => {
         // do we want to return all fields returned by execa?
         result.shell = shell
         result.cmd = cmd
+        result.code = result.exitCode
 
         return result
       }).then(pickMainProps)
-      .catch(pickMainProps) // transform rejection into an object
+      .catch((result) => {
+        result.code = result.exitCode
+
+        return result
+      })
+      .then(pickMainProps) // transform rejection into an object
       .then(trimStdio)
     }
 
