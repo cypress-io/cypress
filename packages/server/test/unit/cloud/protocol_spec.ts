@@ -90,9 +90,20 @@ describe('lib/cloud/protocol', () => {
       },
     ]
 
-    protocolManager.beforeSpec({
+    const spec = {
       instanceId: 'instanceId',
-    })
+      absolute: '/path/to/spec',
+      relative: 'spec',
+      relativeToCommonRoot: 'common/root',
+      specFileExtension: '.ts',
+      fileExtension: '.ts',
+      specType: 'integration' as Cypress.CypressSpecType,
+      baseName: 'spec',
+      name: 'spec',
+      fileName: 'spec.ts',
+    }
+
+    protocolManager.beforeSpec(spec)
 
     expect((protocolManager as any)._errors).to.be.empty
 
@@ -101,6 +112,7 @@ describe('lib/cloud/protocol', () => {
       archivePath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.tar'),
       dbPath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'),
       db: mockDb,
+      spec,
     })
 
     expect(mockDatabase).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {

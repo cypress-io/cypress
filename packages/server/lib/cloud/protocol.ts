@@ -14,7 +14,7 @@ import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, SpecWithRelativeRoot } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -133,7 +133,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('addRunnables', { isEssential: true }, runnables)
   }
 
-  beforeSpec (spec: { instanceId: string }) {
+  beforeSpec (spec: SpecWithRelativeRoot & { instanceId: string }) {
     this._afterSpecDurations = undefined
 
     if (!this._protocol) {
@@ -157,7 +157,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  private _beforeSpec (spec: { instanceId: string }) {
+  private _beforeSpec (spec: SpecWithRelativeRoot & { instanceId: string }) {
     this._instanceId = spec.instanceId
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
@@ -172,7 +172,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._archivePath = archivePath
-    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db, spec })
   }
 
   async afterSpec () {
