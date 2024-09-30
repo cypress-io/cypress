@@ -482,15 +482,19 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
-  launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
-  for (const pref in launchOptions.preferences) {
-    const value = launchOptions.preferences[pref]
+  const xulStorePath = path.join(profile.path(), 'xulstore.json')
 
-    profile.setPreference(pref, value)
+  // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
+  if (!await fs.pathExists(xulStorePath)) {
+    // this causes the browser to launch maximized, which chrome does by default
+    // otherwise an arbitrary size will be picked for the window size
+    // this will not have an effect after first launch in 'interactive' mode
+    const sizemode = 'maximized'
+
+    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
   }
 
-  // TODO: fix this - synchronous FS operation
-  profile.updatePreferences()
+  launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
 
   const userCSSPath = path.join(profileDir, 'chrome')
 
@@ -553,6 +557,22 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
   }
 
+  /**
+   * To set the profile, we use the profile capabilities in firefoxOptions which
+   * requires the profile to be base64 encoded. The profile will be copied over to whatever
+   * profile is created by geckodriver stemming from the root profile path.
+   *
+   * For example, if the profileRoot in geckodriver is /usr/foo/firefox-stable/run-12345, the new webdriver session
+   * will take the base64 encoded profile contents we created in /usr/foo/firefox-stable/run-12345/* (via firefox-profile npm package) and
+   * copy it to a profile created in the profile root, which would look something like /usr/foo/firefox-stable/run-12345/rust_mozprofile<HASH>/*
+   * @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+   */
+  const base64EncodedProfile = await new Promise<string>((resolve, reject) => {
+    profile.encoded(function (err, encodedProfile) {
+      err ? reject(err) : resolve(encodedProfile)
+    })
+  })
+
   const newSessionCapabilities: RemoteConfig = {
     logLevel: Debug.enabled(WEBDRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'info' : 'silent',
     capabilities: {
@@ -561,6 +581,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         acceptInsecureCerts: true,
         // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
         'moz:firefoxOptions': {
+          profile: base64EncodedProfile,
           binary: browser.path,
           args: launchOptions.args,
           prefs: launchOptions.preferences,
@@ -621,14 +642,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     // makes it so get getRemoteDebuggingPort() is calculated correctly
     process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
-
-    // maximize the window if running headful and no width or height args are provided.
-    // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
-    // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
-    // a base 64 encoded profile.
-    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
-      await webdriverClient.maximizeWindow()
-    }
 
     // install the browser extensions
     await Promise.all(_.map(launchOptions.extensions, async (path) => {

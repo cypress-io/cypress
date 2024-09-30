@@ -174,7 +174,19 @@ describe('lib/browsers/firefox', () => {
       plugins.execute.resolves(null)
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.type', 1)
+
+      expect(webdriver.newSession).to.have.been.calledWith(sinon.match({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'network.proxy.type': 1,
+              },
+            },
+          },
+          firstMatch: [],
+        },
+      }))
     })
 
     it('uses default preferences if before:browser:launch returns object with non-object preferences', async function () {
@@ -184,7 +196,19 @@ describe('lib/browsers/firefox', () => {
       })
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.type', 1)
+
+      expect(webdriver.newSession).to.have.been.calledWith(sinon.match({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'network.proxy.type': 1,
+              },
+            },
+          },
+          firstMatch: [],
+        },
+      }))
     })
 
     it('sets preferences if returned by before:browser:launch', async function () {
@@ -195,7 +219,18 @@ describe('lib/browsers/firefox', () => {
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('foo', 'bar')
+      expect(webdriver.newSession).to.have.been.calledWith(sinon.match({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'foo': 'bar',
+              },
+            },
+          },
+          firstMatch: [],
+        },
+      }))
     })
 
     it('creates the WebDriver session and geckodriver instance through capabilities, installs the extension, and passes the correct port to CDP', async function () {
@@ -327,31 +362,23 @@ describe('lib/browsers/firefox', () => {
       expect(wdInstance.maximizeWindow).not.to.have.been.called
     })
 
-    it('does not maximize the browser if "-width" or "-height" arg is set', async function () {
-      this.browser.isHeadless = false
-      sinon.stub(utils, 'executeBeforeBrowserLaunch').resolves({
-        args: ['-width', '1280', '-height', '720'],
-        extensions: [],
-        preferences: {},
-      })
-
-      await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(wdInstance.maximizeWindow).not.to.have.been.called
-    })
-
-    it('maximizes the browser if headed and no "-width" or "-height" arg is set', async function () {
-      this.browser.isHeadless = false
-
-      await firefox.open(this.browser, 'http://', this.options, this.automation)
-
-      expect(wdInstance.maximizeWindow).to.have.been.called
-    })
-
     it('sets user-agent preference if specified', async function () {
       this.options.userAgent = 'User Agent'
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('general.useragent.override', 'User Agent')
+
+      expect(webdriver.newSession).to.have.been.calledWith(sinon.match({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'general.useragent.override': 'User Agent',
+              },
+            },
+          },
+          firstMatch: [],
+        },
+      }))
     })
 
     it('writes extension', async function () {
@@ -402,12 +429,22 @@ describe('lib/browsers/firefox', () => {
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.http', 'proxy-server')
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.ssl', 'proxy-server')
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.http_port', 1234)
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.ssl_port', 1234)
-
-      expect(FirefoxProfile.prototype.setPreference).to.be.calledWith('network.proxy.no_proxies_on')
+      expect(webdriver.newSession).to.have.been.calledWith(sinon.match({
+        capabilities: {
+          alwaysMatch: {
+            'moz:firefoxOptions': {
+              prefs: {
+                'network.proxy.http': 'proxy-server',
+                'network.proxy.ssl': 'proxy-server',
+                'network.proxy.http_port': 1234,
+                'network.proxy.ssl_port': 1234,
+                'network.proxy.no_proxies_on': '',
+              },
+            },
+          },
+          firstMatch: [],
+        },
+      }))
     })
 
     it('does not set proxy-related preferences if not specified', async function () {
@@ -454,11 +491,6 @@ describe('lib/browsers/firefox', () => {
       }), this.options)
     })
 
-    it('updates the preferences', async function () {
-      await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(FirefoxProfile.prototype.updatePreferences).to.be.called
-    })
-
     it('resolves the browser instance as an event emitter', async function () {
       const result = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
@@ -480,6 +512,14 @@ describe('lib/browsers/firefox', () => {
       expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
         'xulstore.json': '[foo xulstore.json]',
         'chrome': { 'userChrome.css': '[foo userChrome.css]' },
+      })
+    })
+
+    it('creates xulstore.json if not exist', async function () {
+      await firefox.open(this.browser, 'http://', this.options, this.automation)
+      // @ts-ignore
+      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
+        'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
       })
     })
 
