@@ -1451,7 +1451,7 @@ jobs:
       - run:
           name: Verify Accessibility Results
           command: |
-            node ./scripts/verify-accessibility-results.js
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node ./scripts/verify-accessibility-results.js
 
   ready-to-release:
     <<: *defaults
