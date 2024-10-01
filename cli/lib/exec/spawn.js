@@ -11,6 +11,7 @@ const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
 const errors = require('../errors')
+const readline = require('readline')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
@@ -235,6 +236,21 @@ module.exports = {
         child.on('close', resolveOn('close'))
         child.on('exit', resolveOn('exit'))
         child.on('error', reject)
+
+        if (isPlatform('win32')) {
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          })
+
+          // on windows, SIGINT does not propagate to the child process when ctrl+c is pressed
+          // this makes sure all nested processes are closed(ex: firefox inside the server)
+          rl.on('SIGINT', function () {
+            let kill = require('tree-kill')
+
+            kill(child.pid, 'SIGINT')
+          })
+        }
 
         // if stdio options is set to 'pipe', then
         //   we should set up pipes:
