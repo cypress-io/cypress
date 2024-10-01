@@ -8,7 +8,7 @@ import chokidar from 'chokidar'
 import path from 'path'
 import pDefer from 'p-defer'
 import fs from 'fs-extra'
-import { DevActions } from '@packages/data-context/src/actions/DevActions'
+import { DevActions } from '../../../packages/data-context/src/actions/DevActions'
 
 import { monorepoPaths } from '../monorepoPaths'
 import { ENV_VARS } from '../gulpConstants'
