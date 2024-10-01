@@ -73,7 +73,7 @@ index 05e55cc..9ea546e 100644
 +          name: "path",
            type: "string",
 -          description: "base64 string of the add on file",
-+          description: "string of the add on file",
++          description: "path to the extension",
            required: true
          },
          {

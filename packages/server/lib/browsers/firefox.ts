@@ -607,8 +607,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     const WD = WebDriver.getWebDriverPackage()
 
     // this command starts the webdriver session and actually opens the browser
-    // to debug geckodriver, set the DEBUG=cypress-verbose:server:browsers:geckodriver (debugs a third-party patched package geckodriver)
-    // @see ./WEB_DRIVER.md
+    // to debug geckodriver, set the DEBUG=cypress-verbose:server:browsers:geckodriver (debugs a third-party patched package geckodriver to enable console output)
+    // to debug webdriver, set the DEBUG=cypress-verbose:server:browsers:webdriver (debugs a third-party patched package webdriver to enable console output)
+    // @see ./firefox_automation.md
     const webdriverClient = await WD.newSession(newSessionCapabilities)
 
     debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
