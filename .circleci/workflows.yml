@@ -76,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'misc/remove_marionette_for_geckodriver', << pipeline.git.branch >> ]
+    - equal: [ 'chore/archive_fail', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -313,12 +313,9 @@ commands:
           keys:
             - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
       - run:
-          name: Bail if specific cache exists
+          name: Bail if cache exists
           command: |
-            if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
-              echo "No updates to system tests node modules, exiting"
-              circleci-agent step halt
-            fi
+            echo "foo"
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
