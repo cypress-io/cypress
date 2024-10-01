@@ -5,6 +5,10 @@ _Released 12/3/2024 (PENDING)_
 
 **Breaking Changes:**
 
+**Bugfixes:**
+
+- Fixed an issue where overflow: clip in parent html node make child node visibility not correctly detected. Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852). Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778).
+
 ## 13.15.1
 
 _Released 10/1/2024 (PENDING)_

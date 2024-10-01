@@ -193,6 +193,12 @@ const elHasDisplayInline = ($el) => {
   return $el.css('display') === 'inline'
 }
 
+const elHasOverflowClip = function ($el) {
+  const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
+
+  return cssOverflow.includes('clip')
+}
+
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
@@ -370,7 +376,8 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
+  if ((elHasOverflowHidden($parent) || elHasOverflowClip($parent))
+     && elHasNoEffectiveWidthOrHeight($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
@@ -386,8 +393,8 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
     return false
   }
 
-  // if we have overflow hidden and no effective width or height
-  if (elHasOverflowHidden($el) && elHasNoEffectiveWidthOrHeight($el)) {
+  // if we have overflow hidden or clip and no effective width or height
+  if ((elHasOverflowHidden($el) || elHasOverflowClip($el)) && elHasNoEffectiveWidthOrHeight($el)) {
     return $el
   }
 
@@ -532,7 +539,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     width = elOffsetWidth($parent)
     height = elOffsetHeight($parent)
 
-    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` or \`overflow: clip\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   // nested else --___________--
