@@ -1443,6 +1443,11 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - run: |
+          if [[ -z MAIN_RECORD_KEY ]]; then
+            # skip for contributor PRs since we don't record to the cloud
+            circleci-agent step halt
+          fi
       - restore_cached_workspace
       - run:
           name: Install extract-cloud-results package
@@ -3029,7 +3034,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         type: approval
         requires:
           - build
-
+    # get-accessibility-results is required for status checks, however, it will be skipped for contributors so it
+    # can run in any order
+    - get-accessibility-results
     - check-ts:
         requires:
           - build
