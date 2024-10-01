@@ -1134,7 +1134,7 @@ describe('visual error templates', () => {
         default: ['spec', '1', 'spec must be a string or comma-separated list'],
       }
     },
-    FIREFOX_MARIONETTE_FAILURE: () => {
+    FIREFOX_GECKODRIVER_FAILURE: () => {
       const err = makeErr()
 
       return {
