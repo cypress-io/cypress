@@ -2691,14 +2691,25 @@ linux-x64-workflow: &linux-x64-workflow
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
+    # Cypress run must be completed to fetch Accessibility report
     - verify-accessibility-results:
         context: test-runner:cypress-record-key
         requires:
+          - reporter-integration-tests
           - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
           - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-tests-webkit
+          - driver-integration-memory-tests
     - lint-types:
         requires:
           - build
