@@ -457,7 +457,7 @@ const util = {
     `
   },
 
-  _cachedArch: undefined,
+  _cachedArch: process.env.CYPRESS_ARCH,
 
   /**
    * Attempt to return the real system arch (not process.arch, which is only the Node binary's arch)
