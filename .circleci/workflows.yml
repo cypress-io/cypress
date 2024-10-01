@@ -1439,7 +1439,7 @@ jobs:
             yarn percy build:finalize || yarn percy build:finalize
 
   # verify accessibility scores from Cypress
-  get-accessibility-results:
+  verify-accessibility-results:
     <<: *defaults
     resource_class: small
     steps:
@@ -2691,7 +2691,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
-    - get-accessibility-results:
+    - verify-accessibility-results:
         context: test-runner:cypress-record-key
         requires:
           - run-app-component-tests-chrome
@@ -3034,9 +3034,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         type: approval
         requires:
           - build
-    # get-accessibility-results is required for status checks, however, it will be skipped for contributors so it
+    # verify-accessibility-results is required for status checks, however, it will be skipped for contributors so it
     # can run in any order
-    - get-accessibility-results
+    - verify-accessibility-results
     - check-ts:
         requires:
           - build
