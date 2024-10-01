@@ -1619,7 +1619,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    it('can modify the request body', function () {
+    it('can modify the request body', function (done) {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only', function (req) {
@@ -1630,15 +1630,17 @@ describe('network stubbing', { retries: 15 }, function () {
       }).then(function () {
         $.post('/post-only', 'quuz').done((responseText) => {
           expect(responseText).to.contain(body)
+
+          done()
         })
       })
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23422
-    it('can add a body to a request that does not have one', { retries: 15 }, function () {
+    it('can add a body to a request that does not have one', { retries: 15 }, function (done) {
       const body = '{"foo":"bar"}'
 
-      cy.intercept('/post-only', function (req) {
+      cy.intercept('/post-only*', function (req) {
         expect(req.body).to.eq('')
         expect(req.method).to.eq('GET')
         req.method = 'POST'
@@ -1646,8 +1648,9 @@ describe('network stubbing', { retries: 15 }, function () {
 
         req.body = body
       }).then(function () {
-        $.get('/post-only').done((responseText) => {
+        $.get('/post-only').then((responseText) => {
           expect(responseText).to.contain(body)
+          done()
         })
       })
     })

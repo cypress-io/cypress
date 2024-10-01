@@ -7,6 +7,9 @@ const tty = require('tty')
 const path = require('path')
 const EE = require('events')
 const mockedEnv = require('mocked-env')
+const readline = require('readline')
+const proxyquire = require('proxyquire')
+
 const debug = require('debug')('test')
 
 const state = require(`${lib}/tasks/state`)
@@ -22,6 +25,7 @@ const execPath = process.execPath
 const nodeVersion = process.versions.node
 
 const defaultBinaryDir = '/default/binary/dir'
+let mockReadlineEE
 
 describe('lib/exec/spawn', function () {
   beforeEach(function () {
@@ -49,8 +53,11 @@ describe('lib/exec/spawn', function () {
 
     // process.stdin is both an event emitter and a readable stream
     this.processStdin = new EE()
+    mockReadlineEE = new EE()
+
     this.processStdin.pipe = sinon.stub().returns(undefined)
     sinon.stub(process, 'stdin').value(this.processStdin)
+    sinon.stub(readline, 'createInterface').returns(mockReadlineEE)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -121,7 +128,6 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
-          '--ozone-platform-hint=auto',
           '--',
           '--foo',
           '--cwd',
@@ -149,7 +155,6 @@ describe('lib/exec/spawn', function () {
         const args = cp.spawn.firstCall.args.slice(0, 2)
         // it is important for "--no-sandbox" to appear before "--" separator
         const expectedCliArgs = [
-          '--ozone-platform-hint=auto',
           '--no-sandbox',
           '--',
           '--foo',
@@ -175,7 +180,6 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
-          '--ozone-platform-hint=auto',
           '--',
           '--foo',
           '--cwd',
@@ -201,7 +205,6 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
-          '--ozone-platform-hint=auto',
           '--',
           '--foo',
           '--cwd',
@@ -389,6 +392,22 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
       })
+    })
+
+    it('propagates treeKill if SIGINT is detected in windows console', async function () {
+      this.spawnedProcess.pid = 7
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      os.platform.returns('win32')
+
+      const treeKillMock = sinon.stub().returns(0)
+
+      const spawn = proxyquire(`${lib}/exec/spawn`, { 'tree-kill': treeKillMock })
+
+      await spawn.start([], { env: {} })
+
+      mockReadlineEE.emit('SIGINT')
+      expect(treeKillMock).to.have.been.calledWith(7, 'SIGINT')
     })
 
     it('does not set windowsHide property when in darwin', function () {

@@ -59,7 +59,7 @@ This will stop developers on Windows from running `yarn clean` unless they are s
 ```json
 { 
   "devDependencies": {
-    "rimraf": "3.0.2",
+    "rimraf": "5.0.10"
   },
   "scripts": {
     "clean": "rimraf '**/*.js'"
