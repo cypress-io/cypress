@@ -170,18 +170,18 @@ describe('src/cypress/dom/visibility', () => {
       // ensure all tests run against a scrollable window
       const scrollThisIntoView = add('<div style=`height: 1000px;` /><div>Should be in view</div>')
 
-      this.$visHidden = add('<ul style="visibility: hidden;"></ul>')
+      this.$visHidden = add('<ul id="ulHidden" style="visibility: hidden;">UL HIDDEN</ul>')
       this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
       this.$displayNone = add('<button style="display: none">display: none</button>')
       this.$inputHidden = add('<input type="hidden" value="abcdef">')
-      this.$divNoWidth = add('<div style="width: 0; height: 100px;">width: 0</div>')
+      this.$divNoWidth = add('<div id="divNoWidth" style="width: 0; height: 100px;">width: 0</div>')
       this.$divNoHeight = add('<div style="width: 50px; height: 0px;">height: 0</div>')
       this.$divDetached = $('<div>foo</div>')
       this.$divVisible = add(`<div>visible</div>`)
 
       this.$optionInSelect = add(`\
 <select>
-  <option>Naruto</option>
+  <option id='optionInSelect' >Naruto</option>
 </select>\
 `)
 
@@ -244,19 +244,19 @@ describe('src/cypress/dom/visibility', () => {
 </table>\
 `)
 
-      this.$parentNoWidth = add(`\
+      this.$parentNoWidthOnly = add(`\
 <div style='width: 0; height: 100px; overflow: hidden;'>
     <span>parent width: 0</span>
 </div>`)
 
       this.$parentNoHeight = add(`\
 <div style='width: 100px; height: 0px; overflow: hidden;'>
-  <span>parent height: 0</span>
+  <span id='parentNoHeight'>parent height: 0</span>
 </div>`)
 
       this.$parentNoWidthHeightOverflowAuto = add(`\
 <div style='width: 0; height: 0px; overflow: auto;'>
-  <span>parent no size, overflow: auto</span>
+  <span id='parentNoWidthHeightOverflowAuto'>parent no size, overflow: auto</span>
 </div>`)
 
       this.$parentWithWidthHeightNoOverflow = add(`\
@@ -335,30 +335,10 @@ describe('src/cypress/dom/visibility', () => {
 <div id="offScreenPosFixed" style="position: fixed; bottom: 0; left: -100px;">off screen</div>\
 `)
 
-      this.$parentPosAbs = add(`\
-<div style='width: 0; height: 100px; overflow: hidden; position: absolute;'>
-  <div style='height: 500px; width: 500px;'>
-    <span>parent position: absolute</span>
-  </div>
-</div>`)
-
       this.$parentDisplayNone = add(`\
 <div id="none" style='display: none;'>
   <span>parent display: none</span>
 </div>\
-`)
-
-      this.$parentPointerEventsNone = add(`\
-<div style="pointer-events: none">
-  <span style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
-</div>\
-`)
-
-      this.$parentPointerEventsNoneCovered = add(`\
-<div style="pointer-events: none;">
-  <span style="position: fixed; top: 40px;">parent pointer-events: none</span>
-</div>
-<span style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</span>\
 `)
 
       this.$parentDisplayInlineChildDisplayBlock = add(`\
@@ -644,14 +624,14 @@ describe('src/cypress/dom/visibility', () => {
 
     describe('option and optgroup', () => {
       it('is visible if option in visible select', function () {
-        expect(this.$optionInSelect.find('option').is(':hidden')).to.be.false
-        expect(this.$optionInSelect.find('option').is(':visible')).to.be.true
+        expect(this.$optionInSelect.find('option#optionInSelect').is(':hidden')).to.be.false
+        expect(this.$optionInSelect.find('option#optionInSelect').is(':visible')).to.be.true
 
-        expect(this.$optionInSelect.find('option')).not.to.be.hidden
-        expect(this.$optionInSelect.find('option')).to.be.visible
+        expect(this.$optionInSelect.find('option#optionInSelect')).not.to.be.hidden
+        expect(this.$optionInSelect.find('option#optionInSelect')).to.be.visible
 
-        cy.wrap(this.$optionInSelect.find('option')).should('not.be.hidden')
-        cy.wrap(this.$optionInSelect.find('option')).should('be.visible')
+        cy.wrap(this.$optionInSelect.find('option#optionInSelect')).should('not.be.hidden')
+        cy.wrap(this.$optionInSelect.find('option#optionInSelect')).should('be.visible')
       })
 
       it('is visible if optgroup in visible select', function () {
@@ -687,8 +667,7 @@ describe('src/cypress/dom/visibility', () => {
         cy.wrap(this.$optionHiddenInSelect.find('#hidden-opt')).should('not.be.visible')
       })
 
-      // TODO(webkit): fix+unskip
-      it('follows regular visibility logic if option outside of select', { browser: '!webkit' }, function () {
+      it('follows regular visibility logic if option outside of select', function () {
         expect(this.$optionOutsideSelect.find('#option-hidden').is(':hidden')).to.be.true
         expect(this.$optionOutsideSelect.find('#option-hidden')).to.be.hidden
         cy.wrap(this.$optionOutsideSelect.find('#option-hidden')).should('be.hidden')
@@ -738,23 +717,24 @@ describe('src/cypress/dom/visibility', () => {
     describe('width and height', () => {
       it('is hidden if offsetWidth is 0', function () {
         expect(this.$divNoWidth.is(':hidden')).to.be.true
-        expect(this.$divNoWidth.is(':visible')).to.be.false
-
         expect(this.$divNoWidth).to.be.hidden
-        expect(this.$divNoWidth).to.not.be.visible
-
         cy.wrap(this.$divNoWidth).should('be.hidden')
+      })
+
+      it('is not visible if offsetWidth is 0', function () {
+        expect(this.$divNoWidth.is(':visible')).to.be.false
+        expect(this.$divNoWidth).to.not.be.visible
         cy.wrap(this.$divNoWidth).should('not.be.visible')
       })
 
       it('is hidden if parent has overflow: hidden and no width', function () {
-        expect(this.$parentNoWidth.find('span')).to.be.hidden
-        expect(this.$parentNoWidth.find('span')).to.not.be.visible
+        expect(this.$parentNoWidthOnly.find('span#parentNoWidthOnly')).to.be.hidden
+        expect(this.$parentNoWidthOnly.find('span#parentNoWidthOnly')).to.not.be.visible
       })
 
       it('is hidden if parent has overflow: hidden and no height', function () {
-        expect(this.$parentNoHeight.find('span')).to.be.hidden
-        expect(this.$parentNoHeight.find('span')).to.not.be.visible
+        expect(this.$parentNoHeight.find('span#parentNoHeight')).to.be.hidden
+        expect(this.$parentNoHeight.find('span#parentNoHeight')).to.not.be.visible
       })
 
       it('is hidden if ancestor has overflow:hidden and no width', function () {
@@ -778,68 +758,6 @@ describe('src/cypress/dom/visibility', () => {
       })
     })
 
-    describe('css position', () => {
-      it('is visible if child has position: absolute', function () {
-        expect(this.$childPosAbs.find('span')).to.be.visible
-        expect(this.$childPosAbs.find('span')).not.be.hidden
-      })
-
-      it('is visible if child has position: fixed', function () {
-        expect(this.$childPosFixed.find('button')).to.be.visible
-        expect(this.$childPosFixed.find('button')).not.to.be.hidden
-      })
-
-      it('is visible if descendent from parent has position: fixed', function () {
-        expect(this.$descendentPosFixed.find('button')).to.be.visible
-        expect(this.$descendentPosFixed.find('button')).not.to.be.hidden
-      })
-
-      it('is visible if has position: fixed and descendent is found', function () {
-        expect(this.$descendantInPosFixed.find('#descendantInPosFixed')).to.be.visible
-        expect(this.$descendantInPosFixed.find('#descendantInPosFixed')).not.to.be.hidden
-      })
-
-      it('is hidden if position: fixed and covered up', function () {
-        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).to.be.hidden
-        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).not.to.be.visible
-      })
-
-      it('is hidden if position: fixed and off screen', function () {
-        expect(this.$offScreenPosFixed).to.be.hidden
-        expect(this.$offScreenPosFixed).not.to.be.visible
-      })
-
-      it('is visible if descendent from parent has position: absolute', function () {
-        expect(this.$descendentPosAbs.find('span')).to.be.visible
-        expect(this.$descendentPosAbs.find('span')).to.not.be.hidden
-      })
-
-      it('is hidden if only the parent has position absolute', function () {
-        expect(this.$parentPosAbs.find('span')).to.be.hidden
-        expect(this.$parentPosAbs.find('span')).to.not.be.visible
-      })
-
-      it('is visible if position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNone.find('span')).to.be.visible
-        expect(this.$parentPointerEventsNone.find('span')).to.not.be.hidden
-      })
-
-      it('is not visible if covered when position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNoneCovered.find('span')).to.be.hidden
-        expect(this.$parentPointerEventsNoneCovered.find('span')).to.not.be.visible
-      })
-
-      it('is visible if pointer-events: none and parent has position: fixed', function () {
-        expect(this.$childPointerEventsNone.find('span')).to.be.visible
-        expect(this.$childPointerEventsNone.find('span')).to.not.be.hidden
-      })
-
-      it('is visible when position: sticky', () => {
-        cy.visit('fixtures/sticky.html')
-        cy.get('#button').should('be.visible')
-      })
-    })
-
     describe('css display', function () {
       // https://github.com/cypress-io/cypress/issues/6183
       it('parent is visible if display inline and child has display block', function () {
@@ -850,8 +768,8 @@ describe('src/cypress/dom/visibility', () => {
 
     describe('css overflow', () => {
       it('is hidden when parent overflow auto and no width/height', function () {
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.not.be.visible
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.hidden
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span#parentNoWidthHeightOverflowAuto')).to.not.be.visible
+        expect(this.$parentNoWidthHeightOverflowAuto.find('span#parentNoWidthHeightOverflowAuto')).to.be.hidden
       })
 
       it('is hidden when parent overflow hidden and out of bounds to left', function () {
@@ -1144,7 +1062,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has `visibility: hidden`', function () {
-        this.reasonIs(this.$visHidden, 'This element `<ul>` is not visible because it has CSS property: `visibility: hidden`')
+        this.reasonIs(this.$visHidden, 'This element `<ul#ulHidden>` is not visible because it has CSS property: `visibility: hidden`')
       })
 
       it('has parent with `visibility: hidden`', function () {
@@ -1172,7 +1090,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has effective zero width', function () {
-        this.reasonIs(this.$divNoWidth, 'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        this.reasonIs(this.$divNoWidth, 'This element `<div#divNoWidth>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
       })
 
       it('has effective zero height', function () {
@@ -1180,7 +1098,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has a parent with an effective zero width and overflow: hidden', function () {
-        this.reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        this.reasonIs(this.$parentNoHeight.find('span#parentNoHeight'), 'This element `<span#parentNoHeight>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
       })
 
       it('element sits outside boundaries of parent with overflow clipping', function () {

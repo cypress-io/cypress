@@ -5,6 +5,12 @@ _Released 12/3/2024 (PENDING)_
 
 **Breaking Changes:**
 
+- Visibility checks are no longer inverse of element 'is.hidden' checks. Element now can be visible, but still not interactable. Use 'is.hidden' to make sure element can be used.
+
+**Bugfixes:**
+
+- Change visibility check to use checkVisibility browser API. Fixed in [#29741](https://github.com/cypress-io/cypress/pull/29741).
+
 ## 13.15.1
 
 _Released 10/1/2024 (PENDING)_

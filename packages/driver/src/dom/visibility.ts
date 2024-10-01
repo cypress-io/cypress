@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $jquery from './jquery'
 import $document from './document'
 import $elements from './elements'
@@ -10,19 +9,76 @@ const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstPare
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
-
-const isVisible = (el) => {
-  return !isHidden(el, 'isVisible()')
+const { wrap } = $jquery
+let optionsObject = {
+  checkOpacity: true,
+  checkVisibilityCSS: true,
+  opacityProperty: true,
+  contentVisibilityAuto: true,
 }
 
-const { wrap } = $jquery
+const isVisible = (el) => {
+  ensureEl(el, 'isVisible()')
 
+  if (checkIsOption(el) === true) {
+    return isOptionVisible(el)
+  }
+
+  if (!(typeof el.checkVisibility === 'function')) {
+    return !isHidden(el, 'isVisible()')
+  }
+
+  // the body and html are always visible
+  if (isBody(el) || isHTML(el)) {
+    return true // is visible
+  }
+
+  if (isStrictlyNotVisible(el)) {
+    return false
+  }
+
+  if (typeof el.checkVisibility === 'function') {
+    return el.checkVisibility(optionsObject) && !isNotVisibleBecauseOfAncestors(el)
+  }
+
+  return isHiddenByAncestors(el, 'isVisible', optionsObject)
+}
+
+const checkIsOption = (el) => {
+  // an option is considered visible if its parent select is visible
+  if (isOption(el) || isOptgroup(el)) {
+    return true
+  }
+
+  return false
+}
+
+const isOptionVisible = (el: any) => {
+  const $el = $jquery.wrap(el)
+
+  if (elHasDisplayNone($el)) {
+    return false
+  }
+
+  // if its parent select is visible, then it's not hidden
+  const $select = getFirstParentWithTagName($el, 'select')
+
+  if ($select && $select.length) {
+    // if the select is hidden, the options in it are not visible too
+    if (isStrictlyHidden($select)) {
+      return false
+    }
+  }
+
+  return true
+}
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
-const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true,
+  contentVisibilityAuto: true }) => {
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
     return true
   }
@@ -98,6 +154,25 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
   return false
 }
 
+const isStrictlyNotVisible = (el) => {
+  const $el = $jquery.wrap(el)
+
+  if (elHasNoEffectiveWidthOrHeight($el)) {
+    // https://github.com/cypress-io/cypress/issues/6183
+    if (elHasDisplayInline($el)) {
+      return !elHasVisibleChild($el)
+    }
+
+    return true // not visible because element has no EffectiveWeightOrHeight
+  }
+
+  if ($transform.detectVisibility($el) !== 'visible') {
+    return true
+  }
+
+  return false
+}
+
 const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true }) => {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
@@ -105,6 +180,26 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el, options.checkOpacity)) {
+    return true // is hidden
+  }
+
+  if (elOrAncestorIsFixedOrSticky($el)) {
+    return elIsNotElementFromPoint($el)
+  }
+
+  // else check if el is outside the bounds
+  // of its ancestors overflow
+  return elIsOutOfBoundsOfAncestorsOverflow($el)
+}
+
+const isNotVisibleBecauseOfAncestors = (el, methodName = 'isNotVisibleBecauseOfAncestors()', options = { checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true,
+  contentVisibilityAuto: true }) => {
+  ensureEl(el, methodName)
+  const $el = $jquery.wrap(el)
+
+  // we do some calculations taking into account the parents
+  // to see if its hidden by a parent
+  if (elIsNotVisibleBecauseOfAncestors($el, options.checkOpacity)) {
     return true // is hidden
   }
 
@@ -378,6 +473,30 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
 
   // continue to recursively walk up the chain until we reach body or html
   return elIsHiddenByAncestors($parent, checkOpacity, $origEl)
+}
+
+const elIsNotVisibleBecauseOfAncestors = function ($el, checkOpacity, $origEl = $el) {
+  // walk up to each parent until we reach the body
+  // if any parent has invisible no other checks are performed
+  // if it is visible we go above
+  const $parent = getParent($el)
+
+  if (isUndefinedOrHTMLBodyDoc($parent)) {
+    return false
+  }
+
+  if (typeof $parent.get(0).checkVisibility !== 'function') {
+    if (elHasOpacityZero($parent) && checkOpacity) {
+      return true
+    }
+  } else {
+    if ($parent.get(0).checkVisibility(optionsObject) === false) {
+      return true
+    }
+  }
+
+  // continue to recursively walk up the chain until we reach body or html
+  return elIsNotVisibleBecauseOfAncestors($parent, checkOpacity, $origEl)
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
