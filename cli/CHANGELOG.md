@@ -5,6 +5,9 @@ _Released 12/3/2024 (PENDING)_
 
 **Breaking Changes:**
 
+- Removed support for Node.js 16 and Node.js 21. Addresses [#29930](https://github.com/cypress-io/cypress/issues/29930).
+- Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
+
 ## 13.15.1
 
 _Released 10/1/2024 (PENDING)_
