@@ -1,11 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.01.1
+## 14.0.0
 
-_Released 10/31/2024 (PENDING)_
+_Released 12/3/2024 (PENDING)_
+
+**Breaking Changes:**
 
 **Bugfixes:**
 
 - Fixed an issue where parent width 0 signal element hidden when it's visible. Fixes [#29687](https://github.com/cypress-io/cypress/issues/29687).
+
+## 13.15.1
+
+_Released 10/1/2024 (PENDING)_
+
+**Misc:**
+
+- Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
 
 ## 13.15.0
 

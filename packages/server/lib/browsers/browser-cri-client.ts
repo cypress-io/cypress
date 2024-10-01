@@ -216,7 +216,7 @@ export class BrowserCriClient {
    *
    * @param {BrowserCriClientCreateOptions} options the options for creating the browser cri client
    * @param options.browserName the display name of the browser being launched
-   * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with GeckoDriver and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @param options.hosts the hosts to which to attempt to connect
    * @param options.onAsynchronousError callback for any cdp fatal errors
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
