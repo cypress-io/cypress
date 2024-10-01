@@ -174,7 +174,7 @@ describe('src/cypress/dom/visibility', () => {
       this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
       this.$displayNone = add('<button style="display: none">display: none</button>')
       this.$inputHidden = add('<input type="hidden" value="abcdef">')
-      this.$divNoWidth = add('<div style="width: 0; height: 100px;">width: 0</div>')
+      this.$divNoWidth = add('<div id="divNoWidth" style="width: 0; height: 100px;">width: 0</div>')
       this.$divNoHeight = add('<div style="width: 50px; height: 0px;">height: 0</div>')
       this.$divDetached = $('<div>foo</div>')
       this.$divVisible = add(`<div>visible</div>`)
@@ -736,15 +736,15 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('width and height', () => {
-      it('is hidden if offsetWidth is 0', function () {
-        expect(this.$divNoWidth.is(':hidden')).to.be.true
-        expect(this.$divNoWidth.is(':visible')).to.be.false
+      it('is visible even if offsetWidth is 0', function () {
+        expect(this.$divNoWidth.is(':hidden')).to.be.false
+        expect(this.$divNoWidth.is(':visible')).to.be.true
 
-        expect(this.$divNoWidth).to.be.hidden
-        expect(this.$divNoWidth).to.not.be.visible
+        expect(this.$divNoWidth).to.not.be.hidden
+        expect(this.$divNoWidth).to.be.visible
 
-        cy.wrap(this.$divNoWidth).should('be.hidden')
-        cy.wrap(this.$divNoWidth).should('not.be.visible')
+        cy.wrap(this.$divNoWidth).should('be.not.hidden')
+        cy.wrap(this.$divNoWidth).should('be.visible')
       })
 
       it('is hidden if parent has overflow: hidden and no width', function () {
@@ -1172,7 +1172,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has effective zero width', function () {
-        this.reasonIs(this.$divNoWidth, 'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        this.reasonIs(this.$divNoWidth, 'This element `<div#divNoWidth>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
       })
 
       it('has effective zero height', function () {

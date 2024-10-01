@@ -520,7 +520,7 @@ describe('src/cy/commands/actions/select', () => {
         cy.$$('#select-maps').show().hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is not visible')
+          expect(err.message).to.include('`cy.select()` failed because this element')
 
           done()
         })

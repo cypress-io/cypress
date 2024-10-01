@@ -5,6 +5,10 @@ _Released 12/3/2024 (PENDING)_
 
 **Breaking Changes:**
 
+**Bugfixes:**
+
+- Fixed an issue where parent width 0 signal element hidden when it's visible. Fixes [#29687](https://github.com/cypress-io/cypress/issues/29687).
+
 ## 13.15.1
 
 _Released 10/1/2024 (PENDING)_
