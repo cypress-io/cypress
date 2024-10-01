@@ -1,11 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.01.0
+## 14.0.0
 
-_Released 10/31/2024 (PENDING)_
+_Released 12/3/2024 (PENDING)_
+
+**Breaking Changes:**
 
 **Bugfixes:**
 
 - Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
+
+## 13.15.1
+
+_Released 10/1/2024 (PENDING)_
+
+**Misc:**
+
+- Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
 
 ## 13.15.0
 
