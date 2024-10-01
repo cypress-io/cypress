@@ -233,7 +233,14 @@ const start = async (options = {}) => {
   const binaryDir = state.getBinaryDir(pkgVersion)
 
   if (!(await validateOS())) {
-    return throwFormErrorText(errors.invalidOS)()
+    if (util.getEnv('CYPRESS_BYPASS_OS_VALIDATION')) {
+      logger.log(
+        stripIndent`
+          ${chalk.yellow('Note:')} OS validation failed, but bypassed. This is unsupported configuration, you are on your own.`,
+      )
+    } else {
+      return throwFormErrorText(errors.invalidOS)()
+    }
   }
 
   await fs.ensureDirAsync(cacheDir)
