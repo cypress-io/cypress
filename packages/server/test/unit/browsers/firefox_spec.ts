@@ -18,7 +18,6 @@ const FirefoxProfile = require('firefox-profile')
 const launch = require('@packages/launcher/lib/browsers')
 const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
-const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
 
 describe('lib/browsers/firefox', () => {
@@ -35,8 +34,6 @@ describe('lib/browsers/firefox', () => {
     mockfs({
       '/path/to/appData/firefox-stable/interactive': {},
     })
-
-    sinon.stub(protocol, '_connectAsync').resolves(null)
 
     this.browserInstance = {
       // should be high enough to not kill any real PIDs
@@ -96,8 +93,6 @@ describe('lib/browsers/firefox', () => {
       }
 
       sinon.stub(process, 'pid').value(1111)
-
-      protocol.foo = 'bar'
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
@@ -432,15 +427,19 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    it('wraps errors when retrying socket fails', async function () {
-      const err = new Error
+    it('wraps errors when failing to connect to firefox (CDP failure)', async function () {
+      const err = new Error('failed to connect to CDP')
 
-      protocol._connectAsync.rejects()
+      // BrowserCriClient.create is stubbed above. restore it and re-stub BrowserCriClient.create
+      // @ts-expect-error
+      BrowserCriClient.create.restore()
+
+      sinon.stub(BrowserCriClient, 'create').rejects(err)
 
       await expect(firefox.open(this.browser, 'http://', this.options, this.automation)).to.be.rejectedWith()
       .then((wrapperErr) => {
         expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
-        expect(wrapperErr.message).to.include(err.message)
+        expect(wrapperErr.details).to.include(err.message)
       })
     })
 
