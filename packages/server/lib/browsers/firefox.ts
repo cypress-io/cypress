@@ -591,6 +591,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         // @ts-expect-error
         'moz:debuggerAddress': true,
         // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
+        // webdriver starts geckodriver with the correct options on behalf of Cypress
         'wdio:geckodriverOptions': geckoDriverOptions,
       },
       firstMatch: [],
