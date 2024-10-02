@@ -57,16 +57,16 @@ async function navigateToUrlClassic (url: string) {
 export default {
   async setup ({
     automation,
-    onError,
     url,
-    remotePort,
     webDriverClassic: wdcInstance,
+    remotePort,
+    onError,
   }: {
     automation: Automation
-    onError?: (err: Error) => void
     url: string
-    remotePort: number
     webDriverClassic: WebDriverClassic
+    remotePort: number
+    onError?: (err: Error) => void
   }): Promise<BrowserCriClient> {
     // set the WebDriver classic instance instantiated from geckodriver
     webDriverClassic = wdcInstance
