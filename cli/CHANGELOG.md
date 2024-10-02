@@ -9,6 +9,10 @@ _Released 10/1/2024 (PENDING)_
 - Cypress now consumes [webdriver](https://github.com/webdriverio/webdriverio/tree/main/packages/webdriver) to help automate the Firefox browser and [firefox-profile](https://github.com/saadtazi/firefox-profile-js) to create a firefox profile and convert it to Base64 to save user screen preferences via `xulstore.json`. Addresses [#30300](https://github.com/cypress-io/cypress/issues/30300) and [#30301](https://github.com/cypress-io/cypress/issues/30301).
 - Pass spec information to protocol's `beforeSpec` to improve troubleshooting when reporting on errors. Addressed in [#30316](https://github.com/cypress-io/cypress/pull/30316).
 
+**Dependency Updates:**
+
+- Updated `simple-git` from `3.16.0` to `3.25.0`. Addressed in [#30076](https://github.com/cypress-io/cypress/pull/30076).
+
 ## 13.15.0
 
 _Released 9/25/2024_
