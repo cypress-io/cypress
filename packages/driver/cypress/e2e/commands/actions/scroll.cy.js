@@ -28,9 +28,9 @@ describe('src/cy/commands/actions/scroll', () => {
       this.scrollBoth.scrollTop = 0
       this.scrollBoth.scrollLeft = 0
 
-      // width/height of scrollable container - width of parent viewport (minux scrollbars) / 2 to get the center
+      // width/height of scrollable container - width of parent viewport (without scrollbars) / 2 to get the center
       // browsers round up the pixel value so we need to round it
-      this.halfScrollPixels = Math.round((500 - 100) / 2)
+      this.halfScrollPixels = Math.round((500 - 85) / 2)
     })
 
     describe('subject', () => {
