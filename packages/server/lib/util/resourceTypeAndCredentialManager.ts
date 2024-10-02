@@ -19,8 +19,8 @@ const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMa
 
 class ResourceTypeAndCredentialManagerClass {
   get (url: string, optionalResourceType?: ResourceType): {
-    resourceType: ResourceType
-    credentialStatus: RequestCredentialLevel
+    resourceType?: ResourceType
+    credentialStatus?: RequestCredentialLevel
   } {
     const hashKey = hashUrl(url)
 
@@ -36,6 +36,11 @@ class ResourceTypeAndCredentialManagerClass {
       // remove item from queue
       value = credentialsObj?.shift()
       debug(`credential value found ${value}`)
+    } else {
+      return {
+        resourceType: optionalResourceType,
+        credentialStatus: undefined,
+      }
     }
 
     // if value is undefined for any reason, apply defaults and assume xhr if no optionalResourceType
