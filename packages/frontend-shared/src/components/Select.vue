@@ -144,9 +144,6 @@
                 </span>
               </div>
             </ListboxOption>
-            <li role="option">
-              <slot name="footer" />
-            </li>
           </ListboxOptions>
         </transition>
       </div>
