@@ -381,10 +381,6 @@ export default (Commands, Cypress, cy, state) => {
             axis: options.axis,
             easing: options.easing,
             duration: options.duration,
-            // TODO: ensureScrollable option does not exist on jQuery or config/jquery.scrollto.ts.
-            // It can be removed.
-            // @ts-ignore
-            ensureScrollable: options.ensureScrollable,
             done () {
               return resolve(options.$el)
             },
