@@ -15,7 +15,7 @@ describe('<FileMatchInput />', () => {
     }
 
     cy.mount(() => (<div class="p-12">
-      <FileMatchInput modelValue={inputText.value} {...methods} />
+      <FileMatchInput aria-label="search for file" modelValue={inputText.value} {...methods} />
     </div>))
     .get('input[type=search]').should('have.value', initialText)
     .clear().type(newText)
