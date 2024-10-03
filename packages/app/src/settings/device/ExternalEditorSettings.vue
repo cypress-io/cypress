@@ -1,6 +1,9 @@
 <template>
   <SettingsSection>
-    <template #title>
+    <template
+      id="choose-editor-label"
+      #title
+    >
       {{ t('settingsPage.editor.title') }}
     </template>
     <template #description>
@@ -10,6 +13,7 @@
     <ChooseExternalEditor
       v-if="props.gql.localSettings"
       :gql="props.gql"
+      label-id="choose-editor-label"
       @chose-editor="handleChoseEditor"
     />
   </SettingsSection>

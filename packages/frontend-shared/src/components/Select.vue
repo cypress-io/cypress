@@ -5,8 +5,14 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="font-medium text-sm text-gray-800 block">
-        <template v-if="label">
+      <ListboxLabel
+        id="select-label"
+        class="font-medium text-sm text-gray-800 block"
+      >
+        <template
+          v-if="label"
+          id="labelId"
+        >
           {{ label }}
         </template>
         <slot
@@ -72,6 +78,7 @@
           leave-to-class="opacity-0"
         >
           <ListboxOptions
+            :aria-labelledby="labelId"
             class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none"
           >
             <ListboxOption
@@ -116,7 +123,6 @@
                     {{ get(option, itemValue || '') }}
                   </slot>
                 </span>
-
                 <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
@@ -171,6 +177,7 @@ const props = withDefaults(defineProps<{
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string
+  labelId: string
   /**
    * The value of the modelValue to render. `value` by default
    */
@@ -183,6 +190,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
+  labelId: undefined,
   itemValue: 'value',
   modelValue: undefined,
   itemKey: 'key',

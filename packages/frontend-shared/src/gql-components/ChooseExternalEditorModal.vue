@@ -15,7 +15,7 @@
       <div>
         <p class="font-normal text-sm text-gray-600 select-none">
           <slot name="description">
-            <span>{{ t("globalPage.externalEditorPreferencesDescription1") }}</span>
+            <span id="choose-editor-label">{{ t("globalPage.externalEditorPreferencesDescription1") }}</span>
           </slot>
         </p>
         <p class="font-normal text-sm text-gray-600 select-none">
@@ -36,6 +36,7 @@
       >
         <ChooseExternalEditor
           :gql="props.gql"
+          label-id="choose-editor-label"
           @chose-editor="val => preferredEditor = val ?? ''"
         />
       </div>

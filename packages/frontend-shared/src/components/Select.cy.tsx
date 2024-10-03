@@ -35,9 +35,11 @@ const mountSelect = (props: any = {}) => {
   // a click on the body dismisses the options
   return cy.mount(() => (
     <div class="p-12 w-[300px]">
+      <label id="mock-label">Mock Label</label>
       <Select
         options={defaultOptions}
         modelValue={value}
+        labelId="mock-label"
         {...props}
         v-slots={props.vSlots}
       />
