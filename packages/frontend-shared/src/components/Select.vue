@@ -144,6 +144,12 @@
                 </span>
               </div>
             </ListboxOption>
+            <li
+              v-if="$slots.footer"
+              role="option"
+            >
+              <slot name="footer" />
+            </li>
           </ListboxOptions>
         </transition>
       </div>

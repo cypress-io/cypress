@@ -45,7 +45,7 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-[12px]"
-          :aria-label="t('components.fileSearch.byFilenameInput') in search"
+          :aria-label="t('components.fileSearch.byExtensionInputLabel')"
           :placeholder="t('components.fileSearch.byExtensionInput')"
         />
         <FileMatchInput
