@@ -8,6 +8,8 @@ _Released 12/3/2024 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Cypress incorrectly uses the box model of elements that have display:contents when determining visibility of child elements. Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
+- Removed support for Node.js 16 and Node.js 21. Addresses [#29930](https://github.com/cypress-io/cypress/issues/29930).
+- Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
 
 ## 13.15.1
 
@@ -16,6 +18,11 @@ _Released 10/1/2024 (PENDING)_
 **Misc:**
 
 - Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
+- Pass spec information to protocol's `beforeSpec` to improve troubleshooting when reporting on errors. Addressed in [#30316](https://github.com/cypress-io/cypress/pull/30316).
+
+**Dependency Updates:**
+
+- Updated `simple-git` from `3.16.0` to `3.25.0`. Addressed in [#30076](https://github.com/cypress-io/cypress/pull/30076).
 
 ## 13.15.0
 
