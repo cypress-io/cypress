@@ -16,7 +16,7 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
         return (
           <div class="p-[16px]">
             <label id="example-label">Mock Choose Editor</label>
-            <ChooseExternalEditor gql={gql} label-id="example-label" />
+            <ChooseExternalEditor gql={gql} labelId="example-label" />
           </div>
         )
       },

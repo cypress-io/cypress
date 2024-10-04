@@ -13,7 +13,7 @@ describe('<Switch />', () => {
           value={valueRef.value}
           // @ts-ignore
           onUpdate={(newVal) => (valueRef.value = newVal)}
-          label-id="test-switch"
+          labelId="test-switch"
         />
       </div>
     ))

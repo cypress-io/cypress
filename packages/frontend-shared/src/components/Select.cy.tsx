@@ -167,6 +167,8 @@ describe('<Select />', () => {
             'onUpdate:modelValue': (value: any) => this.model = value,
             options: defaultOptions,
             placeholder: 'A placeholder',
+            label: 'Pick a color',
+            'label-id': 'label',
           })
         },
       }).then(() => {

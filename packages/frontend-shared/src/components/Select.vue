@@ -5,10 +5,12 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="font-medium text-sm text-gray-800 block">
+      <ListboxLabel
+        :id="label ? labelId : ''"
+        class="font-medium text-sm text-gray-800 block"
+      >
         <template
           v-if="label"
-          id="labelId"
         >
           {{ label }}
         </template>
