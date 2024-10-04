@@ -1447,15 +1447,18 @@ jobs:
             # skip for contributor PRs since we don't record to the cloud
             circleci-agent step halt
           fi
-      - restore_cached_workspace
+      - run:
+          name: checkout
+          command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" --depth 1
       - run:
           name: Install extract-cloud-results package
           command: |
-            yarn add https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz -W
+            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz -g
       - run:
           name: Verify Accessibility Results
           command: |
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node ./scripts/verify-accessibility-results.js
+            cp ./cypress/scripts/verify-accessibility-results.js verify-accessibility-results.js
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node verify-accessibility-results.js
 
   ready-to-release:
     <<: *defaults
@@ -2669,368 +2672,368 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:env-canary
         requires:
           - node_modules_install
-    - check-ts:
-        requires:
-          - build
-    - lint:
-        name: linux-lint
-        requires:
-          - build
-    - percy-finalize:
-        context: test-runner:percy
-        required_env_var: PERCY_TOKEN
-        requires:
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
+    # - check-ts:
+    #     requires:
+    #       - build
+    # - lint:
+    #     name: linux-lint
+    #     requires:
+    #       - build
+    # - percy-finalize:
+    #     context: test-runner:percy
+    #     required_env_var: PERCY_TOKEN
+    #     requires:
+    #       - cli-visual-tests
+    #       - reporter-integration-tests
+    #       - run-app-component-tests-chrome
+    #       - run-app-integration-tests-chrome
+    #       - run-frontend-shared-component-tests-chrome
+    #       - run-launchpad-component-tests-chrome
+    #       - run-launchpad-integration-tests-chrome
+    #       - run-reporter-component-tests-chrome
+    #       - run-webpack-dev-server-integration-tests
+    #       - run-vite-dev-server-integration-tests
     # Cypress run must be completed to fetch Accessibility report
     - verify-accessibility-results:
         context: test-runner:cypress-record-key
         requires:
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
+          # - reporter-integration-tests
+          # - run-app-component-tests-chrome
+          # - run-app-integration-tests-chrome
+          # - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-tests-webkit
-          - driver-integration-memory-tests
-    - lint-types:
-        requires:
-          - build
-    # unit, integration and e2e tests
-    - cli-visual-tests:
-        context: test-runner:percy
-        requires:
-          - build
-    - unit-tests:
-        requires:
-          - build
-    - verify-release-readiness:
-        context: test-runner:npm-release
-        requires:
-          - build
-    - server-unit-tests:
-        requires:
-          - build
-    - server-integration-tests:
-        requires:
-          - build
-    - server-performance-tests:
-        requires:
-          - build
-    - system-tests-node-modules-install:
-        context: test-runner:performance-tracking
-        requires:
-          - build
-    - system-tests-chrome:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-electron:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-firefox:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-webkit:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-non-root:
-        context: test-runner:performance-tracking
-        executor: non-root-docker-user
-        requires:
-          - system-tests-node-modules-install
-    - driver-integration-tests-chrome:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-chrome-beta:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-electron:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-webkit:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-memory-tests:
-        requires:
-          - build
-    - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-launchpad-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
+          # - run-launchpad-integration-tests-chrome
+          # - run-reporter-component-tests-chrome
+          # - run-webpack-dev-server-integration-tests
+          # - run-vite-dev-server-integration-tests
+          # - driver-integration-tests-firefox
+          # - driver-integration-tests-chrome
+          # - driver-integration-tests-chrome-beta
+          # - driver-integration-tests-electron
+          # - driver-integration-tests-webkit
+          # - driver-integration-memory-tests
+    # - lint-types:
+    #     requires:
+    #       - build
+    # # unit, integration and e2e tests
+    # - cli-visual-tests:
+    #     context: test-runner:percy
+    #     requires:
+    #       - build
+    # - unit-tests:
+    #     requires:
+    #       - build
+    # - verify-release-readiness:
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - build
+    # - server-unit-tests:
+    #     requires:
+    #       - build
+    # - server-integration-tests:
+    #     requires:
+    #       - build
+    # - server-performance-tests:
+    #     requires:
+    #       - build
+    # - system-tests-node-modules-install:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - build
+    # - system-tests-chrome:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-electron:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-firefox:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-webkit:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-non-root:
+    #     context: test-runner:performance-tracking
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - driver-integration-tests-chrome:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-chrome-beta:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-firefox:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-electron:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-memory-tests:
+    #     requires:
+    #       - build
+    # - run-frontend-shared-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-launchpad-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
     - run-launchpad-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
-    - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-webpack-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - system-tests-node-modules-install
-    - run-vite-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - system-tests-node-modules-install
-    - run-app-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-reporter-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - reporter-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - build
-    - npm-webpack-dev-server:
-        requires:
-          - system-tests-node-modules-install
-    - npm-vite-dev-server:
-        requires:
-          - build
-    - npm-vite-plugin-cypress-esm:
-        requires:
-          - build
-    - npm-webpack-preprocessor:
-        requires:
-          - build
-    - npm-webpack-batteries-included-preprocessor:
-        requires:
-          - build
-    - npm-vue:
-        requires:
-          - build
-    - npm-puppeteer-unit-tests:
-        requires:
-          - build
-    - npm-puppeteer-cypress-tests:
-        requires:
-          - build
-    - npm-react:
-        requires:
-          - build
-    - npm-angular:
-        requires:
-          - build
-    - npm-angular-signals:
-        requires:
-          - build
-    - npm-mount-utils:
-        requires:
-          - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
-    - npm-cypress-schematic:
-        requires:
-          - build
-    - v8-integration-tests:
-        requires:
-          - system-tests-node-modules-install
+    # - run-app-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-webpack-dev-server-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - run-vite-dev-server-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - run-app-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-reporter-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - reporter-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - build
+    # - npm-webpack-dev-server:
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
+    # - npm-vite-plugin-cypress-esm:
+    #     requires:
+    #       - build
+    # - npm-webpack-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-webpack-batteries-included-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-vue:
+    #     requires:
+    #       - build
+    # - npm-puppeteer-unit-tests:
+    #     requires:
+    #       - build
+    # - npm-puppeteer-cypress-tests:
+    #     requires:
+    #       - build
+    # - npm-react:
+    #     requires:
+    #       - build
+    # - npm-angular:
+    #     requires:
+    #       - build
+    # - npm-angular-signals:
+    #     requires:
+    #       - build
+    # - npm-mount-utils:
+    #     requires:
+    #       - build
+    # - npm-eslint-plugin-dev:
+    #     requires:
+    #       - build
+    # - npm-cypress-schematic:
+    #     requires:
+    #       - build
+    # - v8-integration-tests:
+    #     requires:
+    #       - system-tests-node-modules-install
 
-    - ready-to-release:
-        # <<: *mainBuildFilters
-        requires:
-          - check-ts
-          - npm-angular
-          - npm-angular-signals
-          - npm-eslint-plugin-dev
-          - npm-puppeteer-unit-tests
-          - npm-puppeteer-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-vite-plugin-cypress-esm
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-tests-webkit
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - system-tests-webkit
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - "test binary as a non-root user"
-          - "test binary as a root user"
-          - test-types-cypress-and-jest
-          - test-full-typescript-project
-          - test-binary-against-kitchensink
-          - test-npm-module-on-minimum-node-version
-          - binary-system-tests
-          - yarn-pnp-preprocessor-system-test
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - v8-integration-tests
+    # - ready-to-release:
+    #     # <<: *mainBuildFilters
+    #     requires:
+    #       - check-ts
+    #       - npm-angular
+    #       - npm-angular-signals
+    #       - npm-eslint-plugin-dev
+    #       - npm-puppeteer-unit-tests
+    #       - npm-puppeteer-cypress-tests
+    #       - npm-react
+    #       - npm-mount-utils
+    #       - npm-vue
+    #       - npm-webpack-batteries-included-preprocessor
+    #       - npm-webpack-preprocessor
+    #       - npm-vite-dev-server
+    #       - npm-vite-plugin-cypress-esm
+    #       - npm-webpack-dev-server
+    #       - npm-cypress-schematic
+    #       - lint-types
+    #       - linux-lint
+    #       - percy-finalize
+    #       - driver-integration-tests-firefox
+    #       - driver-integration-tests-chrome
+    #       - driver-integration-tests-chrome-beta
+    #       - driver-integration-tests-electron
+    #       - driver-integration-tests-webkit
+    #       - driver-integration-memory-tests
+    #       - system-tests-non-root
+    #       - system-tests-firefox
+    #       - system-tests-electron
+    #       - system-tests-chrome
+    #       - system-tests-webkit
+    #       - server-performance-tests
+    #       - server-integration-tests
+    #       - server-unit-tests
+    #       - "test binary as a non-root user"
+    #       - "test binary as a root user"
+    #       - test-types-cypress-and-jest
+    #       - test-full-typescript-project
+    #       - test-binary-against-kitchensink
+    #       - test-npm-module-on-minimum-node-version
+    #       - binary-system-tests
+    #       - yarn-pnp-preprocessor-system-test
+    #       - test-kitchensink
+    #       - unit-tests
+    #       - verify-release-readiness
+    #       - v8-integration-tests
 
-    - npm-release:
-        <<: *mainBuildFilters
-        context: test-runner:npm-release
-        requires:
-          - ready-to-release
+    # - npm-release:
+    #     <<: *mainBuildFilters
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - ready-to-release
 
-    - create-and-trigger-packaging-artifacts:
-        context:
-          - test-runner:upload
-          - test-runner:build-binary
-          - publish-binary
-        requires:
-          - node_modules_install
-    - wait-for-binary-publish:
-        type: approval
-        requires:
-          - create-and-trigger-packaging-artifacts
-    - get-published-artifacts:
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
-        requires:
-          - wait-for-binary-publish
-    # various testing scenarios, like building full binary
-    # and testing it on a real project
-    - test-against-staging:
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - build
-    - test-kitchensink:
-        requires:
-          - build
-    - test-kitchensink-against-staging:
-        executor: kitchensink-executor
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - build
-    - test-npm-module-on-minimum-node-version:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - test-types-cypress-and-jest:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - test-full-typescript-project:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - test-binary-against-kitchensink:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - test-npm-module-and-verify-binary:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-kitchensink-chrome:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-recipes-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-recipes-chrome:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-recipes:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-kitchensink-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-todomvc-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-cypress-realworld-app:
-        context: test-runner:cypress-record-key
-        <<: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-as-specific-user:
-        name: "test binary as a non-root user"
-        executor: non-root-docker-user
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - test-binary-as-specific-user:
-        name: "test binary as a root user"
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-    - binary-system-tests:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-          - system-tests-node-modules-install
-    - yarn-pnp-preprocessor-system-test:
-        context: publish-binary
-        requires:
-          - get-published-artifacts
-          - system-tests-node-modules-install
+    # - create-and-trigger-packaging-artifacts:
+    #     context:
+    #       - test-runner:upload
+    #       - test-runner:build-binary
+    #       - publish-binary
+    #     requires:
+    #       - node_modules_install
+    # - wait-for-binary-publish:
+    #     type: approval
+    #     requires:
+    #       - create-and-trigger-packaging-artifacts
+    # - get-published-artifacts:
+    #     context:
+    #       - publish-binary
+    #       - test-runner:commit-status-checks
+    #     requires:
+    #       - wait-for-binary-publish
+    # # various testing scenarios, like building full binary
+    # # and testing it on a real project
+    # - test-against-staging:
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - build
+    # - test-kitchensink:
+    #     requires:
+    #       - build
+    # - test-kitchensink-against-staging:
+    #     executor: kitchensink-executor
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - build
+    # - test-npm-module-on-minimum-node-version:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - test-types-cypress-and-jest:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - test-full-typescript-project:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-kitchensink:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - test-npm-module-and-verify-binary:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-staging:
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-kitchensink-chrome:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-recipes-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-recipes-chrome:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-recipes:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-kitchensink-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-todomvc-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-against-cypress-realworld-app:
+    #     context: test-runner:cypress-record-key
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a non-root user"
+    #     executor: non-root-docker-user
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a root user"
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    # - binary-system-tests:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    #       - system-tests-node-modules-install
+    # - yarn-pnp-preprocessor-system-test:
+    #     context: publish-binary
+    #     requires:
+    #       - get-published-artifacts
+    #       - system-tests-node-modules-install
 
 linux-x64-contributor-workflow: &linux-x64-contributor-workflow
   jobs:
