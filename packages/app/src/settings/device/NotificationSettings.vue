@@ -32,7 +32,7 @@
 
       <div class="px-[16px] divide-y divide-gray-50">
         <div
-          v-for="({id, title}) in switches"
+          v-for="({id, labelId, title}) in switches"
           :key="id"
           class="py-[16px]"
         >

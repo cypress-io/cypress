@@ -31,6 +31,7 @@
     <div class="rounded border h-[40px] w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
+        :aria-label="t('components.fileSearch.expandToSearchByExtensions')"
         @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
@@ -45,7 +46,7 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-[12px]"
-          :aria-label="t('components.fileSearch.byExtensionInputLabel')"
+          :aria-label="t('components.fileSearch.byExtensionInput')"
           :placeholder="t('components.fileSearch.byExtensionInput')"
         />
         <FileMatchInput

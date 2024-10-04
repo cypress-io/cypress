@@ -1,7 +1,8 @@
 <template>
-  <SettingsSection>
+  <SettingsSection
+    label-id="choose-editor-label"
+  >
     <template
-      id="choose-editor-label"
       #title
     >
       {{ t('settingsPage.editor.title') }}
