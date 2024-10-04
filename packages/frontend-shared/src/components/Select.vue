@@ -5,10 +5,7 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel
-        id="select-label"
-        class="font-medium text-sm text-gray-800 block"
-      >
+      <ListboxLabel class="font-medium text-sm text-gray-800 block">
         <template
           v-if="label"
           id="labelId"

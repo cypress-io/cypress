@@ -10,7 +10,6 @@
         :gql="props.gql"
       >
         <button
-          aria-label="open in IDE"
           class="flex outline-transparent text-indigo-500 gap-[8px] items-center group"
           @click="onClick"
         >

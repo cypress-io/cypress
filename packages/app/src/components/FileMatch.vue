@@ -51,7 +51,7 @@
         <FileMatchInput
           v-else
           v-model="localPattern"
-          :aria-label="t('components.fileSearch.byFilenameInput')"
+          aria-label="Search by filename"
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>
