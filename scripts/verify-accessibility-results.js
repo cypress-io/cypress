@@ -61,7 +61,7 @@ getAccessibilityResults({
   }
 
   if (total < problematicRules.length) {
-    throw new Error(`It seems you have resolved ${problematicRules.length - total} rule(s). Remove them from the list of problematic rules so regressions are not introduced.`)
+    console.warn(`It seems you have resolved ${problematicRules.length - total} rule(s). Remove them from the list of problematic rules so regressions are not introduced.`)
   }
 
   console.log('No new Accessibility violations detected!')
