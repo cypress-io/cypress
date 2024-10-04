@@ -55,7 +55,7 @@
     "is-valid-domain": "0.0.20",
     "is-valid-hostname": "1.0.1",
     "jimp": "0.22.12",
-    "jquery": "3.4.1",
+    "jquery": "3.7.1",
     "js-cookie": "3.0.5",
     "json-stable-stringify": "1.0.1",
     "lodash": "^4.17.21",
