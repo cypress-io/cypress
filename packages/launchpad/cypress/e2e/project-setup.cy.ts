@@ -507,7 +507,7 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
