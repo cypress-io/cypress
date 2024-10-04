@@ -1447,6 +1447,7 @@ jobs:
             # skip for contributor PRs since we don't record to the cloud
             circleci-agent step halt
           fi
+      - update_known_hosts
       - run:
           name: checkout
           command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" --depth 1
