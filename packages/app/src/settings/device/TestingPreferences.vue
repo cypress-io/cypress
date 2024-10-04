@@ -13,6 +13,7 @@
         <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
           <label :id="autoScrollingPreference.id">{{ autoScrollingPreference.title }}</label>
           <Switch
+            id="autoScrollingToggle"
             class="mx-[8px]"
             :value="props.gql.localSettings.preferences[autoScrollingPreference.id] ?? false"
             :label-id="autoScrollingPreference.id"
