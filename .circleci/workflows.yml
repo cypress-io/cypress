@@ -1454,7 +1454,7 @@ jobs:
       - run:
           name: Install extract-cloud-results package
           command: |
-            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz -g
+            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz
       - run:
           name: Verify Accessibility Results
           command: |
