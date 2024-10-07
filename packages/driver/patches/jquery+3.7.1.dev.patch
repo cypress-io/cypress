@@ -1,0 +1,174 @@
+diff --git a/node_modules/jquery/README.md b/node_modules/jquery/README.md
+deleted file mode 100644
+index fcc11f3..0000000
+--- a/node_modules/jquery/README.md
++++ /dev/null
+@@ -1,60 +0,0 @@
+-# jQuery
+-
+-> jQuery is a fast, small, and feature-rich JavaScript library.
+-
+-For information on how to get started and how to use jQuery, please see [jQuery's documentation](https://api.jquery.com/).
+-For source files and issues, please visit the [jQuery repo](https://github.com/jquery/jquery).
+-
+-If upgrading, please see the [blog post for 3.7.1](https://blog.jquery.com/2023/08/28/jquery-3-7-1-released-reliable-table-row-dimensions/). This includes notable differences from the previous version and a more readable changelog.
+-
+-## Including jQuery
+-
+-Below are some of the most common ways to include jQuery.
+-
+-### Browser
+-
+-#### Script tag
+-
+-```html
+-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+-```
+-
+-#### Webpack / Browserify / Babel
+-
+-There are several ways to use [Webpack](https://webpack.js.org/), [Browserify](http://browserify.org/) or [Babel](https://babeljs.io/). For more information on using these tools, please refer to the corresponding project's documentation. In the script, including jQuery will usually look like this:
+-
+-```js
+-import $ from "jquery";
+-```
+-
+-If you need to use jQuery in a file that's not an ECMAScript module, you can use the CommonJS syntax:
+-
+-```js
+-var $ = require( "jquery" );
+-```
+-
+-#### AMD (Asynchronous Module Definition)
+-
+-AMD is a module format built for the browser. For more information, we recommend [require.js' documentation](https://requirejs.org/docs/whyamd.html).
+-
+-```js
+-define( [ "jquery" ], function( $ ) {
+-
+-} );
+-```
+-
+-### Node
+-
+-To include jQuery in [Node](https://nodejs.org/), first install with npm.
+-
+-```sh
+-npm install jquery
+-```
+-
+-For jQuery to work in Node, a window with a document is required. Since no such window exists natively in Node, one can be mocked by tools such as [jsdom](https://github.com/jsdom/jsdom). This can be useful for testing purposes.
+-
+-```js
+-const { JSDOM } = require( "jsdom" );
+-const { window } = new JSDOM( "" );
+-const $ = require( "jquery" )( window );
+-```
+diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
+index 1a86433..c81d521 100644
+--- a/node_modules/jquery/dist/jquery.js
++++ b/node_modules/jquery/dist/jquery.js
+@@ -6365,7 +6365,7 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
+ 
+ 		// Support: IE 9 - 11+, Edge 15 - 18+
+ 		// IE/Edge misreport `getComputedStyle` of table rows with width/height
+-		// set in CSS while `offset*` properties report correct values.
++		// set in CSS while `client*` properties report correct values.
+ 		// Behavior in IE 9 is more subtle than in newer versions & it passes
+ 		// some versions of this test; make sure not to make it pass there!
+ 		//
+@@ -6404,7 +6404,7 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
+ 				trStyle = window.getComputedStyle( tr );
+ 				reliableTrDimensionsVal = ( parseInt( trStyle.height, 10 ) +
+ 					parseInt( trStyle.borderTopWidth, 10 ) +
+-					parseInt( trStyle.borderBottomWidth, 10 ) ) === tr.offsetHeight;
++					parseInt( trStyle.borderBottomWidth, 10 ) ) === tr.clientHeight;
+ 
+ 				documentElement.removeChild( table );
+ 			}
+@@ -6630,16 +6630,16 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+ 	// Account for positive content-box scroll gutter when requested by providing computedVal
+ 	if ( !isBorderBox && computedVal >= 0 ) {
+ 
+-		// offsetWidth/offsetHeight is a rounded sum of content, padding, scroll gutter, and border
++		// clientWidth/clientHeight is a rounded sum of content, padding, scroll gutter, and border
+ 		// Assuming integer scroll gutter, subtract the rest and round down
+ 		delta += Math.max( 0, Math.ceil(
+-			elem[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
++			elem[ "client" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
+ 			computedVal -
+ 			delta -
+ 			extra -
+ 			0.5
+ 
+-		// If offsetWidth/offsetHeight is unknown, then we can't determine content-box scroll gutter
++		// If clientWidth/clientHeight is unknown, then we can't determine content-box scroll gutter
+ 		// Use an explicit zero to avoid NaN (gh-3964)
+ 		) ) || 0;
+ 	}
+@@ -6660,7 +6660,7 @@ function getWidthOrHeight( elem, dimension, extra ) {
+ 		valueIsBorderBox = isBorderBox,
+ 
+ 		val = curCSS( elem, dimension, styles ),
+-		offsetProp = "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 );
++		clientProp = "client" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 );
+ 
+ 	// Support: Firefox <=54
+ 	// Return a confounding non-pixel value or feign ignorance, as appropriate.
+@@ -6673,22 +6673,22 @@ function getWidthOrHeight( elem, dimension, extra ) {
+ 
+ 
+ 	// Support: IE 9 - 11 only
+-	// Use offsetWidth/offsetHeight for when box sizing is unreliable.
++	// Use clientWidth/clientHeight for when box sizing is unreliable.
+ 	// In those cases, the computed value can be trusted to be border-box.
+ 	if ( ( !support.boxSizingReliable() && isBorderBox ||
+ 
+ 		// Support: IE 10 - 11+, Edge 15 - 18+
+ 		// IE/Edge misreport `getComputedStyle` of table rows with width/height
+-		// set in CSS while `offset*` properties report correct values.
++		// set in CSS while `client*` properties report correct values.
+ 		// Interestingly, in some cases IE 9 doesn't suffer from this issue.
+ 		!support.reliableTrDimensions() && nodeName( elem, "tr" ) ||
+ 
+-		// Fall back to offsetWidth/offsetHeight when value is "auto"
++		// Fall back to clientWidth/clientHeight when value is "auto"
+ 		// This happens for inline elements with no explicit setting (gh-3571)
+ 		val === "auto" ||
+ 
+ 		// Support: Android <=4.1 - 4.3 only
+-		// Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
++		// Also use clientWidth/clientHeight for misreported inline dimensions (gh-3602)
+ 		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
+ 
+ 		// Make sure the element is visible & connected
+@@ -6696,12 +6696,12 @@ function getWidthOrHeight( elem, dimension, extra ) {
+ 
+ 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
+ 
+-		// Where available, offsetWidth/offsetHeight approximate border box dimensions.
++		// Where available, clientWidth/clientHeight approximate border box dimensions.
+ 		// Where not available (e.g., SVG), assume unreliable box-sizing and interpret the
+ 		// retrieved value as a content box dimension.
+-		valueIsBorderBox = offsetProp in elem;
++		valueIsBorderBox = clientProp in elem;
+ 		if ( valueIsBorderBox ) {
+-			val = elem[ offsetProp ];
++			val = elem[ clientProp ];
+ 		}
+ 	}
+ 
+@@ -6941,11 +6941,11 @@ jQuery.each( [ "height", "width" ], function( _i, dimension ) {
+ 					) :
+ 					0;
+ 
+-			// Account for unreliable border-box dimensions by comparing offset* to computed and
++			// Account for unreliable border-box dimensions by comparing client* to computed and
+ 			// faking a content-box to get border and padding (gh-3699)
+ 			if ( isBorderBox && scrollboxSizeBuggy ) {
+ 				subtract -= Math.ceil(
+-					elem[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
++					elem[ "client" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
+ 					parseFloat( styles[ dimension ] ) -
+ 					boxModelAdjustment( elem, dimension, "border", false, styles ) -
+ 					0.5
