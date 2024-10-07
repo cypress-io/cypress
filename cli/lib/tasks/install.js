@@ -236,7 +236,8 @@ const start = async (options = {}) => {
     if (util.getEnv('CYPRESS_BYPASS_OS_VALIDATION')) {
       logger.log(
         stripIndent`
-          ${chalk.yellow('Note:')} OS validation failed, but bypassed. This is unsupported configuration, you are on your own.`,
+          ${chalk.yellow('Note:')} OS validation failed, but bypassed. This is unsupported configuration, you are on your own.
+        `,
       )
     } else {
       return throwFormErrorText(errors.invalidOS)()
