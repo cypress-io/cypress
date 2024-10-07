@@ -579,6 +579,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     debug(`CDP running on port ${cdpPort}`)
 
+    if (_.isNaN(cdpPort)) {
+      // There is currently an infrequent issue where the CDP port in system
+      // tests, after being parsed, is returning NaN. To see what is being returned
+      // by the firefox capabilities, we are printing moz:debuggerAddress here in the case NaN occurs.
+      // @see https://github.com/cypress-io/cypress/issues/30352 for more details.
+      // eslint-disable-next-line no-console
+      console.log(`CDP parsed address is NaN. Received CDP address ${capabilities['moz:debuggerAddress']}`)
+    }
+
     const browserPID = capabilities['moz:processID']
 
     debug(`firefox running on pid: ${browserPID}`)
