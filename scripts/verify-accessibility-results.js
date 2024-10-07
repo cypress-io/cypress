@@ -2,6 +2,8 @@ const { getAccessibilityResults } = require('@cypress/extract-cloud-results')
 
 /**
  * The current problematic rules that need to be addressed.
+ * View the Accessibility report for the Cypress run in the Cloud
+ * for more details.
  */
 const problematicRules = [
   'aria-required-children',
@@ -54,8 +56,8 @@ getAccessibilityResults({
   const newRuleViolations = rules.filter((rule) => !problematicRules.includes(rule.name))
 
   if (newRuleViolations.length > 0) {
-    console.log('The following rules were violated that were previously passing:')
-    console.log(newRuleViolations)
+    console.error('The following rules were violated that were previously passing:')
+    console.error(newRuleViolations)
 
     throw new Error(`${newRuleViolations.length} rule regressions were introduced and must be fixed.`)
   }

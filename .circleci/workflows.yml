@@ -1467,7 +1467,7 @@ jobs:
     steps:
       - run: |
           if [[ -z MAIN_RECORD_KEY ]]; then
-            # skip for contributor PRs since we don't record to the cloud
+            echo "skipping for contributor PRs since we don't record to the cloud"
             circleci-agent step halt
           fi
       - update_known_hosts
