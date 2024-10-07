@@ -6,6 +6,7 @@
     <button
       class="flex h-full w-full items-center justify-center"
       data-cy="run-all-specs-button"
+      :aria-label="t('specPage.runSelectedSpecs', specNumber)"
       :disabled="specNumber === 0"
       @click.stop="emits('runAllSpecs')"
     >

@@ -13,6 +13,7 @@
       "noMatchesForFileName": "",
       "byFilenameInput": "Search by filename...",
       "byExtensionInput": "Extensions to include e.g. *.tsx, *.vue",
+      "expandToSearchByExtensions": "Search for files with extensions e.g. *.tsx, *.vue",
       "matchesIndicatorEmptyFileSearch": "No matches | 1 match | { denominator } matches",
       "matchesIndicator": "No matches | {numerator} of {denominator} matches | {numerator} of {denominator} matches"
     },
