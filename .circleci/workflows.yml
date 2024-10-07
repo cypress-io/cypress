@@ -1460,6 +1460,30 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # verify accessibility scores from Cypress
+  verify-accessibility-results:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - run: |
+          if [[ -z MAIN_RECORD_KEY ]]; then
+            echo "skipping for contributor PRs since we don't record to the cloud"
+            circleci-agent step halt
+          fi
+      - update_known_hosts
+      - run:
+          name: checkout
+          command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" --depth 1
+      - run:
+          name: Install extract-cloud-results package
+          command: |
+            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz
+      - run:
+          name: Verify Accessibility Results
+          command: |
+            cp ./cypress/scripts/verify-accessibility-results.js verify-accessibility-results.js
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node verify-accessibility-results.js
+
   ready-to-release:
     <<: *defaults
     resource_class: small
@@ -2739,6 +2763,25 @@ linux-x64-workflow: &linux-x64-workflow
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
+    # Cypress run must be completed to fetch Accessibility report
+    - verify-accessibility-results:
+        context: test-runner:cypress-record-key
+        requires:
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-tests-webkit
+          - driver-integration-memory-tests
     - lint-types:
         requires:
           - build
@@ -3074,7 +3117,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         type: approval
         requires:
           - build
-
+    # verify-accessibility-results is required for status checks, however, it will be skipped for contributors so it
+    # can run in any order
+    - verify-accessibility-results
     - check-ts:
         requires:
           - build
