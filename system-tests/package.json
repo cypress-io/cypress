@@ -47,7 +47,7 @@
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",
     "chalk": "2.4.2",
-    "chokidar": "3.5.1",
+    "chokidar": "3.6.0",
     "common-tags": "1.8.0",
     "compression": "1.7.4",
     "cookie-parser": "1.4.5",
