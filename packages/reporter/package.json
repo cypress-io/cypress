@@ -27,7 +27,7 @@
     "cypress-real-events": "1.6.0",
     "lodash": "^4.17.21",
     "markdown-it": "^14.0.0",
-    "mobx": "5.15.4",
+    "mobx": "5.15.7",
     "mobx-react": "6.1.8",
     "prismjs": "1.27.0",
     "prop-types": "15.7.2",
