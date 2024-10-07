@@ -586,6 +586,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       // @see https://github.com/cypress-io/cypress/issues/30352 for more details.
       // eslint-disable-next-line no-console
       console.log(`CDP parsed address is NaN. Received CDP address ${capabilities['moz:debuggerAddress']}`)
+      // eslint-disable-next-line no-console
+      console.log(`Received capabilities ${JSON.stringify(capabilities)}`)
     }
 
     const browserPID = capabilities['moz:processID']
