@@ -10,6 +10,10 @@ _Released 12/3/2024 (PENDING)_
 - Cypress's jQuery has been updated to now return the width and height excluding scrollbars. This matches jQuery 3.2.0+ behavior and more closely aligns with the CSS box model. `cy.scrollTo()` will now take these new calculations into account when scrolling and will scroll to a more accurate position. Also calls to`Cypress.$().height()` or `Cypress.$().width()` may return different, more correct values due to this change. Addresses [#29846](https://github.com/cypress-io/cypress/issues/29846).
 - The undocumented methods `Cypress.backend('firefox:force:gc')` and `Cypress.backend('log:memory:pressure')` were removed. Addresses [#30222](https://github.com/cypress-io/cypress/issues/30222).
 
+**Dependency Updates:**
+
+- Updated `jQuery` from `3.4.1` to `3.7.1`. Addressed in [#30345](https://github.com/cypress-io/cypress/pull/30345).
+
 ## 13.15.1
 
 _Released 10/1/2024 (PENDING)_
