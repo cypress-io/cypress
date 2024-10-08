@@ -37,7 +37,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('body').click()
 
       cy.findByTestId('playground-activator').click()
-      cy.findByTestId('playground-selector').clear().type('[data-cy-root]')
+      cy.findByTestId('playground-selector').clear()
+      cy.findByTestId('playground-selector').type('[data-cy-root]')
 
       // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       // snapshotAUTPanel('cy.get selector')
