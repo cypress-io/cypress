@@ -36,8 +36,7 @@ describe('src/cy/commands/actions/scroll', () => {
       // divide by 2 to get the center
       // browsers round up the pixel value so we need to round it
       this.halfScroll = Math.round((this.scrollableContainerWidthHeight - this.elementWidthHeight) / 2)
-      this.halfScrollWithScrollbar = Math.round((this.scrollableContainerWidthHeight - (this.elementWidthHeight - this.scrollBarWidthHeight)) / 2)
-      this.fullScrollWithScrollbar = Math.round((this.scrollableContainerWidthHeight - (this.elementWidthHeight - this.scrollBarWidthHeight)))
+      this.fullScroll = Math.round(this.scrollableContainerWidthHeight - this.elementWidthHeight)
     })
 
     describe('subject', () => {
@@ -55,7 +54,9 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('can use window', () => {
         cy.window().scrollTo('10px').then((win) => {
-          expect(win.scrollX).to.eq(10)
+          // Firefox doesn't round this number like other browsers
+          // So we round in the test to get consistent results here
+          expect(Math.round(win.scrollX)).to.eq(10)
         })
       })
 
@@ -118,7 +119,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('top').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScroll)
         })
       })
 
@@ -128,7 +129,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('topRight').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.fullScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.fullScroll)
         })
       })
 
@@ -137,7 +138,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('left').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScroll)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -147,8 +148,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('center').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollWithScrollbar)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScroll)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScroll)
         })
       })
 
@@ -157,8 +158,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('right').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollWithScrollbar)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((this.fullScrollWithScrollbar))
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScroll)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq((this.fullScroll))
         })
       })
 
@@ -167,7 +168,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('bottomLeft').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScrollWithScrollbar))
+          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScroll))
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -177,8 +178,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('bottom').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScrollWithScrollbar))
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScroll))
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScroll)
         })
       })
 
@@ -187,8 +188,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('bottomRight').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScrollWithScrollbar))
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq((this.fullScrollWithScrollbar))
+          expect(this.scrollBoth.get(0).scrollTop).to.eq((this.fullScroll))
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq((this.fullScroll))
         })
       })
     })
@@ -239,8 +240,8 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('50%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollWithScrollbar)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScroll)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScroll)
         })
       })
 
@@ -249,7 +250,7 @@ describe('src/cy/commands/actions/scroll', () => {
         expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
 
         cy.get('#scroll-to-both').scrollTo('0%', '50%').then(function () {
-          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollTop).to.eq(this.halfScroll)
           expect(this.scrollBoth.get(0).scrollLeft).to.eq(0)
         })
       })
@@ -260,7 +261,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-both').scrollTo('50%', '0%').then(function () {
           expect(this.scrollBoth.get(0).scrollTop).to.eq(0)
-          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScrollWithScrollbar)
+          expect(this.scrollBoth.get(0).scrollLeft).to.eq(this.halfScroll)
         })
       })
     })
