@@ -15,7 +15,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     })
     .should('have.attr', 'aria-haspopup', 'true')
@@ -55,7 +55,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     }).click()
 
@@ -80,7 +80,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler').should('be.visible')
     cy.findByLabelText('Pick a bundler').should('be.visible')
   })
 

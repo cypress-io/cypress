@@ -27,6 +27,7 @@
           ref="autUrlInputRef"
           :value="studioStore.needsUrl ? urlInProgress : autUrl"
           data-cy="aut-url-input"
+          aria-label="url of the application under test"
           class="flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-51 self-center hocus-link-default truncate"
           @input="setStudioUrl"
           @click="openExternally"
