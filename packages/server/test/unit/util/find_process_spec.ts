@@ -3,6 +3,7 @@ import { sinon } from '../../spec_helper'
 import { byPid } from '../../../lib/util/find_process'
 
 describe('lib/util/find_process', function () {
+  // This is testing the patch for find-process to handle windows processes that have a mixture of carriage returns
   it('does not crash in windows with processes that deal with a mixture of carriage returns', async () => {
     sinon.stub(process, 'platform').value('win32')
     // Create a table that matches what 'Get-CimInstance -className win32_process | select Name,ProcessId,ParentProcessId,CommandLine,ExecutablePath' does in powershell
