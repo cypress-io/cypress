@@ -457,6 +457,21 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   // this is so the BiDi websocket port does not get set to 0, which is the default for the geckodriver package.
   debug('available ports: %o', { foxdriverPort, marionettePort, webDriverBiDiPort })
 
+  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+
+  // Delete the profile directory if in open mode.
+  // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
+  // the profile creation method before 13.15.0 will no longer work with geckodriver/webdriver
+  // and actually corrupts the profile directory from being able to be encoded. Hence, we delete it to prevent any conflicts.
+  // This is critical to make sure different Cypress versions do not corrupt the firefox profile, which can fail silently.
+  if (!options.isTextTerminal) {
+    const doesPathExist = await fs.pathExists(profileDir)
+
+    if (doesPathExist) {
+      await fs.remove(profileDir)
+    }
+  }
+
   const [
     cacheDir,
     extensionDest,
@@ -474,11 +489,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     launchOptions.extensions = [extensionDest]
   }
 
-  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
-
   const profile = new FirefoxProfile({
     destinationDirectory: profileDir,
   })
+
+  // make sure the profile that is ported into the session is destroyed when the browser is closed
+  profile.shouldDeleteOnExit(true)
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
@@ -488,7 +504,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   if (!await fs.pathExists(xulStorePath)) {
     // this causes the browser to launch maximized, which chrome does by default
     // otherwise an arbitrary size will be picked for the window size
-    // this will not have an effect after first launch in 'interactive' mode
+
+    // this used to not have an effect after first launch in 'interactive' mode.
+    // However, since Cypress 13.15.1,
+    // geckodriver creates unique profile names that copy over the xulstore.json to the used profile.
+    // The copy is ultimately updated on the unique profile name and is destroyed when the browser is torn down,
+    // so the values are not persisted. Cypress could hypothetically determine the profile in use, copy the xulstore.json
+    // out of the profile and try to persist it in the next created profile, but this method is likely error prone as it requires
+    // moving/copying of files while creation/deletion of profiles occur, plus the ability to coorelate the correct profile to the current run,
+    // which there are not guarantees we can deterministically do this in open mode.
     const sizemode = 'maximized'
 
     await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
@@ -557,7 +581,13 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
   }
 
-  /**
+  // @ts-expect-error
+  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+
+  browserInstanceWrapper.kill = () => undefined
+
+  try {
+    /**
    * To set the profile, we use the profile capabilities in firefoxOptions which
    * requires the profile to be base64 encoded. The profile will be copied over to whatever
    * profile is created by geckodriver stemming from the root profile path.
@@ -567,42 +597,37 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
    * copy it to a profile created in the profile root, which would look something like /usr/foo/firefox-stable/run-12345/rust_mozprofile<HASH>/*
    * @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
    */
-  const base64EncodedProfile = await new Promise<string>((resolve, reject) => {
-    profile.encoded(function (err, encodedProfile) {
-      err ? reject(err) : resolve(encodedProfile)
+    const base64EncodedProfile = await new Promise<string>((resolve, reject) => {
+      profile.encoded(function (err, encodedProfile) {
+        err ? reject(err) : resolve(encodedProfile)
+      })
     })
-  })
 
-  const newSessionCapabilities: RemoteConfig = {
-    logLevel: Debug.enabled(WEBDRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'info' : 'silent',
-    capabilities: {
-      alwaysMatch: {
-        browserName: 'firefox',
-        acceptInsecureCerts: true,
-        // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
-        'moz:firefoxOptions': {
-          profile: base64EncodedProfile,
-          binary: browser.path,
-          args: launchOptions.args,
-          prefs: launchOptions.preferences,
+    const newSessionCapabilities: RemoteConfig = {
+      logLevel: Debug.enabled(WEBDRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'info' : 'silent',
+      capabilities: {
+        alwaysMatch: {
+          browserName: 'firefox',
+          acceptInsecureCerts: true,
+          // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+          'moz:firefoxOptions': {
+            profile: base64EncodedProfile,
+            binary: browser.path,
+            args: launchOptions.args,
+            prefs: launchOptions.preferences,
+          },
+          // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
+          // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+          // @ts-expect-error
+          'moz:debuggerAddress': true,
+          // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
+          // webdriver starts geckodriver with the correct options on behalf of Cypress
+          'wdio:geckodriverOptions': geckoDriverOptions,
         },
-        // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
-        // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-        // @ts-expect-error
-        'moz:debuggerAddress': true,
-        // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
-        // webdriver starts geckodriver with the correct options on behalf of Cypress
-        'wdio:geckodriverOptions': geckoDriverOptions,
+        firstMatch: [],
       },
-      firstMatch: [],
-    },
-  }
-  // @ts-expect-error
-  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+    }
 
-  browserInstanceWrapper.kill = () => undefined
-
-  try {
     debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities))
 
     const WD = WebDriver.getWebDriverPackage()

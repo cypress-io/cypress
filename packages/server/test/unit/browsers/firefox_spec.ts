@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import debug from 'debug'
 import os from 'os'
 import sinon from 'sinon'
+import fsExtra from 'fs-extra'
 import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
@@ -82,10 +83,10 @@ describe('lib/browsers/firefox', () => {
       },
     }
 
-    wdInstance.maximizeWindow.resolves(null),
-    wdInstance.installAddOn.resolves(null),
-    wdInstance.switchToWindow.resolves(null),
-    wdInstance.navigateTo.resolves(null),
+    wdInstance.maximizeWindow.resolves(undefined)
+    wdInstance.installAddOn.resolves(undefined)
+    wdInstance.switchToWindow.resolves(undefined)
+    wdInstance.navigateTo.resolves(undefined)
 
     sinon.stub(webdriver, 'newSession').resolves(wdInstance)
 
@@ -116,9 +117,14 @@ describe('lib/browsers/firefox', () => {
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
       sinon.stub(utils, 'getPort').resolves(1234)
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
-      sinon.spy(FirefoxProfile.prototype, 'updatePreferences')
+      sinon.spy(FirefoxProfile.prototype, 'shouldDeleteOnExit')
       sinon.spy(FirefoxProfile.prototype, 'path')
+      sinon.stub(FirefoxProfile.prototype, 'encoded').callsFake((cb) => {
+        cb(undefined, 'abcdef')
+      })
 
+      sinon.stub(fsExtra, 'writeJSON').resolves(undefined)
+      sinon.stub(fsExtra, 'writeFile').resolves(undefined)
       browserCriClient = sinon.createStubInstance(BrowserCriClient)
 
       browserCriClient.attachToTargetUrl = sinon.stub().resolves({})
@@ -458,6 +464,12 @@ describe('lib/browsers/firefox', () => {
       expect(FirefoxProfile.prototype.setPreference).not.to.be.calledWith('network.proxy.no_proxies_on')
     })
 
+    it('tears down the temporary profile when the browser is destroyed', async function () {
+      await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+      expect(FirefoxProfile.prototype.shouldDeleteOnExit).to.be.calledWith(true)
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/17896
     it('escapes the downloadsFolders path correctly when running on Windows OS', async function () {
       this.options.proxyServer = 'http://proxy-server:1234'
@@ -498,7 +510,7 @@ describe('lib/browsers/firefox', () => {
       expect(result.kill).to.be.an.instanceof(Function)
     })
 
-    it('does not clear user profile if already exists', async function () {
+    it('always clear user profile if it already exists', async function () {
       mockfs({
         '/path/to/appData/firefox-stable/interactive/': {
           'xulstore.json': '[foo xulstore.json]',
@@ -508,24 +520,29 @@ describe('lib/browsers/firefox', () => {
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-      // @ts-ignore
-      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-        'xulstore.json': '[foo xulstore.json]',
-        'chrome': { 'userChrome.css': '[foo userChrome.css]' },
-      })
+      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).to.be.undefined
     })
 
     it('creates xulstore.json if not exist', async function () {
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      // @ts-ignore
-      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-        'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
+      expect(fsExtra.writeJSON).to.have.been.calledWith('/path/to/appData/firefox-stable/interactive/xulstore.json', {
+        'chrome://browser/content/browser.xhtml':
+          {
+            'main-window':
+              {
+                'width': 1280,
+                'height': 1024,
+                'sizemode': 'maximized',
+              },
+          },
+
       })
     })
 
     it('creates chrome/userChrome.css if not exist', async function () {
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')).ok
+
+      expect(fsExtra.writeFile).to.have.been.calledWith('/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')
     })
 
     it('clears browser cache', async function () {
@@ -538,10 +555,7 @@ describe('lib/browsers/firefox', () => {
       this.options.isTextTerminal = false
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
-      // @ts-ignore
-      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-        'CypressCache': {},
-      })
+      expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).to.be.undefined
     })
 
     it('wraps errors when retrying socket fails', async function () {
