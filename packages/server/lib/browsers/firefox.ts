@@ -20,11 +20,15 @@ import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import type { RemoteConfig } from 'webdriver'
-import { GeckoDriverOptions, WebDriver } from './webdriver'
+import type { GeckodriverParameters } from 'geckodriver'
+import { WebDriver } from './webdriver'
 
 const debug = Debug('cypress:server:browsers:firefox')
 const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
 
+// These debug variables have an impact on the 3rd-party webdriver and geckodriver
+// packages. To see verbose logs from Firefox, set both of these options to the
+// DEBUG variable.
 const WEBDRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:webdriver'
 const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
 
@@ -544,8 +548,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   // resolution of exactly 1280x720
-  // (height must account for firefox url bar, which we can only shrink to 1px ,
-  // and the total size of the window url and tab bar, which is 85 pixels for a total offset of 86 pixels)
+  // (height must account for firefox url bar, which we can only shrink to 2px)
   const BROWSER_ENVS = {
     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
     MOZ_HEADLESS_WIDTH: '1280',
@@ -557,7 +560,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const geckoDriverOptions: GeckoDriverOptions = {
+  const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
     // geckodriver port is assigned under the hood by @wdio/utils
     // @see https://github.com/webdriverio/webdriverio/blob/v9.1.1/packages/wdio-utils/src/node/startWebDriver.ts#L65
@@ -578,6 +581,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     },
     jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
     log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
+    // @ts-expect-error
     logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
   }
 

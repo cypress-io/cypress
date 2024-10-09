@@ -223,14 +223,17 @@ index 3b361a7..0000000
 -
 -For more information on WebdriverIO see the [homepage](https://webdriver.io).
 diff --git a/node_modules/edgedriver/dist/install.js b/node_modules/edgedriver/dist/install.js
-index 99730a0..b71c6ad 100644
+index 99730a0..30e63c0 100644
 --- a/node_modules/edgedriver/dist/install.js
 +++ b/node_modules/edgedriver/dist/install.js
-@@ -205,6 +205,6 @@ function sanitizeVersion(version) {
+@@ -205,6 +205,9 @@ function sanitizeVersion(version) {
   * download on install
   */
  if (process.argv[1] && process.argv[1].endsWith('/dist/install.js') && Boolean(process.env.EDGEDRIVER_AUTO_INSTALL)) {
 -    await download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Edgedriver: ${err.stack}`));
++    // removing the await here as packherd cannot bundle with a top-level await.
++    // This only has an impact if invoking from a CLI context, which cypress is not.
++    // Cypress actually does not directly use this package in any way.
 +    download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Edgedriver: ${err.stack}`));
  }
  //# sourceMappingURL=install.js.map
