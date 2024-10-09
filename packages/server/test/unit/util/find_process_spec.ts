@@ -7,12 +7,12 @@ describe('lib/util/find_process', function () {
   it('does not crash in windows with processes that deal with a mixture of carriage returns', async () => {
     sinon.stub(process, 'platform').value('win32')
     // Create a table that matches what 'Get-CimInstance -className win32_process | select Name,ProcessId,ParentProcessId,CommandLine,ExecutablePath' does in powershell
-    // Attempt to include all of this regex: (\r\n\r\n|\r\n\n|\n\r\n|\n\n)
     const process1 = 'Name : abc\r\nProcessId : 123\r\nParentProcessId : 456\r\nCommandLine : "c:\\path\\to\\abc.exe"\r\nExecutablePath : c:\\path\\to\\abc.exe'
     const process2 = 'Name : xyz\r\nProcessId : 789\r\nParentProcessId : 1011\r\nCommandLine : "c:\\path\\to\\xyz.exe"\r\nExecutablePath : c:\\path\\to\\xyz.exe'
     const process3 = 'Name : def\r\nProcessId : 1213\r\nParentProcessId : 1415\r\nCommandLine : "c:\\path\\to\\def.exe"\r\nExecutablePath : c:\\path\\to\\def.exe'
     const process4 = 'Name : ghi\r\nProcessId : 1617\r\nParentProcessId : 1819\r\nCommandLine : "c:\\path\\to\\ghi.exe"\r\nExecutablePath : c:\\path\\to\\ghi.exe'
     const process5 = 'Name : jkl\r\nProcessId : 2021\r\nParentProcessId : 2223\r\nCommandLine : "c:\\path\\to\\jkl.exe"\r\nExecutablePath : c:\\path\\to\\jkl.exe'
+    // Include all of this regex: (\r\n\r\n|\r\n\n|\n\r\n|\n\n)
     const returnString = `${process1}\r\n\r\n${process2}\r\n\n${process3}\n\r\n${process4}\n\n${process5}`
 
     sinon.stub(utils, 'spawn').returns({
