@@ -605,6 +605,22 @@ describe('lib/browsers/firefox', () => {
         // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
         expect(instance.emit).to.have.been.calledWith('exit')
       })
+
+      it('throws CDPFailedToStartFirefox if the mox:debuggerAddress capability is not returned by webdriver', function () {
+        delete wdInstance.capabilities['moz:debuggerAddress']
+        sinon.stub(process, 'kill').returns(true)
+
+        return firefox.open(this.browser, 'http://', this.options, this.automation).catch((err) => {
+          // make sure we through the correct error here to prompt @packages/server/lib/modes/run.ts
+          // to retry the browser connection
+          expect(err.details).to.include('CDPFailedToStartFirefox: webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser')
+          expect(err.type).to.equal('FIREFOX_COULD_NOT_CONNECT')
+          // kills the browser
+          expect(process.kill).to.have.been.calledWith(1234)
+          // kills the webdriver process / geckodriver process
+          expect(process.kill).to.have.been.calledWith(5678)
+        })
+      })
     })
   })
 
