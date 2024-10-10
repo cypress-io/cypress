@@ -31,6 +31,7 @@
     <div class="rounded border h-[40px] w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
+        :aria-label="t('components.fileSearch.expandToSearchByExtensions')"
         @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
@@ -45,12 +46,13 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-[12px]"
+          :aria-label="t('components.fileSearch.byExtensionInput')"
           :placeholder="t('components.fileSearch.byExtensionInput')"
         />
         <FileMatchInput
           v-else
           v-model="localPattern"
-          aria-label="file-name-input"
+          aria-label="Search by filename"
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>
@@ -72,6 +74,7 @@
         <i-cy-magnifying-glass_x16 class="mr-[8px] ml-[12px] inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
         <FileMatchInput
           v-model="localPattern"
+          :aria-label="t('components.fileSearch.byFilenameInput')"
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>

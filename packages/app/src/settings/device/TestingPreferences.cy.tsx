@@ -28,7 +28,7 @@ describe('<TestingPreferences />', () => {
       </div>),
     })
 
-    cy.get(`#autoScrollingEnabled[role="switch"]`)
+    cy.get(`#autoScrollingToggle[role="switch"]`)
     .should('have.attr', 'aria-checked', 'false')
   })
 })
