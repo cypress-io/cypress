@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.18
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v7
