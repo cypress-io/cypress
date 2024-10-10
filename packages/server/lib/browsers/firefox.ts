@@ -668,6 +668,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       debug('closing geckodriver and webdriver')
       const driverReturnStatus = process.kill(driverPID)
 
+      // needed for closing the browser when switching browsers in open mode to signal
+      // the browser is done closing
+      browserInstanceWrapper.emit('exit')
+
       return browserReturnStatus || driverReturnStatus
     }
 

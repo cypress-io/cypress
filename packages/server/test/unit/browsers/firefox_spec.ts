@@ -589,9 +589,11 @@ describe('lib/browsers/firefox', () => {
         expect(instance).to.be.an.instanceof(EventEmitter)
       })
 
-      it('kills the driver and browser PIDs when the kill method is called', async function () {
+      it('kills the driver and browser PIDs when the kill method is called and emits the exit event', async function () {
         sinon.stub(process, 'kill').returns(true)
         const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        sinon.spy(instance, 'emit')
         const killResult = instance.kill()
 
         expect(killResult).to.be.true
@@ -600,6 +602,8 @@ describe('lib/browsers/firefox', () => {
         // kills the webdriver process/ geckodriver process
         expect(process.kill).to.have.been.calledWith(5678)
         expect(browserCriClient.close).to.have.been.called
+        // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
+        expect(instance.emit).to.have.been.calledWith('exit')
       })
     })
   })
