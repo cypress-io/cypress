@@ -16941,10 +16941,10 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-geckodriver@4.5.0, geckodriver@^4.3.3:
-  version "4.5.0"
-  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-4.5.0.tgz#a2a4e526ac657af7d21089727218adddd750080f"
-  integrity sha512-EnBCT9kJ5oEoP3DaJKjzxAhm7bbNNK6k2q7oCkCT58OIOOiE6Hsr+nVDHflsNaR68HMGtBKOLSZ+YvCDHecScw==
+geckodriver@4.5.1, geckodriver@^4.3.3:
+  version "4.5.1"
+  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-4.5.1.tgz#624fc01815c1aa498dd3f717f7bd4c6cca0c57b8"
+  integrity sha512-lGCRqPMuzbRNDWJOQcUqhNqPvNsIFu6yzXF8J/6K3WCYFd2r5ckbeF7h1cxsnjA7YLSEiWzERCt6/gjZ3tW0ug==
   dependencies:
     "@wdio/logger" "^9.0.0"
     "@zip.js/zip.js" "^2.7.48"

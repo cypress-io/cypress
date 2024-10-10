@@ -581,10 +581,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     },
     jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
     log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
-    // @ts-expect-error
     logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
   }
 
+  // since we no longer directly control the browser with webdriver, we need to make the browserInstance
+  // a simulated wrapper that kills the process IDs that come back from webdriver
   // @ts-expect-error
   let browserInstanceWrapper: BrowserInstance = new EventEmitter()
 
