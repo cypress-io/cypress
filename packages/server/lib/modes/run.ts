@@ -497,17 +497,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       coreData.didBrowserPreviouslyHaveUnexpectedExit = false
     }
 
-    return Bluebird.all([
-      waitForSocketConnection(project, socketId),
-      // TODO: remove the need to extend options and coerce this type
-      launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
-    ])
-    .timeout(browserTimeout)
-    .then(() => {
-      telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
-    })
-    .catch(Bluebird.TimeoutError, async (err) => {
-      debug('Catch on waitForBrowserToConnect')
+    async function retryOnError (err: Error) {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
       console.log('')
 
@@ -519,7 +509,13 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
         // try again up to 3 attempts
         const word = browserLaunchAttempt === 1 ? 'Retrying...' : 'Retrying again...'
 
-        errors.warning('TESTS_DID_NOT_START_RETRYING', word)
+        // @ts-expect-error
+        if (err?.details?.includes('CDPFailedToStartFirefox')) {
+          errors.warning('FIREFOX_CDP_FAILED_TO_CONNECT', word)
+        } else {
+          errors.warning('TESTS_DID_NOT_START_RETRYING', word)
+        }
+
         browserLaunchAttempt += 1
 
         return await wait()
@@ -529,6 +525,33 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       errors.log(err)
 
       onError(err)
+    }
+
+    return Bluebird.all([
+      waitForSocketConnection(project, socketId),
+      // TODO: remove the need to extend options and coerce this type
+      launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
+    ]).catch((e) => {
+      // if the error wrapped is a CDPFailedToStartFirefox, try to relaunch the browser
+      if (e.details.includes('CDPFailedToStartFirefox')) {
+        // if CDP fails to connect, which is ultimately out of our control and in the hands of webdriver
+        // we retry launching the browser in the hopes the session is spawned correctly
+        debug(`Caught in launchBrowser: ${e.details}`)
+
+        return retryOnError(e)
+      }
+
+      // otherwise, fail
+      throw e
+    })
+    .timeout(browserTimeout)
+    .then(() => {
+      telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
+    })
+    .catch(Bluebird.TimeoutError, async (err) => {
+      debug('Catch on waitForBrowserToConnect')
+
+      return retryOnError(err)
     })
   }
 

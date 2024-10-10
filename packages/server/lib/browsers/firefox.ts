@@ -23,6 +23,13 @@ import type { RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
 import { WebDriver } from './webdriver'
 
+export class CDPFailedToStartFirefox extends Error {
+  constructor (message) {
+    super(message)
+    this.name = 'CDPFailedToStartFirefox'
+  }
+}
+
 const debug = Debug('cypress:server:browsers:firefox')
 const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
 
@@ -623,6 +630,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
           },
           // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
           // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+          // NOTE: this typing is fixed in @wdio/types 9.1.0 https://github.com/webdriverio/webdriverio/commit/ed14717ac4269536f9e7906e4d1612f74650b09b
+          // Once we have a node engine that can support the package (i.e., electron 32+ update) we can update the package
           // @ts-expect-error
           'moz:debuggerAddress': true,
           // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
@@ -644,10 +653,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     const webdriverClient = await WD.newSession(newSessionCapabilities)
 
     debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
-
-    const cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
-
-    debug(`CDP running on port ${cdpPort}`)
 
     const browserPID: number = webdriverClient.capabilities['moz:processID']
 
@@ -675,6 +680,21 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       return browserReturnStatus || driverReturnStatus
     }
+
+    // In some cases, the webdriver session will NOT return the moz:debuggerAddress capability even though
+    // we set it to true in the capabilities. This is out of our control, so when this happens, we fail the browser
+    // and gracefully terminate the related processes and attempt to relaunch the browser in the hopes we get a
+    // CDP address.
+    if (!webdriverClient.capabilities['moz:debuggerAddress']) {
+      debugVerbose(`firefox failed to spawn with CDP connection. Failing current instance and retrying`)
+      // since this fails before the instance is created, we need to kill the processes here or else they will stay open
+      browserInstanceWrapper.kill()
+      throw new CDPFailedToStartFirefox(`webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser`)
+    }
+
+    const cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
+
+    debug(`CDP running on port ${cdpPort}`)
 
     // makes it so get getRemoteDebuggingPort() is calculated correctly
     process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
