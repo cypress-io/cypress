@@ -15,7 +15,6 @@ import { type Client as WebDriverClient, default as webdriver } from 'webdriver'
 import { EventEmitter } from 'stream'
 
 const path = require('path')
-const _ = require('lodash')
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
 const utils = require('../../../lib/browsers/utils')
@@ -119,12 +118,12 @@ describe('lib/browsers/firefox', () => {
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
       sinon.spy(FirefoxProfile.prototype, 'shouldDeleteOnExit')
       sinon.spy(FirefoxProfile.prototype, 'path')
-      sinon.stub(FirefoxProfile.prototype, 'encoded').callsFake((cb) => {
+      sinon.stub(FirefoxProfile.prototype, 'encoded').callsFake((cb: Function) => {
         cb(undefined, 'abcdef')
       })
 
       sinon.stub(fsExtra, 'writeJSON').resolves(undefined)
-      sinon.stub(fsExtra, 'writeFile').resolves(undefined)
+      sinon.stub(fsExtra, 'writeFile').returns(undefined)
       browserCriClient = sinon.createStubInstance(BrowserCriClient)
 
       browserCriClient.attachToTargetUrl = sinon.stub().resolves({})
@@ -393,11 +392,6 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('writes extension and ensure write access', async function () {
-      // TODO: Test is failing locally, figure out why??
-      if (!process.env.CI) {
-        return
-      }
-
       mockfs({
         [path.resolve(`${__dirname }../../../../../extension/dist/v2`)]: {
           'background.js': mockfs.file({
@@ -418,16 +412,16 @@ describe('lib/browsers/firefox', () => {
       })
 
       utils.writeExtension.restore()
+      // @ts-expect-error
+      fsExtra.writeFile.restore()
+      sinon.spy(fsExtra, 'chmod')
 
-      const getFile = function (path) {
-        return _.reduce(_.compact(_.split(path, '/')), (acc, item) => {
-          return acc.getItem(item)
-        }, mockfs.getMockRoot())
-      }
+      // bypass the extension clearing that happens in open mode, which is tested at the system test level
+      this.options.isTextTerminal = true
 
       await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-      expect(getFile(`${process.env.HOME }/.config/Cypress/cy/test/browsers/firefox-stable/interactive/CypressExtension/background.js`).getMode()).to.be.equals(0o644)
+      expect(fsExtra.chmod).to.have.been.calledWith(sinon.match(/CypressExtension\/background\.js/), 0o644)
     })
 
     it('sets proxy-related preferences if specified', async function () {
