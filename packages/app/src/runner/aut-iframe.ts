@@ -120,6 +120,7 @@ export class AutIframe {
    */
   removeSrcAttribute = () => {
     this.$iframe?.removeAttr('src')
+    this.$iframe?.removeAttr('srcdoc')
   }
 
   visitBlankPage = (testIsolation?: boolean) => {
@@ -128,7 +129,7 @@ export class AutIframe {
         return
       }
 
-      this.$iframe[0].src = 'about:blank'
+      this.$iframe[0].srcdoc = '<html></html>'
 
       this.$iframe.one('load', () => {
         if (testIsolation) {
