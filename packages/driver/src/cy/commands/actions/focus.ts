@@ -60,7 +60,7 @@ export default (Commands, Cypress, cy) => {
       $elements.isElement(options.$el.get(0)) &&
       $elements.isBody(options.$el.get(0))
 
-      // http://www.w3.org/$R/html5/editing.html#specially-focusable
+      // https://dev.w3.org/html5/spec-LC/editing.html#specially-focusable
       // ensure there is only 1 dom element in the subject
       // make sure its allowed to be focusable
       if (!(isWin || isBody || $dom.isFocusable(options.$el))) {
