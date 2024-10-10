@@ -28,7 +28,7 @@
         class="flex px-3 items-center"
       >
         <label
-          for="altFn"
+          id="altFn"
           class="px-3 text-gray-500"
           @click="handleAlt"
         >
@@ -36,7 +36,7 @@
         </label>
         <Switch
           size="lg"
-          name="altFn"
+          label-id="altFn"
           :value="altValue"
           @update="handleAlt"
         />

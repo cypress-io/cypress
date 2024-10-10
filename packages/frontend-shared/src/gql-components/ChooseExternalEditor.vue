@@ -6,6 +6,7 @@
       :options="editorOptions"
       item-value="name"
       item-key="id"
+      :label-id="labelId"
       :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
       class="w-[400px]"
       @update:model-value="updateEditor"
@@ -118,6 +119,7 @@ fragment ChooseExternalEditor on Query {
 
 const props = defineProps<{
   gql: ChooseExternalEditorFragment
+  labelId: string
 }>()
 
 const { t } = useI18n()
