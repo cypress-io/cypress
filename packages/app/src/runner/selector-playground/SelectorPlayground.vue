@@ -9,6 +9,7 @@
     >
       <button
         class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-[40px] duration-150 items-center justify-center hocus-default"
+        :aria-label="selectorPlaygroundStore.isEnabled ? 'click to interact with the application and build test cases' : 'click to exit interactive test building mode'"
         data-cy="playground-toggle"
         @click="toggleEnabled"
       >
@@ -64,6 +65,7 @@
           autocomplete="off"
           autocorrect="off"
           spellcheck="false"
+          aria-label="selector"
           data-cy="playground-selector"
           :style="{paddingLeft: leftOfInputText + 'ch', paddingRight: widthOfMatchesHelperText + 'px'}"
           class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
@@ -103,6 +105,7 @@
             variant="outline"
             data-cy="playground-copy"
             class="override-border"
+            aria-label="click to copy command to clipboard"
             @click="copyToClipboard"
             @focus="focus"
           >
@@ -124,6 +127,7 @@
             variant="outline"
             data-cy="playground-print"
             class="override-border"
+            aria-label="click to print command to console"
             @click="printSelected()"
             @focus="focus"
           >

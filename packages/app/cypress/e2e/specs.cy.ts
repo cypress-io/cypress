@@ -347,7 +347,7 @@ describe('App: Specs', () => {
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
@@ -359,7 +359,7 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+        cy.findByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
           expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
@@ -695,7 +695,7 @@ describe('App: Specs', () => {
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
@@ -707,7 +707,7 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+        cy.findByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
           expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
