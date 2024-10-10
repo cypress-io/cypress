@@ -11,6 +11,7 @@
       >
         <button
           class="flex outline-transparent text-indigo-500 gap-[8px] items-center group"
+          aria-label="open in IDE"
           @click="onClick"
         >
           <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />

@@ -32,16 +32,17 @@
 
       <div class="px-[16px] divide-y divide-gray-50">
         <div
-          v-for="({id, title}) in switches"
+          v-for="({id, labelId, title}) in switches"
           :key="id"
           class="py-[16px]"
         >
           <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-            <label :for="id">{{ title }}</label>
+            <label :id="labelId">{{ title }}</label>
             <Switch
+              :id="id"
               class="mx-[8px]"
               :value="props.gql.localSettings.preferences[id] ?? false"
-              :name="id"
+              :label-id="labelId"
               :disabled="!desktopNotificationsEnabled"
               @update="(value) => updatePref(id, value)"
             />
@@ -149,10 +150,12 @@ mutation NotificationSettings_ShowNotification($title: String!, $body: String!) 
 const switches = [
   {
     id: 'notifyWhenRunStarts',
+    labelId: 'notifyWhenRunStartsLabel',
     title: t('settingsPage.notifications.notifyMeWhenRunStarts'),
   },
   {
     id: 'notifyWhenRunStartsFailing',
+    labelId: 'notifyWhenRunStartsFailingLabel',
     title: t('settingsPage.notifications.notifyMeWhenRunIsFailing'),
   },
 ]

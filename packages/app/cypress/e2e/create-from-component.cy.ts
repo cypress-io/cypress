@@ -39,7 +39,7 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
 
     cy.findByText('*.vue').should('be.visible')
     cy.findByText('2 matches').should('be.visible')
-    cy.findByLabelText('file-name-input').type('HelloWorld')
+    cy.findByLabelText('Search by filename').type('HelloWorld')
 
     cy.findByText('HelloWorld').should('be.visible')
     cy.findByText('1 of 2 matches').should('be.visible')
@@ -124,7 +124,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
 
     cy.findByText('*.{js,jsx,tsx}').should('be.visible')
     cy.findByText('5 matches').should('be.visible')
-    cy.findByLabelText('file-name-input').type('App')
+    cy.findByLabelText('Search by filename').type('App')
 
     cy.findByText('App').should('be.visible')
     cy.findByText('1 of 5 matches').should('be.visible')
