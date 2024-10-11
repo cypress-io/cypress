@@ -47,7 +47,6 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
       - The [NodeJS](https://nodejs.org/en) version is not the active LTS.
 - [ ] **Update `workflows.yml`**
     - [ ] Ensure it references the new `base-internal` and `browsers-internal` Docker images
-    - [ ] Ensure the new Electron version is used as a build target in the `Build better-sqlite3 for CentOS 7` step
 
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
     - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
