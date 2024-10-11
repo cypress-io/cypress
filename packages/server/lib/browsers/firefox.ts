@@ -463,7 +463,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
-  // Delete the profile directory if in open mode.
+  // Delete the legacy profile directory if in open mode.
   // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
   // the profile creation method before 13.15.0 will no longer work with geckodriver/webdriver
   // and actually corrupts the profile directory from being able to be encoded. Hence, we delete it to prevent any conflicts.
@@ -513,9 +513,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // However, since Cypress 13.15.1,
     // geckodriver creates unique profile names that copy over the xulstore.json to the used profile.
     // The copy is ultimately updated on the unique profile name and is destroyed when the browser is torn down,
-    // so the values are not persisted. Cypress could hypothetically determine the profile in use, copy the xulstore.json
+    // so the values are not persisted. Cypress could hypothetically determine the profile is in use, copy the xulstore.json
     // out of the profile and try to persist it in the next created profile, but this method is likely error prone as it requires
-    // moving/copying of files while creation/deletion of profiles occur, plus the ability to coorelate the correct profile to the current run,
+    // moving/copying of files while creation/deletion of profiles occur, plus the ability to correlate the correct profile to the current run,
     // which there are not guarantees we can deterministically do this in open mode.
     const sizemode = 'maximized'
 
@@ -592,7 +592,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   browserInstanceWrapper.kill = () => undefined
 
   try {
-    /**
+  /**
    * To set the profile, we use the profile capabilities in firefoxOptions which
    * requires the profile to be base64 encoded. The profile will be copied over to whatever
    * profile is created by geckodriver stemming from the root profile path.
