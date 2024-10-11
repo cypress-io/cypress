@@ -155,22 +155,27 @@ function integrityCheck (options) {
       },
       {
         functionName: 'snapshotRequire',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'runWithSnapshot',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'hookRequire',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'startCypress',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'v',
