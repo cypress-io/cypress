@@ -237,8 +237,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalJustInTimeCompile',
-    defaultValue: false,
+    name: 'justInTimeCompile',
+    defaultValue: true,
     validation: validate.isBoolean,
     isExperimental: true,
     requireRestartOnChange: 'server',
@@ -741,8 +741,8 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalJustInTimeCompile',
-    errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+    name: 'justInTimeCompile',
+    errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
     testingTypes: ['component'],
   },
@@ -761,8 +761,8 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalJustInTimeCompile',
-      errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+      name: 'justInTimeCompile',
+      errorKey: 'JIT_COMPONENT_TESTING',
       isWarning: false,
     },
   ],

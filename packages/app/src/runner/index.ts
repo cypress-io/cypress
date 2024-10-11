@@ -445,8 +445,8 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    if (config.experimentalJustInTimeCompile && !config.isTextTerminal) {
-      // If running with experimentalJustInTimeCompile enabled and in open mode,
+    if (config.justInTimeCompile && !config.isTextTerminal) {
+      // If running with justInTimeCompile enabled and in open mode,
       // send a signal to the dev server to load the spec before running
       // since the spec and related resources are not yet compiled.
       await updateDevServerWithSpec(spec)
