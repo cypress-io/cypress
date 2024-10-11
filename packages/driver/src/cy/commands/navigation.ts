@@ -69,7 +69,7 @@ const navigationChanged = async (Cypress, cy, state, source, arg) => {
   debug('navigation changed:', url)
 
   // don't trigger for empty url's or about:blank
-  if (_.isEmpty(url) || (url === 'about:blank')) {
+  if (_.isEmpty(url) || (url === 'about:blank') || (url === 'about:srcdoc')) {
     return
   }
 
