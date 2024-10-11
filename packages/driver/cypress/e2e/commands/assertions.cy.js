@@ -2650,18 +2650,6 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.focus
       })
-
-      it('calls into custom focus pseudos', () => {
-        cy.$$('button:first').focus()
-        const stub = cy.spy($.expr.pseudos, 'focus').as('focus')
-
-        expect(cy.$$('button:first')).to.have.focus
-
-        cy.get('button:first').should('have.focus')
-        .then(() => {
-          expect(stub).to.be.calledTwice
-        })
-      })
     })
 
     context('match', () => {

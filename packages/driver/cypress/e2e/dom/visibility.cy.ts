@@ -168,7 +168,7 @@ describe('src/cypress/dom/visibility', () => {
       }
 
       // ensure all tests run against a scrollable window
-      const scrollThisIntoView = add('<div style=`height: 1000px;` /><div>Should be in view</div>')
+      const scrollThisIntoView = add('<div style=`height: 1000px;`></div><div>Should be in view</div>')
 
       this.$visHidden = add('<ul style="visibility: hidden;"></ul>')
       this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')

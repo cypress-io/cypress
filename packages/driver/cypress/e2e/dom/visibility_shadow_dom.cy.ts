@@ -27,7 +27,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
       }
 
       // ensure all tests run against a scrollable window
-      const scrollThisIntoView = $(`<div style='height: 1000px; width: 10px;' /><div>Should be in view</div>`).appendTo(cy.$$('body'))
+      const scrollThisIntoView = $(`<div style='height: 1000px; width: 10px;'></div><div>Should be in view</div>`).appendTo(cy.$$('body'))
 
       // scroll the 2nd element into view so that
       // there is always a scrollTop so we ensure

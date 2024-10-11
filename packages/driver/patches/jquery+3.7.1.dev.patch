@@ -1,17 +1,17 @@
 diff --git a/node_modules/jquery/README.md b/node_modules/jquery/README.md
 deleted file mode 100644
-index 411a859..0000000
+index fcc11f3..0000000
 --- a/node_modules/jquery/README.md
 +++ /dev/null
-@@ -1,67 +0,0 @@
+@@ -1,60 +0,0 @@
 -# jQuery
 -
 -> jQuery is a fast, small, and feature-rich JavaScript library.
 -
--For information on how to get started and how to use jQuery, please see [jQuery's documentation](http://api.jquery.com/).
+-For information on how to get started and how to use jQuery, please see [jQuery's documentation](https://api.jquery.com/).
 -For source files and issues, please visit the [jQuery repo](https://github.com/jquery/jquery).
 -
--If upgrading, please see the [blog post for 3.4.1](https://blog.jquery.com/2019/05/01/jquery-3-4-1-triggering-focus-events-in-ie-and-finding-root-elements-in-ios-10/). This includes notable differences from the previous version and a more readable changelog.
+-If upgrading, please see the [blog post for 3.7.1](https://blog.jquery.com/2023/08/28/jquery-3-7-1-released-reliable-table-row-dimensions/). This includes notable differences from the previous version and a more readable changelog.
 -
 -## Including jQuery
 -
@@ -22,95 +22,58 @@ index 411a859..0000000
 -#### Script tag
 -
 -```html
--<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 -```
 -
--#### Babel
+-#### Webpack / Browserify / Babel
 -
--[Babel](http://babeljs.io/) is a next generation JavaScript compiler. One of the features is the ability to use ES6/ES2015 modules now, even though browsers do not yet support this feature natively.
+-There are several ways to use [Webpack](https://webpack.js.org/), [Browserify](http://browserify.org/) or [Babel](https://babeljs.io/). For more information on using these tools, please refer to the corresponding project's documentation. In the script, including jQuery will usually look like this:
 -
 -```js
 -import $ from "jquery";
 -```
 -
--#### Browserify/Webpack
--
--There are several ways to use [Browserify](http://browserify.org/) and [Webpack](https://webpack.github.io/). For more information on using these tools, please refer to the corresponding project's documention. In the script, including jQuery will usually look like this...
+-If you need to use jQuery in a file that's not an ECMAScript module, you can use the CommonJS syntax:
 -
 -```js
--var $ = require("jquery");
+-var $ = require( "jquery" );
 -```
 -
 -#### AMD (Asynchronous Module Definition)
 -
--AMD is a module format built for the browser. For more information, we recommend [require.js' documentation](http://requirejs.org/docs/whyamd.html).
+-AMD is a module format built for the browser. For more information, we recommend [require.js' documentation](https://requirejs.org/docs/whyamd.html).
 -
 -```js
--define(["jquery"], function($) {
+-define( [ "jquery" ], function( $ ) {
 -
--});
+-} );
 -```
 -
 -### Node
 -
--To include jQuery in [Node](nodejs.org), first install with npm.
+-To include jQuery in [Node](https://nodejs.org/), first install with npm.
 -
 -```sh
 -npm install jquery
 -```
 -
--For jQuery to work in Node, a window with a document is required. Since no such window exists natively in Node, one can be mocked by tools such as [jsdom](https://github.com/tmpvar/jsdom). This can be useful for testing purposes.
+-For jQuery to work in Node, a window with a document is required. Since no such window exists natively in Node, one can be mocked by tools such as [jsdom](https://github.com/jsdom/jsdom). This can be useful for testing purposes.
 -
 -```js
--require("jsdom").env("", function(err, window) {
--	if (err) {
--		console.error(err);
--		return;
--	}
--
--	var $ = require("jquery")(window);
--});
+-const { JSDOM } = require( "jsdom" );
+-const { window } = new JSDOM( "" );
+-const $ = require( "jquery" )( window );
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 773ad95..84ca2f6 100644
+index 1a86433..8215d0c 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -1100,19 +1100,17 @@ setDocument = Sizzle.setDocument = function( node ) {
- 	docElem = document.documentElement;
- 	documentIsHTML = !isXML( document );
- 
--	// Support: IE 9-11, Edge
--	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
--	if ( preferredDoc !== document &&
--		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
-+	// Support: IE 9 - 11+, Edge 12 - 18+
-+	// Accessing iframe documents after unload throws "permission denied" errors (see trac-13936)
-+	// Support: IE 11+, Edge 17 - 18+
-+	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
-+	// two documents; shallow comparisons work.
-+	// eslint-disable-next-line eqeqeq
-+	if ( docElem.msMatchesSelector && preferredDoc != document &&
-+		( subWindow = document.defaultView ) && subWindow.top !== subWindow ) {
- 
--		// Support: IE 11, Edge
--		if ( subWindow.addEventListener ) {
--			subWindow.addEventListener( "unload", unloadHandler, false );
--
--		// Support: IE 9 - 10 only
--		} else if ( subWindow.attachEvent ) {
--			subWindow.attachEvent( "onunload", unloadHandler );
--		}
-+		// Support: IE 9 - 11+, Edge 12 - 18+
-+		subWindow.addEventListener( "unload", unloadHandler );
- 	}
- 
- 	/* Attributes
-@@ -6534,69 +6491,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
- 	return delta;
+@@ -6647,78 +6647,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+ 	return delta + marginDelta;
  }
  
 -function getWidthOrHeight( elem, dimension, extra ) {
-+function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
++function augmentWidthOrHeight( elem, dimension, extra, isBorderBox, styles ) {
 +	var i,
 +		val = 0;
  
@@ -128,7 +91,7 @@ index 773ad95..84ca2f6 100644
 -		valueIsBorderBox = isBorderBox,
 +	// Otherwise initialize for horizontal or vertical properties
 +	} else {
-+		i = name === "width" ? 1 : 0;
++		i = dimension === "width" ? 1 : 0;
 +	}
  
 -		val = curCSS( elem, dimension, styles ),
@@ -143,15 +106,26 @@ index 773ad95..84ca2f6 100644
 +		// Both box models exclude margin, so add it if we want it
 +		if ( extra === "margin" ) {
 +			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
-+		}
-+
+ 		}
+-		val = "auto";
+-	}
+ 
 +		if ( isBorderBox ) {
-+
+ 
+-	// Support: IE 9 - 11 only
+-	// Use offsetWidth/offsetHeight for when box sizing is unreliable.
+-	// In those cases, the computed value can be trusted to be border-box.
+-	if ( ( !support.boxSizingReliable() && isBorderBox ||
 +			// border-box includes padding, so remove it if we want content
 +			if ( extra === "content" ) {
 +				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
 +			}
-+
+ 
+-		// Support: IE 10 - 11+, Edge 15 - 18+
+-		// IE/Edge misreport `getComputedStyle` of table rows with width/height
+-		// set in CSS while `offset*` properties report correct values.
+-		// Interestingly, in some cases IE 9 doesn't suffer from this issue.
+-		!support.reliableTrDimensions() && nodeName( elem, "tr" ) ||
 +			// At this point, extra isn't border nor margin, so remove border
 +			if ( extra !== "margin" ) {
 +				val -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
@@ -160,32 +134,27 @@ index 773ad95..84ca2f6 100644
 +
 +			// At this point, extra isn't content, so add padding
 +			val += jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
-+
+ 
+-		// Fall back to offsetWidth/offsetHeight when value is "auto"
+-		// This happens for inline elements with no explicit setting (gh-3571)
+-		val === "auto" ||
 +			// At this point, extra isn't content nor padding, so add border
 +			if ( extra !== "padding" ) {
 +				val += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
 +			}
- 		}
--		val = "auto";
- 	}
++		}
++	}
  
+-		// Support: Android <=4.1 - 4.3 only
+-		// Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
+-		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
 +	return val;
 +}
  
--	// Fall back to offsetWidth/offsetHeight when value is "auto"
--	// This happens for inline elements with no explicit setting (gh-3571)
--	// Support: Android <=4.1 - 4.3 only
--	// Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
--	// Support: IE 9-11 only
--	// Also use offsetWidth/offsetHeight for when box sizing is unreliable
--	// We use getClientRects() to check for hidden/disconnected.
--	// In those cases, the computed value can be trusted to be border-box
--	if ( ( !support.boxSizingReliable() && isBorderBox ||
--		val === "auto" ||
--		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
+-		// Make sure the element is visible & connected
 -		elem.getClientRects().length ) {
-+function getWidthOrHeight( elem, name, extra ) {
- 	
++function getWidthOrHeight( elem, dimension, extra ) {
+ 
 +	// Start with offset property, which is equivalent to the border-box value
 +	var val,
 +		valueIsBorderBox = true,
@@ -203,7 +172,7 @@ index 773ad95..84ca2f6 100644
 +	// Running getBoundingClientRect on a disconnected node
 +	// in IE throws an error.
 +	if ( elem.getClientRects().length ) {
-+		val = elem.getBoundingClientRect()[ name ];
++		val = elem.getBoundingClientRect()[ dimension ];
  	}
  
 -	// Normalize "" and auto
@@ -212,14 +181,14 @@ index 773ad95..84ca2f6 100644
 +	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
 +	// MathML - https://bugzilla.mozilla.org/show_bug.cgi?id=491668
 +	if ( val <= 0 || val == null ) {
++
++		// Fall back to computed then uncomputed css if necessary
++		val = curCSS( elem, dimension, styles );
++		if ( val < 0 || val == null ) {
++			val = elem.style[ dimension ];
++		}
  
 -	// Adjust for the element's box model
-+		// Fall back to computed then uncomputed css if necessary
-+		val = curCSS( elem, name, styles );
-+		if ( val < 0 || val == null ) {
-+			val = elem.style[ name ];
-+		}
-+
 +		// Computed unit is not pixels. Stop here and return.
 +		if ( rnumnonpx.test( val ) ) {
 +			return val;
@@ -228,7 +197,7 @@ index 773ad95..84ca2f6 100644
 +		// Check for style in case a browser which returns unreliable values
 +		// for getComputedStyle silently falls back to the reliable elem.style
 +		valueIsBorderBox = isBorderBox &&
-+			( support.boxSizingReliable() || val === elem.style[ name ] );
++			( support.boxSizingReliable() || val === elem.style[ dimension ] );
 +
 +		// Normalize "", auto, and prepare for extra
 +		val = parseFloat( val ) || 0;
@@ -239,8 +208,7 @@ index 773ad95..84ca2f6 100644
 -		boxModelAdjustment(
 +		augmentWidthOrHeight(
  			elem,
--			dimension,
-+			name,
+ 			dimension,
  			extra || ( isBorderBox ? "border" : "content" ),
  			valueIsBorderBox,
 -			styles,
