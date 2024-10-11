@@ -76,7 +76,11 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+<<<<<<< HEAD
     - equal: [ 'ryanm/fix/find-process', << pipeline.git.branch >> ]
+=======
+    - equal: [ 'misc/remove_marionette_for_geckodriver', << pipeline.git.branch >> ]
+>>>>>>> parent of 02be8e5d37 (chore: temporarily patch windows build to install dependencies as caching is currently broken (#30350))
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -623,9 +627,6 @@ commands:
       browser:
         description: browser shortname to target
         type: string
-      executor:
-        description: the executor in use. Only used if Windows for workaround purposes
-        type: executor
       percy:
         description: enable percy
         type: boolean
@@ -640,16 +641,6 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
@@ -1383,16 +1374,6 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1530,16 +1511,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
@@ -1585,16 +1556,6 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1715,16 +1676,6 @@ jobs:
             equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
             - run: rm -f /tmp/cypress/junit/*
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - verify-mocha-results:
           expectedResultCount: 1
@@ -1870,7 +1821,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: frontend-shared
           type: ct
@@ -1886,7 +1836,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: launchpad
           type: ct
@@ -1907,7 +1856,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: launchpad
           type: e2e
@@ -1926,7 +1874,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: app
           type: ct
@@ -1946,7 +1893,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: app
           type: e2e
@@ -2003,7 +1949,6 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
-          executor: << parameters.executor >>
           percy: << parameters.percy >>
           package: reporter
           type: ct
@@ -2286,16 +2231,6 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
