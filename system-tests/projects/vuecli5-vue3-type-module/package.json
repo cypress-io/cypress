@@ -7,7 +7,7 @@
   },
   "type": "module",
   "resolutions": {
-    "@achrinza/node-ipc": "9.2.5"
+    "@achrinza/node-ipc": "9.2.9"
   },
   "projectFixtureDirectory": "vue-cli"
 }
