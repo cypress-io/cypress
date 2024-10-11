@@ -234,6 +234,17 @@ const parseSpecArgv = (pattern) => {
     ]
   }
 
+  // Split the path into directory and file name
+  const lastSlashIndex = pattern.lastIndexOf('/')
+  const directoryPath = pattern.substring(0, lastSlashIndex + 1)
+  const fileName = pattern.substring(lastSlashIndex + 1)
+
+  // Escape the parentheses in the file name
+  const escapedFileName = fileName.replace(/[()]/g, '\\$&')
+
+  // Recombine the directory path and escaped file name
+  pattern = directoryPath + escapedFileName
+
   /**
    * Sanitizes a path's leftover commas.
    *

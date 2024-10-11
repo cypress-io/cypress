@@ -216,6 +216,13 @@ describe('lib/util/args', () => {
       expect(options.spec[2]).to.eq(`${getCwd()}/cypress/integration/foo2/bar/baz/test.ts`)
       expect(options.spec[3]).to.eq(`${getCwd()}/cypress/integration/foo3/bar/baz/foo4.ts`)
     })
+
+    // https://github.com/cypress-io/cypress/issues/28509
+    it('correctly escapes parentheses in filename', function () {
+      const options = this.setup('--spec', 'cypress/integration/foo/bar/test().ts')
+
+      expect(options.spec[0]).to.eq(`${getCwd()}/cypress/integration/foo/bar/test\\(\\).ts`)
+    })
   })
 
   context('--tag', () => {
