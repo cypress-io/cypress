@@ -76,11 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-<<<<<<< HEAD
-    - equal: [ 'ryanm/fix/find-process', << pipeline.git.branch >> ]
-=======
-    - equal: [ 'misc/remove_marionette_for_geckodriver', << pipeline.git.branch >> ]
->>>>>>> parent of 02be8e5d37 (chore: temporarily patch windows build to install dependencies as caching is currently broken (#30350))
+    - equal: [ 'attempt_circle_workaround', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -127,7 +123,7 @@ executors:
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:
-      image: windows-server-2022-gui:stable
+      image: windows-server-2022-gui:2023.05.1
       shell: bash.exe -eo pipefail
     resource_class: windows.large
     environment:
