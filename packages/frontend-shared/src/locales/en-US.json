@@ -610,10 +610,6 @@
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
       },
-      "experimentalJustInTimeCompile": {
-        "name": "Just-In-Time compiling",
-        "description": "Enables Just-In-Time (JIT) compiling for component testing, which will only compile assets related to the spec before the spec is run. Currently supported for Vite and Webpack."
-      },
       "experimentalSourceRewriting": {
         "name": "Source rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."

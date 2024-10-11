@@ -110,14 +110,14 @@ describe('resolveConfig', function () {
       })
     })
 
-    describe('experimentalJustInTimeCompile', () => {
+    describe('justInTimeCompile', () => {
       let viteDevServerConfig: ViteDevServerConfig
 
       beforeEach(async () => {
         const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
 
         viteDevServerConfig = getViteDevServerConfig(projectRoot)
-        viteDevServerConfig.cypressConfig.experimentalJustInTimeCompile = true
+        viteDevServerConfig.cypressConfig.justInTimeCompile = true
       })
 
       describe('open mode', () => {

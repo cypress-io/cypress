@@ -419,7 +419,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
         project.once('end', (results) => {
           debug('project ended with results %O', results)
           // If the project ends and the spec is skipped, treat the run as cancelled
-          // as we do not want to update the dev server unnecessarily for experimentalJustInTimeCompile.
+          // as we do not want to update the dev server unnecessarily for justInTimeCompile.
           if (results?.skippedSpec) {
             isRunCancelled = true
           }
@@ -790,13 +790,13 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const isExperimentalJustInTimeCompile = options.testingType === 'component' && config.experimentalJustInTimeCompile
+    const isJustInTimeCompile = options.testingType === 'component' && config.justInTimeCompile
 
     // Only update the dev server if the run is not cancelled
-    if (isExperimentalJustInTimeCompile) {
+    if (isJustInTimeCompile) {
       if (isRunCancelled) {
         // TODO: this logic to skip updating the dev-server on cancel needs a system-test before the feature goes generally available.
-        debug(`isExperimentalJustInTimeCompile=true and run is cancelled. Not updating dev server with spec ${spec.absolute}.`)
+        debug(`isJustInTimeCompile=true and run is cancelled. Not updating dev server with spec ${spec.absolute}.`)
       } else {
         const ctx = require('@packages/data-context').getCtx()
 

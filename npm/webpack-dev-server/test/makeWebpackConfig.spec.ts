@@ -438,7 +438,7 @@ describe('makeWebpackConfig', () => {
     })
   })
 
-  describe('experimentalJustInTimeCompile', () => {
+  describe('justInTimeCompile', () => {
     let devServerConfig: WebpackDevServerConfig
 
     const WEBPACK_MATRIX: {
@@ -469,7 +469,7 @@ describe('makeWebpackConfig', () => {
         cypressConfig: {
           projectRoot: '.',
           devServerPublicPathRoute: '/test-public-path',
-          experimentalJustInTimeCompile: true,
+          justInTimeCompile: true,
           baseUrl: null,
         } as Cypress.PluginConfigOptions,
         webpackConfig: {
