@@ -7,6 +7,9 @@ _Released 12/3/2024 (PENDING)_
 
 - Removed support for Node.js 16 and Node.js 21. Addresses [#29930](https://github.com/cypress-io/cypress/issues/29930).
 - Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
+- The
+  `experimentalJustInTimeCompile`
+  configuration option for component testing has been replaced with a `justInTimeCompile` option that is `true` by default. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. `justInTimeCompile` is currently supported for [`webpack`](https://www.npmjs.com/package/webpack) and [`vite`](https://www.npmjs.com/package/vite). Addresses [#30234](https://github.com/cypress-io/cypress/issues/30234).
 - The undocumented methods `Cypress.backend('firefox:force:gc')` and `Cypress.backend('log:memory:pressure')` were removed. Addresses [#30222](https://github.com/cypress-io/cypress/issues/30222).
 
 ## 13.15.1
