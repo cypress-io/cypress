@@ -91,10 +91,10 @@ describe('clears session data beforeEach test even with no session', () => {
   })
 })
 
-describe('navigates to about:srcdoc between tests and shows warning about session lifecycle', () => {
+describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
   it('t1', () => {
     cy.contains('Default blank page')
-    cy.contains('This page was cleared by navigating to about:srcdoc.')
+    cy.contains('This page was cleared by navigating to about:blank.')
     cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
@@ -103,12 +103,12 @@ describe('navigates to about:srcdoc between tests and shows warning about sessio
 
   it('t2', () => {
     cy.contains('Default blank page')
-    cy.contains('This page was cleared by navigating to about:srcdoc.')
+    cy.contains('This page was cleared by navigating to about:blank.')
     cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
   })
 })
 
-describe('navigates to special about:srcdoc after session', () => {
+describe('navigates to special about:blank after session', () => {
   beforeEach(() => {
     cy.session('user', () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/user')
@@ -120,7 +120,7 @@ describe('navigates to special about:srcdoc after session', () => {
 
   it('t1', () => {
     cy.contains('Default blank page')
-    cy.contains('This page was cleared by navigating to about:srcdoc.')
+    cy.contains('This page was cleared by navigating to about:blank.')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
@@ -128,7 +128,7 @@ describe('navigates to special about:srcdoc after session', () => {
 
   it('t2', () => {
     cy.contains('Default blank page')
-    cy.contains('This page was cleared by navigating to about:srcdoc.')
+    cy.contains('This page was cleared by navigating to about:blank.')
   })
 })
 

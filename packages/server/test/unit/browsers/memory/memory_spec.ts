@@ -7,16 +7,12 @@ import { Automation } from '../../../../lib/automation'
 
 describe('lib/browsers/memory', () => {
   let memory: typeof import('../../../../lib/browsers/memory')
-  let originalPerformanceNow: () => number
 
   before(() => {
     delete require.cache[require.resolve('../../../../lib/browsers/memory')]
     process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
     memory = require('../../../../lib/browsers/memory')
-
-    originalPerformanceNow = performance.now
-    performance.now = () => 0
   })
 
   beforeEach(() => {
@@ -29,7 +25,6 @@ describe('lib/browsers/memory', () => {
 
   after(() => {
     sinon.restore()
-    performance.now = originalPerformanceNow
   })
 
   context('#getJsHeapSizeLimit', () => {
