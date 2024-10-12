@@ -179,7 +179,7 @@
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.1.7",
-    "mock-fs": "5.2.0",
+    "mock-fs": "5.4.0",
     "p-defer": "^3.0.0",
     "patch-package": "6.4.7",
     "playwright-webkit": "1.24.2",
