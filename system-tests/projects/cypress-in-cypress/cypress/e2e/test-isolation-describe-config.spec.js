@@ -7,12 +7,12 @@ const shouldAlwaysResetPage = (config) => {
 
 const TEST_METADATA = {
   'passes 1': {
-    start: 'about:blank',
+    start: 'about:srcdoc',
     firesTestBeforeAfterRunAsync: true,
-    end: 'about:blank',
+    end: 'about:srcdoc',
   },
   'passes 2': {
-    start: 'about:blank',
+    start: 'about:srcdoc',
     firesTestBeforeAfterRunAsync: true,
     end: '/cypress/e2e/dom-content.html',
   },
@@ -24,17 +24,17 @@ const TEST_METADATA = {
   'passes 4': {
     start: '/cypress/e2e/dom-content.html',
     firesTestBeforeAfterRunAsync: true,
-    end: 'about:blank',
+    end: 'about:srcdoc',
   },
   'passes 5': {
-    start: 'about:blank',
+    start: 'about:srcdoc',
     firesTestBeforeAfterRunAsync: true,
-    end: 'about:blank',
+    end: 'about:srcdoc',
   },
   'passes 6': {
-    start: 'about:blank',
+    start: 'about:srcdoc',
     firesTestBeforeAfterRunAsync: true,
-    end: shouldAlwaysResetPage(Cypress.config) ? 'about:blank' : '/cypress/e2e/dom-content.html',
+    end: shouldAlwaysResetPage(Cypress.config) ? 'about:srcdoc' : '/cypress/e2e/dom-content.html',
   },
 }
 

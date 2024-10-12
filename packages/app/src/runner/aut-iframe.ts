@@ -129,7 +129,7 @@ export class AutIframe {
         return
       }
 
-      this.$iframe[0].srcdoc = '<html></html>'
+      this.$iframe[0].srcdoc = '<!DOCTYPE html><html><head></head><body></body></html>'
 
       this.$iframe.one('load', () => {
         if (testIsolation) {
