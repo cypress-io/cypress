@@ -61,7 +61,11 @@ export class AutIframe {
   }
 
   _showContents (contents) {
-    this._body()?.html(contents)
+    if (!this.$iframe) {
+      return
+    }
+
+    this.$iframe[0].srcdoc = `<!DOCTYPE html><html><body>${contents}</body></html>`
   }
 
   _contents () {
@@ -130,7 +134,6 @@ export class AutIframe {
       }
 
       this.$iframe[0].src = 'about:blank'
-      this.$iframe[0].srcdoc = '<!DOCTYPE html><html><head></head><body></body></html>'
 
       this.$iframe.one('load', () => {
         if (testIsolation) {
