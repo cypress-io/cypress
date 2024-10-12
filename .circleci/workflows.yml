@@ -85,7 +85,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff130
+      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -94,7 +94,7 @@ executors:
   
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node20.15.0-chrome126-ff127
+      - image: cypress/browsers-internal:node20.15.0-chrome126-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -104,7 +104,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff130
+      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
         user: node
     environment:
       PLATFORM: linux
