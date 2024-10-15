@@ -13,7 +13,8 @@ export interface SpecFile extends BaseSpec {
 export interface FoundSpec extends SpecFile {
   specFileExtension: string
   fileExtension: string
-  specType: Cypress.CypressSpecType
+  // see: ./cli/types/cypress.d.ts `Cypress.CypressSpecType`
+  specType: 'integration' | 'component'
 }
 
 export interface SpecWithRelativeRoot extends FoundSpec {
