@@ -5,7 +5,7 @@ import os from 'os'
 
 import globby, { GlobbyOptions } from 'globby'
 import Debug from 'debug'
-import { toPosix } from '../util/file'
+import { toOS, toPosix } from '../util/file'
 
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
@@ -36,14 +36,15 @@ export class FileDataSource {
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobbyOptions = {}): Promise<string[]> {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
-      const workingDirectoryPrefix = path.join(cwd, path.sep)
+      const workingDirectoryPrefix = toOS(path.join(cwd, path.sep))
+      const globPatternWithOS = toOS(globPattern)
 
       // If the pattern includes the working directory, we strip it from the pattern.
       // The working directory path may include characters that conflict with glob
       // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
       // We scope our search to the working directory using the `cwd` globby option.
-      if (globPattern.startsWith(workingDirectoryPrefix)) {
-        return globPattern.replace(workingDirectoryPrefix, '')
+      if (globPatternWithOS.startsWith(workingDirectoryPrefix)) {
+        return globPatternWithOS.replace(workingDirectoryPrefix, '')
       }
 
       return globPattern

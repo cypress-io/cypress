@@ -1,6 +1,5 @@
 import { parse } from '@babel/parser'
 import { expect } from 'chai'
-import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
 import { DataContext } from '../../../src'
@@ -14,7 +13,7 @@ import {
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
-import { createTestDataContext } from '../helper'
+import { createTestDataContext, dedentWithOSLineWrap } from '../helper'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { defaultSpecPattern } from '@packages/config'
 
@@ -128,7 +127,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: `${dedent`
+          content: `${dedentWithOSLineWrap`
             describe('template spec', () => {
               it('passes', () => {
                 cy.visit('https://example.cypress.io')
@@ -167,7 +166,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`
+          content: dedentWithOSLineWrap`
             describe('Button.tsx', () => {
               it('playground', () => {
                 // cy.mount()
@@ -208,7 +207,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
+          content: dedentWithOSLineWrap`import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
@@ -253,7 +252,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`
+          content: dedentWithOSLineWrap`
           import React from 'react'
           import { ${codeGenArgs.componentName} } from '${codeGenArgs.componentPath}'
 
@@ -300,7 +299,7 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`
+          content: dedentWithOSLineWrap`
           import React from 'react'
           import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
 
