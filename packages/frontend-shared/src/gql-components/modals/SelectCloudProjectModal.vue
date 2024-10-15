@@ -44,12 +44,16 @@
         :options="organizationOptions"
         item-value="name"
         item-key="id"
+        label-id="organization-label"
         :placeholder="orgPlaceholder"
         data-cy="selectOrganization"
       >
         <template #label>
           <span class="flex font-normal my-[8px] text-[16px] leading-[24px] items-end justify-between">
-            <span class="">
+            <span
+              id="organization-label"
+              class=""
+            >
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
             <ExternalLink
@@ -76,13 +80,17 @@
         :options="projectOptions"
         item-value="name"
         item-key="id"
+        label-id="project-label"
         :disabled="!pickedOrganization"
         :placeholder="projectPlaceholder"
         data-cy="selectProject"
       >
         <template #label>
           <div class="flex font-normal text-[16px] leading-[24px] items-center justify-between">
-            <p class="text-gray-800">
+            <p
+              id="project-label"
+              class="text-gray-800"
+            >
               {{ t('runs.connect.modal.selectProject.project') }}
               <span class="text-red-500">*</span>
             </p>

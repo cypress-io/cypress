@@ -8,7 +8,7 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
-    "mini-css-extract-plugin": "^1.3.4",
+    "mini-css-extract-plugin": "^2.9.1",
     "svelte": "^3.31.2",
     "svelte-loader": "^3.0.0",
     "webpack": "^5.16.0",

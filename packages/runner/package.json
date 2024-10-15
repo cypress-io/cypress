@@ -18,7 +18,7 @@
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "cross-env": "6.0.3",
-    "rimraf": "^5.0.1",
+    "rimraf": "^5.0.10",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },

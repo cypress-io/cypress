@@ -138,10 +138,12 @@ module.exports = {
      * our mksnapshot. Requiring the package in this way, dynamically, will
      * make it undiscoverable by mksnapshot, which is OK since electron-packager
      * is a build dependency.
+     * Converted to use @electron/packager for >= v18.x.x.
+     * This is the renamed electron-packager.
      */
     const e = 'electron'
     const p = 'packager'
-    const pkgr = require(`${e}-${p}`)
+    const pkgr = require(`@${e}/${p}`)
     const icons = require('@packages/icons')
 
     const iconPath = icons.getPathToIcon('cypress')

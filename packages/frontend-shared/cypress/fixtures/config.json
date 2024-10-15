@@ -284,7 +284,7 @@
               "vue3-file-selector",
               "just-my-luck",
               "combine-properties",
-              "faker",
+              "@faker-js/faker",
               "cypress/support/customPercyCommand"
             ]
           }

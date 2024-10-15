@@ -16,7 +16,7 @@ describe('windowSize', () => {
         // availHeight: top.screen.availHeight,
       }).deep.eq({
         innerWidth: 1280,
-        innerHeight: 633, // chrome 119 increased the size here from 599 to 633
+        innerHeight: 581, // chrome 128 decreased the size here from 633 to 581
         // screenWidth: 1280,
         // screenHeight: 603,
         // availWidth: 1280,

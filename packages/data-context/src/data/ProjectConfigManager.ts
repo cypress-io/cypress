@@ -363,6 +363,7 @@ export class ProjectConfigManager {
 
       this._eventsIpc = new ProjectConfigIpc(
         this.options.ctx.coreData.app.nodePath,
+        this.options.ctx.coreData.app.nodeVersion,
         this.options.projectRoot,
         this.configFilePath,
         this.options.configFile,

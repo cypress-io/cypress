@@ -17,12 +17,12 @@
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;"
   },
   "dependencies": {
-    "@babel/core": "^7.24.5",
-    "@babel/parser": "^7.24.5",
-    "@babel/plugin-syntax-typescript": "^7.24.1",
-    "@babel/plugin-transform-typescript": "^7.24.5",
-    "@babel/traverse": "^7.24.5",
-    "@babel/types": "^7.24.5",
+    "@babel/core": "^7.25.2",
+    "@babel/parser": "^7.25.3",
+    "@babel/plugin-syntax-typescript": "^7.24.7",
+    "@babel/plugin-transform-typescript": "^7.25.2",
+    "@babel/traverse": "^7.25.3",
+    "@babel/types": "^7.25.2",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
     "debug": "^4.3.4",

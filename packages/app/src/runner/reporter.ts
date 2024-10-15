@@ -1,6 +1,7 @@
 import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
 import { getReporterElement } from './utils'
-import { getEventManager, getRunnerConfigFromWindow } from '.'
+import { getEventManager } from '.'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 

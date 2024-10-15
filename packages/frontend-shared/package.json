@@ -23,6 +23,7 @@
   "devDependencies": {
     "@antfu/utils": "^0.7.8",
     "@cypress-design/css": "^0.13.3",
+    "@faker-js/faker": "8.4.1",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify-json/logos": "1.1.42",
@@ -31,7 +32,6 @@
     "@percy/cypress": "^3.1.2",
     "@testing-library/cypress": "9.0.0",
     "@toycode/markdown-it-class": "1.2.3",
-    "@types/faker": "5.5.8",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
@@ -52,7 +52,6 @@
     "cypress-real-events": "1.6.0",
     "dayjs": "^1.9.3",
     "fake-uuid": "^1.0.0",
-    "faker": "5.5.3",
     "floating-vue": "2.0.0-beta.17",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",

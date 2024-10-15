@@ -99,14 +99,14 @@ describe('CLI Interface', () => {
       /**
        * In certain versions of npm, code with an exit code of 10 (Internal Runtime Javascript Failure)
        * is ultimately displayed as an exit code of 1 (Uncaught Runtime Exception).
-       * This seems to occur before Node 7 / NPM 4 and after Node 14/ NPM 7.
+       * This seems to occur before Node 7 / NPM 4 and between Node 14/ NPM 7 and Node 16 / NPM 8.
        * Please see https://github.com/arzzen/all-exit-error-codes/blob/master/programming-languages/javascript/nodejs.md
        * for more details.
        *
        * @returns {boolean}
        */
       const doesNpmObscureInternalExitCode = () => {
-        return semver.lt(npmVersion, '4.0.0') || semver.gt(npmVersion, '6.0.0')
+        return semver.lt(npmVersion, '4.0.0') || (semver.gt(npmVersion, '6.0.0') && semver.lt(npmVersion, '8.0.0'))
       }
 
       beforeEach(() => {

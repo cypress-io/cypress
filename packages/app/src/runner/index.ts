@@ -23,10 +23,10 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 
 let _eventManager: EventManager | undefined
 
@@ -341,10 +341,6 @@ function runSpecE2E (config, spec: SpecFile) {
 
   // initialize Cypress (driver) with the AUT!
   getEventManager().initialize($autIframe, config)
-}
-
-export function getRunnerConfigFromWindow () {
-  return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 }
 
 /**

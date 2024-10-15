@@ -85,7 +85,6 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.contains('h1', 'Configuration files')
     cy.findByText('We added the following files to your project:')
@@ -106,7 +105,6 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--component'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('h1').should('contain', 'Project setup')
   })
 
@@ -435,7 +433,6 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
-        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
@@ -447,7 +444,6 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if component is configured', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
-        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
@@ -511,7 +507,7 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')

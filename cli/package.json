@@ -20,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^3.0.1",
+    "@cypress/request": "^3.0.4",
     "@cypress/xvfb": "^1.2.4",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
@@ -60,12 +60,13 @@
     "semver": "^7.5.3",
     "supports-color": "^8.1.1",
     "tmp": "~0.2.3",
+    "tree-kill": "1.2.2",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.24.5",
-    "@babel/preset-env": "7.24.5",
+    "@babel/cli": "7.24.8",
+    "@babel/preset-env": "7.25.3",
     "@cypress/angular": "0.0.0-development",
     "@cypress/angular-signals": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",

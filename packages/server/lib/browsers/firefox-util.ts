@@ -1,16 +1,14 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import Marionette from 'marionette-client'
-import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
-
-const errors = require('../errors')
+import type { CypressError } from '@packages/errors'
+import type { WebDriverClassic } from './webdriver-classic'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
@@ -22,11 +20,7 @@ let timings = {
   collections: [] as any[],
 }
 
-let driver
-
-const sendMarionette = (data) => {
-  return driver.send(new Command(data))
-}
+let webDriverClassic: WebDriverClassic
 
 const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
@@ -104,43 +98,40 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function connectMarionetteToNewTab () {
+async function connectToNewTabClassic () {
   // Firefox keeps a blank tab open in versions of Firefox 123 and lower when the last tab is closed.
   // For versions 124 and above, a new tab is not created, so @packages/extension creates one for us.
   // Since the tab is always available on our behalf,
   // we can connect to it here and navigate it to about:blank to set it up for CDP connection
-  const handles = await sendMarionette({
-    name: 'WebDriver:GetWindowHandles',
-  })
+  const handles = await webDriverClassic.getWindowHandles()
 
-  await sendMarionette({
-    name: 'WebDriver:SwitchToWindow',
-    parameters: { handle: handles[0] },
-  })
+  await webDriverClassic.switchToWindow(handles[0])
 
-  await navigateToUrl('about:blank')
+  await webDriverClassic.navigate('about:blank')
 }
 
 async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
   debug('firefox: reconnecting to blank tab')
 
-  await connectMarionetteToNewTab()
+  await connectToNewTabClassic()
 
   debug('firefox: reconnecting CDP')
 
-  await browserCriClient.currentlyAttachedTarget?.close().catch(() => {})
-  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+  if (browserCriClient) {
+    await browserCriClient.currentlyAttachedTarget?.close().catch(() => {})
+    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)
+    await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)
+  }
 
   await options.onInitializeNewBrowserTab()
 
   debug(`firefox: navigating to ${options.url}`)
-  await navigateToUrl(options.url)
+  await navigateToUrlClassic(options.url)
 }
 
-async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
-  const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: remotePort, browserName: 'Firefox', onAsynchronousError: onError, onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent })
+async function setupCDP (remotePort: number, automation: Automation, onError?: (err: Error) => void): Promise<BrowserCriClient> {
+  const browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1', '::1'], port: remotePort, browserName: 'Firefox', onAsynchronousError: onError as (err: CypressError) => void, onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent })
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)
@@ -148,11 +139,8 @@ async function setupRemote (remotePort, automation, onError): Promise<BrowserCri
   return browserCriClient
 }
 
-async function navigateToUrl (url) {
-  await sendMarionette({
-    name: 'WebDriver:Navigate',
-    parameters: { url },
-  })
+async function navigateToUrlClassic (url: string) {
+  await webDriverClassic.navigate(url)
 }
 
 const logGcDetails = () => {
@@ -219,28 +207,40 @@ export default {
     return forceGcCc()
   },
 
-  setup ({
+  async setup ({
     automation,
-    extensions,
     onError,
     url,
-    marionettePort,
     foxdriverPort,
     remotePort,
-  }): Bluebird<BrowserCriClient> {
-    return Bluebird.all([
+    webDriverClassic: wdcInstance,
+  }: {
+    automation: Automation
+    onError?: (err: Error) => void
+    url: string
+    foxdriverPort: number
+    remotePort: number
+    webDriverClassic: WebDriverClassic
+  }): Promise<BrowserCriClient> {
+    // set the WebDriver classic instance instantiated from geckodriver
+    webDriverClassic = wdcInstance
+    const [, browserCriClient] = await Promise.all([
       this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError),
-    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
+      setupCDP(remotePort, automation, onError),
+    ])
+
+    await navigateToUrlClassic(url)
+
+    return browserCriClient
   },
 
   connectToNewSpec,
 
-  navigateToUrl,
+  navigateToUrlClassic,
 
-  setupRemote,
+  setupCDP,
 
+  // NOTE: this is going to be removed in Cypress 14. @see https://github.com/cypress-io/cypress/issues/30222
   async setupFoxdriver (port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
@@ -304,64 +304,5 @@ export default {
         debug('firefox RDP error while forcing GC and CC %o', err)
       })
     }
-  },
-
-  async setupMarionette (extensions, url, port) {
-    await protocol._connectAsync({
-      host: '127.0.0.1',
-      port,
-      getDelayMsForRetry,
-    })
-
-    driver = new Marionette.Drivers.Promises({
-      port,
-      tries: 1, // marionette-client has its own retry logic which we want to avoid
-    })
-
-    debug('firefox: navigating page with webdriver')
-
-    const onError = (from, reject?) => {
-      if (!reject) {
-        reject = (err) => {
-          throw err
-        }
-      }
-
-      return (err) => {
-        debug('error in marionette %o', { from, err })
-        reject(errors.get('FIREFOX_MARIONETTE_FAILURE', from, err))
-      }
-    }
-
-    await driver.connect()
-    .catch(onError('connection'))
-
-    await new Bluebird((resolve, reject) => {
-      const _onError = (from) => {
-        return onError(from, reject)
-      }
-
-      const { tcp } = driver
-
-      tcp.socket.on('error', _onError('Socket'))
-      tcp.client.on('error', _onError('CommandStream'))
-
-      sendMarionette({
-        name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
-      }).then(() => {
-        return Bluebird.all(_.map(extensions, (path) => {
-          return sendMarionette({
-            name: 'Addon:Install',
-            parameters: { path, temporary: true },
-          })
-        }))
-      })
-      .then(resolve)
-      .catch(_onError('commands'))
-    })
-
-    // even though Marionette is not used past this point, we have to keep the session open
-    // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
   },
 }

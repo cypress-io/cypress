@@ -1,5 +1,5 @@
 import JustMyLuck from 'just-my-luck'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -75,6 +75,10 @@ export const directories = {
   frontendComponentsFlat: template('frontend/components'),
 }
 
+type NameTemplate = {
+  readonly [key: string]: TemplateExecutor
+}
+
 const nameTemplates = {
   // Business Logic Components
   longDomain: template(`{{prefix}}{{modifier}}{{domain}}{{component}}`),
@@ -134,22 +138,25 @@ const allRandomComponents = combineProperties({
 })
 
 export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTypename: T) => {
-  return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
+  return faker.helpers.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const componentName = componentNameGenerator({
       overrides: d,
-      template: faker.random.objectElement<TemplateExecutor>(nameTemplates),
+      template: faker.helpers.objectValue<NameTemplate>(nameTemplates),
     })
 
     const name = `${componentName}${d.specPattern}${d.fileExtension}`
 
-    const lastModifiedTimestamp = new Date(faker.random.arrayElement([
-      faker.date.recent(8),
-      faker.date.past(1),
-      faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString()),
+    const lastModifiedTimestamp = new Date(faker.helpers.arrayElement([
+      faker.date.recent({ days: 8 }),
+      faker.date.past({ years: 1 }),
+      faker.date.between({
+        from: new Date(Date.now() - 6000000).toUTCString(),
+        to: new Date().toUTCString(),
+      }),
     ]))
 
     return {
-      id: faker.datatype.uuid(),
+      id: faker.string.uuid(),
       baseName: name,
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
@@ -162,7 +169,7 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
       gitInfo: {
         __typename: 'GitInfo' as const,
         statusType: 'unmodified' as const,
-        id: faker.datatype.uuid(),
+        id: faker.string.uuid(),
         author: faker.internet.userName(),
         lastModifiedHumanReadable: dayjs(lastModifiedTimestamp).fromNow(),
         lastModifiedTimestamp: lastModifiedTimestamp.toUTCString(),

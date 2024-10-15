@@ -4,25 +4,25 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { debug as launcherDebug, launch } from '@packages/launcher/lib/browsers'
+import { debug as launcherDebug } from '@packages/launcher/lib/browsers'
 import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
-import { EventEmitter } from 'events'
 import os from 'os'
-import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
-import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import { GeckoDriver } from './geckodriver'
+import { WebDriverClassic } from './webdriver-classic'
 
 const debug = Debug('cypress:server:browsers:firefox')
+const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -355,33 +355,14 @@ toolbar {
 
 let browserCriClient: BrowserCriClient | undefined
 
-export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
-  const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
-
-  detachedInstance.pid = browserInstance.pid
-
-  // kill the entire process tree, from the spawned instance up
-  detachedInstance.kill = (): void => {
-    // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
-    if (browserCriClient) {
-      clearInstanceState({ gracefulShutdown: true })
-    }
-
-    treeKill(browserInstance.pid as number, (err?, result?) => {
-      debug('force-exit of process tree complete %o', { err, result })
-      detachedInstance.emit('exit')
-    })
-  }
-
-  return detachedInstance
-}
-
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
 export function clearInstanceState (options: GracefulShutdownOptions = {}) {
-  debug('closing remote interface client')
+  debug('clearing instance state')
+
   if (browserCriClient) {
+    debug('closing remote interface client')
     browserCriClient.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
   }
@@ -406,34 +387,29 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
-  const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
     args: [
-      '-marionette',
       '-new-instance',
-      '-foreground',
+      // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
+      // '-allow-downgrade',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
 
-  let remotePort
-
-  if (hasCdp) {
-    remotePort = await getRemoteDebuggingPort()
-
-    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
-  }
-
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
     // we don't need to specify width/height since MOZ_HEADLESS_ env vars will be set
     // and the browser will spawn maximized. The user may still supply these args to override
-    // defaultLaunchOptions.args.push('--width=1920')
-    // defaultLaunchOptions.args.push('--height=1081')
+    // defaultLaunchOptions.args.push('-width=1920')
+    // defaultLaunchOptions.args.push('-height=1081')
+  } else if (os.platform() === 'win32' || os.platform() === 'darwin') {
+    // lets the browser come into focus. Only works on Windows or Mac
+    // this argument is added automatically to the linux geckodriver,
+    // so adding it is unnecessary and actually causes the browser to fail to launch.
+    defaultLaunchOptions.args.push('-foreground')
   }
 
   debug('firefox open %o', options)
@@ -467,12 +443,16 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+    geckoDriverPort,
+    webDriverBiDiPort,
+  ] = await Promise.all([getPort(), getPort(), getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  // NOTE: we get the BiDi port and set it inside of geckodriver, but BiDi is not currently enabled (see remote.active-protocols above).
+  // this is so the BiDi websocket port does not get set to 0, which is the default for the geckodriver package.
+  debug('available ports: %o', { foxdriverPort, marionettePort, geckoDriverPort, webDriverBiDiPort })
 
   const [
     cacheDir,
@@ -498,18 +478,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
-
-  const xulStorePath = path.join(profile.path(), 'xulstore.json')
-
-  // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
-  if (!await fs.pathExists(xulStorePath)) {
-    // this causes the browser to launch maximized, which chrome does by default
-    // otherwise an arbitrary size will be picked for the window size
-    // this will not have an effect after first launch in 'interactive' mode
-    const sizemode = 'maximized'
-
-    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
-  }
 
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
   for (const pref in launchOptions.preferences) {
@@ -544,40 +512,115 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), userCss)
   }
 
-  launchOptions.args = launchOptions.args.concat([
-    '-profile',
-    profile.path(),
-  ])
+  // resolution of exactly 1280x720
+  // (height must account for firefox url bar, which we can only shrink to 1px ,
+  // and the total size of the window url and tab bar, which is 85 pixels for a total offset of 86 pixels)
+  const BROWSER_ENVS = {
+    MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
+    MOZ_HEADLESS_WIDTH: '1280',
+    MOZ_HEADLESS_HEIGHT: '806',
+    ...launchOptions.env,
+  }
+
+  debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
+
+  // create the geckodriver process, which we will use WebDriver Classic to open the browser
+  const geckoDriverInstance = await GeckoDriver.create({
+    host: '127.0.0.1',
+    port: geckoDriverPort,
+    marionetteHost: '127.0.0.1',
+    marionettePort,
+    webdriverBidiPort: webDriverBiDiPort,
+    profilePath: profile.path(),
+    binaryPath: browser.path,
+    // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
+    // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
+    // pass them to the firefox process
+    // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1604723#c20 for more details
+    spawnOpts: {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...BROWSER_ENVS,
+        ...process.env,
+      },
+    },
+  })
+
+  const wdcInstance = new WebDriverClassic('127.0.0.1', geckoDriverPort)
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
-    // sets headless resolution to 1280x720 by default
-    // user can overwrite this default with these env vars or --height, --width arguments
-    MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '721',
-    ...launchOptions.env,
-  })
+  const capabilitiesToSend = {
+    capabilities: {
+      alwaysMatch: {
+        acceptInsecureCerts: true,
+        // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+        'moz:firefoxOptions': {
+          binary: browser.path,
+          args: launchOptions.args,
+          prefs: launchOptions.preferences,
+        },
+        // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
+        // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+        'moz:debuggerAddress': true,
+      },
+    },
+  }
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    debugVerbose(`creating session with capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
 
-    if (os.platform() === 'win32') {
-      // override the .kill method for Windows so that the detached Firefox process closes between specs
-      // @see https://github.com/cypress-io/cypress/issues/6392
-      return _createDetachedInstance(browserInstance, browserCriClient)
+    // this command starts the webdriver session and actually opens the browser
+    const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
+
+    debugVerbose(`received capabilities %o`, capabilities)
+
+    const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
+
+    debug(`CDP running on port ${cdpPort}`)
+
+    const browserPID = capabilities['moz:processID']
+
+    debug(`firefox running on pid: ${browserPID}`)
+
+    // makes it so get getRemoteDebuggingPort() is calculated correctly
+    process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+
+    // maximize the window if running headful and no width or height args are provided.
+    // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
+    // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
+    // a base 64 encoded profile.
+    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
+      await wdcInstance.maximizeWindow()
     }
 
-    // monkey-patch the .kill method to that the CDP connection is closed
-    const originalBrowserKill = browserInstance.kill
+    // install the browser extensions
+    await Promise.all(_.map(launchOptions.extensions, (path) => {
+      debug(`installing extension at path: ${path}`)
 
-    browserInstance.kill = (...args) => {
+      return wdcInstance!.installAddOn({
+        path,
+        temporary: true,
+      })
+    }))
+
+    debug('setting up firefox utils')
+    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalGeckoDriverKill = geckoDriverInstance.kill
+
+    geckoDriverInstance.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
       clearInstanceState({ gracefulShutdown: true })
 
       debug('closing firefox')
 
-      return originalBrowserKill.apply(browserInstance, args)
+      process.kill(browserPID)
+
+      debug('closing geckodriver')
+
+      return originalGeckoDriverKill.apply(geckoDriverInstance, args)
     }
 
     await utils.executeAfterBrowserLaunch(browser, {
@@ -587,7 +630,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
-  return browserInstance
+  return geckoDriverInstance
 }
 
 export async function closeExtraTargets () {

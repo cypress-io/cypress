@@ -1,5 +1,5 @@
 import Collapsible from './Collapsible.vue'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 
 faker.seed(1)
 

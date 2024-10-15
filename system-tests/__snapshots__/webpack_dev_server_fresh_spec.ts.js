@@ -321,7 +321,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x581)
      s detected outside of a test (failed).png                                                      
 
 
@@ -404,12 +404,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x581)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x633)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x581)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x581)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x581)
      ).png                                                                                          
 
 
@@ -455,7 +455,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x581)
      ng                                                                                             
 
 
@@ -493,7 +493,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x581)
      his file (failed).png                                                                          
 
 
@@ -744,7 +744,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x581)
      s detected outside of a test (failed).png                                                      
 
 
@@ -827,12 +827,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x581)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x633)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x581)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x581)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x581)
      ).png                                                                                          
 
 
@@ -878,7 +878,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x581)
      ng                                                                                             
 
 
@@ -916,7 +916,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x581)
      his file (failed).png                                                                          
 
 
@@ -1158,7 +1158,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x581)
      s detected outside of a test (failed).png                                                      
 
 
@@ -1241,12 +1241,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x581)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x633)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x581)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x581)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x581)
      ).png                                                                                          
 
 
@@ -1292,7 +1292,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x581)
      ng                                                                                             
 
 
@@ -1330,7 +1330,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x581)
      his file (failed).png                                                                          
 
 
@@ -1584,7 +1584,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x581)
      s detected outside of a test (failed).png                                                      
 
 
@@ -1667,12 +1667,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x581)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x633)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x581)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x581)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x581)
      ).png                                                                                          
 
 
@@ -1718,7 +1718,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x581)
      ng                                                                                             
 
 
@@ -1756,7 +1756,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x581)
      his file (failed).png                                                                          
 
 
@@ -2027,7 +2027,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x581)
      s detected outside of a test (failed).png                                                      
 
 
@@ -2110,12 +2110,12 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x581)
      .png                                                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x633)
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x581)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x581)
      g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x581)
      ).png                                                                                          
 
 
@@ -2161,7 +2161,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x581)
      ng                                                                                             
 
 
@@ -2199,7 +2199,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x581)
      his file (failed).png                                                                          
 
 

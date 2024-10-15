@@ -132,6 +132,7 @@ fragment MainLaunchpadQueryData on Query {
     preferences {
       majorVersionWelcomeDismissed
       wasBrowserSetInCLI
+      shouldLaunchBrowserFromOpenBrowser
     }
   }
   currentProject {
@@ -246,11 +247,11 @@ watch(
 
 function handleClearLandingPage () {
   setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
-  const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+  const shouldLaunchBrowser = query.data?.value?.localSettings?.preferences?.shouldLaunchBrowserFromOpenBrowser
 
   const currentTestingType = currentProject.value?.currentTestingType
 
-  if (wasBrowserSetInCLI && currentTestingType) {
+  if (shouldLaunchBrowser && currentTestingType) {
     launchProject.executeMutation({ testingType: currentTestingType })
   }
 }

@@ -7,13 +7,13 @@ describe('<Switch />', () => {
 
     cy.mount(() => (
       <div class="p-6">
-        <label for="test-switch">Switch</label>
+        <label id="test-switch">Switch</label>
         <Switch
           // @ts-ignore
           value={valueRef.value}
           // @ts-ignore
           onUpdate={(newVal) => (valueRef.value = newVal)}
-          name="test-switch"
+          labelId="test-switch"
         />
       </div>
     ))

@@ -68,6 +68,9 @@ const logError = debug('cypress:snapgen:error')
  * @property nodeEnv the string to provide to `process.env.NODE_ENV` during
  * snapshot creation
  *
+ * @property cypressInternalEnv the string to provide to `process.env.CYPRESS_INTERNAL_ENV` during
+ * snapshot creation
+ *
  * @property minify if `true` the snapshot script will be minified
  *
  * @property supportTypeScript if `true` then TypeScript should be supported
@@ -83,6 +86,7 @@ export type GenerationOpts = {
   resolverMap?: Record<string, string>
   flags: Flag
   nodeEnv: string
+  cypressInternalEnv: string
   minify: boolean
   supportTypeScript: boolean
   integrityCheckSource: string | undefined
@@ -97,6 +101,7 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     nodeModulesOnly: true,
     flags: Flag.Script | Flag.MakeSnapshot | Flag.ReuseDoctorArtifacts,
     nodeEnv: 'development',
+    cypressInternalEnv: 'development',
     minify: false,
     supportTypeScript: false,
     integrityCheckSource: undefined,
@@ -136,6 +141,8 @@ export class SnapshotGenerator {
   private readonly forceNoRewrite: Set<string>
   /** See {@link GenerationOpts} nodeEnv */
   private readonly nodeEnv: string
+  /** See {@link GenerationOpts} cypressInternalEnv */
+  private readonly cypressInternalEnv: string
   /** See {@link GenerationOpts} minify */
   private readonly minify: boolean
   /** See {@link GenerationOpts} integrityCheckSource */
@@ -196,6 +203,7 @@ export class SnapshotGenerator {
       forceNoRewrite,
       flags: mode,
       nodeEnv,
+      cypressInternalEnv,
       minify,
       integrityCheckSource,
       useExistingSnapshotScript,
@@ -220,6 +228,7 @@ export class SnapshotGenerator {
     this.nodeModulesOnly = nodeModulesOnly
     this.forceNoRewrite = new Set(forceNoRewrite)
     this.nodeEnv = nodeEnv
+    this.cypressInternalEnv = cypressInternalEnv
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
     this.minify = minify
@@ -280,6 +289,7 @@ export class SnapshotGenerator {
           nodeModulesOnly: this.nodeModulesOnly,
           forceNoRewrite: this.forceNoRewrite,
           nodeEnv: this.nodeEnv,
+          cypressInternalEnv: this.cypressInternalEnv,
           integrityCheckSource: this.integrityCheckSource,
         },
       ))
@@ -307,6 +317,7 @@ export class SnapshotGenerator {
         baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
         processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
+        cypressInternalEnv: this.cypressInternalEnv,
         supportTypeScript: this.nodeModulesOnly,
         integrityCheckSource: this.integrityCheckSource,
       })
@@ -384,6 +395,7 @@ export class SnapshotGenerator {
           nodeModulesOnly: this.nodeModulesOnly,
           forceNoRewrite: this.forceNoRewrite,
           nodeEnv: this.nodeEnv,
+          cypressInternalEnv: this.cypressInternalEnv,
           integrityCheckSource: this.integrityCheckSource,
         },
       ))
@@ -409,6 +421,7 @@ export class SnapshotGenerator {
         resolverMap: this.resolverMap,
         auxiliaryData: this.auxiliaryData,
         nodeEnv: this.nodeEnv,
+        cypressInternalEnv: this.cypressInternalEnv,
         supportTypeScript: this.nodeModulesOnly,
         integrityCheckSource: this.integrityCheckSource,
       })

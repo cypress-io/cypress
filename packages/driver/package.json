@@ -13,12 +13,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@babel/code-frame": "7.24.2",
+    "@babel/code-frame": "7.24.7",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/unique-selector": "0.0.5",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@medv/finder": "3.1.0",
     "@packages/config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

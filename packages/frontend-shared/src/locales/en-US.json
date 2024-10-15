@@ -13,6 +13,7 @@
       "noMatchesForFileName": "",
       "byFilenameInput": "Search by filename...",
       "byExtensionInput": "Extensions to include e.g. *.tsx, *.vue",
+      "expandToSearchByExtensions": "Search for files with extensions e.g. *.tsx, *.vue",
       "matchesIndicatorEmptyFileSearch": "No matches | 1 match | { denominator } matches",
       "matchesIndicator": "No matches | {numerator} of {denominator} matches | {numerator} of {denominator} matches"
     },
@@ -608,6 +609,10 @@
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
+      },
+      "experimentalJustInTimeCompile": {
+        "name": "Just-In-Time compiling",
+        "description": "Enables Just-In-Time (JIT) compiling for component testing, which will only compile assets related to the spec before the spec is run. Currently supported for Vite and Webpack."
       },
       "experimentalSourceRewriting": {
         "name": "Source rewriting",

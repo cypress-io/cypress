@@ -192,6 +192,7 @@ export default function (Commands, Cypress, cy, state, config) {
       const isFirefoxBefore91 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 91
       const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
       const isFirefox106OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 106
+      const isFirefox129OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 129
 
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
@@ -385,9 +386,9 @@ export default function (Commands, Cypress, cy, state, config) {
 
             keydownEvents = []
 
-            // After Firefox 98,
+            // After Firefox 98 and before 129
             // Firefox doesn't update checkbox automatically even if the click event is sent.
-            if (Cypress.isBrowser('firefox')) {
+            if (Cypress.isBrowser('firefox') && !isFirefox129OrLater) {
               if (event.target.type === 'checkbox') {
                 event.target.checked = !event.target.checked
               } else if (event.target.type === 'radio') { // when checked is false, here cannot be reached because of the above condition

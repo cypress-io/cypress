@@ -1,18 +1,16 @@
 require('../../spec_helper')
-
 import 'chai-as-promised'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
-import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
-import stripAnsi from 'strip-ansi'
 import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { ICriClient } from '../../../lib/browsers/cri-client'
+import { GeckoDriver } from '../../../lib/browsers/geckodriver'
+import * as webDriverClassicImport from '../../../lib/browsers/webdriver-classic'
 
 const path = require('path')
 const _ = require('lodash')
@@ -26,39 +24,9 @@ const specUtil = require('../../specUtils')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
-  let marionetteDriver: any
-  let marionetteSendCb: any
   let foxdriver: any
   let foxdriverTab: any
-
-  const stubMarionette = () => {
-    marionetteSendCb = null
-
-    const connect = sinon.stub()
-
-    connect.resolves()
-
-    const send = sinon.stub().callsFake((opts) => {
-      if (marionetteSendCb) {
-        return marionetteSendCb(opts)
-      }
-
-      return Promise.resolve()
-    })
-
-    const close = sinon.stub()
-
-    const socket = new EventEmitter()
-    const client = new EventEmitter()
-
-    const tcp = { socket, client }
-
-    marionetteDriver = {
-      tcp, connect, send, close,
-    }
-
-    sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
-  }
+  let wdcInstance: sinon.SinonStubbedInstance<webDriverClassicImport.WebDriverClassic>
 
   const stubFoxdriver = () => {
     foxdriverTab = {
@@ -90,7 +58,7 @@ describe('lib/browsers/firefox', () => {
     return mockfs.restore()
   })
 
-  beforeEach(() => {
+  beforeEach(function () {
     sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox-stable/interactive')
 
     mockfs({
@@ -99,29 +67,48 @@ describe('lib/browsers/firefox', () => {
 
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
-    stubMarionette()
+    this.browserInstance = {
+      // should be high enough to not kill any real PIDs
+      pid: Number.MAX_SAFE_INTEGER,
+    }
+
+    sinon.stub(GeckoDriver, 'create').resolves(this.browserInstance)
+
+    wdcInstance = sinon.createStubInstance(webDriverClassicImport.WebDriverClassic)
+
+    wdcInstance.createSession.resolves({
+      capabilities: {
+        'moz:debuggerAddress': '127.0.0.1:12345',
+        acceptInsecureCerts: false,
+        browserName: '',
+        browserVersion: '',
+        platformName: '',
+        pageLoadStrategy: 'normal',
+        strictFileInteractability: false,
+        timeouts: {
+          implicit: 0,
+          pageLoad: 0,
+          script: 0,
+        },
+        'moz:accessibilityChecks': false,
+        'moz:buildID': '',
+        'moz:geckodriverVersion': '',
+        'moz:headless': false,
+        'moz:platformVersion': '',
+        'moz:processID': 0,
+        'moz:profile': '',
+        'moz:shutdownTimeout': 0,
+        'moz:webdriverClick': false,
+        'moz:windowless': false,
+        unhandledPromptBehavior: '',
+        userAgent: '',
+        sessionId: '',
+      },
+    })
+
+    sinon.stub(webDriverClassicImport, 'WebDriverClassic').callsFake(() => wdcInstance)
+
     stubFoxdriver()
-  })
-
-  context('#connectToNewSpec', () => {
-    beforeEach(function () {
-      this.browser = { name: 'firefox', channel: 'stable' }
-      this.automation = {
-        use: sinon.stub().returns({}),
-      }
-
-      this.options = {
-        onError: () => {},
-      }
-    })
-
-    it('calls connectToNewSpec in firefoxUtil', function () {
-      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
-
-      firefox.connectToNewSpec(this.browser, this.options, this.automation)
-
-      expect(firefoxUtil.connectToNewSpec).to.be.called
-    })
   })
 
   context('#open', () => {
@@ -137,11 +124,6 @@ describe('lib/browsers/firefox', () => {
         proxyUrl: 'http://proxy-url',
         socketIoRoute: 'socket/io/route',
         browser: this.browser,
-      }
-
-      this.browserInstance = {
-        // should be high enough to not kill any real PIDs
-        pid: Number.MAX_SAFE_INTEGER,
       }
 
       sinon.stub(process, 'pid').value(1111)
@@ -165,6 +147,30 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
       sinon.stub(CdpAutomation, 'create').resolves()
+    })
+
+    context('#connectToNewSpec', () => {
+      beforeEach(function () {
+        this.options.onError = () => {}
+        this.options.onInitializeNewBrowserTab = sinon.stub()
+      })
+
+      it('calls connectToNewSpec in firefoxUtil', async function () {
+        wdcInstance.getWindowHandles.resolves(['mock-context-id'])
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        this.options.url = 'next-spec-url'
+        await firefox.connectToNewSpec(this.browser, this.options, this.automation)
+
+        expect(this.options.onInitializeNewBrowserTab).to.have.been.called
+        expect(wdcInstance.getWindowHandles).to.have.been.called
+        expect(wdcInstance.switchToWindow).to.have.been.calledWith('mock-context-id')
+
+        // first time when connecting a new tab
+        expect(wdcInstance.navigate).to.have.been.calledWith('about:blank')
+        // second time when navigating to the spec
+        expect(wdcInstance.navigate).to.have.been.calledWith('next-spec-url')
+      })
     })
 
     it('executes before:browser:launch if registered', function () {
@@ -215,29 +221,83 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    it('adds extensions returned by before:browser:launch, along with cypress extension', function () {
-      plugins.has.withArgs('before:browser:launch').returns(true)
-      plugins.execute.resolves({
-        extensions: ['/path/to/user/ext'],
-      })
-
+    it('creates the geckodriver, the creation of the WebDriver session, installs the extension, and passes the correct port to CDP', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
+        expect(GeckoDriver.create).to.have.been.calledWith({
+          host: '127.0.0.1',
+          port: sinon.match(Number),
+          marionetteHost: '127.0.0.1',
+          marionettePort: sinon.match(Number),
+          webdriverBidiPort: sinon.match(Number),
+          profilePath: '/path/to/appData/firefox-stable/interactive',
+          binaryPath: undefined,
+          spawnOpts: sinon.match({
+            stdio: ['ignore', 'pipe', 'pipe'],
+            env: {
+              MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
+              MOZ_HEADLESS_WIDTH: '1280',
+              MOZ_HEADLESS_HEIGHT: '806',
+            },
+          }),
+        })
 
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+        expect(wdcInstance.createSession).to.have.been.calledWith(sinon.match(
+          {
+            capabilities: {
+              alwaysMatch: {
+                acceptInsecureCerts: true,
+                'moz:firefoxOptions': {
+                  args: [
+                    '-new-instance',
+                    '-start-debugger-server',
+                    '-no-remote',
+                    ...(os.platform() !== 'linux' ? ['-foreground'] : []),
+                  ],
+                },
+                'moz:debuggerAddress': true,
+              },
+            },
+          },
+        ))
+
+        expect(wdcInstance.installAddOn).to.have.been.calledWith(sinon.match({
+          path: '/path/to/ext',
+          temporary: true,
+        }))
+
+        expect(wdcInstance.navigate).to.have.been.calledWith('http://')
+
+        // make sure CDP gets the expected port
+        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
       })
     })
 
-    it('adds only cypress extension if before:browser:launch returns object with non-array extensions', function () {
-      plugins.has.withArgs('before:browser:launch').returns(true)
-      plugins.execute.resolves({
-        extensions: 'not-an-array',
+    it('does not maximize the browser if headless', function () {
+      this.browser.isHeadless = true
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(wdcInstance.maximizeWindow).not.to.have.been.called
+      })
+    })
+
+    it('does not maximize the browser if "-width" or "-height" arg is set', function () {
+      this.browser.isHeadless = false
+      sinon.stub(utils, 'executeBeforeBrowserLaunch').resolves({
+        args: ['-width', '1280', '-height', '720'],
+        extensions: [],
+        preferences: {},
       })
 
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
+        expect(wdcInstance.maximizeWindow).not.to.have.been.called
+      })
+    })
 
-        expect(marionetteDriver.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+    it('maximizes the browser if headed and no "-width" or "-height" arg is set', function () {
+      this.browser.isHeadless = false
+
+      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
+        expect(wdcInstance.maximizeWindow).to.have.been.called
       })
     })
 
@@ -357,21 +417,6 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    it('launches with the url and args', function () {
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', 1234, [
-          '-marionette',
-          '-new-instance',
-          '-foreground',
-          '-start-debugger-server',
-          '-no-remote',
-          '--remote-debugging-port=1234',
-          '-profile',
-          '/path/to/appData/firefox-stable/interactive',
-        ])
-      })
-    })
-
     it('resolves the browser instance', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then((result) => {
         expect(result).to.equal(this.browserInstance)
@@ -391,15 +436,6 @@ describe('lib/browsers/firefox', () => {
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
-        })
-      })
-    })
-
-    it('creates xulstore.json if not exist', function () {
-      return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
     })
@@ -464,21 +500,6 @@ describe('lib/browsers/firefox', () => {
 
         expect(instance).to.eq(this.browserInstance)
       })
-
-      // @see https://github.com/cypress-io/cypress/issues/6392
-      it('detached on Windows', async function () {
-        sinon.stub(os, 'platform').returns('win32')
-        const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
-
-        expect(instance).to.not.eq(this.browserInstance)
-        expect(instance.pid).to.eq(this.browserInstance.pid)
-
-        await new Promise((resolve) => {
-          // ensure events are wired as expected
-          instance.on('exit', resolve)
-          instance.kill()
-        })
-      })
     })
   })
 
@@ -489,57 +510,6 @@ describe('lib/browsers/firefox', () => {
   })
 
   context('firefox-util', () => {
-    context('#setupMarionette', () => {
-      // @see https://github.com/cypress-io/cypress/issues/7159
-      it('attaches geckodriver after testing connection', async () => {
-        await firefoxUtil.setupMarionette([], '', port)
-
-        expect(marionetteDriver.connect).to.be.calledOnce
-        expect(protocol._connectAsync).to.be.calledWith({
-          host: '127.0.0.1',
-          port,
-          getDelayMsForRetry: sinon.match.func,
-        })
-      })
-
-      it('rejects on errors on socket', async () => {
-        marionetteSendCb = () => {
-          marionetteDriver.tcp.socket.emit('error', new Error('foo error'))
-
-          return Promise.resolve()
-        }
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
-          expect(err.details).to.include('Error: foo error')
-          expect(err.originalError.message).to.eq('foo error')
-        })
-      })
-
-      it('rejects on errors from marionette commands', async () => {
-        marionetteSendCb = () => {
-          return Promise.reject(new Error('foo error'))
-        }
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
-          expect(err.details).to.include('Error: foo error')
-        })
-      })
-
-      it('rejects on errors during initial Marionette connection', async () => {
-        marionetteDriver.connect.rejects(new Error('not connectable'))
-
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejected.then((err) => {
-          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
-          expect(err.details).to.include('Error: not connectable')
-        })
-      })
-    })
-
     context('#setupFoxdriver', () => {
       it('attaches foxdriver after testing connection', async () => {
         await firefoxUtil.setupFoxdriver(port)
@@ -601,7 +571,7 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, automationStub, null)
+        const actual = await firefoxUtil.setupCDP(port, automationStub, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')

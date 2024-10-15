@@ -264,6 +264,7 @@ export class SnapshotDoctor {
   private readonly previousNoRewrite: Set<string>
   private readonly forceNoRewrite: Set<string>
   private readonly nodeEnv: string
+  private readonly cypressInternalEnv: string
   private readonly _scriptProcessor: AsyncScriptProcessor
   private readonly _warningsProcessor: WarningsProcessor
   private readonly integrityCheckSource: string | undefined
@@ -285,6 +286,7 @@ export class SnapshotDoctor {
     this.previousNoRewrite = unpathify(opts.previousNoRewrite)
     this.forceNoRewrite = unpathify(opts.forceNoRewrite)
     this.nodeEnv = opts.nodeEnv
+    this.cypressInternalEnv = opts.cypressInternalEnv
     this.integrityCheckSource = opts.integrityCheckSource
   }
 
@@ -500,6 +502,7 @@ export class SnapshotDoctor {
             entryFilePath: this.entryFilePath,
             entryPoint: `./${key}`,
             nodeEnv: this.nodeEnv,
+            cypressInternalEnv: this.cypressInternalEnv,
             supportTypeScript: this.nodeModulesOnly,
             integrityCheckSource: this.integrityCheckSource,
           })

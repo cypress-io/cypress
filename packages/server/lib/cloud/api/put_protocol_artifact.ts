@@ -7,15 +7,10 @@ import { putFetch, ParseKinds } from '../network/put_fetch'
 import { isRetryableError } from '../network/is_retryable_error'
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 
-// the upload will get canceled if the stream pipeline
-// stalls (does not push data to the `fetch` sink) for more
-// than 5 seconds
-const MAX_ACTIVITY_DWELL_TIME = 5000
-
 export const _delay = linearDelay(500)
 
 export const putProtocolArtifact = asyncRetry(
-  async (artifactPath: string, maxFileSize: number, destinationUrl: string) => {
+  async (artifactPath: string, maxFileSize: number, destinationUrl: string, uploadMonitorSamplingRate: number) => {
     debug(`Atttempting to upload Test Replay archive from ${artifactPath} to ${destinationUrl})`)
     const { size } = await fsAsync.stat(artifactPath)
 
@@ -23,7 +18,7 @@ export const putProtocolArtifact = asyncRetry(
       throw new Error(`Spec recording too large: artifact is ${size} bytes, limit is ${maxFileSize} bytes`)
     }
 
-    const activityMonitor = new StreamActivityMonitor(MAX_ACTIVITY_DWELL_TIME)
+    const activityMonitor = new StreamActivityMonitor(uploadMonitorSamplingRate)
     const fileStream = fs.createReadStream(artifactPath)
     const controller = activityMonitor.getController()
 

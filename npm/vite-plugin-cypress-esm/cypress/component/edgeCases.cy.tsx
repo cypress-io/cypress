@@ -48,7 +48,7 @@ describe('edge cases', () => {
    * This library has some weird things going on with prototypes
    * under the hood.
    */
-  it('works with react-query', () => {
+  it('works with @tanstack/react-query', () => {
     mount(<App />)
   })
 

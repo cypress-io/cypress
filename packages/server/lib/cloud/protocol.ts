@@ -14,7 +14,7 @@ import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, SpecWithRelativeRoot } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -25,6 +25,8 @@ const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export const DB_SIZE_LIMIT = 5000000000
+
+export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
 
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
@@ -131,7 +133,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('addRunnables', { isEssential: true }, runnables)
   }
 
-  beforeSpec (spec: { instanceId: string }) {
+  beforeSpec (spec: SpecWithRelativeRoot & { instanceId: string }) {
     this._afterSpecDurations = undefined
 
     if (!this._protocol) {
@@ -155,7 +157,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  private _beforeSpec (spec: { instanceId: string }) {
+  private _beforeSpec (spec: SpecWithRelativeRoot & { instanceId: string }) {
     this._instanceId = spec.instanceId
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
@@ -170,7 +172,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._archivePath = archivePath
-    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db, spec })
   }
 
   async afterSpec () {
@@ -320,7 +322,12 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
+        this._protocol.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : DEFAULT_STREAM_SAMPLING_INTERVAL
+
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)
 
       return {
         fileSize,

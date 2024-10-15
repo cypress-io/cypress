@@ -7,6 +7,7 @@
       <h3
         class="inline text-indigo-500 text-md"
         role="rowheader"
+        data-cy="experimentName"
       >
         {{ experiment.name }}
       </h3>
@@ -22,6 +23,7 @@
       <span
         ref="descriptionRef"
         class="description children:text-sm children:leading-[24px]"
+        data-cy="experimentDescription"
         v-html="markdown"
       />
     </span>

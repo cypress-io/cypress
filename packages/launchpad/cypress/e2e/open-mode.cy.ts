@@ -24,7 +24,6 @@ describe('Launchpad: Open Mode', () => {
     it('shows Add Project when no projects have been added', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
 
@@ -32,14 +31,13 @@ describe('Launchpad: Open Mode', () => {
       cy.openGlobalMode()
       cy.addProject('todos')
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
     })
 
     it('does not show Welcome screen on next Launchpad visit when it has already been dismissed', () => {
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ showWelcome: true })
       cy.skipWelcome()
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ showWelcome: true })
       cy.contains('button', 'Continue').should('not.exist')
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
@@ -49,7 +47,6 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
     // e2e testing is configured for the todo project, so we don't expect an error.
     cy.get('h1').should('contain', 'Choose a browser')
@@ -76,7 +73,7 @@ describe('Launchpad: Open Mode', () => {
         ctx.versions['_initialLaunch'] = true
       })
 
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ showWelcome: true })
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.withCtx((ctx, o) => {
@@ -97,7 +94,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.withCtx((ctx, o) => {
         expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
@@ -112,7 +108,6 @@ describe('Launchpad: Open Mode', () => {
     describe('logged-in state', () => {
       it(`sends 'false' when not logged in`, () => {
         cy.visitLaunchpad()
-        cy.skipWelcome()
         cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
@@ -126,7 +121,6 @@ describe('Launchpad: Open Mode', () => {
       it(`sends 'true' when logged in`, () => {
         cy.loginUser()
         cy.visitLaunchpad()
-        cy.skipWelcome()
         cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
@@ -147,7 +141,6 @@ describe('Launchpad: Open Mode', () => {
     it('goes to component test onboarding', () => {
       cy.openProject('react-vite-ts-unconfigured', ['--component'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
       // Component testing is not configured for the todo project
@@ -163,7 +156,6 @@ describe('Launchpad: Open Mode', () => {
 
       cy.openProject('react-vite-ts-unconfigured', ['--component'])
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.get('[data-testid="select-framework"]').as('framework')
 
@@ -207,7 +199,6 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.contains('E2E Testing').click()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
@@ -224,7 +215,6 @@ describe('Launchpad: Open Mode', () => {
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
 
-      cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
@@ -265,7 +255,6 @@ describe('Launchpad: Open Mode', () => {
       cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx(async (ctx, o) => {
         ctx.emitter.toLaunchpad()
@@ -280,7 +269,6 @@ describe('Launchpad: Open Mode', () => {
       cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
@@ -310,7 +298,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project actions"]').click()
       cy.get('button').contains('Open in IDE').click()
@@ -337,7 +324,6 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
       cy.findByTestId('project-card')
       cy.get('[aria-label="Project actions"]').click()
 
@@ -356,7 +342,6 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('no-support-file')
     cy.openProject('no-support-file', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.contains(cy.i18n.launchpadErrors.generic.configErrorTitle)
     cy.contains('Your project does not contain a default supportFile.')
     cy.contains('If a support file is not necessary for your project, set supportFile to false.')
@@ -369,7 +354,6 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('project-with-(glob)-[chars]')
     cy.openProject('project-with-(glob)-[chars]', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
     cy.get('h1').should('contain', 'Choose a browser')
@@ -379,7 +363,6 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('simple with spaces')
     cy.openProject('simple with spaces', ['--e2e'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('h1').should('contain', 'Choose a browser')
   })
 })

@@ -390,7 +390,7 @@ describe('src/cypress/log', function () {
       const log = this.log({ '$el': div })
       const result = log.snapshot()
 
-      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div, undefined, log)
       expect(result).to.equal(log)
     })
 
@@ -436,7 +436,7 @@ describe('src/cypress/log', function () {
       const log = this.log({ '$el': div })
       const result = log.snapshot()
 
-      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div, undefined, log)
       expect(result).to.equal(log)
     })
 
@@ -450,7 +450,7 @@ describe('src/cypress/log', function () {
       const log = this.log({ '$el': div })
       const result = log.snapshot()
 
-      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div, undefined, log)
       expect(result).to.equal(log)
     })
 

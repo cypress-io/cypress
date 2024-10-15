@@ -26,7 +26,7 @@
     "sinon-chai": "^3.3.0"
   },
   "peerDependencies": {
-    "@babel/eslint-parser": "^7.0.0",
+    "@babel/eslint-parser": "^7.25.1",
     "@typescript-eslint/eslint-plugin": ">= 7.0.0",
     "@typescript-eslint/parser": ">= 7.0.0",
     "eslint": "^= 8.0.0",

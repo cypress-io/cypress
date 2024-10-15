@@ -1,5 +1,5 @@
 import gulp from 'gulp'
-import rimraf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import cp from 'child_process'
 import * as path from 'path'
@@ -12,8 +12,8 @@ async function cypressIcons () {
   return require('@packages/icons')
 }
 
-const clean = (done) => {
-  rimraf('dist', done)
+function clean (): Promise<boolean> {
+  return rimraf('dist')
 }
 
 const manifest = (v: 'v2' | 'v3') => {

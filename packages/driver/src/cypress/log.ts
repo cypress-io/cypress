@@ -2,7 +2,7 @@ import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
-import { HIGHLIGHT_ATTR } from '../cy/snapshots'
+import { HIGHLIGHT_ATTR, type ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -239,7 +239,7 @@ const defaults = function (state: StateFunc, config, obj) {
 }
 
 export class Log {
-  createSnapshot: Function
+  createSnapshot: ISnapshots['createSnapshot']
   state: StateFunc
   config: any
   fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
@@ -411,7 +411,7 @@ export class Log {
       this.set('next', null)
     }
 
-    const snapshot = this.createSnapshot(name, this.get('$el'))
+    const snapshot = this.createSnapshot(name, this.get('$el'), undefined, this)
 
     this.addSnapshot(snapshot, options)
 

@@ -1,6 +1,6 @@
 import CoffeeIcon from '~icons/mdi/coffee'
 import LoadingIcon from '~icons/mdi/loading'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
 import { ref } from 'vue'
