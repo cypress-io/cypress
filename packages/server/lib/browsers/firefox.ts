@@ -687,16 +687,20 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       debug('closing firefox')
 
-      const browserReturnStatus = process.kill(browserPID)
+      try {
+        const browserReturnStatus = process.kill(browserPID)
 
-      debug('closing geckodriver and webdriver')
-      const driverReturnStatus = process.kill(driverPID)
+        debug('closing geckodriver and webdriver')
+        const driverReturnStatus = process.kill(driverPID)
 
-      // needed for closing the browser when switching browsers in open mode to signal
-      // the browser is done closing
-      browserInstanceWrapper.emit('exit')
+        // needed for closing the browser when switching browsers in open mode to signal
+        // the browser is done closing
+        browserInstanceWrapper.emit('exit')
 
-      return browserReturnStatus || driverReturnStatus
+        return browserReturnStatus || driverReturnStatus
+      } catch (e) {
+        return true
+      }
     }
 
     let cdpPort: number | undefined

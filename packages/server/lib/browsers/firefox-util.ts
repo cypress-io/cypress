@@ -101,6 +101,9 @@ const attachToTabMemory = Bluebird.method((tab) => {
 })
 
 async function connectToNewSpecBiDi (options, automation: Automation, browserBiDiClient: BidiAutomation) {
+  // when connecting to a new spec, we need to re register the existing bidi client to the automation client
+  // as the automation client resets its middleware between specs in run mode
+  automation.use(browserBiDiClient)
   debug('firefox: reconnecting to blank tab')
   const { contexts } = await webdriverClient.browsingContextGetTree({})
 
@@ -142,11 +145,11 @@ async function connectToNewSpecCDP (options, automation: Automation, browserCriC
 }
 
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
-  const BIDI_EVENTS = ['network.beforeRequestSent', 'network.responseStarted', 'network.responseCompleted', 'network.fetchError', 'script.realmCreated', 'script.realmDestroyed']
-
-  await webdriverClient.sessionSubscribe({ events: BIDI_EVENTS })
+  await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
 
   const biDiClient = new BidiAutomation(webdriverClient, automation)
+
+  automation.use(biDiClient)
 
   return biDiClient
 }
@@ -252,6 +255,10 @@ export default {
       client = await setupBiDi(webdriverClient, automation)
       // use the BiDi commands to visit the url as opposed to classic webdriver
       const { contexts } = await webdriverClient.browsingContextGetTree({})
+
+      // at this point there should only be one context: the top level context.
+      // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
+      client.setTopLevelContextId(contexts[0].context)
 
       await webdriverClient.browsingContextNavigate({
         context: contexts[0].context,
