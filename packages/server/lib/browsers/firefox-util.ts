@@ -148,6 +148,8 @@ async function setupBiDi (webdriverClient: WebDriverClient, automation: Automati
 
   const biDiClient = new BidiAutomation(webdriverClient, automation)
 
+  automation.use(biDiClient)
+
   return biDiClient
 }
 

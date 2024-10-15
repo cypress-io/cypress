@@ -140,4 +140,151 @@ export class BidiAutomation {
     this.#webDriverClient.off('script.realmCreated', this.onRealmCreated.bind(this))
     this.#webDriverClient.off('script.realmDestroyed', this.onRealmDestroyed.bind(this))
   }
+
+  onRequest = async (message, data) => {
+    switch (message) {
+      case 'get:cookies':
+        console.log('get:cookies')
+
+        return
+        // if (data.url) {
+        //   return this.getCookiesByUrl(data.url)
+        // }
+
+        // return this.getAllCookies(data)
+      case 'get:cookie':
+        console.log('get:cookie')
+
+        return
+        // return this.getCookie(data)
+      case 'set:cookie':
+        console.log('set:cookie')
+
+        return
+        // setCookie = normalizeSetCookieProps(data)
+
+        // return this.sendDebuggerCommandFn('Network.setCookie', setCookie)
+        // .then((result: Protocol.Network.SetCookieResponse) => {
+        //   if (!result.success) {
+        //     // i wish CDP provided some more detail here, but this is really it in v1.3
+        //     // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
+        //     throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
+        //   }
+
+        //   return this.getCookie(data)
+        // })
+
+      case 'add:cookies':
+        console.log('add:cookies')
+
+        return
+        // setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+
+        // return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+
+      case 'set:cookies':
+        console.log('set:cookies')
+
+        return
+        // setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+
+        // return this.sendDebuggerCommandFn('Network.clearBrowserCookies')
+        // .then(() => {
+        //   return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+        // })
+
+      case 'clear:cookie':
+        console.log('clear:cookie')
+
+        return
+        // return this.getCookie(data)
+        // // always resolve with the value of the removed cookie. also, getting
+        // // the cookie via CDP first will ensure that we send a cookie `domain`
+        // // to CDP that matches the cookie domain that is really stored
+        // .then((cookieToBeCleared) => {
+        //   if (!cookieToBeCleared) {
+        //     return cookieToBeCleared
+        //   }
+
+        //   return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+        //   .then(() => {
+        //     return cookieToBeCleared
+        //   })
+        // })
+
+      case 'clear:cookies':
+        console.log('clear:cookies')
+
+        return
+        // return Bluebird.mapSeries(data as CyCookieFilter[], async (cookie) => {
+        //   // resolve with the value of the removed cookie
+        //   // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+        //   // that matches the cookie domain that is really stored
+        //   const cookieToBeCleared = await this.getCookie(cookie)
+
+        //   if (!cookieToBeCleared) return
+
+        //   await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+
+        //   return cookieToBeCleared
+        // })
+
+      case 'is:automation:client:connected':
+        return true
+      case 'remote:debugger:protocol':
+        // return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
+        console.log('remote:debugger:protocol')
+
+        return
+      case 'take:screenshot':
+        console.log('take:screenshot')
+
+        return
+        // debugVerbose('capturing screenshot')
+
+        // if (this.focusTabOnScreenshot) {
+        //   try {
+        //     await this.activateMainTab()
+        //   } catch (e) {
+        //     debugVerbose('Error while attempting to activate main tab: %O', e)
+        //   }
+        // }
+
+        // return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
+        // .catch((err) => {
+        //   throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+        // })
+        // .then(({ data }) => {
+        //   return `data:image/png;base64,${data}`
+        // })
+      case 'reset:browser:state':
+        console.log('reset:browser:state')
+
+        // return Promise.all([
+        //   this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+        //   this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        // ])
+        return
+      case 'reset:browser:tabs:for:next:spec':
+        // return this.sendCloseCommandFn(data.shouldKeepTabOpen)
+        return
+      case 'focus:browser:window':
+        console.log('focus:browser:window')
+        // return this.sendDebuggerCommandFn('Page.bringToFront')
+
+        return
+      case 'get:heap:size:limit':
+        console.log('get:heap:size:limit')
+        // return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
+
+        return
+      case 'collect:garbage':
+        console.log('collect:garbage')
+        // return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
+
+        return
+      default:
+        throw new Error(`No automation handler registered for: '${message}'`)
+    }
+  }
 }
