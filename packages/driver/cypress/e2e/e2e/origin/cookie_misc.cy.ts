@@ -49,7 +49,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    describe('removes cookies that are set with an expired expiry time from the server side cookie jar / browser via CDP', () => {
+    describe('removes cookies that are set with an expired expiry time from the server side cookie jar / browser via CDP/BiDi', () => {
       it('works with Max-Age=0', () => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
 
@@ -127,7 +127,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    describe('removes cookies that are set with an expired expiry time from the document.cookie patch / browser via CDP', () => {
+    describe('removes cookies that are set with an expired expiry time from the document.cookie patch / browser via CDP/BiDi', () => {
       it('works with Max-Age=0', () => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
 

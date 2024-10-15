@@ -37,6 +37,8 @@ import { trackTopUrl } from '../util/trackTopUrl'
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
 import type { StateFunc, SubjectChain, QueryFunction } from './state'
+import { patchFetch } from '@packages/runner/injection/patches/fetch'
+import { patchXmlHttpRequest } from '@packages/runner/injection/patches/xmlHttpRequest'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -221,6 +223,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
+
+    // we would need to do something like this in the AUT and the spec frame if we do not get the resource type in the request
+    // this is patch for Spec window
+    // patchFetch(specWindow)
+    // patchXmlHttpRequest(specWindow)
 
     // bind methods
     this.isCy = this.isCy.bind(this)
@@ -873,6 +880,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.contentWindowListeners(contentWindow)
 
     this.overrides.wrapNativeMethods(contentWindow)
+
+    // we would need to do something like this in the AUT and the spec frame if we do not get the resource type in the request
+    // this is patch for AUT window
+    patchFetch(contentWindow)
+    patchXmlHttpRequest(contentWindow)
 
     this.onBeforeWindowLoad()
   }
