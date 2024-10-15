@@ -11,6 +11,8 @@ const OUTPUT_PATH = path.join(__dirname, 'dist')
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
+const devtool = process.env.CYPRESS_INTERNAL_WEBPACK_DEV_TOOL ?? 'inline-source-map'
+
 export function makeCypressWebpackConfig (
   config: CreateFinalWebpackConfig,
 ): Configuration {
@@ -96,7 +98,7 @@ export function makeCypressWebpackConfig (
         indexHtmlFile,
       }),
     ],
-    devtool: 'inline-source-map',
+    devtool,
   } as any
 
   if (isRunMode) {
