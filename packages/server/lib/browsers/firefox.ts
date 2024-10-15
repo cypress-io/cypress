@@ -30,7 +30,7 @@ const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
 // packages. To see verbose logs from Firefox, set both of these options to the
 // DEBUG variable.
 const WEBDRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:webdriver'
-const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
+// const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -579,9 +579,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         ...process.env,
       },
     },
-    jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
-    log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
-    logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
+    jsdebugger: false,
+    log: 'trace',
+    logNoTruncate: true,
   }
 
   // since we no longer directly control the browser with webdriver, we need to make the browserInstance
