@@ -208,6 +208,7 @@ export class GitDataSource {
   }
 
   async #loadAndWatchCurrentBranch () {
+    debug('loading and watching current branch')
     if (this.#destroyed) {
       return
     }
@@ -279,7 +280,7 @@ export class GitDataSource {
   }
 
   async #loadBulkGitInfo (absolutePaths: readonly string[]) {
-    debugVerbose(`checking %d files`, absolutePaths.length)
+    debugVerbose('loading bulk git info from %d files', absolutePaths.length)
     if (absolutePaths.length === 0) {
       return
     }
