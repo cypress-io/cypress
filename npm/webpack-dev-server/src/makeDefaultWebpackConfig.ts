@@ -16,6 +16,7 @@ const devtool = process.env.CYPRESS_INTERNAL_WEBPACK_DEV_TOOL ?? 'inline-source-
 export function makeCypressWebpackConfig (
   config: CreateFinalWebpackConfig,
 ): Configuration {
+  debug('Building webpack config with devtool "%s"', devtool)
   const {
     devServerConfig: {
       cypressConfig: {
