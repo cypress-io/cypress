@@ -153,6 +153,53 @@ describe('makeWebpackConfig', () => {
     snapshot(actual)
   })
 
+  describe('when CYPRESS_INTERNAL_WEBPACK_DEV_TOOL env is set', () => {
+    const devtool = 'eval-source-map'
+
+    beforeEach(() => {
+      process.env.CYPRESS_INTERNAL_WEBPACK_DEV_TOOL = devtool
+    })
+
+    afterEach(() => {
+      process.env.CYPRESS_INTERNAL_WEBPACK_DEV_TOOL = undefined
+    })
+
+    it('overrides the inline-source-map devtool that cypress requires for codeframes', async () => {
+      const devServerConfig: WebpackDevServerConfig = {
+        specs: [],
+        cypressConfig: {
+          isTextTerminal: false,
+          projectRoot: '.',
+          supportFile: '/support.js',
+          devServerPublicPathRoute: '/test-public-path',
+        } as Cypress.PluginConfigOptions,
+        webpackConfig: {
+          output: {
+            publicPath: '/this-will-be-ignored', // This will be overridden by makeWebpackConfig.ts
+          },
+          devServer: {
+            progress: true,
+            overlay: true, // This will be overridden by makeWebpackConfig.ts
+          } as any,
+          optimization: {
+            noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
+          },
+          devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
+        },
+        devServerEvents: new EventEmitter(),
+      }
+      const actual = await makeWebpackConfig({
+        devServerConfig,
+        sourceWebpackModulesResult: createModuleMatrixResult({
+          webpack: 4, // it doesn't really matter which version of webpack this runs against, it's a simple override on the config
+          webpackDevServer: 4,
+        }),
+      })
+
+      expect(actual.devtool).to.eq(devtool)
+    })
+  })
+
   WEBPACK_DEV_SERVER_VERSIONS.forEach((VERSION) => {
     describe(`webpack-dev-server: v${VERSION}`, () => {
       it(`removes entrypoint from merged webpackConfig`, async () => {
