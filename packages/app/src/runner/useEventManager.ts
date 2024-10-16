@@ -50,7 +50,7 @@ export function useEventManager () {
     })
 
     eventManager.on('visit:blank', ({ testIsolation }) => {
-      getAutIframeModel().visitBlankPage(testIsolation)
+      return getAutIframeModel().visitBlankPage(testIsolation)
     })
 
     eventManager.on('run:end', () => {

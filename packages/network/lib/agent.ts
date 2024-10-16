@@ -280,6 +280,7 @@ class HttpAgent extends http.Agent {
       }
     }
 
+    // console.log('addRequest called %o', req, options)
     super.addRequest(req, options)
   }
 
