@@ -19,6 +19,10 @@ _Released 12/3/2024 (PENDING)_
 
 _Released 10/1/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Patched [find-process](https://github.com/yibn2008/find-process) to fix an issue where trying to clean up browser profiles can throw an error on Windows. Addresses [#30378](https://github.com/cypress-io/cypress/issues/30378).
+
 **Misc:**
 
 - Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
