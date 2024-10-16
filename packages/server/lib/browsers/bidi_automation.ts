@@ -301,54 +301,73 @@ export class BidiAutomation {
       case 'is:automation:client:connected':
         return true
       case 'take:screenshot':
-        console.log('take:screenshot')
+      {
+        const { contexts } = await this.#webDriverClient.browsingContextGetTree({})
 
-        return
-        // debugVerbose('capturing screenshot')
+        const cypressContext = contexts[0].context
 
-        // if (this.focusTabOnScreenshot) {
-        //   try {
-        //     await this.activateMainTab()
-        //   } catch (e) {
-        //     debugVerbose('Error while attempting to activate main tab: %O', e)
-        //   }
-        // }
+        // make sure the main cypress context is focused before taking a screenshot
+        await this.#webDriverClient.browsingContextActivate({
+          context: cypressContext,
+        })
 
-        // return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
-        // .catch((err) => {
-        //   throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
-        // })
-        // .then(({ data }) => {
-        //   return `data:image/png;base64,${data}`
-        // })
+        const { data: base64EncodedScreenshot } = await this.#webDriverClient.browsingContextCaptureScreenshot({
+          context: contexts[0].context,
+          format: {
+            type: 'png',
+          },
+        })
+
+        return `data:image/png;base64,${base64EncodedScreenshot}`
+      }
+
       case 'reset:browser:state':
-        console.log('reset:browser:state')
-
-        // return Promise.all([
-        //   this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
-        //   this.sendDebuggerCommandFn('Network.clearBrowserCache'),
-        // ])
 
         // patch this for now just to get clean cookies between tests
+        // we really need something similar to the Storage.clearDataForOrigin and Network.clearBrowserCache methods here,
+        // or the web extension https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/remove API
         await this.#webDriverClient.storageDeleteCookies({})
 
         return
       case 'reset:browser:tabs:for:next:spec':
-        // return this.sendCloseCommandFn(data.shouldKeepTabOpen)
+        {
+          const { contexts } = await this.#webDriverClient.browsingContextGetTree({})
+
+          if (data.shouldKeepTabOpen) {
+            await this.#webDriverClient.browsingContextCreate({
+              type: 'tab',
+            })
+          }
+
+          // CLOSE ALL BUT THE NEW CONTEXT, which makes it active
+          // also do not need to navigate to about:blank as this happens by default
+          for (const context of contexts) {
+            await this.#webDriverClient.browsingContextClose({
+              context: context.context,
+            })
+          }
+
+          // await this.#webDriverClient.browsingContextActivate({
+          //   context: newContext.context,
+          // })
+
+          // await this.#webDriverClient.browsingContextNavigate({
+          //   context: newContext.context,
+          //   url: 'about:blank',
+          // })
+        }
+
         return
       case 'focus:browser:window':
-        console.log('focus:browser:window')
-        // return this.sendDebuggerCommandFn('Page.bringToFront')
+        {
+          const { contexts } = await this.#webDriverClient.browsingContextGetTree({})
 
-        return
-      case 'get:heap:size:limit':
-        console.log('get:heap:size:limit')
-        // return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
+          const cypressContext = contexts[0].context
 
-        return
-      case 'collect:garbage':
-        console.log('collect:garbage')
-        // return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
+          await this.#webDriverClient.browsingContextActivate({
+            context: cypressContext,
+          })
+        }
 
         return
       default:
