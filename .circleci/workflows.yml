@@ -1782,7 +1782,7 @@ jobs:
     working_directory: ~/cypress
     docker:
       # we need an image with yarn 4 berry installed on it to run this test
-      - image: cypress/base-internal:18.17.1-yarn-berry
+      - image: cypress/base-internal:20.18.0-yarn-berry
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
