@@ -50,6 +50,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/html-webpack-plugin-4/index.js',
     'node_modules/html-webpack-plugin-5/index.js',
     'node_modules/mocha-7.0.1/index.js',
+    'packages/server/node_modules/webdriver/build/index.js',
   ]
 
   let entryPoints = new Set([
