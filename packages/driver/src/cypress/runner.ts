@@ -958,7 +958,7 @@ function getTestFromRunnable (runnable) {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest) => {
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest, getResumedAtTestIndex) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -1019,6 +1019,12 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     }
 
     let test = getTest()
+
+    if (hook.config?.skipOnTopLevelChange && getResumedAtTestIndex()) {
+      debug('skipping hook due to top origin change', hook.id)
+
+      return
+    }
 
     if (test && test.state !== 'pending') {
       // if the current test isn't within the hook's suite
@@ -1562,6 +1568,10 @@ export default {
       return test
     }
 
+    const getResumedAtTestIndex = () => {
+      return _resumedAtTestIndex
+    }
+
     return {
       onSpecError,
       setOnlyTestId,
@@ -1602,7 +1612,7 @@ export default {
           _startTime = dayjs().toJSON()
         }
 
-        _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
+        _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest, getResumedAtTestIndex)
 
         return _runner.run((failures) => {
           // if we happen to make it all the way through
@@ -1803,6 +1813,11 @@ export default {
         // test:before:run:async action if its not
         // been fired before for this test
         return Promise.try(() => {
+          // if we are running the _resumedAtTestIndex test, we can clear out the _resumedAtTestIndex
+          if (_resumedAtTestIndex != null && getTestIndexFromId(test.id) === _resumedAtTestIndex) {
+            _resumedAtTestIndex = null
+          }
+
           if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
             cy.reset(test)
             test.slow(Cypress.config('slowTestThreshold'))
@@ -1983,9 +1998,7 @@ export default {
         }
       },
 
-      getResumedAtTestIndex () {
-        return _resumedAtTestIndex
-      },
+      getResumedAtTestIndex,
 
       cleanupQueue (numTestsKeptInMemory) {
         const cleanup = (queue) => {

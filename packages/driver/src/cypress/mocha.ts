@@ -611,13 +611,13 @@ const patchRunnableResetTimeout = () => {
 
 const patchSuiteHooks = (specWindow, config) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
-    const _fn = Suite.prototype[fnName]
+    const _origHookFn = Suite.prototype[fnName]
 
-    Suite.prototype[fnName] = function (title, fn) {
-      const _createHook = this._createHook
+    Suite.prototype[fnName] = function (title, hookConfig, fn) {
+      const _origCreateHook = this._createHook
 
       this._createHook = function (title, fn) {
-        const hook = _createHook.call(this, title, fn)
+        const hook = _origCreateHook.call(this, title, fn)
 
         let invocationStack = hook.invocationDetails?.stack
 
@@ -626,6 +626,10 @@ const patchSuiteHooks = (specWindow, config) => {
 
           hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
+        }
+
+        if (!hook.config) {
+          hook.config = hookConfig
         }
 
         if (this._condensedHooks) {
@@ -639,9 +643,9 @@ const patchSuiteHooks = (specWindow, config) => {
         return hook
       }
 
-      const ret = _fn.call(this, title, fn)
+      const ret = _origHookFn.call(this, title, fn)
 
-      this._createHook = _createHook
+      this._createHook = _origCreateHook
 
       return ret
     }
