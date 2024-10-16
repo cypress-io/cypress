@@ -49,13 +49,13 @@ describe('makeWebpackConfig', () => {
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
+    ;(actual as any).plugins = actual.plugins?.map((p) => p.constructor.name)
 
     // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
+    delete actual.output?.path
     delete actual.entry
 
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
+    expect(actual.output?.publicPath).to.eq('/test-public-path/')
     snapshot(actual)
   })
 
@@ -96,13 +96,13 @@ describe('makeWebpackConfig', () => {
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
+    ;(actual as any).plugins = actual.plugins?.map((p) => p.constructor.name)
 
     // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
+    delete actual.output?.path
     delete actual.entry
 
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
+    expect(actual.output?.publicPath).to.eq('/test-public-path/')
     snapshot(actual)
   })
 
@@ -143,13 +143,13 @@ describe('makeWebpackConfig', () => {
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
+    ;(actual as any).plugins = actual.plugins?.map((p) => p.constructor.name)
 
     // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
+    delete actual.output?.path
     delete actual.entry
 
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
+    expect(actual.output?.publicPath).to.eq('/test-public-path/')
     snapshot(actual)
   })
 
@@ -247,7 +247,7 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
+          expect(actual.plugins?.map((p) => p.constructor.name)).to.have.members(
             ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromWebpackConfigFile'],
           )
         })
@@ -277,7 +277,7 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
+          expect(actual.plugins?.map((p) => p.constructor.name)).to.have.members(
             ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromInlineWebpackConfig'],
           )
         })
@@ -314,13 +314,16 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.length).to.eq(3)
+          expect(actual.plugins?.length).to.eq(3)
           expect(modifyConfig).to.have.been.called
           // merged plugins get added at the top of the chain by default
           // should be merged, not overriding existing plugins
-          expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
-          expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
-          expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
+          expect(actual.plugins).not.to.be.undefined
+          const [ignorePlugin, htmlWebpackPlugin, cypressCTWebpackPlugin] = actual.plugins ?? []
+
+          expect(ignorePlugin.constructor.name).to.eq('IgnorePlugin')
+          expect(htmlWebpackPlugin.constructor.name).to.eq('HtmlWebpackPlugin')
+          expect(cypressCTWebpackPlugin.constructor.name).to.eq('CypressCTWebpackPlugin')
         })
       })
     })
@@ -360,7 +363,7 @@ describe('makeWebpackConfig', () => {
           sourceWebpackModulesResult,
         })
 
-        expect(actual.watchOptions.ignored).to.eql('**/*')
+        expect(actual.watchOptions?.ignored).to.eql('**/*')
       })
 
       it('uses defaults in open mode', async () => {
@@ -391,7 +394,7 @@ describe('makeWebpackConfig', () => {
           sourceWebpackModulesResult,
         })
 
-        expect(actual.watchOptions.ignored).to.eql('**/*')
+        expect(actual.watchOptions?.ignored).to.eql('**/*')
       })
 
       it('uses defaults in open mode', async () => {
@@ -422,7 +425,7 @@ describe('makeWebpackConfig', () => {
           sourceWebpackModulesResult,
         })
 
-        expect(actual.watchOptions.ignored).to.eql('**/*')
+        expect(actual.watchOptions?.ignored).to.eql('**/*')
       })
 
       it('uses defaults in open mode', async () => {
