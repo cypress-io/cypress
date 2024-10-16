@@ -167,20 +167,23 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
+  const effectiveResourceType = this.req.resourceType === 'other' ? undefined : this.req.resourceType
+
   if (!doesTopNeedToBeSimulated(this) ||
-    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+  // TODO: checking for 'other' currently since resourceType is not supported in BiDi yet. See https://bugzilla.mozilla.org/show_bug.cgi?id=1904892
+    (effectiveResourceType !== undefined && effectiveResourceType !== 'xhr' && effectiveResourceType !== 'fetch')) {
     this.next()
 
     return
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, effectiveResourceType)
 
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
-  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
-  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  // if for some reason the resourceType is not set by the prerequest, have a fallback in place (doing this for now for BiDi)
+  this.req.resourceType = !effectiveResourceType ? resourceType : this.req.resourceType
   this.req.credentialsLevel = credentialStatus
   this.next()
 }

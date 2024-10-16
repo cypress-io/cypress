@@ -10,12 +10,31 @@ import type {
   NetworkInitiator,
   ScriptRealmDestroyedParameters,
   ScriptRealmInfo,
+  NetworkCookie,
 } from 'webdriver/build/bidi/localTypes'
+import { CyCookie } from './webkit-automation'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
 const normalizeResourceType = (type: NetworkInitiator['type']) => {
   return type === 'parser' ? 'other' : type
+}
+
+const normalizeCookie = (cookie?: NetworkCookie) => {
+  if (cookie) {
+    return {
+      name: cookie.name,
+      value: cookie.value.value,
+      domain: cookie.domain,
+      path: cookie.path,
+      httpOnly: cookie.httpOnly,
+      secure: cookie.secure,
+      sameSite: cookie.sameSite,
+      expiry: cookie.expiry,
+    }
+  }
+
+  return null
 }
 
 export class BidiAutomation {
@@ -132,6 +151,32 @@ export class BidiAutomation {
     debugVerbose('received script.realmDestroyed %o', params)
   }
 
+  private async getAllCookiesMatchingFilter ({ name, domain }: {
+    name?: string
+    domain: string
+  }) {
+    // filter for storageGetCookies gets the EXACT domain of the cookie
+    // Cypress expects all cookies that apply to that domain to be returned
+    // For instance, domain www.foobar.com would have cookies with .foobar.com applied,
+    // but sending domain=www.foobar.com would not return cookies with .foobar.com domain.
+
+    const filter = name ?
+      {
+        filter: {
+          name,
+        },
+      } : {}
+
+    const { cookies, partitionKey } = await this.#webDriverClient.storageGetCookies(filter)
+
+    // because of this, we get ALL gookies and filter out all cookies that apply to the given domain
+    const appliedDomainCookies = cookies.filter((cookie) => {
+      return `.${domain}`.includes(cookie.domain)
+    })
+
+    return appliedDomainCookies.map((cookie) => normalizeCookie(cookie))
+  }
+
   close () {
     this.#webDriverClient.off('network.beforeRequestSent', this.onBeforeRequestSent.bind(this))
     this.#webDriverClient.off('network.responseStarted', this.onResponseStarted.bind(this))
@@ -144,98 +189,117 @@ export class BidiAutomation {
   onRequest = async (message, data) => {
     switch (message) {
       case 'get:cookies':
-        console.log('get:cookies')
+      {
+        if (data.url) {
+          try {
+            const url = new URL(data.url)
 
-        return
-        // if (data.url) {
-        //   return this.getCookiesByUrl(data.url)
-        // }
+            const cookies = await this.getAllCookiesMatchingFilter({
+              domain: url.hostname,
+            })
 
-        // return this.getAllCookies(data)
+            return cookies
+          } catch (e) {
+            return []
+          }
+        }
+
+        const { cookies } = await this.#webDriverClient.storageGetCookies({})
+
+        return cookies
+      }
+
       case 'get:cookie':
-        console.log('get:cookie')
+      {
+        const cookies = await this.getAllCookiesMatchingFilter(data)
 
-        return
-        // return this.getCookie(data)
+        return cookies[0] || null
+      }
       case 'set:cookie':
-        console.log('set:cookie')
+      {
+        await this.#webDriverClient.storageSetCookie({
+          cookie: {
+            name: data.name,
+            value: {
+              type: 'string',
+              value: data.value,
+            },
+            domain: data.domain,
+            path: data.path,
+            httpOnly: data.httpOnly,
+            secure: data.secure,
+            sameSite: data.sameSite,
+            expiry: data.expiry,
+          },
+        })
 
-        return
-        // setCookie = normalizeSetCookieProps(data)
+        const cookies = await this.getAllCookiesMatchingFilter(data)
 
-        // return this.sendDebuggerCommandFn('Network.setCookie', setCookie)
-        // .then((result: Protocol.Network.SetCookieResponse) => {
-        //   if (!result.success) {
-        //     // i wish CDP provided some more detail here, but this is really it in v1.3
-        //     // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
-        //     throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
-        //   }
-
-        //   return this.getCookie(data)
-        // })
+        return cookies[0] || null
+      }
 
       case 'add:cookies':
-        console.log('add:cookies')
+
+        await Promise.all(data.map((cookie) => {
+          return this.#webDriverClient.storageSetCookie({
+            cookie: {
+              name: cookie.name,
+              value: {
+                type: 'string',
+                value: cookie.value,
+              },
+              domain: cookie.domain,
+              path: cookie.path,
+              httpOnly: cookie.httpOnly,
+              secure: cookie.secure,
+              sameSite: cookie.sameSite,
+              expiry: cookie.expiry,
+            },
+          })
+        }))
 
         return
-        // setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
-
-        // return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
 
       case 'set:cookies':
-        console.log('set:cookies')
+
+        await this.#webDriverClient.storageDeleteCookies({})
+
+        await Promise.all(data.map((cookie) => {
+          return this.#webDriverClient.storageSetCookie({
+            cookie: {
+              name: cookie.name,
+              value: {
+                type: 'string',
+                value: cookie.value,
+              },
+              domain: cookie.domain,
+              path: cookie.path,
+              httpOnly: cookie.httpOnly,
+              secure: cookie.secure,
+              sameSite: cookie.sameSite,
+              expiry: cookie.expiry,
+            },
+          })
+        }))
 
         return
-        // setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
-
-        // return this.sendDebuggerCommandFn('Network.clearBrowserCookies')
-        // .then(() => {
-        //   return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
-        // })
-
       case 'clear:cookie':
-        console.log('clear:cookie')
+
+        await this.#webDriverClient.storageDeleteCookies({})
 
         return
-        // return this.getCookie(data)
-        // // always resolve with the value of the removed cookie. also, getting
-        // // the cookie via CDP first will ensure that we send a cookie `domain`
-        // // to CDP that matches the cookie domain that is really stored
-        // .then((cookieToBeCleared) => {
-        //   if (!cookieToBeCleared) {
-        //     return cookieToBeCleared
-        //   }
-
-        //   return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-        //   .then(() => {
-        //     return cookieToBeCleared
-        //   })
-        // })
 
       case 'clear:cookies':
-        console.log('clear:cookies')
+      {
+        const { cookies: cookiesToClear } = await this.#webDriverClient.storageGetCookies({})
 
-        return
-        // return Bluebird.mapSeries(data as CyCookieFilter[], async (cookie) => {
-        //   // resolve with the value of the removed cookie
-        //   // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-        //   // that matches the cookie domain that is really stored
-        //   const cookieToBeCleared = await this.getCookie(cookie)
+        await this.#webDriverClient.storageDeleteCookies({})
 
-        //   if (!cookieToBeCleared) return
-
-        //   await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-
-        //   return cookieToBeCleared
-        // })
+        return cookiesToClear
+      }
 
       case 'is:automation:client:connected':
         return true
-      case 'remote:debugger:protocol':
-        // return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
-        console.log('remote:debugger:protocol')
-
-        return
       case 'take:screenshot':
         console.log('take:screenshot')
 
@@ -264,6 +328,10 @@ export class BidiAutomation {
         //   this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
         //   this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         // ])
+
+        // patch this for now just to get clean cookies between tests
+        await this.#webDriverClient.storageDeleteCookies({})
+
         return
       case 'reset:browser:tabs:for:next:spec':
         // return this.sendCloseCommandFn(data.shouldKeepTabOpen)
