@@ -6,9 +6,9 @@ import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
+import type { Client as WebDriverClient } from 'webdriver'
 import type { Automation } from '../automation'
 import type { CypressError } from '@packages/errors'
-import type { WebDriverClassic } from './webdriver-classic'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
@@ -20,7 +20,7 @@ let timings = {
   collections: [] as any[],
 }
 
-let webDriverClassic: WebDriverClassic
+let webdriverClient: WebDriverClient
 
 const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
@@ -103,11 +103,11 @@ async function connectToNewTabClassic () {
   // For versions 124 and above, a new tab is not created, so @packages/extension creates one for us.
   // Since the tab is always available on our behalf,
   // we can connect to it here and navigate it to about:blank to set it up for CDP connection
-  const handles = await webDriverClassic.getWindowHandles()
+  const handles = await webdriverClient.getWindowHandles()
 
-  await webDriverClassic.switchToWindow(handles[0])
+  await webdriverClient.switchToWindow(handles[0])
 
-  await webDriverClassic.navigate('about:blank')
+  await webdriverClient.navigateTo('about:blank')
 }
 
 async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
@@ -140,7 +140,7 @@ async function setupCDP (remotePort: number, automation: Automation, onError?: (
 }
 
 async function navigateToUrlClassic (url: string) {
-  await webDriverClassic.navigate(url)
+  await webdriverClient.navigateTo(url)
 }
 
 const logGcDetails = () => {
@@ -213,17 +213,17 @@ export default {
     url,
     foxdriverPort,
     remotePort,
-    webDriverClassic: wdcInstance,
+    webdriverClient: wdInstance,
   }: {
     automation: Automation
     onError?: (err: Error) => void
     url: string
     foxdriverPort: number
     remotePort: number
-    webDriverClassic: WebDriverClassic
+    webdriverClient: WebDriverClient
   }): Promise<BrowserCriClient> {
     // set the WebDriver classic instance instantiated from geckodriver
-    webDriverClassic = wdcInstance
+    webdriverClient = wdInstance
     const [, browserCriClient] = await Promise.all([
       this.setupFoxdriver(foxdriverPort),
       setupCDP(remotePort, automation, onError),
