@@ -14,6 +14,9 @@ const posixSeparator = '/'
 export function makeCypressWebpackConfig (
   config: CreateFinalWebpackConfig,
 ): Configuration {
+  const devtool = process.env.CYPRESS_INTERNAL_WEBPACK_DEV_TOOL ?? 'inline-source-map'
+
+  debug('Building webpack config with devtool "%s"', devtool)
   const {
     devServerConfig: {
       cypressConfig: {
@@ -96,7 +99,7 @@ export function makeCypressWebpackConfig (
         indexHtmlFile,
       }),
     ],
-    devtool: 'inline-source-map',
+    devtool,
   } as any
 
   if (isRunMode) {
