@@ -132,7 +132,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               })
             })
 
-            it('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
+            it.only('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
               cy.intercept(`${originUrl}/test-request`, (req) => {
                 expect(req['headers']['cookie']).to.equal(undefined)
 

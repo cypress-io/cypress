@@ -147,6 +147,10 @@ export class BidiAutomation {
     // since all requests coming from the top level context are blocked, we need to continue them here
     // we only want to mutate requests coming from the AUT frame so we can add the X-Cypress-Is-AUT-Frame header
     // so the request-middleware can identify the request
+    if (url.includes('verify-cookie-login')) {
+      debugger
+    }
+
     if (params.isBlocked) {
       if (params.context === this.#AUTContextId) {
         params.request.headers.push({
@@ -158,9 +162,18 @@ export class BidiAutomation {
         })
       }
 
+      /**
+       *     request: NetworkRequest;
+    cookies?: NetworkCookieHeader[];
+    body?: NetworkBytesValue;
+    headers?: NetworkHeader[];
+    method?: string;
+    url?: string;
+       */
       await this.#webDriverClient.networkContinueRequest({
         request: params.request.request,
         headers: params.request.headers,
+        cookies: params.request.cookies,
       })
     }
   }

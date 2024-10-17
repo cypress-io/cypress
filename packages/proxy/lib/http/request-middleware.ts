@@ -34,6 +34,10 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
   this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
 
+  // if (this.req.url.includes('verify-cookie-login')) {
+  //   debugger
+  // }
+
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }

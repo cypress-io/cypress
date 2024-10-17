@@ -78,7 +78,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       username = getUsername()
     })
 
-    it('works in a session', () => {
+    it.only('works in a session', () => {
       cy.session(username, () => {
         cy.visit('/fixtures/primary-origin.html')
         cy.get('[data-cy="cookie-login"]').click()
