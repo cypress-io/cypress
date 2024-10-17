@@ -3107,17 +3107,6 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Disables setting document.domain to the applications super domain on injection.
-     * This experiment is to be used for sites that do not work with setting document.domain
-     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
-     * navigations, and will require the use of cy.origin(). This option takes an array of
-     * strings/string globs.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @see https://on.cypress.io/experiments#Experimental-Skip-Domain-Injection
-     * @default null
-     */
-    experimentalSkipDomainInjection: string[] | null
-    /**
      * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
      * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
      * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
@@ -3222,6 +3211,13 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
+    /**
+     * Enables document.domain injection so that cy.origin is not necessary for interacting with intra-test navigations to subdomains that are not running an an Origin-Keyed Agent Cluster context.
+     * This configuration option will be removed in Cypress 15.
+     * @deprecated
+     * @default false
+     */
+    injectDocumentDomain?: boolean
   }
 
   /**
