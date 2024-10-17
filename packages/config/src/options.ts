@@ -231,6 +231,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'injectDocumentDomain',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
+  },
+  {
     name: 'experimentalSkipDomainInjection',
     defaultValue: null,
     validation: validate.isNullOrArrayOfStrings,
@@ -765,6 +771,16 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
       isWarning: false,
     },
+    {
+      name: 'experimentalSkipDomainInjection',
+      errorKey: 'EXPERIMENTAL_SKIP_DOMAIN_INJECTION',
+      isWarning: false,
+    },
+    {
+      name: 'injectDocumentDomain',
+      errorKey: 'INJECT_DOCUMENT_DOMAIN_DEPRECATION',
+      isWarning: true,
+    },
   ],
   component: [
     {
@@ -795,6 +811,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalSkipDomainInjection',
       errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'injectDocumentDomain',
+      errorKey: 'INJECT_DOCUMENT_DOMAIN_E2E_ONLY',
       isWarning: false,
     },
   ],
