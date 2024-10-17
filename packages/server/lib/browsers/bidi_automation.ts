@@ -11,6 +11,7 @@ import type {
   ScriptRealmDestroyedParameters,
   ScriptRealmInfo,
   NetworkCookie,
+  BrowsingContextInfo,
 } from 'webdriver/build/bidi/localTypes'
 import { CyCookie } from './webkit-automation'
 
@@ -41,6 +42,10 @@ export class BidiAutomation {
   #webDriverClient: WebDriverClient
   #automation: Automation
   #cachedDataUrlRequestIds: Set<string> = new Set()
+  #AUTContextId: string | undefined = undefined
+  // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
+  topLevelContextId: string | undefined = undefined
+  #interceptId: string | undefined = undefined
 
   constructor (webDriverClient: WebDriverClient, automation: Automation) {
     this.#automation = automation
@@ -53,6 +58,56 @@ export class BidiAutomation {
     this.#webDriverClient.on('network.fetchError', this.onFetchError.bind(this))
     this.#webDriverClient.on('script.realmCreated', this.onRealmCreated.bind(this))
     this.#webDriverClient.on('script.realmDestroyed', this.onRealmDestroyed.bind(this))
+    this.#webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated.bind(this))
+    this.#webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed.bind(this))
+  }
+
+  setTopLevelContextId (contextId: string) {
+    this.topLevelContextId = contextId
+  }
+
+  private async onBrowsingContextCreated (params: BrowsingContextInfo) {
+    // the AUT iframe is always the FIRST child created by the top level parent (second is the reporter, if it exists which isnt the case for headless/test replay)
+    if (!this.#AUTContextId && params.parent && this.topLevelContextId === params.parent) {
+      this.#AUTContextId = params.context
+
+      // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
+      // in this case, we do NOT have to redefined the top level context intercept but instead update the AUTContextId to properly identify the
+      // AUT in the request interceptor.
+      if (!this.#interceptId) {
+        // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
+        // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+        // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
+        const { intercept } = await this.#webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+
+        // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+        this.#interceptId = intercept
+      }
+    }
+  }
+
+  private async onBrowsingContextDestroyed (params: BrowsingContextInfo) {
+    // if the top level context gets destroyed, we need to clear the AUT context and destroy the interceptor as it is no longer applicable
+    if (params.context === this.topLevelContextId) {
+      if (this.#interceptId) {
+        // since we either have:
+        //   1. a new upper level browser context created above with shouldKeepTabOpen set to true.
+        //   2. all the previous contexts are destroyed.
+        // we should clean up our top level interceptor to prevent a memory leak as we no longer need it
+        await this.#webDriverClient.networkRemoveIntercept({
+          intercept: this.#interceptId,
+        })
+
+        this.#interceptId = undefined
+      }
+
+      this.topLevelContextId = undefined
+    }
+
+    // if the AUT context is destroyed (possible that the top level context did not), clear the AUT context Id
+    if (params.context === this.#AUTContextId) {
+      this.#AUTContextId = undefined
+    }
   }
 
   // CDP equivalent: Network.requestWillBeSent
@@ -88,6 +143,26 @@ export class BidiAutomation {
     }
 
     await this.#automation.onBrowserPreRequest?.(browserPreRequest)
+
+    // since all requests coming from the top level context are blocked, we need to continue them here
+    // we only want to mutate requests coming from the AUT frame so we can add the X-Cypress-Is-AUT-Frame header
+    // so the request-middleware can identify the request
+    if (params.isBlocked) {
+      if (params.context === this.#AUTContextId) {
+        params.request.headers.push({
+          name: 'X-Cypress-Is-AUT-Frame',
+          value: {
+            type: 'string',
+            value: 'true',
+          },
+        })
+      }
+
+      await this.#webDriverClient.networkContinueRequest({
+        request: params.request.request,
+        headers: params.request.headers,
+      })
+    }
   }
 
   // CDP equivalent: contains information to infer Network.requestServedFromCache
@@ -184,6 +259,8 @@ export class BidiAutomation {
     this.#webDriverClient.off('network.fetchError', this.onFetchError.bind(this))
     this.#webDriverClient.off('script.realmCreated', this.onRealmCreated.bind(this))
     this.#webDriverClient.off('script.realmDestroyed', this.onRealmDestroyed.bind(this))
+    this.#webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated.bind(this))
+    this.#webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed.bind(this))
   }
 
   onRequest = async (message, data) => {
@@ -334,9 +411,12 @@ export class BidiAutomation {
           const { contexts } = await this.#webDriverClient.browsingContextGetTree({})
 
           if (data.shouldKeepTabOpen) {
-            await this.#webDriverClient.browsingContextCreate({
+            const newTopLevelContext = await this.#webDriverClient.browsingContextCreate({
               type: 'tab',
             })
+
+            this.setTopLevelContextId(newTopLevelContext.context)
+            this.#AUTContextId = undefined
           }
 
           // CLOSE ALL BUT THE NEW CONTEXT, which makes it active
@@ -347,14 +427,17 @@ export class BidiAutomation {
             })
           }
 
-          // await this.#webDriverClient.browsingContextActivate({
-          //   context: newContext.context,
-          // })
+          // if (this.#interceptId) {
+          //   // since we either have:
+          //   //   1. a new upper level browser context created above with shouldKeepTabOpen set to true.
+          //   //   2. all the previous contexts are destroyed.
+          //   // we should clean up our top level interceptor to prevent a memory leak as we no longer need it
+          //   await this.#webDriverClient.networkRemoveIntercept({
+          //     intercept: this.#interceptId,
+          //   })
 
-          // await this.#webDriverClient.browsingContextNavigate({
-          //   context: newContext.context,
-          //   url: 'about:blank',
-          // })
+          //   this.#interceptId = undefined
+          // }
         }
 
         return

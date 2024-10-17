@@ -145,7 +145,7 @@ async function connectToNewSpecCDP (options, automation: Automation, browserCriC
 }
 
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
-  const BIDI_EVENTS = ['network.beforeRequestSent', 'network.responseStarted', 'network.responseCompleted', 'network.fetchError', 'script.realmCreated', 'script.realmDestroyed']
+  const BIDI_EVENTS = ['network.beforeRequestSent', 'network.responseStarted', 'network.responseCompleted', 'network.fetchError', 'script.realmCreated', 'script.realmDestroyed', 'browsingContext.contextCreated', 'browsingContext.contextDestroyed']
 
   await webdriverClient.sessionSubscribe({ events: BIDI_EVENTS })
 
@@ -257,6 +257,10 @@ export default {
       client = await setupBiDi(webdriverClient, automation)
       // use the BiDi commands to visit the url as opposed to classic webdriver
       const { contexts } = await webdriverClient.browsingContextGetTree({})
+
+      // at this point there should only be one context: the top level context.
+      // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
+      client.setTopLevelContextId(contexts[0].context)
 
       await webdriverClient.browsingContextNavigate({
         context: contexts[0].context,
