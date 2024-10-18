@@ -383,9 +383,28 @@ commands:
       - run:
           name: Install Node Modules
           command: |
-            # if we are on arm64 we need to install setuptools as it no longer comes standard with the latest version of python
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # Building better-sqlite3 on arm64 requires gcc-10
               sudo apt install gcc-10 g++-10
+              #Remove the previous alternatives
+              sudo update-alternatives --remove-all gcc
+              sudo update-alternatives --remove-all g++
+
+              #Define the compiler
+              sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 30
+              sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 30
+
+              sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
+              sudo update-alternatives --set cc /usr/bin/gcc
+
+              sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
+              sudo update-alternatives --set c++ /usr/bin/g++
+
+              #Confirm and update (You can use the default setting)
+              sudo update-alternatives --config gcc
+              sudo update-alternatives --config g++
+
+              # if we are on arm64 we need to install setuptools as it no longer comes standard with the latest version of python
               pip install setuptools
             fi
             source ./scripts/ensure-node.sh
