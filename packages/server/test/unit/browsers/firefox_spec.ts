@@ -36,8 +36,6 @@ describe('lib/browsers/firefox', () => {
       '/path/to/appData/firefox-stable/interactive': {},
     })
 
-    sinon.stub(protocol, '_connectAsync').resolves(null)
-
     wdInstance = {
       maximizeWindow: sinon.stub(),
       installAddOn: sinon.stub(),
@@ -58,8 +56,6 @@ describe('lib/browsers/firefox', () => {
     wdInstance.navigateTo.resolves(undefined)
 
     sinon.stub(webdriver, 'newSession').resolves(wdInstance)
-
-    stubFoxdriver()
   })
 
   context('#open', () => {
