@@ -1091,11 +1091,15 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .type('{downarrow}22').then(($div) => {
         if (Cypress.isBrowser('firefox')) {
           expect(trimInnerText($div)).to.eq('foo22\nbar\nbaz')
-
-          return
+        } else if (Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 131) {
+          // Chromium >=131 moves the cursor to the location of the end of the selection
+          // on the next line when typing the downarrow (in this case, behind 'bar')
+          expect(trimInnerText($div)).to.eql('foo\nbar22\nbaz')
+        } else {
+          // Chromium <=130 moves the cursor to the location of the beginning of the selection
+          // on the next line when typing the downarrow (in this case, in front of 'bar')
+          expect(trimInnerText($div)).to.eql('foo\n22bar\nbaz')
         }
-
-        expect(trimInnerText($div)).to.eql('foo\n22bar\nbaz')
       })
     })
   })
