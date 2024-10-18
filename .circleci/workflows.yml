@@ -385,6 +385,7 @@ commands:
           command: |
             # if we are on arm64 we need to install setuptools as it no longer comes standard with the latest version of python
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              sudo apt install gcc-10 g++-10
               pip install setuptools
             fi
             source ./scripts/ensure-node.sh
