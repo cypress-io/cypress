@@ -386,9 +386,6 @@ commands:
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
               # Building better-sqlite3 on arm64 requires gcc-10
               sudo apt install gcc-10 g++-10
-              #Remove the previous alternatives
-              sudo update-alternatives --remove-all gcc
-              sudo update-alternatives --remove-all g++
 
               #Define the compiler
               sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 30
