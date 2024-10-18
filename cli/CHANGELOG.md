@@ -20,6 +20,7 @@ _Released 10/1/2024 (PENDING)_
 **Misc:**
 
 - Cypress now consumes [geckodriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) to help automate the Firefox browser instead of [marionette-client](https://github.com/cypress-io/marionette-client). Addresses [#30217](https://github.com/cypress-io/cypress/issues/30217).
+- Cypress now consumes [webdriver](https://github.com/webdriverio/webdriverio/tree/main/packages/webdriver) to help automate the Firefox browser and [firefox-profile](https://github.com/saadtazi/firefox-profile-js) to create a firefox profile and convert it to Base64 to save user screen preferences via `xulstore.json`. Addresses [#30300](https://github.com/cypress-io/cypress/issues/30300) and [#30301](https://github.com/cypress-io/cypress/issues/30301).
 - Pass spec information to protocol's `beforeSpec` to improve troubleshooting when reporting on errors. Addressed in [#30316](https://github.com/cypress-io/cypress/pull/30316).
 
 **Dependency Updates:**

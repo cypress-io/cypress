@@ -1,9 +1,15 @@
+diff --git a/node_modules/geckodriver/AUTHORS b/node_modules/geckodriver/AUTHORS
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/LICENSE b/node_modules/geckodriver/LICENSE
+old mode 100644
+new mode 100755
 diff --git a/node_modules/geckodriver/README.md b/node_modules/geckodriver/README.md
 deleted file mode 100644
-index 8634875..0000000
+index 95e3ef0..0000000
 --- a/node_modules/geckodriver/README.md
 +++ /dev/null
-@@ -1,230 +0,0 @@
+@@ -1,239 +0,0 @@
 -Geckodriver [![CI](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/ci.yml/badge.svg)](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/ci.yml) [![Audit](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/audit.yml/badge.svg)](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/audit.yml)
 -==========
 -
@@ -223,6 +229,15 @@ index 8634875..0000000
 -Type: `string`<br />
 -Default: `process.env.GECKODRIVER_CACHE_DIR || os.tmpdir()`
 -
+-### `spawnOpts`
+-Options to pass into the geckodriver process. This can be useful if needing
+-Firefox to spawn with `MOZ_` prefix variables, such as `MOZ_HEADLESS_WIDTH`.
+-See https://nodejs.org/api/child_process.html#child_processspawncommand-args-options for
+-all options.
+-
+-Type: `SpawnOptionsWithoutStdio | SpawnOptionsWithStdioTuple`<br />
+-Default: `undefined`
+-
 -# Other Browser Driver
 -
 -If you also look for other browser driver NPM wrappers, you can find them here:
@@ -234,70 +249,84 @@ index 8634875..0000000
 ----
 -
 -For more information on WebdriverIO see the [homepage](https://webdriver.io).
+diff --git a/node_modules/geckodriver/dist/cjs/index.d.ts b/node_modules/geckodriver/dist/cjs/index.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cjs/index.d.ts.map b/node_modules/geckodriver/dist/cjs/index.d.ts.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cjs/index.js b/node_modules/geckodriver/dist/cjs/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cjs/index.js.map b/node_modules/geckodriver/dist/cjs/index.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cli.d.ts b/node_modules/geckodriver/dist/cli.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cli.d.ts.map b/node_modules/geckodriver/dist/cli.d.ts.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cli.js b/node_modules/geckodriver/dist/cli.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/cli.js.map b/node_modules/geckodriver/dist/cli.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/constants.d.ts b/node_modules/geckodriver/dist/constants.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/constants.d.ts.map b/node_modules/geckodriver/dist/constants.d.ts.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/constants.js b/node_modules/geckodriver/dist/constants.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/constants.js.map b/node_modules/geckodriver/dist/constants.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/index.d.ts b/node_modules/geckodriver/dist/index.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/index.d.ts.map b/node_modules/geckodriver/dist/index.d.ts.map
+old mode 100644
+new mode 100755
 diff --git a/node_modules/geckodriver/dist/index.js b/node_modules/geckodriver/dist/index.js
-index 2367e0b..18be0e1 100644
+old mode 100644
+new mode 100755
+index 2edc6d2..d0b456e
 --- a/node_modules/geckodriver/dist/index.js
 +++ b/node_modules/geckodriver/dist/index.js
-@@ -1,11 +1,11 @@
+@@ -1,10 +1,14 @@
  import cp from 'node:child_process';
--import logger from '@wdio/logger';
-+import debugModule from 'debug';
+ import logger from '@wdio/logger';
++import debugModule from 'debug'
  import { download as downloadDriver } from './install.js';
  import { hasAccess, parseParams } from './utils.js';
  import { DEFAULT_HOSTNAME } from './constants.js';
--const log = logger('geckodriver');
-+const debug = debugModule('cypress-verbose:server:browsers:geckodriver');
+ const log = logger('geckodriver');
  export async function start(params) {
--    const { cacheDir, customGeckoDriverPath, ...startArgs } = params;
-+    const { cacheDir, customGeckoDriverPath, spawnOpts, ...startArgs } = params;
++    // wrap in cypress debugger statement to avoid extraneous messages to the console
++    log.setLevel(debugModule.enabled('cypress-verbose:server:browsers:geckodriver') ? 'info' : 'silent')
++
+     const { cacheDir, customGeckoDriverPath, spawnOpts, ...startArgs } = params;
      let geckoDriverPath = (customGeckoDriverPath ||
          process.env.GECKODRIVER_PATH ||
-         // deprecated
-@@ -23,8 +23,8 @@ export async function start(params) {
-     // Otherwise all instances try to connect to the default port and fail
-     startArgs.websocketPort = startArgs.websocketPort ?? 0;
-     const args = parseParams(startArgs);
--    log.info(`Starting Geckodriver at ${geckoDriverPath} with params: ${args.join(' ')}`);
--    return cp.spawn(geckoDriverPath, args);
-+    debug(`Starting Geckodriver at ${geckoDriverPath} with params: ${args.join(' ')}`);
-+    return cp.spawn(geckoDriverPath, args, spawnOpts);
- }
- export const download = downloadDriver;
- export * from './types.js';
+diff --git a/node_modules/geckodriver/dist/index.js.map b/node_modules/geckodriver/dist/index.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/install.d.ts b/node_modules/geckodriver/dist/install.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/install.d.ts.map b/node_modules/geckodriver/dist/install.d.ts.map
+old mode 100644
+new mode 100755
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-index c27c805..d230983 100644
+old mode 100644
+new mode 100755
+index c27c805..ac53518
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
-@@ -4,14 +4,14 @@ import util from 'node:util';
- import stream from 'node:stream';
- import fsp, { writeFile } from 'node:fs/promises';
- import zlib from 'node:zlib';
--import logger from '@wdio/logger';
-+import debugModule from 'debug';
- import tar from 'tar-fs';
- import { HttpsProxyAgent } from 'https-proxy-agent';
- import { HttpProxyAgent } from 'http-proxy-agent';
- import { BINARY_FILE, GECKODRIVER_CARGO_YAML } from './constants.js';
- import { hasAccess, getDownloadUrl, retryFetch } from './utils.js';
- import { BlobReader, BlobWriter, ZipReader } from '@zip.js/zip.js';
--const log = logger('geckodriver');
-+const debug = debugModule('cypress-verbose:server:browsers:geckodriver');
- const streamPipeline = util.promisify(stream.pipeline);
- const fetchOpts = {};
- if (process.env.HTTPS_PROXY) {
-@@ -36,10 +36,10 @@ export async function download(geckodriverVersion = process.env.GECKODRIVER_VERS
-             throw new Error(`Couldn't find version property in Cargo.toml file: ${JSON.stringify(toml)}`);
-         }
-         geckodriverVersion = version.split(' = ').pop().slice(1, -1);
--        log.info(`Detected Geckodriver v${geckodriverVersion} to be latest`);
-+        debug(`Detected Geckodriver v${geckodriverVersion} to be latest`);
-     }
-     const url = getDownloadUrl(geckodriverVersion);
--    log.info(`Downloading Geckodriver from ${url}`);
-+    debug(`Downloading Geckodriver from ${url}`);
-     const res = await retryFetch(url, fetchOpts);
-     if (res.status !== 200) {
-         throw new Error(`Failed to download binary (statusCode ${res.status}): ${res.statusText}`);
 @@ -70,6 +70,8 @@ async function downloadZip(res, cacheDir) {
   * download on install
   */
@@ -305,7 +334,37 @@ index c27c805..d230983 100644
 -    await download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
 +    // removing the await here as packherd cannot bundle with a top-level await.
 +    // This only has an impact if invoking from a CLI context, which cypress is not.
-+    download().then(() => debug('Success!'), (err) => debug(`Failed to install Geckodriver: ${err.stack}`));
++    download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
  }
  //# sourceMappingURL=install.js.map
 \ No newline at end of file
+diff --git a/node_modules/geckodriver/dist/install.js.map b/node_modules/geckodriver/dist/install.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/types.d.ts b/node_modules/geckodriver/dist/types.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/types.d.ts.map b/node_modules/geckodriver/dist/types.d.ts.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/types.js b/node_modules/geckodriver/dist/types.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/types.js.map b/node_modules/geckodriver/dist/types.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/utils.d.ts b/node_modules/geckodriver/dist/utils.d.ts
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/utils.d.ts.map b/node_modules/geckodriver/dist/utils.d.ts.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/utils.js b/node_modules/geckodriver/dist/utils.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/dist/utils.js.map b/node_modules/geckodriver/dist/utils.js.map
+old mode 100644
+new mode 100755
+diff --git a/node_modules/geckodriver/tsconfig.tsbuildinfo b/node_modules/geckodriver/tsconfig.tsbuildinfo
+old mode 100644
+new mode 100755
