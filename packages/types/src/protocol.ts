@@ -121,8 +121,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   beforeSpec (spec: SpecWithRelativeRoot & { instanceId: string }): void
   afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   reportNonFatalErrors (clientMetadata: any): Promise<void>
-  uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | void>
-
+  uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
 }
 
 type Response = {

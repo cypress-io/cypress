@@ -1,0 +1,21 @@
+diff --git a/node_modules/evil-dns/evil-dns.js b/node_modules/evil-dns/evil-dns.js
+index 740f40d..83986c7 100644
+--- a/node_modules/evil-dns/evil-dns.js
++++ b/node_modules/evil-dns/evil-dns.js
+@@ -25,10 +25,12 @@ dns.lookup = function(domain, options, callback) {
+ 
+ 	for (i = 0; i < domains.length; i++) {
+ 		var entry = domains[i];
+-		if (domain.match(entry.domain)) {
+-			if (!family || family === entry.family) {
+-				return callback(null, entry.ip, entry.family);
+-			}			
++		if (domain.match(entry.domain) && (!family || family === entry.family)) {
++			return process.nextTick(
++				options.all
++					? () => callback(null, [{ address: entry.ip, family: entry.family }])
++					: () => callback(null, entry.ip, entry.family)
++			);
+ 		}
+ 	}
+ 
