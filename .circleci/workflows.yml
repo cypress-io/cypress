@@ -136,7 +136,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2023.07.1
+      image: ubuntu-2004:2024.05.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
