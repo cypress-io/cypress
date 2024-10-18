@@ -14,7 +14,7 @@ module.exports = {
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
-    debug('handle iframe %o', { test, specFilter })
+    debug('handle iframe %o', { test, specFilter, config })
 
     const specs = await this.getSpecs(test, config, extraOptions)
     const supportFileJs = this.getSupportFile(config)

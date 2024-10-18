@@ -21,9 +21,9 @@ export namespace CyServer {
     clientRoute: string
     experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
     experimentalSourceRewriting: boolean
+    injectDocumentDomain: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean
-    experimentalSkipDomainInjection: string[] | null
     /**
      * URL to Cypress's runner.
      */

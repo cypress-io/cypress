@@ -7,6 +7,7 @@ import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
+import type { Policy } from '@packages/network/lib/cors'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
@@ -64,11 +65,9 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, skipDomainInjectionForDomains) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, policy: Policy) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props, {
-      skipDomainInjectionForDomains,
-    })
+    return cors.urlMatchesPolicyProps({ policy, frameUrl: req.proxiedUrl, topProps: remoteState.props })
   }
 
   if (remoteState.strategy === 'file') {
@@ -420,7 +419,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(
+    this.req,
+    this.remoteStates.current(),
+    cors.policyFromConfig(this.config),
+  )
 
   span?.setAttributes({
     isInitialInjection: this.res.isInitial,
@@ -437,7 +440,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(
+      this.req,
+      this.remoteStates.getPrimary(),
+      cors.policyFromConfig(this.config),
+    )
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
@@ -832,9 +839,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
-      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
-        skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
-      }),
+      shouldInjectDocumentDomain: this.config.injectDocumentDomain,
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,

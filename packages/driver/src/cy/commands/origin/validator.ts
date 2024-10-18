@@ -84,16 +84,13 @@ export class Validator {
       })
     }
 
-    // Users would be better off not using cy.origin if the origin is part of the same super domain.
-    if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specHref, {
-      skipDomainInjectionForDomains: Cypress.config('experimentalSkipDomainInjection'),
+    const policy = cors.policyFromConfig({ injectDocumentDomain: Cypress.config('injectDocumentDomain') })
+
+    if (cors.urlMatchesPolicy({
+      policy,
+      frameUrl: originLocation.href,
+      topUrl: specHref,
     })) {
-      // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
-
-      const policy = cors.policyForDomain(originLocation.href, {
-        skipDomainInjectionForDomains: Cypress.config('experimentalSkipDomainInjection'),
-      })
-
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
         onFail: this.log,
         args: {

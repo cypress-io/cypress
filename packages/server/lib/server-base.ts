@@ -15,6 +15,7 @@ import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri, concatStream } from '@packages/network'
+import type { Policy } from '@packages/network/lib/cors'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -156,7 +157,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
-  private skipDomainInjectionForDomains: string[] | null = null
+  private _originPolicy: Policy = 'same-origin'
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
 
@@ -237,11 +238,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, experimentalSkipDomainInjection } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, injectDocumentDomain } = config
 
       this._server = this._createHttpServer(app)
 
-      this.skipDomainInjectionForDomains = experimentalSkipDomainInjection
+      this._originPolicy = injectDocumentDomain ? 'same-super-domain-origin' : 'same-origin'
 
       const onError = (err) => {
         // if the server bombs before starting
@@ -904,12 +905,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
-                  const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl
-                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { skipDomainInjectionForDomains: this.skipDomainInjectionForDomains })
+                  const urlDoesNotMatchPolicy = options.hasAlreadyVisitedUrl
+                    && !cors.urlMatchesPolicy({ policy: this._originPolicy, frameUrl: primaryRemoteState.origin, topUrl: newUrl || '' })
                     || options.isFromSpecBridge
 
                   if (!handlingLocalFile) {
-                    this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)
+                    this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicy)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -924,7 +925,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                     details,
                     originalUrl,
                     response: incomingRes,
-                    urlDoesNotMatchPolicyBasedOnDomain,
+                    urlDoesNotMatchPolicyBasedOnDomain: urlDoesNotMatchPolicy,
                   })
                 } else {
                   // TODO: move this logic to the driver too for
