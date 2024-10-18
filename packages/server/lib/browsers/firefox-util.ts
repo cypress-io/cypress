@@ -57,21 +57,20 @@ async function navigateToUrlClassic (url: string) {
 export default {
   async setup ({
     automation,
+    onError,
     url,
-    foxdriverPort,
     remotePort,
     webdriverClient: wdInstance,
   }: {
     automation: Automation
+    onError?: (err: Error) => void
     url: string
-    foxdriverPort: number
     remotePort: number
     webdriverClient: WebDriverClient
   }): Promise<BrowserCriClient> {
     // set the WebDriver classic instance instantiated from geckodriver
     webdriverClient = wdInstance
-    const [, browserCriClient] = await Promise.all([
-      this.setupFoxdriver(foxdriverPort),
+    const [browserCriClient] = await Promise.all([
       setupCDP(remotePort, automation, onError),
     ])
 
