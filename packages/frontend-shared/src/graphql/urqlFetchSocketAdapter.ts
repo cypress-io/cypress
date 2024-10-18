@@ -3,7 +3,7 @@ import type { SocketShape } from '@packages/socket/lib/types'
 import type { ClientOptions } from '@urql/core'
 
 export const urqlFetchSocketAdapter = (io: SocketShape): ClientOptions['fetch'] => {
-  return (url, fetchOptions = {}) => {
+  return (url, fetchOptions: RequestInit = {}) => {
     return new Promise<Response>((resolve, reject) => {
       // Handle aborted requests
       if (fetchOptions.signal) {
