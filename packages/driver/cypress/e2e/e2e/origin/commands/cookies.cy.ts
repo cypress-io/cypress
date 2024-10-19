@@ -189,7 +189,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
 
           // BiDi currently does NOT provide the expiry time with their storage API
           if (Cypress.browser.name !== 'firefox') {
-            expect(consoleProps.props.Yielded).to.have.property('expiry').that.is.a('number')
+            expect(consoleProps.props.Yielded[0]).to.have.property('expiry').that.is.a('number')
           }
 
           expect(consoleProps.props.Yielded[0]).to.have.property('httpOnly').that.equals(false)
@@ -244,7 +244,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
 
           // BiDi currently does NOT provide the expiry time with their storage API
           if (Cypress.browser.name !== 'firefox') {
-            expect(consoleProps.props.Yielded).to.have.property('expiry').that.is.a('number')
+            expect(consoleProps.props['Cleared Cookie']).to.have.property('expiry').that.is.a('number')
           }
 
           expect(consoleProps.props['Cleared Cookie']).to.have.property('httpOnly').that.equals(false)

@@ -533,7 +533,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
       launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
     ]).catch((e) => {
       // if the error wrapped is a CDPFailedToStartFirefox, try to relaunch the browser
-      if (e.details.includes('CDPFailedToStartFirefox')) {
+      if (e?.details?.includes('CDPFailedToStartFirefox')) {
         // if CDP fails to connect, which is ultimately out of our control and in the hands of webdriver
         // we retry launching the browser in the hopes the session is spawned correctly
         debug(`Caught in launchBrowser: ${e.details}`)
