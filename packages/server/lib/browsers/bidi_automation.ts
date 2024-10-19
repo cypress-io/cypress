@@ -14,10 +14,25 @@ import type {
   BrowsingContextInfo,
   NetworkSameSite,
 } from 'webdriver/build/bidi/localTypes'
-import { CyCookie } from './webkit-automation'
+import type { CyCookie } from './webkit-automation'
 import { isHostOnlyCookie } from './cdp_automation'
 import { cookieMatches } from '../automation/util'
-import { StorageCookieFilter, StoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
+
+// this is shipped in remoteTypes within webdriver but it isn't exported, so we need to redefine the type
+interface StoragePartialCookie {
+  name: string
+  value: {
+    type: 'string'
+    value: string
+  }
+  domain: string
+  path: string
+  httpOnly: boolean
+  hostOnly?: boolean
+  secure: boolean
+  sameSite: NetworkSameSite
+  expiry?: number
+}
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
@@ -38,25 +53,22 @@ function convertSameSiteExtensionToBiDi (str: CyCookie['sameSite']) {
     return 'none'
   }
 
-  return str
+  // if no value, default to lax as this is the browser default
+  return str === undefined ? 'lax' : str
 }
 
 // used to normalize cookies to CyCookie before returning them through the automation client
-const convertBiDiCookieToCyCookie = (cookie?: NetworkCookie | null): CyCookie | null => {
-  if (cookie) {
-    return {
-      name: cookie.name,
-      value: cookie.value.value,
-      domain: cookie.domain,
-      path: cookie.path,
-      httpOnly: cookie.httpOnly,
-      hostOnly: !!isHostOnlyCookie(cookie),
-      secure: cookie.secure,
-      sameSite: convertSameSiteBiDiToExtension(cookie.sameSite),
-    }
+const convertBiDiCookieToCyCookie = (cookie: NetworkCookie): CyCookie => {
+  return {
+    name: cookie.name,
+    value: cookie.value.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    hostOnly: !!isHostOnlyCookie(cookie),
+    secure: cookie.secure,
+    sameSite: convertSameSiteBiDiToExtension(cookie.sameSite),
   }
-
-  return null
 }
 
 const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => {
@@ -85,8 +97,8 @@ const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => 
   return cookieToSet
 }
 
-const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StorageCookieFilter => {
-  const cookieToClearFilter: StorageCookieFilter = {
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
+  const cookieToClearFilter: StoragePartialCookie = {
     name: cookie.name,
     value: {
       type: 'string',
@@ -357,7 +369,7 @@ export class BidiAutomation {
     const { cookies } = await this.#webDriverClient.storageGetCookies(BiDiCookieFilter)
 
     // convert the BiDi Cookies to CyCookies
-    const normalizedCookies = cookies.map((cookie) => convertBiDiCookieToCyCookie(cookie)).filter((cookie) => !!cookie)
+    const normalizedCookies: CyCookie[] = cookies.map((cookie) => convertBiDiCookieToCyCookie(cookie))
 
     // because of the above comment on the BiDi API, we get ALL cookies not filtering by domain
     // (name filter is safe to reduce the payload coming back)

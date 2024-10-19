@@ -186,12 +186,26 @@ export class PreRequests {
     const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
+      let cdpLagDuration; let proxyRequestCorrelationDuration = 0
+
+      if (browserPreRequest.cdpRequestWillBeSentReceivedTimestamp) {
+        if (browserPreRequest.cdpRequestWillBeSentTimestamp) {
+          cdpLagDuration = browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp
+        }
+
+        if (pendingRequest.proxyRequestReceivedTimestamp) {
+          proxyRequestCorrelationDuration = Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0)
+        }
+      }
+
+      // timings should always be defined when using CDP.
+      // necessity of timings needs to be accessed with BiDi
       const timings = {
-        cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+        cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp ?? 0,
+        cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp ?? 0,
         proxyRequestReceivedTimestamp: pendingRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp,
-        proxyRequestCorrelationDuration: Math.max(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - pendingRequest.proxyRequestReceivedTimestamp, 0),
+        cdpLagDuration,
+        proxyRequestCorrelationDuration,
       }
 
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
@@ -221,8 +235,9 @@ export class PreRequests {
     debugVerbose('Caching pre-request %s to be matched later. %o', key, browserPreRequest)
     this.pendingPreRequests.push(key, {
       browserPreRequest,
-      cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
-      cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+      // Should always be defined when using CDP
+      cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp ?? 0,
+      cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp ?? 0,
     })
   }
 
