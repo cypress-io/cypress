@@ -674,8 +674,6 @@ commands:
           browser: <<parameters.browser>>
       - run:
           command: |
-            npx kill-port 4455
-            npx kill-port 4456
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
