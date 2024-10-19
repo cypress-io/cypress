@@ -33,7 +33,7 @@
     "mock-fs": "5.2.0",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   },
   "files": [
     "index.js",
