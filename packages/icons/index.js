@@ -1,1 +1,1 @@
-module.exports = require('./dist/icons')
+module.exports = require('./dist/icons.js')
