@@ -3,10 +3,6 @@ import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-serve
 
 export default defineConfig({
   projectId: 'ypt4pf',
-  retries: {
-    runMode: 10,
-    openMode: 0,
-  },
   experimentalStudio: true,
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,

@@ -69,7 +69,7 @@ const navigationChanged = async (Cypress, cy, state, source, arg) => {
   debug('navigation changed:', url)
 
   // don't trigger for empty url's or about:blank
-  if (_.isEmpty(url) || (url === 'about:blank') || (url === 'about:srcdoc')) {
+  if (_.isEmpty(url) || (url === 'about:blank')) {
     return
   }
 
@@ -277,8 +277,8 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   state('onPageLoadErr', onPageLoadErr)
 
   const getRedirectionCount = (href) => {
-    // redirecting to about:blank or about:srcdoc should not count towards the redirection limit.
-    if (href === 'about:blank' || href === 'about:srcdoc') {
+    // redirecting to about:blank should not count towards the redirection limit.
+    if (href === 'about:blank') {
       return 0
     }
 
@@ -341,7 +341,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
         cy.state('onPageLoadErr', null)
 
-        if (url === 'about:blank' || url === 'about:srcdoc') {
+        if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
           options._log?.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {

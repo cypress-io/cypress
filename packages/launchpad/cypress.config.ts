@@ -8,7 +8,7 @@ export default defineConfig({
   viewportHeight: 850,
   experimentalMemoryManagement: true,
   retries: {
-    runMode: 10,
+    runMode: 2,
     openMode: 0,
   },
   reporter: '../../node_modules/cypress-multi-reporters/index.js',

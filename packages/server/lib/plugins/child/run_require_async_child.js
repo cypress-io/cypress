@@ -193,7 +193,7 @@ function run (ipc, file, projectRoot) {
 
       debug('loaded config from %s %o', file, result)
     } catch (err) {
-      // Starting in Node 20, error objects when occurs occur while doing `node --load` are not properly serialized
+      // Starting in Node 20, error objects that are thrown while using `node --load` are not properly serialized
       // so we need to check both the name and the stack. We also have patched ts-node to ensure that the error is
       // of the right form to be serialized.
       if (err.name === 'TSError' || err.stack.includes('TSError')) {

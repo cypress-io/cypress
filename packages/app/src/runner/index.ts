@@ -258,7 +258,6 @@ function runSpecCT (config, spec: SpecFile) {
   })
 
   autIframe._showInitialBlankPage()
-  $autIframe.removeAttr('srcdoc')
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!

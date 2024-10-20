@@ -48,7 +48,7 @@ export class ErrorDataSource {
       }
     }
 
-    if (!absolute || !_.isNumber(line) || !_.isNumber(column) || absolute.includes('ts-node')) {
+    if (!absolute || !_.isNumber(line) || !_.isNumber(column)) {
       return null
     }
 

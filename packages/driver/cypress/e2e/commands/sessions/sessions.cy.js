@@ -65,7 +65,7 @@ describe('cy.session', { retries: 0 }, () => {
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
         .url()
-        .should('eq', 'about:srcdoc')
+        .should('eq', 'about:blank')
       })
 
       it('clears page before the end of each run when nextTestHasTestIsolationOn is undefined', () => {
@@ -79,7 +79,7 @@ describe('cy.session', { retries: 0 }, () => {
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
         .url()
-        .should('eq', 'about:srcdoc')
+        .should('eq', 'about:blank')
       })
 
       it('does not clear the page before the end of each run if the next test has test isolation off', () => {
@@ -93,7 +93,7 @@ describe('cy.session', { retries: 0 }, () => {
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
         .url()
-        .should('not.eq', 'about:srcdoc')
+        .should('not.eq', 'about:blank')
       })
 
       it('clears the browser cookie after each run', () => {
@@ -229,7 +229,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.on('internal:window:load', (args) => {
-          if (args.window.location.href === 'about:srcdoc') {
+          if (args.window.location.href === 'about:blank') {
             clearPageCount++
           }
         })
@@ -245,7 +245,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         // test must be first to run before blank page visit between each test
         it('clears page after command runs', () => {
-          cy.url().should('eq', 'about:srcdoc')
+          cy.url().should('eq', 'about:blank')
         })
 
         it('successfully creates new session', () => {
@@ -336,7 +336,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         // test must be first to run before blank page visit between each test
         it('clears page after command runs', () => {
-          cy.url().should('eq', 'about:srcdoc')
+          cy.url().should('eq', 'about:blank')
         })
 
         it('successfully creates new session and validates it', () => {
@@ -483,7 +483,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         // test must be first to run before blank page visit between each test
         it('clears page after setup runs', () => {
-          cy.url().should('eq', 'about:srcdoc')
+          cy.url().should('eq', 'about:blank')
         })
 
         it('successfully restores saved session', () => {
@@ -547,7 +547,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         // test must be first to run before blank page visit between each test
         it('clears page after command runs', () => {
-          cy.url().should('eq', 'about:srcdoc')
+          cy.url().should('eq', 'about:blank')
         })
 
         it('successfully restores saved session', () => {
@@ -630,7 +630,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         // test must be first to run before blank page visit between each test
         it('clears page after command runs', () => {
-          cy.url().should('eq', 'about:srcdoc')
+          cy.url().should('eq', 'about:blank')
         })
 
         it('successfully recreates session', () => {
@@ -982,7 +982,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         cy.on('internal:window:load', (args) => {
-          if (args.window.location.href === 'about:srcdoc') {
+          if (args.window.location.href === 'about:blank') {
             clearPageCount++
           }
         })

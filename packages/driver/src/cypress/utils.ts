@@ -322,8 +322,6 @@ export default {
   },
 
   iframeSrc ($autIframe, url) {
-    $autIframe.removeAttr('srcdoc')
-
     return $autIframe.prop('src', url)
   },
 

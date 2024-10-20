@@ -174,7 +174,7 @@ describe('save/restore session with cookies and localStorage', () => {
 describe('multiple sessions in test', () => {
   it('switch session during test', () => {
     sessionUser('alice')
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
 
     cy.visit('https://localhost:4466/form')
     expectCurrentSessionData({
@@ -187,7 +187,7 @@ describe('multiple sessions in test', () => {
 
     sessionUser('bob')
 
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
 
     expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
@@ -205,7 +205,7 @@ describe('multiple sessions in test - can switch without redefining', () => {
 
     sessionUser('bob')
     sessionUser('alice')
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
 
     cy.visit('https://localhost:4466/form')
     expectCurrentSessionData({
@@ -226,7 +226,7 @@ describe('multiple sessions in test - can switch without redefining', () => {
       expect(clearSpy).calledThrice
     })
 
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
 
     expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
@@ -249,7 +249,7 @@ function SuiteWithValidateFn (id, fn) {
       type: 'parent',
     })
 
-    // expect(cy.state('window').location.href).eq('about:srcdoc')
+    // expect(cy.state('window').location.href).eq('about:blank')
 
     return fn(validate.callCount)
   })
@@ -271,22 +271,22 @@ function SuiteWithValidateFn (id, fn) {
   })
 
   it('t1', () => {
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
 
     expect(setup).calledOnce
     expect(validate).calledOnce
-    // (1,2) about:srcdoc before & after session creation
+    // (1,2) about:blank before & after session creation
     // (3) after validate runs
     expect(numPageLoads, 'number of page loads').eq(2)
   })
 
   it('t2', () => {
-    cy.url().should('eq', 'about:srcdoc')
+    cy.url().should('eq', 'about:blank')
     expect(setup).calledTwice
     expect(validate).calledThrice
-    // (4) about:srcdoc before session rehydrating
-    // (5,6) about:srcdoc before & after setup function
-    // (7) about:srcdoc after 2nd validate runs
+    // (4) about:blank before session rehydrating
+    // (5,6) about:blank before & after setup function
+    // (7) about:blank after 2nd validate runs
     expect(numPageLoads, 'number of page loads').eq(5)
   })
 }
