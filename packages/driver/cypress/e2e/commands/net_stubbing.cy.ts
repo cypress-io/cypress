@@ -26,6 +26,9 @@ describe('network stubbing', { retries: 15 }, function () {
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+    // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+    // to ensure that we have a valid origin for our tests.
+    cy.visit('/fixtures/empty.html')
   })
 
   context('cy.intercept()', function () {

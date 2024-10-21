@@ -69,7 +69,7 @@ describe('lib/fixture', () => {
   context('json files', () => {
     it('throws when json is invalid', function () {
       const e =
-        `\'bad_json.json\' is not valid JSON.\nUnexpected string in JSON at position 20 while parsing near "{\\n  \\"bad\\": \\"json\\"\\n  \\"should\\": \\"not parse..."`
+        `\'bad_json.json\' is not valid JSON.\nExpected ',' or '}' after property value in JSON at position 20 while parsing near "{\\n  \\"bad\\": \\"json\\"\\n  \\"should\\": \\"not parse..."`
 
       return fixture.get(this.fixturesFolder, 'bad_json.json')
       .then(() => {

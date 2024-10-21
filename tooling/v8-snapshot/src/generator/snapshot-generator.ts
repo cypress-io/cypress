@@ -475,7 +475,9 @@ export class SnapshotGenerator {
 
     // 2. Run the `mksnapshot` binary providing it the path to our snapshot
     //    script
-    const args = [this.snapshotScriptPath, '--output_dir', this.snapshotBinDir]
+    // --no-use-ic flag is a workaround
+    // see https://issues.chromium.org/issues/345280736#comment12
+    const args = [this.snapshotScriptPath, '--output_dir', this.snapshotBinDir, '--no-use-ic']
 
     try {
       const { snapshotBlobFile, v8ContextFile } = await syncAndRun(

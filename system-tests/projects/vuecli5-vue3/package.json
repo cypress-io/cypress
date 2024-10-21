@@ -6,7 +6,7 @@
     "@vue/cli-service": "~5.0.0"
   },
   "resolutions": {
-    "@achrinza/node-ipc": "9.2.5"
+    "@achrinza/node-ipc": "9.2.9"
   },
   "projectFixtureDirectory": "vue-cli"
 }
