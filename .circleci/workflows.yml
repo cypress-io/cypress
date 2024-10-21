@@ -675,6 +675,8 @@ commands:
                 shell: cmd.exe
                 command: |
                   echo 127.0.0.1 localhost > %WINDIR%\System32\drivers\etc\hosts
+                  ipconfig /flushdns
+                  nbstat -R
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
