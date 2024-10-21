@@ -382,8 +382,8 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       this.$elOutOfParentBoundsAbove = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
+<div style='width: 100px; height: 100px; overflow: hidden; position: fixed;'>
+  <span id='elOutOfParentBoundsAbove' style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
 </div>\
 `)
 
@@ -863,7 +863,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is hidden when parent overflow hidden and out of bounds above', function () {
-        expect(this.$elOutOfParentBoundsAbove.find('span')).to.be.hidden
+        expect(this.$elOutOfParentBoundsAbove.find('span#elOutOfParentBoundsAbove')).to.be.hidden
       })
 
       it('is hidden when parent overflow hidden and out of bounds below', function () {
@@ -1200,10 +1200,7 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('element is fixed and being covered', function () {
-        this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\
-This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:
-
-\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
+        this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
       })
 
       it('needs scroll', function () {
