@@ -670,14 +670,36 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // now that we have the driverPID and browser PID
     browserInstanceWrapper.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
+
       clearInstanceState({ gracefulShutdown: true })
 
       debug('closing firefox')
 
-      const browserReturnStatus = process.kill(browserPID)
+      let browserReturnStatus = true
+
+      try {
+        browserReturnStatus = process.kill(browserPID)
+      } catch (e) {
+        if (e.code === 'ESRCH') {
+          debugVerbose('browser process no longer exists. continuing...')
+        } else {
+          throw e
+        }
+      }
 
       debug('closing geckodriver and webdriver')
-      const driverReturnStatus = process.kill(driverPID)
+
+      let driverReturnStatus = true
+
+      try {
+        driverReturnStatus = process.kill(driverPID)
+      } catch (e) {
+        if (e.code === 'ESRCH') {
+          debugVerbose('geckodriver/webdriver process no longer exists. continuing...')
+        } else {
+          throw e
+        }
+      }
 
       // needed for closing the browser when switching browsers in open mode to signal
       // the browser is done closing
