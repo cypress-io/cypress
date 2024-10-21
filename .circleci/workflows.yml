@@ -1555,7 +1555,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn test-integration --scope @tooling/{packherd,v8-snapshot,electron-mksnapshot}
             - verify-mocha-results:
                 expectedResultCount: 3
       - when:
@@ -1567,7 +1567,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/packherd'"
+                  yarn test-integration --scope @tooling/packherd
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:

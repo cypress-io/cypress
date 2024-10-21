@@ -16,7 +16,7 @@
   "devDependencies": {
     "cypress-each": "^1.11.0",
     "cypress-expect": "^2.5.3",
-    "typescript": "^5.4.5"
+    "typescript": "~5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=10"
