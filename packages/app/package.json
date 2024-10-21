@@ -9,7 +9,7 @@
     "clean-deps": "rimraf node_modules",
     "cypress:launch": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
-    "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
+    "cypress:run-cypress-in-cypress": "cross-env DEBUG=cypress:network:* CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project .",
     "cypress:run:e2e:update:snapshots": "CYPRESS_SNAPSHOT_UPDATE=1 yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --spec **/*mochaEvents* --browser chrome",

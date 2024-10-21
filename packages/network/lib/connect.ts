@@ -39,6 +39,13 @@ export function getAddress (port: number, hostname: string): Bluebird<net.Addres
   .then((addresses) => {
     debug('got addresses %o', { hostname, port, addresses })
 
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+      debug('filtering ipv6 addresses %o', { hostname, port, addresses })
+      addresses = addresses.filter((address) => {
+        return address.family === 4
+      })
+    }
+
     // convert to an array if string
     return Array.prototype.concat.call(addresses).map(fn)
   })
