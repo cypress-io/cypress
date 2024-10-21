@@ -3,6 +3,9 @@ import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 import type { CypressWantsInjection } from '../../types'
 import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import Debug from 'debug'
+
+const debug = Debug('cypress:proxy:http:rewriter')
 
 export type SecurityOpts = {
   isNotJavascript?: boolean
@@ -32,6 +35,7 @@ function getRewriter (useAstSourceRewriting: boolean) {
 }
 
 function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
+  debug('getting html to inject from opts %O', opts)
   const {
     cspNonce,
     domainName,

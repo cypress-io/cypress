@@ -95,9 +95,11 @@ export const Cypress = (
     configureServer: async (server: ViteDevServer) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {
         let transformedIndexHtml = await server.transformIndexHtml(base, '')
+
         const viteImport = `<script type="module" src="${options.cypressConfig.devServerPublicPathRoute}/@vite/client"></script>`
 
         // If we're doing cy-in-cy, we need to be able to access the Cypress instance from the parent frame.
+
         if (process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING) {
           transformedIndexHtml = transformedIndexHtml.replace(viteImport, `<script>document.domain = 'localhost';</script>${viteImport}`)
         }
