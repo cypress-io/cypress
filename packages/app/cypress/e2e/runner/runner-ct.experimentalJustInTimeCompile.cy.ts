@@ -2,7 +2,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const EXPERIMENTAL_JIT_DIR: ProjectDirs[number] = 'experimental-JIT'
+const JIT_COMPILE_DIR: ProjectDirs[number] = 'justInTimeCompile'
 
 const PROJECTS: {bundler: 'vite' | 'webpack'}[] = [
   { bundler: 'vite' },
@@ -10,9 +10,9 @@ const PROJECTS: {bundler: 'vite' | 'webpack'}[] = [
 ]
 
 for (const { bundler } of PROJECTS) {
-  const PROJECT_NAME = `${EXPERIMENTAL_JIT_DIR}/${bundler}`
+  const PROJECT_NAME = `${JIT_COMPILE_DIR}/${bundler}`
 
-  describe(`CT experimentalJustInTimeCompile: ${bundler}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
+  describe(`CT justInTimeCompile: ${bundler}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
     const visitComponentSpecAndVerifyPass = (specNumber: number) => {
       cy.contains(`Component-${specNumber}.cy.jsx`).click()
       cy.waitForSpecToFinish(undefined)
