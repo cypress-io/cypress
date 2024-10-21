@@ -671,8 +671,13 @@ commands:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: netsh interface ipv6 set prefix ::ffff:0:0/96 60 4
+                name: default to ipv4 for windows
+                command: |
+                  ipconfig
+                  netsh interface teredo set state disabled
+                  netsh interface ipv6 6to4 set state state=disabled undoonstop=disabled
+                  netsh interface ipv6 isatap set state state=disabled
+                  ipconfig
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
