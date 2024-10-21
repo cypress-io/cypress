@@ -677,6 +677,7 @@ commands:
                   netsh interface teredo set state disabled
                   netsh interface ipv6 6to4 set state state=disabled undoonstop=disabled
                   netsh interface ipv6 isatap set state state=disabled
+                  reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\ /t REG_DWORD /v DisabledComponents /d 255 /f
                   ipconfig
       - windows-install-chrome:
           browser: <<parameters.browser>>
