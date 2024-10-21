@@ -138,6 +138,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   await ensureBody()
 
+  request.addDefaultSubscriptions()
+
   if (!_.isString(req.body) && !_.isBuffer(req.body)) {
     throw new Error('req.body must be a string or a Buffer')
   }

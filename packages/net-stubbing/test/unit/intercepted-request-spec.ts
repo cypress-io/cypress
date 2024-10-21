@@ -32,6 +32,8 @@ describe('InterceptedRequest', () => {
         socket,
       })
 
+      interceptedRequest.addDefaultSubscriptions()
+
       interceptedRequest.addSubscription({
         routeId: '1',
         eventName: 'before:response',
@@ -48,6 +50,58 @@ describe('InterceptedRequest', () => {
             eventName: 'before:request',
             await: true,
             routeId: frame.subscription.routeId,
+          },
+        })
+
+        state.pendingEventHandlers[frame.eventId](frame.data)
+      })
+
+      await interceptedRequest.handleSubscriptions({
+        eventName: 'before:request',
+        data,
+        mergeChanges: _.merge,
+      })
+    })
+
+    it('ignores disabled subscriptions', async () => {
+      const socket = {
+        toDriver: sinon.stub(),
+      }
+      const state = NetStubbingState()
+      const interceptedRequest = new InterceptedRequest({
+        req: {
+          matchingRoutes: [
+            // @ts-ignore
+            {
+              id: '1',
+              hasInterceptor: true,
+              routeMatcher: {},
+              disabled: true,
+            },
+            // @ts-ignore
+            {
+              id: '2',
+              hasInterceptor: true,
+              routeMatcher: {},
+            },
+          ],
+        },
+        state,
+        socket,
+      })
+
+      interceptedRequest.addDefaultSubscriptions()
+
+      const data = { foo: 'bar' }
+
+      socket.toDriver.callsFake((eventName, subEventName, frame) => {
+        expect(eventName).to.eq('net:stubbing:event')
+        expect(subEventName).to.eq('before:request')
+        expect(frame).to.deep.include({
+          subscription: {
+            eventName: 'before:request',
+            await: true,
+            routeId: '2',
           },
         })
 
