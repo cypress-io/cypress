@@ -674,12 +674,7 @@ commands:
                 name: default to ipv4 for windows
                 shell: cmd.exe
                 command: |
-                  ipconfig
-                  netsh interface teredo set state disabled
-                  netsh interface ipv6 6to4 set state state=disabled undoonstop=disabled
-                  netsh interface ipv6 isatap set state state=disabled
-                  reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\ /t REG_DWORD /v DisabledComponents /d 255 /f
-                  ipconfig
+                  echo 127.0.0.1 localhost > %WINDIR%\System32\drivers\etc\hosts
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
