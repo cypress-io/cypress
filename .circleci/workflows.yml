@@ -672,6 +672,7 @@ commands:
           steps:
             - run:
                 name: default to ipv4 for windows
+                shell: cmd.exe
                 command: |
                   ipconfig
                   netsh interface teredo set state disabled
