@@ -364,7 +364,7 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
 
       return config.clientRoute
     }).then((clientRoute) => {
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
+      return cy.visit(`http://127.0.0.1:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
     })
   })
 }
