@@ -228,5 +228,6 @@
   "optionalDependencies": {
     "fsevents": "^2",
     "registry-js": "1.15.0"
-  }
+  },
+  "nx": {}
 }

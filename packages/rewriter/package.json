@@ -42,5 +42,6 @@
       "@types/parse5-html-rewriting-stream",
       "@types/parse5-html-rewriting-stream/**"
     ]
-  }
+  },
+  "nx": {}
 }

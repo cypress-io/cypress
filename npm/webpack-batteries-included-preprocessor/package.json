@@ -82,5 +82,6 @@
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "nx": {}
 }

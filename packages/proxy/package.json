@@ -49,5 +49,6 @@
     "nohoist": [
       "devtools-protocol"
     ]
-  }
+  },
+  "nx": {}
 }
