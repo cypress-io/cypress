@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@babel/parser": "7.25.3",
-    "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
     "@cypress/request": "^3.0.4",
@@ -216,7 +215,6 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
-      "@benmalka/foxdriver",
       "devtools-protocol",
       "edgedriver",
       "geckodriver",
