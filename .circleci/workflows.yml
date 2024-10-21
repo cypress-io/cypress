@@ -666,6 +666,13 @@ commands:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
+      - when:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: reinstall dependencies to work around cache issue (Windows only)
+                command: netsh interface ipv6 set prefix ::ffff:0:0/96 60 4
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
