@@ -1566,6 +1566,7 @@
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
     "./node_modules/bindings/bindings.js",
+    "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
     "./node_modules/braces/lib/constants.js",
@@ -2185,6 +2186,7 @@
     "./node_modules/is-fullwidth-code-point/index.js",
     "./node_modules/is-glob/index.js",
     "./node_modules/is-html/index.js",
+    "./node_modules/is-obj/index.js",
     "./node_modules/is-plain-obj/index.js",
     "./node_modules/is-regexp/index.js",
     "./node_modules/is-stream/index.js",
@@ -2444,7 +2446,6 @@
     "./node_modules/mime-types/index.js",
     "./node_modules/mime/types.json",
     "./node_modules/min-indent/index.js",
-    "./node_modules/minimatch/node_modules/brace-expansion/index.js",
     "./node_modules/minimist/index.js",
     "./node_modules/mocha-7.0.1/lib/browser/progress.js",
     "./node_modules/mocha-7.0.1/lib/context.js",
@@ -2466,7 +2467,6 @@
     "./node_modules/mocha-7.0.1/lib/reporters/markdown.js",
     "./node_modules/mocha-7.0.1/lib/stats-collector.js",
     "./node_modules/mocha-7.0.1/lib/utils.js",
-    "./node_modules/mocha-7.0.1/node_modules/brace-expansion/index.js",
     "./node_modules/mocha-7.0.1/node_modules/debug/node_modules/ms/index.js",
     "./node_modules/mocha-7.0.1/node_modules/debug/src/common.js",
     "./node_modules/mocha-7.0.1/node_modules/glob/common.js",
@@ -3296,7 +3296,6 @@
     "./node_modules/stream-shift/index.js",
     "./node_modules/string-width/index.js",
     "./node_modules/stringify-object/index.js",
-    "./node_modules/stringify-object/node_modules/is-obj/index.js",
     "./node_modules/strip-ansi/index.js",
     "./node_modules/strip-eof/index.js",
     "./node_modules/strip-final-newline/index.js",
@@ -3600,7 +3599,6 @@
     "./packages/data-context/node_modules/ast-types/lib/shared.js",
     "./packages/data-context/node_modules/ast-types/lib/types.js",
     "./packages/data-context/node_modules/ast-types/main.js",
-    "./packages/data-context/node_modules/brace-expansion/index.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -4179,5 +4177,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d1c313d2c407d58afce66f630c5b96a6923b8cd56d85b5704e3d8ad55b369f0f"
+  "deferredHash": "0185ff7168db7fce18d581c53b99c94cb6329ca65bce647468e2fdfc3ffcddf8"
 }
