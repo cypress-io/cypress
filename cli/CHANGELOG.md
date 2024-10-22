@@ -3,6 +3,10 @@
 
 _Released 12/3/2024 (PENDING)_
 
+**Bugfixes:**
+
+- The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
+
 **Breaking Changes:**
 
 - Removed support for Node.js 16 and Node.js 21. Addresses [#29930](https://github.com/cypress-io/cypress/issues/29930).
