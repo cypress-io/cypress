@@ -4188,6 +4188,7 @@
     "./packages/server/node_modules/p-queue/dist/priority-queue.js",
     "./packages/server/node_modules/path-key/index.js",
     "./packages/server/node_modules/path-to-regexp/index.js",
+    "./packages/server/node_modules/pump/index.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/async_iterator.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/destroy.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/end-of-stream.js",
@@ -4250,5 +4251,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "55889ced0067929fda34e5eff0732f66f01cd1551e380ef0accd5c448551ffd4"
+  "deferredHash": "13b4e2c024574673089f0bd15e763cc1db73256cafb63a98edb1e916317e3d3f"
 }
