@@ -398,3 +398,6 @@ tooling/v8-snapshot/cache/prod-win32
 
 # Cloud API validations
 system-tests/lib/validations
+
+.nx/cache
+.nx/workspace-data

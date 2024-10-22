@@ -37,10 +37,11 @@
     "mocha": "6.2.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
-    "typescript": "^5.4.5"
+    "typescript": "~5.4.5"
   },
   "files": [
     "lib"
   ],
-  "types": "./lib/index.ts"
+  "types": "./lib/index.ts",
+  "nx": {}
 }

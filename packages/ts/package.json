@@ -22,5 +22,6 @@
   "files": [
     "register.js",
     "registerDir.js"
-  ]
+  ],
+  "nx": {}
 }
