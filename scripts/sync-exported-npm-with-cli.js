@@ -17,8 +17,6 @@ const currentPackageDir = process.cwd()
 // 1. We'll run npm's own "packlist" against the npm package to be published (@cypress/react, etc)
 // to make sure we don't miss any files when we copy them over to the CLI package
 // The files that will be returned here are the ones from @cypress/react's package.json['files'] key.
-console.log(currentPackageDir)
-
 const arborist = new Arborist({ path: currentPackageDir })
 
 arborist.loadActual().then((tree) => {
