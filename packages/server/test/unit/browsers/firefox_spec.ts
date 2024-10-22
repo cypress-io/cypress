@@ -13,6 +13,7 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { ICriClient } from '../../../lib/browsers/cri-client'
 import { type Client as WebDriverClient, default as webdriver } from 'webdriver'
 import { EventEmitter } from 'stream'
+import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 
 const path = require('path')
 const mockfs = require('mock-fs')
@@ -24,10 +25,12 @@ const specUtil = require('../../specUtils')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
+  const mockContextId = '1234-5678'
   let foxdriver: any
   let foxdriverTab: any
   let wdInstance: sinon.SinonStubbedInstance<WebDriverClient>
   let browserCriClient: BrowserCriClient
+  let bidiAutomationClient: BidiAutomation
 
   const stubFoxdriver = () => {
     foxdriverTab = {
@@ -74,18 +77,34 @@ describe('lib/browsers/firefox', () => {
       getWindowHandles: sinon.stub(),
       switchToWindow: sinon.stub(),
       navigateTo: sinon.stub(),
+      sessionSubscribe: sinon.stub(),
+      browsingContextGetTree: sinon.stub(),
+      browsingContextNavigate: sinon.stub(),
       capabilities: {
         'moz:debuggerAddress': '127.0.0.1:12345',
         // @ts-expect-error
         'moz:processID': 1234,
         'wdio:driverPID': 5678,
       },
+      on: sinon.stub(),
+      off: sinon.stub(),
     }
 
     wdInstance.maximizeWindow.resolves(undefined)
     wdInstance.installAddOn.resolves(undefined)
     wdInstance.switchToWindow.resolves(undefined)
     wdInstance.navigateTo.resolves(undefined)
+    wdInstance.sessionSubscribe.resolves(undefined)
+    wdInstance.browsingContextNavigate.resolves(undefined)
+    wdInstance.browsingContextGetTree.resolves({
+      contexts: [{
+        context: mockContextId,
+        children: null,
+        url: '',
+        userContext: mockContextId,
+        parent: null,
+      }],
+    })
 
     sinon.stub(webdriver, 'newSession').resolves(wdInstance)
 
@@ -132,6 +151,11 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
       sinon.stub(CdpAutomation, 'create').resolves()
+
+      bidiAutomationClient = sinon.createStubInstance(BidiAutomation)
+      bidiAutomationClient.setTopLevelContextId = sinon.stub().returns(undefined)
+
+      sinon.stub(BidiAutomation, 'create').returns(bidiAutomationClient)
     })
 
     context('#connectToNewSpec', () => {
@@ -140,7 +164,7 @@ describe('lib/browsers/firefox', () => {
         this.options.onInitializeNewBrowserTab = sinon.stub()
       })
 
-      it('calls connectToNewSpec in firefoxUtil', async function () {
+      it('CDP: calls connectToNewSpecCDP in firefoxUtil', async function () {
         wdInstance.getWindowHandles.resolves(['mock-context-id'])
         await firefox.open(this.browser, 'http://', this.options, this.automation)
 
@@ -155,6 +179,24 @@ describe('lib/browsers/firefox', () => {
         expect(wdInstance.navigateTo).to.have.been.calledWith('about:blank')
         // second time when navigating to the spec
         expect(wdInstance.navigateTo).to.have.been.calledWith('next-spec-url')
+      })
+
+      it('BiDi: calls connectToNewSpecBiDi in firefoxUtil', async function () {
+        this.browser.family = 'firefox'
+        this.browser.majorVersion = '131'
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        this.options.url = 'next-spec-url'
+        await firefox.connectToNewSpec(this.browser, this.options, this.automation)
+
+        expect(this.options.onInitializeNewBrowserTab).to.have.been.called
+        expect(wdInstance.browsingContextGetTree).to.have.been.calledWith({})
+
+        // Only happens one time when navigating to the spec since the context gets created on about:blank, which is tested in BidiAutomation
+        expect(wdInstance.browsingContextNavigate).to.have.been.calledWith({
+          context: mockContextId,
+          url: 'next-spec-url',
+        })
       })
     })
 
@@ -238,75 +280,19 @@ describe('lib/browsers/firefox', () => {
       }))
     })
 
-    it('creates the WebDriver session and geckodriver instance through capabilities, installs the extension, and passes the correct port to CDP', async function () {
-      await firefox.open(this.browser, 'http://', this.options, this.automation)
-      expect(webdriver.newSession).to.have.been.calledWith({
-        logLevel: 'silent',
-        capabilities: sinon.match({
-          alwaysMatch: {
-            browserName: 'firefox',
-            acceptInsecureCerts: true,
-            // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
-            'moz:firefoxOptions': {
-              binary: '/path/to/binary',
-              args: [
-                '-new-instance',
-                '-start-debugger-server',
-                '-no-remote',
-                ...(os.platform() !== 'linux' ? ['-foreground'] : []),
-              ],
-              // only partially match the preferences object because it is so large
-              prefs: sinon.match({
-                'remote.active-protocols': 2,
-                'remote.enabled': true,
-              }),
-            },
-            'moz:debuggerAddress': true,
-            'wdio:geckodriverOptions': {
-              host: '127.0.0.1',
-              marionetteHost: '127.0.0.1',
-              marionettePort: sinon.match(Number),
-              websocketPort: sinon.match(Number),
-              profileRoot: '/path/to/appData/firefox-stable/interactive',
-              binaryPath: undefined,
-              spawnOpts: sinon.match({
-                stdio: ['ignore', 'pipe', 'pipe'],
-                env: {
-                  MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
-                  MOZ_HEADLESS_WIDTH: '1280',
-                  MOZ_HEADLESS_HEIGHT: '722',
-                },
-              }),
-              jsdebugger: false,
-              log: 'error',
-              logNoTruncate: false,
-
-            },
-          },
-          firstMatch: [],
-        }),
-      })
-
-      expect(wdInstance.installAddOn).to.have.been.calledWith('/path/to/ext', true)
-
-      expect(wdInstance.navigateTo).to.have.been.calledWith('http://')
-
-      // make sure CDP gets the expected port
-      expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
-    })
-
-    describe('debugging', () => {
-      afterEach(() => {
-        debug.disable()
-      })
-
-      it('sets additional arguments if "DEBUG=cypress-verbose:server:browsers:geckodriver" and "DEBUG=cypress-verbose:server:browsers:webdriver" is set', async function () {
-        debug.enable('cypress-verbose:server:browsers:geckodriver,cypress-verbose:server:browsers:webdriver')
-
-        await firefox.open(this.browser, 'http://', this.options, this.automation)
-
-        expect(webdriver.newSession).to.have.been.calledWith({
-          logLevel: 'info',
+    describe(`webdriver capabilities`, () => {
+      const getExpectedCapabilities = ({
+        shouldUseBiDi,
+        isDebugEnabled,
+      }: {
+        shouldUseBiDi?: boolean
+        isDebugEnabled?: boolean
+      } = {
+        shouldUseBiDi: false,
+        isDebugEnabled: false,
+      }) => {
+        return {
+          logLevel: isDebugEnabled ? 'info' : 'silent',
           capabilities: sinon.match({
             alwaysMatch: {
               browserName: 'firefox',
@@ -321,12 +307,12 @@ describe('lib/browsers/firefox', () => {
                   ...(os.platform() !== 'linux' ? ['-foreground'] : []),
                 ],
                 // only partially match the preferences object because it is so large
-                prefs: sinon.match({
-                  'remote.active-protocols': 2,
+                prefs: {
+                  'remote.active-protocols': shouldUseBiDi ? 1 : 2,
                   'remote.enabled': true,
-                }),
+                },
               },
-              'moz:debuggerAddress': true,
+              'moz:debuggerAddress': !shouldUseBiDi,
               'wdio:geckodriverOptions': {
                 host: '127.0.0.1',
                 marionetteHost: '127.0.0.1',
@@ -334,29 +320,91 @@ describe('lib/browsers/firefox', () => {
                 websocketPort: sinon.match(Number),
                 profileRoot: '/path/to/appData/firefox-stable/interactive',
                 binaryPath: undefined,
-                spawnOpts: sinon.match({
+                spawnOpts: {
                   stdio: ['ignore', 'pipe', 'pipe'],
                   env: {
                     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
                     MOZ_HEADLESS_WIDTH: '1280',
                     MOZ_HEADLESS_HEIGHT: '722',
                   },
-                }),
-                jsdebugger: true,
-                log: 'debug',
-                logNoTruncate: true,
+                },
+                jsdebugger: !!isDebugEnabled,
+                log: isDebugEnabled ? 'debug' : 'error',
+                logNoTruncate: !!isDebugEnabled,
               },
             },
             firstMatch: [],
           }),
+        }
+      }
+
+      describe(`creates the WebDriver session and geckodriver instance through capabilities, installs the extension, and passes the correct port to CDP`, function () {
+        it('for CDP', async function () {
+          await firefox.open(this.browser, 'http://', this.options, this.automation)
+          expect(webdriver.newSession).to.have.been.calledWith((getExpectedCapabilities({ shouldUseBiDi: false })))
+
+          expect(wdInstance.installAddOn).to.have.been.calledWith('/path/to/ext', true)
+
+          expect(wdInstance.navigateTo).to.have.been.calledWith('http://')
+
+          // make sure CDP gets the expected port
+          expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
         })
 
-        expect(wdInstance.installAddOn).to.have.been.calledWith('/path/to/ext', true)
+        it('for BiDi', async function () {
+          this.browser.family = 'firefox'
+          this.browser.majorVersion = '131'
+          await firefox.open(this.browser, 'http://', this.options, this.automation)
+          expect(webdriver.newSession).to.have.been.calledWith((getExpectedCapabilities({ shouldUseBiDi: true })))
 
-        expect(wdInstance.navigateTo).to.have.been.calledWith('http://')
+          expect(wdInstance.installAddOn).to.have.been.calledWith('/path/to/ext', true)
 
-        // make sure CDP gets the expected port
-        expect(BrowserCriClient.create).to.be.calledWith({ hosts: ['127.0.0.1', '::1'], port: 12345, browserName: 'Firefox', onAsynchronousError: undefined, onServiceWorkerClientEvent: undefined })
+          expect(wdInstance.sessionSubscribe).to.be.calledWith({ events: [
+            'network.beforeRequestSent',
+            'network.responseStarted',
+            'network.responseCompleted',
+            'network.fetchError',
+            'script.realmCreated',
+            'script.realmDestroyed',
+            'browsingContext.contextCreated',
+            'browsingContext.contextDestroyed',
+          ] })
+
+          expect(wdInstance.browsingContextGetTree).to.be.calledWith({})
+
+          expect(wdInstance.browsingContextNavigate).to.have.been.calledWith({
+            context: mockContextId,
+            url: 'http://',
+          })
+
+          // make sure Bidi gets created
+          expect(BidiAutomation.create).to.be.calledWith(wdInstance, this.automation)
+          expect(bidiAutomationClient.setTopLevelContextId).to.be.calledWith(mockContextId)
+        })
+      })
+
+      describe('debugging: sets additional arguments if "DEBUG=cypress-verbose:server:browsers:geckodriver" and "DEBUG=cypress-verbose:server:browsers:webdriver" is set', () => {
+        afterEach(() => {
+          debug.disable()
+        })
+
+        it('for CDP', async function () {
+          debug.enable('cypress-verbose:server:browsers:geckodriver,cypress-verbose:server:browsers:webdriver')
+
+          await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+          expect(webdriver.newSession).to.have.been.calledWith((getExpectedCapabilities({ isDebugEnabled: true })))
+        })
+
+        it('for BiDi', async function () {
+          this.browser.family = 'firefox'
+          this.browser.majorVersion = '131'
+          debug.enable('cypress-verbose:server:browsers:geckodriver,cypress-verbose:server:browsers:webdriver')
+
+          await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+          expect(webdriver.newSession).to.have.been.calledWith((getExpectedCapabilities({ isDebugEnabled: true, shouldUseBiDi: true })))
+        })
       })
     })
 
@@ -480,21 +528,37 @@ describe('lib/browsers/firefox', () => {
       }), this.options)
     })
 
-    // CDP is deprecated in Firefox 129 and up.
-    // In order to enable CDP, we need to set
-    // remote.active-protocol=2
-    // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
-    // @see https://github.com/cypress-io/cypress/issues/29713
-    it('sets "remote.active-protocols"=2 to keep CDP enabled for firefox versions 129 and up', async function () {
-      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+    describe('sets "remote.active-protocols"', function () {
+      // CDP is deprecated in Firefox 129 and up.
+      // In order to enable CDP, we need to set
+      // remote.active-protocol=2
+      // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+      // @see https://github.com/cypress-io/cypress/issues/29713
+      it('=2 to enable only CDP', async function () {
+        const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
 
-      await firefox.open(this.browser, 'http://', this.options, this.automation)
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-      expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
-        preferences: {
-          'remote.active-protocols': 2,
-        },
-      }), this.options)
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            'remote.active-protocols': 2,
+          },
+        }), this.options)
+      })
+
+      it('=1 to enable only BiDi', async function () {
+        this.browser.family = 'firefox'
+        this.browser.majorVersion = '131'
+        const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+          preferences: {
+            'remote.active-protocols': 1,
+          },
+        }), this.options)
+      })
     })
 
     it('resolves the browser instance as an event emitter', async function () {
@@ -683,7 +747,7 @@ describe('lib/browsers/firefox', () => {
       })
     })
 
-    context('#setupRemote', function () {
+    context('#setupCDP', function () {
       it('correctly sets up the remote agent', async function () {
         const criClientStub: ICriClient = {
           targetId: '',

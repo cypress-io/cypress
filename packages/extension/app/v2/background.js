@@ -67,30 +67,6 @@ const connect = function (host, path, extraOpts) {
     })
   })
 
-  const listenToOnBeforeHeaders = once(() => {
-    // adds a header to the request to mark it as a request for the AUT frame
-    // itself, so the proxy can utilize that for injection purposes
-    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
-      if (
-        // parentFrameId: 0 means the parent is the top-level, so if it isn't
-        // 0, it's nested inside the AUT and can't be the AUT itself
-        details.parentFrameId !== 0
-        // is the spec frame, not the AUT
-        || details.url.includes('__cypress')
-      ) return
-
-      return {
-        requestHeaders: [
-          ...details.requestHeaders,
-          {
-            name: 'X-Cypress-Is-AUT-Frame',
-            value: 'true',
-          },
-        ],
-      }
-    }, { urls: ['<all_urls>'], types: ['sub_frame'] }, ['blocking', 'requestHeaders'])
-  })
-
   const fail = (id, err) => {
     return ws.emit('automation:response', id, {
       __error: err.message,
@@ -150,7 +126,6 @@ const connect = function (host, path, extraOpts) {
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
-      listenToOnBeforeHeaders()
     }
   })
 
