@@ -25,7 +25,7 @@ arborist.loadActual().then((tree) => {
   packlist(tree)
   .then((files) => {
     // 2. Move all of the files that would be published under @cypress/react
-  // to be copied under cli/react (drop the @cypress namespace)
+    // to be copied under cli/react (drop the @cypress namespace)
     const cliPath = path.join(__dirname, '..', 'cli')
 
     // Typically, these packages are independently published as @cypress/package-name
@@ -41,7 +41,7 @@ arborist.loadActual().then((tree) => {
     // 3. For each file, mkdir if not exists, and then copy the dist'd assets over
     // to write to the `cliPackageConfig` at the end
     files.forEach((f) => {
-    // mkdir if not exists
+      // mkdir if not exists
       const { dir } = path.parse(f)
 
       if (dir) {
@@ -61,17 +61,17 @@ arborist.loadActual().then((tree) => {
     const esmEntry = isModule ? currentPackageConfig.main : currentPackageConfig.module
 
     if (types) {
-    // ./react/dist/cypress-react-cjs.js, etc
+      // ./react/dist/cypress-react-cjs.js, etc
       subPackageExports.types = `./${exportName}/${types}`
     }
 
     if (esmEntry) {
-    // ./react/dist/cypress-react-esm.js, etc
+      // ./react/dist/cypress-react-esm.js, etc
       subPackageExports.import = `./${exportName}/${esmEntry}`
     }
 
     if (!isModule) {
-    // ./react/dist/cypress-react-cjs.js, etc
+      // ./react/dist/cypress-react-cjs.js, etc
       subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
     }
 
