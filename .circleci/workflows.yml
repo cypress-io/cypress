@@ -385,6 +385,7 @@ commands:
           command: |
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
               # Building better-sqlite3 on arm64 requires gcc-10
+              # on Arm, CI runs as non-root so we need to use sudo
               sudo apt install gcc-10 g++-10
 
               # Update default to gcc-10 and g++-10
@@ -666,17 +667,6 @@ commands:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: default to ipv4 for windows
-                shell: cmd.exe
-                command: |
-                  echo 127.0.0.1 localhost > %WINDIR%\System32\drivers\etc\hosts
-                  ipconfig /flushdns
-                  nbstat -R
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
