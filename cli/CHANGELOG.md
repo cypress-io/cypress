@@ -30,6 +30,10 @@ _Released 9/25/2024_
 - Fixed an issue where Firefox was incorrectly mutating the state of click events on checkboxes after Firefox version `129` and up. Addressed in [#30245](https://github.com/cypress-io/cypress/pull/30245).
 - Fixed a regression introduced in 13.13.0 where 'Open in IDE' would not work for filepaths containing spaces and various other characters on Windows. Addresses [#29820](https://github.com/cypress-io/cypress/issues/29820).
 
+**Bugfixes:**
+
+- Fixed an issue where run Cypress internal unit test cases error on Windows. Addressed in [#30157](https://github.com/cypress-io/cypress/pull/30157)
+
 **Misc:**
 
 - Pass along the related log to the `createSnapshot` function for protocol usage. Addressed in [#30244](https://github.com/cypress-io/cypress/pull/30244).

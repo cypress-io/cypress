@@ -42,8 +42,8 @@ describe('FileDataSource', () => {
           )
 
           expect(files).to.have.length(2)
-          expect(files[0]).to.eq(path.join(projectPath, 'root-script-1.js'))
-          expect(files[1]).to.eq(path.join(projectPath, 'root-script-2.js'))
+          expect(files[0]).to.eq(fileUtil.toPosix(path.join(projectPath, 'root-script-1.js')))
+          expect(files[1]).to.eq(fileUtil.toPosix(path.join(projectPath, 'root-script-2.js')))
         })
 
         it('finds files matching relative patterns in working dir', async () => {
@@ -67,7 +67,9 @@ describe('FileDataSource', () => {
         it('does not replace working directory in glob pattern if it is not leading', async () => {
           // Create a redundant structure within the project dir matching its absolute path
           // and write a new script in that location
-          const nestedScriptPath = path.join(projectPath, 'cypress', projectPath)
+
+          // project path on windows contains drive letter, cannot be joined directly
+          const nestedScriptPath = path.join(projectPath, 'cypress', path.parse(projectPath).base)
 
           await fs.mkdirs(nestedScriptPath)
           await fs.writeFile(path.join(nestedScriptPath, 'nested-script.js'), '')
@@ -76,7 +78,7 @@ describe('FileDataSource', () => {
           // to the working directory
           let files = await fileDataSource.getFilesByGlob(
             projectPath,
-            `./cypress${projectPath}/nested-script.js`,
+            `./cypress/${path.parse(projectPath).base}/nested-script.js`,
           )
 
           expect(files).to.have.length(1)

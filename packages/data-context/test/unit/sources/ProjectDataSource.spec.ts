@@ -14,6 +14,7 @@ import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
 import FixturesHelper from '@tooling/system-tests'
+import { toOS } from '../../../src/util'
 
 chai.use(sinonChai)
 const { expect } = chai
@@ -42,7 +43,7 @@ describe('matchedSpecs', () => {
         fileExtension: '.js',
         fileName: 'screenshot_element_capture_spec',
         name: 'cypress/integration/screenshot_element_capture_spec.js',
-        relative: 'cypress/integration/screenshot_element_capture_spec.js',
+        relative: toOS('cypress/integration/screenshot_element_capture_spec.js'),
         relativeToCommonRoot: 'screenshot_element_capture_spec.js',
         specFileExtension: '.js',
         specType: 'integration',
@@ -129,7 +130,7 @@ describe('transformSpec', () => {
       specType: 'integration',
       baseName: 'spec.cy.js',
       fileName: 'spec',
-      relative: 'src/spec.cy.js',
+      relative: toOS('src/spec.cy.js'),
       name: 'src/spec.cy.js',
       relativeToCommonRoot: 'C:/Windows/Project/src/spec.cy.js',
     }
@@ -265,7 +266,7 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'cypress/component/bar/meta-component-test.cy.ts',
     ])
 
-    expect(lcp).to.equal('cypress/component')
+    expect(lcp).to.equal(toOS('cypress/component'))
   })
 
   it('with src and cypress', () => {
@@ -292,7 +293,7 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'src/frontend/MyComponent.cy.ts',
     ])
 
-    expect(lcp).to.equal('src/frontend')
+    expect(lcp).to.equal(toOS('src/frontend'))
   })
 })
 
@@ -776,14 +777,14 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/spec.cy.js')
+      expect(defaultSpecFileName).to.equal(toOS('cypress/e2e/spec.cy.js'))
     })
 
     it('yields default if the spec pattern is default', async () => {
       sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.e2e] })
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/spec.cy.js')
+      expect(defaultSpecFileName).to.equal(toOS('cypress/e2e/spec.cy.js'))
     })
 
     it('yields common prefix if there are existing specs', async () => {
@@ -795,7 +796,7 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/foo/spec.cy.js')
+      expect(defaultSpecFileName).to.equal(toOS('cypress/e2e/foo/spec.cy.js'))
     })
 
     it('yields spec pattern guess if there are no existing specs', async () => {
@@ -816,7 +817,7 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
+      expect(defaultSpecFileName).to.equal(toOS('cypress/component-tests/foo/ComponentName.spec.js'))
     })
 
     describe('jsx/tsx handling', () => {
@@ -831,7 +832,7 @@ describe('ProjectDataSource', () => {
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-        expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
+        expect(defaultSpecFileName).to.equal(toOS('cypress/component/ComponentName.cy.jsx'), defaultSpecFileName)
       })
 
       it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {

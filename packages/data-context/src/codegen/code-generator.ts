@@ -5,6 +5,7 @@ import * as ejs from 'ejs'
 import fm from 'front-matter'
 import _ from 'lodash'
 import Debug from 'debug'
+import { toOS } from '../util'
 
 const debug = Debug('cypress:data-context:codegen:code-generator')
 
@@ -179,7 +180,7 @@ export async function hasNonExampleSpec (testTemplateDir: string, specs: string[
     return templateFiles.some((templateFile) => templateFile.substring(testTemplateDir.length + 1) === spec)
   }
 
-  return specs.some((spec) => !specInTemplates(spec))
+  return specs.map(((spec) => toOS(spec))).some((spec) => !specInTemplates(spec))
 }
 
 export async function getExampleSpecPaths (testTemplateDir: string): Promise<string[]> {
