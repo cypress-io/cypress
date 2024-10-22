@@ -1,8 +1,11 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import _ from 'lodash'
 import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 import { InterceptedRequest } from '../../lib/server/intercepted-request'
 import { state as NetStubbingState } from '../../lib/server/state'
+
+chai.use(sinonChai)
 
 describe('InterceptedRequest', () => {
   context('handleSubscriptions', () => {
@@ -61,6 +64,8 @@ describe('InterceptedRequest', () => {
         data,
         mergeChanges: _.merge,
       })
+
+      expect(socket.toDriver).to.be.calledTwice
     })
 
     it('ignores disabled subscriptions', async () => {
@@ -101,7 +106,7 @@ describe('InterceptedRequest', () => {
           subscription: {
             eventName: 'before:request',
             await: true,
-            routeId: '2',
+            routeId: frame.subscription.routeId,
           },
         })
 
@@ -113,6 +118,8 @@ describe('InterceptedRequest', () => {
         data,
         mergeChanges: _.merge,
       })
+
+      expect(socket.toDriver).to.be.calledOnce
     })
   })
 })

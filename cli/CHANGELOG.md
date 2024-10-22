@@ -6,7 +6,7 @@ _Released 10/1/2024 (PENDING)_
 **Bugfixes:**
 
 - Patched [find-process](https://github.com/yibn2008/find-process) to fix an issue where trying to clean up browser profiles can throw an error on Windows. Addresses [#30378](https://github.com/cypress-io/cypress/issues/30378).
-- Fixed an issue where requests to the same resource in rapid succession may not have the appropriate static response intercept applied if there are multiple intercepts that apply for that resource. 
+- Fixed an issue where requests to the same resource in rapid succession may not have the appropriate static response intercept applied if there are multiple intercepts that apply for that resource. Addresses [#30375](https://github.com/cypress-io/cypress/issues/30375).
 
 **Misc:**
 
