@@ -26,5 +26,6 @@
     "dist",
     "src/snapshot-require.ts"
   ],
-  "types": "src/snapshot-require.ts"
+  "types": "src/snapshot-require.ts",
+  "nx": {}
 }

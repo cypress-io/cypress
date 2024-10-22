@@ -1554,7 +1554,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
             - verify-mocha-results:
                 expectedResultCount: 3
       - when:
@@ -1566,7 +1566,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/packherd'"
+                  yarn test-integration --scope=@tooling/packherd
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:
@@ -1690,7 +1690,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
+      - run: yarn test-unit --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1736,7 +1736,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-integration --scope @packages/server
+      - run: yarn test-integration --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -2084,7 +2084,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/webpack-preprocessor
+          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2129,7 +2129,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vue
+          command: yarn lerna run build --scope=@cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -2142,7 +2142,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular
+          command: yarn lerna run build --scope=@cypress/angular
       - store-npm-logs
 
   npm-angular-signals:
@@ -2151,7 +2151,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-signals
+          command: yarn lerna run build --scope=@cypress/angular-signals
       - store-npm-logs
 
   npm-puppeteer-unit-tests:
@@ -2160,7 +2160,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/puppeteer
+          command: yarn lerna run build --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2192,7 +2192,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/react
+          command: yarn lerna run build --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2209,7 +2209,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
+          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2226,7 +2226,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/mount-utils
+          command: yarn lerna run build --scope=@cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2258,7 +2258,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope @cypress/schematic
+            yarn lerna run build --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |
