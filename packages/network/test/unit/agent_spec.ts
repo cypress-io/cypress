@@ -973,7 +973,7 @@ describe('lib/agent', function () {
         expect(req._header).to.equal([
           'GET / HTTP/1.1',
           'host: foo.bar.baz.invalid',
-          // `keep-alive` was changed to be the default in Node 19: 
+          // `keep-alive` was changed to be the default in Node 19:
           // https://nodejs.org/en/blog/announcements/v19-release-announce#https11-keepalive-by-default
           'Connection: keep-alive',
           '', '',
@@ -990,7 +990,7 @@ describe('lib/agent', function () {
           'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
           'Host: foo.fleem.invalid',
           'bing: bang',
-          // `keep-alive` was changed to be the default in Node 19: 
+          // `keep-alive` was changed to be the default in Node 19:
           // https://nodejs.org/en/blog/announcements/v19-release-announce#https11-keepalive-by-default
           'Connection: keep-alive',
           '', '',
