@@ -4,6 +4,7 @@ import dns, { LookupAddress, LookupAllOptions } from 'dns'
 import _ from 'lodash'
 import net from 'net'
 import tls from 'tls'
+import os from 'os'
 
 const debug = debugModule('cypress:network:connect')
 
@@ -38,6 +39,15 @@ export function getAddress (port: number, hostname: string): Bluebird<net.Addres
   return lookupAsync(hostname, { all: true })
   .then((addresses) => {
     debug('got addresses %o', { hostname, port, addresses })
+
+    // ipv6 addresses are causing problems with cypress in cypress internal e2e tests
+    // on windows, so we are filtering them out here
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT && os.platform() === 'win32') {
+      debug('filtering ipv6 addresses %o', { hostname, port, addresses })
+      addresses = addresses.filter((address) => {
+        return address.family === 4
+      })
+    }
 
     // convert to an array if string
     return Array.prototype.concat.call(addresses).map(fn)

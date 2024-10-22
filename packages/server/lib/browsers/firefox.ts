@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
@@ -16,13 +17,32 @@ import mimeDb from 'mime-db'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError } from '@packages/errors'
+import { getError, SerializedError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import { GeckoDriver } from './geckodriver'
-import { WebDriverClassic } from './webdriver-classic'
+import type { RemoteConfig } from 'webdriver'
+import type { GeckodriverParameters } from 'geckodriver'
+import { WebDriver } from './webdriver'
+
+export class CDPFailedToStartFirefox extends Error {
+  private static readonly ERROR_NAME = 'CDPFailedToStartFirefox'
+  constructor (message) {
+    super(message)
+    this.name = CDPFailedToStartFirefox.ERROR_NAME
+  }
+
+  public static isCDPFailedToStartFirefoxError (error?: SerializedError): error is CDPFailedToStartFirefox {
+    return error?.name === CDPFailedToStartFirefox.ERROR_NAME
+  }
+}
 
 const debug = Debug('cypress:server:browsers:firefox')
 const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
+
+// These debug variables have an impact on the 3rd-party webdriver and geckodriver
+// packages. To see verbose logs from Firefox, set both of these options to the
+// DEBUG variable.
+const WEBDRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:webdriver'
+const GECKODRIVER_DEBUG_NAMESPACE_VERBOSE = 'cypress-verbose:server:browsers:geckodriver'
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to
@@ -440,15 +460,29 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const [
     marionettePort,
-    geckoDriverPort,
     webDriverBiDiPort,
-  ] = await Promise.all([getPort(), getPort(), getPort(), getPort()])
+  ] = await Promise.all([getPort(), getPort()])
 
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
   // NOTE: we get the BiDi port and set it inside of geckodriver, but BiDi is not currently enabled (see remote.active-protocols above).
   // this is so the BiDi websocket port does not get set to 0, which is the default for the geckodriver package.
-  debug('available ports: %o', { marionettePort, geckoDriverPort, webDriverBiDiPort })
+  debug('available ports: %o', { marionettePort, webDriverBiDiPort })
+
+  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+
+  // Delete the legacy profile directory if in open mode.
+  // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
+  // the profile creation method before 13.15.0 will no longer work with geckodriver/webdriver
+  // and actually corrupts the profile directory from being able to be encoded. Hence, we delete it to prevent any conflicts.
+  // This is critical to make sure different Cypress versions do not corrupt the firefox profile, which can fail silently.
+  if (!options.isTextTerminal) {
+    const doesPathExist = await fs.pathExists(profileDir)
+
+    if (doesPathExist) {
+      await fs.remove(profileDir)
+    }
+  }
 
   const [
     cacheDir,
@@ -467,23 +501,36 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     launchOptions.extensions = [extensionDest]
   }
 
-  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
-
   const profile = new FirefoxProfile({
     destinationDirectory: profileDir,
   })
 
+  // make sure the profile that is ported into the session is destroyed when the browser is closed
+  profile.shouldDeleteOnExit(true)
+
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
-  launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
-  for (const pref in launchOptions.preferences) {
-    const value = launchOptions.preferences[pref]
+  const xulStorePath = path.join(profile.path(), 'xulstore.json')
 
-    profile.setPreference(pref, value)
+  // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
+  if (!await fs.pathExists(xulStorePath)) {
+    // this causes the browser to launch maximized, which chrome does by default
+    // otherwise an arbitrary size will be picked for the window size
+
+    // this used to not have an effect after first launch in 'interactive' mode.
+    // However, since Cypress 13.15.1,
+    // geckodriver creates unique profile names that copy over the xulstore.json to the used profile.
+    // The copy is ultimately updated on the unique profile name and is destroyed when the browser is torn down,
+    // so the values are not persisted. Cypress could hypothetically determine the profile is in use, copy the xulstore.json
+    // out of the profile and try to persist it in the next created profile, but this method is likely error prone as it requires
+    // moving/copying of files while creation/deletion of profiles occur, plus the ability to correlate the correct profile to the current run,
+    // which there are not guarantees we can deterministically do this in open mode.
+    const sizemode = 'maximized'
+
+    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
   }
 
-  // TODO: fix this - synchronous FS operation
-  profile.updatePreferences()
+  launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
 
   const userCSSPath = path.join(profileDir, 'chrome')
 
@@ -509,26 +556,26 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   // resolution of exactly 1280x720
-  // (height must account for firefox url bar, which we can only shrink to 1px ,
-  // and the total size of the window url and tab bar, which is 85 pixels for a total offset of 86 pixels)
+  // (height must account for firefox url bar, which we can only shrink to 2px)
   const BROWSER_ENVS = {
     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
     MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '806',
+    MOZ_HEADLESS_HEIGHT: '722',
     ...launchOptions.env,
   }
 
   debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
 
-  // create the geckodriver process, which we will use WebDriver Classic to open the browser
-  const geckoDriverInstance = await GeckoDriver.create({
+  debug('launch in firefox', { url, args: launchOptions.args })
+
+  const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
-    port: geckoDriverPort,
+    // geckodriver port is assigned under the hood by @wdio/utils
+    // @see https://github.com/webdriverio/webdriverio/blob/v9.1.1/packages/wdio-utils/src/node/startWebDriver.ts#L65
     marionetteHost: '127.0.0.1',
     marionettePort,
-    webdriverBidiPort: webDriverBiDiPort,
-    profilePath: profile.path(),
-    binaryPath: browser.path,
+    websocketPort: webDriverBiDiPort,
+    profileRoot: profile.path(),
     // To pass env variables into the firefox process, we CANNOT do it through capabilities when starting the browser.
     // Since geckodriver spawns the firefox process, we can pass the env variables directly to geckodriver, which in turn will
     // pass them to the firefox process
@@ -540,84 +587,153 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         ...process.env,
       },
     },
-  })
-
-  const wdcInstance = new WebDriverClassic('127.0.0.1', geckoDriverPort)
-
-  debug('launch in firefox', { url, args: launchOptions.args })
-
-  const capabilitiesToSend = {
-    capabilities: {
-      alwaysMatch: {
-        acceptInsecureCerts: true,
-        // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
-        'moz:firefoxOptions': {
-          binary: browser.path,
-          args: launchOptions.args,
-          prefs: launchOptions.preferences,
-        },
-        // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
-        // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-        'moz:debuggerAddress': true,
-      },
-    },
+    jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,
+    log: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'debug' : 'error',
+    logNoTruncate: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE),
   }
 
+  // since we no longer directly control the browser with webdriver, we need to make the browserInstance
+  // a simulated wrapper that kills the process IDs that come back from webdriver
+  // @ts-expect-error
+  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+
+  browserInstanceWrapper.kill = () => undefined
+
   try {
-    debugVerbose(`creating session with capabilities %s`, JSON.stringify(capabilitiesToSend.capabilities))
+  /**
+   * To set the profile, we use the profile capabilities in firefoxOptions which
+   * requires the profile to be base64 encoded. The profile will be copied over to whatever
+   * profile is created by geckodriver stemming from the root profile path.
+   *
+   * For example, if the profileRoot in geckodriver is /usr/foo/firefox-stable/run-12345, the new webdriver session
+   * will take the base64 encoded profile contents we created in /usr/foo/firefox-stable/run-12345/* (via firefox-profile npm package) and
+   * copy it to a profile created in the profile root, which would look something like /usr/foo/firefox-stable/run-12345/rust_mozprofile<HASH>/*
+   * @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+   */
+    const base64EncodedProfile = await new Promise<string>((resolve, reject) => {
+      profile.encoded(function (err, encodedProfile) {
+        err ? reject(err) : resolve(encodedProfile)
+      })
+    })
+
+    const newSessionCapabilities: RemoteConfig = {
+      logLevel: Debug.enabled(WEBDRIVER_DEBUG_NAMESPACE_VERBOSE) ? 'info' : 'silent',
+      capabilities: {
+        alwaysMatch: {
+          browserName: 'firefox',
+          acceptInsecureCerts: true,
+          // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+          'moz:firefoxOptions': {
+            profile: base64EncodedProfile,
+            binary: browser.path,
+            args: launchOptions.args,
+            prefs: launchOptions.preferences,
+          },
+          // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
+          // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
+          // NOTE: this typing is fixed in @wdio/types 9.1.0 https://github.com/webdriverio/webdriverio/commit/ed14717ac4269536f9e7906e4d1612f74650b09b
+          // Once we have a node engine that can support the package (i.e., electron 32+ update) we can update the package
+          // @ts-expect-error
+          'moz:debuggerAddress': true,
+          // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
+          // webdriver starts geckodriver with the correct options on behalf of Cypress
+          'wdio:geckodriverOptions': geckoDriverOptions,
+        },
+        firstMatch: [],
+      },
+    }
+
+    debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities))
+
+    const WD = WebDriver.getWebDriverPackage()
 
     // this command starts the webdriver session and actually opens the browser
-    const { capabilities } = await wdcInstance.createSession(capabilitiesToSend)
+    // to debug geckodriver, set the DEBUG=cypress-verbose:server:browsers:geckodriver (debugs a third-party patched package geckodriver to enable console output)
+    // to debug webdriver, set the DEBUG=cypress-verbose:server:browsers:webdriver (debugs a third-party patched package webdriver to enable console output)
+    // @see ./firefox_automation.md
+    const webdriverClient = await WD.newSession(newSessionCapabilities)
 
-    debugVerbose(`received capabilities %o`, capabilities)
+    debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
 
-    const cdpPort = parseInt(new URL(`ws://${capabilities['moz:debuggerAddress']}`).port)
-
-    debug(`CDP running on port ${cdpPort}`)
-
-    const browserPID = capabilities['moz:processID']
+    const browserPID: number = webdriverClient.capabilities['moz:processID']
 
     debug(`firefox running on pid: ${browserPID}`)
 
-    // makes it so get getRemoteDebuggingPort() is calculated correctly
-    process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+    const driverPID: number = webdriverClient.capabilities['wdio:driverPID'] as number
 
-    // maximize the window if running headful and no width or height args are provided.
-    // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
-    // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
-    // a base 64 encoded profile.
-    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
-      await wdcInstance.maximizeWindow()
-    }
+    debug(`webdriver running on pid: ${driverPID}`)
 
-    // install the browser extensions
-    await Promise.all(_.map(launchOptions.extensions, (path) => {
-      debug(`installing extension at path: ${path}`)
-
-      return wdcInstance!.installAddOn({
-        path,
-        temporary: true,
-      })
-    }))
-
-    debug('setting up firefox utils')
-    browserCriClient = await firefoxUtil.setup({ automation, url, webDriverClassic: wdcInstance, remotePort: cdpPort, onError: options.onError })
-
-    // monkey-patch the .kill method to that the CDP connection is closed
-    const originalGeckoDriverKill = geckoDriverInstance.kill
-
-    geckoDriverInstance.kill = (...args) => {
+    // now that we have the driverPID and browser PID
+    browserInstanceWrapper.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
+
       clearInstanceState({ gracefulShutdown: true })
 
       debug('closing firefox')
 
-      process.kill(browserPID)
+      let browserReturnStatus = true
 
-      debug('closing geckodriver')
+      try {
+        browserReturnStatus = process.kill(browserPID)
+      } catch (e) {
+        if (e.code === 'ESRCH') {
+          debugVerbose('browser process no longer exists. continuing...')
+        } else {
+          throw e
+        }
+      }
 
-      return originalGeckoDriverKill.apply(geckoDriverInstance, args)
+      debug('closing geckodriver and webdriver')
+
+      let driverReturnStatus = true
+
+      try {
+        driverReturnStatus = process.kill(driverPID)
+      } catch (e) {
+        if (e.code === 'ESRCH') {
+          debugVerbose('geckodriver/webdriver process no longer exists. continuing...')
+        } else {
+          throw e
+        }
+      }
+
+      // needed for closing the browser when switching browsers in open mode to signal
+      // the browser is done closing
+      browserInstanceWrapper.emit('exit')
+
+      return browserReturnStatus || driverReturnStatus
     }
+
+    // In some cases, the webdriver session will NOT return the moz:debuggerAddress capability even though
+    // we set it to true in the capabilities. This is out of our control, so when this happens, we fail the browser
+    // and gracefully terminate the related processes and attempt to relaunch the browser in the hopes we get a
+    // CDP address. @see https://github.com/cypress-io/cypress/issues/30352#issuecomment-2405701867 for more details.
+    if (!webdriverClient.capabilities['moz:debuggerAddress']) {
+      debug(`firefox failed to spawn with CDP connection. Failing current instance and retrying`)
+      // since this fails before the instance is created, we need to kill the processes here or else they will stay open
+      browserInstanceWrapper.kill()
+      throw new CDPFailedToStartFirefox(`webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser`)
+    }
+
+    const cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
+
+    debug(`CDP running on port ${cdpPort}`)
+
+    // makes it so get getRemoteDebuggingPort() is calculated correctly
+    process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+
+    // install the browser extensions
+    await Promise.all(_.map(launchOptions.extensions, async (path) => {
+      debug(`installing extension at path: ${path}`)
+      const id = await webdriverClient.installAddOn(path, true)
+
+      debug(`extension with id ${id} installed!`)
+
+      return
+    }))
+
+    debug('setting up firefox utils')
+    browserCriClient = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, onError: options.onError })
 
     await utils.executeAfterBrowserLaunch(browser, {
       webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
@@ -626,7 +742,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
-  return geckoDriverInstance
+  return browserInstanceWrapper
 }
 
 export async function closeExtraTargets () {

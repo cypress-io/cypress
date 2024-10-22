@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'ryanm/fix/find-process'
+        - 'ryanm/chore/fix-windows-tests'
         - 'publish-binary'
 
 # usually we don't build Mac app - it takes a long time
@@ -42,7 +42,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/find-process', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/find-process', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -76,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/find-process', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -85,7 +85,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff130
+      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -94,7 +94,7 @@ executors:
   
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node20.15.0-chrome126-ff127
+      - image: cypress/browsers-internal:node20.15.0-chrome126-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -104,7 +104,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff130
+      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
         user: node
     environment:
       PLATFORM: linux
@@ -152,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/find-process" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/fix-windows-tests" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -345,6 +345,9 @@ commands:
       only-cache-for-root-user:
         type: boolean
         default: false
+      build-better-sqlite3:
+        type: boolean
+        default: false
     steps:
       - install_cache_helpers_dependencies
       - run:
@@ -353,9 +356,18 @@ commands:
       - run:
           name: Generate platform key
           command: node ./scripts/get-platform-key.js > platform_key
-      - restore_cache:
-          name: Restore cache state, to check for known modules cache existence
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - restore_cache:
+                name: Restore cache state, to check for known modules cache existence
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-better-sqlite3
+      - unless:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - restore_cache:
+                name: Restore cache state, to check for known modules cache existence
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -377,6 +389,10 @@ commands:
             PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - build-better-sqlite3
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
@@ -399,11 +415,22 @@ commands:
                 paths:
                   - /tmp/node_modules_cache
       - run: touch node_modules_installed
-      - save_cache:
-          name: Saving node-modules cache state key
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
-          paths:
-            - node_modules_installed
+      - when:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - save_cache:
+                name: Saving node-modules cache state key
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-better-sqlite3
+                paths:
+                  - node_modules_installed
+      - unless:
+          condition: <<parameters.build-better-sqlite3>>
+          steps:
+            - save_cache:
+                name: Saving node-modules cache state key
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
@@ -485,6 +512,39 @@ commands:
             which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+
+  # This code builds better-sqlite3 on Debian 10 (Buster). This is necessary because Debian 10 has the oldest glibc version (2.28) that we support.
+  #
+  # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
+  # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
+  # project directory so volume mounts are not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
+  build-better-sqlite3:
+    description: Build better-sqlite3 for glibc 2.28
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Build better-sqlite3 for glibc 2.28
+          command: |
+            if [[ ! -f better_sqlite3.node ]]; then
+              set -x
+              apt update && apt install -y docker.io
+              docker run -d --name better-sqlite3-builder cypress/base-internal:20.15.0-buster /bin/bash -c "sleep 1000000000"
+              docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 27.1.3 --include-regex 'better_sqlite3.node$'"
+              docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+              docker rm -f better-sqlite3-builder
+              cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
+            else
+              cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            fi
+      - save_cache:
+          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+          paths:
+            - better_sqlite3.node
+      - run:
+          name: Clean up top level better-sqlite3 file
+          command: |
+            rm ~/cypress/better_sqlite3.node
 
   run-driver-integration-tests:
     parameters:
@@ -1289,6 +1349,9 @@ jobs:
       resource_class:
         type: string
         default: medium
+      build-better-sqlite3:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - update_known_hosts
@@ -1305,6 +1368,7 @@ jobs:
             - ProgramData/nvm # windows
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+          build-better-sqlite3: <<parameters.build-better-sqlite3>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -2671,7 +2735,8 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        build-better-sqlite3: true
     - build:
         context: test-runner:env-canary
         requires:
