@@ -14,7 +14,7 @@
     "binary-smoke-test": "node ./scripts/binary.js smoke",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream && lerna run build-cli --stream",
+    "build": "lerna run build --stream --skip-nx-cache && lerna run build-cli --stream --skip-nx-cache",
     "build-prod": "lerna run build-prod --stream && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope",
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
