@@ -551,7 +551,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         return resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '::', listener)
+      return this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
