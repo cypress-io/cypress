@@ -25,7 +25,7 @@
     "@types/node": "^18.17.5",
     "chai": "4.2.0",
     "mocha": "3.5.3",
-    "typescript": "^5.4.5"
+    "typescript": "~5.4.5"
   },
   "peerDependencies": {
     "@angular/cli": ">=14",

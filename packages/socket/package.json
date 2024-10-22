@@ -48,5 +48,6 @@
       "socket.io-client",
       "socket.io-client/socket.io-parser"
     ]
-  }
+  },
+  "nx": {}
 }

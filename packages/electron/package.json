@@ -34,5 +34,6 @@
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
-  }
+  },
+  "nx": {}
 }

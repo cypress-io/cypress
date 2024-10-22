@@ -13,7 +13,7 @@
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "svelte": "^3.49.0",
-    "typescript": "^5.4.5"
+    "typescript": "~5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=10.6.0",
