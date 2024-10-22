@@ -1285,7 +1285,8 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
 
         describe('misc', () => {
           describe('domains', () => {
-            it('attaches subdomain and TLD cookies when making subdomain requests', () => {
+            // NOTE: tested in ./with-inject-document-domain/cookie_behavior
+            it.skip('attaches subdomain and TLD cookies when making subdomain requests', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
                 expect(req['headers']['cookie']).to.equal('foo=bar; bar=baz')
 

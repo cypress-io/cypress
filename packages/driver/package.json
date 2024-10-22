@@ -6,7 +6,8 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
-    "cypress:run": "node ../../scripts/cypress run",
+    "cypress:run": "node ../../scripts/cypress run --config-file ./cypress.config.ts",
+    "cypress:run-doc-domain": "node ../../scripts/cypress run --config-file ./cypress.config-inject-document-domain.ts",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'"
