@@ -1575,7 +1575,6 @@
     "./node_modules/browserslist/index.js",
     "./node_modules/browserslist/node.js",
     "./node_modules/browserslist/parse.js",
-    "./node_modules/buffer-equal/index.js",
     "./node_modules/bytes/index.js",
     "./node_modules/call-bind/callBound.js",
     "./node_modules/call-bind/index.js",
@@ -2289,6 +2288,7 @@
     "./node_modules/lazy-ass/index.js",
     "./node_modules/load-bmfont/index.js",
     "./node_modules/load-bmfont/lib/is-binary.js",
+    "./node_modules/load-bmfont/node_modules/buffer-equal/index.js",
     "./node_modules/lodash._baseassign/index.js",
     "./node_modules/lodash._basecopy/index.js",
     "./node_modules/lodash._basecreate/index.js",
@@ -4180,5 +4180,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "465d9ea33d6e01dac0e0ca57388ef83127db6d7824f874482431c6a2bb37e2ed"
+  "deferredHash": "8e90942c622942287c1462c6576572943546f0975ee7127573c914adde9fc1d2"
 }
