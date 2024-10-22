@@ -41,7 +41,7 @@ export function getAddress (port: number, hostname: string): Bluebird<net.Addres
     debug('got addresses %o', { hostname, port, addresses })
 
     // ipv6 addresses are causing problems with cypress in cypress internal e2e tests
-    // so we are filtering them out here
+    // on windows, so we are filtering them out here
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT && os.platform() === 'win32') {
       debug('filtering ipv6 addresses %o', { hostname, port, addresses })
       addresses = addresses.filter((address) => {
