@@ -43,5 +43,6 @@
     "src",
     "dist"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {}
 }

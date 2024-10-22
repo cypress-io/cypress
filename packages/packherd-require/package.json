@@ -28,5 +28,6 @@
     "dist",
     "src/require.ts"
   ],
-  "types": "src/require.ts"
+  "types": "src/require.ts",
+  "nx": {}
 }

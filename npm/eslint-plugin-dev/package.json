@@ -52,5 +52,6 @@
     "cypress",
     "eslint",
     "eslintplugin"
-  ]
+  ],
+  "nx": {}
 }
