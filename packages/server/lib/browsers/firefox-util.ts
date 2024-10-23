@@ -8,12 +8,14 @@ const debug = Debug('cypress:server:browsers:firefox-util')
 let webdriverClient: WebDriverClient
 
 async function connectToNewSpecBiDi (options, automation: Automation, browserBiDiClient: BidiAutomation) {
-  // when connecting to a new spec, we need to re register the existing bidi client to the automation client
-  // as the automation client resets its middleware between specs in run mode
   debug('firefox: reconnecting to blank tab')
   const { contexts } = await webdriverClient.browsingContextGetTree({})
 
   browserBiDiClient.setTopLevelContextId(contexts[0].context)
+  debug('registering middleware')
+  // when connecting to a new spec, we need to re register the existing bidi client to the automation client
+  // as the automation client resets its middleware between specs in run mode
+  automation.use(browserBiDiClient.automationMiddleware)
 
   await options.onInitializeNewBrowserTab()
 

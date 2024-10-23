@@ -390,9 +390,6 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   debug('connectToNewSpec bidi')
   await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
-
-  debug('registering middleware')
-  automation.use(browserBidiClient!.automationMiddleware)
 }
 
 export function connectToExisting () {
