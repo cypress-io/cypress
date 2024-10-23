@@ -97,6 +97,8 @@ describe('lib/exec/spawn', function () {
             at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
             at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
             at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
+        
+        [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
       `
 
       const lines = _

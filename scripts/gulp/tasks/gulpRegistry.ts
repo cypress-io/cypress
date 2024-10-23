@@ -71,24 +71,36 @@ export async function exitAfterAll () {
   process.stdin.pause()
 }
 
-function exitHandler (msg: string) {
-  return async function _exitHandler (exitCode: number) {
-    hasExited = true
-    console.log(`Exiting due to ${msg} => code ${exitCode}`)
-    await exitAllProcesses()
-    process.exit(exitCode)
-  }
+async function exitHandler (exitCode: number) {
+  hasExited = true
+  console.log(`Exiting with code ${exitCode}`)
+  await exitAllProcesses()
+  process.exit(exitCode)
+}
+
+async function signalHandler (signal: NodeJS.Signals, code: number) {
+  hasExited = true
+  console.log(`Exiting due to ${signal}`)
+  await exitAllProcesses()
+  process.exit(128 + code)
+}
+
+async function uncaughtExceptionHandler (error: Error) {
+  hasExited = true
+  console.log(`Uncaught exception ${error.message}`)
+  await exitAllProcesses()
+  process.exit(6)
 }
 
 // do something when app is closing
-process.on('exit', exitHandler('exit'))
+process.on('exit', exitHandler)
 
 // catches ctrl+c event
-process.on('SIGINT', exitHandler('SIGINT'))
+process.on('SIGINT', signalHandler)
 
 // catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR1', exitHandler('SIGUSR1'))
-process.on('SIGUSR2', exitHandler('SIGUSR2'))
+process.on('SIGUSR1', signalHandler)
+process.on('SIGUSR2', signalHandler)
 
 // catches uncaught exceptions
-process.on('uncaughtException', exitHandler('uncaughtException'))
+process.on('uncaughtException', uncaughtExceptionHandler)

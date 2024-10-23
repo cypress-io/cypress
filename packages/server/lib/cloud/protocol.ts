@@ -9,7 +9,6 @@ import os from 'os'
 import path from 'path'
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
-import { performance } from 'perf_hooks'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 

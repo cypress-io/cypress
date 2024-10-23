@@ -374,8 +374,10 @@ class $Cypress {
     })
     .then(() => {
       return (new Promise((resolve) => {
-        if (this.$autIframe) {
+        if (this.$autIframe.prop('contentWindow')) {
           resolve()
+        } else if (this.$autIframe) {
+          this.$autIframe.on('load', resolve)
         } else {
           // block initialization if the iframe has not been created yet
           // Used in CT when async chunks for plugins take their time to download/parse

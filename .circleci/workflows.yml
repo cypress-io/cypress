@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'ryanm/chore/fix-windows-tests'
+        - 'ryanm/chore/electron-upgrade'
         - 'publish-binary'
 
 # usually we don't build Mac app - it takes a long time
@@ -42,7 +42,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/electron-upgrade', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/electron-upgrade', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -76,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/electron-upgrade', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -85,7 +85,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
+      - image: cypress/browsers-internal:node20.18.0-bullseye-chrome129-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -94,7 +94,7 @@ executors:
   
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node20.15.0-chrome126-ff131
+      - image: cypress/browsers-internal:node20.18.0-bullseye-chrome129-ff131
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -104,7 +104,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node18.17.1-chrome128-ff131
+      - image: cypress/browsers-internal:node20.18.0-bullseye-chrome129-ff131
         user: node
     environment:
       PLATFORM: linux
@@ -136,7 +136,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2023.07.1
+      image: ubuntu-2004:2024.05.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -152,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/fix-windows-tests" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/electron-upgrade" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -383,6 +383,24 @@ commands:
       - run:
           name: Install Node Modules
           command: |
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # Building better-sqlite3 on arm64 requires gcc-10
+              # on Arm, CI runs as non-root so we need to use sudo
+              sudo apt install gcc-10 g++-10
+
+              # Update default to gcc-10 and g++-10
+              sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 30
+              sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 30
+              sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
+              sudo update-alternatives --set cc /usr/bin/gcc
+              sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
+              sudo update-alternatives --set c++ /usr/bin/g++
+              sudo update-alternatives --config gcc
+              sudo update-alternatives --config g++
+
+              # If we are on arm64 we need to install setuptools as it no longer comes standard with the latest version of python
+              pip install setuptools
+            fi
             source ./scripts/ensure-node.sh
             # avoid installing Percy's Chromium every time we use @percy/cli
             # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
@@ -528,9 +546,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:20.15.0-buster /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:20.15.0-buster-python3.8-gcc-10.5 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 27.1.3 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 32.2.0 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -1782,7 +1800,7 @@ jobs:
     working_directory: ~/cypress
     docker:
       # we need an image with yarn 4 berry installed on it to run this test
-      - image: cypress/base-internal:18.17.1-yarn-berry
+      - image: cypress/base-internal:20.18.0-yarn-berry
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress

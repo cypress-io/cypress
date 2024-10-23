@@ -37,7 +37,7 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e' })
+    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e', projectId: '1', cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } } })
 
     protocol = (protocolManager as any)._protocol
     expect((protocol as any)).not.to.be.undefined
@@ -339,7 +339,7 @@ describe('lib/cloud/protocol', () => {
 
         sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
         sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
-        protocolManager.beforeSpec({ instanceId })
+        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', relativeToCommonRoot: 'common/root', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
 
         expectedAfterSpecTotal = 225
 
