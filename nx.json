@@ -28,12 +28,12 @@
   },
   "namedInputs": {
     "sharedGlobals": [
-      "{workspaceRoot}/scripts",
-      "{workspaceRoot}/.circleci/cache-version.txt"
+      "{workspaceRoot}/scripts"
     ],
     "default": [
       "{projectRoot}/**/*",
-      "sharedGlobals"
+      "sharedGlobals",
+      "{workspaceRoot}/.circleci/cache-version.txt"
     ],
     "production": [
       "default",
