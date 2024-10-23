@@ -74,7 +74,15 @@ const isContainerVulkanDriverWarning = /^Warning: vkCreateInstance/
 
 const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Initialize|Create|operator).+(VulkanError|BackendVk).cpp/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack]
+/**
+ * In Electron 32.0.0 a new debug scenario log message started appearing when iframes navigate to about:blank. This is a benign message.
+ * https://github.com/electron/electron/issues/44368
+ * Sample:
+ * [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
+ */
+const isDebugScenario4 = /Hit debug scenario: 4/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
