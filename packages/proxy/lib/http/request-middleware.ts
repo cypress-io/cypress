@@ -9,7 +9,7 @@ import {
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
-import type { CypressIncomingRequest } from '../types'
+import type { CypressIncomingRequest, ResourceType } from '../types'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -119,7 +119,19 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   const copyResourceTypeAndNext = () => {
     this.res.off('close', onClose)
 
-    this.req.resourceType = this.req.browserPreRequest?.resourceType
+    const patchedResourceTypeFromFF = this.req.headers['x-cypress-resource-type']
+
+    // BiDi is unable to pick up the resource type and the extensions SOMETIMES sends it
+    // this is not a reliable way to get the resource type
+    if (this.req.headers['x-cypress-resource-type']) {
+      delete this.req.headers['x-cypress-resource-type']
+      this.req.resourceType = patchedResourceTypeFromFF as ResourceType
+      if (this.req.browserPreRequest) {
+        this.req.browserPreRequest.resourceType = patchedResourceTypeFromFF as ResourceType
+      }
+    } else {
+      this.req.resourceType = this.req.browserPreRequest?.resourceType
+    }
 
     span?.setAttributes({
       resourceType: this.req.resourceType,
@@ -167,20 +179,30 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  // because of BiDi, we need to look up the resourceType/credentialStatus BEFORE checking if we need to simulate/set credential level
+  // because 'other' resourceType is used for just about everything, so we need to see if we have any actual xhr or fetrch requests
+  // We have to do this because resourceType is not supported in BiDi yet. See https://bugzilla.mozilla.org/show_bug.cgi?id=1904892
+  // NOTE: this should NOT have an impact on CDP
+
+  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+
+  // if there is a mismatch and we actually have a logged resource type from the fetch/xmlhttprequest, set it
+  if (resourceType !== this.req.resourceType && (resourceType === 'fetch' || resourceType === 'xhr')) {
+    this.req.resourceType = resourceType
+  }
+
   if (!doesTopNeedToBeSimulated(this) ||
-    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+    (this.req.resourceType !== undefined && resourceType !== 'xhr' && resourceType !== 'fetch')) {
     this.next()
 
     return
   }
 
-  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
-
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
-  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
-  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  // if for some reason the resourceType is not set by the prerequest, have a fallback in place (doing this for now for BiDi)
+  this.req.resourceType = resourceType || this.req.resourceType
   this.req.credentialsLevel = credentialStatus
   this.next()
 }

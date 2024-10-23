@@ -4,6 +4,31 @@ const browser = require('webextension-polyfill')
 
 const client = require('./client')
 
+// temporary work around to try and 'patch' resource type since it is missing in BiDi
+const EXTENSION_TO_CDP_RESOURCE_TYPE_MAP = {
+  main_frame: 'document',
+  sub_frame: 'document',
+  // we get the 'xhr' / 'fetch' resource type from the resourceTypeAndCredentialManager since we are patching fetch and xhr.
+  // mark this as other for now
+  xmlhttprequest: 'other',
+  websocket: 'websocket',
+  stylesheet: 'stylesheet',
+  xslt: 'stylesheet',
+  script: 'script',
+  image: 'image',
+  imageset: 'image',
+  font: 'font',
+  csp_report: 'cspviolationreport',
+  ping: 'ping',
+  web_manifest: 'manifest',
+  beacon: 'other',
+  media: 'other',
+  object: 'other',
+  object_subrequest: 'other',
+  speculative: 'other',
+  xml_dtd: 'other',
+}
+
 const checkIfFirefox = async () => {
   if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
     return false
@@ -50,6 +75,25 @@ const connect = function (host, path, extraOpts) {
     })
   })
 
+  // TODO: intercept all types here. gate this behind shouldUseBiDi
+  const listenToOnBeforeHeaders = once(() => {
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      const modifiedHeaders = {
+        requestHeaders: [
+          ...details.requestHeaders,
+          {
+            name: 'X-Cypress-Resource-Type',
+            value: EXTENSION_TO_CDP_RESOURCE_TYPE_MAP[details.type],
+          },
+        ],
+      }
+
+      return modifiedHeaders
+    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
+  })
+
   const ws = client.connect(host, path, extraOpts)
 
   ws.on('automation:config', async (config) => {
@@ -59,6 +103,7 @@ const connect = function (host, path, extraOpts) {
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
+      listenToOnBeforeHeaders()
     }
   })
 
