@@ -103,6 +103,8 @@ const attachToTabMemory = Bluebird.method((tab) => {
 async function connectToNewSpecBiDi (options, automation: Automation, browserBiDiClient: BidiAutomation) {
   // when connecting to a new spec, we need to re register the existing bidi client to the automation client
   // as the automation client resets its middleware between specs in run mode
+  automation.use(browserBiDiClient)
+
   debug('firefox: reconnecting to blank tab')
   const { contexts } = await webdriverClient.browsingContextGetTree({})
 
@@ -147,6 +149,8 @@ async function setupBiDi (webdriverClient: WebDriverClient, automation: Automati
   await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
 
   const biDiClient = BidiAutomation.create(webdriverClient, automation)
+
+  automation.use(biDiClient)
 
   return biDiClient
 }

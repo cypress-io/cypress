@@ -1368,10 +1368,11 @@ describe('src/cy/commands/cookies', () => {
 
       cy.setCookie('five', 'bar')
 
-      // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-      // TODO(webkit): pw webkit has the same issue as firefox (no "unspecified" state), need a patched binary
-      if (Cypress.isBrowser('firefox') || Cypress.isBrowser('webkit')) {
+      // TODO(webkit): pw webkit has no "unspecified" state, need a patched binary
+      if (Cypress.isBrowser('webkit')) {
         cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
+      } else if (Cypress.isBrowser('firefox')) {
+        cy.getCookie('five').should('include', { sameSite: 'lax' })
       } else {
         cy.getCookie('five').should('not.have.property', 'sameSite')
       }
