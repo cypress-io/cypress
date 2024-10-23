@@ -18,7 +18,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
-    specPattern: 'cypress/**/with-inject-document-domain/**/*.cy.{js,ts}',
+    specPattern: '{cypress/**/with-inject-document-domain/**/origin/**/*.cy.{js,ts},cypress/**/privileged_commands.cy.ts}',
     injectDocumentDomain: true,
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,

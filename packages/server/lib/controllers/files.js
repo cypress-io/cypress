@@ -36,6 +36,7 @@ module.exports = {
       namespace: config.namespace,
       scripts: allFilesToSend,
       url: req.proxiedUrl,
+      documentDomainContext: config.injectDocumentDomain,
     })
 
     const iframeOptions = {
@@ -64,6 +65,7 @@ module.exports = {
       namespace: config.namespace,
       scripts: [],
       url: req.proxiedUrl,
+      documentDomainContext: config.injectDocumentDomain,
     })
 
     const iframeOptions = {
