@@ -140,7 +140,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^1.6.1",
-    "electron": "32.2.0",
+    "electron": "33.0.2",
     "electron-builder": "^23.6.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
