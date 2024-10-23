@@ -128,8 +128,6 @@ export class AutIframe {
         return
       }
 
-      this.$iframe[0].srcdoc = '<html></html>'
-      this.$iframe?.removeAttr('srcdoc')
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
