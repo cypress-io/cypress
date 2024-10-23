@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'misc/use_webdriver'
+        - 'ryanm/chore/fix-windows-tests'
         - 'publish-binary'
 
 # usually we don't build Mac app - it takes a long time
@@ -42,7 +42,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'misc/use_webdriver', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,7 +53,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'misc/use_webdriver', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -76,7 +76,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'misc/use_webdriver', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/chore/fix-windows-tests', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -152,7 +152,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "misc/use_webdriver" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/fix-windows-tests" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1555,7 +1555,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
             - verify-mocha-results:
                 expectedResultCount: 3
       - when:
@@ -1567,7 +1567,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/packherd'"
+                  yarn test-integration --scope=@tooling/packherd
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:
@@ -1691,7 +1691,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
+      - run: yarn test-unit --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1737,7 +1737,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-integration --scope @packages/server
+      - run: yarn test-integration --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -2085,7 +2085,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/webpack-preprocessor
+          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2130,7 +2130,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vue
+          command: yarn lerna run build --scope=@cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -2143,7 +2143,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular
+          command: yarn lerna run build --scope=@cypress/angular
       - store-npm-logs
 
   npm-angular-signals:
@@ -2152,7 +2152,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-signals
+          command: yarn lerna run build --scope=@cypress/angular-signals
       - store-npm-logs
 
   npm-puppeteer-unit-tests:
@@ -2161,7 +2161,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/puppeteer
+          command: yarn lerna run build --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2193,7 +2193,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/react
+          command: yarn lerna run build --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2210,7 +2210,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
+          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2227,7 +2227,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/mount-utils
+          command: yarn lerna run build --scope=@cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2259,7 +2259,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope @cypress/schematic
+            yarn lerna run build --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |

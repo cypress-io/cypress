@@ -50,5 +50,6 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fpuppeteer&template=1-bug-report.md&title=",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "nx": {}
 }
