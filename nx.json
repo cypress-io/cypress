@@ -32,7 +32,8 @@
     ],
     "default": [
       "{projectRoot}/**/*",
-      "sharedGlobals"
+      "sharedGlobals",
+      "{workspaceRoot}/.circleci/cache-version.txt"
     ],
     "production": [
       "default",
