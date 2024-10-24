@@ -1156,6 +1156,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
         default: [{ configFile: '/path/to/cypress.config.js' }],

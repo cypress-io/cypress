@@ -966,7 +966,17 @@ describe('config/src/project/utils', () => {
         experimentalGetCookiesSameSite: true,
       })
 
-      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
+      expect(warning).to.be.calledWith('EXPERIMENTAL_JIT_COMPILE_REMOVED')
+    })
+
+    it('warns if experimentalJustInTimeCompile is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalJustInTimeCompile', true, {
+        experimentalJustInTimeCompile: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_JIT_COMPILE_REMOVED')
     })
 
     it('warns if experimentalSessionSupport is passed', async function () {

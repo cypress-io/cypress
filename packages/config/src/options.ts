@@ -17,6 +17,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
   'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+  'EXPERIMENTAL_JIT_COMPILE_REMOVED',
   'EXPERIMENTAL_SAMESITE_REMOVED',
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
@@ -635,6 +636,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalJustInTimeCompile',
+    errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalNetworkStubbing',
