@@ -17,6 +17,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
   'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+  'EXPERIMENTAL_JIT_COMPILE_REMOVED',
   'EXPERIMENTAL_SAMESITE_REMOVED',
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
@@ -237,8 +238,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalJustInTimeCompile',
-    defaultValue: false,
+    name: 'justInTimeCompile',
+    defaultValue: true,
     validation: validate.isBoolean,
     isExperimental: true,
     requireRestartOnChange: 'server',
@@ -637,6 +638,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalJustInTimeCompile',
+    errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
+    isWarning: true,
+  }, {
     name: 'experimentalNetworkStubbing',
     errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
     isWarning: true,
@@ -741,8 +746,8 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalJustInTimeCompile',
-    errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+    name: 'justInTimeCompile',
+    errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
     testingTypes: ['component'],
   },
@@ -761,8 +766,8 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalJustInTimeCompile',
-      errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+      name: 'justInTimeCompile',
+      errorKey: 'JIT_COMPONENT_TESTING',
       isWarning: false,
     },
   ],

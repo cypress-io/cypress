@@ -969,6 +969,16 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
     })
 
+    it('warns if experimentalJustInTimeCompile is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalJustInTimeCompile', true, {
+        experimentalJustInTimeCompile: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_JIT_COMPILE_REMOVED')
+    })
+
     it('warns if experimentalSessionSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -1056,11 +1066,11 @@ describe('config/src/project/utils', () => {
             clientCertificates: { value: [], from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalSkipDomainInjection: { value: null, from: 'default' },
-            experimentalJustInTimeCompile: { value: false, from: 'default' },
             experimentalCspAllowList: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
@@ -1074,7 +1084,7 @@ describe('config/src/project/utils', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            justInTimeCompile: { value: true, from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
@@ -1154,10 +1164,10 @@ describe('config/src/project/utils', () => {
             clientCertificates: { value: [], from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalSkipDomainInjection: { value: null, from: 'default' },
-            experimentalJustInTimeCompile: { value: false, from: 'default' },
             experimentalCspAllowList: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
@@ -1193,7 +1203,7 @@ describe('config/src/project/utils', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            justInTimeCompile: { value: true, from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },

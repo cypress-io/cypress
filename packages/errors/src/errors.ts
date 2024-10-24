@@ -1249,6 +1249,14 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
+
+        A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
+
+        You can safely remove this option from your config.`
+  },
   // TODO: verify configFile is absolute path
   // TODO: make this relative path, not absolute
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
@@ -1348,11 +1356,9 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
-  EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+  JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
-    The ${fmt.highlight(`experimentalJustInTimeCompile`)} experiment is currently only supported for Component Testing.
-
-    If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/just-in-time-compile`
+    The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`
   },
   EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
     const code = errPartial`
