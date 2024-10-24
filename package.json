@@ -31,7 +31,7 @@
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
     "precypress:run": "yarn ensure-deps",
     "cypress:run": "cypress run --dev",
-    "cypress:run:ct": "cypress run-ct --dev",
+    "cypress:run:ct": "cypress run --component --dev",
     "precypress:run:debug": "yarn ensure-deps",
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
