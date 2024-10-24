@@ -88,6 +88,10 @@ _Released 8/27/2024_
 
 - Allow HiDPI screen running Wayland to use Cypress window/browser by adding `--ozone-platform-hint=auto` flag to Electron's runtime argument. Addresses [#20891](https://github.com/cypress-io/cypress/issues/20891).
 
+**Bugfixes:**
+
+- Fixed Google Chrome for Testing version not parsing correctly. Fixes [#28123](https://github.com/cypress-io/cypress/issues/28123).
+
 **Dependency Updates:**
 
 - Updated `detect-port` from `1.3.0` to `1.6.1`. Addressed in [#30038](https://github.com/cypress-io/cypress/pull/30038).
