@@ -25,7 +25,7 @@
     "semver": "^7.5.3",
     "speed-measure-webpack-plugin": "1.4.2",
     "tslib": "^2.3.1",
-    "webpack-dev-server": "^4.15.2",
+    "webpack-dev-server": "^5.1.0",
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
