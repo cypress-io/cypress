@@ -268,7 +268,7 @@
     "**/jquery": "3.4.1",
     "**/pretty-format": "26.4.0",
     "**/sharp": "0.29.3",
-    "**/socket.io-parser": "4.0.5",
+    "**/socket.io-parser": "4.2.4",
     "**/ua-parser-js": "0.7.33",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1346313",
