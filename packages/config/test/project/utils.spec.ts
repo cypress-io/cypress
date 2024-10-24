@@ -966,7 +966,7 @@ describe('config/src/project/utils', () => {
         experimentalGetCookiesSameSite: true,
       })
 
-      expect(warning).to.be.calledWith('EXPERIMENTAL_JIT_COMPILE_REMOVED')
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
     })
 
     it('warns if experimentalJustInTimeCompile is passed', async function () {
