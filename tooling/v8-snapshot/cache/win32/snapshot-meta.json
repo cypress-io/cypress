@@ -1584,6 +1584,7 @@
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
     "./node_modules/bindings/bindings.js",
+    "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
     "./node_modules/braces/lib/constants.js",
@@ -2204,6 +2205,7 @@
     "./node_modules/is-fullwidth-code-point/index.js",
     "./node_modules/is-glob/index.js",
     "./node_modules/is-html/index.js",
+    "./node_modules/is-obj/index.js",
     "./node_modules/is-plain-obj/index.js",
     "./node_modules/is-regexp/index.js",
     "./node_modules/is-stream/index.js",
@@ -2467,7 +2469,6 @@
     "./node_modules/mime-types/index.js",
     "./node_modules/mime/types.json",
     "./node_modules/min-indent/index.js",
-    "./node_modules/minimatch/node_modules/brace-expansion/index.js",
     "./node_modules/minimist/index.js",
     "./node_modules/mocha-7.0.1/lib/browser/progress.js",
     "./node_modules/mocha-7.0.1/lib/context.js",
@@ -2489,7 +2490,6 @@
     "./node_modules/mocha-7.0.1/lib/reporters/markdown.js",
     "./node_modules/mocha-7.0.1/lib/stats-collector.js",
     "./node_modules/mocha-7.0.1/lib/utils.js",
-    "./node_modules/mocha-7.0.1/node_modules/brace-expansion/index.js",
     "./node_modules/mocha-7.0.1/node_modules/debug/node_modules/ms/index.js",
     "./node_modules/mocha-7.0.1/node_modules/debug/src/common.js",
     "./node_modules/mocha-7.0.1/node_modules/glob/common.js",
@@ -3320,7 +3320,6 @@
     "./node_modules/stream-shift/index.js",
     "./node_modules/string-width/index.js",
     "./node_modules/stringify-object/index.js",
-    "./node_modules/stringify-object/node_modules/is-obj/index.js",
     "./node_modules/strip-ansi/index.js",
     "./node_modules/strip-eof/index.js",
     "./node_modules/strip-final-newline/index.js",
@@ -3636,7 +3635,6 @@
     "./packages/data-context/node_modules/ast-types/lib/shared.js",
     "./packages/data-context/node_modules/ast-types/lib/types.js",
     "./packages/data-context/node_modules/ast-types/main.js",
-    "./packages/data-context/node_modules/brace-expansion/index.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -4188,7 +4186,6 @@
     "./packages/server/node_modules/p-queue/dist/priority-queue.js",
     "./packages/server/node_modules/path-key/index.js",
     "./packages/server/node_modules/path-to-regexp/index.js",
-    "./packages/server/node_modules/pump/index.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/async_iterator.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/destroy.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/end-of-stream.js",
@@ -4251,5 +4248,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "13b4e2c024574673089f0bd15e763cc1db73256cafb63a98edb1e916317e3d3f"
+  "deferredHash": "3d8af6a4ecd3a5f38a549b16077ad3659f2b902085064d1934fb9f379987e9c1"
 }
