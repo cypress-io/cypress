@@ -1,6 +1,6 @@
 const systemTests = require('../lib/system-tests').default
 
-describe('run-ct', () => {
+describe('run ct', () => {
   systemTests.setup()
 
   systemTests.it('reports correct exit code when failing', {
