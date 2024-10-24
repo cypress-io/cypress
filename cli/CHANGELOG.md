@@ -162,6 +162,7 @@ _Released 7/01/2024_
 
 - Fixed an issue where Chrome launch instances would not recreate the browser CRI client correctly after recovering from an unexpected browser closure. Fixes [#27657](https://github.com/cypress-io/cypress/issues/27657). Fixed in [#29663](https://github.com/cypress-io/cypress/pull/29663).
 - Fixed an issue where Firefox 129 (Firefox Nightly) would not launch with Cypress. Fixes [#29713](https://github.com/cypress-io/cypress/issues/29713). Fixed in [#29720](https://github.com/cypress-io/cypress/pull/29720).
+- Specs with () in the filename will no longer fail to load and now behave as any other spec when run with the `--spec` argument via `cypress run`. Fixes [#28509](https://github.com/cypress-io/cypress/issues/28509).
 
 **Dependency Updates:**
 
@@ -275,7 +276,7 @@ _Released 4/23/2024_
 
 - Fixed a regression introduced in [`13.6.0`](https://docs.cypress.io/guides/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1, even when a test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
 - Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
-
+ 
 **Misc:**
 
 - `.its()` type now excludes null and undefined. Fixes [#28872](https://github.com/cypress-io/cypress/issues/28872).
