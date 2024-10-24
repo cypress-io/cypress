@@ -5,7 +5,6 @@ import debug from 'debug'
 import os from 'os'
 import sinon from 'sinon'
 import fsExtra from 'fs-extra'
-import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
@@ -19,41 +18,12 @@ const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
 const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
-const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
-  let foxdriver: any
-  let foxdriverTab: any
   let wdInstance: sinon.SinonStubbedInstance<WebDriverClient>
   let browserCriClient: BrowserCriClient
-
-  const stubFoxdriver = () => {
-    foxdriverTab = {
-      data: '',
-      memory: {
-        isAttached: false,
-        getState: sinon.stub().resolves(),
-        attach: sinon.stub().resolves(),
-        on: sinon.stub(),
-        forceGarbageCollection: sinon.stub().resolves(),
-        forceCycleCollection: sinon.stub().resolves(),
-      },
-    }
-
-    const browser = {
-      listTabs: sinon.stub().resolves([foxdriverTab]),
-      request: sinon.stub().withArgs('listTabs').resolves({ tabs: [foxdriverTab] }),
-      on: sinon.stub(),
-    }
-
-    foxdriver = {
-      browser,
-    }
-
-    sinon.stub(Foxdriver, 'attach').resolves(foxdriver)
-  }
 
   afterEach(() => {
     return mockfs.restore()
@@ -65,8 +35,6 @@ describe('lib/browsers/firefox', () => {
     mockfs({
       '/path/to/appData/firefox-stable/interactive': {},
     })
-
-    sinon.stub(protocol, '_connectAsync').resolves(null)
 
     wdInstance = {
       maximizeWindow: sinon.stub(),
@@ -88,8 +56,6 @@ describe('lib/browsers/firefox', () => {
     wdInstance.navigateTo.resolves(undefined)
 
     sinon.stub(webdriver, 'newSession').resolves(wdInstance)
-
-    stubFoxdriver()
   })
 
   context('#open', () => {
@@ -108,8 +74,6 @@ describe('lib/browsers/firefox', () => {
       }
 
       sinon.stub(process, 'pid').value(1111)
-
-      protocol.foo = 'bar'
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
@@ -552,15 +516,19 @@ describe('lib/browsers/firefox', () => {
       expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).to.be.undefined
     })
 
-    it('wraps errors when retrying socket fails', async function () {
-      const err = new Error
+    it('wraps errors when failing to connect to firefox (CDP failure)', async function () {
+      const err = new Error('failed to connect to CDP')
 
-      protocol._connectAsync.rejects()
+      // BrowserCriClient.create is stubbed above. restore it and re-stub BrowserCriClient.create
+      // @ts-expect-error
+      BrowserCriClient.create.restore()
+
+      sinon.stub(BrowserCriClient, 'create').rejects(err)
 
       await expect(firefox.open(this.browser, 'http://', this.options, this.automation)).to.be.rejectedWith()
       .then((wrapperErr) => {
         expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
-        expect(wrapperErr.message).to.include(err.message)
+        expect(wrapperErr.details).to.include(err.message)
       })
     })
 
@@ -651,38 +619,6 @@ describe('lib/browsers/firefox', () => {
   })
 
   context('firefox-util', () => {
-    context('#setupFoxdriver', () => {
-      it('attaches foxdriver after testing connection', async () => {
-        await firefoxUtil.setupFoxdriver(port)
-
-        expect(Foxdriver.attach).to.be.calledWith('127.0.0.1', port)
-        expect(protocol._connectAsync).to.be.calledWith({
-          host: '127.0.0.1',
-          port,
-          getDelayMsForRetry: sinon.match.func,
-        })
-      })
-
-      it('sets the collectGarbage callback which can be used to force GC+CC', async () => {
-        await firefoxUtil.setupFoxdriver(port)
-
-        const { memory } = foxdriverTab
-
-        expect(memory.forceCycleCollection).to.not.be.called
-        expect(memory.forceGarbageCollection).to.not.be.called
-
-        await firefoxUtil.collectGarbage()
-
-        expect(memory.forceCycleCollection).to.be.calledOnce
-        expect(memory.forceGarbageCollection).to.be.calledOnce
-
-        await firefoxUtil.collectGarbage()
-
-        expect(memory.forceCycleCollection).to.be.calledTwice
-        expect(memory.forceGarbageCollection).to.be.calledTwice
-      })
-    })
-
     context('#setupRemote', function () {
       it('correctly sets up the remote agent', async function () {
         const criClientStub: ICriClient = {

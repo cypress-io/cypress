@@ -75,13 +75,6 @@ declare namespace Cypress {
   }
 
   interface Backend {
-    /**
-     * Firefox only: Force Cypress to run garbage collection routines.
-     * No-op if not running in Firefox.
-     *
-     * @see https://on.cypress.io/firefox-gc-issue
-     */
-    (task: 'firefox:force:gc'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 

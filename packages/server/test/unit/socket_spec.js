@@ -15,7 +15,6 @@ const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
 
-const firefoxUtil = require('../../lib/browsers/firefox-util').default
 const { createRoutes } = require('../../lib/routes')
 const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
@@ -509,32 +508,6 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
           expect(resp.error).to.deep.eq(errors.cloneErr(err))
-
-          return done()
-        })
-      })
-    })
-
-    context('on(backend:request, firefox:force:gc)', () => {
-      it('calls firefoxUtil#collectGarbage', function (done) {
-        sinon.stub(firefoxUtil, 'collectGarbage').resolves()
-
-        return this.client.emit('backend:request', 'firefox:force:gc', (resp) => {
-          expect(firefoxUtil.collectGarbage).to.be.calledOnce
-          expect(resp.error).to.be.undefined
-
-          return done()
-        })
-      })
-
-      it('errors when collectGarbage throws', function (done) {
-        const err = new Error('foo')
-
-        sinon.stub(firefoxUtil, 'collectGarbage').throws(err)
-
-        return this.client.emit('backend:request', 'firefox:force:gc', (resp) => {
-          expect(firefoxUtil.collectGarbage).to.be.calledOnce
-          expect(resp.error.message).to.eq(err.message)
 
           return done()
         })

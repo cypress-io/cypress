@@ -8,7 +8,6 @@ import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
-import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import fixture from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -417,10 +416,6 @@ export class SocketBase {
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
                 return options.onResetServerState()
-              case 'log:memory:pressure':
-                return firefoxUtil.log()
-              case 'firefox:force:gc':
-                return firefoxUtil.collectGarbage()
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':
