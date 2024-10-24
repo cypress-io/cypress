@@ -3119,7 +3119,7 @@ declare namespace Cypress {
     experimentalSkipDomainInjection: string[] | null
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
-     * @default true
+     * @default false
      */
     experimentalSourceRewriting: boolean
     /**
