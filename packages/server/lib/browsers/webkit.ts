@@ -84,7 +84,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     env: {},
   }
 
-  const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
+  const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions)
 
   if (launchOptions.extensions.length) options.onWarning?.(new Error('WebExtensions not supported in WebKit, but extensions were passed in before:browser:launch.'))
 

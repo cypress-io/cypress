@@ -503,7 +503,7 @@ export = {
       preferences: electronOptions,
     })
 
-    const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, electronOptions)
+    const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions)
 
     this.validateLaunchOptions(launchOptions)
 

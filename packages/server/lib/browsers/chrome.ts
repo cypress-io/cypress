@@ -518,7 +518,7 @@ export = {
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions),
     ])
 
     if (launchOptions.preferences) {
