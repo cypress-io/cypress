@@ -46,12 +46,11 @@ interface StringValues {
  * @example
   ```
   {
-    experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.'
+    experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially'
   }
   ```
 */
 const _summaries: StringValues = {
-  experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
   experimentalJustInTimeCompile: 'Just-In-Time compiling',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
@@ -71,12 +70,11 @@ const _summaries: StringValues = {
  * @example
   ```
   {
-    experimentalFetchPolyfill: 'Fetch polyfill'
+    experimentalRunAllSpecs: 'Run All Specs'
   }
   ```
 */
 const _names: StringValues = {
-  experimentalFetchPolyfill: 'Fetch Polyfill',
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
   experimentalJustInTimeCompile: 'Enables Just-In-Time (JIT) compiling for component testing, which will only compile assets related to the spec before the spec is run. Currently supported for Vite and Webpack.',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',

@@ -87,11 +87,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalFetchPolyfill',
-    defaultValue: false,
-    isExperimental: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     isExperimental: true,

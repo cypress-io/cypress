@@ -21,7 +21,6 @@ exports['module api and after:run results'] = `
     "env": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
-    "experimentalFetchPolyfill": false,
     "experimentalInteractiveRunEvents": false,
     "experimentalRunAllSpecs": false,
     "experimentalMemoryManagement": false,

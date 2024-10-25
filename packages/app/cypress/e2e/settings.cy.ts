@@ -183,13 +183,6 @@ describe('App: Settings', () => {
           href: 'https://on.cypress.io/experiments',
         })
 
-        cy.get('[data-cy="experiment-experimentalFetchPolyfill"]').within(() => {
-          cy.validateExternalLink({
-            name: 'cy.intercept()',
-            href: 'https://on.cypress.io/intercept',
-          })
-        })
-
         cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]').within(() => {
           cy.validateExternalLink({
             name: 'before:run',
