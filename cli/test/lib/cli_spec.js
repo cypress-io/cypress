@@ -635,34 +635,10 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
-    it('spawns server with correct args for deprecated component-testing command', () => {
-      this.exec('open-ct --dev')
-      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
-      expect(spawn.start.firstCall.args[0]).to.include('component')
-    })
-
     it('runs server with correct args for component-testing', () => {
       this.exec('run --component --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
-    })
-
-    it('runs server with correct args for deprecated component-testing command', () => {
-      this.exec('run-ct --dev')
-      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
-      expect(spawn.start.firstCall.args[0]).to.include('component')
-    })
-
-    it('does display open-ct command in the help', () => {
-      return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.include('open-ct')
-      })
-    })
-
-    it('does display run-ct command in the help', () => {
-      return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.include('run-ct')
-      })
     })
   })
 })
