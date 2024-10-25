@@ -224,30 +224,6 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
-      plugins.registerEvent('before:browser:launch', (browser, config) => {
-        return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
-      })
-
-      const pathToTheme = extension.getPathToTheme()
-
-      const onWarning = sinon.stub()
-
-      return chrome.open({ isHeaded: true }, 'http://', { onWarning, onError: () => {} }, this.automation)
-      .then(() => {
-        const args = launch.launch.firstCall.args[3]
-
-        expect(args).to.deep.eq([
-          '--foo=bar',
-          `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
-          '--user-data-dir=/profile/dir',
-          '--disk-cache-dir=/profile/dir/CypressCache',
-        ])
-
-        expect(onWarning).calledOnce
-      })
-    })
-
     it('normalizes --load-extension if provided in plugin', function () {
       plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
