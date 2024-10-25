@@ -441,7 +441,7 @@ describe('lib/browsers/firefox', () => {
           // NOTE: sinon.match treats the string itself as a regular expression. The backslashes need to be escaped.
           'browser.download.dir': 'C:\\\\Users\\\\test\\\\Downloads\\\\My_Test_Downloads_Folder',
         },
-      }), this.options)
+      }))
     })
 
     // CDP is deprecated in Firefox 129 and up.
@@ -458,7 +458,7 @@ describe('lib/browsers/firefox', () => {
         preferences: {
           'remote.active-protocols': 2,
         },
-      }), this.options)
+      }))
     })
 
     it('resolves the browser instance as an event emitter', async function () {
