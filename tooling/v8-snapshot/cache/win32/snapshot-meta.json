@@ -1584,7 +1584,6 @@
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
     "./node_modules/bindings/bindings.js",
-    "./node_modules/brace-expansion/index.js",
     "./node_modules/braces/index.js",
     "./node_modules/braces/lib/compile.js",
     "./node_modules/braces/lib/constants.js",
@@ -4186,6 +4185,7 @@
     "./packages/server/node_modules/p-queue/dist/priority-queue.js",
     "./packages/server/node_modules/path-key/index.js",
     "./packages/server/node_modules/path-to-regexp/index.js",
+    "./packages/server/node_modules/pump/index.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/async_iterator.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/destroy.js",
     "./packages/server/node_modules/readable-stream/lib/internal/streams/end-of-stream.js",
@@ -4248,5 +4248,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "3d8af6a4ecd3a5f38a549b16077ad3659f2b902085064d1934fb9f379987e9c1"
+  "deferredHash": "13b4e2c024574673089f0bd15e763cc1db73256cafb63a98edb1e916317e3d3f"
 }
