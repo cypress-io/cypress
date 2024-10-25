@@ -491,7 +491,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   ] = await Promise.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
-    utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions),
+    utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     options.videoApi && recordVideo(options.videoApi),
   ])
 

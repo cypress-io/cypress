@@ -134,7 +134,7 @@ const removeOldProfiles = function (browser) {
 
 const pathToExtension = extension.getPathToExtension()
 
-async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions) {
+async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
   if (plugins.has('before:browser:launch')) {
     const span = telemetry.startSpan({ name: 'lifecycle:before:browser:launch' })
 
@@ -150,7 +150,7 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
     span?.end()
 
     if (pluginConfigResult) {
-      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult)
+      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
     }
   }
 
@@ -178,7 +178,7 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
   }
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult) {
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
   // strip out all the known launch option properties from the resulting object
   const unexpectedProperties: string[] = _
   .chain(pluginConfigResult)
