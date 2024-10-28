@@ -5,25 +5,26 @@
         "default",
         "{workspaceRoot}/.eslintrc.js"
       ],
-      "cache": true
+      "cache": false
     },
     "check-ts": {
       "inputs": [
         "default",
         "sharedGlobals"
       ],
-      "cache": true
+      "cache": false
     },
     "build": {
       "dependsOn": [
         "^build"
       ],
-      "cache": true
+      "cache": false
     },
     "build-prod": {
       "dependsOn": [
         "^build-prod"
-      ]
+      ],
+      "cache": false
     }
   },
   "namedInputs": {

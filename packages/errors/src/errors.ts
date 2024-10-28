@@ -1257,9 +1257,9 @@ export const AllCypressErrors = {
 
         Please remove this flag from: ${fmt.path(arg1.configFile)}
 
-        Component Testing is now a standalone command. You can now run your component tests with:
+        Component Testing is now a supported testing type. You can run your component tests with:
 
-          ${fmt.terminal(`cypress open-ct`)}
+          ${fmt.terminal(`cypress open --component`)}
 
         https://on.cypress.io/migration-guide`
   },
