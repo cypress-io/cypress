@@ -39,12 +39,6 @@ const isDbusWarning = /Failed to connect to the bus:/
 // ERROR: No matching issuer found
 const isCertVerifyProcBuiltin = /(^\[.*ERROR:cert_verify_proc_builtin\.cc|^----- Certificate i=0 \(OU=Cypress Proxy|^ERROR: No matching issuer found$)/
 
-// Electron logs a benign warning about WebSwapCGLLayer on MacOS v12 and Electron v18 due to a naming collision in shared libraries.
-// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/33685
-// Sample:
-// objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
-const isMacOSElectronWebSwapCGLLayerWarning = /^objc\[\d+\]: Class WebSwapCGLLayer is implemented in both.*Which one is undefined\./
-
 /**
  * Electron logs benign warnings about Vulkan when run on hosts that do not have a GPU. This is coming from the primary Electron process,
  * and not the browser being used for tests.
@@ -82,7 +76,7 @@ const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Init
  */
 const isDebugScenario4 = /Hit debug scenario: 4/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isMacOSElectronWebSwapCGLLayerWarning, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4]
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
