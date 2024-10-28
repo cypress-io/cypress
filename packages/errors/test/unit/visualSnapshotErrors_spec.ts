@@ -570,11 +570,6 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
-      return {
-        default: [],
-      }
-    },
     DUPLICATE_TASK_KEY: () => {
       const tasks = ['foo', 'bar', 'baz']
 
