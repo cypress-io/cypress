@@ -88,11 +88,6 @@
     "field": "experimentalCspAllowList"
   },
   {
-    "value": false,
-    "from": "default",
-    "field": "experimentalFetchPolyfill"
-  },
-  {
     "value": true,
     "from": "default",
     "field": "experimentalInteractiveRunEvents"

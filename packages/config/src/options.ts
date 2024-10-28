@@ -204,11 +204,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalFetchPolyfill',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: validate.isBoolean,
