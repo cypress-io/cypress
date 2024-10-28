@@ -74,7 +74,7 @@ const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Init
  * Sample:
  * [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
  */
-const isDebugScenario4 = /Hit debug scenario: 4/
+const isDebugScenario4 = /^\[[^\]]+debug_utils\.cc[^\]]+\] Hit debug scenario: 4/
 
 const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4]
 
