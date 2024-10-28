@@ -3,10 +3,6 @@
 
 _Released 12/3/2024 (PENDING)_
 
-**Bugfixes:**
-
-- The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
-
 **Breaking Changes:**
 
 - Removed support for Node.js 16 and Node.js 21. Addresses [#29930](https://github.com/cypress-io/cypress/issues/29930).
@@ -15,6 +11,10 @@ _Released 12/3/2024 (PENDING)_
 - The undocumented methods `Cypress.backend('firefox:force:gc')` and `Cypress.backend('log:memory:pressure')` were removed. Addresses [#30222](https://github.com/cypress-io/cypress/issues/30222).
 - Upgraded bundled Node.js version from `18.17.0` to `20.18.0`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
 - It is no longer possible to do things like `cy.window().then((win) => win.fetch('<some-url>')` without doing some form of initial navigation via `cy.visit()`. `cy.request` will still work in this scenario. Addressed in [#29547](https://github.com/cypress-io/cypress/pull/30394).
+
+**Bugfixes:**
+
+- The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
 
 **Dependency Updates:**
 
