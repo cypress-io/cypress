@@ -10,7 +10,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
   const { nextVersion } = await getNextVersionForBinary()
 
   const body = JSON.stringify({
-    branch: 'ryanm/chore/electron-upgrade',
+    branch: 'release/14.0.0',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
