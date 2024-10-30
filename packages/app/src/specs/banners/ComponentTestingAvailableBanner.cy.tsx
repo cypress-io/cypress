@@ -6,7 +6,6 @@ import type Sinon from 'sinon'
 const frameworks = [
   { name: 'React', type: 'react' },
   { name: 'Create React App', type: 'reactscripts' },
-  { name: 'Nuxt.js (v2)', type: 'nuxtjs' },
   { name: 'Vue', type: 'vue3' },
   { name: 'Angular', type: 'angular' },
   { name: 'Next.js', type: 'nextjs' },

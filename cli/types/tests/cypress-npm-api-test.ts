@@ -114,16 +114,6 @@ const componentConfigVueCliWebpack: Cypress.ConfigOptions = {
   }
 }
 
-const componentConfigNuxtWebpack: Cypress.ConfigOptions = {
-  component: {
-    devServer: {
-      bundler: 'webpack',
-      framework: 'nuxt',
-      webpackConfig: {}
-    }
-  }
-}
-
 const componentConfigCRAWebpack: Cypress.ConfigOptions = {
   component: {
     devServer: {

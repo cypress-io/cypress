@@ -18,7 +18,6 @@ We will also attempt to scaffold a configuration file for projects using React a
 | Vue CLI          | 4.x        | Webpack    | 4.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vueclivue3-configured)           |
 | Vue CLI          | 5.x        | Webpack    | 5.x      | Vue 2        | `@cypress/vue2@latest`  | Covered by other Vue CLI test projects.                             |
 | Vue CLI          | 5.x        | Webpack    | 5.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vuecli5vue3-configured)          |
-| Nuxt.js          | 2.x        | Webpack    | 4.x, 5.x | Vue 2        | `@cypress/vue2@latest`  | [Link](../../system-tests/projects/pristine-nuxtjs-vue2-configured) |
 
 ### TODO
 

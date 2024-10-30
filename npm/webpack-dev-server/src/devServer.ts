@@ -8,7 +8,6 @@ import type { Compiler, Configuration } from 'webpack'
 import { createWebpackDevServer } from './createWebpackDevServer'
 import debugLib from 'debug'
 import { vueCliHandler } from './helpers/vueCliHandler'
-import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
@@ -111,8 +110,6 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
   switch (devServerConfig.framework) {
     case 'create-react-app':
       return createReactAppHandler(devServerConfig)
-    case 'nuxt':
-      return await nuxtHandler(devServerConfig)
 
     case 'vue-cli':
       return await vueCliHandler(devServerConfig)

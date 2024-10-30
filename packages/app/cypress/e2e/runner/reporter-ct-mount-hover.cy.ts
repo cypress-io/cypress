@@ -9,7 +9,6 @@ const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
   { projectName: 'react18', test: 'App.cy' },
   { projectName: 'create-react-app-configured', test: 'App.cy' },
   { projectName: 'vueclivue3-configured', test: 'HelloWorld.cy' },
-  { projectName: 'nuxtjs-vue2-configured', test: 'Tutorial.cy' },
 ]
 
 // These are especially flaky on windows, skipping them there.

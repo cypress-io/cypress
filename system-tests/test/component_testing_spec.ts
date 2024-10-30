@@ -59,14 +59,6 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('nuxtjs-vue2-configured', {
-    project: 'nuxtjs-vue2-configured',
-    testingType: 'component',
-    spec: 'components/Tutorial.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vuecli5vue3-configured', {
     project: 'vuecli5vue3-configured',
     testingType: 'component',

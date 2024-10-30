@@ -200,25 +200,6 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
     ].join(' '.repeat(8))),
   },
   {
-    type: 'nuxtjs',
-    configFramework: 'nuxt',
-    category: 'template',
-    name: 'Nuxt.js (v2)',
-    detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
-    supportedBundlers: ['webpack'],
-    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
-      return [
-        dependencies.WIZARD_DEPENDENCY_NUXT,
-        dependencies.WIZARD_DEPENDENCY_VUE_2,
-      ]
-    },
-    codeGenFramework: 'vue',
-    glob: '*.vue',
-    mountModule: mountModule('cypress/vue2'),
-    supportStatus: 'alpha',
-    componentIndexHtml: componentIndexHtmlGenerator(),
-  },
-  {
     type: 'vue2',
     configFramework: 'vue',
     category: 'library',

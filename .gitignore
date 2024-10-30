@@ -293,9 +293,6 @@ typings/
 # next.js build output
 .next
 
-# nuxt.js build output
-.nuxt
-
 # rollup.js default build output
 dist/
 

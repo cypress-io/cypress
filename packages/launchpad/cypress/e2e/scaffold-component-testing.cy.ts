@@ -133,20 +133,6 @@ describe('scaffolding component testing', {
     })
   })
 
-  context('nuxtjs-vue2-unconfigured', () => {
-    it('scaffolds component testing for Nuxt 2', () => {
-      startSetupFor('nuxtjs-vue2-unconfigured')
-
-      // should detect correctly
-      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
-      cy.contains('button', /Nuxt\.js \(v2\)\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
-      cy.contains('button', 'Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
-      verifyConfigFile(`cypress.config.js`)
-    })
-  })
-
   context('angular-cli-unconfigured', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23452
     it('scaffolds component testing for Angular', { retries: 15 }, () => {

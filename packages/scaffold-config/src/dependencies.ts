@@ -79,15 +79,6 @@ export const WIZARD_DEPENDENCY_VITE = {
   minVersion: '^4.0.0 || ^5.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_NUXT = {
-  type: 'nuxt',
-  name: 'Nuxt',
-  package: 'nuxt',
-  installer: 'nuxt@2',
-  description: 'The Intuitive Vue Framework',
-  minVersion: '^2.0.0',
-} as const
-
 export const WIZARD_DEPENDENCY_NEXT = {
   type: 'next',
   name: 'Next',
@@ -157,7 +148,6 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_REACT_SCRIPTS,
   WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
   WIZARD_DEPENDENCY_VITE,
-  WIZARD_DEPENDENCY_NUXT,
   WIZARD_DEPENDENCY_NEXT,
   WIZARD_DEPENDENCY_REACT,
   WIZARD_DEPENDENCY_REACT_DOM,
