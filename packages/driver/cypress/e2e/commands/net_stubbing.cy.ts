@@ -1697,23 +1697,6 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23404
-    it('can delay with deprecated delayMs param', { retries: 15 }, function () {
-      const delayMs = 250
-
-      cy.intercept('/timeout*', (req) => {
-        this.start = Date.now()
-
-        req.reply({
-          delayMs,
-        })
-      }).then(() => {
-        return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(delayMs + 100, 100)
-        })
-      })
-    })
-
     // @see https://github.com/cypress-io/cypress/issues/14446
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23406
     it('should delay the same amount on every response', { retries: 15 }, () => {
