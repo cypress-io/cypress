@@ -6,7 +6,7 @@ describe('component testing projects', function () {
   systemTests.it('create-react-app-configured', {
     project: 'create-react-app-configured',
     testingType: 'component',
-    spec: 'src/App.cy.jsx',
+    spec: 'src/App.cy.js',
     browser: 'chrome',
     expectedExitCode: 0,
   })

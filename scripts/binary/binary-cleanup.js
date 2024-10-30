@@ -55,16 +55,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
 
   let entryPoints = new Set([
     ...startingEntryPoints.map((entryPoint) => path.join(unixBuildAppDir, entryPoint)),
-    // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
-    ...['ibmi',
-      'sunos',
-      'android',
-      'darwin',
-      'freebsd',
-      'linux',
-      'openbsd',
-      'sunos',
-      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/default-gateway/${platform}.js`)),
   ])
   let esbuildResult
   let newEntryPointsFound = true

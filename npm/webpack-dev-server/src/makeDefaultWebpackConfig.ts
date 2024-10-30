@@ -109,18 +109,6 @@ export function makeCypressWebpackConfig (
     }
   }
 
-  if (webpackDevServerMajorVersion === 5) {
-    return {
-      ...finalConfig,
-      devServer: {
-        port: webpackDevServerPort,
-        client: {
-          overlay: false,
-        },
-      },
-    }
-  }
-
   if (webpackDevServerMajorVersion === 4) {
     return {
       ...finalConfig,
@@ -133,12 +121,14 @@ export function makeCypressWebpackConfig (
     }
   }
 
-  // @ts-ignore
+  // default is webpack-dev-server v5
   return {
     ...finalConfig,
     devServer: {
       port: webpackDevServerPort,
-      overlay: false,
+      client: {
+        overlay: false,
+      },
     },
   }
 }

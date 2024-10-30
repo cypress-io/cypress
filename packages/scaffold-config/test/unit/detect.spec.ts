@@ -75,19 +75,10 @@ export function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevD
 const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkDefinition(x))
 
 describe('detectFramework', () => {
-  it('Create React App v4', async () => {
-    const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
-
-    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
-    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
-
-    expect(actual.framework?.type).to.eq('reactscripts')
-  })
-
   it('Create React App v5', async () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
-    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '4.0.0' }])
+    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('reactscripts')
@@ -111,7 +102,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('vueclivue2-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { devDependency: '@vue/cli-service', version: '4.0.0' },
+      { devDependency: '@vue/cli-service', version: '5.0.0' },
       { dependency: 'vue', version: '2.5.0' },
     ])
 

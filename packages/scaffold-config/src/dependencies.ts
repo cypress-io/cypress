@@ -58,7 +58,7 @@ export const WIZARD_DEPENDENCY_REACT_SCRIPTS = {
   package: 'react-scripts',
   installer: 'react-scripts',
   description: 'Create React apps with no build configuration',
-  minVersion: '^4.0.0 || ^5.0.0',
+  minVersion: '^5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
@@ -67,7 +67,7 @@ export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
   package: '@vue/cli-service',
   installer: '@vue/cli-service',
   description: 'Standard Tooling for Vue.js Development',
-  minVersion: '^4.0.0 || ^5.0.0',
+  minVersion: '^5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VITE = {

@@ -15,7 +15,6 @@
     "@babel/register": "7.24.6",
     "@svgr/webpack": "8.0.1",
     "@types/webpack": "^5.28.1",
-    "@types/webpack-dev-server": "^4.0.0",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "10.4.19",
     "babel-loader": "9.1.3",

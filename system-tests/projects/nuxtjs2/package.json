@@ -5,7 +5,8 @@
     "vue": "^2.6.14",
     "vue-server-renderer": "^2.6.14",
     "vue-template-compiler": "^2.6.14",
-    "webpack": "^4.46.0"
+    "webpack": "^4.46.0",
+    "webpack-dev-server": "^4.15.2"
   },
   "projectFixtureDirectory": "nuxtjs2"
 }

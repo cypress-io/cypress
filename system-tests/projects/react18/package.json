@@ -9,7 +9,8 @@
     "css-loader": "^4.3.0",
     "style-loader": "^2.0.0",
     "vite": "^2.8.0",
-    "webpack": "^4"
+    "webpack": "^4",
+    "webpack-dev-server": "^4"
   },
   "sideEffects": false,
   "projectFixtureDirectory": "react"
