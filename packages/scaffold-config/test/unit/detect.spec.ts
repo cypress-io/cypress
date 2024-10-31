@@ -154,7 +154,8 @@ describe('detectFramework', () => {
     expect(actual.bundler).to.eq('vite')
   })
 
-  ;['10.0.0', '11.0.0', '12.0.0', '13.0.0', '14.0.0'].forEach((v) => {
+  // keeping array style as to make it easier to support future next versions
+  ;['14.0.0'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
 
