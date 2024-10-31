@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
@@ -47,6 +47,7 @@ export default class Attempt {
   _logs: {[key: string]: Log} = {}
 
   constructor (props: TestProps, test: Test) {
+    makeObservable(this)
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test
