@@ -23,7 +23,7 @@
       <div class="grow">
         <div>
           <button
-            class="font-medium box-border focus:outline-none"
+            class="box-border font-medium focus:outline-none"
             :class="{
               'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
               'text-jade-700': browser.isSelected,
@@ -38,14 +38,14 @@
             "
           >
             {{ t('topNav.version') }} {{ browser.majorVersion }}
-            <span v-if="browser.version === 'unsupported'">
+            <span v-if="!browser.isVersionSupported">
               Unsupported
             </span>
           </div>
         </div>
       </div>
       <div>
-        <div class="flex h-full items-center align-middle">
+        <div class="flex items-center h-full align-middle">
           <template v-if="browser.isSelected">
             <div data-cy="top-nav-browser-list-selected-item">
               <i-cy-circle-check_x24 class="h-[24px] w-[24px] icon-dark-jade-100 icon-light-jade-500" />
@@ -60,7 +60,7 @@
                 />
                 <template #popper>
                   <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
-                    <div class="font-medium text-white mb-2">
+                    <div class="mb-2 font-medium text-white">
                       Unsupported browser
                     </div>
                     {{ browser.warning }}
