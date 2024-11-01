@@ -38,8 +38,6 @@ mainConfig.resolve = {
   alias: {
     'bluebird': require.resolve('bluebird'),
     'lodash': require.resolve('lodash'),
-    'react': require.resolve('react'),
-    'react-dom': require.resolve('react-dom'),
   },
 }
 
