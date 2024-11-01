@@ -1628,6 +1628,8 @@
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/sender.js",
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/stream.js",
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/validation.js",
+    "./node_modules/ci-info/index.js",
+    "./node_modules/ci-info/vendors.json",
     "./node_modules/cli-truncate/index.js",
     "./node_modules/coffeescript/lib/coffeescript/lexer.js",
     "./node_modules/coffeescript/lib/coffeescript/parser.js",
@@ -2193,9 +2195,6 @@
     "./node_modules/inherits/inherits_browser.js",
     "./node_modules/is-binary-path/index.js",
     "./node_modules/is-buffer/index.js",
-    "./node_modules/is-ci/index.js",
-    "./node_modules/is-ci/node_modules/ci-info/index.js",
-    "./node_modules/is-ci/node_modules/ci-info/vendors.json",
     "./node_modules/is-core-module/core.json",
     "./node_modules/is-core-module/index.js",
     "./node_modules/is-dotfile/index.js",
@@ -4196,5 +4195,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ee315c4573e4682b18a047254d03f5aa666f910065d38356b3da2d5ac3517806"
+  "deferredHash": "0928a843b58cc17a5c675b6a7439a3113393e7a7cf4b2873109fc07ba93506c9"
 }
