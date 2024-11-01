@@ -5,6 +5,7 @@ _Released 11/5/2024 (PENDING)_
 
 **Dependency Updates:**
 
+- Updated `mobx` from `5.15.4` to `6.13.5` and `mobx-react` from `6.1.8` to `9.1.1`. Addresses [#30509](https://github.com/cypress-io/cypress/issues/30509).
 - Updated `@cypress/request` from `3.0.4` to `3.0.6`. Addressed in [#30488](https://github.com/cypress-io/cypress/pull/30488).
 
 ## 13.15.1
