@@ -1,7 +1,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_REACT: ProjectFixtureDir[] = ['cra-4', 'cra-5', 'cra-ejected']
+const WEBPACK_REACT: ProjectFixtureDir[] = ['cra-5', 'cra-ejected']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []

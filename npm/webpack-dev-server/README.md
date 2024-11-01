@@ -47,10 +47,9 @@ This module should be primarily covered by system-tests / open-mode tests. All s
 
 `webpack${major}_wds${devServerMajor}-$framework{-$variant}`
 
-- webpack4_wds3-react
+- webpack4_wds4-react
 - webpack5_wds5-react
 - webpack4_wds4-next-11
-- webpack5_wds3-next-12
 - webpack4_wds4-create-react-app
 
 ## Architecture
@@ -69,7 +68,8 @@ We then merge the sourced config with the user's webpack config, and layer on ou
 | --------------------------- | ------- |
 | <= v1                       | <= v9   |
 | >= v2                       | >= v10  |
-| >= v4                       | >= v13  |
+| >= v3                       | >= v13  |
+| >= v4                       | >= v14  |
 
 ## License
 

@@ -74,7 +74,7 @@
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
     "@babel/eslint-parser": "7.25.1",
-    "@cypress/request": "^3.0.4",
+    "@cypress/request": "^3.0.6",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.8.0",
     "@electron/notarize": "^2.5.0",

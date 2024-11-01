@@ -8,7 +8,5 @@ Vue.component('GlobalComponentWithCustomDirective', GlobalComponentWithCustomDir
 Vue.directive('custom', custom)
 
 new Vue({
-  render (h) {
-    return h(App)
-  },
+  render: (h) => h(App),
 }).$mount('#app')

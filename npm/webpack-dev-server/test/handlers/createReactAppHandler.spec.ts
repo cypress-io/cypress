@@ -50,25 +50,6 @@ const expectReactScriptsFiveModifications = (webpackConfig: Configuration) => {
 describe('createReactAppHandler', function () {
   this.timeout(1000 * 60)
 
-  it('sources the config from react-scripts v4', async () => {
-    const projectRoot = await scaffoldMigrationProject('cra-4')
-
-    process.chdir(projectRoot)
-
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = createReactAppHandler({
-      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-      framework: 'create-react-app',
-    } as WebpackDevServerConfig)
-
-    expect(webpackConfig.mode).eq('development')
-    expectEslintModifications(webpackConfig)
-    expectModuleSourceInPlaceModifications(webpackConfig, projectRoot)
-    expectBabelRuleModifications(webpackConfig, projectRoot)
-
-    expect(sourceWebpackModulesResult.framework?.importPath).to.include('react-scripts')
-    expect(sourceWebpackModulesResult.webpack.majorVersion).eq(4)
-  })
-
   it('sources the config from react-scripts v5', async () => {
     const projectRoot = await scaffoldMigrationProject('cra-5')
 

@@ -1,21 +1,23 @@
 {
-  "name": "vueclivue3-unconfigured",
+  "name": "vueclivue3-custom-index-html",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve"
   },
   "dependencies": {
-    "vue": "^3.0.0"
+    "vue": "^3.2.13"
   },
   "devDependencies": {
-    "@vue/cli-service": "~4.5.15",
-    "@vue/compiler-sfc": "^3.0.0"
+    "@vue/cli-service": "~5.0.0"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.9"
+  }
 }

@@ -20,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^3.0.4",
+    "@cypress/request": "^3.0.6",
     "@cypress/xvfb": "^1.2.4",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
