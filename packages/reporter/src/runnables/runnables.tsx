@@ -160,7 +160,7 @@ class Runnables extends Component<RunnablesProps> {
     const { error, runnablesStore, spec, studioEnabled, canSaveStudioLogs } = this.props
 
     return (
-      <div ref='container' className='container'>
+      <div id='runnables-container' className='container'>
         <RunnableHeader spec={spec} statsStore={statsStore} />
         <RunnablesContent
           runnablesStore={runnablesStore}
@@ -191,7 +191,9 @@ class Runnables extends Component<RunnablesProps> {
     // we need to always call scroller.setContainer, but the callback can be undefined
     // so we pass maybeHandleScroll. If we don't, Cypress blows up with an error like
     // `A container must be set on the scroller with scroller.setContainer(container)`
-    scroller.setContainer(this.refs.container as Element, maybeHandleScroll)
+    const runnablesContainer = document.querySelector('#runnables-container')
+
+    scroller.setContainer(runnablesContainer as HTMLElement, maybeHandleScroll)
   }
 }
 

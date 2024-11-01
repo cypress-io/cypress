@@ -15,6 +15,7 @@
     "watch": "node ../../scripts/run-webpack --watch --progress"
   },
   "devDependencies": {
+    "@reach/dialog": "0.10.5",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "cross-env": "6.0.3",

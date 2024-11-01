@@ -3,7 +3,7 @@ import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 import React, { Component } from 'react'
-import { render } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
@@ -154,8 +154,10 @@ declare global {
 if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
-    // @ts-ignore
-    render(<Reporter {...props as Required<BaseReporterProps>} />, document.getElementById('app'))
+    const container: HTMLElement = document.getElementById('app') as HTMLElement
+    const root = createRoot(container)
+
+    root.render(<Reporter {...props as Required<BaseReporterProps>} />)
   }
 }
 
