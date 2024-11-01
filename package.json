@@ -112,8 +112,8 @@
     "@types/mocha": "8.0.3",
     "@types/node": "18.17.5",
     "@types/prismjs": "1.16.0",
-    "@types/react": "16.9.50",
-    "@types/react-dom": "16.9.8",
+    "@types/react": "17.0.83",
+    "@types/react-dom": "17.0.25",
     "@types/request-promise": "4.1.45",
     "@types/send": "^0.17.1",
     "@types/sinon-chai": "3.2.3",
@@ -263,7 +263,6 @@
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
     "**/@types/enzyme": "3.10.5",
-    "**/@types/react": "16.9.50",
     "**/@wdio/logger": "9.0.0",
     "**/jquery": "3.4.1",
     "**/pretty-format": "26.4.0",
