@@ -223,6 +223,9 @@ export class CommandQueue extends Queue<$Command> {
     // end in case we have after / afterEach hooks
     // which need to run
     this.index = this.length
+
+    // Mark the state as stable, so that any cypress commands can be re-queued during the after / afterEach hooks
+    this.state('isStable', true)
   }
 
   private runCommand (command: $Command) {
@@ -544,8 +547,6 @@ export class CommandQueue extends Queue<$Command> {
 
       Cypress.action('cy:command:failed', current, err)
       this.cleanup()
-
-      this.state('isStable', true)
 
       return this.cy.fail(err)
     }
