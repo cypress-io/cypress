@@ -3,6 +3,10 @@
 
 _Released 11/5/2024 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where the Cypres runner could hang in `after` or `afterEach` hooks that run Cypress commands after a page load timeout error occurs. Addresses [#30238](https://github.com/cypress-io/cypress/issues/30238).
+
 **Misc:**
 
 - Fixed a typo in CLI `global` option help text. Addresses [#30531](https://github.com/cypress-io/cypress/issues/30531).
