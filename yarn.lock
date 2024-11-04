@@ -13499,7 +13499,7 @@ debug@3.2.6:
   dependencies:
     ms "^2.1.1"
 
-debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.3, debug@^4.3.4, debug@^4.3.5, debug@^4.3.6, debug@~4.3.1:
+debug@4, debug@4.3.7, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.3, debug@^4.3.4, debug@^4.3.5, debug@^4.3.6, debug@~4.3.1:
   version "4.3.7"
   resolved "https://registry.npmjs.org/debug/-/debug-4.3.7.tgz#87945b4151a011d76d95a198d7111c865c360a52"
   integrity sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==
@@ -29121,14 +29121,14 @@ stop-iteration-iterator@^1.0.0:
   dependencies:
     internal-slot "^1.0.4"
 
-stop-only@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/stop-only/-/stop-only-3.0.1.tgz#480176c2712d59373eff6accc8de5fbff960c2ee"
-  integrity sha512-B38Y/K0QbnAbE3llvP4WkjzdN4QkgAHMLC/FxQyPMOC/X6SLrGjRsqFiebkrt6fqQnD9jdp8QpMIdQWMuUYEhA==
+stop-only@3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/stop-only/-/stop-only-3.4.1.tgz#c4c407a82270f0d540dd57b551c7bd16ce81a457"
+  integrity sha512-zMxczK6GJG5h1UZgk3VPJjOQJ0w7C9MclgqgcQPct8KgOWUItrUz7sK7MjoRQWvFJQJaDUpXrcV/OHyhqB9pZQ==
   dependencies:
-    debug "4.1.1"
+    debug "4.3.7"
     execa "0.11.0"
-    minimist "1.2.0"
+    minimist "1.2.8"
 
 stream-browserify@3.0.0, stream-browserify@^3.0.0:
   version "3.0.0"
