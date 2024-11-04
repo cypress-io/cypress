@@ -110,7 +110,7 @@ const descriptions = {
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
-  global: 'force Cypress into global mode as if its globally installed',
+  global: 'force Cypress into global mode as if it were globally installed',
   group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
