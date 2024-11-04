@@ -18,6 +18,7 @@ _Released 12/3/2024 (PENDING)_
 - `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 3. Additionally, `@cypress/webpack-dev-server` now ships with `webpack-dev-server` version 5 by default. `webpack-dev-server` version 4 will need to be installed along side Cypress if you are still using `webpack` version 4. Addresses [#29308](https://github.com/cypress-io/cypress/issues/29308), [#30347](https://github.com/cypress-io/cypress/issues/30347), and [#30141](https://github.com/cypress-io/cypress/issues/30141).
 - `@cypress/vite-dev-server` no longer supports `vite` versions 2 and 3. Addresses [#29377](https://github.com/cypress-io/cypress/issues/29377) and [#29378](https://github.com/cypress-io/cypress/issues/29378).
 - Cypress Component Testing no longer supports `Nuxt.js` version 2. Addresses [#30468](https://github.com/cypress-io/cypress/issues/30468).
+- Cypress Component Testing no longer supports `Vue` version 2. Addresses [#30295](https://github.com/cypress-io/cypress/issues/30295).
 
 **Bugfixes:**
 

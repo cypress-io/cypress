@@ -4,7 +4,6 @@ type ProjectDirs = typeof fixtureDirs
 
 const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
   { projectName: 'angular-18', test: 'app.component' },
-  { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
   { projectName: 'create-react-app-configured', test: 'App.cy' },
@@ -42,10 +41,6 @@ for (const { projectName, test } of PROJECTS) {
         cy.specsPageIsVisible()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish(undefined)
-        if (projectName === 'vueclivue2-configured') {
-          // since there are multiple tests within the vueclivue2-configured spec, we need to expand the drop down to run the below assertion
-          cy.get('.collapsible-content.runnables-region .collapsible-header-wrapper.runnable-wrapper:first').click()
-        }
 
         cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {
           cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {

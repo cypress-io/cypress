@@ -88,11 +88,12 @@ describe('supportFileComponent', () => {
   })
 
   context('vue', () => {
-    for (const mountModule of ['cypress/vue2', 'cypress/vue'] as const) {
-      it(`handles ${mountModule} and JS`, () => {
-        const actual = supportFileComponent('js', mountModule)
+    const mountModule = 'cypress/vue'
 
-        expect(actual).to.eq(dedent`
+    it(`handles ${mountModule} and JS`, () => {
+      const actual = supportFileComponent('js', mountModule)
+
+      expect(actual).to.eq(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -121,12 +122,12 @@ describe('supportFileComponent', () => {
           // Example use:
           // cy.mount(MyComponent)
           `)
-      })
+    })
 
-      it(`handles ${mountModule} and TS`, () => {
-        const actual = supportFileComponent('ts', mountModule)
+    it(`handles ${mountModule} and TS`, () => {
+      const actual = supportFileComponent('ts', mountModule)
 
-        expect(actual).to.eq(dedent`
+      expect(actual).to.eq(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -167,8 +168,7 @@ describe('supportFileComponent', () => {
         // Example use:
         // cy.mount(MyComponent)
       `)
-      })
-    }
+    })
   })
 
   context('angular', () => {

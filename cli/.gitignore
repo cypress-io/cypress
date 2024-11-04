@@ -16,7 +16,6 @@ build
 # ignore packages synced at build-time via
 # the sync-exported-npm-with-cli.js script
 vue
-vue2
 react*
 mount-utils
 angular

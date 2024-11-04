@@ -135,25 +135,6 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
-    type: 'vueclivue2',
-    configFramework: 'vue-cli',
-    category: 'template',
-    name: 'Vue CLI (Vue 2)',
-    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
-    supportedBundlers: ['webpack'],
-    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
-      return [
-        dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
-        dependencies.WIZARD_DEPENDENCY_VUE_2,
-      ]
-    },
-    codeGenFramework: 'vue',
-    glob: '*.vue',
-    mountModule: mountModule('cypress/vue2'),
-    supportStatus: 'full',
-    componentIndexHtml: componentIndexHtmlGenerator(),
-  },
-  {
     type: 'vueclivue3',
     configFramework: 'vue-cli',
     category: 'template',
@@ -198,25 +179,6 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
       `<!-- Used by Next.js to inject CSS. -->\n`,
       `<div id="__next_css__DO_NOT_USE__"></div>`,
     ].join(' '.repeat(8))),
-  },
-  {
-    type: 'vue2',
-    configFramework: 'vue',
-    category: 'library',
-    name: 'Vue.js 2',
-    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
-    supportedBundlers: ['webpack', 'vite'],
-    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
-      return [
-        getBundler(bundler),
-        dependencies.WIZARD_DEPENDENCY_VUE_2,
-      ]
-    },
-    codeGenFramework: 'vue',
-    glob: '*.vue',
-    mountModule: mountModule('cypress/vue2'),
-    supportStatus: 'full',
-    componentIndexHtml: componentIndexHtmlGenerator(),
   },
   {
     type: 'vue3',

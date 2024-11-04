@@ -14,9 +14,7 @@ We will also attempt to scaffold a configuration file for projects using React a
 | Create React App | 4.x        | Webpack    | 4.x      | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/create-react-app-configured)     |
 | React            | -          | Vite       | 2.x      | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/react-vite-ts-configured)        |
 | Vue              | -          | Vite       | 2.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vue3-vite-ts-configured)         |
-| Vue CLI          | 4.x        | Webpack    | 4.x      | Vue 2        | `@cypress/vue2@latest`  | [Link](../../system-tests/projects/vueclivue2-configured)           |
 | Vue CLI          | 4.x        | Webpack    | 4.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vueclivue3-configured)           |
-| Vue CLI          | 5.x        | Webpack    | 5.x      | Vue 2        | `@cypress/vue2@latest`  | Covered by other Vue CLI test projects.                             |
 | Vue CLI          | 5.x        | Webpack    | 5.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vuecli5vue3-configured)          |
 
 ### TODO

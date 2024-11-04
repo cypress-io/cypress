@@ -11,14 +11,6 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('vueclivue2-configured', {
-    project: 'vueclivue2-configured',
-    testingType: 'component',
-    spec: 'src/**/*.cy.js',
-    browser: 'electron',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vueclivue3-configured', {
     project: 'vueclivue3-configured',
     testingType: 'component',
@@ -164,14 +156,6 @@ describe('svelte component testing', () => {
 
 describe('Vue major versions with Vite', () => {
   systemTests.setup()
-
-  systemTests.it('vue 2', {
-    project: `vue2`,
-    testingType: 'component',
-    spec: '**/*.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
 
   systemTests.it('vue 3', {
     project: `vue3`,

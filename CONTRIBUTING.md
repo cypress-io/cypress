@@ -192,7 +192,6 @@ Here is a list of the npm packages in this repository:
  | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
  | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
- | [vue2](./npm/vue2)                                       | `@cypress/vue2`                     | Cypress component testing for Vue 2.               |
  | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript.  |
  | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |

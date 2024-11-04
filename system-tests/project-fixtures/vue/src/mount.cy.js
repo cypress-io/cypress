@@ -11,7 +11,6 @@ describe('mount', () => {
     })
 
     it('should remove previous mounted component', () => {
-      // hack for vue2 vs vue mount
       const props = (props) => ({ props, propsData: props })
 
       cy.mount(HelloWorld, props({ msg: 'Render 1' }))
