@@ -98,32 +98,22 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['13', '14', '15', '16', '17']
+const ANGULAR_VERSIONS = ['17', '18']
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
 
   for (const version of ANGULAR_VERSIONS) {
-    let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
-
-    if (version === '13') {
-      spec = `${spec},!src/app/components/standalone.component.cy.ts,!src/app/components/signals.component.cy.ts`
-    }
-
-    if (version === '14' || version === '15') {
-      spec = `${spec},!src/app/components/signals.component.cy.ts`
-    }
-
     systemTests.it(`v${version} with mount tests`, {
       project: `angular-${version}`,
-      spec,
+      spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
       testingType: 'component',
       browser: 'chrome',
       expectedExitCode: 0,
     })
   }
 
-  systemTests.it('angular 14 custom config', {
+  systemTests.it('angular 18 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',

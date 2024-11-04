@@ -20,6 +20,7 @@ _Released 12/3/2024 (PENDING)_
 - Cypress Component Testing no longer supports `Nuxt.js` version 2. Addresses [#30468](https://github.com/cypress-io/cypress/issues/30468).
 - Cypress Component Testing no longer supports `Vue` version 2. Addresses [#30295](https://github.com/cypress-io/cypress/issues/30295).
 - Cypress Component Testing no longer supports `Next.js` versions 10, 11, 12, and 13. Addresses [#29583](https://github.com/cypress-io/cypress/issues/29583).
+- Cypress Component Testing no longer supports `Angular` versions 13, 14, 15, and 16. The minimum supported version is now `17.2.0` in order to fully support Angular [signals](https://angular.dev/guide/signals). Addresses [#29582](https://github.com/cypress-io/cypress/issues/29582). Addressed in [#30539](https://github.com/cypress-io/cypress/pull/30539).
 
 **Deprecations:**
 

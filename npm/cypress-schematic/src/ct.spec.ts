@@ -1,3 +1,4 @@
+import { describe, it } from 'vitest'
 import Fixtures, { ProjectFixtureDir } from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import execa from 'execa'
@@ -35,11 +36,9 @@ const copyAngularMount = async (projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-14', 'angular-15']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-17', 'angular-18']
 
-describe('ng add @cypress/schematic / e2e and ct', function () {
-  this.timeout(1000 * 60 * 5)
-
+describe('ng add @cypress/schematic / e2e and ct', { timeout: 1000 * 60 * 5 }, function () {
   for (const project of ANGULAR_PROJECTS) {
     it('should install ct files with option and no component specs', async () => {
       const projectPath = await scaffoldAngularProject(project)
