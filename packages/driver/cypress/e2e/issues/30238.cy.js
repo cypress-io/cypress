@@ -19,6 +19,12 @@ afterEach(() => {
 })
 
 it('runs an after block without timing out when the page load times out', { pageLoadTimeout: 500 }, () => {
+  cy.on('fail', (error) => {
+    expect(error.message).to.include('Timed out after')
+
+    return false
+  })
+
   cy.on('window:before:load', (win) => {
     // Stop the page from loading so that the page load times out
     win.stop()
