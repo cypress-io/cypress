@@ -65,10 +65,72 @@ index fcc11f3..0000000
 -const $ = require( "jquery" )( window );
 -```
 diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
-index 1a86433..8215d0c 100644
+index 1a86433..1c417b1 100644
 --- a/node_modules/jquery/dist/jquery.js
 +++ b/node_modules/jquery/dist/jquery.js
-@@ -6647,78 +6647,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+@@ -1419,29 +1419,45 @@ find.matches = function( expr, elements ) {
+ };
+ 
+ find.matchesSelector = function( elem, expr ) {
+-	setDocument( elem );
++	try {
++		// this prevents `is` from calling into the native .matchesSelector method
++		// which would prevent our `focus` code from ever being called during is(:focus).
++		const isUsingFocus = _.includes(expr, ':focus')
+ 
+-	if ( documentIsHTML &&
+-		!nonnativeSelectorCache[ expr + " " ] &&
+-		( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
++		setDocument( elem );
+ 	
+-		try {
+-			var ret = matches.call( elem, expr );
++		if (!isUsingFocus && documentIsHTML &&
++			!nonnativeSelectorCache[ expr + " " ] &&
++			( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
+ 	
+-			// IE 9's matchesSelector returns false on disconnected nodes
+-			if ( ret || support.disconnectedMatch ||
++			try {
++				var ret = matches.call( elem, expr );
+ 	
+-					// As well, disconnected nodes are said to be in a document
+-					// fragment in IE 9
+-					elem.document && elem.document.nodeType !== 11 ) {
+-				return ret;
++				// IE 9's matchesSelector returns false on disconnected nodes
++				if ( ret || support.disconnectedMatch ||
++	
++						// As well, disconnected nodes are said to be in a document
++						// fragment in IE 9
++						elem.document && elem.document.nodeType !== 11 ) {
++					return ret;
++				}
++			} catch ( e ) {
++				nonnativeSelectorCache( expr, true );
+ 			}
+-		} catch ( e ) {
+-			nonnativeSelectorCache( expr, true );
+ 		}
+-	}
+ 
+-	return find( expr, document, null, [ elem ] ).length > 0;
++		return find( expr, document, null, [ elem ] ).length > 0;
++	} catch (e) {
++			// https://github.com/cypress-io/cypress/issues/21108
++      // When regex starts with =, it is a syntax error when nothing found.
++      // Because Sizzle internally escapes = to handle attribute selectors.
++      // @see https://github.com/jquery/sizzle/blob/20390f05731af380833b5aa805db97de0b91268a/external/jquery/jquery.js#L4363-L4370
++      if (e.message.includes(`Syntax error, unrecognized expression: :cy-contains`)) {
++        return false
++      }
++
++      throw e
++	}
+ };
+ 
+ find.contains = function( context, elem ) {
+@@ -6647,78 +6663,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
  	return delta + marginDelta;
  }
  
