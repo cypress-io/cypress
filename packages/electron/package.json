@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "node ./bin/cypress-electron --install",
+    "build-binary": "node ./bin/cypress-electron --install",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",

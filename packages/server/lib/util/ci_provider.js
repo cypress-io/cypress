@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 const debug = require('debug')('cypress:server')
 
 const getIsCi = () => isCi

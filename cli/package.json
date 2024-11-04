@@ -20,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^3.0.4",
+    "@cypress/request": "^3.0.6",
     "@cypress/xvfb": "^1.2.4",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
@@ -31,6 +31,7 @@
     "cachedir": "^2.3.0",
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
+    "ci-info": "^4.0.0",
     "cli-cursor": "^3.1.0",
     "cli-table3": "~0.6.1",
     "commander": "^6.2.1",
@@ -45,7 +46,6 @@
     "figures": "^3.2.0",
     "fs-extra": "^9.1.0",
     "getos": "^3.2.1",
-    "is-ci": "^3.0.1",
     "is-installed-globally": "~0.4.0",
     "lazy-ass": "^1.6.0",
     "listr2": "^3.8.3",

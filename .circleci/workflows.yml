@@ -1466,7 +1466,7 @@ jobs:
     resource_class: small
     steps:
       - run: |
-          if [[ -z MAIN_RECORD_KEY ]]; then
+          if [[ -z "$MAIN_RECORD_KEY" ]]; then
             echo "skipping for contributor PRs since we don't record to the cloud"
             circleci-agent step halt
           fi

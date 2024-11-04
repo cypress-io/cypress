@@ -16,7 +16,7 @@ import {
   browserNameVersionRe,
 } from './normalizeStdout'
 
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -79,16 +79,6 @@ type ExecOptions = {
    * If set, test using the built Cypress CLI and binary. Expects a built CLI in `/cli/build` and packed binary in `/cypress.zip`.
    */
   withBinary?: boolean
-  /**
-   * Deprecated. Use `--cypress-inspect-brk` from command line instead.
-   * @deprecated
-   */
-  inspectBrk?: null
-  /**
-   * Deprecated. Use `--no-exit` from command line instead.
-   * @deprecated
-   */
-  exit?: null
   /**
    * Don't exit when tests are finished. You can also pass `--no-exit` via the command line.
    */
@@ -629,14 +619,6 @@ const systemTests = {
   },
 
   options (ctx, options: ExecOptions) {
-    if (options.inspectBrk != null) {
-      throw new Error(`
-      passing { inspectBrk: true } to system test options is no longer supported
-      Please pass the --cypress-inspect-brk flag to the test command instead
-      e.g. "yarn test async_timeouts_spec.js --cypress-inspect-brk"
-      `)
-    }
-
     _.defaults(options, {
       browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
@@ -648,18 +630,9 @@ const systemTests = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
-      inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
 
     const projectPath = Fixtures.projectPath(options.project)
-
-    if (options.exit != null) {
-      throw new Error(`
-      passing { exit: false } to system test options is no longer supported
-      Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test async_timeouts_spec.js --no-exit"
-      `)
-    }
 
     if (options.noExit && options.timeout < 3000000) {
       options.timeout = 3000000
@@ -768,10 +741,6 @@ const systemTests = {
 
     if (options.noExit) {
       args.push('--no-exit')
-    }
-
-    if (options.inspectBrk) {
-      args.push('--inspect-brk')
     }
 
     if (options.tag) {

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.15.0",
+  "version": "13.15.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "binary-smoke-test": "node ./scripts/binary.js smoke",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream && lerna run build-cli --stream",
+    "build": "lerna run build --stream && yarn workspace @packages/electron build-binary && lerna run build-cli --stream",
     "build-prod": "lerna run build-prod --stream && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope",
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
@@ -74,7 +74,7 @@
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
     "@babel/eslint-parser": "7.25.1",
-    "@cypress/request": "^3.0.4",
+    "@cypress/request": "^3.0.6",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.6.1",
     "@electron/notarize": "^2.1.0",

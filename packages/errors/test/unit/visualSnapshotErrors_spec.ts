@@ -15,7 +15,7 @@ process.env.CYPRESS_INTERNAL_ENV = 'test'
 
 // require'd so the unsafe types from the server / missing types don't mix in here
 const termToHtml = require('term-to-html')
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')

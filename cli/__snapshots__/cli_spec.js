@@ -33,7 +33,7 @@ exports['shows help for open --foo 1'] = `
                                      multiple values with a comma. overrides any
                                      value in cypress.config.{js,ts,mjs,cjs} or
                                      cypress.env.json
-    --global                         force Cypress into global mode as if its
+    --global                         force Cypress into global mode as if it were
                                      globally installed
     -p, --port <port>                runs Cypress on a specific port. overrides
                                      any value in cypress.config.{js,ts,mjs,cjs}.
