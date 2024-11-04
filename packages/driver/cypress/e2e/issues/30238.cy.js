@@ -3,7 +3,7 @@ after(() => {
   expect(cy.state('isStable')).to.be.true
 
   // ensure we can enqueue a command without timing out
-  cy.window().then(() => {
+  cy.then(() => {
     expect(true).to.be.true
   })
 })
@@ -13,13 +13,14 @@ afterEach(() => {
   expect(cy.state('isStable')).to.be.true
 
   // ensure that we can enqueue a command without timing out
-  cy.window().then(() => {
+  cy.then(() => {
     expect(true).to.be.true
   })
 })
 
 it('runs an after block without timing out when the page load times out', { pageLoadTimeout: 500 }, () => {
   cy.on('window:before:load', (win) => {
+    // Stop the page from loading so that the page load times out
     win.stop()
   })
 
