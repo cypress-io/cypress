@@ -5,7 +5,7 @@ _Released 11/5/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where the Cypres runner could hang in `after` or `afterEach` hooks that run Cypress commands after a page load timeout error occurs. Addresses [#30238](https://github.com/cypress-io/cypress/issues/30238).
+- Fixed an issue where the Cypress runner could hang in `after` or `afterEach` hooks that run Cypress commands after a page load timeout error occurs. Addresses [#30238](https://github.com/cypress-io/cypress/issues/30238).
 
 **Misc:**
 
