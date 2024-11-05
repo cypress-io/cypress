@@ -122,7 +122,7 @@ jobs:
         id: check-need-for-pr
         run: |
           echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length) >> $GITHUB_OUTPUT
-          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
+          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-need-for-pr.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
           echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
