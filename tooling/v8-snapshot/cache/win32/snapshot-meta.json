@@ -613,14 +613,6 @@
     "./packages/data-context/node_modules/fs-extra/lib/json/jsonfile.js",
     "./packages/data-context/node_modules/fs-extra/lib/path-exists/index.js",
     "./packages/data-context/node_modules/get-stream/buffer-stream.js",
-    "./packages/data-context/node_modules/prettier/index.js",
-    "./packages/data-context/node_modules/prettier/parser-babel.js",
-    "./packages/data-context/node_modules/prettier/parser-espree.js",
-    "./packages/data-context/node_modules/prettier/parser-flow.js",
-    "./packages/data-context/node_modules/prettier/parser-glimmer.js",
-    "./packages/data-context/node_modules/prettier/parser-meriyah.js",
-    "./packages/data-context/node_modules/prettier/parser-typescript.js",
-    "./packages/data-context/node_modules/prettier/third-party.js",
     "./packages/data-context/node_modules/readdirp/index.js",
     "./packages/data-context/node_modules/supports-color/index.js",
     "./packages/data-context/src/DataActions.ts",
@@ -3666,14 +3658,6 @@
     "./packages/data-context/node_modules/is-stream/index.js",
     "./packages/data-context/node_modules/npm-run-path/index.js",
     "./packages/data-context/node_modules/path-key/index.js",
-    "./packages/data-context/node_modules/prettier/doc.js",
-    "./packages/data-context/node_modules/prettier/package.json",
-    "./packages/data-context/node_modules/prettier/parser-angular.js",
-    "./packages/data-context/node_modules/prettier/parser-graphql.js",
-    "./packages/data-context/node_modules/prettier/parser-html.js",
-    "./packages/data-context/node_modules/prettier/parser-markdown.js",
-    "./packages/data-context/node_modules/prettier/parser-postcss.js",
-    "./packages/data-context/node_modules/prettier/parser-yaml.js",
     "./packages/data-context/node_modules/semver/classes/comparator.js",
     "./packages/data-context/node_modules/semver/classes/range.js",
     "./packages/data-context/node_modules/semver/classes/semver.js",
@@ -4198,5 +4182,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8779c571eed7d0a1badedaa8eb7e6ea059d9c96f240873afefc1cfeaf365f1c2"
+  "deferredHash": "58ee4cca18eb7035b80a3e39c212f3647d9ea33ddfea23d5020643b81b86a621"
 }
