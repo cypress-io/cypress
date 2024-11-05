@@ -4232,7 +4232,6 @@
     "./packages/types/src/spec.ts",
     "./packages/types/src/util.ts",
     "./packages/types/src/video.ts",
-    "./packages/types/src/warning.ts",
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
