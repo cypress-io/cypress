@@ -33,7 +33,6 @@
     "chalk": "3.0.0",
     "chokidar-cli": "2.1.0",
     "cypress": "0.0.0-development",
-    "execa": "^8.0.1",
     "fs-extra": "^10.1.0",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
