@@ -59,18 +59,18 @@ jobs:
         if: ${{ matrix.platform == 'windows-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='windows'" >> $GITHUB_ENV
+          echo "PLATFORM=windows" >> $GITHUB_ENV
         shell: bash
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='linux'" >> $GITHUB_ENV
+          echo "PLATFORM=linux" >> $GITHUB_ENV
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='darwin'" >> $GITHUB_ENV
+          echo "PLATFORM=darwin" >> $GITHUB_ENV
       - name: Install setuptools - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: sudo -H pip install setuptools
