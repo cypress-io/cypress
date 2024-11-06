@@ -45,7 +45,7 @@ concurrency:
 jobs:
   update-v8-snapshot-cache:
     strategy:
-      max-parallel: 1
+      max-parallel: 3
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
