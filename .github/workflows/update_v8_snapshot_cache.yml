@@ -59,18 +59,18 @@ jobs:
         if: ${{ matrix.platform == 'windows-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='windows'" >> $GITHUB_ENV
+          echo "PLATFORM=windows" >> $GITHUB_ENV
         shell: bash
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='linux'" >> $GITHUB_ENV
+          echo "PLATFORM=linux" >> $GITHUB_ENV
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: |
           echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM='darwin'" >> $GITHUB_ENV
+          echo "PLATFORM=darwin" >> $GITHUB_ENV
       - name: Install setuptools - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: sudo -H pip install setuptools
@@ -121,8 +121,11 @@ jobs:
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS != 'true' }}" >> $GITHUB_OUTPUT
+          echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
+          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_NAME != env.BASE_BRANCH && steps.check-need-for-pr.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
           echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
         shell: bash
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
@@ -135,7 +138,7 @@ jobs:
           git merge --squash -Xtheirs stash
       ## Update available and a PR doesn't already exist
       - name: Checkout new branch
-        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update != 'true' }}
         run: git checkout -b ${{ env.BRANCH_NAME }} ${{ env.BASE_BRANCH }}
       ## Commit changes if present
       - name: Commit the changes
