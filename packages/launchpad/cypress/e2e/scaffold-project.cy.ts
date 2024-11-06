@@ -79,8 +79,8 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains('Pick a framework').click()
   cy.contains(opts.framework).click()
   if (opts.bundler) {
-    cy.contains('Webpack(detected)').click()
-    cy.contains(opts.bundler).click()
+    cy.contains('Pick a bundler').click()
+    cy.contains(Cypress._.startCase(opts.bundler)).click()
   }
 
   cy.contains('Next step').click()
@@ -147,22 +147,22 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   it('scaffolds CT for a JS project', () => {
     const language = 'js'
 
-    scaffoldAndOpenCTProject({ name: 'pristine', framework: 'Create React App', removeFixturesFolder: true })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)' })
+    scaffoldAndOpenCTProject({ name: 'pristine', framework: 'React.js', bundler: 'webpack', removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'React.js' })
   })
 
   it('scaffolds CT for a TS project', () => {
     const language = 'ts'
 
-    scaffoldAndOpenCTProject({ name: 'pristine-yarn', framework: 'Create React App', removeFixturesFolder: true })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)' })
+    scaffoldAndOpenCTProject({ name: 'pristine-yarn', framework: 'React.js', bundler: 'webpack', removeFixturesFolder: true })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'React.js' })
   })
 
   it('scaffolds CT and skip fixtures for a JS project', () => {
     const language = 'js'
 
-    scaffoldAndOpenCTProject({ name: 'pristine', framework: 'Create React App', removeFixturesFolder: false })
-    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'Create React App (v5)', customDirectory: 'without-fixtures' })
+    scaffoldAndOpenCTProject({ name: 'pristine', framework: 'React.js', bundler: 'webpack', removeFixturesFolder: false })
+    assertScaffoldedFilesAreCorrect({ language, testingType: 'component', ctFramework: 'React.js', customDirectory: 'without-fixtures' })
   })
 
   // TODO: Fix flaky test

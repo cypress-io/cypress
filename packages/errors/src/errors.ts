@@ -1621,7 +1621,7 @@ export const AllCypressErrors = {
       {
         component: {
           devServer: {
-            framework: 'create-react-app', ${fmt.comment('// Your framework')}
+            framework: 'react', ${fmt.comment('// Your framework')}
             bundler: 'webpack' ${fmt.comment('// Your dev server')}
           }
         }

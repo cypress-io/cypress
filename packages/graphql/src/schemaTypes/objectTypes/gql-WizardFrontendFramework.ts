@@ -13,7 +13,7 @@ export const WizardFrontendFramework = objectType({
     }),
 
     t.nonNull.string('category', {
-      description: 'The category (framework, like react-scripts, or library, like react',
+      description: 'The category (framework, like next.js, or library, like react',
     }),
 
     t.nonNull.string('name', {

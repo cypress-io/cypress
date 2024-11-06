@@ -15,21 +15,6 @@ describe('packagesToInstall', () => {
     removeCommonNodeModules()
   })
 
-  it('create-react-app-unconfigured', async () => {
-    const ctx = createTestDataContext()
-    const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
-
-    ctx.update((coreData) => {
-      coreData.currentProject = projectPath
-      coreData.wizard.chosenFramework = findFramework('reactscripts')
-      coreData.wizard.chosenBundler = findBundler('webpack')
-    })
-
-    const actual = await ctx.wizard.installDependenciesCommand()
-
-    expect(actual).to.eq(`npm install -D react-scripts react-dom react`)
-  })
-
   it('vueclivue3-unconfigured', async () => {
     const ctx = createTestDataContext()
 

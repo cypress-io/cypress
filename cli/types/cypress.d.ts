@@ -3340,19 +3340,19 @@ declare namespace Cypress {
   interface CypressComponentDependency {
     /**
      * Unique identifier.
-     * @example 'reactscripts'
+     * @example 'react'
      */
     type: string
 
     /**
      * Name to display in the user interface.
-     * @example "React Scripts"
+     * @example "React.js"
      */
     name: string
 
     /**
      * Package name on npm.
-     * @example react-scripts
+     * @example react
      */
     package: string
 
@@ -3363,21 +3363,20 @@ declare namespace Cypress {
      *
      * @example `react`
      * @example `react@18`
-     * @example `react-scripts`
      */
     installer: string
 
     /**
      * Description shown in UI. It is recommended to use the same one the package uses on npm.
-     * @example  'Create React apps with no build configuration'
+     * @example  'A JavaScript library for building user interfaces'
      */
     description: string
 
     /**
      * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
      * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
-     * @example '^=4.0.0 || ^=5.0.0'
-     * @example '^2.0.0'
+     * @example '^=17.0.0 || ^=8.0.0'
+     * @example '^4.0.0'
      */
     minVersion: string
   }
@@ -3386,7 +3385,7 @@ declare namespace Cypress {
     /**
      * A semantic, unique identifier.
      * Must begin with `cypress-ct-` or `@org/cypress-ct-` for third party implementations.
-     * @example 'reactscripts'
+     * @example 'react'
      * @example 'nextjs'
      * @example 'cypress-ct-solid-js'
      */
@@ -3400,7 +3399,7 @@ declare namespace Cypress {
      *   export default {
      *     component: {
      *       devServer: {
-     *         framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *         framework: 'react' // can be 'next', 'vue', etc etc.
      *       }
      *     }
      *   }
@@ -3415,7 +3414,7 @@ declare namespace Cypress {
     /**
      * Name displayed in Launchpad when doing initial setup.
      * @example 'Solid.js'
-     * @example 'Create React App'
+     * @example 'React.js'
      */
     name: string
 
@@ -3516,7 +3515,7 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'vue-cli' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'

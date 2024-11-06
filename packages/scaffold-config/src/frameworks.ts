@@ -115,26 +115,6 @@ export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefini
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   {
-    type: 'reactscripts',
-    configFramework: 'create-react-app',
-    category: 'template',
-    name: 'Create React App',
-    supportedBundlers: ['webpack'],
-    detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
-    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
-      return [
-        dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS,
-        dependencies.WIZARD_DEPENDENCY_REACT_DOM,
-        dependencies.WIZARD_DEPENDENCY_REACT,
-      ]
-    },
-    codeGenFramework: 'react',
-    glob: '*.{js,jsx,tsx}',
-    mountModule: reactMountModule,
-    supportStatus: 'full',
-    componentIndexHtml: componentIndexHtmlGenerator(),
-  },
-  {
     type: 'vueclivue3',
     configFramework: 'vue-cli',
     category: 'template',

@@ -24,7 +24,6 @@ system-tests/projects/outdated-deps-vuecli3
 system-tests/projects/e2e/static/jquery.js
 
 # snapshots
-system-tests/projects/pristine/expected-cypress-js-component-create-react-app-v5/cypress.config.js
 system-tests/projects/pristine/expected-cypress-js-e2e/cypress.config.js
 system-tests/projects/pristine/expected-cypress-js-e2e-without-fixtures/cypress.config.js
 system-tests/projects/pristine-module/expected-cypress-js-e2e/cypress.config.js

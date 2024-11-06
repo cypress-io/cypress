@@ -12,7 +12,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   component: {
     devServer: {
-      framework: 'create-react-app',
+      framework: 'react',
       bundler: 'webpack',
       // webpackConfig?: Will try to infer, if passed it will be used as is
     }
@@ -31,7 +31,7 @@ export default defineConfig({
     devServer(devServerConfig) {
       return devServer({
         ...devServerConfig,
-        framework: 'create-react-app',
+        framework: 'react',
         webpackConfig: require('./webpack.config.js')
       })
     }
@@ -50,7 +50,6 @@ This module should be primarily covered by system-tests / open-mode tests. All s
 - webpack4_wds4-react
 - webpack5_wds5-react
 - webpack4_wds4-next-11
-- webpack4_wds4-create-react-app
 
 ## Architecture
 

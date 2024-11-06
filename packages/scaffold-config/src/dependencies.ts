@@ -43,15 +43,6 @@ export const WIZARD_DEPENDENCY_TYPESCRIPT = {
   minVersion: '^3.4.0 || ^4.0.0 || ^5.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_REACT_SCRIPTS = {
-  type: 'reactscripts',
-  name: 'React Scripts',
-  package: 'react-scripts',
-  installer: 'react-scripts',
-  description: 'Create React apps with no build configuration',
-  minVersion: '^5.0.0',
-} as const
-
 export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
   type: 'vuecliservice',
   name: 'Vue CLI',
@@ -136,7 +127,6 @@ export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
-  WIZARD_DEPENDENCY_REACT_SCRIPTS,
   WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
   WIZARD_DEPENDENCY_VITE,
   WIZARD_DEPENDENCY_NEXT,
@@ -164,7 +154,6 @@ const componentDependenciesOfInterest = [
   '@angular/platform-browser-dynamic',
   'react',
   'react-dom',
-  'react-scripts',
   'vue',
   '@vue/cli-service',
   'svelte',

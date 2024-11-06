@@ -23,7 +23,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .should('have.attr', 'aria-expanded', 'true')
 
     cy.get('li').spread(($firstLi, $secondLi) => {
-      cy.wrap($firstLi).should('contain', 'Create React App (v5) Support is in  Alpha')
+      cy.wrap($firstLi).should('contain', 'React.js')
       cy.wrap($firstLi).find('svg').should('have.attr', 'data-cy', 'react-logo')
 
       cy.wrap($secondLi).should('contain', 'Vue.js (v3)')
@@ -59,7 +59,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v5) Support is in Alpha (detected)' }).should('be.visible').click()
+    cy.findByRole('option', { name: 'React.js (detected)' }).should('be.visible').click()
   })
 
   it('shows the description of bundler', () => {

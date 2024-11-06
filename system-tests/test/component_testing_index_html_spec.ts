@@ -3,14 +3,6 @@ import systemTests from '../lib/system-tests'
 describe('component testing projects', function () {
   systemTests.setup()
 
-  systemTests.it('create-react-app-custom-index-html', {
-    project: 'create-react-app-custom-index-html',
-    testingType: 'component',
-    spec: 'src/App.cy.jsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('vueclivue3-custom-index-html', {
     project: 'vueclivue3-custom-index-html',
     testingType: 'component',
