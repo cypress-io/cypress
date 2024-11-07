@@ -1,6 +1,6 @@
 import { TestFilter } from '@packages/types'
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import AgentModel, { AgentProps } from '../agents/agent-model'
 import CommandModel, { CommandProps } from '../commands/command-model'
 import { HookProps } from '../hooks/hook-model'
@@ -74,6 +74,7 @@ export class RunnablesStore {
   showingSnapshot = defaults.showingSnapshot
 
   constructor ({ appState, scroller }: Props) {
+    makeObservable(this)
     this.appState = appState
     this.scroller = scroller
   }

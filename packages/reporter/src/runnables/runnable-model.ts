@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 import { HookProps } from '../hooks/hook-model'
 
 export interface RunnableProps {
@@ -14,6 +14,7 @@ export default class Runnable {
   @observable hooks: Array<HookProps> = []
 
   constructor (props: RunnableProps, level: number) {
+    makeObservable(this)
     this.id = props.id
     this.title = props.title
     this.level = level

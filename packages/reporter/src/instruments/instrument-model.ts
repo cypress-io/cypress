@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 import { Instrument, TestState } from '@packages/types'
 
 export interface AliasObject {
@@ -38,6 +38,7 @@ export default class Log {
   testId: string
 
   constructor (props: InstrumentProps) {
+    makeObservable(this)
     this.id = props.id
     this.alias = props.alias
     this.aliasType = props.aliasType

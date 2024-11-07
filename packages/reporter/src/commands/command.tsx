@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -377,6 +377,11 @@ class Command extends Component<Props> {
     appState,
     events,
     runnablesStore,
+  }
+
+  constructor (props: Props) {
+    super(props)
+    makeObservable(this)
   }
 
   render () {

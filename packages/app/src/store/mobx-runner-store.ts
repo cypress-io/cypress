@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import type { AutomationStatus } from '../store'
 
 const defaults = {
@@ -25,6 +25,7 @@ export class MobxRunnerStore {
   @observable canSaveStudioLogs = false
 
   constructor (testingType: Cypress.TestingType) {
+    makeObservable(this)
     this.width = defaults[testingType].width
     this.height = defaults[testingType].height
   }
