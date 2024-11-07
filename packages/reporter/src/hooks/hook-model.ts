@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable, computed } from 'mobx'
+import { observable, computed, makeObservable } from 'mobx'
 
 import { FileDetails } from '@packages/types'
 
@@ -30,6 +30,7 @@ export default class Hook implements HookProps {
   private _currentNumber = 1
 
   constructor (props: HookProps) {
+    makeObservable(this)
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails

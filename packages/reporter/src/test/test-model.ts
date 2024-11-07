@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 import { FileDetails, TestState } from '@packages/types'
 import Attempt from '../attempts/attempt-model'
@@ -61,6 +61,8 @@ export default class Test extends Runnable {
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
+
+    makeObservable(this)
 
     this.invocationDetails = props.invocationDetails
 

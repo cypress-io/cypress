@@ -1,6 +1,6 @@
 /* eslint-disable padding-line-between-statements */
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, makeObservable } from 'mobx'
 
 import type { FileDetails } from '@packages/types'
 
@@ -45,6 +45,7 @@ export default class Err {
   @observable isRecovered: boolean = false
 
   constructor (props?: Partial<ErrProps>) {
+    makeObservable(this)
     this.update(props)
   }
 
