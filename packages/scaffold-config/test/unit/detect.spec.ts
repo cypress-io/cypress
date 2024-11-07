@@ -191,7 +191,7 @@ describe('detectFramework', () => {
       const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
-        { dependency: 'svelte', version: '5.0.0' },
+        { dependency: 'svelte', version: '4.0.0' },
         { dependency: 'vite', version: v },
       ])
 
@@ -206,7 +206,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('svelte-webpack-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { dependency: 'svelte', version: '5.0.0' },
+      { dependency: 'svelte', version: '4.0.0' },
       { dependency: 'webpack', version: '5.0.0' },
     ])
 
