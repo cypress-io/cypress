@@ -1,6 +1,6 @@
 import { signal, computed } from '@angular/core'
 import { SignalsRequiredComponent } from './signals-required.component'
-import { createOutputSpy } from 'cypress/angular-signals'
+import { createOutputSpy } from 'cypress/angular'
 
 // NOTE: if this is the only test in your test suite, this error will continually throw until the fixture is closed.
 it('errors on required props missing', (done) => {
