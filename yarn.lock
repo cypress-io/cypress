@@ -27333,7 +27333,7 @@ rollup@^3.27.1:
   optionalDependencies:
     fsevents "~2.3.2"
 
-rollup@^4.13.0, rollup@^4.20.0:
+rollup@^4.13.0, rollup@^4.20.0, rollup@^4.24.4:
   version "4.24.4"
   resolved "https://registry.npmjs.org/rollup/-/rollup-4.24.4.tgz#fdc76918de02213c95447c9ffff5e35dddb1d058"
   integrity sha512-vGorVWIsWfX3xbcyAS+I047kFKapHYivmkaT63Smj77XwvLSJos6M1xGqZnBPFQFBRZDOcG1QnYEIxAvTr/HjA==
@@ -32926,13 +32926,6 @@ zone.js@0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.9.0.tgz#f42319d657f7616724ed40c5907d4614b4c683fa"
   integrity sha512-EfygvVnLxPSCMSgJ4h7SoY+XNr7ybdwvvwEQ70lvMFl9coNnciXSyWi8Kg6znK1ubyUSffkCKvleSQpLuUKw0Q==
-
-zone.js@~0.11.4:
-  version "0.11.7"
-  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.11.7.tgz#262194267c7b964e8da77ce16b9fba9bea23cfdc"
-  integrity sha512-e39K2EdK5JfA3FDuUTVRvPlYV4aBfnOOcGuILhQAT7nzeV12uSrLBzImUM9CDVoncDSX4brR/gwqu0heQ3BQ0g==
-  dependencies:
-    tslib "^2.3.0"
 
 zone.js@~0.14.6:
   version "0.14.6"
