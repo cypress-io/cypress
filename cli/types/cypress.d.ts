@@ -3393,7 +3393,7 @@ declare namespace Cypress {
     type: string
 
     /**
-     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     * Used as the flag for `getPreset` for meta frameworks, such as finding the webpack config for CRA, Angular, etc.
      * It is also the name of the string added to `cypress.config`
      *
      * @example
@@ -3445,12 +3445,12 @@ declare namespace Cypress {
     dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      */
     codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      * @example '*.{js,jsx,tsx}'
      */
     glob?: string
