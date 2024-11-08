@@ -1,4 +1,6 @@
 {
+  "name": "vite5.4.10-react",
+  "version": "0.0.0-test",
   "devDependencies": {
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
     "@vitejs/plugin-react": "4.3.3",

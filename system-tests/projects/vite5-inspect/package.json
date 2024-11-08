@@ -1,4 +1,6 @@
 {
+  "name": "vite5-inspect",
+  "version": "0.0.0-test",
   "devDependencies": {
     "react": "^18.3.1",
     "vite": "^5.4.10",

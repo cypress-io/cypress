@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress-pnp-webpack-preprocessor-test@workspace:.":
+"yarn-v4.3.1-pnp-dep-resolution@workspace:.":
   version: 0.0.0-use.local
-  resolution: "cypress-pnp-webpack-preprocessor-test@workspace:."
+  resolution: "yarn-v4.3.1-pnp-dep-resolution@workspace:."
   dependencies:
     axe-core: "npm:4.9.1"
     cypress-axe: "npm:1.5.0"

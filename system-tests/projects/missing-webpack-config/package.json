@@ -1,9 +1,8 @@
 {
-  "name": "react-vite-missing-vite-config",
-  "version": "0.0.0",
-  "private": true,
+  "name": "missing-webpack-config",
+  "version": "0.0.0-test",
   "devDependencies": {
-    "webpack": "^5.0.0",
-    "webpack-dev-server": "4.9.0"
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "5.1.0"
   }
 }

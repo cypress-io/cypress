@@ -25,6 +25,7 @@ export const verify = (title, ctx, options) => {
     message,
     stack,
     isCyOrigin,
+    isPreprocessorWithTypescript,
   } = options
 
   const codeFrameFileRegex = new RegExp(`${Cypress.spec.relative}:${line}${column ? `:${column}` : ''}`)
@@ -70,6 +71,8 @@ export const verify = (title, ctx, options) => {
       // code frames will show this as the 1st line
       if (isCyOrigin) {
         cy.get('.test-err-code-frame pre span').should('include.text', `('${title}',,function()`)
+      } else if (isPreprocessorWithTypescript) {
+        cy.get('.test-err-code-frame pre span').should('include.text', `'${title}',this,function(){`)
       } else {
         cy.get('.test-err-code-frame pre span').should('include.text', `fail('${title}',this,()=>`)
       }

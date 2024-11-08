@@ -1,7 +1,6 @@
 {
   "name": "outdated-deps-vue-vite",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.0.0-test",
   "dependencies": {
     "vue": "^2.6.10"
   },

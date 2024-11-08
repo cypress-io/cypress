@@ -1,7 +1,6 @@
 {
   "name": "vue3-vite-ts-custom-index-html",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.0-test",
   "scripts": {
     "dev": "vite",
     "preview": "vite preview"

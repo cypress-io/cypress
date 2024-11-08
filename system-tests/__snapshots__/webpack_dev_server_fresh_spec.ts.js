@@ -15,7 +15,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-   41 modules
 
 
   ✓ ensures we have launched at the overridden port
@@ -69,9 +68,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-6 assets
-58 modules
-webpack x.x.x compiled successfully in xxx ms
 
 
   ✓ ensures we have launched at the overridden port
@@ -127,7 +123,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-   51 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -173,7 +168,7 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
   1 failing
 
   1) An uncaught error was detected outside of a test:
-     Error: The following error originated from your test code, not from Cypress.
+     The following error originated from your test code, not from Cypress.
 
   > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -190,6 +185,23 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  Error: The following error originated from your test code, not from Cypress.
+  
+    > Module build failed (from [..]):
+  SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
+  
+    6 |   cy.get('h1').contains('Hello World')
+    7 | }
+  > 8 | })
+      | ^
+    9 |
+      [stack trace lines]
+  
+  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+  
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 
@@ -550,9 +562,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-16 assets
-68 modules
-
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -564,7 +573,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.j
   9 |
       [stack trace lines]
 
-webpack x.x.x compiled with x errors in xxx ms
+webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -599,7 +608,7 @@ webpack x.x.x compiled with x errors in xxx ms
   1 failing
 
   1) An uncaught error was detected outside of a test:
-     Error: The following error originated from your test code, not from Cypress.
+     The following error originated from your test code, not from Cypress.
 
   > Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -616,6 +625,23 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  Error: The following error originated from your test code, not from Cypress.
+  
+    > Module build failed (from [..]):
+  SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
+  
+    6 |   cy.get('h1').contains('Hello World')
+    7 | }
+  > 8 | })
+      | ^
+    9 |
+      [stack trace lines]
+  
+  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+  
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
       [stack trace lines]
 
 
@@ -976,9 +1002,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-16 assets
-72 modules
-
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
@@ -990,7 +1013,7 @@ SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.j
   9 |
       [stack trace lines]
 
-webpack x.x.x compiled with x errors in xxx ms
+webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -1417,9 +1440,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  port.cy.jsx                                                                     (1 of 1)
-6 assets
-62 modules
-webpack x.x.x compiled successfully in xxx ms
 
 
   ✓ ensures we have launched at the overridden port
@@ -1462,7 +1482,7 @@ Your configFile threw an error from: cypress-webpack.config.ts
 We stopped running your tests because your config file crashed.
 
 CypressWebpackDevServerError: Incompatible major versions of webpack and webpack-dev-server!
-      webpack-dev-server major version 5 only works with major versions of webpack 5 - saw webpack-dev-server version 5.0.4.
+      webpack-dev-server major version 5 only works with major versions of webpack 5 - saw webpack-dev-server version 5.1.0.
       If using webpack major version 4, please install webpack-dev-server version 4 to be used with @cypress/webpack-dev-server or upgrade to webpack 5.
       [stack trace lines]
 `

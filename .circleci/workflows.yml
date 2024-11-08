@@ -1789,7 +1789,7 @@ jobs:
       PLATFORM: linux
     machine:
       # using `machine` gives us a Linux VM that can run Docker
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2004:2024.05.1
       docker_layer_caching: true
     resource_class: medium
     steps:

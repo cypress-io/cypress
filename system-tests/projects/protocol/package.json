@@ -1,21 +1,20 @@
 {
   "name": "protocol-sample-project",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.0-test",
   "scripts": {},
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7.17.8",
-    "@babel/preset-react": "^7.17.8",
-    "@babel/preset-typescript": "^7.17.8",
-    "css-loader": "^6.5.1",
-    "esbuild": "^0.17.11",
-    "mini-css-extract-plugin": "^2.9.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "style-loader": "^3.3.1",
-    "typescript": "^4.9.5",
-    "webpack": "^5.65.0"
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "css-loader": "^7.1.2",
+    "esbuild": "^0.24.0",
+    "mini-css-extract-plugin": "^2.9.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "style-loader": "^4.0.0",
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1"
   },
   "eslintConfig": {
     "extends": [

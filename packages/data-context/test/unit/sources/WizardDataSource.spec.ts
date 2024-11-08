@@ -18,7 +18,7 @@ describe('packagesToInstall', () => {
   it('regular react project with webpack', async () => {
     const ctx = createTestDataContext()
 
-    const projectPath = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
+    const projectPath = await scaffoldMigrationProject('react18-webpack-unconfigured')
 
     ctx.update((coreData) => {
       coreData.currentProject = projectPath

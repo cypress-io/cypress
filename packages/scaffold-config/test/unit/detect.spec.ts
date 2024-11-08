@@ -76,10 +76,10 @@ const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkD
 
 describe('detectFramework', () => {
   it('React App with webpack 5', async () => {
-    const projectPath = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
+    const projectPath = await scaffoldMigrationProject('react18-webpack-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { dependency: 'react', version: '16.0.0' },
+      { dependency: 'react', version: '18.0.0' },
       { devDependency: 'webpack', version: '5.0.0' },
     ])
 

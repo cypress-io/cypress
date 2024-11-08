@@ -34,17 +34,10 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
-
-  systemTests.it('issue-25951-next-app', {
-    project: 'issue-25951-next-app',
-    testingType: 'component',
-    spec: 'src/pages/_app.cy.tsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
 })
 
-const REACT_MAJOR_VERSIONS = ['17', '18'] as const
+// keeping structure as to adapt to future versions of react
+const REACT_MAJOR_VERSIONS = ['18'] as const
 
 describe(`React major versions with Vite`, function () {
   systemTests.setup()
@@ -119,7 +112,7 @@ describe('svelte component testing', () => {
 
   for (const bundler of ['webpack', 'vite']) {
     systemTests.it(`svelte + ${bundler}`, {
-      project: `svelte-${bundler}`,
+      project: `svelte-${bundler}-configured`,
       testingType: 'component',
       spec: '**/*.cy.js,!src/errors.cy.js',
       browser: 'chrome',

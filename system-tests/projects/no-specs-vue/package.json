@@ -1,17 +1,15 @@
 {
-  "name": "no-specs-vue-3",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "name": "no-specs-vue",
+  "version": "0.0.0-test",
   "scripts": {
-    "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
+    "build-only": "vite build",
+    "dev": "vite",
     "preview": "vite preview",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
     "test:unit": "cypress run --component",
     "test:unit:dev": "cypress open --component",
-    "build-only": "vite build",
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
@@ -22,11 +20,11 @@
     "@types/node": "^20.17.0",
     "@vitejs/plugin-vue": "^5.1.4",
     "@vue/tsconfig": "^0.5.1",
-    "cypress": "^13.15.0",
     "npm-run-all2": "^7.0.1",
     "start-server-and-test": "^2.0.8",
     "typescript": "~5.6.0",
     "vite": "^5.4.10",
     "vue-tsc": "^2.1.6"
-  }
+  },
+  "type": "module"
 }

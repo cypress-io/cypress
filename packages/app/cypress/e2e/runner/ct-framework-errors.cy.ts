@@ -51,7 +51,8 @@ function loadErrorSpec (options: Options): VerifyFunc {
   return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde: false, mode: 'component' })
 }
 
-const reactVersions = [17, 18] as const
+// keeping structure as to easily adapt for future versions of react
+const reactVersions = [18] as const
 
 reactVersions.forEach((reactVersion) => {
   describe(`React ${reactVersion}`, {
@@ -281,12 +282,12 @@ describe.skip('Svelte', {
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
-    cy.scaffoldProject('svelte-webpack')
+    cy.scaffoldProject('svelte-webpack-configured')
   })
 
   it('error conditions', () => {
     const verify = loadErrorSpec({
-      projectName: 'svelte-webpack',
+      projectName: 'svelte-webpack-configured',
       configFile: 'cypress.config.js',
       filePath: 'src/errors.cy.js',
       failCount: 4,

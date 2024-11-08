@@ -1,7 +1,6 @@
 {
   "name": "vue-vite-ts-unconfigured",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.0-test",
   "scripts": {
     "dev": "vite",
     "preview": "vite preview"
