@@ -37,19 +37,6 @@ describe('scaffolding component testing', {
     })
   })
 
-  context('create-react-app', () => {
-    it('scaffolds component testing for Create React App v5 project', () => {
-      startSetupFor('create-react-app-unconfigured')
-
-      // should detect correctly
-      cy.get('button').should('be.visible').contains('Create React App(detected)')
-      cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
-      verifyConfigFile(`cypress.config.js`)
-    })
-  })
-
   context('react-vite-ts-unconfigured', () => {
     it('scaffolds component testing for React and Vite', () => {
       startSetupFor('react-vite-ts-unconfigured')

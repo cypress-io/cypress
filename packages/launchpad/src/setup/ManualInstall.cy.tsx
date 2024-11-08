@@ -17,7 +17,7 @@ describe('<ManualInstall />', () => {
   })
 
   it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
-    const framework = deps.WIZARD_DEPENDENCY_REACT_SCRIPTS
+    const framework = deps.WIZARD_DEPENDENCY_REACT
     const language = deps.WIZARD_DEPENDENCY_TYPESCRIPT
 
     const stubCopy = sinon.stub()
@@ -38,7 +38,7 @@ describe('<ManualInstall />', () => {
       })
     })
 
-    const installCommand = `npm install -D react-scripts typescript`
+    const installCommand = `npm install -D react react-dom typescript`
 
     cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
     cy.findByDisplayValue(installCommand).should('be.visible')
@@ -67,6 +67,6 @@ describe('<ManualInstall />', () => {
       ),
     })
 
-    cy.findByLabelText('installed').should('be.visible')
+    cy.get('[aria-label="installed"]').should('be.visible')
   })
 })

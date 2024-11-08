@@ -75,15 +75,6 @@ export function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevD
 const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkDefinition(x))
 
 describe('detectFramework', () => {
-  it('Create React App v5', async () => {
-    const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
-
-    fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
-    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
-
-    expect(actual.framework?.type).to.eq('reactscripts')
-  })
-
   it('React App with webpack 5', async () => {
     const projectPath = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
 

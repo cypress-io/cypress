@@ -2,7 +2,7 @@
 
 Logic related to scaffolding new projects using launchpad, including detecting component frameworks and bundlers, installing dependencies and creating `cypress.config.js` files. 
 
-We have integrations for popular code generators like Create React App, Next.js and Vue CLI, and ship a `cypress.config.js` that will work out of the box for those templates.
+We have integrations for popular code generators like Next.js and Vue CLI, and ship a `cypress.config.js` that will work out of the box for those templates.
 
 We will also attempt to scaffold a configuration file for projects using React and Vue projects using Vite and Webpack that are not necessarily created using a code generator.
 
@@ -10,8 +10,6 @@ We will also attempt to scaffold a configuration file for projects using React a
 
 | Name             | Version    | Dev Server | Version  | Library      | Component Adaptor       | Example Project                                                     |
 | ---------------- | -------    | ---------- | -------- | ------------ | ----------------------- | ------------------------------------------------------------------- |
-| Create React App | 5.x        | Webpack    | 5.x      | React 16, 17 | `@cypress/react@latest` | [TODO]                                                              |
-| Create React App | 4.x        | Webpack    | 4.x      | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/create-react-app-configured)     |
 | React            | -          | Vite       | 2.x      | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/react-vite-ts-configured)        |
 | Vue              | -          | Vite       | 2.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vue3-vite-ts-configured)         |
 | Vue CLI          | 4.x        | Webpack    | 4.x      | Vue 3        | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vueclivue3-configured)           |

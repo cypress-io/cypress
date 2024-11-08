@@ -13,7 +13,6 @@ export const FrameworkBundlerLogos = {
   vueclivue3: LogoVue,
   nextjs: LogoNext,
   react: LogoReact,
-  reactscripts: LogoReact,
   angular: LogoAngular,
   svelte: LogoSvelte,
 } as const

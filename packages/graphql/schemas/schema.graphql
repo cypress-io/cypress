@@ -2547,7 +2547,7 @@ type WizardErroredFramework implements Node {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
-  """The category (framework, like react-scripts, or library, like react"""
+  """The category (framework, like next.js, or library, like react"""
   category: String!
 
   """Raw SVG icon of framework"""
