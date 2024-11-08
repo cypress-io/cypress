@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 13.16.0
+
+_Released 11/19/2024 (PENDING)_
+
+**Features:**
+
+- Updated the protocol to be able to flex logic based on project config. Addresses [#30560](https://github.com/cypress-io/cypress/issues/30560).
+
 ## 13.15.2
 
 _Released 11/5/2024_

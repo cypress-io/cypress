@@ -591,6 +591,13 @@ describe('lib/cloud/api', () => {
         get protocolManager () {
           return protocolManager
         },
+        getConfig: () => {
+          return {
+            port: 1234,
+            devServerPublicPathRoute: '/dev-server',
+            proxyUrl: 'http://localhost:1234',
+          }
+        },
       }
 
       return api.createRun({
@@ -616,6 +623,11 @@ describe('lib/cloud/api', () => {
               url: 'http://localhost:1234/',
               retryWithBackoff: api.retryWithBackoff,
               requestPromise: api.rp,
+            },
+            projectConfig: {
+              port: 1234,
+              devServerPublicPathRoute: '/dev-server',
+              proxyUrl: 'http://localhost:1234',
             },
           },
         )
@@ -666,6 +678,13 @@ describe('lib/cloud/api', () => {
         get protocolManager () {
           return protocolManager
         },
+        getConfig: () => {
+          return {
+            port: 1234,
+            devServerPublicPathRoute: '/dev-server',
+            proxyUrl: 'http://localhost:1234',
+          }
+        },
       }
 
       return api.createRun({
@@ -691,6 +710,11 @@ describe('lib/cloud/api', () => {
               url: 'http://localhost:1234/',
               retryWithBackoff: api.retryWithBackoff,
               requestPromise: api.rp,
+            },
+            projectConfig: {
+              port: 1234,
+              devServerPublicPathRoute: '/dev-server',
+              proxyUrl: 'http://localhost:1234',
             },
           },
         )

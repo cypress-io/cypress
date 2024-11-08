@@ -426,6 +426,8 @@ export default {
       }
 
       if (script) {
+        const config = options.project.getConfig()
+
         await options.project.protocolManager.setupProtocol(script, {
           runId: result.runId,
           projectId: options.projectId,
@@ -434,6 +436,11 @@ export default {
             url: apiUrl,
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
+          },
+          projectConfig: {
+            devServerPublicPathRoute: config.devServerPublicPathRoute,
+            port: config.port,
+            proxyUrl: config.proxyUrl,
           },
           mountVersion: runnerCapabilities.protocolMountVersion,
         })

@@ -4,6 +4,7 @@ import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
 import type { ProxyTimings } from './proxy'
 import type { SpecWithRelativeRoot } from './spec'
+import { FullConfig } from './config'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -85,6 +86,8 @@ export type CaptureArtifact = {
   filePath: string
 }
 
+type ProjectConfig = Pick<FullConfig, 'devServerPublicPathRoute' | 'port' | 'proxyUrl'>
+
 export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
@@ -96,6 +99,7 @@ export type ProtocolManagerOptions = {
       get (options: any): Promise<any>
     }
   }
+  projectConfig: ProjectConfig
   mountVersion?: number
 }
 
