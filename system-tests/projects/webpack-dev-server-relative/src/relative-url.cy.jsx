@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress/react18'
+import { mount } from 'cypress/react'
 
 describe('webpack-dev-server', () => {
   it('image with relative path should load', () => {

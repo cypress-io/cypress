@@ -1,15 +1,9 @@
-import React, { Component } from 'react'
+import React, { useEffect } from 'react'
 
-export default class Comp extends Component {
-  componentDidMount () {
-    this.props.onMount()
-  }
+export const Comp = ({ onMount }) => {
+  useEffect(() => {
+    onMount()
+  }, [])
 
-  componentWillUnmount () {
-    this.props.onUnmount()
-  }
-
-  render () {
-    return <div>Component with mount and unmount calls</div>
-  }
+  return <div>Component with mount and unmount calls</div>
 }

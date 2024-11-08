@@ -186,7 +186,6 @@ Here is a list of the npm packages in this repository:
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
  | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
- | [react18](./npm/react18)                               | `@cypress/react18`                   | Cypress component testing for React 18.           |
  | [schematic](./npm/cypress-schematic)                   | `@cypress/schematic`            | Official Angular Schematic and Builder for the Angular CLI.|
  | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |

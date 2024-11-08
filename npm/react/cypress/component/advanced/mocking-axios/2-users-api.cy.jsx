@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
-import { Users } from './3-users-api.jsx'
-import * as axios from './axios-api'
+import { Users } from './2-users-api.jsx'
+import * as axios from './axios-api.jsx'
 
 describe('Mocking wrapped Axios', () => {
   it('shows real users', () => {

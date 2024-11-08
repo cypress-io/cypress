@@ -19,7 +19,7 @@ describe('Config options', () => {
       await ctx.actions.file.writeFileInProject(
         'src/App.cy.jsx', `
         import React from 'react'
-        import { mount } from 'cypress/react18'
+        import { mount } from 'cypress/react'
 
         export const App = () => {
           return (

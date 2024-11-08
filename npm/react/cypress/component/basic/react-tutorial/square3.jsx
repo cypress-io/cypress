@@ -1,18 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-export default class Square extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      value: null,
-    }
-  }
+export default function Square () {
+  const [value, setValue] = useState(null)
 
-  render () {
-    return (
-      <button className="square" onClick={() => this.setState({ value: 'X' })}>
-        {this.state.value}
-      </button>
-    )
-  }
+  return (
+    <button className="square" onClick={() => setValue('X')}>
+      {value}
+    </button>
+  )
 }

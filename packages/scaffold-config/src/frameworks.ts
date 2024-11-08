@@ -101,16 +101,6 @@ export function getBundler (bundler: WizardBundler['type']): WizardBundler {
 
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
-const reactMountModule = async (projectPath: string) => {
-  const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
-
-  if (!reactPkg.detectedVersion || !semver.valid(reactPkg.detectedVersion)) {
-    return 'cypress/react'
-  }
-
-  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
-}
-
 export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
@@ -130,7 +120,7 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: reactMountModule,
+    mountModule: mountModule('cypress/react'),
     supportStatus: 'full',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
@@ -176,7 +166,7 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: reactMountModule,
+    mountModule: mountModule('cypress/react'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },

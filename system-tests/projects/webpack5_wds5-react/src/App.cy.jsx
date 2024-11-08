@@ -1,6 +1,6 @@
 import React from 'react'
 import { App } from './App'
-import { mount } from 'cypress/react18'
+import { mount } from 'cypress/react'
 
 it('renders hello world', () => {
   mount(<App />)

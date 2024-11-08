@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
-// import the entire axios module
-// later we can use axios.get to make requests
-import axios from 'axios'
+// import wrapped Axios method
+import axiosApi from './axios-api.jsx'
 
 export function Users () {
   const [users, setUsers] = useState([])
 
   const getUsers = async () => {
-    const response = await axios.get('https://jsonplaceholder.cypress.io/users?_limit=3')
+    console.log({ axiosApi })
+    const response = await axiosApi.get('https://jsonplaceholder.cypress.io/users?_limit=3')
     // JSON responses are automatically parsed.
 
     setUsers(response.data)

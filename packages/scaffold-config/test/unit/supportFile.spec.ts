@@ -4,11 +4,12 @@ import { expect } from 'chai'
 
 describe('supportFileComponent', () => {
   context('react', () => {
-    for (const mountModule of ['cypress/react', 'cypress/react18'] as const) {
-      it(`handles ${mountModule} and JS`, () => {
-        const actual = supportFileComponent('js', mountModule)
+    const mountModule = 'cypress/react'
 
-        expect(actual).to.eq(dedent`
+    it(`handles ${mountModule} and JS`, () => {
+      const actual = supportFileComponent('js', mountModule)
+
+      expect(actual).to.eq(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -37,12 +38,12 @@ describe('supportFileComponent', () => {
           // Example use:
           // cy.mount(<MyComponent />)
           `)
-      })
+    })
 
-      it(`handles ${mountModule} and TS`, () => {
-        const actual = supportFileComponent('ts', mountModule)
+    it(`handles ${mountModule} and TS`, () => {
+      const actual = supportFileComponent('ts', mountModule)
 
-        expect(actual).to.eq(dedent`
+      expect(actual).to.eq(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -83,8 +84,7 @@ describe('supportFileComponent', () => {
         // Example use:
         // cy.mount(<MyComponent />)
       `)
-      })
-    }
+    })
   })
 
   context('vue', () => {

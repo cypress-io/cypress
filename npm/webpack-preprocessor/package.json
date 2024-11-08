@@ -70,9 +70,6 @@
   "nx": {
     "targets": {
       "build": {
-        "dependsOn": [
-          "!@cypress/react18:build"
-        ],
         "outputs": [
           "{projectRoot}/dist"
         ]

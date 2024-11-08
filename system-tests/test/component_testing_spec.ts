@@ -47,7 +47,7 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite-default.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -65,7 +65,7 @@ describe(`React major versions with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
