@@ -23,6 +23,7 @@ _Released 12/3/2024 (PENDING)_
 - Cypress Component Testing no longer supports `Angular` versions 13, 14, 15, and 16. The minimum supported version is now `17.2.0` in order to fully support Angular [signals](https://angular.dev/guide/signals). Addresses [#29582](https://github.com/cypress-io/cypress/issues/29582). Addressed in [#30539](https://github.com/cypress-io/cypress/pull/30539).
 - The `cypress/angular-signals` test harness is no longer included in the Cypress binary. Instead, signals support is now shipped with `cypress/angular`! This requires `rxjs` to be installed as a `peerDependency`. Addresses [#29606](https://github.com/cypress-io/cypress/issues/29606).
 - Cypress Component Testing no longer supports `create-react-app`. Addresses [#30028](https://github.com/cypress-io/cypress/issues/30028).
+- Cypress Component Testing no longer supports `@vue/cli-service`. Addresses [#30481](https://github.com/cypress-io/cypress/issues/30481).
 
 **Deprecations:**
 

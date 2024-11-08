@@ -47,7 +47,7 @@ describe('<SelectFrameworkOrBundler />', () => {
           {
             name: 'VueJs',
             id: 'vue',
-            type: 'vueclivue3',
+            type: 'vite',
             supportStatus: 'full',
           },
         ]}

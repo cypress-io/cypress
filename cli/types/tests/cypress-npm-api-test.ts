@@ -104,16 +104,6 @@ const componentConfigVueWebpack: Cypress.ConfigOptions = {
   }
 }
 
-const componentConfigVueCliWebpack: Cypress.ConfigOptions = {
-  component: {
-    devServer: {
-      bundler: 'webpack',
-      framework: 'vue-cli',
-      webpackConfig: {}
-    }
-  }
-}
-
 const componentConfigViteReact: Cypress.ConfigOptions = {
   component: {
     devServer: {

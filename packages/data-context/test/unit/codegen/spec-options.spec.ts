@@ -89,7 +89,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[0],
+            framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
 
@@ -108,7 +108,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[0],
+            framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
 
@@ -127,7 +127,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[3],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
             isDefault: true,
@@ -146,7 +146,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[3],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
           })
@@ -166,7 +166,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[3],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
           })
@@ -212,7 +212,7 @@ describe('spec-options', () => {
               codeGenPath: `${tmpPath}/${componentPath}`,
               codeGenType: 'component',
               isDefaultSpecPattern: false,
-              framework: CT_FRAMEWORKS[0],
+              framework: CT_FRAMEWORKS[1],
               specPattern,
               specs,
             })
@@ -322,7 +322,7 @@ describe('spec-options', () => {
               codeGenType: 'component',
               isDefaultSpecPattern: true,
               specPattern: [defaultSpecPattern.component],
-              framework: CT_FRAMEWORKS[0],
+              framework: CT_FRAMEWORKS[1],
             })
 
             await fs.outputFile(`${tmpPath}/${fileName}`, '// foo')

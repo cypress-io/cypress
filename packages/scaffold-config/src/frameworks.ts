@@ -115,25 +115,6 @@ export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefini
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   {
-    type: 'vueclivue3',
-    configFramework: 'vue-cli',
-    category: 'template',
-    name: 'Vue CLI (Vue 3)',
-    supportedBundlers: ['webpack'],
-    detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
-    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
-      return [
-        dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
-        dependencies.WIZARD_DEPENDENCY_VUE_3,
-      ]
-    },
-    codeGenFramework: 'vue',
-    glob: '*.vue',
-    mountModule: mountModule('cypress/vue'),
-    supportStatus: 'full',
-    componentIndexHtml: componentIndexHtmlGenerator(),
-  },
-  {
     type: 'nextjs',
     category: 'template',
     configFramework: 'next',

@@ -43,15 +43,6 @@ export const WIZARD_DEPENDENCY_TYPESCRIPT = {
   minVersion: '^3.4.0 || ^4.0.0 || ^5.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
-  type: 'vuecliservice',
-  name: 'Vue CLI',
-  package: '@vue/cli-service',
-  installer: '@vue/cli-service',
-  description: 'Standard Tooling for Vue.js Development',
-  minVersion: '^5.0.0',
-} as const
-
 export const WIZARD_DEPENDENCY_VITE = {
   type: 'vite',
   name: 'Vite',
@@ -127,7 +118,6 @@ export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
-  WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
   WIZARD_DEPENDENCY_VITE,
   WIZARD_DEPENDENCY_NEXT,
   WIZARD_DEPENDENCY_REACT,

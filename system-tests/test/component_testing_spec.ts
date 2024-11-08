@@ -3,18 +3,18 @@ import systemTests from '../lib/system-tests'
 describe('component testing projects', function () {
   systemTests.setup()
 
-  systemTests.it('vueclivue3-configured', {
-    project: 'vueclivue3-configured',
-    testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
     testingType: 'component',
     spec: 'src/App.cy.tsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it('vue3-webpack-ts-configured', {
+    project: 'vue3-webpack-ts-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
     browser: 'chrome',
     expectedExitCode: 0,
   })
@@ -39,14 +39,6 @@ describe('component testing projects', function () {
     project: 'issue-25951-next-app',
     testingType: 'component',
     spec: 'src/pages/_app.cy.tsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('vuecli5vue3-configured', {
-    project: 'vuecli5vue3-configured',
-    testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.js',
     browser: 'chrome',
     expectedExitCode: 0,
   })

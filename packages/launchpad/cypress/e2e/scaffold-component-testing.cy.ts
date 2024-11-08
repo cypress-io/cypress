@@ -24,16 +24,17 @@ const ONE_MINUTE = 1000 * 60
 describe('scaffolding component testing', {
   taskTimeout: ONE_MINUTE,
 }, () => {
-  context('vuecli5vue3', () => {
-    it('scaffolds component testing for Vue CLI 5 w/ Vue 3 project', () => {
-      startSetupFor('vuecli5vue3-unconfigured')
+  context('webpack5vue3', () => {
+    it('scaffolds component testing for Webpack 5 w/ Vue 3 project', () => {
+      startSetupFor('vue3-webpack-ts-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
+      cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
+      cy.get('button').should('be.visible').contains('Webpack(detected)')
       cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
-      verifyConfigFile(`cypress.config.js`)
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 
