@@ -135,7 +135,7 @@ jobs:
           git reset --hard
           git checkout ${{ env.BRANCH_NAME }}
           git pull origin ${{ env.BRANCH_NAME }}
-          git merge --squash -Xtheirs stash
+          git merge -Xtheirs stash
       ## Update available and a PR doesn't already exist
       - name: Checkout new branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update != 'true' }}
