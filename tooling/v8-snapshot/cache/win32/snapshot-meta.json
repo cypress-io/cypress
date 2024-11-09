@@ -80,7 +80,6 @@
   ],
   "deferred": [
     "./node_modules/@ampproject/remapping/dist/remapping.umd.js",
-    "./node_modules/@ampproject/remapping/node_modules/@jridgewell/gen-mapping/dist/gen-mapping.umd.js",
     "./node_modules/@babel/core/lib/config/config-chain.js",
     "./node_modules/@babel/core/lib/config/config-descriptors.js",
     "./node_modules/@babel/core/lib/config/files/configuration.js",
@@ -3590,6 +3589,7 @@
     "./packages/config/src/project/utils.ts",
     "./packages/config/src/utils.ts",
     "./packages/config/src/validation.ts",
+    "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/ast-types/def/babel-core.js",
     "./packages/data-context/node_modules/ast-types/def/babel.js",
     "./packages/data-context/node_modules/ast-types/def/core-operators.js",
@@ -4182,5 +4182,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d99ff406e891de2c4a13493b52804afba50b51d8c7dc50d8e25168b3f9c92046"
+  "deferredHash": "a594eaaeaad8ebf27ad4c96637d4caad4990ed449e35608269370306e337c765"
 }
