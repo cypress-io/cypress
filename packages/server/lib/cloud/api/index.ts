@@ -437,11 +437,7 @@ export default {
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
-          projectConfig: {
-            devServerPublicPathRoute: config.devServerPublicPathRoute,
-            port: config.port,
-            proxyUrl: config.proxyUrl,
-          },
+          projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }

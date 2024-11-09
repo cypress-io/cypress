@@ -86,7 +86,7 @@ export type CaptureArtifact = {
   filePath: string
 }
 
-type ProjectConfig = Pick<FullConfig, 'devServerPublicPathRoute' | 'port' | 'proxyUrl'>
+type ProjectConfig = Pick<FullConfig, 'devServerPublicPathRoute' | 'port' | 'proxyUrl' | 'namespace'>
 
 export type ProtocolManagerOptions = {
   runId: string

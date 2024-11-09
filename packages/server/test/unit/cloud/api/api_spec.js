@@ -596,6 +596,7 @@ describe('lib/cloud/api', () => {
             port: 1234,
             devServerPublicPathRoute: '/dev-server',
             proxyUrl: 'http://localhost:1234',
+            namespace: '__cypress',
           }
         },
       }
@@ -628,6 +629,7 @@ describe('lib/cloud/api', () => {
               port: 1234,
               devServerPublicPathRoute: '/dev-server',
               proxyUrl: 'http://localhost:1234',
+              namespace: '__cypress',
             },
           },
         )
@@ -683,6 +685,7 @@ describe('lib/cloud/api', () => {
             port: 1234,
             devServerPublicPathRoute: '/dev-server',
             proxyUrl: 'http://localhost:1234',
+            namespace: '__cypress',
           }
         },
       }
@@ -715,6 +718,7 @@ describe('lib/cloud/api', () => {
               port: 1234,
               devServerPublicPathRoute: '/dev-server',
               proxyUrl: 'http://localhost:1234',
+              namespace: '__cypress',
             },
           },
         )
