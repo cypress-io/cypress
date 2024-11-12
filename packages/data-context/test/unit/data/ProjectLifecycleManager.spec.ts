@@ -94,6 +94,36 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
       expect(ctx.actions.project.launchProject).to.not.be.called
     })
+
+    it('uses config defaultBrowser option', async () => {
+      ctx = createDataContext({
+        project: 'foo',
+        testingType: 'e2e',
+      })
+
+      // @ts-expect-error
+      ctx.lifecycleManager._configManager = {
+        // @ts-expect-error
+        getFullInitialConfig() {
+          return {
+            browsers: [],
+          }
+        }
+      }
+
+      Object.defineProperty(ctx.lifecycleManager, 'loadedFullConfig', {
+        get() {
+          return {
+            defaultBrowser: 'chrome'
+          }
+        }
+      })
+
+      await ctx.lifecycleManager.setInitialActiveBrowser()
+
+      expect(ctx.modeOptions.browser).to.eq('chrome')
+      expect(ctx.coreData.cliBrowser).to.eq('chrome')
+    })
   })
 
   context('#eventProcessPid', () => {
