@@ -99,29 +99,37 @@ describe('ProjectLifecycleManager', () => {
       ctx = createDataContext({
         project: 'foo',
         testingType: 'e2e',
-        isBrowserGivenByCli: false
+        isBrowserGivenByCli: false,
       })
 
       // @ts-expect-error
       ctx.lifecycleManager._configManager = {
         // @ts-expect-error
-        getFullInitialConfig() {
+        getFullInitialConfig () {
           return {
             browsers: [],
           }
-        }
+        },
+      }
+
+      // @ts-expect-error
+      ctx._apis.browserApi.ensureAndGetByNameOrPath = function () {
+        return browsers[0]
       }
 
       Object.defineProperty(ctx.lifecycleManager, 'loadedFullConfig', {
-        get() {
+        get () {
           return {
-            defaultBrowser: 'chrome'
+            defaultBrowser: 'chrome',
           }
-        }
+        },
       })
+
+      expect(ctx.modeOptions.activeBrowser).to.eq(undefined)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
+      expect(ctx.modeOptions.activeBrowser).to.include({ name: 'chrome' })
       expect(ctx.modeOptions.browser).to.eq('chrome')
       expect(ctx.coreData.cliBrowser).to.eq('chrome')
     })
@@ -130,29 +138,37 @@ describe('ProjectLifecycleManager', () => {
       ctx = createDataContext({
         project: 'foo',
         testingType: 'e2e',
-        isBrowserGivenByCli: true
+        isBrowserGivenByCli: true,
       })
 
       // @ts-expect-error
       ctx.lifecycleManager._configManager = {
         // @ts-expect-error
-        getFullInitialConfig() {
+        getFullInitialConfig () {
           return {
             browsers: [],
           }
-        }
+        },
+      }
+
+      // @ts-expect-error
+      ctx._apis.browserApi.ensureAndGetByNameOrPath = function () {
+        return browsers[0]
       }
 
       Object.defineProperty(ctx.lifecycleManager, 'loadedFullConfig', {
-        get() {
+        get () {
           return {
-            defaultBrowser: 'chrome'
+            defaultBrowser: 'chrome',
           }
-        }
+        },
       })
+
+      expect(ctx.modeOptions.activeBrowser).to.eq(undefined)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
+      expect(ctx.modeOptions.activeBrowser).to.include({ name: 'electron' })
       expect(ctx.modeOptions.browser).to.eq(undefined)
       expect(ctx.coreData.cliBrowser).to.eq(undefined)
     })
