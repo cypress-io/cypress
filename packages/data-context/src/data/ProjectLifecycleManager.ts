@@ -320,7 +320,7 @@ export class ProjectLifecycleManager {
     // update the cliBrowser to the defaultBrowser from the config
     // since we want the defaultBrowser to behave as if it was passed via CLI
     const shouldUpdateCliBrowser = (configBrowser && !this.ctx.modeOptions.isBrowserGivenByCli) &&
-      (this.ctx.isRunMode || this.ctx.coreData.cliBrowser)
+      (this.ctx.isRunMode || !this.ctx.coreData.cliBrowser)
     if (shouldUpdateCliBrowser) {
       this.ctx.actions.browser.updateCliBrowser(configBrowser)
     }
