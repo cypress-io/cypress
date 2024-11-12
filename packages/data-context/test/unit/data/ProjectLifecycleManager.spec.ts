@@ -114,7 +114,8 @@ describe('ProjectLifecycleManager', () => {
 
       // @ts-expect-error
       ctx._apis.browserApi.ensureAndGetByNameOrPath = function () {
-        return browsers[0]
+        // return browser object for chrome
+        return browsers[1]
       }
 
       Object.defineProperty(ctx.lifecycleManager, 'loadedFullConfig', {
@@ -153,6 +154,7 @@ describe('ProjectLifecycleManager', () => {
 
       // @ts-expect-error
       ctx._apis.browserApi.ensureAndGetByNameOrPath = function () {
+        // return browser object for electron
         return browsers[0]
       }
 
