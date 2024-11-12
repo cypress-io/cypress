@@ -130,9 +130,9 @@ describe('ProjectLifecycleManager', () => {
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.modeOptions.activeBrowser).to.include({ name: 'chrome' })
       expect(ctx.modeOptions.browser).to.eq('chrome')
       expect(ctx.coreData.cliBrowser).to.eq('chrome')
+      expect(ctx.coreData.activeBrowser).to.include({ name: 'chrome' })
     })
 
     it('doesn\'t use config defaultBrowser option if --browser is given', async () => {
@@ -170,9 +170,9 @@ describe('ProjectLifecycleManager', () => {
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.modeOptions.activeBrowser).to.include({ name: 'electron' })
       expect(ctx.modeOptions.browser).to.eq(undefined)
       expect(ctx.coreData.cliBrowser).to.eq(undefined)
+      expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
     })
   })
 
