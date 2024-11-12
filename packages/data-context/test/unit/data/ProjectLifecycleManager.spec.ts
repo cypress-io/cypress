@@ -95,10 +95,11 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.actions.project.launchProject).to.not.be.called
     })
 
-    it('uses config defaultBrowser option', async () => {
+    it('uses config defaultBrowser option if --browser is not given', async () => {
       ctx = createDataContext({
         project: 'foo',
         testingType: 'e2e',
+        isBrowserGivenByCli: false
       })
 
       // @ts-expect-error
@@ -123,6 +124,37 @@ describe('ProjectLifecycleManager', () => {
 
       expect(ctx.modeOptions.browser).to.eq('chrome')
       expect(ctx.coreData.cliBrowser).to.eq('chrome')
+    })
+
+    it('doesn\'t use config defaultBrowser option if --browser is given', async () => {
+      ctx = createDataContext({
+        project: 'foo',
+        testingType: 'e2e',
+        isBrowserGivenByCli: true
+      })
+
+      // @ts-expect-error
+      ctx.lifecycleManager._configManager = {
+        // @ts-expect-error
+        getFullInitialConfig() {
+          return {
+            browsers: [],
+          }
+        }
+      }
+
+      Object.defineProperty(ctx.lifecycleManager, 'loadedFullConfig', {
+        get() {
+          return {
+            defaultBrowser: 'chrome'
+          }
+        }
+      })
+
+      await ctx.lifecycleManager.setInitialActiveBrowser()
+
+      expect(ctx.modeOptions.browser).to.eq(undefined)
+      expect(ctx.coreData.cliBrowser).to.eq(undefined)
     })
   })
 
