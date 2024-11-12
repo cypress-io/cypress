@@ -319,7 +319,7 @@ export class ProjectLifecycleManager {
     // the active browser isn't set (we are in run mode or when the config changes in open mode),
     // update the cliBrowser to the defaultBrowser from the config
     // since we want the defaultBrowser to behave as if it was passed via CLI
-    if (this.ctx.isRunMode || !this.ctx.coreData.cliBrowser) {
+    if (configBrowser && !this.ctx.modeOptions.isBrowserGivenByCli) {
       if (!this.ctx.coreData.activeBrowser) {
         this.ctx.actions.browser.updateCliBrowser(configBrowser)
       } else {
