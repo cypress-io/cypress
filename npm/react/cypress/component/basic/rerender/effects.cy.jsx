@@ -62,7 +62,12 @@ it('should run unmount effect cleanup when unmounting', () => {
 
     cy
     .then(() => ReactDom.unmountComponentAtNode(getContainerEl()))
-    .then(() => {
+    .then(async () => {
+      // does not call useEffect in react 17 unmount synchronously.
+      // @see https://github.com/facebook/react/issues/20263
+      // to keep this test working, we need to flush the microtask queue.
+      await new Promise((r) => setTimeout(r))
+
       expect(layoutEffectCleanup).to.have.been.callCount(1)
       expect(effectCleanup).to.have.been.callCount(1)
     })

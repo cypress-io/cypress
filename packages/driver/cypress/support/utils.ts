@@ -10,7 +10,7 @@ export const getCommandLogWithText = (command, type = 'method') => {
 }
 
 export const findReactInstance = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$')) as string
+  let key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null
