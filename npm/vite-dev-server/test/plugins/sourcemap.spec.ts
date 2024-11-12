@@ -8,55 +8,53 @@ import SinonChai from 'sinon-chai'
 Chai.use(SinonChai)
 
 describe('sourcemap plugin', () => {
-  ['js', 'jsx', 'ts', 'tsx', 'vue', 'mjs', 'cjs'].forEach((ext) => {
-    it('should append sourcemap to the code if sourceMappingURL is not present', () => {
-      const code = 'console.log("hello world")'
-      const id = `test.${ext}`
-      const options = {} as ViteDevServerConfig
-      const vite = {} as Vite
-      const plugin = CypressSourcemap(options, vite) as Plugin & { getCombinedSourcemap: () => { toUrl: () => string } }
+  it('should append sourcemap to the code if sourceMappingURL is not present', () => {
+    const code = 'console.log("hello world")'
+    const id = `test.js`
+    const options = {} as ViteDevServerConfig
+    const vite = {} as Vite
+    const plugin = CypressSourcemap(options, vite) as Plugin & { getCombinedSourcemap: () => { toUrl: () => string } }
 
-      plugin.getCombinedSourcemap = () => {
-        return {
-          toUrl: () => 'data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==',
-        }
+    plugin.getCombinedSourcemap = () => {
+      return {
+        toUrl: () => 'data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==',
       }
+    }
 
-      expect(plugin.name).to.equal('cypress:sourcemap')
-      expect(plugin.enforce).to.equal('post')
+    expect(plugin.name).to.equal('cypress:sourcemap')
+    expect(plugin.enforce).to.equal('post')
 
-      if (plugin.transform instanceof Function) {
-        const result = plugin.transform.call(plugin, code, id)
+    if (plugin.transform instanceof Function) {
+      const result = plugin.transform.call(plugin, code, id)
 
-        expect(result.code).to.include('//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==')
-      } else {
-        throw new Error('transform is not a function')
+      expect(result.code).to.eq('console.log("hello world")\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==')
+    } else {
+      throw new Error('transform is not a function')
+    }
+  })
+
+  it('should replace sourceMappingURL with sourcemap and handle query parameters', () => {
+    const code = 'console.log("hello world")\n//# sourceMappingURL=old-url'
+    const id = `test.js?v=12345`
+    const options = {} as ViteDevServerConfig
+    const vite = {} as Vite
+    const plugin = CypressSourcemap(options, vite) as Plugin & { getCombinedSourcemap: () => { toUrl: () => string } }
+
+    plugin.getCombinedSourcemap = () => {
+      return {
+        toUrl: () => 'data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==',
       }
-    })
+    }
 
-    it('should replace sourceMappingURL with sourcemap', () => {
-      const code = 'console.log("hello world")\n//# sourceMappingURL=old-url'
-      const id = `test.${ext}`
-      const options = {} as ViteDevServerConfig
-      const vite = {} as Vite
-      const plugin = CypressSourcemap(options, vite) as Plugin & { getCombinedSourcemap: () => { toUrl: () => string } }
+    expect(plugin.name).to.equal('cypress:sourcemap')
+    expect(plugin.enforce).to.equal('post')
 
-      plugin.getCombinedSourcemap = () => {
-        return {
-          toUrl: () => 'data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==',
-        }
-      }
+    if (plugin.transform instanceof Function) {
+      const result = plugin.transform.call(plugin, code, id)
 
-      expect(plugin.name).to.equal('cypress:sourcemap')
-      expect(plugin.enforce).to.equal('post')
-
-      if (plugin.transform instanceof Function) {
-        const result = plugin.transform.call(plugin, code, id)
-
-        expect(result.code).to.include('//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==')
-      } else {
-        throw new Error('transform is not a function')
-      }
-    })
+      expect(result.code).to.eq('console.log("hello world")\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==')
+    } else {
+      throw new Error('transform is not a function')
+    }
   })
 })

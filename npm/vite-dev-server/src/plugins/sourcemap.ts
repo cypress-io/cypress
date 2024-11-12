@@ -15,9 +15,11 @@ export const CypressSourcemap = (
     enforce: 'post',
     transform (code, id, options?) {
       try {
+        // Remove query parameters from the id. This is necessary because some files
+        // have a cache buster query parameter (e.g. `?v=12345`)
         const queryParameterLessId = id.split('?')[0]
 
-        if (/\.(js|jsx|ts|tsx|vue|mjs|cjs)$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
+        if (/\.js$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
           /*
           The Vite dev server and plugins automatically generate sourcemaps for most files, but they are
           only included in the served files if any transpilation actually occurred (JSX, TS, etc). This
