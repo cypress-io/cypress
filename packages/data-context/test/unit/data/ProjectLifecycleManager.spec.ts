@@ -126,7 +126,7 @@ describe('ProjectLifecycleManager', () => {
         },
       })
 
-      expect(ctx.modeOptions.activeBrowser).to.eq(undefined)
+      expect(ctx.coreData.activeBrowser).to.eq(undefined)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
@@ -166,7 +166,7 @@ describe('ProjectLifecycleManager', () => {
         },
       })
 
-      expect(ctx.modeOptions.activeBrowser).to.eq(undefined)
+      expect(ctx.coreData.activeBrowser).to.eq(undefined)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
