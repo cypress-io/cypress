@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.15.2
+## 13.15.3
 
-_Released 11/5/2024_
+_Released xx/xx/xxxx_
 
 **Features:**
 
 - Added new [`defaultBrowser`](https://docs.cypress.io/app/references/configuration) configuration option to specify the default browser to launch. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+
+## 13.15.2
+
+_Released 11/5/2024_
 
 **Bugfixes:**
 
