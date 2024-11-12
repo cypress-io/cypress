@@ -40,7 +40,7 @@ export const WIZARD_DEPENDENCY_TYPESCRIPT = {
   package: 'typescript',
   installer: 'typescript',
   description: 'TypeScript is a language for application-scale JavaScript',
-  minVersion: '^3.4.0 || ^4.0.0 || ^5.0.0',
+  minVersion: '^4.0.0 || ^5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_CLI_SERVICE = {
