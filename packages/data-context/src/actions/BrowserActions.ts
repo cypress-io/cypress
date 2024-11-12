@@ -40,6 +40,11 @@ export class BrowserActions {
     })
   }
 
+  updateCliBrowser (browser: string) {
+    this.ctx.updateModeOptionsBrowser(browser)
+    this.ctx.coreData.cliBrowser = browser
+  }
+
   async focusActiveBrowserWindow () {
     await this.browserApi.focusActiveBrowserWindow()
   }

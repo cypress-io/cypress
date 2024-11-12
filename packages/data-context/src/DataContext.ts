@@ -426,11 +426,7 @@ export class DataContext {
     })
   }
 
-  updateCliBrowser (browser: string) {
-    // in open mode, prevent cliBrowser from being changed after browser is opened
-    if (this.isRunMode || !this.coreData.cliBrowser) {
-      (this._modeOptions as Partial<AllModeOptions>).browser = browser
-      this.coreData.cliBrowser = browser
-    }
+  updateModeOptionsBrowser (browser: string) {
+    (this.modeOptions as Partial<AllModeOptions>).browser = browser
   }
 }
