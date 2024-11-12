@@ -37,11 +37,12 @@ export const CypressSourcemap = (
           */
 
           const sourcemap = this.getCombinedSourcemap()
+          const sourcemapUrl = sourcemap.toUrl()
 
           if (/\/\/# sourceMappingURL=/i.test(code)) {
-            code = code.replace(/\/\/# sourceMappingURL=(.*)$/m, `//# sourceMappingURL=${sourcemap.toUrl()}`)
+            code = code.replace(/\/\/# sourceMappingURL=(.*)$/m, `//# sourceMappingURL=${sourcemapUrl}`)
           } else {
-            code += `\n//# sourceMappingURL=${sourcemap.toUrl()}`
+            code += `\n//# sourceMappingURL=${sourcemapUrl}`
           }
 
           return {
