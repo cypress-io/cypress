@@ -209,30 +209,29 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  // TODO: make this version of @vue/cli-service 5 in https://github.com/cypress-io/cypress/issues/30295 or related issue
-  it.skip('warns against outdated @vue/cli dependency', () => {
-    cy.scaffoldProject('outdated-deps-vuecli3')
-    cy.addProject('outdated-deps-vuecli3')
+  it('warns against outdated vue/vite dependency', () => {
+    cy.scaffoldProject('outdated-deps-vue-vite')
+    cy.addProject('outdated-deps-vue-vite')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.contains('outdated-deps-vuecli3').click()
+    cy.contains('outdated-deps-vue-vite').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', '@vue/cli-service. Expected ^4.0.0 || ^5.0.0, found 3.12.1.')
+    .should('contain.text', 'vite. Expected ^4.0.0 || ^5.0.0, found 3.2.11.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 2)
   })
 
   it('does not show warning for project with supported dependencies', () => {
-    cy.scaffoldProject('vueclivue3-configured')
-    cy.addProject('vueclivue3-configured')
+    cy.scaffoldProject('vue3-webpack-ts-configured')
+    cy.addProject('vue3-webpack-ts-configured')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.contains('vueclivue3-configured').click()
+    cy.contains('vue3-webpack-ts-configured').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()

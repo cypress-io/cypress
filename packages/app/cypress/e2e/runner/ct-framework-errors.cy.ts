@@ -208,21 +208,21 @@ describe('Vue', {
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
-    cy.scaffoldProject('vuecli5-vue3')
+    cy.scaffoldProject('vue3-webpack-ts-configured')
   })
 
   it('error conditions', () => {
     const verify = loadErrorSpec({
-      projectName: 'vuecli5-vue3',
+      projectName: 'vue3-webpack-ts-configured',
       configFile: 'cypress.config.ts',
-      filePath: 'src/components/Errors.cy.js',
+      filePath: 'src/components/Errors.cy.ts',
       failCount: 4,
     })
 
     verify('error on mount', {
       fileName: 'Errors.vue',
       line: 19,
-      column: 16,
+      column: 15,
       message: [
         'mount error',
       ],
@@ -232,7 +232,7 @@ describe('Vue', {
     verify('sync error', {
       fileName: 'Errors.vue',
       line: 24,
-      column: 16,
+      column: 15,
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
@@ -247,7 +247,7 @@ describe('Vue', {
     verify('async error', {
       fileName: 'Errors.vue',
       line: 28,
-      column: 18,
+      column: 17,
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
@@ -265,8 +265,8 @@ describe('Vue', {
         'Timed out retrying',
         'element-that-does-not-exist',
       ],
-      codeFrameRegex: /Errors\.cy\.js:25/,
-      stackRegex: /Errors\.cy\.js:25/,
+      codeFrameRegex: /Errors\.cy\.ts:32/,
+      stackRegex: /Errors\.cy\.ts:32/,
     })
   })
 })

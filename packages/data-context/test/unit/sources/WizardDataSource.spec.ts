@@ -15,36 +15,36 @@ describe('packagesToInstall', () => {
     removeCommonNodeModules()
   })
 
-  it('vueclivue3-unconfigured', async () => {
+  it('regular react project with webpack', async () => {
     const ctx = createTestDataContext()
 
-    const projectPath = await scaffoldMigrationProject('vueclivue3-unconfigured')
+    const projectPath = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
 
     ctx.update((coreData) => {
       coreData.currentProject = projectPath
-      coreData.wizard.chosenFramework = findFramework('vueclivue3')
+      coreData.wizard.chosenFramework = findFramework('react')
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
+    expect(actual).to.eq(`npm install -D webpack react react-dom`)
   })
 
-  it('vuecli5vue3-unconfigured', async () => {
+  it('regular vue project with webpack', async () => {
     const ctx = createTestDataContext()
 
-    const projectPath = await scaffoldMigrationProject('vuecli5vue3-unconfigured')
+    const projectPath = await scaffoldMigrationProject('vue3-webpack-ts-unconfigured')
 
     ctx.update((coreData) => {
       coreData.currentProject = projectPath
-      coreData.wizard.chosenFramework = findFramework('vueclivue3')
+      coreData.wizard.chosenFramework = findFramework('vue3')
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
+    expect(actual).to.eq(`npm install -D webpack vue`)
   })
 
   it('regular react project with vite', async () => {

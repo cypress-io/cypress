@@ -1,8 +1,9 @@
-import { defineConfig } from 'cypress'
+const { defineConfig } = require('cypress')
 
-export default defineConfig({
+module.exports = defineConfig({
   component: {
     experimentalSingleTabRunMode: true,
+    supportFile: false,
     devServer: {
       framework: 'vue',
       bundler: 'vite',

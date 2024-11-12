@@ -5,7 +5,7 @@ export default defineConfig({
     experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'vue',
-      bundler: 'vite',
+      bundler: 'webpack',
     },
   },
 })

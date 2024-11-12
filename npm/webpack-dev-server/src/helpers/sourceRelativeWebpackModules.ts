@@ -66,7 +66,6 @@ export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
 type FrameworkWebpackMapper = { [Property in Frameworks]: string | undefined }
 
 const frameworkWebpackMapper: FrameworkWebpackMapper = {
-  'vue-cli': '@vue/cli-service',
   react: undefined,
   vue: undefined,
   next: 'next',
