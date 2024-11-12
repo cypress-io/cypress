@@ -15,7 +15,9 @@ export const CypressSourcemap = (
     enforce: 'post',
     transform (code, id, options?) {
       try {
-        if (/\.js$/i.test(id) && !/\/\/# sourceMappingURL=/i.test(code)) {
+        const queryParameterLessId = id.split('?')[0]
+
+        if (/\.(js|jsx|ts|tsx|vue|mjs|cjs)$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
           /*
           The Vite dev server and plugins automatically generate sourcemaps for most files, but they are
           only included in the served files if any transpilation actually occurred (JSX, TS, etc). This
@@ -36,7 +38,11 @@ export const CypressSourcemap = (
 
           const sourcemap = this.getCombinedSourcemap()
 
-          code += `\n//# sourceMappingURL=${sourcemap.toUrl()}`
+          if (/\/\/# sourceMappingURL=/i.test(code)) {
+            code = code.replace(/\/\/# sourceMappingURL=(.*)$/m, `//# sourceMappingURL=${sourcemap.toUrl()}`)
+          } else {
+            code += `\n//# sourceMappingURL=${sourcemap.toUrl()}`
+          }
 
           return {
             code,
