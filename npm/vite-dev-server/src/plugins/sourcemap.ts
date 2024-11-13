@@ -20,7 +20,7 @@ export const CypressSourcemap = (
         const queryParameterLessId = id.split('?')[0]
 
         // Check if the file has a JavaScript extension and does not have an inlined sourcemap
-        if (/\.(js|jsx|ts|tsx|vue|mjs|cjs)$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
+        if (/\.(js|jsx|ts|tsx|vue|svelte|mjs|cjs)$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
           /*
           The Vite dev server and plugins automatically generate sourcemaps for most files, but there are
           some files that don't have sourcemaps generated for them or are not inlined. We utilize a 'post' plugin

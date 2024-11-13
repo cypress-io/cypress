@@ -9,7 +9,7 @@ import sinon from 'sinon'
 Chai.use(SinonChai)
 
 describe('sourcemap plugin', () => {
-  ['js', 'jsx', 'ts', 'tsx', 'vue', 'mjs', 'cjs'].forEach((ext) => {
+  ['js', 'jsx', 'ts', 'tsx', 'vue', 'svelte', 'mjs', 'cjs'].forEach((ext) => {
     it(`should append sourcemap to the code if sourceMappingURL is not present for files with extension ${ext}`, () => {
       const code = 'console.log("hello world")'
       const id = `test.js`
