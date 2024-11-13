@@ -19,6 +19,7 @@ export const CypressSourcemap = (
         // have a cache buster query parameter (e.g. `?v=12345`)
         const queryParameterLessId = id.split('?')[0]
 
+        // Check if the file has a JavaScript extension and does not have an inlined sourcemap
         if (/\.(js|jsx|ts|tsx|vue|mjs|cjs)$/i.test(queryParameterLessId) && !/\/\/# sourceMappingURL=data/i.test(code)) {
           /*
           The Vite dev server and plugins automatically generate sourcemaps for most files, but there are
