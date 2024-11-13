@@ -4,7 +4,7 @@ import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
 import type { ProxyTimings } from './proxy'
 import type { SpecWithRelativeRoot } from './spec'
-import { FullConfig } from './config'
+import type { FullConfig } from './config'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
