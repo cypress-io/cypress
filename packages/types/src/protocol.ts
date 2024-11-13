@@ -4,7 +4,6 @@ import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
 import type { ProxyTimings } from './proxy'
 import type { SpecWithRelativeRoot } from './spec'
-import type { FullConfig } from './config'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -86,7 +85,12 @@ export type CaptureArtifact = {
   filePath: string
 }
 
-type ProjectConfig = Pick<FullConfig, 'devServerPublicPathRoute' | 'port' | 'proxyUrl' | 'namespace'>
+type ProjectConfig = {
+  devServerPublicPathRoute: string
+  namespace: string
+  port: number
+  proxyUrl: string
+}
 
 export type ProtocolManagerOptions = {
   runId: string
