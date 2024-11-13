@@ -5,7 +5,9 @@ _Released 12/31/2025 (PENDING)_
 
 **Features:**
 
-- Added new [`defaultBrowser`](https://docs.cypress.io/app/references/configuration) configuration option to specify the default browser to launch. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+- Added new
+  [`defaultBrowser`](https://docs.cypress.io/app/references/configuration)
+  configuration option to specify the default browser to launch. This option only affects the first browser launched; changing this option after the browser is already launched will have no effect. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
 
 ## 13.15.2
 
