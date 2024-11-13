@@ -40,7 +40,7 @@ export class BrowserActions {
     })
   }
 
-  updateCliBrowser (browser: string) {
+  setCliBrowser (browser: string) {
     this.ctx.updateModeOptionsBrowser(browser)
     this.ctx.coreData.cliBrowser = browser
   }
