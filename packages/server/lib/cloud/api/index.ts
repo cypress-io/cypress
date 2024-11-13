@@ -426,6 +426,8 @@ export default {
       }
 
       if (script) {
+        const config = options.project.getConfig()
+
         await options.project.protocolManager.setupProtocol(script, {
           runId: result.runId,
           projectId: options.projectId,
@@ -435,6 +437,7 @@ export default {
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
+          projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
         })
       }

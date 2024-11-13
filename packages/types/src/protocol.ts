@@ -85,6 +85,13 @@ export type CaptureArtifact = {
   filePath: string
 }
 
+type ProjectConfig = {
+  devServerPublicPathRoute: string
+  namespace: string
+  port: number
+  proxyUrl: string
+}
+
 export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
@@ -96,6 +103,7 @@ export type ProtocolManagerOptions = {
       get (options: any): Promise<any>
     }
   }
+  projectConfig: ProjectConfig
   mountVersion?: number
 }
 
