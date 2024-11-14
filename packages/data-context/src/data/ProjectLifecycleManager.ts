@@ -323,7 +323,7 @@ export class ProjectLifecycleManager {
 
     // if we already have an activeBrowser, that means we are reloading the browser (e.g. after a config change in open mode)
     // so we need to set the CLI browser to the activeBrowser to ensure the GUI shows the correct browser
-    if (this.ctx.coreData.activeBrowser) {
+    if (this.ctx.coreData.activeBrowser && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       this.ctx.actions.browser.setCliBrowser(`${this.ctx.coreData.activeBrowser.name}:${this.ctx.coreData.activeBrowser.channel}`)
     }
 
