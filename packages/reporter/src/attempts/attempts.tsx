@@ -1,6 +1,6 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React from 'react'
 
 import type { TestState } from '@packages/types'
 import Agents from '../agents/agents'
@@ -52,7 +52,7 @@ function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
       <Sessions model={model.sessions} />
       <Agents model={model} />
       <Routes model={model} />
-      <div ref='commands' className='runnable-commands-region'>
+      <div className='runnable-commands-region'>
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
       {model.state === 'failed' && (
@@ -71,37 +71,24 @@ interface AttemptProps {
   studioActive: boolean
 }
 
-@observer
-class Attempt extends Component<AttemptProps> {
-  componentDidUpdate () {
-    this.props.scrollIntoView()
-  }
-
-  render () {
-    const { model, studioActive } = this.props
-
-    // HACK: causes component update when command log is added
-    model.commands.length
-
-    return (
-      <li
-        key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.state}`)}
-        ref="container"
+const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studioActive }) => {
+  return (
+    <li
+      key={model.id}
+      className={cs('attempt-item', `attempt-state-${model.state}`)}
+    >
+      <Collapsible
+        header={<AttemptHeader index={model.id} state={model.state} />}
+        hideExpander
+        headerClass='attempt-name'
+        contentClass='attempt-content'
+        isOpen={model.isOpen}
       >
-        <Collapsible
-          header={<AttemptHeader index={model.id} state={model.state} />}
-          hideExpander
-          headerClass='attempt-name'
-          contentClass='attempt-content'
-          isOpen={model.isOpen}
-        >
-          {renderAttemptContent(model, studioActive)}
-        </Collapsible>
-      </li>
-    )
-  }
-}
+        {renderAttemptContent(model, studioActive)}
+      </Collapsible>
+    </li>
+  )
+})
 
 const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
   return (<ul className={cs('attempts', {

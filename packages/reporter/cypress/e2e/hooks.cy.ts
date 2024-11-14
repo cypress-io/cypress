@@ -26,7 +26,7 @@ describe('hooks', () => {
       })
     })
 
-    cy.get('.reporter').then(() => {
+    cy.get('.reporter.mounted').then(() => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
     })

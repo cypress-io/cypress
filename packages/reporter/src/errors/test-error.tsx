@@ -44,12 +44,10 @@ interface TestErrorProps {
   testId?: string
   commandId?: number
   // the command group level to nest the recovered in-test error
-  groupLevel: number
+  groupLevel?: number
 }
 
-const TestError = (props: TestErrorProps) => {
-  const { err } = props
-
+const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, commandId }) => {
   if (!err || !err.displayMessage) return null
 
   const md = new Markdown('zero')
@@ -57,7 +55,7 @@ const TestError = (props: TestErrorProps) => {
   md.enable(['backticks', 'emphasis', 'escape'])
 
   const onPrint = () => {
-    events.emit('show:error', props)
+    events.emit('show:error', { err, groupLevel, testId, commandId })
   }
 
   const _onPrintClick = (e: MouseEvent) => {
@@ -72,7 +70,7 @@ const TestError = (props: TestErrorProps) => {
 
   if (err.isRecovered) {
     // cap the group nesting to 5 levels to keep the log text legible
-    for (let i = 0; i < props.groupLevel; i++) {
+    for (let i = 0; i < groupLevel; i++) {
       groupPlaceholder.push(<span key={`${err.name}-err-${i}`} className='err-group-block' />)
     }
   }
@@ -119,10 +117,6 @@ const TestError = (props: TestErrorProps) => {
       </div>
     </div>
   )
-}
-
-TestError.defaultProps = {
-  groupLevel: 0,
 }
 
 export default observer(TestError)
