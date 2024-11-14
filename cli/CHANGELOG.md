@@ -6,7 +6,7 @@ _Released 11/19/2024 (PENDING)_
 **Features:**
 
 - Updated the protocol to be able to flex logic based on project config. Addresses [#30560](https://github.com/cypress-io/cypress/issues/30560).
-- Added new [`defaultBrowser`](https://docs.cypress.io/app/references/configuration) configuration option to specify the default browser to launch. This option only affects the first browser launch; changing this option after the browser is already launched will have no effect. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+- Added new [`defaultBrowser`](https://docs.cypress.io/app/references/configuration#Browser) configuration option to specify the default browser to launch. This option only affects the first browser launch; changing this option after the browser is already launched will have no effect. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
 
 ## 13.15.2
 
