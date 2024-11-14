@@ -227,6 +227,9 @@ Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
 export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
 ```
 
+> [!IMPORTANT]
+> The above steps to install an earlier version of Python are currently not available for the interim release Ubuntu `24.10`. The highest compatible Ubuntu version for rebuilding Cypress from source error-free is currently Ubuntu `24.04`.
+
 For Ubuntu `24.04` refer also to the [Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section [Unprivileged user namespace restrictions](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890#unprivileged-user-namespace-restrictions-15) and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on this version of Ubuntu after building Cypress from source.
 
 #### Windows
