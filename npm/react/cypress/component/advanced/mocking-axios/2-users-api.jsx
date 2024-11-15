@@ -8,7 +8,6 @@ export function Users () {
   const getUsers = async () => {
     console.log({ axiosApi })
     const response = await axiosApi.get('https://jsonplaceholder.cypress.io/users?_limit=3')
-    // JSON responses are automatically parsed.
 
     setUsers(response.data)
   }

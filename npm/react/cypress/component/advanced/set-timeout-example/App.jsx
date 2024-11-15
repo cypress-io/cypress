@@ -12,7 +12,7 @@ function App () {
     return () => {
       clearTimeout(_timer)
     }
-  })
+  }, [])
 
   return (
     <div className="App">

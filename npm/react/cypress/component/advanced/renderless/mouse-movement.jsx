@@ -36,7 +36,7 @@ export default function MouseMovement ({ onMoved }) {
       clearTimeout(timer)
       setTimer(undefined)
     }
-  })
+  }, [])
 
   return null
 }

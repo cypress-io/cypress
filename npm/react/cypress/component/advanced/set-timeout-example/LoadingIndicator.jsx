@@ -12,7 +12,7 @@ export default function LoadingIndicator ({ isLoading, children }) {
     return () => {
       clearTimeout(_delayTimer)
     }
-  })
+  }, [])
 
   if (isLoading) {
     if (!isPastDelay) {
