@@ -42,6 +42,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 **Dependency Updates:**
 
 - Upgraded `electron` from `27.3.10` to `32.2.0`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
+- Upgraded `@electron/rebuild` from `3.2.10` to `3.7.1`. Addresses [#28766](https://github.com/cypress-io/cypress/issues/28766) and [#30632](https://github.com/cypress-io/cypress/issues/30632).
 - Upgraded bundled Chromium version from `118.0.5993.159` to `128.0.6613.178`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
 - Updated `jQuery` from `3.4.1` to `3.7.1`. Addressed in [#30345](https://github.com/cypress-io/cypress/pull/30345).
 - Updated `react` from `17.0.2` to `18.3.1` and `react-dom` from `17.0.2` to `18.3.1`. Addresses [#30511](https://github.com/cypress-io/cypress/issues/30511).
