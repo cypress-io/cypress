@@ -1151,6 +1151,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
         default: [{ configFile: '/path/to/cypress.config.js' }],
@@ -1277,7 +1282,7 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+    JIT_COMPONENT_TESTING: () => {
       return {
         default: [],
       }

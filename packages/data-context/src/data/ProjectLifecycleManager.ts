@@ -241,7 +241,7 @@ export class ProjectLifecycleManager {
           /**
            * We need to start the dev server in the ProjectLifecycleManager when:
            *   1. GA component testing is running so we can compile the dev server will all specs matching the specPattern
-           *   2. experimentalJustInTimeCompile is enabled (for webpack-dev-server). In this case, we start a dev server
+           *   2. justInTimeCompile is enabled (for webpack-dev-server). In this case, we start a dev server
            *      with an empty specs list to initially compile the support file and related dependencies in order to hopefully
            *      leverage the dev server cache for recompiling for when we actually have a spec to add to the dev server entry.
            *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.

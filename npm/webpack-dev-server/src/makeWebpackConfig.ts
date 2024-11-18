@@ -80,12 +80,12 @@ export async function makeWebpackConfig (
     cypressConfig: {
       projectRoot,
       supportFile,
-      experimentalJustInTimeCompile,
+      justInTimeCompile,
     },
     framework,
   } = config.devServerConfig
 
-  config.devServerConfig.specs = experimentalJustInTimeCompile ? [] : config.devServerConfig.specs
+  config.devServerConfig.specs = justInTimeCompile ? [] : config.devServerConfig.specs
 
   if (!userWebpackConfig && !frameworkWebpackConfig) {
     debug('Not user or framework webpack config received. Trying to automatically source it')

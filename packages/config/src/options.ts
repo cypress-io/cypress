@@ -232,12 +232,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalJustInTimeCompile',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
     name: 'experimentalOriginDependencies',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -290,6 +284,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     overrideLevel: 'any',
+  }, {
+    name: 'justInTimeCompile',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -632,6 +631,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalJustInTimeCompile',
+    errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'experimentalNetworkStubbing',
     errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
     isWarning: true,
@@ -736,8 +740,8 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalJustInTimeCompile',
-    errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+    name: 'justInTimeCompile',
+    errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
     testingTypes: ['component'],
   },
@@ -756,8 +760,8 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalJustInTimeCompile',
-      errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+      name: 'justInTimeCompile',
+      errorKey: 'JIT_COMPONENT_TESTING',
       isWarning: false,
     },
   ],

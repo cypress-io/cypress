@@ -17,12 +17,12 @@ const getAllMatches = (source, regex) => {
   return matches
 }
 
-describe('component testing: experimentalJustInTimeCompile', function () {
+describe('component testing: justInTimeCompile', function () {
   systemTests.setup()
 
-  // makes sure experimentalJustInTimeCompile=true has no affect on how vite compiles files.
+  // makes sure justInTimeCompile=true has no affect on how vite compiles files.
   systemTests.it('vite@5', {
-    project: 'experimental-JIT/vite',
+    project: 'justInTimeCompile/vite',
     testingType: 'component',
     browser: 'electron',
     expectedExitCode: 0,
@@ -48,7 +48,7 @@ describe('component testing: experimentalJustInTimeCompile', function () {
   })
 
   systemTests.it('webpack@5', {
-    project: 'experimental-JIT/webpack',
+    project: 'justInTimeCompile/webpack',
     testingType: 'component',
     browser: 'electron',
     expectedExitCode: 0,
@@ -60,7 +60,7 @@ describe('component testing: experimentalJustInTimeCompile', function () {
         },
       })
       const serverPortRegex = /Component testing webpack server 5 started on port 8080/g
-      const componentsCompiledSeparatelyRegex = /experimental-JIT\/webpack\/src\/Component\-[1-3].cy.jsx/g
+      const componentsCompiledSeparatelyRegex = /justInTimeCompile\/webpack\/src\/Component\-[1-3].cy.jsx/g
 
       const totalServersSamePort = getAllMatches(stderr, serverPortRegex).length
       const totalComponentsCompiledSeparately = getAllMatches(stderr, componentsCompiledSeparatelyRegex).length

@@ -1,6 +1,6 @@
 module.exports = {
   component: {
-    experimentalJustInTimeCompile: true,
+    justInTimeCompile: true,
     devServer: {
       framework: 'react',
       bundler: 'webpack',

@@ -2,18 +2,18 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const EXPERIMENTAL_JIT_DIR: ProjectDirs[number] = 'experimental-JIT'
+const JIT_DIR: ProjectDirs[number] = 'justInTimeCompile'
 
 const PROJECTS: {bundler: 'vite' | 'webpack'}[] = [
-  // when running for vite, experimentalJustInTimeCompile=true is set but is a no-op for vite since JIT compiling is not supported in vite
+  // when running for vite, justInTimeCompile=true is set but is a no-op for vite since JIT compiling is not supported in vite
   { bundler: 'vite' },
   { bundler: 'webpack' },
 ]
 
 for (const { bundler } of PROJECTS) {
-  const PROJECT_NAME = `${EXPERIMENTAL_JIT_DIR}/${bundler}`
+  const PROJECT_NAME = `${JIT_DIR}/${bundler}`
 
-  describe(`CT experimentalJustInTimeCompile: ${bundler}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
+  describe(`CT justInTimeCompile: ${bundler}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
     const visitComponentSpecAndVerifyPass = (specNumber: number) => {
       cy.contains(`Component-${specNumber}.cy.jsx`).click()
       cy.waitForSpecToFinish(undefined)
