@@ -1,1 +1,1 @@
-yarn cypress:run --project=/Users/bill/Repositories/ct-webpack-test --component 
+yarn cypress:run --project=./cypress/system-tests/projects/experimental-JIT --component 

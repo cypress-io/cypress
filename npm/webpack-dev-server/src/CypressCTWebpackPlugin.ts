@@ -108,7 +108,7 @@ export class CypressCTWebpackPlugin {
    *
    * See https://github.com/cypress-io/cypress/issues/24398
    */
-  private onSpecsChange = async (specs: Cypress.Cypress['spec'][]) => {
+  private onSpecsChange = async ({ specs, options }: { specs: Cypress.Cypress['spec'][], options?: { neededForJustInTimeCompile: boolean}}) => {
     if (!this.compilation || _.isEqual(specs, this.files)) {
       return
     }

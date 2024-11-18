@@ -239,14 +239,14 @@ export class ProjectLifecycleManager {
           const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
 
           /**
-             * We need to start the dev server in the ProjectLifecycleManager when:
-             *   1. GA component testing is running so we can compile the dev server will all specs matching the specPattern
-             *   2. experimentalJustInTimeCompile is enabled. In this case, we start a dev server
-             *      with an empty specs list to initially compile the support file and related dependencies in order to hopefully
-             *      leverage the dev server cache for recompiling for when we actually have a spec to add to the dev server entry.
-             */
-          const specsToStartDevServer = finalConfig.experimentalJustInTimeCompile ? [] : this.ctx.project.specs
-          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: specsToStartDevServer, config: finalConfig })
+           * We need to start the dev server in the ProjectLifecycleManager when:
+           *   1. GA component testing is running so we can compile the dev server will all specs matching the specPattern
+           *   2. experimentalJustInTimeCompile is enabled (for webpack-dev-server). In this case, we start a dev server
+           *      with an empty specs list to initially compile the support file and related dependencies in order to hopefully
+           *      leverage the dev server cache for recompiling for when we actually have a spec to add to the dev server entry.
+           *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.
+           */
+          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           // If we received a cypressConfig.port we want to null it out
           // because we propagated it into the devServer.port and it is

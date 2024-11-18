@@ -20,6 +20,7 @@ const getAllMatches = (source, regex) => {
 describe('component testing: experimentalJustInTimeCompile', function () {
   systemTests.setup()
 
+  // makes sure experimentalJustInTimeCompile=true has no affect on how vite compiles files.
   systemTests.it('vite@5', {
     project: 'experimental-JIT/vite',
     testingType: 'component',
@@ -41,8 +42,8 @@ describe('component testing: experimentalJustInTimeCompile', function () {
 
       // expect 1 server to be created
       expect(totalServersSamePort).to.equal(1)
-      // expect each component compiled individually
-      expect(totalComponentsCompiledSeparately).to.equal(3)
+      // expect each component to be compiled all together (no JIT support for vite)
+      expect(totalComponentsCompiledSeparately).to.equal(0)
     },
   })
 

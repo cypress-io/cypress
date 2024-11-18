@@ -65,7 +65,6 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
 function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig | InlineConfig {
   const {
     cypressConfig: {
-      experimentalJustInTimeCompile,
       port,
       projectRoot,
       devServerPublicPathRoute,
@@ -129,8 +128,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
       port: vitePort,
       host: '127.0.0.1',
       // Disable file watching and HMR when executing tests in `run` mode
-      // if experimentalJustInTimeCompile is configured, we need to watch for file changes as the spec entries are going to be updated per test in run mode
-      ...(isTextTerminal && !experimentalJustInTimeCompile
+      ...(isTextTerminal
         ? { watch: { ignored: '**/*' }, hmr: false }
         : {}),
     },

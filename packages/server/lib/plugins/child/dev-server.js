@@ -5,8 +5,8 @@ const wrap = (ipc, invoke, ids, args) => {
   const [options] = args
   const devServerEvents = new EE()
 
-  ipc.on('dev-server:specs:changed', (specs) => {
-    devServerEvents.emit('dev-server:specs:changed', specs)
+  ipc.on('dev-server:specs:changed', (specsAndOptions) => {
+    devServerEvents.emit('dev-server:specs:changed', specsAndOptions)
   })
 
   devServerEvents.on('dev-server:compile:success', ({ specFile } = {}) => {

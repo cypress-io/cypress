@@ -5,6 +5,7 @@ type ProjectDirs = typeof fixtureDirs
 const EXPERIMENTAL_JIT_DIR: ProjectDirs[number] = 'experimental-JIT'
 
 const PROJECTS: {bundler: 'vite' | 'webpack'}[] = [
+  // when running for vite, experimentalJustInTimeCompile=true is set but is a no-op for vite since JIT compiling is not supported in vite
   { bundler: 'vite' },
   { bundler: 'webpack' },
 ]

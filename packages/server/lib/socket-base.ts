@@ -394,7 +394,7 @@ export class SocketBase {
           // update the dev server with the spec running
           debug(`updating CT dev-server with spec: ${spec.relative}`)
           // @ts-expect-error
-          await devServer.updateSpecs([spec])
+          await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
 
           return socket.emit('dev-server:on-spec-updated')
         })

@@ -826,8 +826,10 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
         // If in run mode, we need to update the dev server with our spec.
         // in open mode, this happens in the browser through the web socket, but we do it here in run mode
-        // to try and have it happen as early as possible to make the test run as fast as possible
-        await ctx._apis.projectApi.getDevServer().updateSpecs([spec])
+        // to try and have it happen as early as possible to make the test run as fast as possible.
+        // NOTE: this is a no-op for @cypress/vite-dev-server and only applies to @cypress/webpack-dev-server
+        // since just-in-time compile does not apply to vite.
+        await ctx._apis.projectApi.getDevServer().updateSpecs([spec], { neededForJustInTimeCompile: true })
       }
     }
 

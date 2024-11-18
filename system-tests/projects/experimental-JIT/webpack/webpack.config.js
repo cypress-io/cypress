@@ -5,6 +5,7 @@ module.exports = ({ mode } = { mode: 'production' }) => {
     mode,
     // so we don't get variable module output when comparing snapshots in system-tests
     stats: 'errors-only',
+    // stats: 'normal', // if debugging JIT
     resolve: {
       extensions: ['.js', '.ts', '.jsx', '.tsx'],
       alias: {
