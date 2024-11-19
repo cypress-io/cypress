@@ -35,7 +35,7 @@ exports['module api and after:run results'] = `
     "fixturesFolder": "/path/to/fixturesFolder",
     "excludeSpecPattern": "*.hot-update.js",
     "includeShadowDom": false,
-    "justInTimeCompile": false,
+    "justInTimeCompile": true,
     "keystrokeDelay": 0,
     "modifyObstructiveCode": true,
     "numTestsKeptInMemory": 0,

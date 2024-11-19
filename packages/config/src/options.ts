@@ -286,7 +286,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'justInTimeCompile',
-    defaultValue: false,
+    defaultValue: true,
     validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   }, {

@@ -124,17 +124,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
 
-ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from [..]):
-SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
-
-  6 |   cy.get('h1').contains('Hello World')
-  7 | }
-> 8 | })
-    | ^
-  9 |
-      [stack trace lines]
-
 
   ✓ renders hello world
   ✓ renders background
@@ -160,6 +149,17 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
+
+ERROR in ./src/AppCompilationError.cy.jsx
+Module build failed (from [..]):
+SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
+
+  6 |   cy.get('h1').contains('Hello World')
+  7 | }
+> 8 | })
+    | ^
+  9 |
+      [stack trace lines]
 
 
   1) An uncaught error was detected outside of a test
@@ -562,18 +562,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from [..]):
-SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
-
-  6 |   cy.get('h1').contains('Hello World')
-  7 | }
-> 8 | })
-    | ^
-  9 |
-      [stack trace lines]
-
-webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -600,6 +588,18 @@ webpack compiled with 1 error
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
+ERROR in ./src/AppCompilationError.cy.jsx
+Module build failed (from [..]):
+SyntaxError: /foo/bar/.projects/webpack5_wds4-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
+
+  6 |   cy.get('h1').contains('Hello World')
+  7 | }
+> 8 | })
+    | ^
+  9 |
+      [stack trace lines]
+
+webpack compiled with 1 error
 
 
   1) An uncaught error was detected outside of a test
@@ -1002,18 +1002,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 9)
-ERROR in ./src/AppCompilationError.cy.jsx
-Module build failed (from [..]):
-SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
-
-  6 |   cy.get('h1').contains('Hello World')
-  7 | }
-> 8 | })
-    | ^
-  9 |
-      [stack trace lines]
-
-webpack compiled with 1 error
 
 
   ✓ renders hello world
@@ -1040,6 +1028,18 @@ webpack compiled with 1 error
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
+ERROR in ./src/AppCompilationError.cy.jsx
+Module build failed (from [..]):
+SyntaxError: /foo/bar/.projects/webpack5_wds5-react/src/AppCompilationError.cy.jsx: Unexpected token, expected "," (8:0)
+
+  6 |   cy.get('h1').contains('Hello World')
+  7 | }
+> 8 | })
+    | ^
+  9 |
+      [stack trace lines]
+
+webpack compiled with 1 error
 
 
   1) An uncaught error was detected outside of a test
