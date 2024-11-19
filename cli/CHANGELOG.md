@@ -34,6 +34,10 @@ _Released 12/3/2024 (PENDING)_
 - The `resourceType` option on `cy.intercept` has been deprecated. We anticipate the resource types to change or be completely removed in the future. Our intention is to replace essential functionality dependent on the `resourceType` within Cypress in a future version (like hiding network logs that are not fetch/xhr). Please leave feedback on any essential uses of `resourceType`
 in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addresses [#30433](https://github.com/cypress-io/cypress/issues/30433).
 
+**Features:**
+
+- Cypress Component Testing now supports `React` version 19. Cypress will allow detected use of the React 19 Release Candidate until React 19 is officially released. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
+
 **Bugfixes:**
 
 - Elements with `display: contents` will no longer use box model calculations for visibility, and correctly show as visible when it is visible. Fixed in [#29680](https://github.com/cypress-io/cypress/pull/29680). Fixes [#29605](https://github.com/cypress-io/cypress/issues/29605).
