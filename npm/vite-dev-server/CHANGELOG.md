@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v5.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.2.0...@cypress/vite-dev-server-v5.2.1) (2024-11-19)
+
+
+### Bug Fixes
+
+* ensure that each js file served up by vite dev server has an inline sourcemap ([#30606](https://github.com/cypress-io/cypress/issues/30606)) ([4bf8e58](https://github.com/cypress-io/cypress/commit/4bf8e585cd68e0f5bb879a960073ed30791ebc37))
+
 # [@cypress/vite-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.1.1...@cypress/vite-dev-server-v5.2.0) (2024-08-27)
 
 

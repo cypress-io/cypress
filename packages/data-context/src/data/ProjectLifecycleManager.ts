@@ -308,10 +308,25 @@ export class ProjectLifecycleManager {
   /**
    * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
    *  1. The value of `--browser` passed via CLI.
-   *  2. The last browser selected in `open` mode (by name and channel) for this project.
-   *  3. The first browser found.
+   *  2. The value of `defaultBrowser` in `cypress.config`.
+   *  3. The last browser selected in `open` mode (by name and channel) for this project.
+   *  4. The first browser found.
    */
   async setInitialActiveBrowser () {
+    const configDefaultBrowser = this.loadedFullConfig?.defaultBrowser
+
+    // if we have a default browser from the config and a CLI browser wasn't passed and the active browser hasn't been set
+    // set the cliBrowser to the defaultBrowser from the config since we want the defaultBrowser to behave as if it was passed via CLI
+    if (configDefaultBrowser && !this.ctx.modeOptions.isBrowserGivenByCli && !this.ctx.coreData.activeBrowser) {
+      this.ctx.actions.browser.setCliBrowser(configDefaultBrowser)
+    }
+
+    // if we already have an activeBrowser, that means we are reloading the browser (e.g. after a config change in open mode)
+    // so we need to set the CLI browser to the activeBrowser to ensure the GUI shows the correct browser
+    if (this.ctx.coreData.activeBrowser && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      this.ctx.actions.browser.setCliBrowser(`${this.ctx.coreData.activeBrowser.name}:${this.ctx.coreData.activeBrowser.channel}`)
+    }
+
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
