@@ -58,7 +58,7 @@ export const WIZARD_DEPENDENCY_NEXT = {
   package: 'next',
   installer: 'next',
   description: 'The React Framework for Production',
-  minVersion: '^14.0.0',
+  minVersion: '^14.0.0 || ^15.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CLI = {

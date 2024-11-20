@@ -1,5 +1,5 @@
 {
-  "name": "next-latest",
+  "name": "next-14",
   "version": "0.0.0-test",
   "scripts": {
     "build": "next build",
