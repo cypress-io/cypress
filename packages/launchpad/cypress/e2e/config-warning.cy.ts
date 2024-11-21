@@ -203,8 +203,8 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
     .should('contain.text', 'vite. Expected ^4.0.0 || ^5.0.0, found 3.2.11')
-    .should('contain.text', 'react. Expected ^18.0.0, found 15.6.2.')
-    .should('contain.text', 'react-dom. Expected ^18.0.0 but dependency was not found.')
+    .should('contain.text', 'react. Expected ^18.0.0 || ^19.0.0-rc || ^19.0.0, found 15.6.2.')
+    .should('contain.text', 'react-dom. Expected ^18.0.0 || ^19.0.0-rc || ^19.0.0 but dependency was not found.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })

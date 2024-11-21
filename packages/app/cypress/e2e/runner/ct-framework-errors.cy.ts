@@ -51,8 +51,7 @@ function loadErrorSpec (options: Options): VerifyFunc {
   return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde: false, mode: 'component' })
 }
 
-// keeping structure as to easily adapt for future versions of react
-const reactVersions = [18] as const
+const reactVersions = [18, 19] as const
 
 reactVersions.forEach((reactVersion) => {
   describe(`React ${reactVersion}`, {
