@@ -97,6 +97,8 @@ describe('lib/exec/spawn', function () {
             at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
         
         [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
+
+        [18489:0822/130231.159571:ERROR:gl_display.cc(497)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
       `
 
       const lines = _

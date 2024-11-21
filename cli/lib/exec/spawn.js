@@ -76,7 +76,15 @@ const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Init
  */
 const isDebugScenario4 = /^\[[^\]]+debug_utils\.cc[^\]]+\] Hit debug scenario: 4/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4]
+/**
+ * In Electron 32.0.0 a new EGL driver message started appearing when running on Linux. This is a benign message.
+ * https://github.com/electron/electron/issues/43415
+ * Sample:
+ * [78887:1023/114920.074882:ERROR:gl_display.cc(14)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
+ */
+const isEGLDriverMessage = /^\[[^\]]+gl_display\.cc[^\]]+\] EGL Driver message \(Error\) eglQueryDeviceAttribEXT: Bad attribute\./
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4, isEGLDriverMessage]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
