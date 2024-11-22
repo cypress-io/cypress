@@ -122,6 +122,9 @@ jobs:
         id: check-number-of-existing-prs
         run: |
           echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+        shell: bash
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
