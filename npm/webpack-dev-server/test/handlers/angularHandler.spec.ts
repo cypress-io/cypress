@@ -46,8 +46,8 @@ describe('angularHandler', function () {
     expectLoadsAngularBuildOptions(buildOptions)
   })
 
-  it('sources the config from angular-18', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-18')
+  it('sources the config from angular-19', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-19')
 
     process.chdir(projectRoot)
     const devServerConfig = {

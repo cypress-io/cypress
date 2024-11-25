@@ -41,6 +41,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - Cypress Component Testing now supports:
   - `Next.js` version 15. Addresses [#30445](https://github.com/cypress-io/cypress/issues/30445).
   - `React` version 19. Cypress will allow detected use of the React 19 Release Candidate until React 19 is officially released. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
+  - `Angular` version 19. Addresses [#30175](https://github.com/cypress-io/cypress/issues/30175).
 
 **Bugfixes:**
 
