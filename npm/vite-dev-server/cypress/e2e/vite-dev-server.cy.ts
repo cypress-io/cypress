@@ -44,8 +44,8 @@ describe('Config options', () => {
   })
 
   it('supports supportFile = false', () => {
-    cy.scaffoldProject('vite5.4.10-react')
-    cy.openProject('vite5.4.10-react', ['--config-file', 'cypress-vite-no-support.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-no-support.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -59,8 +59,8 @@ describe('Config options', () => {
   it('supports serving files with whitespace', () => {
     const specWithWhitespace = 'spec with whitespace.cy.jsx'
 
-    cy.scaffoldProject('vite5.4.10-react')
-    cy.openProject('vite5.4.10-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, { specWithWhitespace }) => {
@@ -77,8 +77,8 @@ describe('Config options', () => {
   })
 
   it('supports @cypress/vite-dev-server', () => {
-    cy.scaffoldProject('vite5.4.10-react')
-    cy.openProject('vite5.4.10-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -89,8 +89,8 @@ describe('Config options', () => {
   })
 
   it('supports viteConfig as an async function', () => {
-    cy.scaffoldProject('vite5.4.10-react')
-    cy.openProject('vite5.4.10-react', ['--config-file', 'cypress-vite-async-function-config.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-async-function-config.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -120,8 +120,8 @@ describe('sourcemaps', () => {
       })
     `
 
-    cy.scaffoldProject('vite5.4.10-react')
-    cy.openProject('vite5.4.10-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, o) => {

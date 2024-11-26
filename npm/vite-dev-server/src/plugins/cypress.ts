@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-5'
+import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-6'
 import type { Vite } from '../getVite'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'

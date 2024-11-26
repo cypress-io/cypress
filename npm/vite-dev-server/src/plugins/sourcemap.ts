@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import type { PluginOption } from 'vite-5'
+import type { PluginOption } from 'vite-6'
 import type { Vite } from '../getVite'
 
 import type { ViteDevServerConfig } from '../devServer'

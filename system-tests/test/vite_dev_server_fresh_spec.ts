@@ -4,7 +4,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const VITE_REACT: ProjectDirs[number][] = ['vite4.5.5-react', 'vite5.4.10-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite4.5.5-react', 'vite5.4.10-react', 'vite6.0.0-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
