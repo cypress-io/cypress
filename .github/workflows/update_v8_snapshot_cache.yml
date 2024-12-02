@@ -118,11 +118,17 @@ jobs:
           echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }}" >> $GITHUB_ENV
           echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }} && echo 'true')" >> $GITHUB_ENV
         shell: bash
+      - name: Check number of existing prs
+        id: check-number-of-existing-prs
+        run: |
+          echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+        shell: bash
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
-          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_NAME != env.BASE_BRANCH && steps.check-need-for-pr.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
+          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_NAME != env.BASE_BRANCH && steps.check-number-of-existing-prs.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
           echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
