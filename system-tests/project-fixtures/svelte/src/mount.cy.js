@@ -85,18 +85,6 @@ describe('Svelte mount', () => {
     })
   })
 
-  it('throws error when receiving removed mounting option', () => {
-    Cypress.on('fail', (e) => {
-      expect(e.message).to.contain('The `styles` mounting option is no longer supported.')
-
-      return false
-    })
-
-    cy.mount(Counter, {
-      styles: `body { background: red; }`,
-    })
-  })
-
   context('teardown', () => {
     beforeEach(() => {
       // component-index.html has anchor element within [data-cy-root] so base # of elements is 1

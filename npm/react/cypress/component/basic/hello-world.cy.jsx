@@ -9,10 +9,4 @@ describe('HelloWorld component', () => {
     mount(<HelloWorld />)
     cy.contains('Hello World!')
   })
-
-  it('errors if passing alias', () => {
-    expect(() => mount(<HelloWorld />, { alias: 'foo' })).to.throw(
-      `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('foo') instead.`,
-    )
-  })
 })
