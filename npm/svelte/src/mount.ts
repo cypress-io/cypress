@@ -1,7 +1,6 @@
 import {
   getContainerEl,
   setupHooks,
-  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 
@@ -61,8 +60,6 @@ export function mount<T extends SvelteComponent> (
   Component: SvelteConstructor<T>,
   options: MountOptions<T> = {},
 ): Cypress.Chainable<MountReturn<T>> {
-  checkForRemovedStyleOptions(options)
-
   return cy.then(() => {
     // Remove last mounted component if cy.mount is called more than once in a test
     cleanup()

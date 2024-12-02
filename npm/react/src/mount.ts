@@ -8,7 +8,6 @@ import {
 import type {
   MountOptions,
   InternalMountOptions,
-  UnmountArgs,
 } from './index'
 
 let root: ReactDOM.Root | null
@@ -69,16 +68,7 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
 }
-/**
- * Removed as of Cypress 11.0.0.
- * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
- */
-export function unmount (options: UnmountArgs = { log: true }) {
-  // @ts-expect-error - undocumented API
-  Cypress.utils.throwErrByPath('mount.unmount')
-}
 
-// Re-export this to help with migrating away from `unmount`
 export {
   getContainerEl,
 }
