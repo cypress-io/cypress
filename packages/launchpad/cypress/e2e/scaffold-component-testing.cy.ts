@@ -146,7 +146,7 @@ describe('scaffolding component testing', {
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
-      verifyConfigFile(`cypress.config.js`)
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 
@@ -160,7 +160,7 @@ describe('scaffolding component testing', {
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
-      verifyConfigFile(`cypress.config.js`)
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 

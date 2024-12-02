@@ -20,7 +20,7 @@ _Released 12/17/2024 (PENDING)_
   - `Next.js` versions 10, 11, 12, and 13. Addresses [#29583](https://github.com/cypress-io/cypress/issues/29583).
   - `Nuxt.js` version 2. Addresses [#30468](https://github.com/cypress-io/cypress/issues/30468).
   - `React` versions 16 and 17. Addresses [#29607](https://github.com/cypress-io/cypress/issues/29607).
-  - `Svelte` version 3. Addresses [#30492](https://github.com/cypress-io/cypress/issues/30492).
+  - `Svelte` versions 3 and 4. Addresses [#30492](https://github.com/cypress-io/cypress/issues/30492) and [#30692](https://github.com/cypress-io/cypress/issues/30692).
   - `Vue` version 2. Addresses [#30295](https://github.com/cypress-io/cypress/issues/30295).
 - The `cypress/react18` test harness is no longer included in the Cypress binary. Instead, React 18 support is now shipped with `cypress/react`! Addresses [#29607](https://github.com/cypress-io/cypress/issues/29607).
 - The `cypress/angular-signals` test harness is no longer included in the Cypress binary. Instead, signals support is now shipped with `cypress/angular`! This requires `rxjs` to be installed as a `peerDependency`. Addresses [#29606](https://github.com/cypress-io/cypress/issues/29606).
@@ -43,6 +43,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
   - `React` version 19. Cypress will allow detected use of the React 19 Release Candidate until React 19 is officially released. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
   - `Angular` version 19. Addresses [#30175](https://github.com/cypress-io/cypress/issues/30175).
   - `Vite` version 6. Addresses [#30591](https://github.com/cypress-io/cypress/issues/30591).
+  - `Svelte` version 5. Addresses [#29641](https://github.com/cypress-io/cypress/issues/29641).
 
 **Bugfixes:**
 

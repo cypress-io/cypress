@@ -1828,6 +1828,32 @@ jobs:
           command: |
             # we need to bootstrap the binary into our project directory and run the tests
             source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run'
+  # We can remove this job a once https://github.com/sveltejs/svelte-loader/issues/243 is resolved.
+  svelte-webpack-system-test:
+    parallelism: 1
+    working_directory: ~/cypress
+    docker:
+      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+    environment:
+      # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
+      REPO_DIR: /root/cypress
+      TEST_PROJECT_DIR: ./system-tests/projects/svelte-webpack-configured
+      USE_YARN_TO_INSTALL_CYPRESS_BINARY: true
+    steps:
+      - maybe_skip_binary_jobs
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install monorepo dependencies
+          command: yarn install --ignore-scripts
+      - run:
+          name: install dependencies
+          command: cd ./system-tests/projects/svelte-webpack-configured && yarn
+      - run:
+          name: Bootstrap the Cypress binary and run binary system test
+          command: |
+            # we need to bootstrap the binary into our project directory and run the tests
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
 
   system-tests-chrome:
     <<: *defaults
@@ -2993,6 +3019,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-npm-module-on-minimum-node-version
           - binary-system-tests
           - yarn-pnp-preprocessor-system-test
+          - svelte-webpack-system-test
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
@@ -3108,6 +3135,11 @@ linux-x64-workflow: &linux-x64-workflow
           - get-published-artifacts
           - system-tests-node-modules-install
     - yarn-pnp-preprocessor-system-test:
+        context: publish-binary
+        requires:
+          - get-published-artifacts
+          - system-tests-node-modules-install
+    - svelte-webpack-system-test:
         context: publish-binary
         requires:
           - get-published-artifacts
