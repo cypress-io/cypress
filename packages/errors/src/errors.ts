@@ -188,6 +188,8 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}
 
+        Because you passed the ${fmt.flag(`--record`)} flag, this run cannot proceed because it requires a valid response from our servers.
+
         ${fmt.listFlags(arg1.flags, {
       group: '--group',
       ciBuildId: '--ciBuildId',

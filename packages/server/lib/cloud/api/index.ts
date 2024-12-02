@@ -458,22 +458,20 @@ export default {
       'platform',
     ])
 
-    return retryWithBackoff((attemptIndex) => {
-      return rp.post({
-        body,
-        url: recordRoutes.instances(runId),
-        json: true,
-        encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
-        headers: {
-          'x-route-version': '5',
-          'x-cypress-run-id': runId,
-          'x-cypress-request-attempt': attemptIndex,
-        },
-      })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    return rp.post({
+      body,
+      url: recordRoutes.instances(runId),
+      json: true,
+      encrypt: preflightResult.encrypt,
+      timeout: timeout ?? SIXTY_SECONDS,
+      headers: {
+        'x-route-version': '5',
+        'x-cypress-run-id': runId,
+        'x-cypress-request-attempt': 0,
+      },
     })
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
   },
 
   postInstanceTests (options) {
