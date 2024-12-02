@@ -169,10 +169,6 @@ describe('src/cypress/dom/visibility', () => {
     })
   })
 
-  const add = (el) => {
-    return $(el).appendTo(cy.$$('body'))
-  }
-
   context('hidden/visible overrides', () => {
     beforeEach(function () {
       // ensure all tests run against a scrollable window
