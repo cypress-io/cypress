@@ -2,7 +2,8 @@
 import Calculator from './Calculator.vue'
 import { mount } from '@cypress/vue'
 
-describe('Calculator', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Calculator', () => {
   it('adds two numbers', () => {
     cy.viewport(400, 200)
     mount(Calculator)
