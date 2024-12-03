@@ -36,7 +36,7 @@ const copyAngularMount = async (projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-17', 'angular-18']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-18', 'angular-19']
 
 describe('ng add @cypress/schematic / e2e and ct', { timeout: 1000 * 60 * 5 }, function () {
   for (const project of ANGULAR_PROJECTS) {

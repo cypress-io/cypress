@@ -219,7 +219,9 @@ function initTestBed<T> (
   return componentFixture
 }
 
-@Component({ selector: 'cy-wrapper-component', template: '' })
+// if using the Wrapper Component (template strings), the component itself cannot be
+// a standalone component
+@Component({ selector: 'cy-wrapper-component', template: '', standalone: false })
 class WrapperComponent { }
 
 /**
@@ -260,6 +262,11 @@ function setupFixture<T> (
 
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
+  }).catch((e) => {
+    // If this promise does not settle in Angular 19 it is rejected
+    // https://github.com/angular/angular/blob/main/CHANGELOG.md#1900-2024-11-19
+    // eslint-disable-next-line no-console
+    console.error(e)
   })
 
   return fixture

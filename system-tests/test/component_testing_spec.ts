@@ -74,7 +74,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['17', '18']
+const ANGULAR_VERSIONS = ['17', '18', '19']
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
@@ -89,7 +89,7 @@ describe(`Angular CLI versions`, () => {
     })
   }
 
-  systemTests.it('angular 18 custom config', {
+  systemTests.it('angular 19 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',
@@ -100,6 +100,13 @@ describe(`Angular CLI versions`, () => {
   systemTests.it('angular custom root', {
     project: 'angular-custom-root',
     spec: 'ui/app/app.component.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it('angular signals', {
+    project: 'angular-signals',
     testingType: 'component',
     browser: 'chrome',
     expectedExitCode: 0,

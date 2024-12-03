@@ -3,7 +3,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
-  { projectName: 'angular-18', test: 'app.component' },
+  { projectName: 'angular-19', test: 'app.component' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
   { projectName: 'next-14', test: 'index.cy' },
