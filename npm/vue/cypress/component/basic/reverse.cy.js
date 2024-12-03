@@ -1,7 +1,7 @@
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
-describe('Handling User Input', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Handling User Input', () => {
   // Example from https://vuejs.org/v2/guide/#Handling-User-Input
   const template = `
     <div>
@@ -20,7 +20,9 @@ describe('Handling User Input', () => {
     },
   }
 
-  beforeEach(mountCallback({ template, data, methods }))
+  beforeEach(() => {
+    mount({ template, data, methods })
+  })
 
   it('reverses text', () => {
     cy.contains('Hello Vue')

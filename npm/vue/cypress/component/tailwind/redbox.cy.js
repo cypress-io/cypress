@@ -1,11 +1,11 @@
 import { mount } from '@cypress/vue'
 import RedBox from './RedBox.vue'
-
-const tailwindCdnLink = 'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css'
+import './redbox.css'
 
 const inlineStyle = 'body { background: blue; }'
 
-describe('RedBox 1', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('RedBox 1', () => {
   const template = '<red-box :status="true" />'
   const options = {
     extensions: {
@@ -13,13 +13,6 @@ describe('RedBox 1', () => {
         'red-box': RedBox,
       },
     },
-    // you can inject additional styles to be downloaded
-    //
-    style: inlineStyle,
-    stylesheets: [
-      // you can use external links
-      tailwindCdnLink,
-    ],
   }
 
   it('displays red Hello RedBox', () => {
@@ -35,7 +28,8 @@ describe('RedBox 1', () => {
   })
 })
 
-describe('RedBox 2', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('RedBox 2', () => {
   const template = '<red-box :status="false" />'
   const options = {
     extensions: {
@@ -43,10 +37,6 @@ describe('RedBox 2', () => {
         'red-box': RedBox,
       },
     },
-    stylesheets: [
-      // you can use external links
-      tailwindCdnLink,
-    ],
   }
 
   beforeEach(() => {

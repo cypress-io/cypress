@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { MyPlugin } from './MyPlugin'
 import { MyPluginWithOptions } from './MyPluginWithOptions'
-import { mount, mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
 const EmptyComponent = { template: '<div></div>' }
 
@@ -28,8 +28,9 @@ describe('Custom plugin MyPlugin', () => {
     use,
   }
 
-  // use "mountCallback" to register the plugins
-  beforeEach(mountCallback(EmptyComponent, { extensions }))
+  beforeEach(() => {
+    mount(EmptyComponent, { extensions })
+  })
 
   it('registers global method on Vue instance', () => {
     cy.wrap(Cypress).its('vue').its('aPluginMethod').should('be.a', 'function')

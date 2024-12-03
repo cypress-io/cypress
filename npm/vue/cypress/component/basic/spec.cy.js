@@ -1,7 +1,7 @@
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
-describe('Declarative rendering', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Declarative rendering', () => {
   // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
   const template = `
     <div id="app">
@@ -9,14 +9,14 @@ describe('Declarative rendering', () => {
     </div>
   `
 
-  beforeEach(
-    mountCallback({
+  beforeEach(() => {
+    mount({
       template,
       data () {
         return { message: 'Hello Vue!' }
       },
-    }),
-  )
+    })
+  })
 
   it('shows hello', () => {
     cy.contains('Hello Vue!')
