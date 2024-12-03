@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount, mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
 describe('Mixins', () => {
   const template = '<div>mixin test</div>'
@@ -17,13 +17,13 @@ describe('Mixins', () => {
       mixin,
     }
 
-    beforeEach(mountCallback({ template }, { extensions }))
-
     it('calls mixin "created" method', () => {
-      // the "created" will be called twice
-      // 1 - when the test wrapper element made by the Vue test utils is created
-      // 2 - when the element above we are testing is created
-      expect(MyMixin.created).to.have.been.calledTwice
+      mount({ template }, { extensions }).then(() => {
+        // the "created" will be called twice
+        // 1 - when the test wrapper element made by the Vue test utils is created
+        // 2 - when the element above we are testing is created
+        expect(MyMixin.created).to.have.been.calledTwice
+      })
     })
   })
 

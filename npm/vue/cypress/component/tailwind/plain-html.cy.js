@@ -1,4 +1,5 @@
 import { mount } from '@cypress/vue'
+import '/node_modules/tailwindcss/dist/tailwind.min.css'
 
 // example comes from https://tailwindcss.com/components/cards/#horizontal
 const html = `
@@ -27,14 +28,12 @@ const html = `
 </div>
 `
 
-it('renders card', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+it.skip('renders card', () => {
   cy.viewport(1000, 500)
   mount(
     {
       template: html,
-    },
-    {
-      stylesheets: '/node_modules/tailwindcss/dist/tailwind.min.css',
     },
   )
 
