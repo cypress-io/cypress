@@ -164,6 +164,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Replaces CDP connection error message in Firefox since Cypress will retry
+  .replace(/Failed to spawn CDP with Firefox. Retrying.*\.\.\./, '')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
