@@ -141,8 +141,8 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^1.6.1",
-    "electron": "32.2.0",
-    "electron-builder": "^23.6.0",
+    "electron": "33.2.1",
+    "electron-builder": "^25.1.8",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.5.0",
@@ -212,7 +212,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=20.18.0",
+    "node": ">=20.18.1",
     "yarn": ">=1.22.17"
   },
   "productName": "Cypress",
