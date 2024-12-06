@@ -20,7 +20,7 @@ describe('windowSize', () => {
         innerHeight: top.window.innerHeight,
       }).deep.eq({
         innerWidth: 1280,
-        innerHeight: process.env.CI ? 676 : 677, // firefox 133 decreased the size here from 720 to 676/677
+        innerHeight: Cypress.env('CI') ? 676 : 677, // firefox 133 decreased the size here from 720 to 676/677
       })
     } else {
       expect({
