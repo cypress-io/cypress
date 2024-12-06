@@ -147,6 +147,27 @@ describe('lib/browsers/cri-client', function () {
 
           expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
         })
+
+        it('does not send Runtime.runIfWaitingForDebugger if not waiting for debugger', async () => {
+          await fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: false,
+            // @ts-ignore
+            targetInfo: { type: 'service_worker' },
+          })
+
+          expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        })
+
+        it('sends Runtime.runIfWaitingForDebugger even if Network.enable throws', async () => {
+          criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target closed'))
+
+          await fireCDPEvent('Target.attachedToTarget', {
+            // @ts-ignore
+            targetInfo: { type: 'service_worker' },
+          })
+
+          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        })
       })
     })
 
