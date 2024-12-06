@@ -22,7 +22,7 @@ export const WIZARD_DEPENDENCY_REACT = {
   package: 'react',
   installer: 'react',
   description: 'A JavaScript library for building user interfaces',
-  minVersion: '^18.0.0 || ^19.0.0-rc || ^19.0.0',
+  minVersion: '^18.0.0 || ^19.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_REACT_DOM = {
@@ -31,7 +31,7 @@ export const WIZARD_DEPENDENCY_REACT_DOM = {
   package: 'react-dom',
   installer: 'react-dom',
   description: 'This package serves as the entry point to the DOM and server renderers for React',
-  minVersion: '^18.0.0 || ^19.0.0-rc || ^19.0.0',
+  minVersion: '^18.0.0 || ^19.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_TYPESCRIPT = {
@@ -58,7 +58,10 @@ export const WIZARD_DEPENDENCY_NEXT = {
   package: 'next',
   installer: 'next',
   description: 'The React Framework for Production',
-  minVersion: '^14.0.0 || ^15.0.0',
+  // next 15.0.0 -> 15.0.3 use the React 19 RC as a dependency
+  // Since we do not support the React 19 RC and only the official React 19 release,
+  // we will only be supporting Next.js 15.0.4 officially (the others previously mentioned should still work)
+  minVersion: '^14.0.0 || ^15.0.4',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
