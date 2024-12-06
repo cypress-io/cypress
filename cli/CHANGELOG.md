@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.16.2
+
+_Released 12/17/2024_
+
+**Bugfixes:**
+
+- Fixed and issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
+
 ## 13.16.1
 
 _Released 12/03/2024_
