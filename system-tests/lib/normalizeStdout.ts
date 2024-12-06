@@ -180,7 +180,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
     str = str.split('\n').filter((line) => !line.includes(wdsFailedMsg)).join('\n')
   }
 
-  // in Firefox 130, height dimensions are off by 1 pixel (721px local and 719px CI), so we need to fix the offset to match common snapshots
   // in Firefox 133, height dimensions are off by 43/44 pixels (677px local and 676px CI), so we need to fix the offset to match common snapshots
   if (options.browser === 'firefox') {
     const dimensionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
@@ -193,11 +192,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
       let expectedHeight = height
       const expectedWidth = matches?.groups?.width
 
-      if (height === 719) { // only happens on default height for whatever reason in firefox 130...
-        expectedHeight = height + 1
-      } else if (height === 721) { // only happens on default height for whatever reason in firefox 130...
-        expectedHeight = height - 1
-      } else if (height === 676) { // only happens on default height for whatever reason in firefox 133...
+      if (height === 676) { // only happens on default height for whatever reason in firefox 133...
         expectedHeight = height + 44
       } else if (height === 677) { // only happens on default height for whatever reason in firefox 133...
         expectedHeight = height + 43
