@@ -38,6 +38,7 @@
     "@packages/telemetry": "0.0.0-development",
     "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
+    "axios": "^1.7.9",
     "base64url": "^3.0.1",
     "better-sqlite3": "9.2.2",
     "black-hole-stream": "0.0.1",
@@ -216,6 +217,7 @@
   "workspaces": {
     "nohoist": [
       "@benmalka/foxdriver",
+      "axios",
       "devtools-protocol",
       "edgedriver",
       "geckodriver",
