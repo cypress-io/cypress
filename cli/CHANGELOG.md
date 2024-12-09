@@ -5,7 +5,7 @@ _Released 12/17/2024 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed and issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
+- Fixed an issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
 
 ## 13.16.1
 
