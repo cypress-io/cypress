@@ -303,7 +303,7 @@ export class ProjectConfigIpc extends EventEmitter {
         // best option that leverages the existing modules we bundle in the binary.
         // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        let tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        let tsNodeEsmLoader = `--no-experimental-require-module --experimental-specifier-resolution=node --loader ${tsNodeEsm}`
 
         // in nodejs 22.7.0, the --experimental-detect-module option is now enabled by default.
         // We need to disable it with the --no-experimental-detect-module flag.
