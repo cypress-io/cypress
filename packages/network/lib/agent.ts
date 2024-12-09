@@ -441,3 +441,7 @@ class HttpsAgent extends https.Agent {
 const agent = new CombinedAgent()
 
 export default agent
+
+export const httpsAgent = new HttpsAgent()
+
+export const httpAgent = new HttpAgent()
