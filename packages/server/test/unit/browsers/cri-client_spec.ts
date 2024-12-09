@@ -3,6 +3,7 @@ import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
 import type { CriClient } from '../../../lib/browsers/cri-client'
 import pDefer from 'p-defer'
+import type Protocol from 'devtools-protocol'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
@@ -108,11 +109,9 @@ describe('lib/browsers/cri-client', function () {
         it('does not enable network', async () => {
           await Promise.all(['service_worker', 'page', 'other'].map((type) => {
             return fireCDPEvent('Target.attachedToTarget', {
-              // do not need entire event payload for this test
-              // @ts-ignore
               targetInfo: {
                 type,
-              },
+              } as Protocol.Target.TargetInfo,
             })
           }))
 
@@ -123,11 +122,9 @@ describe('lib/browsers/cri-client', function () {
       describe('target type is something other than service worker, page, or other', () => {
         it('enables network', async () => {
           await fireCDPEvent('Target.attachedToTarget', {
-          // do not need entire event payload for this test
-          // @ts-ignore
             targetInfo: {
-              type: 'somethin else',
-            },
+              type: 'iframe',
+            } as Protocol.Target.TargetInfo,
           })
 
           expect(criStub.send).to.have.been.calledWith('Network.enable')
@@ -135,17 +132,51 @@ describe('lib/browsers/cri-client', function () {
       })
 
       describe('target is waiting for debugger', () => {
+        const sessionId = 'abc123'
+
         it('sends Runtime.runIfWaitingForDebugger', async () => {
-          const sessionId = 'abc123'
+          await fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+
+        it('does not send Runtime.runIfWaitingForDebugger if not waiting for debugger', async () => {
+          await fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: false,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+        })
+
+        it('sends Runtime.runIfWaitingForDebugger even if Network.enable throws', async () => {
+          criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target closed'))
 
           await fireCDPEvent('Target.attachedToTarget', {
             waitingForDebugger: true,
             sessionId,
-            // @ts-ignore
-            targetInfo: { type: 'service_worker' },
+            targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
           })
 
+          expect(criStub.send).to.have.been.calledWith('Network.enable').and.to.have.thrown()
           expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+
+        it('continues even if Runtime.runIfWaitingForDebugger throws', async () => {
+          criStub.send.withArgs('Runtime.runIfWaitingForDebugger').throws(new Error('ProtocolError: Inspected target closed'))
+
+          await fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId).and.to.have.thrown()
         })
       })
     })
