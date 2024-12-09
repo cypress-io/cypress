@@ -880,60 +880,76 @@ describe('lib/cloud/api', () => {
   })
 
   context('.createInstance', () => {
-    beforeEach(function () {
+    const runId = 'run-id-123'
+    let nocked
+    const osName = 'darwin'
+
+    const instanceRequestData = {
+      spec: 'cypress/integration/app_spec.js',
+      groupId: 'groupId123',
+      machineId: 'machineId123',
+      platform: {},
+    }
+
+    const instanceResponseData = {
+      instanceId: 'instance-id-123',
+      claimedInstances: 0,
+      estimatedWallClockDuration: null,
+      spec: null,
+      totalInstances: 0,
+    }
+
+    beforeEach(() => {
       Object.defineProperty(process.versions, 'chrome', {
         value: '53',
       })
 
-      this.createProps = {
-        runId: 'run-id-123',
-        spec: 'cypress/integration/app_spec.js',
-        groupId: 'groupId123',
-        machineId: 'machineId123',
-        platform: {},
-      }
-
-      this.postProps = _.omit(this.createProps, 'runId')
-    })
-
-    it('POSTs /runs/:id/instances', function () {
-      os.platform.returns('darwin')
-
-      nock(API_BASEURL)
+      nocked = nock(API_BASEURL)
       .matchHeader('x-route-version', '5')
-      .matchHeader('x-cypress-run-id', this.createProps.runId)
+      .matchHeader('x-cypress-run-id', runId)
       .matchHeader('x-cypress-request-attempt', '0')
-      .matchHeader('x-os-name', 'darwin')
+      .matchHeader('x-os-name', osName)
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs/run-id-123/instances', this.postProps)
-      .reply(200, {
-        instanceId: 'instance-id-123',
+      .post(`/runs/${runId}/instances`)
+
+      os.platform.returns(osName)
+    })
+
+    describe('when the request succeeds', () => {
+      beforeEach(() => {
+        nocked.reply(200, instanceResponseData)
       })
 
-      return api.createInstance(this.createProps)
-      .get('instanceId')
-      .then((instanceId) => {
-        expect(instanceId).to.eq('instance-id-123')
+      it('returns the created instance', async () => {
+        const response = await api.createInstance(runId, instanceRequestData)
+
+        for (let k in instanceResponseData) {
+          expect(instanceResponseData[k]).to.eq(response[k])
+        }
       })
     })
 
-    it('POST /runs/:id/instances failure formatting', () => {
-      nock(API_BASEURL)
-      .matchHeader('x-route-version', '5')
-      .matchHeader('x-os-name', 'linux')
-      .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs/run-id-123/instances')
-      .reply(422, {
-        errors: {
-          tests: ['is required'],
-        },
+    describe('when the request fails with 422', () => {
+      beforeEach(() => {
+        nocked.reply(422, {
+          errors: {
+            tests: ['is required'],
+          },
+        })
       })
 
-      return api.createInstance({ runId: 'run-id-123' })
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.message).to.eq(`\
+      it('throws a tagged and formatted error message', async () => {
+        let thrown
+
+        try {
+          await api.createInstance(runId, instanceRequestData)
+        } catch (e) {
+          thrown = e
+        }
+
+        expect(thrown).not.to.be.undefined
+        expect(thrown.isApiError, 'tagged as isApiError').to.be.true
+        expect(thrown.message).to.eq(`\
 422
 
 {
@@ -947,49 +963,23 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('handles timeouts', () => {
-      nock(API_BASEURL)
-      .matchHeader('x-route-version', '5')
-      .matchHeader('x-os-name', 'linux')
-      .matchHeader('x-cypress-version', pkg.version)
-      .post('/runs/run-id-123/instances')
-      .delayConnection(5000)
-      .reply(200, {})
+    describe('when the request times out', () => {
+      const timeout = 100
 
-      return api.createInstance({
-        runId: 'run-id-123',
-        timeout: 100,
-      })
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
-      })
-    })
-
-    it('sets timeout to 60 seconds', () => {
-      sinon.stub(api.rp, 'post').resolves({
-        instanceId: 'instanceId123',
+      beforeEach(() => {
+        nocked
+        .delayConnection(5000)
+        .reply(200, {})
       })
 
-      return api.createInstance({})
-      .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
-      })
-    })
-
-    it('tags errors', function () {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/runs/run-id-123/instances', this.postProps)
-      .reply(500, {})
-
-      return api.createInstance(this.createProps)
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      it('handles timeouts', () => {
+        return api.createInstance(runId, instanceRequestData, timeout)
+        .then(() => {
+          throw new Error('should have thrown here')
+        }).catch((err) => {
+          expect(err.message).to.eq(`timeout of ${timeout}ms exceeded`)
+          expect(err.isApiError).to.be.true
+        })
       })
     })
   })

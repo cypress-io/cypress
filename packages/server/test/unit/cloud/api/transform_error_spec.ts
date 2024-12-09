@@ -33,6 +33,7 @@ describe('transformError', () => {
         }
         expect(thrown).not.to.be.undefined
         expect(thrown.message).to.eq(expectedDataMessage)
+        expect(thrown.isApiError).to.be.true
       })
     })
 
@@ -45,7 +46,8 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown).to.eq(err)
+        expect(thrown.message).to.eq(err.message)
+        expect(thrown.isApiError).to.be.true
       })
     })
   })
@@ -74,6 +76,7 @@ describe('transformError', () => {
         }
         expect(thrown).to.not.be.undefined
         expect(thrown.message).to.eq(expectedDataMessage)
+        expect(thrown.isApiError).to.be.true
       })
     })
 
@@ -86,7 +89,8 @@ describe('transformError', () => {
         } catch (e) {
           thrown = e
         }
-        expect(thrown).to.eq(err)
+        expect(thrown.message).to.eq(err.message)
+        expect(thrown.isApiError).to.be.true
       })
     })
   })

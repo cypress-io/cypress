@@ -1,7 +1,13 @@
 import { isObject } from 'lodash'
 import axios, { AxiosError } from 'axios'
 
-export const transformError = (err: AxiosError | Error & { error?: any, statusCode: number }): never => {
+declare module 'axios' {
+  export interface AxiosError {
+    isApiError?: boolean
+  }
+}
+
+export const transformError = (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }): never => {
   const { data, status } = axios.isAxiosError(err) ?
     { data: err.response?.data, status: err.status } :
     { data: err.error, status: err.statusCode }
@@ -11,6 +17,8 @@ export const transformError = (err: AxiosError | Error & { error?: any, statusCo
 
     err.message = [status, body].join('\n\n')
   }
+
+  err.isApiError = true
 
   throw err
 }
