@@ -23,6 +23,7 @@ import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
 import type { AfterSpecDurations } from '@packages/types'
+import { transformError } from './transform_error'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -206,19 +207,6 @@ const retryWithBackoff = (fn) => {
   }
 
   return attempt(0)
-}
-
-const formatResponseBody = function (err) {
-  // if the body is JSON object
-  if (_.isObject(err.error)) {
-    // transform the error message to include the
-    // stringified body (represented as the 'error' property)
-    const body = JSON.stringify(err.error, null, 2)
-
-    err.message = [err.statusCode, body].join('\n\n')
-  }
-
-  throw err
 }
 
 const tagError = function (err) {
@@ -444,7 +432,7 @@ export default {
 
       return result
     })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, transformError)
     .catch(tagError)
   },
 
@@ -470,7 +458,7 @@ export default {
         'x-cypress-request-attempt': 0,
       },
     })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, transformError)
     .catch(tagError)
   },
 
@@ -490,7 +478,7 @@ export default {
         },
         body,
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -510,7 +498,7 @@ export default {
 
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -530,7 +518,7 @@ export default {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -557,7 +545,7 @@ export default {
           'metadata',
         ]),
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
