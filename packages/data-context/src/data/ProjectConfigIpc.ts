@@ -303,7 +303,7 @@ export class ProjectConfigIpc extends EventEmitter {
         // best option that leverages the existing modules we bundle in the binary.
         // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        let tsNodeEsmLoader = `--no-experimental-require-module --experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        let tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
 
         // in nodejs 22.7.0, the --experimental-detect-module option is now enabled by default.
         // We need to disable it with the --no-experimental-detect-module flag.
@@ -311,6 +311,14 @@ export class ProjectConfigIpc extends EventEmitter {
         if (this.nodeVersion && semver.gte(this.nodeVersion, '22.7.0')) {
           debug(`detected node version ${this.nodeVersion}, adding --no-experimental-detect-module option to child_process NODE_OPTIONS.`)
           tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-detect-module`
+        }
+
+        // in nodejs 22.12.0, the --experimental-require-module option is now enabled by default.
+        // We need to disable it with the --no-experimental-require-module flag.
+        // @see https://github.com/cypress-io/cypress/issues/30715
+        if (this.nodeVersion && semver.gte(this.nodeVersion, '22.12.0')) {
+          debug(`detected node version ${this.nodeVersion}, adding --no-experimental-require-module option to child_process NODE_OPTIONS.`)
+          tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-require-module`
         }
 
         if (childOptions.env.NODE_OPTIONS) {
