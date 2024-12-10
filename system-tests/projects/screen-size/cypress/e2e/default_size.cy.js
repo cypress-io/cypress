@@ -10,33 +10,25 @@ describe('windowSize', () => {
       expect({
         innerWidth: top.window.innerWidth,
         innerHeight: top.window.innerHeight,
-        // screenWidth: top.screen.width,
-        // screenHeight: top.screen.height,
-        // availWidth: top.screen.availWidth,
-        // availHeight: top.screen.availHeight,
       }).deep.eq({
         innerWidth: 1280,
         innerHeight: 581, // chrome 128 decreased the size here from 633 to 581
-        // screenWidth: 1280,
-        // screenHeight: 603,
-        // availWidth: 1280,
-        // availHeight: 603,
+      })
+    } else if (Cypress.browser.name === 'firefox') {
+      expect({
+        innerWidth: top.window.innerWidth,
+        innerHeight: top.window.innerHeight,
+      }).deep.eq({
+        innerWidth: 1280,
+        innerHeight: Cypress.env('CI') ? 676 : 677, // firefox 133 decreased the size here from 720 to 676/677
       })
     } else {
       expect({
         innerWidth: top.window.innerWidth,
         innerHeight: top.window.innerHeight,
-        // screenWidth: top.screen.width,
-        // screenHeight: top.screen.height,
-        // availWidth: top.screen.availWidth,
-        // availHeight: top.screen.availHeight,
       }).deep.eq({
         innerWidth: 1280,
         innerHeight: 720,
-        // screenWidth: 1280,
-        // screenHeight: 720,
-        // availWidth: 1280,
-        // availHeight: 720,
       })
     }
   })

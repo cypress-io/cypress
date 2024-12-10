@@ -8,16 +8,16 @@ We will also attempt to scaffold a configuration file for projects using React a
 
 ### Supported Frameworks and Libraries
 
-| Name             | Version    | Dev Server | Version  | Library        | Component Adaptor          | Example Project                                                     |
-| ---------------- | -------    | ---------- | -------- | -------------- | -------------------------- | ------------------------------------------------------------------- |
-| React            | -          | Vite       | 4.x, 5.x | React 16, 17   | `@cypress/react@latest`    | [Link](../../system-tests/projects/react-vite-ts-configured)        |
-| React            | -          | Webpack    | 4.x, 5.x | React 16, 17   | `@cypress/vue@latest`      | [Link](../../system-tests/projects/react18)                         |
-| Vue              | -          | Vite       | 4.x, 5.x | Vue 3          | `@cypress/react@latest`    | [Link](../../system-tests/projects/vue3-vite-ts-configured)         |
-| Vue              | -          | Webpack    | 4.x, 5.x | Vue 3          | `@cypress/vue@latest`      | [Link](../../system-tests/projects/vue3-webpack-ts-configured)      |
-| Angular          | -          | Webpack    | 5.x      | Angular 17, 18 | `@cypress/angular@latest`  | [Link](../../system-tests/projects/angular-cli-configured)          |
-| Svelte           | -          | Vite       | 4.x, 5.x | Svelte 4       | `@cypress/svelte@latest`   | [Link](../../system-tests/projects/svelte-vite-configured)          |
-| Svelte           | -          | Webpack    | 4.x, 5.x | Svelte 4       | `@cypress/svelte@latest`   | [Link](../../system-tests/projects/svelte-webpack-configured)       |
-| Next.js          | 14.x       | Webpack    | 4.x, 5.x | React 18       | `@cypress/react@latest`    | [Link](../../system-tests/projects/nextjs-configured)               |
+| Name             | Version| Dev Server | Version | Library            | Component Adaptor          | Example Project                                                     |
+| ---------------- | -------| ---------- | ------- | ------------------ | -------------------------- | ------------------------------------------------------------------- |
+| React            | -      | Vite       | 4, 5    | React 18, 19       | `@cypress/react@latest`    | [Link](../../system-tests/projects/react-vite-ts-configured)        |
+| React            | -      | Webpack    | 4, 5    | React 18, 19       | `@cypress/vue@latest`      | [Link](../../system-tests/projects/react18)                         |
+| Vue              | -      | Vite       | 4, 5, 6 | Vue 3              | `@cypress/react@latest`    | [Link](../../system-tests/projects/vue3-vite-ts-configured)         |
+| Vue              | -      | Webpack    | 4, 5    | Vue 3              | `@cypress/vue@latest`      | [Link](../../system-tests/projects/vue3-webpack-ts-configured)      |
+| Angular          | -      | Webpack    | 5       | Angular 17, 18, 19 | `@cypress/angular@latest`  | [Link](../../system-tests/projects/angular-cli-configured)          |
+| Svelte           | -      | Vite       | 4, 5, 6 | Svelte 5           | `@cypress/svelte@latest`   | [Link](../../system-tests/projects/svelte-vite-configured)          |
+| Svelte           | -      | Webpack    | 4, 5    | Svelte 5           | `@cypress/svelte@latest`   | [Link](../../system-tests/projects/svelte-webpack-configured)       |
+| Next.js          | 14, 15 | Webpack    | 4, 5    | React 18, 19       | `@cypress/react@latest`    | [Link](../../system-tests/projects/nextjs-configured)               |
 
 ### Adding More Projects
 

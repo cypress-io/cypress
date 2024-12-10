@@ -38,7 +38,7 @@
     "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
     "base64url": "^3.0.1",
-    "better-sqlite3": "11.3.0",
+    "better-sqlite3": "11.5.0",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.2",
     "bundle-require": "3.0.4",
