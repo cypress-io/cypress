@@ -342,9 +342,8 @@ export class BrowserCriClient {
       try {
         await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       } catch (error) {
-        // it's possible that the target was closed before we could enable
-        // network and continue, in that case, just ignore
-        debug('error running Runtime.runIfWaitingForDebugger:', error)
+        // it's possible that the target was closed before we could tell it to run, in that case, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger: %o', error)
       }
     }
 
