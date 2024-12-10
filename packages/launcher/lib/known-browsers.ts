@@ -30,22 +30,39 @@ export const validateMinVersion = (browser: FoundBrowser): BrowserValidatorResul
 /** list of the browsers we can detect and use by default */
 export const knownBrowsers: Browser[] = [
   {
+    name: 'chrome-for-testing',
+    family: 'chromium',
+    channel: 'stable',
+    displayName: 'Chrome Testing',
+    versionRegex: /Google Chrome for Testing (\S+)/m,
+    binary: ['chrome'],
+    minSupportedVersion: MIN_CHROME_VERSION,
+  },
+  {
+    name: 'chrome-for-testing',
+    family: 'chromium',
+    channel: 'beta',
+    displayName: 'Chrome Testing Beta',
+    versionRegex: /Google Chrome for Testing (\S+)/m,
+    binary: ['chrome'],
+    minSupportedVersion: MIN_CHROME_VERSION,
+  },
+  {
+    name: 'chrome-for-testing',
+    family: 'chromium',
+    channel: 'canary',
+    displayName: 'Chrome Testing Canary',
+    versionRegex: /Google Chrome for Testing (\S+)/m,
+    binary: ['chrome'],
+    minSupportedVersion: MIN_CHROME_VERSION,
+  },
+  {
     name: 'chrome',
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/m,
+    versionRegex: /Google Chrome(?! for Testing) (\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
-    minSupportedVersion: MIN_CHROME_VERSION,
-  },
-  {
-    name: 'chromium',
-    family: 'chromium',
-    // technically Chromium is always in development
-    channel: 'stable',
-    displayName: 'Chromium',
-    versionRegex: /Chromium (\S+)/m,
-    binary: ['chromium-browser', 'chromium'],
     minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
@@ -61,9 +78,19 @@ export const knownBrowsers: Browser[] = [
     name: 'chrome',
     family: 'chromium',
     channel: 'canary',
-    displayName: 'Canary',
+    displayName: 'Chrome Canary',
     versionRegex: /Google Chrome Canary (\S+)/m,
     binary: 'google-chrome-canary',
+    minSupportedVersion: MIN_CHROME_VERSION,
+  },
+  {
+    name: 'chromium',
+    family: 'chromium',
+    // technically Chromium is always in development
+    channel: 'stable',
+    displayName: 'Chromium',
+    versionRegex: /Chromium (\S+)/m,
+    binary: ['chromium-browser', 'chromium'],
     minSupportedVersion: MIN_CHROME_VERSION,
   },
   {

@@ -46,6 +46,13 @@ function formChromeCanaryAppPath () {
   return [normalize(exe)]
 }
 
+function formChromeForTestingAppPath () {
+  return [
+    'C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe',
+    'C:/Program Files/Google/Chrome for Testing/chrome.exe',
+  ].map(normalize)
+}
+
 function getFirefoxPaths (editionFolder) {
   return () => {
     return (['Program Files', 'Program Files (x86)'])
@@ -90,6 +97,11 @@ const formPaths: WindowsBrowserPaths = {
     stable: formFullAppPath,
     beta: formChromeBetaAppPath,
     canary: formChromeCanaryAppPath,
+  },
+  'chrome-for-testing': {
+    stable: formChromeForTestingAppPath,
+    beta: formChromeForTestingAppPath,
+    canary: formChromeForTestingAppPath,
   },
   chromium: {
     stable: formChromiumAppPath,

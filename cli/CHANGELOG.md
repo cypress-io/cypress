@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.16.2
+## 13.17.0
 
 _Released 12/17/2024 (PENDING)_
+
+**Features:**
+
+- Added support for Google Chrome for Testing browser. Addresses [#28123](https://github.com/cypress-io/cypress/issues/28123) and [#28554](https://github.com/cypress-io/cypress/issues/28554).
 
 **Bugfixes:**
 
