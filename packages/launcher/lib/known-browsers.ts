@@ -30,33 +30,6 @@ export const validateMinVersion = (browser: FoundBrowser): BrowserValidatorResul
 /** list of the browsers we can detect and use by default */
 export const knownBrowsers: Browser[] = [
   {
-    name: 'chrome-for-testing',
-    family: 'chromium',
-    channel: 'stable',
-    displayName: 'Chrome Testing',
-    versionRegex: /Google Chrome for Testing (\S+)/m,
-    binary: ['chrome'],
-    minSupportedVersion: MIN_CHROME_VERSION,
-  },
-  {
-    name: 'chrome-for-testing',
-    family: 'chromium',
-    channel: 'beta',
-    displayName: 'Chrome Testing Beta',
-    versionRegex: /Google Chrome for Testing (\S+)/m,
-    binary: ['chrome'],
-    minSupportedVersion: MIN_CHROME_VERSION,
-  },
-  {
-    name: 'chrome-for-testing',
-    family: 'chromium',
-    channel: 'canary',
-    displayName: 'Chrome Testing Canary',
-    versionRegex: /Google Chrome for Testing (\S+)/m,
-    binary: ['chrome'],
-    minSupportedVersion: MIN_CHROME_VERSION,
-  },
-  {
     name: 'chrome',
     family: 'chromium',
     channel: 'stable',
@@ -81,6 +54,15 @@ export const knownBrowsers: Browser[] = [
     displayName: 'Chrome Canary',
     versionRegex: /Google Chrome Canary (\S+)/m,
     binary: 'google-chrome-canary',
+    minSupportedVersion: MIN_CHROME_VERSION,
+  },
+  {
+    name: 'chrome',
+    family: 'chromium',
+    channel: 'test',
+    displayName: 'Chrome Test',
+    versionRegex: /Google Chrome for Testing (\S+)/m,
+    binary: 'chrome',
     minSupportedVersion: MIN_CHROME_VERSION,
   },
   {

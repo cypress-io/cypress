@@ -2,7 +2,7 @@ export const BROWSER_FAMILY = ['chromium', 'firefox', 'webkit']
 
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
 
-export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | 'test' | string
 
 export type BrowserFamily = typeof BROWSER_FAMILY[number]
 

@@ -4,6 +4,7 @@ import edgeIcon from 'browser-logos/src/edge/edge.svg?url'
 import electronIcon from 'browser-logos/src/electron/electron.svg?url'
 import canaryIcon from 'browser-logos/src/chrome-canary/chrome-canary.svg?url'
 import chromeBetaIcon from 'browser-logos/src/chrome-beta/chrome-beta.svg?url'
+import chromeTestIcon from 'browser-logos/src/chrome-test/chrome-test.svg?url'
 import chromiumIcon from 'browser-logos/src/chromium/chromium.svg?url'
 import edgeBetaIcon from 'browser-logos/src/edge-beta/edge-beta.png'
 import edgeCanaryIcon from 'browser-logos/src/edge-canary/edge-canary.png'
@@ -18,7 +19,7 @@ export const allBrowsersIcons = {
   'Chrome': chromeIcon,
   'Chrome Beta': chromeBetaIcon,
   'Chrome Canary': canaryIcon,
-  'Chrome Testing': chromeIcon,
+  'Chrome Test': chromeTestIcon,
   'Firefox': firefoxIcon,
   'Edge': edgeIcon,
   'Chromium': chromiumIcon,

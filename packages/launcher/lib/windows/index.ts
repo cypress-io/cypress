@@ -97,11 +97,7 @@ const formPaths: WindowsBrowserPaths = {
     stable: formFullAppPath,
     beta: formChromeBetaAppPath,
     canary: formChromeCanaryAppPath,
-  },
-  'chrome-for-testing': {
-    stable: formChromeForTestingAppPath,
-    beta: formChromeForTestingAppPath,
-    canary: formChromeForTestingAppPath,
+    test: formChromeForTestingAppPath,
   },
   chromium: {
     stable: formChromiumAppPath,
