@@ -61,9 +61,9 @@ describe('Launchpad: Setup Project', () => {
     cy.contains('Choose a browser', { timeout: 15000 })
 
     cy.findByRole('radio', { name: 'Chrome v1' })
-    cy.findByRole('radio', { name: 'Firefox v5' })
-    cy.findByRole('radio', { name: 'Electron v12' })
-    cy.findByRole('radio', { name: 'Edge v8' })
+    cy.findByRole('radio', { name: 'Firefox v6' })
+    cy.findByRole('radio', { name: 'Electron v13' })
+    cy.findByRole('radio', { name: 'Edge v9' })
   }
 
   beforeEach(() => {

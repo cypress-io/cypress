@@ -43,12 +43,18 @@ describe('windows browser detection', () => {
   })
 
   it('detects browsers as expected', async () => {
+    // chrome
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
+    // chromium
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
+    // chrome-for-testing
+    stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '1.2.3')
+    stubBrowser('C:/Program Files/Google/Chrome for Testing/chrome.exe', '1.2.3')
 
+    // chrome beta
     stubBrowser('C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe', '6.7.8')
 
-    // canary is installed in homedir
+    // chrome canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Google/Chrome SxS/Application/chrome.exe`, '3.4.5')
 
     // have 32-bit and 64-bit ff - 64-bit will be preferred
