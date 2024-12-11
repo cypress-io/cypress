@@ -136,7 +136,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2024.11.1
+      image: ubuntu-2004:2023.07.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -1772,7 +1772,7 @@ jobs:
       PLATFORM: linux
     machine:
       # using `machine` gives us a Linux VM that can run Docker
-      image: ubuntu-2004:2024.11.1
+      image: ubuntu-2004:2023.07.1
       docker_layer_caching: true
     resource_class: medium
     steps:
