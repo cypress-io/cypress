@@ -64,6 +64,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - Upgraded bundled Chromium version from `118.0.5993.159` to `130.0.6723.137`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547) and [#30561](https://github.com/cypress-io/cypress/issues/30561).
 - Updated `jQuery` from `3.4.1` to `3.7.1`. Addressed in [#30345](https://github.com/cypress-io/cypress/pull/30345).
 - Updated `react` from `17.0.2` to `18.3.1` and `react-dom` from `17.0.2` to `18.3.1`. Addresses [#30511](https://github.com/cypress-io/cypress/issues/30511).
+- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.3.2` to `2.4.6`. Addresses [#26628](https://github.com/cypress-io/cypress/issues/26628).
 
 ## 13.16.2
 

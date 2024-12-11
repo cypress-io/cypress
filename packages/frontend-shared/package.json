@@ -41,7 +41,7 @@
     "@vue/compiler-core": "3.2.47",
     "@vue/compiler-dom": "3.2.47",
     "@vue/compiler-sfc": "3.2.47",
-    "@vue/test-utils": "2.3.2",
+    "@vue/test-utils": "2.4.6",
     "@vueuse/core": "7.2.2",
     "autoprefixer": "^10.4.19",
     "axe-core": "4.4.1",
