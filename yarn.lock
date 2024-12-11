@@ -10986,7 +10986,7 @@ brorand@^1.0.1, brorand@^1.1.0:
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
 "browser-logos@github:alrra/browser-logos":
-  version "74.1.0"
+  version "75.0.0"
   resolved "https://codeload.github.com/alrra/browser-logos/tar.gz/021a9533c9d872dccf92713f59afb383b29a50eb"
 
 browser-resolve@2.0.0:
