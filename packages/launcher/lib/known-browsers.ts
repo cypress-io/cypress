@@ -57,9 +57,9 @@ export const knownBrowsers: Browser[] = [
     minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
-    name: 'chrome',
+    name: 'chrome-for-testing',
     family: 'chromium',
-    channel: 'test',
+    channel: 'stable',
     displayName: 'Chrome Test',
     versionRegex: /Google Chrome for Testing (\S+)/m,
     binary: 'chrome',

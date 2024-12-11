@@ -32,7 +32,9 @@ export const browsers: Detectors = {
       appId: 'com.google.Chrome.canary',
       versionProperty: 'KSVersion',
     },
-    test: {
+  },
+  'chrome-for-testing': {
+    stable: {
       appName: 'Google Chrome for Testing.app',
       executable: 'Contents/MacOS/Google Chrome for Testing',
       appId: 'com.google.chrome.for.testing',
