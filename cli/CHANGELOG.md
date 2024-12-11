@@ -7,6 +7,7 @@ _Released 12/17/2024 (PENDING)_
 
 - Fixed an issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
 - Updated Firefox `userChrome.css` to correctly hide the toolbox during headless mode. Addresses [#30721](https://github.com/cypress-io/cypress/issues/30721).
+- Fixed an issue loading the `cypress.config.ts` file with Node.js version `22.12.0`. Addresses [#30715](https://github.com/cypress-io/cypress/issues/30715).
 
 **Dependency Updates:**
 
