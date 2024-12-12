@@ -116,10 +116,10 @@ const formPaths: WindowsBrowserPaths = {
     beta: () => {
       return [normalize('C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe')]
     },
+    canary: formEdgeCanaryAppPath,
     dev: () => {
       return [normalize('C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe')]
     },
-    canary: formEdgeCanaryAppPath,
   },
 }
 

@@ -58,7 +58,7 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     'name': 'chrome-for-testing',
     'family': 'chromium',
     'channel': 'stable',
-    'displayName': 'Chrome Test',
+    'displayName': 'Chrome for Testing',
     'versionRegex': {},
     'binary': 'chrome',
     'minSupportedVersion': 64,

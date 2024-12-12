@@ -76,16 +76,16 @@ export const browsers: Detectors = {
       bundleId: 'com.microsoft.Edge',
       versionProperty: 'CFBundleShortVersionString',
     },
-    canary: {
-      appName: 'Microsoft Edge Canary.app',
-      executable: 'Contents/MacOS/Microsoft Edge Canary',
-      bundleId: 'com.microsoft.Edge.Canary',
-      versionProperty: 'CFBundleShortVersionString',
-    },
     beta: {
       appName: 'Microsoft Edge Beta.app',
       executable: 'Contents/MacOS/Microsoft Edge Beta',
       bundleId: 'com.microsoft.Edge.Beta',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    canary: {
+      appName: 'Microsoft Edge Canary.app',
+      executable: 'Contents/MacOS/Microsoft Edge Canary',
+      bundleId: 'com.microsoft.Edge.Canary',
       versionProperty: 'CFBundleShortVersionString',
     },
     dev: {

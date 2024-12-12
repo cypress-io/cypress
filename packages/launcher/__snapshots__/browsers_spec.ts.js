@@ -34,7 +34,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     'name': 'chrome-for-testing',
     'family': 'chromium',
     'channel': 'stable',
-    'displayName': 'Chrome Test',
+    'displayName': 'Chrome for Testing',
     'versionRegex': {},
     'binary': 'chrome',
     'minSupportedVersion': 64,
