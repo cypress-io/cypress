@@ -20,20 +20,19 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { IconBrowserChrome,
+import {
+  IconBrowserChrome,
+  IconBrowserChromeBeta,
   IconBrowserChromeCanary,
-  IconBrowserSafari,
   IconBrowserMozillaFirefox,
   IconBrowserEdge,
   IconBrowserWebkit,
   IconBrowserElectronLight,
-  IconBrowserChromeBeta,
+  IconGeneralGlobe,
 } from '@cypress-design/vue-icon'
 
-// Note: These browser names should map to the list of logoPaths found at https://github.com/cypress-io/cypress-services/blob/46073cb5c387af3b203404280a1664a85e233b93/packages/common/src/logos/getLogoPath.ts
-// Some of these are currently incorrect (ex: CHROME-CANARY).
-// We are also missing browsers from the list as well
-export type BrowserType = 'CHROME' | 'CHROME BETA' | 'CANARY' | 'CHROME CANARY' | 'CHROME-FOR-TESTING' | 'CUSTOM-CHROME-FOR-TESTING' | 'SAFARI' | 'FIREFOX' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
+// Note: These browser names should map to the list of logoPaths found at https://github.com/cypress-io/cypress-services/blob/develop/packages/common/src/logos/getLogoPath.ts
+export type BrowserType = 'CHROME' | 'CHROME BETA' | 'CANARY' | 'CHROME CANARY' | 'CHROME FOR TESTING' | 'CUSTOM CHROME FOR TESTING' | 'CHROMIUM' | 'CUSTOM CHROMIUM' | 'EDGE' | 'EDGE BETA' | 'EDGE CANARY' | 'EDGE DEV' | 'ELECTRON' | 'FIREFOX' | 'FIREFOX DEVELOPER EDITION' | 'FIREFOX NIGHTLY' | 'WEBKIT'
 
 interface LayeredProps {
   browsers: BrowserType[]
@@ -45,7 +44,7 @@ const results = computed(() => {
   if (props.browsers) {
     return props.browsers.map((browserType) => {
       return {
-        icon: BROWSER_MAP[browserType],
+        icon: BROWSER_MAP[browserType] || IconGeneralGlobe,
         name: `browser-icon-${browserType.toLowerCase().replaceAll(' ', '_')}`,
       }
     })
@@ -54,6 +53,7 @@ const results = computed(() => {
   return []
 })
 
+// TODO: Add correct icons for firefox, edge, and chromium
 const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME': IconBrowserChrome,
   'CHROME BETA': IconBrowserChromeBeta,
@@ -61,11 +61,15 @@ const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME CANARY': IconBrowserChromeCanary,
   'CHROME FOR TESTING': IconBrowserChrome,
   'CUSTOM CHROME FOR TESTING': IconBrowserChrome,
-  'SAFARI': IconBrowserSafari,
-  'FIREFOX': IconBrowserMozillaFirefox,
   'EDGE': IconBrowserEdge,
-  'WEBKIT': IconBrowserWebkit,
+  'EDGE BETA': IconBrowserEdge,
+  'EDGE CANARY': IconBrowserEdge,
+  'EDGE DEV': IconBrowserEdge,
   'ELECTRON': IconBrowserElectronLight,
+  'FIREFOX': IconBrowserMozillaFirefox,
+  'FIREFOX DEVELOPER EDITION': IconBrowserMozillaFirefox,
+  'FIREFOX NIGHTLY': IconBrowserMozillaFirefox,
+  'WEBKIT': IconBrowserWebkit,
 }
 
 </script>
