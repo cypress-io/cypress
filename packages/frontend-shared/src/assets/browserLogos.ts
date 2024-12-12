@@ -19,7 +19,7 @@ export const allBrowsersIcons = {
   'Chrome': chromeIcon,
   'Chrome Beta': chromeBetaIcon,
   'Chrome Canary': canaryIcon,
-  'Chrome Test': chromeTestIcon,
+  'Chrome for Testing': chromeTestIcon,
   'Firefox': firefoxIcon,
   'Edge': edgeIcon,
   'Chromium': chromiumIcon,
