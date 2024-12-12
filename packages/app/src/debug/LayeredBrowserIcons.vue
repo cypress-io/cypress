@@ -61,6 +61,8 @@ const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME CANARY': IconBrowserChromeCanary,
   'CHROME FOR TESTING': IconBrowserChrome,
   'CUSTOM CHROME FOR TESTING': IconBrowserChrome,
+  'CHROMIUM': IconGeneralGlobe,
+  'CUSTOM CHROMIUM': IconGeneralGlobe,
   'EDGE': IconBrowserEdge,
   'EDGE BETA': IconBrowserEdge,
   'EDGE CANARY': IconBrowserEdge,
