@@ -395,7 +395,7 @@ const getPathToScreenshot = function (data, details, screenshotsFolder) {
   return getPath(data, ext, screenshotsFolder, data.overwrite)
 }
 
-module.exports = {
+export = {
   crop,
 
   getPath,
