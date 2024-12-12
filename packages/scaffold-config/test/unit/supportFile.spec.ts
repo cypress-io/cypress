@@ -27,9 +27,6 @@ describe('supportFileComponent', () => {
           // Import commands.js using ES2015 syntax:
           import './commands'
 
-          // Alternatively you can use CommonJS syntax:
-          // require('./commands')
-
           import { mount } from '${mountModule}'
 
           Cypress.Commands.add('mount', mount)
@@ -60,9 +57,6 @@ describe('supportFileComponent', () => {
 
         // Import commands.js using ES2015 syntax:
         import './commands'
-
-        // Alternatively you can use CommonJS syntax:
-        // require('./commands')
 
         import { mount } from '${mountModule}'
 
@@ -111,9 +105,6 @@ describe('supportFileComponent', () => {
           // Import commands.js using ES2015 syntax:
           import './commands'
 
-          // Alternatively you can use CommonJS syntax:
-          // require('./commands')
-
           import { mount } from '${mountModule}'
 
           Cypress.Commands.add('mount', mount)
@@ -144,9 +135,6 @@ describe('supportFileComponent', () => {
 
         // Import commands.js using ES2015 syntax:
         import './commands'
-
-        // Alternatively you can use CommonJS syntax:
-        // require('./commands')
 
         import { mount } from '${mountModule}'
 
@@ -195,9 +183,6 @@ describe('supportFileComponent', () => {
         // Import commands.js using ES2015 syntax:
         import './commands'
 
-        // Alternatively you can use CommonJS syntax:
-        // require('./commands')
-
         import { mount } from '${mountModule}'
 
         // Augment the Cypress namespace to include type definitions for
@@ -244,9 +229,6 @@ describe('supportFileComponent', () => {
           // Import commands.js using ES2015 syntax:
           import './commands'
 
-          // Alternatively you can use CommonJS syntax:
-          // require('./commands')
-
           import { mount } from 'cypress/svelte'
 
           Cypress.Commands.add('mount', mount)
@@ -277,9 +259,6 @@ describe('supportFileComponent', () => {
 
         // Import commands.js using ES2015 syntax:
         import './commands'
-
-        // Alternatively you can use CommonJS syntax:
-        // require('./commands')
 
         import { mount } from 'cypress/svelte'
 
