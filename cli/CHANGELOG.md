@@ -5,7 +5,7 @@ _Released 12/17/2024 (PENDING)_
 
 **Features:**
 
-- Added support for Google Chrome for Testing browser. Addresses [#28123](https://github.com/cypress-io/cypress/issues/28123) and [#28554](https://github.com/cypress-io/cypress/issues/28554).
+- Added official support for Google Chrome for Testing browser. Addresses [#28123](https://github.com/cypress-io/cypress/issues/28123) and [#28554](https://github.com/cypress-io/cypress/issues/28554).
 
 **Bugfixes:**
 

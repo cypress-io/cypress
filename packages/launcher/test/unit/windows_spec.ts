@@ -47,7 +47,7 @@ describe('windows browser detection', () => {
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
     // chromium
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
-    // chrome-for-testing
+    // chrome-for-testing - 64-bit will be preferred
     stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '1.2.3')
     stubBrowser('C:/Program Files/Google/Chrome for Testing/chrome.exe', '1.2.3')
 
@@ -77,23 +77,30 @@ describe('windows browser detection', () => {
     snapshot(await detect(knownBrowsers))
   })
 
-  it('detects 64-bit Chrome Beta app path', async () => {
+  it('detects Chrome Beta 64-bit install', async () => {
     stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })!
 
-    snapshot(await windowsHelper.detect(chrome))
+    snapshot(await detect([chrome]))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8425
-  it('detects new Chrome 64-bit app path', async () => {
+  it('detects Chrome 64-bit install', async () => {
     stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })!
 
-    snapshot(await windowsHelper.detect(chrome))
+    snapshot(await detect([chrome]))
+  })
+
+  it('detects Chrome for Testing 32-bit install', async () => {
+    stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '5.5.5')
+    const chromeForTesting = _.find(knownBrowsers, { name: 'chrome-for-testing' })!
+
+    snapshot(await detect([chromeForTesting]))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8432
-  it('detects local Firefox installs', async () => {
+  it('detects Firefox local installs', async () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Mozilla Firefox/firefox.exe`, '100')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Nightly/firefox.exe`, '200')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Developer Edition/firefox.exe`, '300')

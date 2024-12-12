@@ -48,8 +48,8 @@ function formChromeCanaryAppPath () {
 
 function formChromeForTestingAppPath () {
   return [
-    'C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe',
     'C:/Program Files/Google/Chrome for Testing/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe',
   ].map(normalize)
 }
 
