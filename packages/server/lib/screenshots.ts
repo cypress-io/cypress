@@ -1,21 +1,22 @@
-const _ = require('lodash')
-const mime = require('mime')
-const path = require('path')
-const Promise = require('bluebird')
-const dataUriToBuffer = require('data-uri-to-buffer')
-const Jimp = require('jimp')
-const sizeOf = require('image-size')
-const colorString = require('color-string')
-const sanitize = require('sanitize-filename')
-let debug = require('debug')('cypress:server:screenshot')
-const plugins = require('./plugins')
-const { fs } = require('./util/fs')
+import _ from 'lodash'
+import Debug from 'debug'
+import mime from 'mime'
+import path from 'path'
+import Promise from 'bluebird'
+import dataUriToBuffer from 'data-uri-to-buffer'
+import Jimp from 'jimp'
+import sizeOf from 'image-size'
+import colorString from 'color-string'
+import sanitize from 'sanitize-filename'
+import * as plugins from './plugins'
+import { fs } from './util/fs'
 
+let debug = Debug('cypress:server:screenshot')
 const RUNNABLE_SEPARATOR = ' -- '
 const pathSeparatorRe = /[\\\/]/g
 
 // internal id incrementor
-let __ID__ = null
+let __ID__: string | null = null
 
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
 // the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
@@ -32,20 +33,35 @@ const MIN_PREFIX_BYTES = 64
 
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
+// @ts-ignore
 debug = _.wrap(debug, (fn, str, ...args) => {
   return fn(`(${__ID__}) ${str}`, ...args)
 })
 
-const isBlack = (rgba) => {
+interface RGBA {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+const isBlack = (rgba: RGBA): boolean => {
   return `${rgba.r}${rgba.g}${rgba.b}` === '000'
 }
 
-const isWhite = (rgba) => {
+const isWhite = (rgba: RGBA): boolean => {
   return `${rgba.r}${rgba.g}${rgba.b}` === '255255255'
 }
 
-const intToRGBA = function (int) {
-  const obj = Jimp.intToRGBA(int)
+interface RGBAWithName extends RGBA {
+  name?: string
+  isNotWhite?: boolean
+  isWhite?: boolean
+  isBlack?: boolean
+}
+
+const intToRGBA = function (int: number): RGBAWithName {
+  const obj: RGBAWithName = Jimp.intToRGBA(int) as RGBAWithName
 
   if (debug.enabled) {
     obj.name = colorString.to.keyword([
@@ -115,7 +131,7 @@ const captureAndCheck = function (data, automate, conditionFn) {
 
   return (attempt = function () {
     tries++
-    const totalDuration = new Date() - start
+    const totalDuration = new Date().getTime() - start.getTime()
 
     debug('capture and check %o', { tries, totalDuration })
 
@@ -187,7 +203,7 @@ const pixelConditionFn = function (data, image) {
   return passes
 }
 
-let multipartImages = []
+let multipartImages: { data, image, takenAt, __ID__ }[] = []
 
 const clearMultipartState = function () {
   debug('clearing %d cached multipart images', multipartImages.length)
@@ -246,7 +262,7 @@ const stitchScreenshots = function (pixelRatio) {
 
   debug(`stitch ${multipartImages.length} images together`)
 
-  const takenAts = []
+  const takenAts: string[] = []
   let heightMarker = 0
   const fullImage = new Jimp(fullWidth, fullHeight)
 
@@ -278,6 +294,7 @@ const getBuffer = function (details) {
 
   return Promise
   .promisify(details.image.getBuffer)
+  // @ts-ignore
   .call(details.image, Jimp.AUTO)
 }
 
@@ -316,6 +333,7 @@ const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
+    // @ts-ignore
     return fs.outputFileAsync(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
@@ -350,6 +368,7 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
     .chain(data.titles)
     .map(sanitizeToString)
     .join(RUNNABLE_SEPARATOR)
+    // @ts-ignore
     .concat([])
     .value()
   }
@@ -468,8 +487,10 @@ module.exports = {
 
       return getBuffer(details)
       .then((buffer) => {
+        // @ts-ignore
         return fs.outputFileAsync(pathToScreenshot, buffer)
       }).then(() => {
+        // @ts-ignore
         return fs.statAsync(pathToScreenshot).get('size')
       }).then((size) => {
         const dimensions = getDimensions(details)
@@ -492,7 +513,7 @@ module.exports = {
   },
 
   afterScreenshot (data, details) {
-    const duration = new Date() - new Date(data.startTime)
+    const duration = new Date().getTime() - new Date(data.startTime).getTime()
 
     details = _.extend({}, data, details, { duration })
     details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
