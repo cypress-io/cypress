@@ -2,7 +2,6 @@ describe('windowSize', () => {
   it('spawns with correct default size', () => {
     // assert the browser was spawned at 1280x720 and is full size
     // normally e2e tests spawn at fixed size, but this spec should be spawned without passing any width/height arguments in plugins file.
-    // TODO: look into fixing screen/available height and width
     if (Cypress.browser.name === 'chrome') {
       // NOTE: there is a bug in chrome headless=new where height is not spawned correctly
       // the issue is marked as fixed, but others are still running into it in Chrome 116
@@ -13,14 +12,6 @@ describe('windowSize', () => {
       }).deep.eq({
         innerWidth: 1280,
         innerHeight: 581, // chrome 128 decreased the size here from 633 to 581
-      })
-    } else if (Cypress.browser.name === 'firefox') {
-      expect({
-        innerWidth: top.window.innerWidth,
-        innerHeight: top.window.innerHeight,
-      }).deep.eq({
-        innerWidth: 1280,
-        innerHeight: Cypress.env('CI') ? 676 : 677, // firefox 133 decreased the size here from 720 to 676/677
       })
     } else {
       expect({
