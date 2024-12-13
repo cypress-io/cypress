@@ -19,6 +19,18 @@ const pathSeparatorRe = /[\\\/]/g
 // internal id incrementor
 let __ID__: string | null = null
 
+interface Data {
+  specName: string
+  name: string
+  titles?: string[]
+  testFailure?: boolean
+  testAttemptIndex?: number
+  overwrite?: boolean
+  simple?: boolean
+  current?: number
+  total?: number
+}
+
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
 // the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
 // errors are encountered, `maxSafeBytes` will be decremented to at most `MIN_PREFIX_BYTES`, at
@@ -354,25 +366,27 @@ const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
   })
 }
 
-const sanitizeToString = (title) => {
+const sanitizeToString = (title: string | null | undefined) => {
   // test titles may be values which aren't strings like
   // null or undefined - so convert before trying to sanitize
   return sanitize(_.toString(title))
 }
 
-const getPath = function (data, ext, screenshotsFolder, overwrite) {
+const getPath = function (data: Data, ext, screenshotsFolder: string, overwrite: Data['overwrite']) {
   let names
   const specNames = (data.specName || '')
   .split(pathSeparatorRe)
 
   if (data.name) {
-    names = data.name.split(pathSeparatorRe).map(sanitize)
+    names = data.name.split(pathSeparatorRe).map((name: string) => sanitize(name))
   } else {
-    names = [_
+    names = _
     .chain(data.titles)
-    .map(sanitizeToString)
+    .map((title: string | null | undefined) => sanitizeToString(title))
     .join(RUNNABLE_SEPARATOR)
-    .value()]
+    // @ts-expect-error - this shouldn't be necessary, but it breaks if you remove it
+    .concat([])
+    .value()
   }
 
   const index = names.length - 1
@@ -391,7 +405,7 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
   return ensureSafePath(withoutExt, ext, overwrite)
 }
 
-const getPathToScreenshot = function (data, details, screenshotsFolder) {
+const getPathToScreenshot = function (data: Data, details, screenshotsFolder: string) {
   const ext = mime.getExtension(getType(details))
 
   return getPath(data, ext, screenshotsFolder, data.overwrite)
@@ -406,7 +420,7 @@ export = {
 
   imagesMatch,
 
-  capture (data, automate) {
+  capture (data: Data, automate) {
     __ID__ = _.uniqueId('s')
 
     debug('capturing screenshot %o', data)
@@ -482,7 +496,7 @@ export = {
     })
   },
 
-  save (data, details, screenshotsFolder) {
+  save (data: Data, details, screenshotsFolder: string) {
     return getPathToScreenshot(data, details, screenshotsFolder)
     .then((pathToScreenshot) => {
       debug('save', pathToScreenshot)
