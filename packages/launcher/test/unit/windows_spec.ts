@@ -45,8 +45,10 @@ describe('windows browser detection', () => {
   it('detects browsers as expected', async () => {
     // chrome
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
-    // chromium
+    // chromium - 32-bit will be preferred for passivity
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
+    stubBrowser('C:/Program Files/Google/chrome-win/chrome.exe', '2.3.4')
+
     // chrome-for-testing - 64-bit will be preferred
     stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '1.2.3')
     stubBrowser('C:/Program Files/Google/Chrome for Testing/chrome.exe', '1.2.3')
@@ -108,6 +110,27 @@ describe('windows browser detection', () => {
     const firefoxes = _.filter(knownBrowsers, { family: 'firefox' })
 
     snapshot(await detect(firefoxes))
+  })
+
+  it('detects Chromium 64-bit install', async () => {
+    stubBrowser('C:/Program Files/Google/chrome-win/chrome.exe', '6.6.6')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
+  })
+
+  it('detects Chromium 32-bit install in Chromium folder', async () => {
+    stubBrowser('C:/Program Files (x86)/Google/Chromium/chrome.exe', '7.7.7')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
+  })
+
+  it('detects Chromium 64-bit install in Chromium folder', async () => {
+    stubBrowser('C:/Program Files/Google/Chromium/chrome.exe', '8.8.8')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
   })
 
   it('works with :browserName format in Windows', () => {

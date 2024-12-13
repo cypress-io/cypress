@@ -353,3 +353,72 @@ exports['windows browser detection detects Firefox local installs 1'] = [
     },
   },
 ]
+
+exports['windows browser detection detects Chromium 64-bit install 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'minSupportedVersion': 64,
+    'path': 'C:/Program Files/Google/chrome-win/chrome.exe',
+    'version': '6.6.6',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Chromium 32-bit install in Chromium folder 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'minSupportedVersion': 64,
+    'path': 'C:/Program Files (x86)/Google/Chromium/chrome.exe',
+    'version': '7.7.7',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Chromium 64-bit install in Chromium folder 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'minSupportedVersion': 64,
+    'path': 'C:/Program Files/Google/Chromium/chrome.exe',
+    'version': '8.8.8',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
