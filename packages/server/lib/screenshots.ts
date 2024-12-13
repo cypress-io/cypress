@@ -10,6 +10,7 @@ import colorString from 'color-string'
 import sanitize from 'sanitize-filename'
 import * as plugins from './plugins'
 import { fs } from './util/fs'
+import { stat } from 'fs/promises'
 
 let debug = Debug('cypress:server:screenshot')
 const RUNNABLE_SEPARATOR = ' -- '
@@ -33,10 +34,9 @@ const MIN_PREFIX_BYTES = 64
 
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
-// @ts-ignore
 debug = _.wrap(debug, (fn, str, ...args) => {
   return fn(`(${__ID__}) ${str}`, ...args)
-})
+}) as Debug.Debugger
 
 interface RGBA {
   r: number
@@ -292,10 +292,15 @@ const getBuffer = function (details) {
     return Promise.resolve(details.buffer)
   }
 
-  return Promise
-  .promisify(details.image.getBuffer)
-  // @ts-ignore
-  .call(details.image, Jimp.AUTO)
+  return new Promise((resolve, reject) => {
+    details.image.getBuffer(Jimp.AUTO, (err, val) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(val)
+      }
+    })
+  })
 }
 
 const getDimensions = function (details) {
@@ -333,8 +338,7 @@ const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
-    // @ts-ignore
-    return fs.outputFileAsync(fullPath, '')
+    return fs.outputFile(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
       debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
@@ -364,13 +368,11 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
   if (data.name) {
     names = data.name.split(pathSeparatorRe).map(sanitize)
   } else {
-    names = _
+    names = [_
     .chain(data.titles)
     .map(sanitizeToString)
     .join(RUNNABLE_SEPARATOR)
-    // @ts-ignore
-    .concat([])
-    .value()
+    .value()]
   }
 
   const index = names.length - 1
@@ -487,12 +489,10 @@ export = {
 
       return getBuffer(details)
       .then((buffer) => {
-        // @ts-ignore
-        return fs.outputFileAsync(pathToScreenshot, buffer)
+        return fs.outputFile(pathToScreenshot, buffer)
       }).then(() => {
-        // @ts-ignore
-        return fs.statAsync(pathToScreenshot).get('size')
-      }).then((size) => {
+        return stat(pathToScreenshot)
+      }).then(({ size }) => {
         const dimensions = getDimensions(details)
 
         const { multipart, pixelRatio, takenAt } = details
