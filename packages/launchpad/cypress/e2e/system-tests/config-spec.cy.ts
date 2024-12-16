@@ -4,7 +4,7 @@ describe('config-spec', () => {
     cy.findBrowsers()
     cy.openProject('plugin-filter-browsers', ['--e2e'])
     cy.withCtx(async (ctx) => {
-      expect(await ctx.browser.machineBrowsers()).to.have.length(12) // stubbed list of all browsers
+      expect(await ctx.browser.machineBrowsers()).to.have.length(13) // stubbed list of all browsers
     })
 
     cy.visitLaunchpad()

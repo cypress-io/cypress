@@ -30,7 +30,7 @@ function generatePlist (key, value) {
 
 function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
   (utils.getOutput as unknown as SinonStub)
-  .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
+  .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.bundleId}"' | head -1`)
   .resolves({ stdout: `/Applications/${findAppParams.appName}` })
 
   ;(fse.readFile as SinonStub)

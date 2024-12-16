@@ -44,7 +44,7 @@ describe('App Top Nav Workflows', () => {
         .should('have.attr', 'src')
         .and('contain', 'firefox')
 
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 5')
+        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 6')
       })
     })
 
@@ -82,19 +82,19 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@browserItems').eq(1)
         .should('contain', 'Edge')
-        .and('contain', 'Version 8')
+        .and('contain', 'Version 9')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
         .should('contain', 'Electron')
-        .and('contain', 'Version 12')
+        .and('contain', 'Version 13')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(3)
         .should('contain', 'Firefox')
-        .and('contain', 'Version 5')
+        .and('contain', 'Version 6')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
       })

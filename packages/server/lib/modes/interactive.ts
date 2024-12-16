@@ -125,6 +125,7 @@ export = {
         show: true,
         frame: true,
         transparent: false,
+        // @ts-ignore
         icon: image.createFromPath(cyIcons.getPathToIcon('icon_64x64.png')),
       },
     }
