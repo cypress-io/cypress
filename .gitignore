@@ -280,7 +280,9 @@ typings/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
+# Yarn files that shouldn't be checked in
+.yarnrc
+.yarn/
 .yarn-integrity
 
 # dotenv environment variables file
