@@ -69,7 +69,7 @@ export abstract class DocumentDomainInjection {
 
     debug('called from', new Error().stack)
 
-    if (config.injectDocumentDomain && config.testingType === 'e2e') {
+    if (config.injectDocumentDomain && config.testingType !== 'component') {
       debug('Returning document domain injection behavior')
 
       return new DocumentDomainBehavior()

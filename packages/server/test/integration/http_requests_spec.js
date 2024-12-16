@@ -3213,6 +3213,7 @@ describe('Routes', () => {
       describe('with config.injectDocumentDomain enabled', function () {
         const config = {
           injectDocumentDomain: true,
+          testingType: 'e2e',
         }
         const superdomain = 'cypress.io'
         const origin = 'http://www.cypress.io'
