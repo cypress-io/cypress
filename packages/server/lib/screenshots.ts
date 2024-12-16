@@ -19,16 +19,56 @@ const pathSeparatorRe = /[\\\/]/g
 // internal id incrementor
 let __ID__: string | null = null
 
+type ScreenshotsFolder = string | false | undefined
+
+interface Clip {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
 interface Data {
   specName: string
   name: string
+  startTime: Date
+  viewport: {
+    width: number
+    height: number
+  }
   titles?: string[]
   testFailure?: boolean
-  testAttemptIndex?: number
   overwrite?: boolean
   simple?: boolean
   current?: number
   total?: number
+  testAttemptIndex?: number
+  appOnly?: boolean
+  hideRunnerUi?: boolean
+  clip?: Clip
+  userClip?: Clip
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
+interface Details {
+  image: any
+  pixelRatio: any
+  multipart: any
+  takenAt: Date
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
+interface SavedDetails {
+  size?: any
+  takenAt?: Date
+  dimensions?: any
+  multipart?: any
+  pixelRatio?: any
+  name?: any
+  specName?: string
+  testFailure?: boolean
+  path?: string
 }
 
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
@@ -136,7 +176,7 @@ const hasHelperPixels = function (image, pixelRatio) {
   )
 }
 
-const captureAndCheck = function (data, automate, conditionFn) {
+const captureAndCheck = function (data: Data, automate, conditionFn) {
   let attempt
   const start = new Date()
   let tries = 0
@@ -168,7 +208,7 @@ const captureAndCheck = function (data, automate, conditionFn) {
   })()
 }
 
-const isMultipart = (data) => {
+const isMultipart = (data: Data) => {
   return _.isNumber(data.current) && _.isNumber(data.total)
 }
 
@@ -194,7 +234,7 @@ const crop = function (image, dimensions, pixelRatio = 1) {
   return image.clone().crop(x, y, width, height)
 }
 
-const pixelConditionFn = function (data, image) {
+const pixelConditionFn = function (data: Data, image) {
   const pixelRatio = image.bitmap.width / data.viewport.width
 
   const hasPixels = hasHelperPixels(image, pixelRatio)
@@ -215,7 +255,7 @@ const pixelConditionFn = function (data, image) {
   return passes
 }
 
-let multipartImages: { data, image, takenAt, __ID__ }[] = []
+let multipartImages: { data: Data, image, takenAt, __ID__ }[] = []
 
 const clearMultipartState = function () {
   debug('clearing %d cached multipart images', multipartImages.length)
@@ -227,7 +267,7 @@ const imagesMatch = (img1, img2) => {
   return img1.bitmap.data.equals(img2.bitmap.data)
 }
 
-const lastImagesAreDifferent = function (data, image) {
+const lastImagesAreDifferent = function (data: Data, image) {
   // ensure the previous image isn't the same,
   // which might indicate the page has not scrolled yet
   const previous = _.last(multipartImages)
@@ -250,7 +290,7 @@ const lastImagesAreDifferent = function (data, image) {
   return !matches
 }
 
-const multipartConditionFn = function (data, image) {
+const multipartConditionFn = function (data: Data, image) {
   if (data.current === 1) {
     return pixelConditionFn(data, image) && lastImagesAreDifferent(data, image)
   }
@@ -372,7 +412,7 @@ const sanitizeToString = (title: string | null | undefined) => {
   return sanitize(_.toString(title))
 }
 
-const getPath = function (data: Data, ext, screenshotsFolder: string, overwrite: Data['overwrite']) {
+const getPath = function (data: Data, ext, screenshotsFolder: ScreenshotsFolder, overwrite: Data['overwrite']) {
   let names
   const specNames = (data.specName || '')
   .split(pathSeparatorRe)
@@ -396,16 +436,22 @@ const getPath = function (data: Data, ext, screenshotsFolder: string, overwrite:
     names[index] = `${names[index]} (failed)`
   }
 
-  if (data.testAttemptIndex > 0) {
+  if (data.testAttemptIndex && data.testAttemptIndex > 0) {
     names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
   }
 
-  const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
+  let withoutExt
+
+  if (screenshotsFolder) {
+    withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
+  } else {
+    withoutExt = path.join(...specNames, ...names)
+  }
 
   return ensureSafePath(withoutExt, ext, overwrite)
 }
 
-const getPathToScreenshot = function (data: Data, details, screenshotsFolder: string) {
+const getPathToScreenshot = function (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {
   const ext = mime.getExtension(getType(details))
 
   return getPath(data, ext, screenshotsFolder, data.overwrite)
@@ -454,7 +500,7 @@ export = {
         debug(`multi-part ${data.current}/${data.total}`)
       }
 
-      if (multipart && (data.total > 1)) {
+      if (multipart && (data.total && data.total > 1)) {
         // keep previous screenshot partials around b/c if two screenshots are
         // taken in a row, the UI might not be caught up so we need something
         // to compare the new one to
@@ -496,7 +542,7 @@ export = {
     })
   },
 
-  save (data: Data, details, screenshotsFolder: string) {
+  save (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {
     return getPathToScreenshot(data, details, screenshotsFolder)
     .then((pathToScreenshot) => {
       debug('save', pathToScreenshot)
@@ -526,7 +572,7 @@ export = {
     })
   },
 
-  afterScreenshot (data, details) {
+  afterScreenshot (data: Data, details: SavedDetails) {
     const duration = new Date().getTime() - new Date(data.startTime).getTime()
 
     details = _.extend({}, data, details, { duration })
