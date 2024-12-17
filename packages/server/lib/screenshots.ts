@@ -367,7 +367,7 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
+const ensureSafePath = function (withoutExt: string, extension: string, overwrite: boolean, num = 0) {
   const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
 
   const maxSafePrefixBytes = maxSafeBytes - suffix.length
@@ -418,7 +418,8 @@ const getPath = function (data: Data, ext, screenshotsFolder: ScreenshotsFolder,
   .split(pathSeparatorRe)
 
   if (data.name) {
-    names = data.name.split(pathSeparatorRe).map((name: string) => sanitize(name))
+    // @ts-expect-error
+    names = data.name.split(pathSeparatorRe).map(sanitize)
   } else {
     names = _
     .chain(data.titles)
