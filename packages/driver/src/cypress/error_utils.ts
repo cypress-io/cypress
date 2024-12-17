@@ -18,7 +18,7 @@ if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
 
-    ;(err as Error).stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn?.name, false)
+    ;(err as Error).stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn?.name)
   }
 }
 
