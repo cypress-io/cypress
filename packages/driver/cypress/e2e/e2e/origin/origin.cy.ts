@@ -11,7 +11,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
   })
 
   if (!Cypress.config('injectDocumentDomain')) {
-    it('creates and injects into google subdomains', () => {
+    it('creates and does not inject into google subdomains', () => {
     // Intercept google to keep our tests independent from google.
       cy.intercept('https://www.google.com', {
         body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
@@ -30,7 +30,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
       })
     })
 
-    it('creates and injects into google subdomains when visiting in an origin block', () => {
+    it('creates and does not inject into google subdomains when visiting in an origin block', () => {
     // Intercept google to keep our tests independent from google.
       cy.intercept('https://www.google.com', {
         body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
