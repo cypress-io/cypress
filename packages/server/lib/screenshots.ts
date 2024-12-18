@@ -367,7 +367,7 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureSafePath = function (withoutExt: string, extension: string, overwrite: boolean, num = 0) {
+const ensureSafePath = function (withoutExt: string, extension: string, overwrite: Data['overwrite'], num = 0) {
   const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
 
   const maxSafePrefixBytes = maxSafeBytes - suffix.length
