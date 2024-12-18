@@ -226,6 +226,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       // 1. visits www.foobar.com:3500: The AUT and top are the same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
         // 2. set a cookie via Set-Cookie Response header. Since top and AUT are the same-origin, this works
+        // @ts-expect-error
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
@@ -239,11 +240,13 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         // for same super domain origin and not same origin in Cypress <= 13, so the cookies are NOT simulated.
         // In Cypress 14, we are changing this to check for same origin for simulation conditions, which will allow this cookie
         // to be set and correctly simulate the AUT as top.
+        // @ts-expect-error
         cy.wrap(makeRequest(window.top, `http://${hostnameB}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
       // 5. mock a navigation back to the first domain (this isn't necessary but makes the test cleaner) now AUT and top are same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
+        // @ts-expect-error
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/test-request`, 'fetch'))
 
         cy.wait('@cookiedRequest').then(({ request }) => {
