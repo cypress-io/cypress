@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.17.0
 
-_Released 12/17/2024 (PENDING)_
+_Released 12/17/2024_
 
 **Features:**
 
@@ -11,7 +11,7 @@ _Released 12/17/2024 (PENDING)_
 
 - Fixed an issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
 - Updated Firefox `userChrome.css` to correctly hide the toolbox during headless mode. Addresses [#30721](https://github.com/cypress-io/cypress/issues/30721).
-- Fixed an issue loading the `cypress.config.ts` file with Node.js version `22.12.0`. Addresses [#30715](https://github.com/cypress-io/cypress/issues/30715).
+- Fixed an issue loading the `cypress.config.ts` file with Node.js version `22.12.0` if it is loaded as an ESM. Addresses [#30715](https://github.com/cypress-io/cypress/issues/30715).
 
 **Misc:**
 
