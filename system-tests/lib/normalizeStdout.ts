@@ -164,6 +164,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Replaces CDP connection error message in Firefox since Cypress will retry
+  .replace(/Failed to spawn CDP with Firefox. Retrying.*\.\.\./, '')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
@@ -176,25 +178,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
 
   if (str.includes(wdsFailedMsg)) {
     str = str.split('\n').filter((line) => !line.includes(wdsFailedMsg)).join('\n')
-  }
-
-  // in Firefox 130, height dimensions are off by 1 pixel in CI, so we need to fix the offset to match common snapshots
-  if (options.browser === 'firefox' && process.env.CI) {
-    const dimensionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
-
-    const matches = dimensionRegex.exec(str)
-
-    if (matches?.groups?.height && matches?.groups?.width) {
-      const height = parseInt(matches?.groups?.height)
-
-      // only happens on default height for whatever reason in firefox 130...
-      if (height === 719) {
-        const expectedHeight = height + 1
-        const expectedWidth = matches?.groups?.width
-
-        str = str.replaceAll(`(${expectedWidth}x${height})`, `(${expectedWidth}x${expectedHeight})`)
-      }
-    }
   }
 
   if (options.sanitizeScreenshotDimensions) {

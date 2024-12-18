@@ -116,15 +116,25 @@ describe(`Angular CLI versions`, () => {
 describe('svelte component testing', () => {
   systemTests.setup()
 
-  for (const bundler of ['webpack', 'vite']) {
-    systemTests.it(`svelte + ${bundler}`, {
-      project: `svelte-${bundler}-configured`,
-      testingType: 'component',
-      spec: '**/*.cy.js,!src/errors.cy.js',
-      browser: 'chrome',
-      expectedExitCode: 0,
-    })
-  }
+  // svelte-webpack-configured is currently difficult to test.
+  // This is currently tested as a binary-like system-test inside CI.
+  // We can unskip this test and remove the binary-like CircleCI test
+  // once https://github.com/sveltejs/svelte-loader/issues/243 is resolved.
+  systemTests.it.skip(`svelte + webpack`, {
+    project: `svelte-webpack-configured`,
+    testingType: 'component',
+    spec: '**/*.cy.ts,!src/lib/errors.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it(`svelte + vite`, {
+    project: `svelte-vite-configured`,
+    testingType: 'component',
+    spec: '**/*.cy.ts,!src/lib/errors.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 describe('Vue major versions with Vite', () => {

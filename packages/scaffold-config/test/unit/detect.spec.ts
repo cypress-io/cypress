@@ -131,12 +131,12 @@ describe('detectFramework', () => {
     expect(actual.bundler).to.eq('vite')
   })
 
-  ;['14.0.0', '15.0.0'].forEach((v) => {
+  ;['14.0.0', '15.0.4'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
-        { dependency: 'react', version: v === '15.0.0' ? '19.0.0-rc.1' : '18.0.0' },
+        { dependency: 'react', version: v === '15.0.0' ? '19.0.0' : '18.0.0' },
         { dependency: 'next', version: v },
       ])
 
@@ -162,12 +162,12 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['4.0.0', '5.0.0'].forEach((v) => {
+  ;['5.0.0', '6.0.0'].forEach((v) => {
     it(`Svelte and Vite v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
-        { dependency: 'svelte', version: '4.0.0' },
+        { dependency: 'svelte', version: '5.0.0' },
         { dependency: 'vite', version: v },
       ])
 
@@ -182,7 +182,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('svelte-webpack-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { dependency: 'svelte', version: '4.0.0' },
+      { dependency: 'svelte', version: '5.0.0' },
       { dependency: 'webpack', version: '5.0.0' },
     ])
 

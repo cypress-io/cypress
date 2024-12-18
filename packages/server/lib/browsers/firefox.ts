@@ -368,7 +368,12 @@ toolbar {
   overflow: hidden !important;
   display: none;
 }
-
+toolbox {
+  height: 0px !important;
+  min-height: 0px !important;
+  overflow: hidden !important;
+  border: none !important;
+}
 `
 
 let browserCriClient: BrowserCriClient | undefined
@@ -556,11 +561,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   // resolution of exactly 1280x720
-  // (height must account for firefox url bar, which we can only shrink to 2px)
   const BROWSER_ENVS = {
     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
     MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '722',
+    MOZ_HEADLESS_HEIGHT: '720',
     ...launchOptions.env,
   }
 

@@ -9,7 +9,7 @@ _Released 12/17/2024 (PENDING)_
 - Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
 - Cypress now only officially supports the latest 3 major versions of Chrome, Firefox, and Edge - older browser versions may still work, but we recommend keeping your browsers up to date to ensure compatibility with Cypress. A warning will no longer be displayed on browser selection in the Launchpad for any 'unsupported' browser versions. Additionally, the undocumented `minSupportedVersion` property has been removed from `Cypress.browser`. Addressed in [#30462](https://github.com/cypress-io/cypress/pull/30462).
 - It is no longer possible to make a `fetch` or `XMLHttpRequest` request from the `about:blank` page in Electron (i.e. `cy.window().then((win) => win.fetch('<some-url>')`). You must use `cy.request` instead or perform some form of initial navigation via `cy.visit()`. Addressed in [#29547](https://github.com/cypress-io/cypress/pull/30394).
-- Upgraded bundled Node.js version from `18.17.0` to `20.18.0`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
+- Upgraded bundled Node.js version from `18.17.0` to `20.18.1`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
 - `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 3. Additionally, `@cypress/webpack-dev-server` now ships with `webpack-dev-server` version 5 by default. `webpack-dev-server` version 4 will need to be installed along side Cypress if you are still using `webpack` version 4. Addresses [#29308](https://github.com/cypress-io/cypress/issues/29308), [#30347](https://github.com/cypress-io/cypress/issues/30347), and [#30141](https://github.com/cypress-io/cypress/issues/30141).
 - `@cypress/vite-dev-server` no longer supports `vite` versions 2 and 3. Addresses [#29377](https://github.com/cypress-io/cypress/issues/29377) and [#29378](https://github.com/cypress-io/cypress/issues/29378).
 - The `experimentalJustInTimeCompile` configuration option for component testing has been replaced with a `justInTimeCompile` option that is `true` by default. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. `justInTimeCompile` is now only supported for [`webpack`](https://www.npmjs.com/package/webpack). Addresses [#30234](https://github.com/cypress-io/cypress/issues/30234). Addressed in [#30402](https://github.com/cypress-io/cypress/pull/30402).
@@ -20,7 +20,7 @@ _Released 12/17/2024 (PENDING)_
   - `Next.js` versions 10, 11, 12, and 13. Addresses [#29583](https://github.com/cypress-io/cypress/issues/29583).
   - `Nuxt.js` version 2. Addresses [#30468](https://github.com/cypress-io/cypress/issues/30468).
   - `React` versions 16 and 17. Addresses [#29607](https://github.com/cypress-io/cypress/issues/29607).
-  - `Svelte` version 3. Addresses [#30492](https://github.com/cypress-io/cypress/issues/30492).
+  - `Svelte` versions 3 and 4. Addresses [#30492](https://github.com/cypress-io/cypress/issues/30492) and [#30692](https://github.com/cypress-io/cypress/issues/30692).
   - `Vue` version 2. Addresses [#30295](https://github.com/cypress-io/cypress/issues/30295).
 - The `cypress/react18` test harness is no longer included in the Cypress binary. Instead, React 18 support is now shipped with `cypress/react`! Addresses [#29607](https://github.com/cypress-io/cypress/issues/29607).
 - The `cypress/angular-signals` test harness is no longer included in the Cypress binary. Instead, signals support is now shipped with `cypress/angular`! This requires `rxjs` to be installed as a `peerDependency`. Addresses [#29606](https://github.com/cypress-io/cypress/issues/29606).
@@ -39,10 +39,11 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 **Features:**
 
 - Cypress Component Testing now supports:
-  - `Next.js` version 15. Addresses [#30445](https://github.com/cypress-io/cypress/issues/30445).
-  - `React` version 19. Cypress will allow detected use of the React 19 Release Candidate until React 19 is officially released. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
+  - `Next.js` version >=15.0.4. Versions 15.0.0 - 15.0.3 depend on the React 19 Release Candidate and are not officially supported by Cypress, but should still work. Addresses [#30445](https://github.com/cypress-io/cypress/issues/30445).
+  - `React` version 19. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
   - `Angular` version 19. Addresses [#30175](https://github.com/cypress-io/cypress/issues/30175).
   - `Vite` version 6. Addresses [#30591](https://github.com/cypress-io/cypress/issues/30591).
+  - `Svelte` version 5. Addresses [#29641](https://github.com/cypress-io/cypress/issues/29641).
 
 **Bugfixes:**
 
@@ -58,11 +59,30 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 
 **Dependency Updates:**
 
-- Upgraded `electron` from `27.3.10` to `32.2.0`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
+- Upgraded `electron` from `27.3.10` to `33.2.1`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547) and [#30561](https://github.com/cypress-io/cypress/issues/30561).
 - Upgraded `@electron/rebuild` from `3.2.10` to `3.7.1`. Addresses [#28766](https://github.com/cypress-io/cypress/issues/28766) and [#30632](https://github.com/cypress-io/cypress/issues/30632).
-- Upgraded bundled Chromium version from `118.0.5993.159` to `128.0.6613.178`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
+- Upgraded bundled Chromium version from `118.0.5993.159` to `130.0.6723.137`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547) and [#30561](https://github.com/cypress-io/cypress/issues/30561).
 - Updated `jQuery` from `3.4.1` to `3.7.1`. Addressed in [#30345](https://github.com/cypress-io/cypress/pull/30345).
 - Updated `react` from `17.0.2` to `18.3.1` and `react-dom` from `17.0.2` to `18.3.1`. Addresses [#30511](https://github.com/cypress-io/cypress/issues/30511).
+- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.3.2` to `2.4.6`. Addresses [#26628](https://github.com/cypress-io/cypress/issues/26628).
+
+## 13.16.2
+
+_Released 12/17/2024 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where targets may hang if `Network.enable` is not implemented for the target. Addresses [#29876](https://github.com/cypress-io/cypress/issues/29876).
+- Updated Firefox `userChrome.css` to correctly hide the toolbox during headless mode. Addresses [#30721](https://github.com/cypress-io/cypress/issues/30721).
+- Fixed an issue loading the `cypress.config.ts` file with Node.js version `22.12.0`. Addresses [#30715](https://github.com/cypress-io/cypress/issues/30715).
+
+**Misc:**
+
+- Removed a comment from the scaffolded `supportFile` for component tests around CommonJS syntax. Addresses [#23287](https://github.com/cypress-io/cypress/issues/23287).
+
+**Dependency Updates:**
+
+- Updated `chai` from `4.2.0` to `4.5.0`. Addressed in [#30737](https://github.com/cypress-io/cypress/pull/30737).
 
 ## 13.16.1
 
@@ -70,7 +90,6 @@ _Released 12/03/2024_
 
 **Bugfixes:**
 
-- Support multiple imports of one module with multiple lines. Addressed in [#30314](https://github.com/cypress-io/cypress/pull/30314).
 - During recorded or parallel runs, execution will fail if Cypress is unable to confirm the creation of an instance instead of skipping the spec. Addresses [#30628](https://github.com/cypress-io/cypress/issues/30628).
 
 ## 13.16.0

@@ -238,7 +238,7 @@ describe('lib/browsers/firefox', () => {
                 env: {
                   MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
                   MOZ_HEADLESS_WIDTH: '1280',
-                  MOZ_HEADLESS_HEIGHT: '722',
+                  MOZ_HEADLESS_HEIGHT: '720',
                 },
               }),
               jsdebugger: false,
@@ -303,7 +303,7 @@ describe('lib/browsers/firefox', () => {
                   env: {
                     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
                     MOZ_HEADLESS_WIDTH: '1280',
-                    MOZ_HEADLESS_HEIGHT: '722',
+                    MOZ_HEADLESS_HEIGHT: '720',
                   },
                 }),
                 jsdebugger: true,
