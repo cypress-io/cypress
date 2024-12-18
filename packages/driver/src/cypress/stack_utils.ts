@@ -116,11 +116,10 @@ const getInvocationDetails = (specWindow, config) => {
     // note: specWindow.Cypress can be undefined or null
     // if the user quickly reloads the tests multiple times
 
-    // firefox throws a different stack than chromium
-    // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (includes __cypress/tests)
+    // firefox and chrome throw stacks that include lines from cypress
+    // So we drop the lines until we get to the spec stackframe (includes __cypress)
     if (specWindow.Cypress) {
-      stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+      stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
     }
 
     const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
