@@ -99,12 +99,13 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
     let post = parts[0]
 
-    console.log('POST:')
-    console.log(`"${post}"`)
-    console.log('/POST')
-
     if (browserName === 'firefox') {
-      post = post.replace(whiteSpaceBetweenNewlines, '\n')
+      // in firefox, the 'loading_failed' error doesn't get normalized properly:
+      // to match other browsers, it must be "\n  \n", but it gets modified to "\n"
+      // which causes a mismatch.
+      if (post !== '\n  \n') {
+        post = post.replace(whiteSpaceBetweenNewlines, '\n')
+      }
     }
 
     return `\n      [stack trace lines]${post}`
