@@ -10,7 +10,6 @@ import colorString from 'color-string'
 import sanitize from 'sanitize-filename'
 import * as plugins from './plugins'
 import { fs } from './util/fs'
-import { stat } from 'fs/promises'
 
 let debug = Debug('cypress:server:screenshot')
 const RUNNABLE_SEPARATOR = ' -- '
@@ -552,7 +551,8 @@ export = {
       .then((buffer) => {
         return fs.outputFile(pathToScreenshot, buffer)
       }).then(() => {
-        return stat(pathToScreenshot)
+        // @ts-expect-error TODO: size is not assignable here
+        return fs.statAsync(pathToScreenshot).get('size')
       }).then(({ size }) => {
         const dimensions = getDimensions(details)
 
