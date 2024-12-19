@@ -12,7 +12,6 @@ export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Ca
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
-const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
@@ -98,15 +97,6 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
 
   return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
     let post = parts[0]
-
-    if (browserName === 'firefox') {
-      // in firefox, the 'loading_failed' error doesn't get normalized properly:
-      // to match other browsers, it must be "\n  \n", but it gets modified to "\n"
-      // which causes a mismatch.
-      if (post !== '\n  \n') {
-        post = post.replace(whiteSpaceBetweenNewlines, '\n')
-      }
-    }
 
     return `\n      [stack trace lines]${post}`
   })
