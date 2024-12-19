@@ -49,7 +49,7 @@
           </Tooltip>
           <div class="text-center">
             <component
-              :is="browser.displayName ? allBrowsersIcons[browser.displayName.toLowerCase()] : allBrowsersIcons.generic"
+              :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               alt=""
               class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"

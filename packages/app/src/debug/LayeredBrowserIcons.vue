@@ -32,7 +32,7 @@ const results = computed(() => {
   if (props.browsers) {
     return props.browsers.map((browserType) => {
       return {
-        icon: browserType ? allBrowsersIcons[browserType.toLowerCase()] : allBrowsersIcons.generic,
+        icon: allBrowsersIcons[browserType?.toLowerCase()] || allBrowsersIcons.generic,
         name: `browser-icon-${browserType.toLowerCase().replaceAll(' ', '_')}`,
       }
     })

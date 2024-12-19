@@ -20,7 +20,7 @@
         >
           <template #heading>
             <component
-              :is="selectedBrowser.displayName ? allBrowsersIcons[selectedBrowser.displayName.toLowerCase()] : allBrowsersIcons.generic"
+              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               class="min-w-[16px] w-[16px]"
             />
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}

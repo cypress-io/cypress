@@ -16,7 +16,7 @@
       @click="handleBrowserChoice(browser)"
     >
       <component
-        :is="browser.displayName ? allBrowsersIcons[browser.displayName.toLowerCase()] : allBrowsersIcons.generic"
+        :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
         class="mr-[16px] min-w-[26px] w-[26px] min-h-[45px]"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
         alt=""

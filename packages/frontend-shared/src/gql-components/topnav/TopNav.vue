@@ -106,7 +106,7 @@
   >
     <template #heading="{ open }">
       <component
-        :is="props.gql.currentProject.activeBrowser.displayName ? allBrowsersIcons[props.gql.currentProject.activeBrowser.displayName.toLowerCase()] : allBrowsersIcons.generic"
+        :is="allBrowsersIcons[props.gql.currentProject.activeBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
         v-if="props.gql?.currentProject?.activeBrowser?.displayName"
         class="w-[16px] filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
