@@ -343,15 +343,10 @@ const getBuffer = function (details) {
     return Promise.resolve(details.buffer)
   }
 
-  return new Promise((resolve, reject) => {
-    details.image.getBuffer(Jimp.AUTO, (err, val) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(val)
-      }
-    })
-  })
+  return Promise
+  .promisify(details.image.getBuffer)
+  // @ts-expect-error
+  .call(details.image, Jimp.AUTO)
 }
 
 const getDimensions = function (details) {
