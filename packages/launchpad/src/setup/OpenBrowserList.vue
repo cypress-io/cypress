@@ -48,12 +48,12 @@
             </template>
           </Tooltip>
           <div class="text-center">
-            <img
-              :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
+            <component
+              :is="browser.displayName ? allBrowsersIcons[browser.displayName.toLowerCase()] : allBrowsersIcons.generic"
               alt=""
               class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
-            >
+            />
           </div>
           <div
             class="font-medium pt-2 px-2 text-[18px] leading-[28px] truncate"

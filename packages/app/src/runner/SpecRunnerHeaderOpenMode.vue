@@ -63,11 +63,11 @@
         :disabled="autStore.isRunning"
       >
         <template #heading>
-          <img
+          <component
+            :is="selectedBrowser.displayName ? allBrowsersIcons[selectedBrowser.displayName.toLowerCase()] : allBrowsersIcons.generic"
             class="min-w-[16px] w-[16px]"
-            :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             :alt="selectedBrowser.displayName"
-          >
+          />
           {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>
 

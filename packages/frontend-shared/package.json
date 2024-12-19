@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@antfu/utils": "^0.7.8",
-    "@cypress-design/css": "^0.13.3",
+    "@cypress-design/css": "^1.0.0",
     "@faker-js/faker": "8.4.1",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
@@ -45,7 +45,6 @@
     "@vueuse/core": "7.2.2",
     "autoprefixer": "^10.4.19",
     "axe-core": "4.4.1",
-    "browser-logos": "github:alrra/browser-logos",
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
     "cypress-plugin-tab": "1.0.5",

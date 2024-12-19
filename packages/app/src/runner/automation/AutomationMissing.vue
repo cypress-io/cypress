@@ -19,10 +19,10 @@
           data-cy="select-browser"
         >
           <template #heading>
-            <img
+            <component
+              :is="selectedBrowser.displayName ? allBrowsersIcons[selectedBrowser.displayName.toLowerCase()] : allBrowsersIcons.generic"
               class="min-w-[16px] w-[16px]"
-              :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
-            >
+            />
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
           </template>
 

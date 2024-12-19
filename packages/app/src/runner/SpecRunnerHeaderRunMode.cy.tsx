@@ -70,7 +70,7 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.mount(<SpecRunnerHeaderRunMode />)
 
-      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.Chrome)
+      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.chrome)
       cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     })
   })

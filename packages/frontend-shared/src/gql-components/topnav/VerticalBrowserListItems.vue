@@ -15,12 +15,12 @@
       :data-browser-id="browser.id"
       @click="handleBrowserChoice(browser)"
     >
-      <img
-        class="mr-[16px] min-w-[26px] w-[26px]"
+      <component
+        :is="browser.displayName ? allBrowsersIcons[browser.displayName.toLowerCase()] : allBrowsersIcons.generic"
+        class="mr-[16px] min-w-[26px] w-[26px] min-h-[45px]"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
-        :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         alt=""
-      >
+      />
       <div class="grow">
         <div>
           <button
