@@ -59,11 +59,11 @@ interface Details {
 
 // TODO: This is likely not representative of the entire Type and should be updated
 interface SavedDetails {
-  size?: any
+  size?: string
   takenAt?: Date
-  dimensions?: any
+  dimensions?: string
   multipart?: any
-  pixelRatio?: any
+  pixelRatio?: number
   name?: any
   specName?: string
   testFailure?: boolean
@@ -553,7 +553,7 @@ export = {
       }).then(() => {
         // @ts-expect-error TODO: size is not assignable here
         return fs.statAsync(pathToScreenshot).get('size')
-      }).then(({ size }) => {
+      }).then((size) => {
         const dimensions = getDimensions(details)
 
         const { multipart, pixelRatio, takenAt } = details
