@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.17.1
+
+_Released 12/31/2024_
+
+**Misc:**
+
+- Updated to use Cypress design system browser icons. Addressed in [#30790](https://github.com/cypress-io/cypress/pull/30790).
+
 ## 13.17.0
 
 _Released 12/17/2024_
