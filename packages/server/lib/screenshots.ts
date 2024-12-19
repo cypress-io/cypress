@@ -423,7 +423,7 @@ const getPath = function (data: Data, ext, screenshotsFolder: ScreenshotsFolder,
   } else {
     names = _
     .chain(data.titles)
-    .map((title: string | null | undefined) => sanitizeToString(title))
+    .map(sanitizeToString)
     .join(RUNNABLE_SEPARATOR)
     // @ts-expect-error - this shouldn't be necessary, but it breaks if you remove it
     .concat([])
