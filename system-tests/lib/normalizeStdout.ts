@@ -12,6 +12,7 @@ export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Ca
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
@@ -95,10 +96,18 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
 
   const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
-  return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
-    let post = parts[0]
+  return str.replace(stackTraceRegex, (match: string, trailingWhitespace: string | undefined, offset: number) => {
+    // the whitespace between direct error stack and the "From Node.js Internals:" stack,
+    // in firefox, in visit_spec erorr contexts, does not normalize properly: it needs to
+    // be "\n  \n", in order to match other browsers. So, in cases of firefox, if that string
+    // is found immediately following the matching stack trace, we need to normalize to "\n  \n".
+    const replacementWhitespace = str.substring(offset + match.length).indexOf('From Node.js Internals') === 2 ?
+      '\n  \n' : '\n'
+    const normalizedTrailingWhitespace = browserName === 'firefox' ?
+      trailingWhitespace.replace(whiteSpaceBetweenNewlines, replacementWhitespace) :
+      trailingWhitespace
 
-    return `\n      [stack trace lines]${post}`
+    return `\n      [stack trace lines]${normalizedTrailingWhitespace}`
   })
 }
 
