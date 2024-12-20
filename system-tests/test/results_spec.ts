@@ -10,6 +10,9 @@ const archRegex = /"arch": "[^"]+"/g
 const versionRegex = /"(browserVersion|cypressVersion|osVersion|resolvedNodeVersion|version)": "[^"]+"/g
 const majorVersionRegex = /"(majorVersion)": [0-9]+/g
 const pathRegex = /"(absolute|projectRoot|downloadsFolder|fileServerFolder|fixturesFolder|resolvedNodePath|screenshotsFolder|videosFolder|cypressBinaryRoot|path)": "[^"]+"/g
+// matches similar to: `\n    at SOME_CODEPATH"`
+const stackLineRegex = /(\Wn {4}at.+)"/g
+
 /**
  * normalize dynamic data in results json like dates, paths, durations, etc
  * @param {string} resultsJson input string
@@ -24,7 +27,7 @@ const normalizeResults = (resultsJson) => {
   .replace(majorVersionRegex, '"$1": "X"')
   .replace(osNameRegex, '"$1": "linux"')
   .replace(archRegex, '"arch": "x64"')
-  .replace(/(\Wn {4}at.+)"/g, ' <stack lines>"')
+  .replace(stackLineRegex, ' <stack lines>"')
 }
 
 const normalizeBrowsers = (browsers) => {
