@@ -431,16 +431,11 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
 const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameIndex => {
-  //console.log('stackAndCodeFrameIndex', { isCypressErr: isCypressErr(err), isChai: isChaiValidationErr(err) })
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
-    //console.log('splicing userInvocationStack')
-
     return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
   }
-
-  //console.log('returning new stack from userInvocationStack')
 
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) || '' }
 }

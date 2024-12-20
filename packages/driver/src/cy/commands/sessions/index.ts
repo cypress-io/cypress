@@ -254,7 +254,6 @@ export default function (Commands, Cypress, cy) {
 
               const userInvocationStack = $errUtils.getUserInvocationStack(err, Cypress.state)
 
-              //console.log('enhancingStack from session', { err, userInvocationStack })
               err = $errUtils.enhanceStack({
                 err,
                 userInvocationStack,

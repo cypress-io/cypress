@@ -31,10 +31,11 @@ const hasCrossFrameStacks = (specWindow) => {
   return topStack === specStack
 }
 
-const stackWithContentAppended = (err, stack: string = '') => {
+const stackWithContentAppended = (err, stack: string | undefined) => {
+  const usableStack = stack ?? ''
   const appendToStack = err.appendToStack
 
-  if (!appendToStack || !appendToStack.content) return stack
+  if (!appendToStack || !appendToStack.content) return usableStack
 
   delete err.appendToStack
 
@@ -43,7 +44,7 @@ const stackWithContentAppended = (err, stack: string = '') => {
   const normalizedContent = normalizeStackIndentation(appendToStack.content)
   const content = $utils.indent(normalizedContent, 2)
 
-  return `${stack}\n\n${appendToStack.title}:\n${content}`
+  return `${usableStack}\n\n${appendToStack.title}:\n${content}`
 }
 
 const stackWithLinesRemoved = (stack, cb) => {

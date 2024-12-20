@@ -19,7 +19,6 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
-    excludeSpecPattern: 'cypress/**/with-inject-document-domain/**/*.cy.{js,ts}',
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {

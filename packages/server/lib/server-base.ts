@@ -15,7 +15,6 @@ import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri, concatStream, DocumentDomainInjection } from '@packages/network'
-import type { Policy } from '@packages/network/lib/cors'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -159,10 +158,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
-  private _originPolicy: Policy = 'same-origin'
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
-  private _config: Cfg
   private _documentDomainInjection: DocumentDomainInjection
 
   constructor (config: Cfg) {
@@ -176,8 +173,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._fileServer = null
 
     this._documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
-    // TODO: maybe dont need to keep this around anymore
-    this._config = config
 
     const remoteStatePorts = () => {
       return {
@@ -248,12 +243,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, injectDocumentDomain } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
       this._server = this._createHttpServer(app)
-
-      debug('inject document domain?', injectDocumentDomain)
-      this._originPolicy = injectDocumentDomain ? 'same-super-domain-origin' : 'same-origin'
 
       const onError = (err) => {
         // if the server bombs before starting

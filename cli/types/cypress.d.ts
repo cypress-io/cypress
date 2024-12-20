@@ -3112,7 +3112,11 @@ declare namespace Cypress {
      * @default null
      */
     experimentalSkipDomainInjection: string[] | null
-    // TODO: document
+    /**
+     * Enables setting document.domain to the superdomain on code injection. This option is
+     * disabled by default. Enabling this option allows for navigating between subdomains in
+     * the same test without the use of cy.origin().
+     */
     injectDocumentDomain: boolean
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.

@@ -221,8 +221,8 @@ describe('privileged commands', () => {
     }
 
     strategies.forEach((strategy) => {
-      describe(`strategy: ${strategy}`, () => {
-        commands.forEach((command) => {
+      commands.forEach((command) => {
+        describe(`strategy: ${strategy}`, () => {
           describe(`command: ${command}`, () => {
             it('fails in html script', (done) => {
               cy.on('fail', (err) => {

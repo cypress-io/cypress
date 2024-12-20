@@ -17,6 +17,30 @@ import type { ParsedHostWithProtocolAndHost } from './types'
 
 const debug = Debug('cypress:network:document-domain-injection')
 
+export abstract class DocumentDomainInjection {
+  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}): DocumentDomainInjection {
+    debug('Determining injection behavior for config values: %o', {
+      injectDocumentDomain: config.injectDocumentDomain,
+      testingType: config.testingType,
+    })
+
+    if (config.injectDocumentDomain && config.testingType !== 'component') {
+      debug('Returning document domain injection behavior')
+
+      return new DocumentDomainBehavior()
+    }
+
+    debug('Returning origin behavior - no document domain injection')
+
+    return new OriginBehavior()
+  }
+
+  public abstract getOrigin (url: string): string
+  public abstract getHostname (url: string): string
+  public abstract urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean
+  public abstract shouldInjectDocumentDomain (url: string | undefined): boolean
+}
+
 export class DocumentDomainBehavior implements DocumentDomainInjection {
   public getOrigin (url: string) {
     return getSuperDomainOrigin(url)
@@ -58,30 +82,4 @@ export class OriginBehavior implements DocumentDomainInjection {
 
     return false
   }
-}
-
-export abstract class DocumentDomainInjection {
-  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}): DocumentDomainInjection {
-    debug('Determining injection behavior for config values: %o', {
-      injectDocumentDomain: config.injectDocumentDomain,
-      testingType: config.testingType,
-    })
-
-    debug('called from', new Error().stack)
-
-    if (config.injectDocumentDomain && config.testingType !== 'component') {
-      debug('Returning document domain injection behavior')
-
-      return new DocumentDomainBehavior()
-    }
-
-    debug('Returning origin behavior - no document domain injection')
-
-    return new OriginBehavior()
-  }
-
-  public abstract getOrigin (url: string): string
-  public abstract getHostname (url: string): string
-  public abstract urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean
-  public abstract shouldInjectDocumentDomain (url: string | undefined): boolean
 }

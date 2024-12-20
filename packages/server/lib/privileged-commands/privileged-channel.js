@@ -68,8 +68,6 @@
       )
     })
 
-    //console.log('hasSpecFrameStackLines? ', err.stack, stackLines, filteredLines, filteredLines.length)
-
     return filteredLines.length > 0
   }
 
@@ -81,8 +79,6 @@
     if (browserFamily === 'webkit') {
       return isInCallback(err) && hasValidCallbackContext
     }
-
-    //console.log('hasCallbackInsideEval', isInCallback(err), stringIncludes.call(err.stack, '> eval line'))
 
     return isInCallback(err) && stringIncludes.call(err.stack, '> eval line')
   }
@@ -98,8 +94,6 @@
 
       return stringIncludes.call(err.stack, script)
     })
-
-    //console.log('hasStackLinesFromSpecOrSupportFile?', scripts, filteredLines)
 
     return filteredLines.length > 0
   }
@@ -129,10 +123,7 @@
       return hasSpecBridgeInvocation(err)
     }
 
-    //console.log('should check special case?', { browserFamily, documentDomainContext }, browserFamily && documentDomainContext)
     if (browserFamily === 'chromium' && documentDomainContext) {
-      //console.log('checking special case', browserFamily, documentDomainContext, browserFamily && documentDomainContext)
-
       return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 

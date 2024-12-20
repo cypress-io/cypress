@@ -247,15 +247,12 @@ describe('config/src/index', () => {
 
   describe('.validateNeedToRestartOnChange', () => {
     it('returns the need to restart if given key has changed', () => {
-      let result = configUtil.validateNeedToRestartOnChange({ blockHosts: [] }, { blockHosts: ['https://example.com'] })
-
-      expect(result).to.eql({
+      expect(configUtil.validateNeedToRestartOnChange({ blockHosts: [] }, { blockHosts: ['https://example.com'] })).to.eql({
         server: true,
         browser: false,
       })
 
-      result = configUtil.validateNeedToRestartOnChange({ injectDocumentDomain: true }, {})
-      expect(result).to.eql({
+      expect(configUtil.validateNeedToRestartOnChange({ injectDocumentDomain: true }, {})).to.eql({
         server: true,
         browser: false,
       })

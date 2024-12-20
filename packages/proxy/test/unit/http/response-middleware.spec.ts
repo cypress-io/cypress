@@ -2127,7 +2127,7 @@ describe('http/response-middleware', function () {
       htmlStub.restore()
     })
 
-    ;[true].forEach((injectDocumentDomain) => {
+    ;[true, false].forEach((injectDocumentDomain) => {
       describe(`when injectDocumentDomain is ${injectDocumentDomain}`, () => {
         const config = {
           modifyObstructiveCode: true,

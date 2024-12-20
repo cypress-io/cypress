@@ -99,7 +99,7 @@ export const Cypress = (
     },
     configureServer: async (server: ViteDevServer) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {
-        let transformedIndexHtml = await server.transformIndexHtml(base, '')
+        const transformedIndexHtml = await server.transformIndexHtml(base, '')
 
         return res.end(transformedIndexHtml)
       })

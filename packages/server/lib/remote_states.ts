@@ -62,8 +62,6 @@ interface RemoteStatesServerPorts {
  * }
  */
 export class RemoteStates {
-  // Cypress.RemoteState was coming from the namespace declared in @packages/net-stubbing, somehow
-  // now it's defined (for a second time) in `./remote_states_abs.ts
   private remoteStates: Map<string, RemoteState> = new Map()
   private primaryOriginKey: string = ''
   private currentOriginKey: string = ''
