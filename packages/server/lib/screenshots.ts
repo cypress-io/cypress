@@ -384,7 +384,8 @@ const ensureSafePath = function (withoutExt: string, extension: string, overwrit
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
-    return fs.outputFile(fullPath, '')
+    // @ts-expect-error
+    return fs.outputFileAsync(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
       debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
