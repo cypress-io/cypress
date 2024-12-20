@@ -382,9 +382,9 @@ export class SocketBase {
         })
 
         const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const { origin } = new URL(url)
+          const { hostname } = new URL(url)
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, origin), url, sameSiteContext)
+          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext)
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
