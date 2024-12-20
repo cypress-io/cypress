@@ -3102,20 +3102,14 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Disables setting document.domain to the applications super domain on injection.
-     * This experiment is to be used for sites that do not work with setting document.domain
-     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
-     * navigations, and will require the use of cy.origin(). This option takes an array of
-     * strings/string globs.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @see https://on.cypress.io/experiments#Experimental-Skip-Domain-Injection
-     * @default null
-     */
-    experimentalSkipDomainInjection: string[] | null
-    /**
      * Enables setting document.domain to the superdomain on code injection. This option is
      * disabled by default. Enabling this option allows for navigating between subdomains in
-     * the same test without the use of cy.origin().
+     * the same test without the use of cy.origin(). Setting document.domain is deprecated in Chrome.
+     * Enabling this may result in incompatibilities with sites that leverage origin-agent-cluster
+     * headers. Enabling this when a browser does not support setting document.domain will not result 
+     * in the browser allowing document.domain to be set. In these cases, this configuration option
+     * must be set to false, to allow cy.origin() to be used on subdomains.
+     * @default false
      */
     injectDocumentDomain: boolean
     /**
