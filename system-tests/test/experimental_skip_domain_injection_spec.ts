@@ -30,7 +30,7 @@ describe('e2e experimentalSkipDomainInjection=true', () => {
   })
 
   systemTests.it('fails with an error message about experimentalSkipDomainInjection being removed', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)f
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'experimental_skip_domain_injection.cy.ts',
