@@ -3106,7 +3106,7 @@ declare namespace Cypress {
      * disabled by default. Enabling this option allows for navigating between subdomains in
      * the same test without the use of cy.origin(). Setting document.domain is deprecated in Chrome.
      * Enabling this may result in incompatibilities with sites that leverage origin-agent-cluster
-     * headers. Enabling this when a browser does not support setting document.domain will not result 
+     * headers. Enabling this when a browser does not support setting document.domain will not result
      * in the browser allowing document.domain to be set. In these cases, this configuration option
      * must be set to false, to allow cy.origin() to be used on subdomains.
      * @default false

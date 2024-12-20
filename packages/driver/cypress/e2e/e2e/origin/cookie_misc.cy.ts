@@ -251,7 +251,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
         cy.wait('@cookiedRequest').then(({ request }) => {
           // in Cypress <= 13, this should be (which is wrong)
-            // expect(req['headers']['cookie']).to.equal('foo1=bar1')
+          // expect(req['headers']['cookie']).to.equal('foo1=bar1')
 
           // in Cypress 14, this should be (which is correct)
           expect(request.headers.cookie).to.equal(cookie)
