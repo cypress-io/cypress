@@ -1,16 +1,7 @@
 import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
+import '../../e2e/support/browserIconCommands'
 import type { Socket } from '@packages/socket/lib/browser'
-
-declare global {
-  namespace Cypress {
-    interface Chainable {
-      verifyBrowserIconSvg(
-        expectedSvgData: string
-      ): Chainable<JQuery<HTMLElement>>
-    }
-  }
-}
 
 export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
   get: (obj, prop) => {
@@ -59,33 +50,3 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
     null, // CypressJQuery, shouldn't be using driver in component tests anyway
   )
 }
-
-function verifyBrowserIconSvg (
-  subject: JQuery<HTMLElement>,
-  expectedSvgData: string,
-) {
-  cy.then(() => {
-    let actualSvgData = ''
-
-    subject.each((_, el) => {
-      actualSvgData += el.outerHTML
-    })
-
-    const actualNormalizedSvgData = actualSvgData
-    .replaceAll('></path>', '/>')
-    .replaceAll('></circle>', '/>')
-    .replace(/<title>.*<\/title>/, '')
-
-    const expectedNormalizedSvgData = expectedSvgData.replace(/<defs>.*<\/defs>/, '')
-
-    expect(actualNormalizedSvgData).to.equal(expectedNormalizedSvgData)
-
-    return subject
-  })
-}
-
-Cypress.Commands.add(
-  'verifyBrowserIconSvg',
-  { prevSubject: true },
-  verifyBrowserIconSvg,
-)

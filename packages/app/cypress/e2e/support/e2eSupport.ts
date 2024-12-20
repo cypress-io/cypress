@@ -1,4 +1,5 @@
 import '@packages/frontend-shared/cypress/support/e2e'
+import './browserIconCommands'
 import 'cypress-real-events/support'
 import './execute-spec'
 
@@ -20,7 +21,7 @@ beforeEach(() => {
 function e2eTestingTypeIsSelected () {
   cy.findByTestId('specs-testing-type-header').within(() => {
     cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'true')
-    cy.findByTestId('testing-type-switch').contains('button', 'Component').should('not.have.attr', 'aria-selected')
+    cy.findByTestId('testing-type-switch').contains('button', 'Component').should('have.attr', 'aria-selected', 'false')
   })
 }
 
@@ -28,7 +29,7 @@ Cypress.Commands.add('verifyE2ESelected', e2eTestingTypeIsSelected)
 
 function ctTestingTypeIsSelected () {
   cy.findByTestId('specs-testing-type-header').within(() => {
-    cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('not.have.attr', 'aria-selected')
+    cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'false')
     cy.findByTestId('testing-type-switch').contains('button', 'Component').should('have.attr', 'aria-selected', 'true')
   })
 }
