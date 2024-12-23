@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.16.1",
+  "version": "13.17.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -213,7 +213,7 @@
   },
   "engines": {
     "node": ">=20.18.1",
-    "yarn": ">=1.22.17"
+    "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
   "license": "MIT",

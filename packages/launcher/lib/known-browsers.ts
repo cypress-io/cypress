@@ -7,7 +7,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/m,
+    versionRegex: /Google Chrome(?! for Testing) (\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
     validator: (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
       // a validator method can be defined to mark a browser as unsupported
@@ -25,15 +25,6 @@ export const knownBrowsers: Browser[] = [
     },
   },
   {
-    name: 'chromium',
-    family: 'chromium',
-    // technically Chromium is always in development
-    channel: 'stable',
-    displayName: 'Chromium',
-    versionRegex: /Chromium (\S+)/m,
-    binary: ['chromium-browser', 'chromium'],
-  },
-  {
     name: 'chrome',
     family: 'chromium',
     channel: 'beta',
@@ -45,9 +36,26 @@ export const knownBrowsers: Browser[] = [
     name: 'chrome',
     family: 'chromium',
     channel: 'canary',
-    displayName: 'Canary',
+    displayName: 'Chrome Canary',
     versionRegex: /Google Chrome Canary (\S+)/m,
     binary: 'google-chrome-canary',
+  },
+  {
+    name: 'chrome-for-testing',
+    family: 'chromium',
+    channel: 'stable',
+    displayName: 'Chrome for Testing',
+    versionRegex: /Google Chrome for Testing (\S+)/m,
+    binary: 'chrome',
+  },
+  {
+    name: 'chromium',
+    family: 'chromium',
+    // technically Chromium is always in development
+    channel: 'stable',
+    displayName: 'Chromium',
+    versionRegex: /Chromium (\S+)/m,
+    binary: ['chromium-browser', 'chromium'],
   },
   {
     name: 'firefox',
@@ -89,18 +97,18 @@ export const knownBrowsers: Browser[] = [
   {
     name: 'edge',
     family: 'chromium',
-    channel: 'canary',
-    displayName: 'Edge Canary',
-    versionRegex: /Microsoft Edge.+?(\S*(?= canary)|(?<=canary )\S*)/mi,
-    binary: ['edge-canary', 'microsoft-edge-canary'],
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
     channel: 'beta',
     displayName: 'Edge Beta',
     versionRegex: /Microsoft Edge.+?(\S*(?= beta)|(?<=beta )\S*)/mi,
     binary: ['edge-beta', 'microsoft-edge-beta'],
+  },
+  {
+    name: 'edge',
+    family: 'chromium',
+    channel: 'canary',
+    displayName: 'Edge Canary',
+    versionRegex: /Microsoft Edge.+?(\S*(?= canary)|(?<=canary )\S*)/mi,
+    binary: ['edge-canary', 'microsoft-edge-canary'],
   },
   {
     name: 'edge',

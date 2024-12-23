@@ -771,7 +771,7 @@
     "./packages/server/lib/plugins/preprocessor.js",
     "./packages/server/lib/plugins/run_events.js",
     "./packages/server/lib/reporter.js",
-    "./packages/server/lib/screenshots.js",
+    "./packages/server/lib/screenshots.ts",
     "./packages/server/lib/util/chrome_policy_check.js",
     "./packages/server/lib/util/cookies.ts",
     "./packages/server/lib/util/fs.ts",
@@ -4184,5 +4184,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e596be1821cc2b05713da07adece7ebc715adb9bbff1e38299c2d35db61ed3a4"
+  "deferredHash": "2d0ac745adc4cff2d5562745f93c4f051ee4d49bd19fd80280bd0e4cc6076675"
 }

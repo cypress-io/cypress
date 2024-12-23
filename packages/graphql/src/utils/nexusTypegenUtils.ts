@@ -92,7 +92,6 @@ const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
   debounced[cfg.filePath] =
     debounced[cfg.filePath] ?? _.debounce(nexusTypegen, 500)
 
-  // @ts-expect-error
   debounced[cfg.filePath](cfg)
 }
 

@@ -12,17 +12,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     ],
   },
   {
-    'name': 'chromium',
-    'family': 'chromium',
-    'channel': 'stable',
-    'displayName': 'Chromium',
-    'versionRegex': {},
-    'binary': [
-      'chromium-browser',
-      'chromium',
-    ],
-  },
-  {
     'name': 'chrome',
     'family': 'chromium',
     'channel': 'beta',
@@ -34,9 +23,28 @@ exports['browsers returns the expected list of browsers 1'] = [
     'name': 'chrome',
     'family': 'chromium',
     'channel': 'canary',
-    'displayName': 'Canary',
+    'displayName': 'Chrome Canary',
     'versionRegex': {},
     'binary': 'google-chrome-canary',
+  },
+  {
+    'name': 'chrome-for-testing',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chrome for Testing',
+    'versionRegex': {},
+    'binary': 'chrome',
+  },
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
   },
   {
     'name': 'firefox',
@@ -82,23 +90,23 @@ exports['browsers returns the expected list of browsers 1'] = [
   {
     'name': 'edge',
     'family': 'chromium',
-    'channel': 'canary',
-    'displayName': 'Edge Canary',
-    'versionRegex': {},
-    'binary': [
-      'edge-canary',
-      'microsoft-edge-canary',
-    ],
-  },
-  {
-    'name': 'edge',
-    'family': 'chromium',
     'channel': 'beta',
     'displayName': 'Edge Beta',
     'versionRegex': {},
     'binary': [
       'edge-beta',
       'microsoft-edge-beta',
+    ],
+  },
+  {
+    'name': 'edge',
+    'family': 'chromium',
+    'channel': 'canary',
+    'displayName': 'Edge Canary',
+    'versionRegex': {},
+    'binary': [
+      'edge-canary',
+      'microsoft-edge-canary',
     ],
   },
   {

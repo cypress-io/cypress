@@ -9,12 +9,5 @@
   ],
   "compilerOptions": {
     "lib": ["esnext"],
-    "types": [
-      "mocha",
-      "node"
-    ],
-    "resolveJsonModule": true,
-    "noUnusedLocals": false,
-    "importHelpers": true
   }
 }

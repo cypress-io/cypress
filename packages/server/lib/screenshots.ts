@@ -1,21 +1,74 @@
-const _ = require('lodash')
-const mime = require('mime')
-const path = require('path')
-const Promise = require('bluebird')
-const dataUriToBuffer = require('data-uri-to-buffer')
-const Jimp = require('jimp')
-const sizeOf = require('image-size')
-const colorString = require('color-string')
-const sanitize = require('sanitize-filename')
-let debug = require('debug')('cypress:server:screenshot')
-const plugins = require('./plugins')
-const { fs } = require('./util/fs')
+import _ from 'lodash'
+import Debug from 'debug'
+import mime from 'mime'
+import path from 'path'
+import Promise from 'bluebird'
+import dataUriToBuffer from 'data-uri-to-buffer'
+import Jimp from 'jimp'
+import sizeOf from 'image-size'
+import colorString from 'color-string'
+import sanitize from 'sanitize-filename'
+import * as plugins from './plugins'
+import { fs } from './util/fs'
 
+let debug = Debug('cypress:server:screenshot')
 const RUNNABLE_SEPARATOR = ' -- '
 const pathSeparatorRe = /[\\\/]/g
 
 // internal id incrementor
-let __ID__ = null
+let __ID__: string | null = null
+
+type ScreenshotsFolder = string | false | undefined
+
+interface Clip {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
+interface Data {
+  specName: string
+  name: string
+  startTime: Date
+  viewport: {
+    width: number
+    height: number
+  }
+  titles?: string[]
+  testFailure?: boolean
+  overwrite?: boolean
+  simple?: boolean
+  current?: number
+  total?: number
+  testAttemptIndex?: number
+  appOnly?: boolean
+  hideRunnerUi?: boolean
+  clip?: Clip
+  userClip?: Clip
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
+interface Details {
+  image: any
+  pixelRatio: any
+  multipart: any
+  takenAt: Date
+}
+
+// TODO: This is likely not representative of the entire Type and should be updated
+interface SavedDetails {
+  size?: string
+  takenAt?: Date
+  dimensions?: string
+  multipart?: any
+  pixelRatio?: number
+  name?: any
+  specName?: string
+  testFailure?: boolean
+  path?: string
+}
 
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
 // the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
@@ -34,18 +87,32 @@ const MIN_PREFIX_BYTES = 64
 // screenshot id to the debug logs for easier association
 debug = _.wrap(debug, (fn, str, ...args) => {
   return fn(`(${__ID__}) ${str}`, ...args)
-})
+}) as Debug.Debugger
 
-const isBlack = (rgba) => {
+interface RGBA {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+const isBlack = (rgba: RGBA): boolean => {
   return `${rgba.r}${rgba.g}${rgba.b}` === '000'
 }
 
-const isWhite = (rgba) => {
+const isWhite = (rgba: RGBA): boolean => {
   return `${rgba.r}${rgba.g}${rgba.b}` === '255255255'
 }
 
-const intToRGBA = function (int) {
-  const obj = Jimp.intToRGBA(int)
+interface RGBAWithName extends RGBA {
+  name?: string
+  isNotWhite?: boolean
+  isWhite?: boolean
+  isBlack?: boolean
+}
+
+const intToRGBA = function (int: number): RGBAWithName {
+  const obj: RGBAWithName = Jimp.intToRGBA(int) as RGBAWithName
 
   if (debug.enabled) {
     obj.name = colorString.to.keyword([
@@ -108,14 +175,14 @@ const hasHelperPixels = function (image, pixelRatio) {
   )
 }
 
-const captureAndCheck = function (data, automate, conditionFn) {
+const captureAndCheck = function (data: Data, automate, conditionFn) {
   let attempt
   const start = new Date()
   let tries = 0
 
   return (attempt = function () {
     tries++
-    const totalDuration = new Date() - start
+    const totalDuration = new Date().getTime() - start.getTime()
 
     debug('capture and check %o', { tries, totalDuration })
 
@@ -140,7 +207,7 @@ const captureAndCheck = function (data, automate, conditionFn) {
   })()
 }
 
-const isMultipart = (data) => {
+const isMultipart = (data: Data) => {
   return _.isNumber(data.current) && _.isNumber(data.total)
 }
 
@@ -166,7 +233,7 @@ const crop = function (image, dimensions, pixelRatio = 1) {
   return image.clone().crop(x, y, width, height)
 }
 
-const pixelConditionFn = function (data, image) {
+const pixelConditionFn = function (data: Data, image) {
   const pixelRatio = image.bitmap.width / data.viewport.width
 
   const hasPixels = hasHelperPixels(image, pixelRatio)
@@ -187,7 +254,7 @@ const pixelConditionFn = function (data, image) {
   return passes
 }
 
-let multipartImages = []
+let multipartImages: { data: Data, image, takenAt, __ID__ }[] = []
 
 const clearMultipartState = function () {
   debug('clearing %d cached multipart images', multipartImages.length)
@@ -199,7 +266,7 @@ const imagesMatch = (img1, img2) => {
   return img1.bitmap.data.equals(img2.bitmap.data)
 }
 
-const lastImagesAreDifferent = function (data, image) {
+const lastImagesAreDifferent = function (data: Data, image) {
   // ensure the previous image isn't the same,
   // which might indicate the page has not scrolled yet
   const previous = _.last(multipartImages)
@@ -222,7 +289,7 @@ const lastImagesAreDifferent = function (data, image) {
   return !matches
 }
 
-const multipartConditionFn = function (data, image) {
+const multipartConditionFn = function (data: Data, image) {
   if (data.current === 1) {
     return pixelConditionFn(data, image) && lastImagesAreDifferent(data, image)
   }
@@ -246,7 +313,7 @@ const stitchScreenshots = function (pixelRatio) {
 
   debug(`stitch ${multipartImages.length} images together`)
 
-  const takenAts = []
+  const takenAts: string[] = []
   let heightMarker = 0
   const fullImage = new Jimp(fullWidth, fullHeight)
 
@@ -278,6 +345,7 @@ const getBuffer = function (details) {
 
   return Promise
   .promisify(details.image.getBuffer)
+  // @ts-expect-error
   .call(details.image, Jimp.AUTO)
 }
 
@@ -293,7 +361,7 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
+const ensureSafePath = function (withoutExt: string, extension: string, overwrite: Data['overwrite'], num = 0) {
   const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
 
   const maxSafePrefixBytes = maxSafeBytes - suffix.length
@@ -316,6 +384,7 @@ const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
+    // @ts-expect-error
     return fs.outputFileAsync(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
@@ -332,24 +401,26 @@ const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
   })
 }
 
-const sanitizeToString = (title) => {
+const sanitizeToString = (title: string | null | undefined) => {
   // test titles may be values which aren't strings like
   // null or undefined - so convert before trying to sanitize
   return sanitize(_.toString(title))
 }
 
-const getPath = function (data, ext, screenshotsFolder, overwrite) {
+const getPath = function (data: Data, ext, screenshotsFolder: ScreenshotsFolder, overwrite: Data['overwrite']) {
   let names
   const specNames = (data.specName || '')
   .split(pathSeparatorRe)
 
   if (data.name) {
+    // @ts-expect-error
     names = data.name.split(pathSeparatorRe).map(sanitize)
   } else {
     names = _
     .chain(data.titles)
     .map(sanitizeToString)
     .join(RUNNABLE_SEPARATOR)
+    // @ts-expect-error - this shouldn't be necessary, but it breaks if you remove it
     .concat([])
     .value()
   }
@@ -361,22 +432,28 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
     names[index] = `${names[index]} (failed)`
   }
 
-  if (data.testAttemptIndex > 0) {
+  if (data.testAttemptIndex && data.testAttemptIndex > 0) {
     names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
   }
 
-  const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
+  let withoutExt
+
+  if (screenshotsFolder) {
+    withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
+  } else {
+    withoutExt = path.join(...specNames, ...names)
+  }
 
   return ensureSafePath(withoutExt, ext, overwrite)
 }
 
-const getPathToScreenshot = function (data, details, screenshotsFolder) {
+const getPathToScreenshot = function (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {
   const ext = mime.getExtension(getType(details))
 
   return getPath(data, ext, screenshotsFolder, data.overwrite)
 }
 
-module.exports = {
+export = {
   crop,
 
   getPath,
@@ -385,7 +462,7 @@ module.exports = {
 
   imagesMatch,
 
-  capture (data, automate) {
+  capture (data: Data, automate) {
     __ID__ = _.uniqueId('s')
 
     debug('capturing screenshot %o', data)
@@ -419,7 +496,7 @@ module.exports = {
         debug(`multi-part ${data.current}/${data.total}`)
       }
 
-      if (multipart && (data.total > 1)) {
+      if (multipart && (data.total && data.total > 1)) {
         // keep previous screenshot partials around b/c if two screenshots are
         // taken in a row, the UI might not be caught up so we need something
         // to compare the new one to
@@ -461,15 +538,16 @@ module.exports = {
     })
   },
 
-  save (data, details, screenshotsFolder) {
+  save (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {
     return getPathToScreenshot(data, details, screenshotsFolder)
     .then((pathToScreenshot) => {
       debug('save', pathToScreenshot)
 
       return getBuffer(details)
       .then((buffer) => {
-        return fs.outputFileAsync(pathToScreenshot, buffer)
+        return fs.outputFile(pathToScreenshot, buffer)
       }).then(() => {
+        // @ts-expect-error TODO: size is not assignable here
         return fs.statAsync(pathToScreenshot).get('size')
       }).then((size) => {
         const dimensions = getDimensions(details)
@@ -491,8 +569,8 @@ module.exports = {
     })
   },
 
-  afterScreenshot (data, details) {
-    const duration = new Date() - new Date(data.startTime)
+  afterScreenshot (data: Data, details: SavedDetails) {
+    const duration = new Date().getTime() - new Date(data.startTime).getTime()
 
     details = _.extend({}, data, details, { duration })
     details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')

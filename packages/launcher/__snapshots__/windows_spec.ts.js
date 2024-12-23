@@ -15,8 +15,56 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Google Chrome.app',
       'executable': 'Contents/MacOS/Google Chrome',
-      'appId': 'com.google.Chrome',
+      'bundleId': 'com.google.Chrome',
       'versionProperty': 'KSVersion',
+    },
+  },
+  {
+    'name': 'chrome',
+    'family': 'chromium',
+    'channel': 'beta',
+    'displayName': 'Chrome Beta',
+    'versionRegex': {},
+    'binary': 'google-chrome-beta',
+    'path': 'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
+    'version': '6.7.8',
+    'findAppParams': {
+      'appName': 'Google Chrome Beta.app',
+      'executable': 'Contents/MacOS/Google Chrome Beta',
+      'bundleId': 'com.google.Chrome.beta',
+      'versionProperty': 'KSVersion',
+    },
+  },
+  {
+    'name': 'chrome',
+    'family': 'chromium',
+    'channel': 'canary',
+    'displayName': 'Chrome Canary',
+    'versionRegex': {},
+    'binary': 'google-chrome-canary',
+    'path': 'C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe',
+    'version': '3.4.5',
+    'findAppParams': {
+      'appName': 'Google Chrome Canary.app',
+      'executable': 'Contents/MacOS/Google Chrome Canary',
+      'bundleId': 'com.google.Chrome.canary',
+      'versionProperty': 'KSVersion',
+    },
+  },
+  {
+    'name': 'chrome-for-testing',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chrome for Testing',
+    'versionRegex': {},
+    'binary': 'chrome',
+    'path': 'C:/Program Files/Google/Chrome for Testing/chrome.exe',
+    'version': '1.2.3',
+    'findAppParams': {
+      'appName': 'Google Chrome for Testing.app',
+      'executable': 'Contents/MacOS/Google Chrome for Testing',
+      'bundleId': 'com.google.chrome.for.testing',
+      'versionProperty': 'CFBundleShortVersionString',
     },
   },
   {
@@ -34,40 +82,8 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Chromium.app',
       'executable': 'Contents/MacOS/Chromium',
-      'appId': 'org.chromium.Chromium',
+      'bundleId': 'org.chromium.Chromium',
       'versionProperty': 'CFBundleShortVersionString',
-    },
-  },
-  {
-    'name': 'chrome',
-    'family': 'chromium',
-    'channel': 'beta',
-    'displayName': 'Chrome Beta',
-    'versionRegex': {},
-    'binary': 'google-chrome-beta',
-    'path': 'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
-    'version': '6.7.8',
-    'findAppParams': {
-      'appName': 'Google Chrome Beta.app',
-      'executable': 'Contents/MacOS/Google Chrome Beta',
-      'appId': 'com.google.Chrome.beta',
-      'versionProperty': 'KSVersion',
-    },
-  },
-  {
-    'name': 'chrome',
-    'family': 'chromium',
-    'channel': 'canary',
-    'displayName': 'Canary',
-    'versionRegex': {},
-    'binary': 'google-chrome-canary',
-    'path': 'C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe',
-    'version': '3.4.5',
-    'findAppParams': {
-      'appName': 'Google Chrome Canary.app',
-      'executable': 'Contents/MacOS/Google Chrome Canary',
-      'appId': 'com.google.Chrome.canary',
-      'versionProperty': 'KSVersion',
     },
   },
   {
@@ -82,7 +98,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Firefox.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.firefox',
+      'bundleId': 'org.mozilla.firefox',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -101,7 +117,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Firefox Developer Edition.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.firefoxdeveloperedition',
+      'bundleId': 'org.mozilla.firefoxdeveloperedition',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -120,7 +136,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Firefox Nightly.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.nightly',
+      'bundleId': 'org.mozilla.nightly',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -139,26 +155,7 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Microsoft Edge.app',
       'executable': 'Contents/MacOS/Microsoft Edge',
-      'appId': 'com.microsoft.Edge',
-      'versionProperty': 'CFBundleShortVersionString',
-    },
-  },
-  {
-    'name': 'edge',
-    'family': 'chromium',
-    'channel': 'canary',
-    'displayName': 'Edge Canary',
-    'versionRegex': {},
-    'binary': [
-      'edge-canary',
-      'microsoft-edge-canary',
-    ],
-    'path': 'C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe',
-    'version': '14',
-    'findAppParams': {
-      'appName': 'Microsoft Edge Canary.app',
-      'executable': 'Contents/MacOS/Microsoft Edge Canary',
-      'appId': 'com.microsoft.Edge.Canary',
+      'bundleId': 'com.microsoft.Edge',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -177,7 +174,26 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Microsoft Edge Beta.app',
       'executable': 'Contents/MacOS/Microsoft Edge Beta',
-      'appId': 'com.microsoft.Edge.Beta',
+      'bundleId': 'com.microsoft.Edge.Beta',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+  {
+    'name': 'edge',
+    'family': 'chromium',
+    'channel': 'canary',
+    'displayName': 'Edge Canary',
+    'versionRegex': {},
+    'binary': [
+      'edge-canary',
+      'microsoft-edge-canary',
+    ],
+    'path': 'C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe',
+    'version': '14',
+    'findAppParams': {
+      'appName': 'Microsoft Edge Canary.app',
+      'executable': 'Contents/MacOS/Microsoft Edge Canary',
+      'bundleId': 'com.microsoft.Edge.Canary',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -196,25 +212,75 @@ exports['windows browser detection detects browsers as expected 1'] = [
     'findAppParams': {
       'appName': 'Microsoft Edge Dev.app',
       'executable': 'Contents/MacOS/Microsoft Edge Dev',
-      'appId': 'com.microsoft.Edge.Dev',
+      'bundleId': 'com.microsoft.Edge.Dev',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
 ]
 
-exports['windows browser detection detects 64-bit Chrome Beta app path 1'] = {
-  'name': 'chrome',
-  'version': '9.0.1',
-  'path': 'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
-}
+exports['windows browser detection detects Chrome Beta 64-bit install 1'] = [
+  {
+    'name': 'chrome',
+    'family': 'chromium',
+    'channel': 'beta',
+    'displayName': 'Chrome Beta',
+    'versionRegex': {},
+    'binary': 'google-chrome-beta',
+    'minSupportedVersion': 64,
+    'path': 'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
+    'version': '9.0.1',
+    'findAppParams': {
+      'appName': 'Google Chrome Beta.app',
+      'executable': 'Contents/MacOS/Google Chrome Beta',
+      'bundleId': 'com.google.Chrome.beta',
+      'versionProperty': 'KSVersion',
+    },
+  },
+]
 
-exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
-  'name': 'chrome',
-  'version': '4.4.4',
-  'path': 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-}
+exports['windows browser detection detects Chrome 64-bit install 1'] = [
+  {
+    'name': 'chrome',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chrome',
+    'versionRegex': {},
+    'binary': [
+      'google-chrome',
+      'chrome',
+      'google-chrome-stable',
+    ],
+    'path': 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'version': '4.4.4',
+    'findAppParams': {
+      'appName': 'Google Chrome.app',
+      'executable': 'Contents/MacOS/Google Chrome',
+      'bundleId': 'com.google.Chrome',
+      'versionProperty': 'KSVersion',
+    },
+  },
+]
 
-exports['windows browser detection detects local Firefox installs 1'] = [
+exports['windows browser detection detects Chrome for Testing 32-bit install 1'] = [
+  {
+    'name': 'chrome-for-testing',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chrome for Testing',
+    'versionRegex': {},
+    'binary': 'chrome',
+    'path': 'C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe',
+    'version': '5.5.5',
+    'findAppParams': {
+      'appName': 'Google Chrome for Testing.app',
+      'executable': 'Contents/MacOS/Google Chrome for Testing',
+      'bundleId': 'com.google.chrome.for.testing',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Firefox local installs 1'] = [
   {
     'name': 'firefox',
     'family': 'firefox',
@@ -227,7 +293,7 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     'findAppParams': {
       'appName': 'Firefox.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.firefox',
+      'bundleId': 'org.mozilla.firefox',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -246,7 +312,7 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     'findAppParams': {
       'appName': 'Firefox Developer Edition.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.firefoxdeveloperedition',
+      'bundleId': 'org.mozilla.firefoxdeveloperedition',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },
@@ -265,7 +331,73 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     'findAppParams': {
       'appName': 'Firefox Nightly.app',
       'executable': 'Contents/MacOS/firefox',
-      'appId': 'org.mozilla.nightly',
+      'bundleId': 'org.mozilla.nightly',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Chromium 64-bit install 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'path': 'C:/Program Files/Google/chrome-win/chrome.exe',
+    'version': '6.6.6',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Chromium 32-bit install in Chromium folder 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'path': 'C:/Program Files (x86)/Google/Chromium/chrome.exe',
+    'version': '7.7.7',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
+      'versionProperty': 'CFBundleShortVersionString',
+    },
+  },
+]
+
+exports['windows browser detection detects Chromium 64-bit install in Chromium folder 1'] = [
+  {
+    'name': 'chromium',
+    'family': 'chromium',
+    'channel': 'stable',
+    'displayName': 'Chromium',
+    'versionRegex': {},
+    'binary': [
+      'chromium-browser',
+      'chromium',
+    ],
+    'path': 'C:/Program Files/Google/Chromium/chrome.exe',
+    'version': '8.8.8',
+    'findAppParams': {
+      'appName': 'Chromium.app',
+      'executable': 'Contents/MacOS/Chromium',
+      'bundleId': 'org.chromium.Chromium',
       'versionProperty': 'CFBundleShortVersionString',
     },
   },

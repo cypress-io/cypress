@@ -165,7 +165,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
   // Replaces CDP connection error message in Firefox since Cypress will retry
-  .replace(/Failed to spawn CDP with Firefox. Retrying.*\.\.\./, '')
+  .replace(/\nFailed to spawn CDP with Firefox. Retrying.*\.\.\.\n/g, '')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
