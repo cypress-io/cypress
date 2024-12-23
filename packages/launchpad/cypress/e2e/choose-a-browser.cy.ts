@@ -46,7 +46,7 @@ describe('Choose a browser page', () => {
 
       cy.get('h1').should('contain', 'Choose a browser')
 
-      cy.findByRole('radio', { name: 'Edge v8', checked: true })
+      cy.findByRole('radio', { name: 'Edge v9', checked: true })
 
       cy.percySnapshot()
 
@@ -103,8 +103,10 @@ describe('Choose a browser page', () => {
       // varies depending on platform
       if (Cypress.platform === 'win32') {
         cy.get('@AlertBody').find('code').eq(1).should('have.text', `win-version-info is unable to access file: \\${path.replaceAll('/', '\\')}`)
-      } else {
+      } else if (Cypress.platform === 'linux') {
         cy.get('@AlertBody').find('code').eq(1).should('have.text', `spawn ${path} ENOENT`)
+      } else {
+        cy.get('@AlertBody').find('code').eq(1).should('have.text', `Unable to find browser with path ${path}`)
       }
 
       cy.percySnapshot()
@@ -127,11 +129,11 @@ describe('Choose a browser page', () => {
 
       cy.findByRole('radio', { name: 'Chrome v1' })
 
-      cy.findByRole('radio', { name: 'Firefox v5' })
+      cy.findByRole('radio', { name: 'Firefox v6' })
 
-      cy.findByRole('radio', { name: 'Electron v12' })
+      cy.findByRole('radio', { name: 'Electron v13' })
 
-      cy.findByRole('radio', { name: 'Edge v8' })
+      cy.findByRole('radio', { name: 'Edge v9' })
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -194,7 +196,7 @@ describe('Choose a browser page', () => {
       cy.get('h1').should('contain', 'Choose a browser')
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
-      cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
+      cy.findByRole('radio', { name: 'Firefox v6', checked: false }).as('firefoxItem')
 
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
 
@@ -205,7 +207,7 @@ describe('Choose a browser page', () => {
       })
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: false })
-      cy.findByRole('radio', { name: 'Firefox v5', checked: true })
+      cy.findByRole('radio', { name: 'Firefox v6', checked: true })
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
     })
@@ -323,7 +325,7 @@ describe('Choose a browser page', () => {
       })
 
       cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
-      cy.findByRole('radio', { name: 'Firefox v5', checked: true }).should('be.visible')
+      cy.findByRole('radio', { name: 'Firefox v6', checked: true }).should('be.visible')
     })
 
     it('should return to welcome screen if user modifies the config file to not include the current testing type and recover', () => {
@@ -371,7 +373,7 @@ describe('Choose a browser page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: 'Electron v12', checked: true })
+      cy.findByRole('radio', { name: 'Electron v13', checked: true })
       cy.percySnapshot()
     })
   })

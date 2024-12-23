@@ -64,9 +64,13 @@ export type AppInfo = {
 }
 
 export type FindAppParams = {
+  // The name of the application (e.g. 'Google Chrome.app')
   appName: string
+  // The path to the executable within the application (e.g. 'Contents/MacOS/Google Chrome')
   executable: string
-  appId: string
+  // The CFBundleIdentifier in the Info.plist (e.g. 'com.google.Chrome')
+  bundleId: string
+  // The key from the Info.plist to find the version (e.g. 'KSVersion')
   versionProperty: string
 }
 
@@ -75,8 +79,8 @@ function formApplicationPath (appName: string) {
 }
 
 /** finds an application and its version */
-export function findApp ({ appName, executable, appId, versionProperty }: FindAppParams): Promise<AppInfo> {
-  debugVerbose('looking for app %s id %s', executable, appId)
+export function findApp ({ appName, executable, bundleId, versionProperty }: FindAppParams): Promise<AppInfo> {
+  debugVerbose('looking for app %s bundle id %s', executable, bundleId)
 
   const findVersion = (foundPath: string) => {
     return parsePlist(foundPath, versionProperty).then((version) => {
@@ -90,7 +94,7 @@ export function findApp ({ appName, executable, appId, versionProperty }: FindAp
   }
 
   const tryMdFind = () => {
-    return mdfind(appId).then(findVersion)
+    return mdfind(bundleId).then(findVersion)
   }
 
   const tryFullApplicationFind = () => {
