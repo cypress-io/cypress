@@ -1,4 +1,4 @@
-exports['@cypress/vite-dev-server react executes all of the tests for vite4.5.5-react 1'] = `
+exports['@cypress/vite-dev-server react executes all of the specs for vite4.5.5-react 1'] = `
 
 ====================================================================================================
 
@@ -401,7 +401,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/vite-dev-server / react / executes all of the tests for vite4.5.5-react when port is statically configured'] = `
+exports['@cypress/vite-dev-server / react / executes the port.cy.jsx spec for vite4.5.5-react when port is statically configured'] = `
 
 ====================================================================================================
 
@@ -454,7 +454,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite4.
 
 `
 
-exports['@cypress/vite-dev-server react executes all of the tests for vite5.4.10-react 1'] = `
+exports['@cypress/vite-dev-server react executes all of the specs for vite5.4.10-react 1'] = `
 
 ====================================================================================================
 
@@ -857,7 +857,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/vite-dev-server / react / executes all of the tests for vite5.4.10-react when port is statically configured'] = `
+exports['@cypress/vite-dev-server / react / executes the port.cy.jsx spec for vite5.4.10-react when port is statically configured'] = `
 
 ====================================================================================================
 
@@ -910,7 +910,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite5.
 
 `
 
-exports['@cypress/vite-dev-server react executes all of the tests for vite6.0.0-react 1'] = `
+exports['@cypress/vite-dev-server react executes all of the specs for vite6.0.0-react 1'] = `
 
 ====================================================================================================
 
@@ -1313,7 +1313,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/vite-dev-server / react / executes all of the tests for vite6.0.0-react when port is statically configured'] = `
+exports['@cypress/vite-dev-server / react / executes the port.cy.jsx spec for vite6.0.0-react when port is statically configured'] = `
 
 ====================================================================================================
 
