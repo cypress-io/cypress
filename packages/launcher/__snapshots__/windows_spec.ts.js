@@ -226,7 +226,6 @@ exports['windows browser detection detects Chrome Beta 64-bit install 1'] = [
     'displayName': 'Chrome Beta',
     'versionRegex': {},
     'binary': 'google-chrome-beta',
-    'minSupportedVersion': 64,
     'path': 'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
     'version': '9.0.1',
     'findAppParams': {

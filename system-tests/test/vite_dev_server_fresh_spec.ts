@@ -11,7 +11,7 @@ describe('@cypress/vite-dev-server', function () {
 
   describe('react', () => {
     for (const project of VITE_REACT) {
-      it(`executes all of the tests for ${project}`, function () {
+      it(`executes all of the specs for ${project}`, function () {
         return systemTests.exec(this, {
           project,
           configFile: 'cypress-vite.config.ts',
@@ -22,7 +22,7 @@ describe('@cypress/vite-dev-server', function () {
         })
       })
 
-      systemTests.it(`executes all of the tests for ${project} when port is statically configured`, {
+      systemTests.it(`executes the port.cy.jsx spec for ${project} when port is statically configured`, {
         project,
         configFile: 'cypress-vite-port.config.ts',
         spec: 'src/port.cy.jsx',

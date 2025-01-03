@@ -11,7 +11,7 @@ describe('windowSize', () => {
         innerHeight: top.window.innerHeight,
       }).deep.eq({
         innerWidth: 1280,
-        innerHeight: 581, // chrome 128 decreased the size here from 633 to 581
+        innerHeight: 633, // chrome 119 increased the size here from 599 to 633
       })
     } else {
       expect({
