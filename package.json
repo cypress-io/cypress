@@ -278,6 +278,5 @@
     "devtools-protocol": "0.0.1346313",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
-  },
-  "packageManager": "yarn@1.22.19+sha512.ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71"
+  }
 }
