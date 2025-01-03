@@ -395,8 +395,7 @@ describe('lib/agent', function () {
         })
       })
 
-      // NOTE: this does not work in develop nor release/14.0.0 locally due to EADDRNOTAVAIL - likely setup/teardown is improper
-      it.skip('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
+      it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(this.agent.httpsAgent, 'createUpstreamProxyConnection')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
