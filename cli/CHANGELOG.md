@@ -41,7 +41,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 
 **Features:**
 
-- `injectDocumentDomain`, a new configuration option, can be set to `true` in order to re-enable the injection of `document.domain` setters in Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
+- `injectDocumentDomain`, a new configuration option, can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
 - Cypress Component Testing now supports:
   - `Next.js` version >=15.0.4. Versions 15.0.0 - 15.0.3 depend on the React 19 Release Candidate and are not officially supported by Cypress, but should still work. Addresses [#30445](https://github.com/cypress-io/cypress/issues/30445).
   - `React` version 19. Addresses [#29470](https://github.com/cypress-io/cypress/issues/29470).
