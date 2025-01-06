@@ -1400,12 +1400,6 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
     PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
       const err = makeErr()
 
@@ -1422,7 +1416,7 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_SKIP_DOMAIN_INJECTION: () => {
+    EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED: () => {
       return {
         default: [],
       }

@@ -1350,17 +1350,10 @@ export const AllCypressErrors = {
     return errTemplate`\
     The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`
   },
-  EXPERIMENTAL_SKIP_DOMAIN_INJECTION: () => {
+  EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED: () => {
     return errTemplate`\
       The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is over. ${fmt.highlight('document.domain')} injection is now off by default.
 
-      Read the migration guide for Cypress v14.0.0: https://on.cypress.com/migration-guide
-    `
-  },
-  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-    return errTemplate`\
-      The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is over, and this configuration option is no longer honored.
-    
       Read the migration guide for Cypress v14.0.0: https://on.cypress.com/migration-guide
     `
   },

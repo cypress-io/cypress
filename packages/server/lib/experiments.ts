@@ -53,7 +53,6 @@ interface StringValues {
 const _summaries: StringValues = {
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
-  experimentalSkipDomainInjection: 'Disables setting document.domain to the document\'s super domain on injection.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
@@ -76,7 +75,6 @@ const _summaries: StringValues = {
 const _names: StringValues = {
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
-  experimentalSkipDomainInjection: 'Use Default document.domain',
   experimentalSingleTabRunMode: 'Single Tab Run Mode',
   experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalStudio: 'Studio',

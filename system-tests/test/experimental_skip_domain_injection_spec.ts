@@ -33,7 +33,6 @@ describe('e2e experimentalSkipDomainInjection=true', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
-    spec: 'experimental_skip_domain_injection.cy.ts',
     snapshot: true,
     expectedExitCode: 1,
     config: {

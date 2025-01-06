@@ -27,7 +27,6 @@ exports['module api and after:run results'] = `
     "experimentalMemoryManagement": false,
     "experimentalModifyObstructiveThirdPartyCode": false,
     "injectDocumentDomain": false,
-    "experimentalSkipDomainInjection": null,
     "experimentalOriginDependencies": false,
     "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
