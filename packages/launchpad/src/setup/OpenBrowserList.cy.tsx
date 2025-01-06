@@ -2,6 +2,7 @@ import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/longBrowsersList'
 import { defaultMessages } from '@cy/i18n'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 // Testing Note: because state for this component is maintained on the server and updated via gql mutations,
 // this component test can't do interactions that change the chosen browser at the moment. Interactions and states
@@ -31,7 +32,7 @@ describe('<OpenBrowserList />', () => {
 
     // Renders a default logo if we don't provide one
     cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
+    cy.get('[data-cy-browser="fake"] svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
 
     cy.percySnapshot()
   })

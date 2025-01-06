@@ -1,5 +1,4 @@
 import '@packages/frontend-shared/cypress/support/e2e'
-import './browserIconCommands'
 import 'cypress-real-events/support'
 import './execute-spec'
 
