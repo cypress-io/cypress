@@ -944,7 +944,7 @@ export default {
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
         ${isSkipDomainInjectionEnabled ? `
-        If \`experimentalSkipDomainInjection\` is enabled for this domain, a ${cmd('origin')} command is required.
+        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
         ` : ''}
         Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 

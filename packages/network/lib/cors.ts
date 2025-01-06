@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import minimatch from 'minimatch'
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
@@ -163,19 +162,6 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
 }
 
 /**
- * @param url - the url to check the policy against.
- * @param arrayOfStringOrGlobPatterns - an array of url strings or globs to match against
- * @returns {boolean} - whether or not a match was found
- */
-const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns: string[]): boolean => {
-  let { hostname } = uri.parse(url)
-
-  return !!arrayOfStringOrGlobPatterns.find((globPattern) => {
-    return minimatch(hostname || '', globPattern)
-  })
-}
-
-/**
  * Returns the policy that will be used for the specified url.
  * @param url - the url to check the policy against.
  * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
@@ -185,25 +171,6 @@ export const policyFromConfig = (config: { injectDocumentDomain: boolean }): Pol
   return config.injectDocumentDomain ?
     'same-super-domain-origin' :
     'same-origin'
-}
-
-/**
- * @param url - The url to check for injection
- * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
- * @returns {boolean} whether or not document.domain should be injected solely based on the url.
- */
-export const shouldInjectDocumentDomain = (url: string, opts?: {
-  skipDomainInjectionForDomains: string[] | null
-}) => {
-  // When determining if we want to injection document domain,
-  // We need to make sure the experimentalSkipDomainInjection feature flag is off.
-  // If on, we need to make sure the glob pattern doesn't exist in the array so we cover possible intersections (google).
-  if (_.isArray(opts?.skipDomainInjectionForDomains)) {
-    // if we match the glob, we want to return false
-    return !doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
-  }
-
-  return true
 }
 
 /**
