@@ -23,12 +23,12 @@
       </div>
     </PopoverButton>
     <TransitionQuickFade>
-      <!-- instead of using 'hidden' class, we use 'h-0 w-0 overflow-hidden' due to -->
+      <!-- instead of using 'hidden' class, we use 'invisible' due to -->
       <!-- https://github.com/cypress-io/cypress-design/issues/517 -->
       <PopoverPanel
         static
         class="bg-white rounded shadow-dropdown top-[36px] right-0 z-10 absolute"
-        :class="(forceOpenState === true) || open ? '' : 'h-0 w-0 overflow-hidden'"
+        :class="(forceOpenState === true) || open ? '' : 'invisible'"
       >
         <ul
           v-if="variant !== 'panel'"
