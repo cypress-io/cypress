@@ -63,12 +63,11 @@ We then merge the sourced config with the user's webpack config, and layer on ou
 
 ## Compatibility
 
-| @cypress/webpack-dev-server | cypress |
-| --------------------------- | ------- |
-| <= v1                       | <= v9   |
-| >= v2                       | >= v10  |
-| >= v3                       | >= v13  |
-| >= v4                       | >= v14  |
+| @cypress/webpack-dev-server  | cypress        |
+| ---------------------------- | -------------- |
+| <= v1                        | <= v9          |
+| >= v2 <= v3                  | >= v10 <= v13  |
+| >= v4                        | >= v14         |
 
 ## License
 
