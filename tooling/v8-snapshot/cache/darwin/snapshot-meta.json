@@ -3838,6 +3838,7 @@
     "./packages/network/lib/concat-stream.ts",
     "./packages/network/lib/connect.ts",
     "./packages/network/lib/cors.ts",
+    "./packages/network/lib/document-domain-injection.ts",
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/node_modules/proxy-from-env/index.js",
