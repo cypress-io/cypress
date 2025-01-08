@@ -3,64 +3,11 @@
 
 ### breaking
 
-* dropping support for webpack-dev-server 3 from @cypress/webpack-dev-server and make `@cypress/webpack-dev-server` ship with `webpack-dev-server` version 5 by default (from 4) ([#30467](https://github.com/cypress-io/cypress/issues/30467)) ([d9c21a9](https://github.com/cypress-io/cypress/commit/d9c21a9a672c38606da038a77792956239690532))
 * release version 4.0.0 of @cypress/webpack-dev-server. ([85da287](https://github.com/cypress-io/cypress/commit/85da2870fd722ea7f08c7cfc5708780415bddf2e))
-
-
-### Features
-
-* support angular 19 and update tests [run ci] ([#30675](https://github.com/cypress-io/cypress/issues/30675)) ([dcdefb4](https://github.com/cypress-io/cypress/commit/dcdefb4069486d587a87de802064017ec9b67b55))
-* support next 15 [run ci] ([#30654](https://github.com/cypress-io/cypress/issues/30654)) ([f4aec3e](https://github.com/cypress-io/cypress/commit/f4aec3ed4671d415bfd0d5f4e199e53173653a88))
-
 
 ### BREAKING CHANGES
 
-* Cypress 14 drops support for webpack-dev-server 3. webpack/webpack-dev-server 4 and 5 are supported. @cypress/webpack-dev-server also ships with webpack-dev-server v5 by default.
-* support for webpack-dev-server version 3 has been removed. webpack-dev-server 3 is no longer maintained by the webpack team. To reduce overhead, Cypress is now removing support in Cypress 14.
-
-* update create-react-app-configured/unconfigured
-
-* updated vueclivue2-configured to use vue cli v5
-
-* updated vueclivue2-unconfigured to use vue cli v5
-
-* updated vueclivue3-unconfigured to use vue cli v5
-
-* updated vueclivue3-configured to use vue cli v5
-
-* updated vueclivue3-custom-index-html to use vue cli v5
-
-* update react17 project to use webpack-dev-server v4 (default ships v5 which does not work with webpack 4)
-
-* update react18 project to use webpack-dev-server v4 (default ships v5 which does not work with webpack 4)
-
-* update nuxt version to avoid some issues in the preprocessed webpack config
-
-* update cy in cy component scaffolding tests to run on more suites, as well as skip config warning for outdated vuecli3 as it will throw due to wds being on version 3. this is a VERY old version, and the test needs to be updated to use vuecli5 so we get wds v5 (vuecli5 support will be deprecated)
-
-* no longer support cra v4 and vue/cli-service v4
-
-* remove cra v4 and vue cli service v4 detect tests as they are no longer supported [run ci]
-
-* chore: update cra app custom index to use cra 5 [run ci]
-
-* update protocol spec snapshot [run ci]
-
-* chore: remove stale references to old vuecli system tests [run ci]
-
-* update webpack-dev-server-4 to actually be wds 4 [run ci]
-
-* add changelog entry [run ci]
-
-* update cache key and tests that should not pass [run ci]
-
-* add issue to changelog entry
-
-* no longer clean up default-gateway as it was shipped with webpack-dev-server 4, which is now a dev dependency [run ci]
-
-* fix issues with node-ipc being out of date [run ci]
-
-* move changelog to correct section [run ci]
+* Cypress 14 drops support for webpack-dev-server 3. webpack/webpack-dev-server 4 and 5 are supported. @cypress/webpack-dev-server now ships with webpack-dev-server v5 by default.
 
 # [@cypress/webpack-dev-server-v3.11.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.10.1...@cypress/webpack-dev-server-v3.11.0) (2024-08-27)
 
