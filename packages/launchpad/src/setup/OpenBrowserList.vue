@@ -109,7 +109,7 @@
             >
               <component
                 :is="testingTypeIcon"
-                class="mr-[8px] icon-dark-white"
+                class="mr-[8px] icon-dark-gray-500 icon-light-transparent"
               />
               {{ browserText.running }}
             </Button>
