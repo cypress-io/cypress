@@ -86,7 +86,7 @@ function cleanup () {
   } catch (e) {
     const notSupportedError = new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported.`)
 
-    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/component-framework-configuration'
+    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/frameworks'
     throw notSupportedError
   }
 
