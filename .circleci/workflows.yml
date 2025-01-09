@@ -603,7 +603,7 @@ commands:
 
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
-              PARALLEL=""
+              PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"

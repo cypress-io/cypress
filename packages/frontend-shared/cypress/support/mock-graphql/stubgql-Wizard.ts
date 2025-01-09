@@ -54,7 +54,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       __typename: 'WizardNpmPackage',
       id: 'typescript',
       satisfied: false,
-      detectedVersion: '5.4.5',
+      detectedVersion: '3.9.4',
       ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
     },
   ],
