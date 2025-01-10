@@ -10,6 +10,7 @@
     "allowJs": false,
     "rootDir": "src",
     "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
     "types": ["node"],
     "typeRoots": [
       "../../node_modules/@types"
