@@ -131,8 +131,13 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       // The stack includes frames internal to cypress, after the spec stackframe. In order
       // to determine the invocation details, the stack needs to be parsed and trimmed.
 
-      // in Chrome and Firefox, the spec stackframe includes the pattern, '__cypress/tests'.
-      stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+      // in Chrome and Firefox in E2E contexts, the spec stackframe includes the pattern, '__cypress/tests'.
+      if (stack.includes('__cypress/tests')) {
+        stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+      } else {
+        // CT error contexts include the `__cypress` marker but not the `/tests` portion
+        stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
+      }
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
