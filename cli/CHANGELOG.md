@@ -55,7 +55,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - Fixed a visibility issue for elements with `textContent` but without a width or height. Fixed in [#29688](https://github.com/cypress-io/cypress/pull/29688). Fixes [#29687](https://github.com/cypress-io/cypress/issues/29687).
 - Elements whose parent elements has `overflow: clip` and no height/width will now correctly show as hidden. Fixed in [#29778](https://github.com/cypress-io/cypress/pull/29778). Fixes [#23852](https://github.com/cypress-io/cypress/issues/23852).
 - The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
-- The Open in IDE button next to blocks and hooks in the runner UI will now properly open the IDE. This bug was introduced in a prerelease version of Cypress 14.0.0. Fixed in [#30859](https://github.com/cypress-io/cypress/pull/30859).
+- The Open in IDE button next to blocks and hooks in the runner UI will now properly open the IDE. This bug was introduced in a prerelease version of Cypress 14.0.0. Fixed in [#30859](https://github.com/cypress-io/cypress/pull/30859). Fixes [#30847](https://github.com/cypress-io/cypress/issues/30847).
 
 **Misc:**
 
