@@ -114,6 +114,7 @@ type InvocationDetails = {
   line?: number
   originalFile?: string
   relativeFile?: string
+  stack: string
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
@@ -134,7 +135,7 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
 
     (details as any).stack = stack
 
