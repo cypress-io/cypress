@@ -13,7 +13,8 @@
     "noEmit": true,
     "outDir": "dist",
     "noErrorTruncation": true,
-    "types": ["vitest/globals"]
+    "types": [],
+    "resolveJsonModule": true
   },
   "exclude": [
     "dist",
