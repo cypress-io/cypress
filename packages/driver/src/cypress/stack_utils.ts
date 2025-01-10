@@ -108,9 +108,16 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
-type InvocationDetails = MessageLineDetail | {}
+type InvocationDetails = {
+  absoluteFile?: string
+  column?: number
+  line?: number
+  originalFile?: string
+  relativeFile?: string
+}
 
-const getInvocationDetails = (specWindow, config) => {
+// used to determine codeframes for hook/test/etc definitions rather than command invocations
+const getInvocationDetails = (specWindow, config): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -120,7 +127,11 @@ const getInvocationDetails = (specWindow, config) => {
     // firefox and chrome throw stacks that include lines from cypress
     // So we drop the lines until we get to the spec stackframe (includes __cypress)
     if (specWindow.Cypress) {
-      stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
+      // The stack includes frames internal to cypress, after the spec stackframe. In order
+      // to determine the invocation details, the stack needs to be parsed and trimmed.
+
+      // in Chrome and Firefox, the spec stackframe includes the pattern, '__cypress/tests'.
+      stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
     const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
