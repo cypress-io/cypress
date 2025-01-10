@@ -7,19 +7,8 @@
       v-if="shouldShowWelcome"
       class="pt-[64px]"
       role="main"
-      :video-html="videoHtml"
       @clearLandingPage="handleClearLandingPage"
-    >
-      <template
-        v-if="videoHtml"
-        #video
-      >
-        <div
-          class="major-version-welcome-video"
-          v-html="videoHtml"
-        />
-      </template>
-    </MajorVersionWelcome>
+    />
     <main
       v-else
       class="px-[24px] pt-[86px] pb-[24px]"
@@ -148,7 +137,6 @@ fragment MainLaunchpadQueryData on Query {
       id
     }
   }
-  videoEmbedHtml
   isGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
@@ -277,8 +265,6 @@ const shouldShowWelcome = computed(() => {
 
   return false
 })
-
-const videoHtml = computed(() => query.data.value?.videoEmbedHtml || '')
 
 </script>
 <style scoped lang="scss">
