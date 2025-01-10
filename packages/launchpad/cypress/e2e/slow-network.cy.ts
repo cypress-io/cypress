@@ -5,12 +5,6 @@ describe('slow network: launchpad', () => {
     cy.scaffoldProject('todos')
 
     cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-        // stubbing the AbortController is a bit difficult with fetch ctx, so instead
-        // assume the migration handler itself returned null from a timeout
-        return null
-      })
-
       const currentStubbedFetch = ctx.util.fetch;
 
       (ctx.util.fetch as Sinon.SinonStub).restore()
@@ -40,7 +34,6 @@ describe('slow network: launchpad', () => {
     })
   })
 
-  // NOTE: testing the videoEmbedHTML query abortController with the current setup is a bit difficult.
   // The timeout happens as needed, but is not functioning correctly in this E2E test
   it('loads through to the browser screen when the network is slow', () => {
     cy.loginUser()
