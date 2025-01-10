@@ -13,9 +13,10 @@
     "noEmit": true,
     "outDir": "dist",
     "noErrorTruncation": true,
-    "types": []
+    "types": ["vitest/globals"]
   },
   "exclude": [
-    "dist"
+    "dist",
+    "test"
   ]
 }

@@ -10,7 +10,9 @@
     "cypress:run:inject-document-domain": "node ../../scripts/cypress run --config-file ./cypress.config-injectDocumentDomain.ts",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "dependencies": {},
   "devDependencies": {
@@ -58,6 +60,7 @@
     "jimp": "0.22.12",
     "jquery": "3.7.1",
     "js-cookie": "3.0.5",
+    "jsdom": "^26.0.0",
     "json-stable-stringify": "1.0.1",
     "lodash": "^4.17.21",
     "md5": "2.3.0",
@@ -81,6 +84,7 @@
     "url-parse": "1.5.10",
     "vanilla-text-mask": "5.1.1",
     "vite": "5.2.11",
+    "vitest": "^2.1.8",
     "webpack": "^5.88.2",
     "zone.js": "0.9.0"
   },
