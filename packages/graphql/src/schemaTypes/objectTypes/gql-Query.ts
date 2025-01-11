@@ -146,17 +146,6 @@ export const Query = objectType({
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
     })
-
-    t.string('videoEmbedHtml', {
-      description: 'Markup for the migration landing page video embed',
-      resolve: (source, args, ctx) => {
-        // NOTE: embedded video is not always a part of the v9 - v10 migration experience
-        // in the case of v1x - v13, we want to show an embedded video to users installing the major
-        // version for the first time without going through the steps of the migration resolver, hence
-        // why this lives in the root resolver but the migration context
-        return ctx.migration.getVideoEmbedHtml()
-      },
-    })
   },
   sourceType: {
     module: '@packages/graphql',
