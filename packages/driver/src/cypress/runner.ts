@@ -362,16 +362,22 @@ const isLastSuite = (suite, tests) => {
 }
 
 // we are the last test that will run in the suite
-// if we're the last test in the tests array or
+// if we're the last test in the tests array and we're not retrying (i.e. test.final) or
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests): boolean => {
-  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return (test.final && isLastTest(test, tests)) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
 const nextTestThatWillRunInSuite = (test, tests) => {
+  // if the test failed in the before all hook, then we are the next test that will run
   if (test.failedFromHookId && (test.hookName === 'before all')) {
     return null
+  }
+
+  // if this test hasn't been finalized, then we will be retry'ing it so just return this test
+  if (test.final === false) {
+    return test
   }
 
   const index = _.findIndex(tests, { id: test.id })
