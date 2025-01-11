@@ -366,7 +366,7 @@ const isLastSuite = (suite, tests) => {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests): boolean => {
-  return (test.final && isLastTest(test, tests)) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
 const nextTestThatWillRunInSuite = (test, tests) => {
@@ -528,7 +528,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         const isRunMode = !Cypress.config('isInteractive')
         const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
         const shouldAlwaysResetPage = isRunMode && !isHeadedNoExit
-        const isLastTestThatWillRunInSuite = lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
+        const isLastTestThatWillRunInSuite = test.final && lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
 
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
