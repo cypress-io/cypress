@@ -43,6 +43,9 @@
     "webpack-4": "npm:webpack@^4",
     "webpack-dev-server-4": "npm:webpack-dev-server@^4"
   },
+  "peerDependencies": {
+    "cypress": ">=14.0.0"
+  },
   "files": [
     "dist"
   ],
