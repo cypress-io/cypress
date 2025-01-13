@@ -7,5 +7,6 @@
     "allowJs": false,
     "noImplicitAny": true,
     "noImplicitReturns": false,
+    "noUncheckedIndexedAccess": true,
   }
 }

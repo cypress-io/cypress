@@ -1,6 +1,7 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
+    "useDefineForClassFields": true,
     "types": [
       "node",
       "cypress",
