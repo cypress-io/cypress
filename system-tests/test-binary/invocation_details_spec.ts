@@ -40,6 +40,8 @@ describe('invocation details captured by protocol', () => {
       const spec = 'protocol.cy.js,test-isolation.cy.js,shadow-dom.cy.js'
 
       return systemTests.exec(this, {
+        timeout: 240000,
+        dockerImage: 'cypress/base-internal:20.18.1-bullseye',
         withBinary: true,
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         project: 'protocol',
@@ -74,6 +76,8 @@ describe('invocation details captured by protocol', () => {
     [true, false].forEach((experimentalSingleTabRunMode) => {
       it('verifies the protocol events are correct', function () {
         return systemTests.exec(this, {
+          timeout: 240000,
+          dockerImage: 'cypress/base-internal:20.18.1-bullseye',
           withBinary: true,
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           project: 'protocol',
