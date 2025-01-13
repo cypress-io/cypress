@@ -5,7 +5,9 @@ describe('issue 28527', { testIsolation: false, retries: 2 }, () => {
 
   beforeEach(() => {
     // ensure we run the tests in run mode
+    // @ts-expect-error
     Cypress.config('isInteractive', false)
+    // @ts-expect-error
     Cypress.config('exit', true)
   })
 
@@ -22,5 +24,8 @@ describe('issue 28527', { testIsolation: false, retries: 2 }, () => {
     cy.get('title').should('have.text', 'Empty HTML Fixture')
     cy.url().should('include', '/fixtures/empty.html')
     cy.url().should('not.include', 'about:blank')
+    cy.then(() => {
+      expect(Cypress.currentRetry).to.equal(2)
+    })
   })
 })
