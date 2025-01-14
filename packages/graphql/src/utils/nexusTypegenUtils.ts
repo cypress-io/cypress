@@ -92,7 +92,7 @@ const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
   debounced[cfg.filePath] =
     debounced[cfg.filePath] ?? _.debounce(nexusTypegen, 500)
 
-  debounced[cfg.filePath](cfg)
+  debounced[cfg.filePath]?.(cfg)
 }
 
 interface NexusTypegenWatchCfg extends NexusTypegenCfg {

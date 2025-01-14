@@ -333,7 +333,7 @@ type CloudProjectNotFound {
 }
 
 union CloudProjectResult =
-    CloudProject
+  | CloudProject
   | CloudProjectNotFound
   | CloudProjectUnauthorized
 
@@ -456,7 +456,7 @@ type CloudProjectSpec implements Node {
 }
 
 union CloudProjectSpecFlakyResult =
-    CloudFeatureNotEnabled
+  | CloudFeatureNotEnabled
   | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
@@ -500,7 +500,7 @@ type CloudProjectSpecNotFound {
 }
 
 union CloudProjectSpecResult =
-    CloudProjectSpec
+  | CloudProjectSpec
   | CloudProjectSpecNotFound
   | CloudProjectUnauthorized
 

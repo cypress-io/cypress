@@ -12,6 +12,7 @@
     "lib": ["esnext"],
     "allowJs": false,
     "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
     "types": []
   },
 }

@@ -9,7 +9,6 @@
     "preserveWatchOutput": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "outDir": "dist",
     "noErrorTruncation": true,
