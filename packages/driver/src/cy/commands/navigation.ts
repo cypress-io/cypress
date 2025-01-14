@@ -616,6 +616,10 @@ export default (Commands, Cypress, cy, state, config) => {
           cleanup()
         }
 
+        // Make sure the reload command can communicate with the AUT.
+        // if we failed for any other reason, we need to display the correct error to the user.
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
+
         return null
       })
     },
@@ -699,6 +703,9 @@ export default (Commands, Cypress, cy, state, config) => {
           if (typeof cleanup === 'function') {
             cleanup()
           }
+
+          // Make sure the go command can communicate with the AUT.
+          Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
           return null
         })

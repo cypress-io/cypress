@@ -190,22 +190,108 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
   context('cross-origin AUT errors', () => {
     // We only need to check .get here because the other commands are chained off of it.
+    // the exceptions are window(), document(), title(), url(), hash(), location(), go(), reload(), and scrollTo()
+    const assertOriginFailure = (err: Error, done: () => void) => {
+      expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
+      expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+      expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
+      expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
+
+      //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
+      expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+      expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+      done()
+    }
+
     it('.get()', { defaultCommandTimeout: 50 }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include(`Timed out retrying after 50ms:`)
-        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
-        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
-        expect(err.message).to.include(`Using \`cy.origin()\` to wrap the commands run on \`http://www.foobar.com:3500\` will likely fix this issue.`)
-        expect(err.message).to.include(`cy.origin('http://www.foobar.com:3500', () => {\`\n\`  <commands targeting http://www.foobar.com:3500 go here>\`\n\`})`)
-
-        //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
-        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
-        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
-        done()
+        assertOriginFailure(err, done)
       })
 
       cy.get('a[data-cy="dom-link"]').click()
       cy.get('#button')
+    })
+
+    it('.window()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.window()
+    })
+
+    it('.document()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.document()
+    })
+
+    it('.title()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.title()
+    })
+
+    it('.url()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.url()
+    })
+
+    it('.hash()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.hash()
+    })
+
+    it('.location()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.location()
+    })
+
+    it('.go()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.go('back')
+    })
+
+    it('.reload()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.reload()
+    })
+
+    it('.scrollTo()', (done) => {
+      cy.on('fail', (err) => {
+        assertOriginFailure(err, done)
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.scrollTo('bottom')
     })
   })
 

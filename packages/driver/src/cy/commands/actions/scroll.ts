@@ -325,6 +325,9 @@ export default (Commands, Cypress, cy, state) => {
       const subjectChain = cy.subjectChain()
 
       const ensureScrollability = () => {
+        // Make sure the scroll command can communicate with the AUT
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
+
         try {
           subject = cy.getSubjectFromChain(subjectChain)
 
