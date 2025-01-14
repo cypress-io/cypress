@@ -375,7 +375,7 @@ const nextTestThatWillRunInSuite = (test, tests) => {
     return null
   }
 
-  // if this test hasn't been finalized, then we will be retry'ing it so just return this test
+  // if this test hasn't been finalized, then we will be retrying it so just return this test
   if (test.final === false) {
     return test
   }
