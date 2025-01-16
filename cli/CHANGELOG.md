@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.0.1
+
+_Released 1/28/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
+
 ## 14.0.0
 
 _Released 1/16/2025_
