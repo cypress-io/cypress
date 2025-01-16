@@ -128,6 +128,7 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
+          // @ts-ignore - scrollTo does not define a 'done()' key on its config object.
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,

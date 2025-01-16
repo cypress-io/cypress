@@ -12,9 +12,11 @@
     "noEmit": true,
     "outDir": "dist",
     "noErrorTruncation": true,
-    "types": []
+    "types": [],
+    "resolveJsonModule": true
   },
   "exclude": [
-    "dist"
+    "dist",
+    "test"
   ]
 }

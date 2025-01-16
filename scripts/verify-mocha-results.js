@@ -11,17 +11,32 @@ const la = require('lazy-ass')
 const path = require('path')
 const { readCircleEnv } = require('./circle-env')
 
-const RESULT_REGEX = /<testsuites name="([^"]+)" time="([^"]+)" tests="([^"]+)" failures="([^"]+)"(?: skipped="([^"]+)"|)>/
+// mocha regex
+const MOCHA_REGEX = /<testsuites name="([^"]+)" time="([^"]+)" tests="([^"]+)" failures="([^"]+)"(?: skipped="([^"]+)"|)>/
+// vitest regex
+const VITEST_REGEX = /<testsuites name="([^"]+)" tests="([^"]+)" failures="([^"]+)" errors="([^"]+)" time="([^"]+)"(?: skipped="([^"]+)"|)>/
+
 const REPORTS_PATH = '/tmp/cypress/junit'
 
 const expectedResultCount = Number(process.argv[process.argv.length - 1])
 
-const parseResult = (xml) => {
-  const [name, time, tests, failures, skipped] = RESULT_REGEX.exec(xml).slice(1)
+const parseMochaResult = (xml) => {
+  const [name, time, tests, failures, skipped] = MOCHA_REGEX.exec(xml).slice(1)
 
   return {
     name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped || 0),
   }
+}
+const parseVitestResult = (xml) => {
+  const [name, tests, failures, , time, skipped] = VITEST_REGEX.exec(xml).slice(1)
+
+  return {
+    name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped || 0),
+  }
+}
+
+const parseResult = (xml) => {
+  return MOCHA_REGEX.test(xml) ? parseMochaResult(xml) : parseVitestResult(xml)
 }
 
 const total = { tests: 0, failures: 0, skipped: 0 }
