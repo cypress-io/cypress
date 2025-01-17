@@ -10,7 +10,9 @@
     "clean": "rimraf src/*.js src/**/*.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "semver": "^7.6.3"
+  },
   "devDependencies": {
     "@types/node": "20.16.0",
     "devtools-protocol": "0.0.1346313",
