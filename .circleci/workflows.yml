@@ -32,7 +32,7 @@ mainBuildFilters: &mainBuildFilters
         - 'update-v8-snapshot-cache-on-develop'
         - 'chore/update_vue_test_utils'
         - 'publish-binary'
-        - 'cacie/29590/document-domain-subdomains'
+        - 'chore/fix_windows_kitchensink'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -80,7 +80,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/chore/electron-33-upgrade', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/fix-hook-test-stack-analysis', << pipeline.git.branch >> ]
+    - equal: [ 'chore/fix_windows_kitchensink', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -156,7 +156,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/update_vue_test_utils" && "$CIRCLE_BRANCH" != cacie/fix-hook-test-stack-analysis ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/update_vue_test_utils" && "$CIRCLE_BRANCH" != chore/fix_windows_kitchensink ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -908,10 +908,6 @@ commands:
         description: Pull request number to check out before installing and testing
         type: integer
         default: 0
-      wait-on:
-        description: Whether to use wait-on to wait on a server to be booted
-        type: string
-        default: ""
       server-start-command:
         description: Server start command for repo
         type: string
@@ -1113,11 +1109,17 @@ commands:
             source ./ci-ensure-node.sh
             <<parameters.server-start-command>>
           background: true
-      - run:
-          condition: <<parameters.wait-on>>
-          name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: |
-            npx wait-on <<parameters.wait-on>> --timeout 120000
+      - when:
+          condition:
+            not:
+              equal: [ "", <<parameters.wait-on>> ]
+          steps:
+            - run:
+                name: "Waiting on server to boot: <<parameters.wait-on>>"
+                command: |
+                  npm i -g wait-on
+                  npx wait-on <<parameters.wait-on>> --timeout 120000
+
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - when:
@@ -2769,7 +2771,6 @@ jobs:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
-          wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
     <<: *defaults
