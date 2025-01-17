@@ -65,7 +65,6 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
 - Fixed an issue where the spec filename was not updating correctly when changing specs in `open` mode. Fixes [#30852](https://github.com/cypress-io/cypress/issues/30852).
 - `cy.origin()` now correctly errors when the [`cy.window()`](https://docs.cypress.io/api/commands/window), [`cy.document()`](https://docs.cypress.io/api/commands/document), [`cy.title()`](https://docs.cypress.io/api/commands/title), [`cy.url()`](https://docs.cypress.io/api/commands/url), [`cy.location()`](https://docs.cypress.io/api/commands/location) ,[`cy.hash()`](https://docs.cypress.io/api/commands/hash), [`cy.go()`](https://docs.cypress.io/api/commands/go), [`cy.reload()`](https://docs.cypress.io/api/commands/reload), and [`cy.scrollTo()`](https://docs.cypress.io/api/commands/scrollTo) commands are used outside of the `cy.origin()` command after the AUT has navigated away from the primary origin. Fixes [#30848](https://github.com/cypress-io/cypress/issues/30848). Fixed in [#30858](https://github.com/cypress-io/cypress/pull/30858).
-- Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
 
 **Misc:**
 
