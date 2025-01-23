@@ -3,6 +3,7 @@
   "compilerOptions": {
     "allowJs": false,
     "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
     "outDir": "dist",
   },
 }

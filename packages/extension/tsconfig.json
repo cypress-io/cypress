@@ -2,6 +2,7 @@
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
     "target": "es2015",
+    "allowJs": true,
     "strict": false
   }
 }

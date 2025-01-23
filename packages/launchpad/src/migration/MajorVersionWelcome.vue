@@ -212,7 +212,7 @@ const versionReleaseDates = computed(() => {
     '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
     '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
-    '14': useTimeAgo(Date.UTC(2025, 0, 10)).value,
+    '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
   }
 })
 

@@ -89,6 +89,9 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addQuery('title', function title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the window command can communicate with the AUT.
+    // otherwise, it yields an empty string
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
     Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
@@ -96,6 +99,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the window command can communicate with the AUT.
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
     Cypress.log({
       hidden: options.log === false,
@@ -114,6 +119,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the document command can communicate with the AUT.
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
     Cypress.log({
       hidden: options.log === false,
