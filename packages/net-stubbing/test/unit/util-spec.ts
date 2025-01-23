@@ -1,4 +1,4 @@
-import { getBodyEncoding } from '../../lib/server/util'
+import { getBodyEncoding, parseContentType } from '../../lib/server/util'
 import { expect } from 'chai'
 import { join } from 'path'
 import { readFileSync } from 'fs'
@@ -6,6 +6,34 @@ import { readFileSync } from 'fs'
 const imageBuffer = readFileSync(join(__dirname, '..', 'fixtures', 'cypress-logo.png'))
 
 describe('net-stubbing util', () => {
+  describe('parseContentType', () => {
+    it('returns application/json', () => {
+      const str = JSON.stringify({ foo: 'bar' })
+
+      expect(parseContentType(str)).to.eq('application/json')
+    })
+
+    it('returns text/html', () => {
+      const str = `\
+<html>
+  <body>foobarbaz</body>
+</html>\
+`
+
+      expect(parseContentType(str)).to.eq('text/html')
+    })
+
+    it('returns text/plain', () => {
+      const str = 'foobar<p>baz'
+
+      expect(parseContentType(str)).to.eq('text/plain')
+    })
+
+    it('returns text/plain by default', () => {
+      expect(parseContentType()).to.eq('text/plain')
+    })
+  })
+
   context('getBodyEncoding', () => {
     it('returns null without data', () => {
       expect(getBodyEncoding(null)).to.equal(null)

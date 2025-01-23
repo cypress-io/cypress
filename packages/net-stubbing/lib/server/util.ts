@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
+import mime from 'mime'
 import isHtml from 'is-html'
 import { IncomingMessage } from 'http'
 import {
@@ -18,12 +19,43 @@ import type { CypressIncomingRequest } from '@packages/proxy'
 import type { InterceptedRequest } from './intercepted-request'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
-// TODO: move this into net-stubbing once cy.route is removed
-import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
+const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
+
+const isValidJSON = function (text) {
+  if (_.isObject(text)) {
+    return true
+  }
+
+  try {
+    const o = JSON.parse(text)
+
+    return _.isObject(o)
+  } catch (error) {
+    false
+  }
+
+  return false
+}
+
+export function parseContentType (response?: string) {
+  const ret = (type) => {
+    return mime.getType(type) //+ "; charset=utf-8"
+  }
+
+  if (isValidJSON(response)) {
+    return ret('json')
+  }
+
+  if (response && htmlLikeRe.test(response)) {
+    return ret('html')
+  }
+
+  return ret('text')
+}
 
 export function emit (socket: CyServer.Socket, eventName: string, data: object) {
   if (debug.enabled) {
