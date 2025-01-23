@@ -103,7 +103,7 @@ import OpenBrowser from './setup/OpenBrowser.vue'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
 import { usePromptManager } from '@cy/gql-components/composables/usePromptManager'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 const { setMajorVersionWelcomeDismissed } = usePromptManager()
 const { t } = useI18n()
@@ -234,7 +234,7 @@ watch(
 )
 
 function handleClearLandingPage () {
-  setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
+  setMajorVersionWelcomeDismissed(GET_MAJOR_VERSION_FOR_CONTENT())
   const shouldLaunchBrowser = query.data?.value?.localSettings?.preferences?.shouldLaunchBrowserFromOpenBrowser
 
   const currentTestingType = currentProject.value?.currentTestingType
@@ -246,7 +246,7 @@ function handleClearLandingPage () {
 
 const shouldShowWelcome = computed(() => {
   if (query.data.value) {
-    const hasThisVersionBeenSeen = query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
+    const hasThisVersionBeenSeen = query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()]
     const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
     const currentTestingType = currentProject.value?.currentTestingType
 
