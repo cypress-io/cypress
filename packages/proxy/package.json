@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\"",
-    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\""
+    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\"",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "bluebird": "3.5.3",

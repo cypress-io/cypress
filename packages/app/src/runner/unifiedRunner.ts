@@ -25,8 +25,8 @@ export function useUnifiedRunner () {
     initialized.value = true
   })
 
-  onBeforeUnmount(() => {
-    UnifiedRunnerAPI.teardown()
+  onBeforeUnmount(async () => {
+    await UnifiedRunnerAPI.teardown()
     initialized.value = false
   })
 

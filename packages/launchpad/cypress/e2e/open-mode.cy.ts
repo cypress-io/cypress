@@ -58,8 +58,8 @@ describe('Launchpad: Open Mode', () => {
         o.sinon.spy(ctx.util.fetch)
       })
 
-      cy.withCtx((ctx, o) => {
-        ctx.config.localSettingsApi.setPreferences({
+      cy.withCtx(async (ctx, o) => {
+        await ctx.config.localSettingsApi.setPreferences({
           notifyWhenRunCompletes: ['failed'],
         })
       })

@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "fs-extra": "9.1.0"

@@ -1,59 +1,19 @@
 {
+  "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    /* Basic Options */
-    "target": "es2015",
-    "module": "commonjs",
-    /*
-     * Allow javascript files to be compiled.
-     * Override this in modules that need JS
-     */
-    "allowJs": true,
+    "target": "es2017",
     "jsx": "react",
     "outDir": "dist",
-    "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
-    // "checkJs": true,                       /* Report errors in .js files. */
-    // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
-    /* Generates corresponding '.d.ts' file. */
-    // "declaration": true,
-    // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
-    /* Generates corresponding '.map' file. */
-    "sourceMap": true,
-    /* Import emit helpers from 'tslib'. */
-    "importHelpers": true,
-    "strictNullChecks": true,
-    // "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
-    // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
-    /* Strict Type-Checking Options */
-    // "traceResolution": true,
     "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    /**
-     * Skip type checking of all declaration files (*.d.ts).
-     * TODO: Look into changing this in the future
-     */
-    /* Additional Checks */
-    /* Report errors on unused locals. */
-    // "noEmit": true,
-    "noUnusedLocals": false,
-    // "noUnusedParameters": true,            /* Report errors on unused parameters. */
-    /* Report error when not all code paths in function return a value. */
-    "noImplicitReturns": true,
-    // "noFallthroughCasesInSwitch": true,    /* Report errors for fallthrough cases in switch statement. */
-    /* Module Resolution Options */
-    // "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    // "baseUrl": "../",                       /* Base directory to resolve non-absolute module names. */
-    // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
-    // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "types": [],                           /* Type declaration files to be included in compilation. */
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noErrorTruncation": true,
-    "experimentalDecorators": true,
-    // "noResolve": true
-    "resolveJsonModule": true
+    "types": [
+      "node",
+      "cypress",
+      "cypress-real-events",
+      "react",
+    ],                           /* Type declaration files to be included in compilation. */
+    "noErrorTruncation": true
   },
   "exclude": [
     "dist",

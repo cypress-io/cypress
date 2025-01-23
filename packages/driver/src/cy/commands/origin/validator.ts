@@ -1,6 +1,6 @@
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
-import { difference, isPlainObject, isString } from 'lodash'
+import { difference, isPlainObject, isString, isFunction } from 'lodash'
 import type { LocationObject } from '../../../cypress/location'
 import * as cors from '@packages/network/lib/cors'
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
@@ -52,18 +52,18 @@ export class Validator {
   }
 
   _isValidCallbackFn (callbackFn) {
-    if (_.isFunction(callbackFn)) return true
+    if (isFunction(callbackFn)) return true
 
     // the user must pass a function, but at runtime the function may be
     // replaced with an object in the form
     // { callbackName: string, outputFilePath: string }
     // by the webpack-preprocessor. if it doesn't have that form, it's
     // an invalid input by the user
-    if (_.isPlainObject(callbackFn)) {
+    if (isPlainObject(callbackFn)) {
       return (
         Object.keys(callbackFn).length === 2
-        && _.isString(callbackFn.callbackName)
-        && _.isString(callbackFn.outputFilePath)
+        && isString(callbackFn.callbackName)
+        && isString(callbackFn.outputFilePath)
       )
     }
 

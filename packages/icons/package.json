@@ -6,10 +6,11 @@
   "main": "index.js",
   "scripts": {
     "build": "ts-node ./scripts/build.ts && ts-node ./scripts/ico.ts",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts"
+    "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",

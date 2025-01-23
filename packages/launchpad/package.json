@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
-    "check-ts": "vue-tsc --noEmit",
+    "check-ts": "vue-tsc --noEmit && yarn -s tslint",
     "clean": "rimraf dist && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
@@ -16,6 +16,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "test": "yarn cypress:run:ct && yarn types",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
   "dependencies": {},

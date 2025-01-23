@@ -11,7 +11,7 @@ import ErrorStack from '../errors/error-stack'
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
-import Err from './err-model'
+import type Err from './err-model'
 import { formattedMessage } from '../commands/command'
 
 import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x8.svg'
