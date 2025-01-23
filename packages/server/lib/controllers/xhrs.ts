@@ -1,7 +1,7 @@
-const _ = require('lodash')
-const mime = require('mime')
-const Promise = require('bluebird')
-const fixture = require('../fixture')
+import _ from 'lodash'
+import mime from 'mime'
+import Promise from 'bluebird'
+import fixture from '../fixture'
 
 const fixturesRe = /^(fx:|fixture:)/
 const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
@@ -24,7 +24,7 @@ const isValidJSON = function (text) {
 
 module.exports = {
   handle (req, res, config, next) {
-    const get = function (val, def) {
+    const get = function (val, def?) {
       return decodeURI(req.get(val) || def)
     }
 
@@ -37,7 +37,7 @@ module.exports = {
       // figure out the stream interface and pipe these
       // chunks to the response
       return this.getResponse(response, config)
-      .then((resp = {}) => {
+      .then((resp: { data: any, encoding?: string }) => {
         let { data, encoding } = resp
 
         // grab content-type from x-cypress-headers if present
@@ -73,7 +73,7 @@ module.exports = {
         .set(headers)
         .status(status)
         .end(chunk)
-      }).catch((err) => {
+      }).catch((err: Error) => {
         return res
         .status(400)
         .send({ __error: err.stack })
@@ -87,8 +87,8 @@ module.exports = {
     return respond()
   },
 
-  _get (resp, config) {
-    const options = {}
+  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: string }> {
+    const options: { encoding?: string } = {}
 
     const file = resp.replace(fixturesRe, '')
 
@@ -99,7 +99,7 @@ module.exports = {
     }
 
     return fixture.get(config.fixturesFolder, filePath, options)
-    .then((bytes) => {
+    .then((bytes: any) => {
       return {
         data: bytes,
         encoding,
