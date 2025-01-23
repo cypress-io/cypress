@@ -6,7 +6,7 @@ describe('src/cypress/dom/visibility', () => {
     return $(el).appendTo(cy.$$('body'))
   }
 
-  const reasonIs = ($el, str) => {
+  const reasonIs = ($el: JQuery, str: string) => {
     expect(dom.getReasonIsHidden($el)).to.eq(str)
   }
 
@@ -1056,6 +1056,51 @@ describe('src/cypress/dom/visibility', () => {
 
         cy.contains('test-2').should('not.be.visible')
         cy.contains('test-1').should('be.visible')
+      })
+
+      it('is hidden when element is an option and the parent has overflow clip', function () {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="width: 150px; height: 20px; overflow: clip;">
+            <div style="width: 150px; height: 25px;"></div>
+            <select>
+              <optgroup label='Shinobi'>
+                <option>Naruto</option>
+              </optgroup>
+            </select>
+          </div>
+        `)
+
+        cy.get('option').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<option>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+
+        cy.get('optgroup').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<optgroup>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+
+        cy.get('select').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<select>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+      })
+
+      it('is visible when element is an option and the parent has overflow clip but is within the bounds', function () {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="width: 150px; height: 20px; overflow: clip;">
+            <select>
+              <optgroup label='Shinobi'>
+                <option>Naruto</option>
+              </optgroup>
+            </select>
+          </div>
+        `)
+
+        cy.get('option').should('be.visible')
+        cy.get('optgroup').should('be.visible')
+        cy.get('select').should('be.visible')
       })
     })
 

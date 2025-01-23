@@ -45,7 +45,7 @@ export const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTML
   return collectParents([], el)
 }
 
-export const findParent = (el, condition) => {
+export const findParent = <R>(el: HTMLElement, condition: (parent: HTMLElement, node: HTMLElement) => R) => {
   const collectParent = (node) => {
     const parent = getParentNode(node)
 
@@ -61,7 +61,7 @@ export const findParent = (el, condition) => {
   return collectParent(el)
 }
 
-export const getFirstParentWithTagName = ($el, tagName) => {
+export const getFirstParentWithTagName = ($el: JQuery, tagName: string) => {
   if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }

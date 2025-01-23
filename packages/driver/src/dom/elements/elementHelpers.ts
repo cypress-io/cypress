@@ -6,7 +6,7 @@ const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)
 
 const valueIsNumberTypeRe = /progress|meter|li/
 
-export const getTagName = (el) => {
+export const getTagName = (el: HTMLElement) => {
   const tagName = el.tagName || ''
 
   return tagName.toLowerCase()
