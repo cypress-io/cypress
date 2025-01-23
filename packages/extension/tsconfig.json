@@ -1,7 +1,7 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2020",
     "allowJs": true,
     "strict": false
   }

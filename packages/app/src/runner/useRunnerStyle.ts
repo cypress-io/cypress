@@ -114,11 +114,11 @@ export const useRunnerStyle = () => {
 export function useResizablePanels () {
   const preferences = usePreferences()
 
-  const handleResizeEnd = (panel: DraggablePanel) => {
+  const handleResizeEnd = async (panel: DraggablePanel) => {
     if (panel === 'panel1') {
-      preferences.update('specListWidth', specListWidth.value)
+      await preferences.update('specListWidth', specListWidth.value)
     } else {
-      preferences.update('reporterWidth', reporterWidth.value)
+      await preferences.update('reporterWidth', reporterWidth.value)
     }
   }
 

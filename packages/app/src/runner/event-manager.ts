@@ -875,9 +875,9 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    this.ws.emit('studio:get:commands:text', this.studioStore.logs, (commandsText) => {
-      this.studioStore.copyToClipboard(commandsText)
-      .then(cb)
+    this.ws.emit('studio:get:commands:text', this.studioStore.logs, async (commandsText) => {
+      await this.studioStore.copyToClipboard(commandsText)
+      cb()
     })
   }
 
