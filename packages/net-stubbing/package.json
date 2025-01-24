@@ -16,6 +16,7 @@
     "is-html": "^2.0.0",
     "istextorbinary": "6.0.0",
     "lodash": "^4.17.15",
+    "mime": "^2.6.0",
     "mime-types": "2.1.27",
     "minimatch": "^3.1.2",
     "throttle": "^1.0.3"
