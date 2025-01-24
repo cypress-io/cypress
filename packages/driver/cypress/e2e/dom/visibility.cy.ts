@@ -1102,6 +1102,118 @@ describe('src/cypress/dom/visibility', () => {
         cy.get('optgroup').should('be.visible')
         cy.get('select').should('be.visible')
       })
+
+      it('is visible when x direction is clip but element is visible in y direction', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Visible</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('be.visible')
+      })
+
+      it('is hidden when x direction is hidden and y direction is coerced by browser to auto', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: hidden">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when x direction is auto and y direction is coerced by browser to auto', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: auto">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when y direction is hidden and x direction is set to clip but coerced by browser to hidden', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: hidden">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when y direction is auto and x direction is set to clip but coerced by browser to hidden', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: auto">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is visible when x direction is clip and y direction is visible', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: visible">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Visible</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('be.visible')
+      })
+
+      it('is hidden when y direction is overriden by setting overflow to clip', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-y: visible; overflow: clip;">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
     })
 
     describe('css clip-path', () => {
