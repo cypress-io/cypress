@@ -132,7 +132,7 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
   const el = $el[0]
   let transform
 
-  if ($el[0].style.transform) {
+  if (el instanceof HTMLElement && el.style.transform) {
     const style = getComputedStyle(el)
 
     transform = style.getPropertyValue('transform')
