@@ -130,13 +130,11 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
   const el = $el[0]
-  let transform
 
-  if (el instanceof HTMLElement && el.style.transform) {
-    const style = getComputedStyle(el)
+  const style = getComputedStyle(el)
+  let transform = style.getPropertyValue('transform')
 
-    transform = style.getPropertyValue('transform')
-  } else {
+  if (!transform.length) {
     transform = 'none'
   }
 
