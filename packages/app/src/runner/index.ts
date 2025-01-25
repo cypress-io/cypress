@@ -100,9 +100,6 @@ function createIframeModel () {
     autIframe.highlightEl,
     autIframe.doesAUTMatchTopSuperDomainOrigin,
     getEventManager(),
-    {
-      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
-    },
   )
 
   iframeModel.listen()
@@ -185,8 +182,6 @@ function teardownSpec (isRerun: boolean = false) {
   return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
-let isTorndown = false
-
 /**
  * Called when navigating away from the runner page.
  * This will teardown the reporter, event manager, and
@@ -198,7 +193,6 @@ export async function teardown () {
   _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
-  isTorndown = true
 }
 
 /**
@@ -353,13 +347,7 @@ async function runSpecE2E (config, spec: SpecFile) {
 async function initialize () {
   await dfd.promise
 
-  isTorndown = false
-
   const config = getRunnerConfigFromWindow()
-
-  if (isTorndown) {
-    return
-  }
 
   // Reset stores
   const autStore = useAutStore()
