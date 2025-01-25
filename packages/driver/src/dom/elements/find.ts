@@ -45,7 +45,7 @@ export const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTML
   return collectParents([], el)
 }
 
-export const findParent = <R>(el: HTMLElement, condition: (parent: HTMLElement, node: HTMLElement) => R) => {
+export const findParent = (el, condition) => {
   const collectParent = (node) => {
     const parent = getParentNode(node)
 
