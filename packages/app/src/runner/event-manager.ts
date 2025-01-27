@@ -307,10 +307,6 @@ export class EventManager {
       this._studioCopyToClipboard(cb)
     })
 
-    this.localBus.on('studio:start', () => {
-      rerun()
-    })
-
     this.localBus.on('studio:copy:to:clipboard', (cb) => {
       this._studioCopyToClipboard(cb)
     })
