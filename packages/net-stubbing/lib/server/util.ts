@@ -42,7 +42,7 @@ const isValidJSON = function (text: unknown) {
 }
 
 export function parseContentType (response?: string) {
-  const ret = (type) => {
+  const ret = (type: string) => {
     return mime.getType(type) //+ "; charset=utf-8"
   }
 
