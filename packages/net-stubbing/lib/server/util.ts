@@ -25,7 +25,7 @@ import { getEncoding } from 'istextorbinary'
 const debug = Debug('cypress:net-stubbing:server:util')
 const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
 
-const isValidJSON = function (text) {
+const isValidJSON = function (text: unknown) {
   if (_.isObject(text)) {
     return true
   }
