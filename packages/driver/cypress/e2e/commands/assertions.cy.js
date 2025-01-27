@@ -939,6 +939,17 @@ describe('src/cy/commands/assertions', () => {
       expect(2n).to.equal(2n)
     })
 
+    it('handles non-HTMLElement(s) (e.g. Element)', () => {
+      const xml = '<?xml version="1.0" encoding="UTF-8"?><foo><bar>Bar</bar></foo>'
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(xml, 'application/xml')
+      const foo = doc.getElementsByTagName('foo')[0]
+
+      expect(foo).not.to.be.undefined
+      expect(foo).to.be.instanceOf(Element)
+      expect(foo).not.to.be.instanceOf(HTMLElement)
+    })
+
     it('#consoleProps for regular objects', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
