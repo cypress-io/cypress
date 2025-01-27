@@ -31,7 +31,7 @@ const isValidJSON = function (text: unknown) {
   }
 
   try {
-    const o = JSON.parse(text)
+    const o = JSON.parse(text as string)
 
     return _.isObject(o)
   } catch (error) {
@@ -42,19 +42,15 @@ const isValidJSON = function (text: unknown) {
 }
 
 export function parseContentType (response?: string) {
-  const ret = (type: string) => {
-    return mime.getType(type) //+ "; charset=utf-8"
-  }
-
   if (isValidJSON(response)) {
-    return ret('json')
+    return mime.getType('json')
   }
 
   if (response && htmlLikeRe.test(response)) {
-    return ret('html')
+    return mime.getType('html')
   }
 
-  return ret('text')
+  return mime.getType('text')
 }
 
 export function emit (socket: CyServer.Socket, eventName: string, data: object) {
