@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run --config-file ./cypress.config.ts",
@@ -12,7 +12,8 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {},
   "devDependencies": {

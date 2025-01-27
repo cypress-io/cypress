@@ -15,7 +15,7 @@ import { getOperationName } from '@urql/core'
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 import type { OpenModeOptions, RunModeOptions } from '@packages/types'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { RelevantRunInfo } from '../../src/gen/graphcache-config.gen'
 
 type SystemTestProject = typeof fixtureDirs[number]
@@ -48,7 +48,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     appApi: {} as AppApiShape,
     localSettingsApi: {
       getPreferences: sinon.stub().resolves({
-        majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 },
+        majorVersionWelcomeDismissed: { [GET_MAJOR_VERSION_FOR_CONTENT()]: 123456 },
         notifyWhenRunCompletes: ['failed'],
       }),
       getAvailableEditors: sinon.stub(),

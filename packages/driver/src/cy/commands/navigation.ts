@@ -457,14 +457,14 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('test:before:run', reset)
 
-  Cypress.on('stability:changed', (bool, event) => {
+  Cypress.on('stability:changed', async (bool, event) => {
     // only send up page loading events when we're
     // not stable!
-    stabilityChanged(Cypress, state, config, bool)
+    await stabilityChanged(Cypress, state, config, bool)
   })
 
-  Cypress.on('navigation:changed', (source, arg) => {
-    navigationChanged(Cypress, cy, state, source, arg)
+  Cypress.on('navigation:changed', async (source, arg) => {
+    await navigationChanged(Cypress, cy, state, source, arg)
   })
 
   Cypress.on('form:submitted', (e) => {

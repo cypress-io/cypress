@@ -2,7 +2,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import { AppState } from '../lib/app-state'
+import type { AppState } from '../lib/app-state'
 import defaultEvents, { Events } from '../lib/events'
 import Switch from '../lib/switch'
 

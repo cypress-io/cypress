@@ -37,9 +37,6 @@ export class IframeModel {
     private highlightEl: ({ body }: any, opts: any) => void,
     private isAUTSameOrigin: () => boolean,
     private eventManager: EventManager,
-    private studio: {
-      selectorPlaygroundModel: any
-    },
   ) {
     this._reset()
   }

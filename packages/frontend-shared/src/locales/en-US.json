@@ -219,7 +219,7 @@
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       },
-      "ct": {
+      "componentTesting": {
         "title": "{0} component testing is available for this project",
         "content": "You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.",
         "primaryAction": "Quick setup",

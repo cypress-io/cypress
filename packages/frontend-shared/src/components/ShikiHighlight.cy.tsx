@@ -33,7 +33,7 @@ module.exports = defineConfig({
 
 describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () => {
   beforeEach(async () => {
-    initHighlighter()
+    await initHighlighter()
   })
 
   it('playground', () => {

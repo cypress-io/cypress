@@ -133,7 +133,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, reactive, ref, watch, Ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
@@ -285,12 +285,13 @@ const bannerCohortOptions: BannerCohortOptions = {
 
 const cohortBuilder = useCohorts()
 
-const getCohortForBanner = (bannerId: BannerId): Ref<CohortOption | undefined> => {
+const getCohortForBanner = (bannerId: BannerId) => {
   const cohortConfig: CohortConfig = {
     name: bannerId,
     options: bannerCohortOptions[bannerId] || [],
   }
 
+  // tslint:disable-next-line:no-floating-promises
   return cohortBuilder.getCohort(cohortConfig)
 }
 

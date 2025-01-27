@@ -23,7 +23,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
       )
 
       cy.findByTestId('alert-prefix-icon').should('be.visible')
-      cy.contains(defaultMessages.specPage.banners.ct.title.replace('{0}', framework.name)).should('be.visible')
+      cy.contains(defaultMessages.specPage.banners.componentTesting.title.replace('{0}', framework.name)).should('be.visible')
     })
   })
 

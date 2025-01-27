@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
@@ -13,6 +14,7 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
+    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./dist/v2/background.js",
     "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
   },
   "dependencies": {
