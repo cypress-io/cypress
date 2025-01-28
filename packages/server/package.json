@@ -92,7 +92,7 @@
     "log-symbols": "2.2.0",
     "md5": "2.3.0",
     "memfs": "3.5.3",
-    "mime": "2.6.0",
+    "mime": "^4.0.6",
     "mime-db": "1.45.0",
     "minimatch": "3.1.2",
     "minimist": "1.2.8",

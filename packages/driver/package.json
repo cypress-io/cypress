@@ -67,7 +67,7 @@
     "md5": "2.3.0",
     "method-override": "3.0.0",
     "methods": "1.1.2",
-    "mime-types": "2.1.27",
+    "mime": "^4.0.6",
     "minimatch": "3.1.2",
     "mocha": "7.0.1",
     "multer": "1.4.4",
