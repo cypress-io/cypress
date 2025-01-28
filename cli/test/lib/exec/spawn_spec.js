@@ -95,7 +95,7 @@ describe('lib/exec/spawn', function () {
             at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
             at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
             at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
-        
+
         [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
 
         [18489:0822/130231.159571:ERROR:gl_display.cc(497)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
@@ -111,6 +111,18 @@ describe('lib/exec/spawn', function () {
       _.each(lines, (line) => {
         expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
       })
+    })
+
+    it('returns true for XDG runtime dir warnings', () => {
+      expect(spawn.isGarbageLineWarning('error: XDG_RUNTIME_DIR is invalid or not set')).to.be.true
+    })
+
+    it('returns true for MESA ZINK errors', () => {
+      expect(spawn.isGarbageLineWarning('MESA: error: ZINK: failed to choose pdev')).to.be.true
+    })
+
+    it('returns true for GLX driver errors', () => {
+      expect(spawn.isGarbageLineWarning('glx: failed to create drisw screen')).to.be.true
     })
   })
 

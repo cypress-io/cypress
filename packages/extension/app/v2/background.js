@@ -293,6 +293,7 @@ const automation = {
       for (const window of windows) {
         // remove/close the window if it's not the current window
         if (window.id !== currentWindowInfo.id) {
+          // tslint:disable-next-line:no-empty
           await browser.windows.remove(window.id).catch(() => {})
         }
       }
@@ -308,8 +309,9 @@ const automation = {
         const newAboutBlankTab = await browser.tabs.create({ url: 'about:blank', active: false })
 
         newTabId = newAboutBlankTab.id
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
+      } catch (e) {
+        undefined
+      }
 
       return browser.tabs.remove(currentWindowInfo.tabs.map((tab) => tab.id).filter((tab) => tab.id !== newTabId))
     }).then(callback)

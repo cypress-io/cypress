@@ -7,11 +7,13 @@
     "prebuild": "rimraf ./dist",
     "build": "node ../../scripts/run-webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
+    "check-ts": "yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "cypress:run": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "node ../../scripts/run-webpack --watch --progress"
   },
   "devDependencies": {

@@ -221,8 +221,8 @@ describe('Vue', {
 
     verify('error on mount', {
       fileName: 'Errors.vue',
-      line: 19,
-      column: 15,
+      line: 29,
+      column: 13,
       message: [
         'mount error',
       ],
@@ -231,8 +231,8 @@ describe('Vue', {
 
     verify('sync error', {
       fileName: 'Errors.vue',
-      line: 24,
-      column: 15,
+      line: 34,
+      column: 13,
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
@@ -246,8 +246,8 @@ describe('Vue', {
 
     verify('async error', {
       fileName: 'Errors.vue',
-      line: 28,
-      column: 17,
+      line: 38,
+      column: 15,
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [

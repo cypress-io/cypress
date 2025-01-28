@@ -1,30 +1,13 @@
-const _ = require('lodash')
-const mime = require('mime')
-const Promise = require('bluebird')
-const fixture = require('../fixture')
+import { parseContentType } from '@packages/net-stubbing/lib/server/util'
+import _ from 'lodash'
+import Promise from 'bluebird'
+import fixture from '../fixture'
 
 const fixturesRe = /^(fx:|fixture:)/
-const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
 
-const isValidJSON = function (text) {
-  if (_.isObject(text)) {
-    return true
-  }
-
-  try {
-    const o = JSON.parse(text)
-
-    return _.isObject(o)
-  } catch (error) {
-    false
-  }
-
-  return false
-}
-
-module.exports = {
+export = {
   handle (req, res, config, next) {
-    const get = function (val, def) {
+    const get = function (val, def?) {
       return decodeURI(req.get(val) || def)
     }
 
@@ -37,7 +20,7 @@ module.exports = {
       // figure out the stream interface and pipe these
       // chunks to the response
       return this.getResponse(response, config)
-      .then((resp = {}) => {
+      .then((resp: { data: any, encoding?: BufferEncoding }) => {
         let { data, encoding } = resp
 
         // grab content-type from x-cypress-headers if present
@@ -73,7 +56,7 @@ module.exports = {
         .set(headers)
         .status(status)
         .end(chunk)
-      }).catch((err) => {
+      }).catch((err: Error) => {
         return res
         .status(400)
         .send({ __error: err.stack })
@@ -87,8 +70,8 @@ module.exports = {
     return respond()
   },
 
-  _get (resp, config) {
-    const options = {}
+  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: string }> {
+    const options: { encoding?: string } = {}
 
     const file = resp.replace(fixturesRe, '')
 
@@ -99,7 +82,7 @@ module.exports = {
     }
 
     return fixture.get(config.fixturesFolder, filePath, options)
-    .then((bytes) => {
+    .then((bytes: any) => {
       return {
         data: bytes,
         encoding,
@@ -115,22 +98,6 @@ module.exports = {
     return Promise.resolve({ data: resp })
   },
 
-  parseContentType (response) {
-    const ret = (type) => {
-      return mime.getType(type) //+ "; charset=utf-8"
-    }
-
-    if (isValidJSON(response)) {
-      return ret('json')
-    }
-
-    if (htmlLikeRe.test(response)) {
-      return ret('html')
-    }
-
-    return ret('text')
-  },
-
   parseHeaders (headers, response) {
     try {
       headers = JSON.parse(headers)
@@ -141,7 +108,7 @@ module.exports = {
     }
 
     if (headers['content-type'] == null) {
-      headers['content-type'] = this.parseContentType(response)
+      headers['content-type'] = parseContentType(response)
     }
 
     return headers

@@ -61,7 +61,7 @@ export const findParent = (el, condition) => {
   return collectParent(el)
 }
 
-export const getFirstParentWithTagName = ($el, tagName) => {
+export const getFirstParentWithTagName = ($el: JQuery, tagName: string) => {
   if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }

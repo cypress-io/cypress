@@ -4,12 +4,12 @@ import { action, computed, observable, makeObservable } from 'mobx'
 import { FileDetails, TestState } from '@packages/types'
 import Attempt from '../attempts/attempt-model'
 import Err, { ErrProps } from '../errors/err-model'
-import { HookProps } from '../hooks/hook-model'
+import type { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
-import { CommandProps } from '../commands/command-model'
-import { AgentProps } from '../agents/agent-model'
-import { RouteProps } from '../routes/route-model'
-import { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import type { CommandProps } from '../commands/command-model'
+import type { AgentProps } from '../agents/agent-model'
+import type { RouteProps } from '../routes/route-model'
+import type { RunnablesStore, LogProps } from '../runnables/runnables-store'
 
 export type UpdateTestCallback = () => void
 

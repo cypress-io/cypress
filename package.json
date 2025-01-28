@@ -274,6 +274,7 @@
     "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.5",
     "**/ua-parser-js": "0.7.33",
+    "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1346313",
     "sharp": "0.29.3",

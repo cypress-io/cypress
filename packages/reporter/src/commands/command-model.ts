@@ -4,7 +4,7 @@ import { action, computed, observable, makeObservable } from 'mobx'
 import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
-import { SessionProps } from '../sessions/sessions-model'
+import type { SessionProps } from '../sessions/sessions-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
