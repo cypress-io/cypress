@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.0.2
+
+_Released 2/11/2025_
+
+**Dependency Updates:**
+
+- Upgraded `mime` from `2.6.0` to `4.0.6`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/30144).
+
 ## 14.0.1
 
 _Released 1/28/2025_
