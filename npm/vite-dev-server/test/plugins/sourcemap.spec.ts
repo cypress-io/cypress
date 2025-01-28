@@ -104,4 +104,29 @@ describe('sourcemap plugin', () => {
       throw new Error('transform is not a function')
     }
   })
+
+  it('should not touch sourceMappingURL if it is part of the code', () => {
+    const code = 'console.log("\n//# sourceMappingURL=")'
+    const id = `test.js`
+    const options = {} as ViteDevServerConfig
+    const vite = {} as Vite
+    const plugin = CypressSourcemap(options, vite) as Plugin & { getCombinedSourcemap: () => { toUrl: () => string } }
+
+    plugin.getCombinedSourcemap = () => {
+      return {
+        toUrl: () => 'data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==',
+      }
+    }
+
+    expect(plugin.name).to.equal('cypress:sourcemap')
+    expect(plugin.enforce).to.equal('post')
+
+    if (plugin.transform instanceof Function) {
+      const result = plugin.transform.call(plugin, code, id)
+
+      expect(result.code).to.eq('console.log("\n//# sourceMappingURL=")\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozfQ==')
+    } else {
+      throw new Error('transform is not a function')
+    }
+  })
 })

@@ -40,7 +40,7 @@ app.use(Toast, {
   closeOnClick: false,
 })
 
-makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
   app.use(urql, client)
   app.use(createRouter())
   app.use(createI18n())

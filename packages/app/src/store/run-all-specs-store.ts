@@ -43,7 +43,7 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
 
     // Won't execute unless we are testing since the browser gets killed. In testing,
     // we can stub `launchProject` to verify the functionality is working
-    router.push({ path: '/specs/runner', query: { file: RUN_ALL_SPECS_KEY } })
+    await router.push({ path: '/specs/runner', query: { file: RUN_ALL_SPECS_KEY } })
   }
 
   async function runAllSpecs () {

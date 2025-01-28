@@ -1,3 +1,5 @@
+import { camelCase, assignIn, set } from 'lodash'
+import { defaultMessages } from '@cy/i18n'
 import SpecsListBanners from './SpecsListBanners.vue'
 import { ref } from 'vue'
 import type { Ref } from 'vue'
@@ -5,7 +7,6 @@ import { SpecsListBannersFragment, SpecsListBannersFragmentDoc, UseCohorts_Deter
 import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
-import { assignIn, set } from 'lodash'
 import { UserProjectStatusStore, useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import type { UserProjectStatusState } from '@packages/frontend-shared/src/store/user-project-status-store'
 
@@ -120,19 +121,19 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         }
 
         const bannerTrueConditions: Record<string, DeepPartial<UserProjectStatusState>> = {
-          'login-banner': {},
-          'create-organization-banner': {
+          'login': {},
+          'create-organization': {
             user: { isLoggedIn: true, isOrganizationLoaded: true },
           },
-          'connect-project-banner': {
+          'connect-project': {
             user: { isLoggedIn: true, isMemberOfOrganization: true },
             project: { isConfigLoaded: true },
           },
-          'record-banner': {
+          'record': {
             user: { isLoggedIn: true, isMemberOfOrganization: true },
             project: { isProjectConnected: true, hasNoRecordedRuns: true, hasNonExampleSpec: true, isConfigLoaded: true },
           },
-          'component-testing-banner': {
+          'component-testing': {
             testingType: 'e2e',
             user: { isLoggedIn: true, isMemberOfOrganization: true },
             project: { isProjectConnected: true, hasNonExampleSpec: true, isConfigLoaded: true, hasDetectedCtFramework: true },
@@ -153,7 +154,20 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
           }
         })
 
-        cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
+        cy.get(`[data-cy="${bannerTestId}-banner"]`)
+        .should('be.visible')
+
+        // The ct title has dynamic content and seems complicated to set here, so ignoring
+        let ctBannerTitle = defaultMessages.specPage.banners.componentTesting.title
+
+        if (ctBannerTitle) {
+          defaultMessages.specPage.banners.componentTesting.title = ctBannerTitle.replace('{0}', 'React')
+        }
+
+        cy.wrap(Object.entries(defaultMessages.specPage.banners[camelCase(bannerTestId)])).each((entry) => {
+          // @ts-expect-error
+          cy.contains(entry[1]).should('be.visible')
+        })
       })
 
       it('should be preempted by spec not found banner', () => {
@@ -382,7 +396,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       } as any,
     }
 
-    validateSmartNotificationBehaviors(BannerIds.ACI_082022_LOGIN, 'login-banner', gql)
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_LOGIN, 'login', gql)
   })
 
   describe('create organization', () => {
@@ -404,7 +418,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
     })
 
-    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CREATE_ORG, 'create-organization-banner', gql)
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CREATE_ORG, 'create-organization', gql)
   })
 
   describe('connect project', () => {
@@ -423,7 +437,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       } as any,
     }
 
-    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CONNECT_PROJECT, 'connect-project-banner', gql)
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_CONNECT_PROJECT, 'connect-project', gql)
   })
 
   describe('record', () => {
@@ -456,7 +470,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
     })
 
-    validateSmartNotificationBehaviors(BannerIds.ACI_082022_RECORD, 'record-banner', gql)
+    validateSmartNotificationBehaviors(BannerIds.ACI_082022_RECORD, 'record', gql)
   })
 
   describe('component testing', () => {
@@ -525,7 +539,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
     )
 
     validateCloseControl()
-    validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
+    validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing', gql)
 
     it('should not render when another smart banner has been dismissed within two days', () => {
       userProjectStatusStore.setBannersState({

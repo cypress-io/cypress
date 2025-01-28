@@ -1,6 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import MajorVersionWelcome from './MajorVersionWelcome.vue'
 import interval from 'human-interval'
+import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 const text = defaultMessages.majorVersionWelcome
 
@@ -35,7 +36,7 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
   })
 
   it('renders correct time for releases and overflows correctly', () => {
-    cy.clock(Date.UTC(2025, 0, 10))
+    cy.clock(Date.UTC(2025, 0, 16))
     cy.mount(<MajorVersionWelcome />)
     cy.contains('14.0.0 Released just now')
     cy.contains('13.0.0 Released last year')
@@ -51,5 +52,14 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     cy.viewport(1280, 500)
 
     cy.percySnapshot('content overflows inside box')
+  })
+
+  // Test is designed to fail as a signal when the next major version of Cypress is bumped in the package.json
+  // to signal to the team that we need to create a splash page
+  it('makes sure there is an entry for the current major release in the monorepo package.json version', () => {
+    cy.mount(<MajorVersionWelcome />)
+    const currentMajorVersion = GET_MAJOR_VERSION_FOR_CONTENT()
+
+    cy.get('a').should('contain.text', `${currentMajorVersion}.0.0`)
   })
 })

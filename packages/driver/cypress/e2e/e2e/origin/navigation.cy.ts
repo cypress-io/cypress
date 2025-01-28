@@ -192,11 +192,11 @@ describe('event timing', { browser: '!webkit' }, () => {
 
     cy.origin('http://www.foobar.com:3500', () => {
       cy.log('inside cy.origin foobar')
-    })
-
-    // This command is run from localhost against the cross-origin aut. Updating href is one of the few allowed commands. See https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#location
-    cy.window().then((win) => {
-      win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
+      // Updating href is one of the few allowed commands. See https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#location
+      // However, not everything on the window is accessible. Therefore, we force window() to only run on the same origin as the AUT context
+      cy.window().then((win) => {
+        win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
+      })
     })
 
     cy.origin('http://www.idp.com:3500', () => {

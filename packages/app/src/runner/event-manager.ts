@@ -307,10 +307,6 @@ export class EventManager {
       this._studioCopyToClipboard(cb)
     })
 
-    this.localBus.on('studio:start', () => {
-      rerun()
-    })
-
     this.localBus.on('studio:copy:to:clipboard', (cb) => {
       this._studioCopyToClipboard(cb)
     })
@@ -875,9 +871,9 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    this.ws.emit('studio:get:commands:text', this.studioStore.logs, (commandsText) => {
-      this.studioStore.copyToClipboard(commandsText)
-      .then(cb)
+    this.ws.emit('studio:get:commands:text', this.studioStore.logs, async (commandsText) => {
+      await this.studioStore.copyToClipboard(commandsText)
+      cb()
     })
   }
 

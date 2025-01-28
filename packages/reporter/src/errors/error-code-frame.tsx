@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Prism from 'prismjs'
 
-import { CodeFrame } from './err-model'
+import type { CodeFrame } from './err-model'
 import FileNameOpener from '../lib/file-name-opener'
 
 interface Props {

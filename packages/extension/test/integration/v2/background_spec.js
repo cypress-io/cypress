@@ -1,3 +1,4 @@
+/* tslint:disable:no-empty */
 require('../../spec_helper')
 const _ = require('lodash')
 const http = require('http')

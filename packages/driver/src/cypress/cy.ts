@@ -218,6 +218,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
+    // TODO: this should be awaited
+    /* tslint:disable:no-floating-promises */
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()

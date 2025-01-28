@@ -88,7 +88,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     }
 
     function wrapListener (listener: FetchListener): FetchListener {
-      return (event) => {
+      return async (event) => {
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
         const oldRespondWith = event.respondWith
@@ -111,7 +111,7 @@ export const injectIntoServiceWorker = (body: Buffer) => {
         if (returnValue instanceof Promise) {
           // if the listener returns a promise, we need to wait for it to resolve
           // before we can determine if the service worker handled the request
-          returnValue.then(() => {
+          await returnValue.then(() => {
             sendFetchRequest({ url: event.request.url, isControlled: respondWithCalled })
           })
         } else {

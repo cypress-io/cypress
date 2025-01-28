@@ -1,3 +1,17 @@
+# [@cypress/vite-dev-server-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.1...@cypress/vite-dev-server-v6.0.2) (2025-01-27)
+
+
+### Bug Fixes
+
+* avoid source map plugin from replacing valid code ([#30890](https://github.com/cypress-io/cypress/issues/30890)) ([3149a8f](https://github.com/cypress-io/cypress/commit/3149a8f1841c59e9578958c181b66ec39a27ea37))
+
+# [@cypress/vite-dev-server-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.0...@cypress/vite-dev-server-v6.0.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* add cypress 14 as a peer dependency for vite-dev-server ([#30857](https://github.com/cypress-io/cypress/issues/30857)) ([107d3ed](https://github.com/cypress-io/cypress/commit/107d3eda5e71029d879f5d21289c0aca16af3091))
+
 # [@cypress/vite-dev-server-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.2.1...@cypress/vite-dev-server-v6.0.0) (2025-01-08)
 
 
