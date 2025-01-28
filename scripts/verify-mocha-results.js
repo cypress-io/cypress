@@ -29,10 +29,6 @@ const parseResult = (xml) => {
   }
 }
 
-const parseResult = (xml) => {
-  return MOCHA_REGEX.test(xml) ? parseMochaResult(xml) : parseVitestResult(xml)
-}
-
 const total = { tests: 0, failures: 0, skipped: 0 }
 
 console.log(`Looking for reports in ${REPORTS_PATH}`)
