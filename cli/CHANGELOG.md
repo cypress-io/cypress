@@ -5,7 +5,7 @@ _Released 2/11/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `mime` from `2.6.0` to `4.0.6`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/30144).
+- Upgraded `mime` from `2.6.0` to `4.0.6`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/30144). Addressed in [#30966](https://github.com/cypress-io/cypress/pull/30966).
 
 ## 14.0.1
 
