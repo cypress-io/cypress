@@ -10,6 +10,7 @@ _Released 1/28/2025 (PENDING)_
 - Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where the incorrect visiblity would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where an `option` element would not return the correct visibility if its parent element has a clipping overflow. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where non-HTMLElement(s) may fail during assertions. Fixes [#30944](https://github.com/cypress-io/cypress/issues/30944)
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where error codeframes in the runner UI were not populated with the correct data in failed retry attempts. Fixes [#30927](https://github.com/cypress-io/cypress/issues/30927).
 
 **Misc:**
 
