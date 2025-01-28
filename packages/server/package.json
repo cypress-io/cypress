@@ -163,7 +163,6 @@
     "@types/chrome": "0.0.101",
     "@types/chrome-remote-interface": "0.31.14",
     "@types/http-proxy": "1.17.4",
-    "@types/mime": "3.0.1",
     "@types/node": "20.16.0",
     "@types/request-promise": "^4.1.48",
     "babel-loader": "9.1.3",
