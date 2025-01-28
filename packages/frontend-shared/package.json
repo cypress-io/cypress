@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "node ./script/build.js",
-    "check-ts": "vue-tsc --noEmit",
+    "check-ts": "vue-tsc --noEmit && yarn -s tslint",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
@@ -15,7 +15,8 @@
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
-    "test": "yarn cypress:run && yarn types"
+    "test": "yarn cypress:run && yarn types",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "@packages/data-context": "0.0.0-development"

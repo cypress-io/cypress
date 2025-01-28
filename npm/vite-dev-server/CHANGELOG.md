@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.1...@cypress/vite-dev-server-v6.0.2) (2025-01-27)
+
+
+### Bug Fixes
+
+* avoid source map plugin from replacing valid code ([#30890](https://github.com/cypress-io/cypress/issues/30890)) ([3149a8f](https://github.com/cypress-io/cypress/commit/3149a8f1841c59e9578958c181b66ec39a27ea37))
+
 # [@cypress/vite-dev-server-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.0...@cypress/vite-dev-server-v6.0.1) (2025-01-15)
 
 

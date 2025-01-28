@@ -26,6 +26,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
     // Connect the socket regardless of whether or not we have newly created it
     window.cypressSockets[fullNamespace].connect()
 
+    // @ts-expect-error TODO: fix type
     return window.cypressSockets[fullNamespace]
   }
 
@@ -48,6 +49,7 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
     // Connect the socket regardless of whether or not we have newly created it
     window.cypressSockets[fullNamespace].connect()
 
+    // @ts-expect-error TODO: fix type
     return window.cypressSockets[fullNamespace]
   }
 

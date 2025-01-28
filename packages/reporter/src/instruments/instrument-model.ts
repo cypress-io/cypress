@@ -1,5 +1,5 @@
 import { observable, makeObservable } from 'mobx'
-import { Instrument, TestState } from '@packages/types'
+import type { Instrument, TestState } from '@packages/types'
 
 export interface AliasObject {
   name: string

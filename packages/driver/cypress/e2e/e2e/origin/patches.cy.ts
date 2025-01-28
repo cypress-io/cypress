@@ -309,6 +309,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               let url = new URL('/test-request', 'http://app.foobar.com:3500').toString()
 
               return new Promise<void>((resolve, reject) => {
+                // tslint:disable:no-floating-promises
                 fetch(url, {
                   credentials: 'include',
                   headers: {

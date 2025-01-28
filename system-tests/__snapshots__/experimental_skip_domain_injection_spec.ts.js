@@ -13,7 +13,7 @@ https://on.cypress.io/configuration
 
 The experimentalSkipDomainInjection experiment is over. document.domain injection is now off by default.
 
-Read the migration guide for Cypress v14.0.0: https://on.cypress.com/migration-guide
+Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
 
 
 `

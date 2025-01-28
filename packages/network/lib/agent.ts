@@ -240,7 +240,7 @@ export class CombinedAgent {
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
 
-      this.httpAgent.addRequest(req, options)
+      return this.httpAgent.addRequest(req, options)
     })
   }
 }
@@ -325,7 +325,7 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  addRequest (req: http.ClientRequest, options: https.RequestOptions) {
+  async addRequest (req: http.ClientRequest, options: https.RequestOptions) {
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
@@ -338,7 +338,7 @@ class HttpsAgent extends https.Agent {
     if (baseCaOptions) {
       super.addRequest(req, mergeCAOptions(options, baseCaOptions))
     } else {
-      baseCaOptionsPromise.then((caOptions) => {
+      await baseCaOptionsPromise.then((caOptions) => {
         super.addRequest(req, mergeCAOptions(options, caOptions))
       })
     }

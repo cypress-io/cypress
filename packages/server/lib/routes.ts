@@ -151,8 +151,8 @@ export const createCommonRoutes = ({
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
   })
 
-  router.get(`/${config.namespace}/source-maps/:id.map`, (req, res) => {
-    networkProxy.handleSourceMapRequest(req, res)
+  router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
+    await networkProxy.handleSourceMapRequest(req, res)
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
@@ -274,8 +274,8 @@ export const createCommonRoutes = ({
     })
   }
 
-  router.all('*', (req, res) => {
-    networkProxy.handleHttpRequest(req, res)
+  router.all('*', async (req, res) => {
+    await networkProxy.handleHttpRequest(req, res)
   })
 
   // when we experience uncaught errors

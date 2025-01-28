@@ -896,10 +896,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       return state.logs.length === 0
     },
 
-    isReady (state): boolean {
-      return this.isOpen && this.isEmpty && !state.isLoading && !state.isFailed
-    },
-
     hookId: (state) => {
       return `${state.testId}-studio`
     },

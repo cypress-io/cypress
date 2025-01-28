@@ -367,7 +367,7 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
     }
 
-    const onError = (error: Error): Promise<void> => {
+    const onError = async (error: Error): Promise<void> => {
       const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
 
       if (pendingRequest) {
@@ -391,7 +391,7 @@ export class Http {
         }
 
         ctx.debug('Re-using pre-request data %o', preRequest)
-        this.addPendingBrowserPreRequest(preRequest)
+        await this.addPendingBrowserPreRequest(preRequest)
       }
 
       return _runStage(HttpStages.Error, ctx, onError)

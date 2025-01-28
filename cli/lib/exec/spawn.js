@@ -84,7 +84,33 @@ const isDebugScenario4 = /^\[[^\]]+debug_utils\.cc[^\]]+\] Hit debug scenario: 4
  */
 const isEGLDriverMessage = /^\[[^\]]+gl_display\.cc[^\]]+\] EGL Driver message \(Error\) eglQueryDeviceAttribEXT: Bad attribute\./
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe, isDbusWarning, isCertVerifyProcBuiltin, isHostVulkanDriverWarning, isContainerVulkanDriverWarning, isContainerVulkanStack, isDebugScenario4, isEGLDriverMessage]
+/**
+ * Mesa/GLX related warnings that occur in certain Linux environments without proper GPU support
+ * or when running in containers. These are benign warnings that don't affect functionality.
+ * Samples:
+ * error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+ * MESA: error: ZINK: failed to choose pdev
+ * glx: failed to create drisw screen
+ */
+const isXdgRuntimeError = /^error: XDG_RUNTIME_DIR is invalid or not set/
+const isMesaZinkError = /^MESA: error: ZINK: failed to choose pdev/
+const isGlxDriverError = /^glx: failed to create drisw screen/
+
+const GARBAGE_WARNINGS = [
+  isXlibOrLibudevRe,
+  isHighSierraWarningRe,
+  isRenderWorkerRe,
+  isDbusWarning,
+  isCertVerifyProcBuiltin,
+  isHostVulkanDriverWarning,
+  isContainerVulkanDriverWarning,
+  isContainerVulkanStack,
+  isDebugScenario4,
+  isEGLDriverMessage,
+  isXdgRuntimeError,
+  isMesaZinkError,
+  isGlxDriverError,
+]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {

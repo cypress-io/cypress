@@ -1354,7 +1354,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is over. ${fmt.highlight('document.domain')} injection is now off by default.
 
-      Read the migration guide for Cypress v14.0.0: https://on.cypress.com/migration-guide
+      Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
     `
   },
   // TODO: link to docs on injectDocumentDomain
@@ -1362,7 +1362,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in Cypress 15.
     
-      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.com/inject-document-domain-configuration
+      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
   },
   INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
@@ -1370,7 +1370,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is only available for E2E testing.
 
-      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.com/inject-document-domain-configuration
+      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {

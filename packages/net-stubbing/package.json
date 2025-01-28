@@ -5,16 +5,18 @@
   "main": "./lib/server",
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .ts,.json, .",
-    "test": "CYPRESS_INTERNAL_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
+    "test": "CYPRESS_INTERNAL_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "@types/mime-types": "2.1.0",
     "is-html": "^2.0.0",
     "istextorbinary": "6.0.0",
     "lodash": "^4.17.15",
+    "mime": "^2.6.0",
     "mime-types": "2.1.27",
     "minimatch": "^3.1.2",
     "throttle": "^1.0.3"

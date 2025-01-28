@@ -1,12 +1,28 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.0.1
+## 14.0.2
 
-_Released 1/28/2024 (PENDING)_
+_Released 2/11/2025_
 
 **Bugfixes:**
 
 - Actions performed in `after` hooks, like `.click()` and `.type()` will now correctly retry and perform the action when a test fails. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
+
+## 14.0.1
+
+_Released 1/28/2025_
+
+**Bugfixes:**
+
 - Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where an element would not return the correct visibility if its offset parent was within the clipping element. Fixes [#30922](https://github.com/cypress-io/cypress/issues/30922).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where the incorrect visiblity would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
+- Fixed an issue where an `option` element would not return the correct visibility if its parent element has a clipping overflow. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
+- Fixed an issue where non-HTMLElement(s) may fail during assertions. Fixes [#30944](https://github.com/cypress-io/cypress/issues/30944)
+
+**Misc:**
+
+- Some broken links displayed in 14+ now link to the correct documentation URL. Addresses [#30951](https://github.com/cypress-io/cypress/issues/30951). Addressed in [#30953](https://github.com/cypress-io/cypress/pull/30953).
+- Benign Mesa/GLX related warnings are now hidden in the terminal output when running Cypress in certain Linux environments or containers. Addresses [#29521](https://github.com/cypress-io/cypress/issues/29521) and [#29554](https://github.com/cypress-io/cypress/issues/29554).
 
 ## 14.0.0
 
@@ -21,7 +37,7 @@ _Released 1/16/2025_
 - The `cy.origin()` command must now be used when navigating between subdomains. Because this is a fairly disruptive change for users who frequently navigate between subdomains, a new configuration option is being introduced. `injectDocumentDomain` can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. This configuration option is marked as deprecated and you will receive a warning when Cypress is launched with this option set to `true`. It will be removed in Cypress 15. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770). Addresses [#25806](https://github.com/cypress-io/cypress/issues/25806), [#25987](https://github.com/cypress-io/cypress/issues/25987), [#27528](https://github.com/cypress-io/cypress/issues/27528), [#29445](https://github.com/cypress-io/cypress/issues/29445), [#29590](https://github.com/cypress-io/cypress/issues/29590) and [#30571](https://github.com/cypress-io/cypress/issues/30571).
 - It is no longer possible to make a `fetch` or `XMLHttpRequest` request from the `about:blank` page in Electron (i.e. `cy.window().then((win) => win.fetch('<some-url>'))`). You must use `cy.request` instead or perform some form of initial navigation via `cy.visit()`. Addressed in [#30394](https://github.com/cypress-io/cypress/pull/30394).
 - The `experimentalJustInTimeCompile` configuration option for component testing has been replaced with a `justInTimeCompile` option that is `true` by default. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. `justInTimeCompile` is now only supported for [`webpack`](https://www.npmjs.com/package/webpack). Addresses [#30234](https://github.com/cypress-io/cypress/issues/30234). Addressed in [#30641](https://github.com/cypress-io/cypress/pull/30641).
-- Cypress Component Testing no longer supports: 
+- Cypress Component Testing no longer supports:
   - `create-react-app`. Addresses [#30028](https://github.com/cypress-io/cypress/issues/30028).
   - `@vue/cli-service`. Addresses [#30481](https://github.com/cypress-io/cypress/issues/30481).
   - `Angular` versions 13, 14, 15, and 16. The minimum supported version is now `17.2.0` in order to fully support Angular [signals](https://angular.dev/guide/signals). Addresses [#29582](https://github.com/cypress-io/cypress/issues/29582). Addressed in [#30539](https://github.com/cypress-io/cypress/pull/30539).
@@ -66,7 +82,6 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - The CSS pseudo-class `:dir()` is now supported when testing in Electron. Addresses [#29766](https://github.com/cypress-io/cypress/issues/29766).
 - Fixed an issue where the spec filename was not updating correctly when changing specs in `open` mode. Fixes [#30852](https://github.com/cypress-io/cypress/issues/30852).
 - `cy.origin()` now correctly errors when the [`cy.window()`](https://docs.cypress.io/api/commands/window), [`cy.document()`](https://docs.cypress.io/api/commands/document), [`cy.title()`](https://docs.cypress.io/api/commands/title), [`cy.url()`](https://docs.cypress.io/api/commands/url), [`cy.location()`](https://docs.cypress.io/api/commands/location) ,[`cy.hash()`](https://docs.cypress.io/api/commands/hash), [`cy.go()`](https://docs.cypress.io/api/commands/go), [`cy.reload()`](https://docs.cypress.io/api/commands/reload), and [`cy.scrollTo()`](https://docs.cypress.io/api/commands/scrollTo) commands are used outside of the `cy.origin()` command after the AUT has navigated away from the primary origin. Fixes [#30848](https://github.com/cypress-io/cypress/issues/30848). Fixed in [#30858](https://github.com/cypress-io/cypress/pull/30858).
-- Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
 
 **Misc:**
 
