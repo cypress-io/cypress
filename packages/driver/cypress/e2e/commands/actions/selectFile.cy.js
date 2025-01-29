@@ -272,7 +272,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           expect(input[0].files[0].name).to.eq('valid.json')
           expect(input[0].files[1].name).to.eq('app.js')
           expect(input[0].files[0].type).to.eq('application/json')
-          expect(input[0].files[1].type).to.eq('application/javascript')
+          expect(input[0].files[1].type).to.eq('text/javascript')
         })
       })
 
