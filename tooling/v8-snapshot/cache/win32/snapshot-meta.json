@@ -3841,6 +3841,10 @@
     "./packages/net-stubbing/node_modules/mime-db/db.json",
     "./packages/net-stubbing/node_modules/mime-db/index.js",
     "./packages/net-stubbing/node_modules/mime-types/index.js",
+    "./packages/net-stubbing/node_modules/mime/Mime.js",
+    "./packages/net-stubbing/node_modules/mime/index.js",
+    "./packages/net-stubbing/node_modules/mime/types/other.js",
+    "./packages/net-stubbing/node_modules/mime/types/standard.js",
     "./packages/network/lib/allow-destroy.ts",
     "./packages/network/lib/blocked.ts",
     "./packages/network/lib/ca.ts",
@@ -3965,7 +3969,7 @@
     "./packages/server/lib/controllers/reporter.js",
     "./packages/server/lib/controllers/runner.ts",
     "./packages/server/lib/controllers/spec.js",
-    "./packages/server/lib/controllers/xhrs.js",
+    "./packages/server/lib/controllers/xhrs.ts",
     "./packages/server/lib/cwd.js",
     "./packages/server/lib/exec.js",
     "./packages/server/lib/experiments.ts",
@@ -4199,5 +4203,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "25cf950f503e7289cce5d180221ee6460fe1d75d10e6a32398edf0b9e8016028"
+  "deferredHash": "d2a29dbec206607da4108a98d5dc68bd1e2e57b8f6e47f06af72a6d105392a20"
 }
