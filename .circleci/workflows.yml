@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  browser-tools: circleci/browser-tools@1.5.0
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -30,7 +33,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'mschile/issue-30922'
+        - 'chore/browser_spike'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +44,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-30922', << pipeline.git.branch >> ]
+    - equal: [ 'chore/browser_spike', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,7 +55,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-30922', << pipeline.git.branch >> ]
+    - equal: [ 'chore/browser_spike', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -75,7 +78,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-30922', << pipeline.git.branch >> ]
+    - equal: [ 'chore/browser_spike', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -84,7 +87,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -93,7 +96,7 @@ executors:
   
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -103,7 +106,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
         user: node
     environment:
       PLATFORM: linux
@@ -151,7 +154,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mschile/issue-30922" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/browser_spike" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -508,27 +511,69 @@ commands:
             source ./scripts/ensure-node.sh
             yarn check-node-version
 
-  install-chrome:
-    description: Install Google Chrome
+  install-browsers:
+    description: Install Google Chrome or Firefox
     parameters:
-      channel:
-        description: browser channel to install
+      executor:
+        description: The executor in use. Only used if Windows for workaround purposes
+        type: executor
+        default: cy-doc
+      install-chrome:
+        description: whether or not to install google chrome
+        type: boolean
+        default: false
+      google-chrome-channel:
+        description: Google Chrome channel to install
         type: string
-      version:
-        description: browser version to install
+        # can be stable, beta, dev, or canary
+        default: stable
+      google-chrome-version:
+        description: Google Chrome version to install
         type: string
+        # latest can also be used here
+        default: 131.0.6778.108
+      install-firefox:
+        description: whether or not to install firefox
+        type: boolean
+        default: false
+      firefox-version:
+        description: Firefox version to install
+        type: string
+        # latest can also be used here
+        default: 134.0.2
     steps:
-      - run:
-          name: Install Google Chrome (<<parameters.channel>>)
-          command: |
-            echo "Installing Chrome (<<parameters.channel>>) v<<parameters.version>>"
-            wget -O /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-<<parameters.channel>>/google-chrome-<<parameters.channel>>_<<parameters.version>>-1_amd64.deb" && \
-            dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
-            apt-get install -f -y && \
-            rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
-            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
-            echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
-            echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+      - when:
+          condition:
+            not:
+              equal: [ *windows-executor, << parameters.executor >> ]
+          # see https://circleci.com/developer/orbs/orb/circleci/browser-tools
+          steps:
+            - when:
+                condition:
+                  equal: [ true, << parameters.install-firefox >> ]
+                steps:
+                  - browser-tools/install-firefox:
+                      # https://download-installer.cdn.mozilla.net/pub/firefox/releases/
+                      version: << parameters.firefox-version >>
+            - when:
+                condition:
+                  equal: [ true, << parameters.install-chrome >> ]
+                steps:
+                  - browser-tools/install-chrome:
+                      # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
+                      channel: << parameters.google-chrome-channel >> 
+                      chrome-version: << parameters.google-chrome-version >>
+                  - when:
+                      condition:
+                        equal: [ 'beta', << parameters.google-chrome-channel>> ]
+                      steps:
+                        - run:
+                            # When the beta is downloaded with this orb,
+                            # google-chrome-beta is linked in addition to google-chrome,
+                            # which we do not expect and errors out when running Cypress
+                            name: remove linked google-chrome binary 
+                            command: |
+                              rm /usr/bin/google-chrome           
 
   # This code builds better-sqlite3 on Debian 10 (Buster). This is necessary because Debian 10 has the oldest glibc version (2.28) that we support.
   #
@@ -571,7 +616,7 @@ commands:
       install-chrome-channel:
         description: chrome channel to install
         type: string
-        default: ''
+        default: 'stable'
       inject-document-domain:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
@@ -580,11 +625,25 @@ commands:
     steps:
       - restore_cached_workspace
       - when:
-          condition: <<parameters.install-chrome-channel>>
+          condition:
+            equal: [ chrome, << parameters.browser >> ]
           steps:
-            - install-chrome:
-                channel: <<parameters.install-chrome-channel>>
-                version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
+            - install-browsers:
+                install-chrome: true
+      - when:
+          condition:
+            equal: [ chrome:beta, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+                google-chrome-channel: << parameters.install-chrome-channel >>
+                google-chrome-version: latest
+      - when:
+          condition:
+            equal: [ firefox, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -680,6 +739,10 @@ commands:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
+      - install-browsers:
+          install-chrome: true 
+          install-firefox: true
+          executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
@@ -753,6 +816,9 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
       - run:
           name: Run system tests
           environment:
@@ -929,6 +995,8 @@ commands:
           # force installing the freshly built binary
           command: |
             CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - install-browsers:
+          install-chrome: true
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1021,6 +1089,10 @@ commands:
         description: Server start command for repo
         type: string
         default: "npm start --if-present"
+      executor:
+        description: The executor in use. Only used if Windows for workaround purposes
+        type: executor
+        default: cy-doc
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1114,7 +1186,10 @@ commands:
                 command: |
                   npm i -g wait-on
                   npx wait-on <<parameters.wait-on>> --timeout 120000
-
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
+          executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - when:
@@ -1661,6 +1736,9 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
@@ -1769,6 +1847,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
       - run: yarn test-integration --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -1780,6 +1860,9 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -1848,7 +1931,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -2121,6 +2204,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: |
             CYPRESS_CONFIG_ENV=production \
@@ -2143,6 +2228,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: |
             CYPRESS_CONFIG_ENV=production \
@@ -2253,6 +2340,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
@@ -2726,6 +2815,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+          executor: << parameters.executor >>
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
