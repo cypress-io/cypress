@@ -531,7 +531,7 @@ commands:
         description: Google Chrome version to install
         type: string
         # latest can also be used here
-        default: 131.0.6778.108
+        default: 132.0.6834.159
       install-firefox:
         description: whether or not to install firefox
         type: boolean
