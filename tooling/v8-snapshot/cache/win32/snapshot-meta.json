@@ -3838,10 +3838,10 @@
     "./packages/net-stubbing/node_modules/debug/node_modules/ms/index.js",
     "./packages/net-stubbing/node_modules/debug/src/common.js",
     "./packages/net-stubbing/node_modules/has-flag/index.js",
-    "./packages/net-stubbing/node_modules/mime/dist/src/Mime.js",
-    "./packages/net-stubbing/node_modules/mime/dist/src/index.js",
-    "./packages/net-stubbing/node_modules/mime/dist/types/other.js",
-    "./packages/net-stubbing/node_modules/mime/dist/types/standard.js",
+    "./packages/net-stubbing/node_modules/mime/Mime.js",
+    "./packages/net-stubbing/node_modules/mime/index.js",
+    "./packages/net-stubbing/node_modules/mime/types/other.js",
+    "./packages/net-stubbing/node_modules/mime/types/standard.js",
     "./packages/network/lib/allow-destroy.ts",
     "./packages/network/lib/blocked.ts",
     "./packages/network/lib/ca.ts",
@@ -4091,10 +4091,10 @@
     "./packages/server/node_modules/is-stream/index.js",
     "./packages/server/node_modules/mime-db/db.json",
     "./packages/server/node_modules/mime-db/index.js",
-    "./packages/server/node_modules/mime/dist/src/Mime.js",
-    "./packages/server/node_modules/mime/dist/src/index.js",
-    "./packages/server/node_modules/mime/dist/types/other.js",
-    "./packages/server/node_modules/mime/dist/types/standard.js",
+    "./packages/server/node_modules/mime/Mime.js",
+    "./packages/server/node_modules/mime/index.js",
+    "./packages/server/node_modules/mime/types/other.js",
+    "./packages/server/node_modules/mime/types/standard.js",
     "./packages/server/node_modules/mkdirp/index.js",
     "./packages/server/node_modules/mocha-teamcity-reporter/lib/teamcity.js",
     "./packages/server/node_modules/mocha/lib/browser/progress.js",
@@ -4200,5 +4200,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "32da23405191ed363d5ad0a23de5e37e21877bbf90a588e0c3d4c9a55703309a"
+  "deferredHash": "6b65853589b9d2f255e8e9f28d809bdc39586a0438de2381a676c6a98f6ee1bd"
 }
