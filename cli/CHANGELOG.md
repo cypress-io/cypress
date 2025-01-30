@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.0.2
 
-_Released 2/11/2025_
+_Released 2/11/2025 (PENDING)_
 
 **Bugfixes:**
 
 - Actions performed in `after` hooks, like `.click()` and `.type()` will now correctly retry and perform the action when a test fails. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
+
+**Dependency Updates:**
+
+- Upgraded `mime` from `2.6.0` to `3.0.0`. Addressed in [#30966](https://github.com/cypress-io/cypress/pull/30966).
 
 ## 14.0.1
 

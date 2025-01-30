@@ -16,7 +16,7 @@ module.exports = {
     }
 
     return res
-    .type('application/javascript')
+    .type('text/javascript')
     .set('ETag', clientVersion)
     .status(200)
     // TODO: replace this entire file and sendFile call with `express.static`.

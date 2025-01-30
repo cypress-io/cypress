@@ -80,7 +80,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -101,7 +101,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -121,7 +121,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -141,7 +141,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -159,7 +159,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -179,7 +179,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -196,7 +196,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -220,7 +220,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -245,7 +245,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -271,7 +271,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -293,7 +293,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -317,7 +317,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -336,7 +336,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -359,7 +359,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -388,7 +388,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('fixtures/service-worker.html')
@@ -414,7 +414,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('/fixtures/service-worker.html')
@@ -437,7 +437,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('/fixtures/service-worker.html')
@@ -457,7 +457,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
       cy.intercept('/fixtures/service-worker.js', (req) => {
         req.reply(`(${script})()`,
-          { 'Content-Type': 'application/javascript' })
+          { 'Content-Type': 'text/javascript' })
       })
 
       cy.visit('/fixtures/service-worker.html')
@@ -495,7 +495,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -523,7 +523,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -551,7 +551,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -564,7 +564,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -595,7 +595,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html').then(async (win) => {
@@ -621,7 +621,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -640,7 +640,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -658,7 +658,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html')
@@ -676,7 +676,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.visit('fixtures/service-worker.html?skipReload')
@@ -694,7 +694,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
 
     cy.intercept('/fixtures/service-worker.js', (req) => {
       req.reply(`(${script})()`,
-        { 'Content-Type': 'application/javascript' })
+        { 'Content-Type': 'text/javascript' })
     })
 
     cy.intercept('/fixtures/1mb*', (req) => {
