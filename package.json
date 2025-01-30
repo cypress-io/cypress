@@ -276,7 +276,7 @@
     "**/ua-parser-js": "0.7.33",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
-    "devtools-protocol": "0.0.1346313",
+    "devtools-protocol": "0.0.1413303",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   },
