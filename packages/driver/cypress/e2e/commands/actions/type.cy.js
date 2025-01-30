@@ -480,10 +480,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     describe('retries in after hook when failures', () => {
-      it('types in element in hook', (done) => {
+      it('types in element in hook', () => {
         cy.on('fail', (err) => {
           expect(err.message).contain('expected true to be false')
-          done()
         })
 
         expect(true).to.be.false
@@ -503,10 +502,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     describe('retries in afterEach hook when failures', () => {
-      it('types in element in hook', (done) => {
+      it('types in element in hook', () => {
         cy.on('fail', (err) => {
           expect(err.message).contain('expected true to be false')
-          done()
         })
 
         expect(true).to.be.false

@@ -1725,10 +1725,9 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       describe('retries in after hook when failures', () => {
-        it('clicks element in hook', (done) => {
+        it('clicks element in hook', () => {
           cy.on('fail', (err) => {
             expect(err.message).contain('expected true to be false')
-            done()
           })
 
           expect(true).to.be.false
@@ -1748,10 +1747,11 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       describe('retries in afterEach hook when failures', () => {
-        it('clicks element in hook', (done) => {
+        it('clicks element in hook', () => {
           cy.on('fail', (err) => {
             expect(err.message).contain('expected true to be false')
-            done()
+
+            return false
           })
 
           expect(true).to.be.false
