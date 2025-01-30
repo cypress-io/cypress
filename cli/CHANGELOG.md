@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.0.2
 
-_Released 2/11/2025_
+_Released 2/11/2025 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where error codeframes in the runner UI were not populated with the correct data in failed retry attempts. Fixes [#30927](https://github.com/cypress-io/cypress/issues/30927).
+
+**Dependency Updates:**
+
+- Upgraded `mime` from `2.6.0` to `3.0.0`. Addressed in [#30966](https://github.com/cypress-io/cypress/pull/30966).
 
 ## 14.0.1
 

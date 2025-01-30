@@ -14,7 +14,6 @@ import type CyServer from '@packages/server'
 import { Socket } from 'net'
 import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
-import MimeTypes from 'mime-types'
 import type { CypressIncomingRequest } from '@packages/proxy'
 import type { InterceptedRequest } from './intercepted-request'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
@@ -154,7 +153,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
 
   if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
     // attempt to detect mimeType based on extension, fall back to regular cy.fixture inspection otherwise
-    const mimeType = MimeTypes.lookup(fixture.filePath) || parseContentType(data)
+    const mimeType = mime.getType(fixture.filePath) || parseContentType(data)
 
     _.set(staticResponse, 'headers.content-type', mimeType)
   }

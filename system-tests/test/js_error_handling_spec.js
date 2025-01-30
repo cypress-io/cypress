@@ -27,7 +27,7 @@ const onServer = function (app) {
     const buf = fs.readFileSync(Fixtures.path('server/gzip-bad.html.gz'))
 
     return res.set({
-      'content-type': 'application/javascript',
+      'content-type': 'text/javascript',
       'content-encoding': 'gzip',
     })
     .send(buf)
