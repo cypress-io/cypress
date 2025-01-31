@@ -3,6 +3,10 @@
 
 _Released 2/11/2025 (PENDING)_
 
+**Bugfixes:**
+
+- All commands performed in `after` and `afterEach` hooks will now correctly retry when a test fails. Commands that are actions like `.click()` and `.type()` will now perform the action in this situation also. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
+
 **Dependency Updates:**
 
 - Upgraded `mime` from `2.6.0` to `3.0.0`. Addressed in [#30966](https://github.com/cypress-io/cypress/pull/30966).
