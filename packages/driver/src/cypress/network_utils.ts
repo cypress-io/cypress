@@ -10,7 +10,7 @@ export default {
       }
 
       xhr.onerror = function (e) {
-        reject(new Error(`Fetching resource at '${resourceUrl}' failed: ${this.status} ${this.statusText} \n\n ${e}`))
+        reject(new Error(`Fetching resource at '${resourceUrl}' failed. Status: ${this.status} Text: ${this.statusText} \n\n Error: ${e}`))
       }
 
       xhr.open('GET', resourceUrl)
