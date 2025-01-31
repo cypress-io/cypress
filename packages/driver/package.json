@@ -45,7 +45,7 @@
     "chai": "4.2.0",
     "chai-subset": "1.6.0",
     "clone": "2.1.2",
-    "compression": "1.7.4",
+    "compression": "1.7.5",
     "cookie-parser": "1.4.5",
     "core-js-pure": "3.21.0",
     "cors": "2.8.5",
