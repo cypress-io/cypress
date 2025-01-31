@@ -5,7 +5,7 @@ _Released 2/11/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Actions performed in `after` hooks, like `.click()` and `.type()` will now correctly retry and perform the action when a test fails. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
+- All commands performed in `after` and `afterEach` hooks will now correctly retry when a test fails. Commands that are actions like `.click()` and `.type()` will now perform the action in this situation also. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
 
 **Dependency Updates:**
 
