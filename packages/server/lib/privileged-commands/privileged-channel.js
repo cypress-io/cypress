@@ -92,7 +92,12 @@
         script = replace.call(script, queryStringRegex, '')
       }
 
-      return stringIncludes.call(err.stack, script)
+      // stack URLs come in URI encoded by default.
+      // we need to make sure our script names are also URI encoded
+      // so the comparisons match
+      const scriptName = encodeURI(script)
+
+      return stringIncludes.call(err.stack, scriptName)
     })
 
     return filteredLines.length > 0
