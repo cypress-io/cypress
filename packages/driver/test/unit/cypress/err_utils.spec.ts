@@ -59,7 +59,6 @@ describe('err_utils', () => {
 
           const invocationFrame = second ?? first
 
-          //console.log(invocationFrame)
           expect(invocationFrame).toContain(`${invocationFile}:${line}:${column}`)
         })
       })
