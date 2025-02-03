@@ -30,7 +30,7 @@
     "@iconify-json/logos": "1.1.42",
     "@iconify-json/mdi": "1.1.63",
     "@percy/core": "^1.0.0-beta.48",
-    "@percy/cypress": "^3.1.2",
+    "@percy/cypress": "^3.1.3",
     "@testing-library/cypress": "9.0.0",
     "@toycode/markdown-it-class": "1.2.3",
     "@urql/core": "2.4.4",
