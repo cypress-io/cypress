@@ -1,6 +1,6 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "132.0.6834.159"
+chrome-stable-version: &chrome-stable-version "133.0.6943.53"
 chrome-beta-version: &chrome-beta-version "133.0.6943.35"
 firefox-stable-version: &firefox-stable-version "134.0.2"
 
