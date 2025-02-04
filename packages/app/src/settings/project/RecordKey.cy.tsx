@@ -1,5 +1,6 @@
 import { RecordKeyFragmentDoc } from '../../generated/graphql-test'
 import RecordKey from './RecordKey.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<RecordKey />', () => {

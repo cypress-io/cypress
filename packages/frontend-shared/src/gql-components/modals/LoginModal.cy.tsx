@@ -1,5 +1,6 @@
 import { LoginModalFragmentDoc } from '../../generated/graphql-test'
 import LoginModal from './LoginModal.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'

@@ -5,6 +5,7 @@ const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const url = require('url')
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 const { shell } = require('electron')
 
 const machineId = require('./machine_id')

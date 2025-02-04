@@ -1,5 +1,6 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import { defineComponent, ref, h } from 'vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 const buttonSelector = '[data-cy=new-spec-button]'

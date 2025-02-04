@@ -1,4 +1,5 @@
 import AlertHeader from './AlertHeader.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import CoffeeIcon from '~icons/mdi/coffee'
 
 describe('<AlertHeader />', () => {

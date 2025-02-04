@@ -1,7 +1,7 @@
 /* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'

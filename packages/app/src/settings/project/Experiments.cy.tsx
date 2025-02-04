@@ -1,6 +1,7 @@
 import { ExperimentsFragmentDoc } from '../../generated/graphql-test'
 import config from '@packages/frontend-shared/cypress/fixtures/config.json'
 import Experiments from './Experiments.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
