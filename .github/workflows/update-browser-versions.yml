@@ -32,6 +32,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+        # we install yaml in the ./scripts directory to avoid all the dependencies being installed in the root of the monorepo.
+      - name: install dependencies
+        run: CI=true yarn
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v7
