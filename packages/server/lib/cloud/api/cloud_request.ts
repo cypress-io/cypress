@@ -6,8 +6,8 @@ import pkg from '@packages/root'
 import { httpAgent, httpsAgent } from '@packages/network/lib/agent'
 
 import app_config from '../../../config/app.json'
-import { transformError } from './transform_error'
-import { logRequest, logResponse, logResponseErr } from './log_requests'
+import { installErrorTransform } from './axios_middleware/transform_error'
+import { installLogging } from './axios_middleware/logging'
 
 // initialized with an export for testing purposes
 export const _create = (): AxiosInstance => {
@@ -24,9 +24,8 @@ export const _create = (): AxiosInstance => {
     },
   })
 
-  instance.interceptors.request.use(logRequest)
-  instance.interceptors.response.use(logResponse, logResponseErr)
-  instance.interceptors.response.use(undefined, transformError)
+  installLogging(instance)
+  installErrorTransform(instance)
 
   return instance
 }

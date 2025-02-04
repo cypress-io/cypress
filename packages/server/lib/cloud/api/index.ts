@@ -25,7 +25,7 @@ import type { ProjectBase } from '../../project-base'
 import type { AfterSpecDurations } from '@packages/types'
 
 import { createInstance } from './create_instance'
-import { transformError } from './transform_error'
+import { transformError } from './axios_middleware/transform_error'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')

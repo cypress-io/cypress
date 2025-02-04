@@ -1,5 +1,5 @@
 import { isObject } from 'lodash'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosInstance } from 'axios'
 
 declare module 'axios' {
   export interface AxiosError {
@@ -21,4 +21,8 @@ export const transformError = (err: AxiosError | Error & { error?: any, statusCo
   err.isApiError = true
 
   throw err
+}
+
+export const installErrorTransform = (axios: AxiosInstance) => {
+  axios.interceptors.response.use(undefined, transformError)
 }

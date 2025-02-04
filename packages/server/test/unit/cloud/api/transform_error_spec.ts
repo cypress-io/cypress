@@ -1,6 +1,7 @@
 import { expect } from 'chai'
-import { transformError } from '../../../../lib/cloud/api/transform_error'
-import { AxiosError, AxiosResponse } from 'axios'
+import { installErrorTransform } from '../../../../lib/cloud/api/axios_middleware/transform_error'
+import { AxiosError, AxiosResponse, AxiosInstance } from 'axios'
+import sinon, { SinonSpy } from 'sinon'
 
 describe('transformError', () => {
   const status = 400
@@ -9,6 +10,31 @@ describe('transformError', () => {
   "message": "this is an error message"
 }`
   const originalMessage = 'an error occurred'
+  let transformError: (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }) => never
+
+  beforeEach(() => {
+    const mockAxiosInstance: Partial<AxiosInstance> = {
+      interceptors: {
+        response: {
+          use: sinon.spy(),
+          eject: sinon.spy(),
+          clear: sinon.spy(),
+        },
+        request: {
+          use: sinon.spy(),
+          eject: sinon.spy(),
+          clear: sinon.spy(),
+        },
+      },
+    }
+
+    // @ts-expect-error
+    installErrorTransform(mockAxiosInstance)
+
+    const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as SinonSpy).firstCall.args
+
+    transformError = secondArg
+  })
 
   describe('when it receives an axios error', () => {
     let err: AxiosError

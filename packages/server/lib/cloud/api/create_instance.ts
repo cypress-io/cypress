@@ -22,13 +22,15 @@ type CreateInstanceRequestData = {
   }
 }
 
-export const createInstance = async (runId: string, instanceData: CreateInstanceRequestData, timeout: number = 0): Promise<CreateInstanceResponse> => {
-  return (await CloudRequest.post(`/runs/${runId}/instances`, instanceData, {
+export const createInstance = async (runId: string, instanceData: CreateInstanceRequestData, timeout: number = 0) => {
+  const { data } = await CloudRequest.post<CreateInstanceResponse>(`/runs/${runId}/instances`, instanceData, {
     headers: {
       'x-route-version': '5',
       'x-cypress-run-id': runId,
       'x-cypress-request-attempt': '0',
     },
     timeout,
-  })).data
+  })
+
+  return data
 }

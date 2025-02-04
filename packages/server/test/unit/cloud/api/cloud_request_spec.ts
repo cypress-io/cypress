@@ -8,7 +8,7 @@ import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
 import { logRequest, logResponseErr, logResponse } from '../../../../lib/cloud/api/log_requests'
-import { transformError } from '../../../../lib/cloud/api/transform_error'
+import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 
 chai.use(sinonChai)
 
