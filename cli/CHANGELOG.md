@@ -10,6 +10,10 @@ _Released 2/11/2025 (PENDING)_
 - Fixed an issue in Cypress [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where privileged commands did not run correctly when a spec file or support file contained characters that required encoding. Fixes [#30933](https://github.com/cypress-io/cypress/issues/30933).
 - Re-enabled retrying Cloud instance creation for runs that are parallel or recorded. Fixes [#31002](https://github.com/cypress-io/cypress/issues/31002).
 
+**Misc:**
+
+- Updated the mismatched dependencies warning message to be neutral, avoiding assumptions about upgrading or downgrading. Fixes [#30990](https://github.com/cypress-io/cypress/issues/30990).
+
 **Dependency Updates:**
 
 - Upgraded `mime` from `2.6.0` to `3.0.0`. Addressed in [#30966](https://github.com/cypress-io/cypress/pull/30966).
