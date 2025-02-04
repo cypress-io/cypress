@@ -8,6 +8,7 @@ _Released 2/11/2025 (PENDING)_
 - Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where error codeframes in the runner UI were not populated with the correct data in failed retry attempts. Fixes [#30927](https://github.com/cypress-io/cypress/issues/30927).
 - All commands performed in `after` and `afterEach` hooks will now correctly retry when a test fails. Commands that are actions like `.click()` and `.type()` will now perform the action in this situation also. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
 - Fixed an issue in Cypress [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where privileged commands did not run correctly when a spec file or support file contained characters that required encoding. Fixes [#30933](https://github.com/cypress-io/cypress/issues/30933).
+- Re-enabled retrying Cloud instance creation for runs that are parallel or recorded. Fixes [#31002](https://github.com/cypress-io/cypress/issues/31002).
 
 **Dependency Updates:**
 
