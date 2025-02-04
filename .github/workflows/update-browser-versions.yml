@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: develop
+      # TODO: rebase this out
+      BASE_BRANCH: chore/source_browser_version
     # Prevent from running this workflow on forks
     if: github.repository == 'cypress-io/cypress'
     steps:
