@@ -5,7 +5,8 @@
     "types": [
       "node",
       "cypress",
-      "cypress-real-events"
+      "cypress-real-events",
+      "react"
     ], /* Type declaration files to be included in compilation. */
     "importsNotUsedAsValues": "remove",
     "lib": ["DOM"]

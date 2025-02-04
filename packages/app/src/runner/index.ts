@@ -100,9 +100,6 @@ function createIframeModel () {
     autIframe.highlightEl,
     autIframe.doesAUTMatchTopSuperDomainOrigin,
     getEventManager(),
-    {
-      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
-    },
   )
 
   iframeModel.listen()
@@ -185,8 +182,6 @@ function teardownSpec (isRerun: boolean = false) {
   return getEventManager().teardown(getMobxRunnerStore(), isRerun)
 }
 
-let isTorndown = false
-
 /**
  * Called when navigating away from the runner page.
  * This will teardown the reporter, event manager, and
@@ -198,7 +193,6 @@ export async function teardown () {
   _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
-  isTorndown = true
 }
 
 /**
@@ -292,7 +286,7 @@ function setSpecForDriver (spec: SpecFile) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (config, spec: SpecFile) {
+async function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -315,7 +309,7 @@ function runSpecE2E (config, spec: SpecFile) {
     el.remove()
   })
 
-  autIframe.visitBlankPage()
+  await autIframe.visitBlankPage()
 
   // create Spec IFrame
   const specSrc = getSpecUrl({
@@ -353,13 +347,7 @@ function runSpecE2E (config, spec: SpecFile) {
 async function initialize () {
   await dfd.promise
 
-  isTorndown = false
-
   const config = getRunnerConfigFromWindow()
-
-  if (isTorndown) {
-    return
-  }
 
   // Reset stores
   const autStore = useAutStore()
@@ -445,8 +433,8 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    if (config.experimentalJustInTimeCompile && !config.isTextTerminal) {
-      // If running with experimentalJustInTimeCompile enabled and in open mode,
+    if (config.justInTimeCompile && !config.isTextTerminal) {
+      // If running with justInTimeCompile enabled and in open mode,
       // send a signal to the dev server to load the spec before running
       // since the spec and related resources are not yet compiled.
       await updateDevServerWithSpec(spec)

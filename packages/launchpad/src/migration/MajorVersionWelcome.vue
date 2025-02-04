@@ -31,65 +31,29 @@
               {{ t('majorVersionWelcome.title') }}
             </h1>
 
-            <div
-              v-if="slots['video']"
-              class="border-transparent rounded mb-6 bg-gray-50/50 border-4px text-center max-w-80vw w-688px overflow-hidden"
-            >
-              <div
-                class="bg-white rounded-t border-4px-gray-500 w-full p-24px"
-                data-cy="video-container"
-              >
-                <slot name="video" />
-              </div>
-            </div>
-
             <div class="mb-[16px]">
               <ExternalLink
-                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"
+                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v14#14-0-0"
                 class="font-bold text-indigo-500"
               >
-                13.0.0
+                14.0.0
               </ExternalLink>
               <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['13'] }}
+                Released {{ versionReleaseDates['14'] }}
               </span>
             </div>
             <div class="children:mb-[16px]">
               <p>
-                For a complete list of updates please review our
-                <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
+                We’ve improved performance of component testing and added support for new framework and dev server versions.
+              </p>
+              <p>
+                This release also includes breaking changes to <InlineCodeFragment>cy.origin</InlineCodeFragment> that are necessary to handle
+                Chrome’s deprecation of <InlineCodeFragment>document.domain</InlineCodeFragment>, which should fix issues for some users in recent Chrome versions. Support for older versions of Node.js, Linux distributions, browsers and component testing frameworks and dev servers is also removed.
+              </p>
+              <p>
+                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v14#14-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>. To take a deep-dive into this release, read our <ExternalLink href="https://on.cypress.io/cypress-13-release?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  blog post</ExternalLink>.
-              </p>
-
-              <h2 class="font-bold text-[18px] text-jade-1000">
-                Test Replay
-              </h2>
-
-              <p>
-                Test Replay brings the debugging experience you know and love from the Cypress app directly into your recorded tests in Cypress Cloud. Previously, trying to debug failures and flake in CI was painful and time consuming with only videos & screenshots. Test Replay provides a way to inspect the DOM, network events, and console logs of your application from your tests exactly as they ran in CI.
-              </p>
-
-              <p>
-                Test Replay is available in all Cypress Cloud plans. To start using Test Replay, simply record a run to Cypress Cloud. Learn more in our <ExternalLink href="https://on.cypress.io/test-replay?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  documentation</ExternalLink>.
-              </p>
-
-              <h2 class="font-bold mt-[24px] mb-[16px] text-[18px] text-jade-1000">
-                Changes to video defaults
-              </h2>
-
-              <p>
-                <InlineCodeFragment>video</InlineCodeFragment> and <InlineCodeFragment>videoCompression</InlineCodeFragment> are now set to <InlineCodeFragment>false</InlineCodeFragment> by default. Recording and compressing videos can be resource intensive, often impacting the duration of tests running in CI. Test Replay now serves as the primary replacement for debugging via video. We’ve changed these video options to be opt-in so you can configure recording video based on your needs.
-              </p>
-
-              <p>
-                The <InlineCodeFragment>shouldUploadVideoOnPass</InlineCodeFragment> option is no longer available. This option was mostly used to skip video compression for unused videos which is now skipped by default. If you want to control which videos are saved locally or uploaded to Cypress Cloud, see our <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
-                  documentation
-                </ExternalLink> for our recommended workaround.
+                  changelog</ExternalLink>.
               </p>
             </div>
           </div>
@@ -101,6 +65,29 @@
             <h2 class="font-bold mt-[24px] mb-[12px] text-[14px] text-gray-600">
               Previous release highlights
             </h2>
+            <div class="pb-[8px]">
+              <ExternalLink
+                href="https://on.cypress.io/changelog#13-0-0"
+                class="font-bold text-indigo-500"
+              >
+                13.0.0
+              </ExternalLink>
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
+                Released {{ versionReleaseDates['13'] }}
+              </span>
+            </div>
+            <p class="text-[14px] leading-[20px]">
+              We introduced <ExternalLink href="https://on.cypress.io/test-replay?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                Test Replay </ExternalLink> and made changes to default values for video configuration.
+              <br>
+              <br>
+              Read about the v13.0.0 changes in our
+              <ExternalLink href="https://on.cypress.io/cypress-13-release">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
+            </p>
+            <br>
             <div class="pb-[8px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#12-0-0"
@@ -201,7 +188,7 @@ import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
-import { computed, ref, useSlots } from 'vue'
+import { computed, ref } from 'vue'
 
 const { t } = useI18n()
 
@@ -209,7 +196,6 @@ const scroller = ref<HTMLElement | null>(null)
 const wrapper = ref<HTMLElement | null>(null)
 const { arrivedState, y: scrollerY } = useScroll(scroller)
 const { height: wrapperHeight } = useElementSize(wrapper)
-const slots = useSlots()
 
 const emit = defineEmits<{
   (eventName: 'clearLandingPage', value: void): void
@@ -226,6 +212,7 @@ const versionReleaseDates = computed(() => {
     '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
     '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
+    '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
   }
 })
 

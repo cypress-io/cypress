@@ -1,6 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
@@ -58,8 +58,8 @@ describe('Launchpad: Open Mode', () => {
         o.sinon.spy(ctx.util.fetch)
       })
 
-      cy.withCtx((ctx, o) => {
-        ctx.config.localSettingsApi.setPreferences({
+      cy.withCtx(async (ctx, o) => {
+        await ctx.config.localSettingsApi.setPreferences({
           notifyWhenRunCompletes: ['failed'],
         })
       })
@@ -231,7 +231,7 @@ describe('Launchpad: Open Mode', () => {
           [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
         } })
       }, {
-        MAJOR_VERSION_FOR_CONTENT,
+        MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
       })
 
       cy.scaffoldProject('launchpad')

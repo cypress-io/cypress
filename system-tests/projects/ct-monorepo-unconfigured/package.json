@@ -1,9 +1,7 @@
 {
   "name": "ct-monorepo-unconfigured",
-  "version": "1.0.0",
+  "version": "0.0.0-test",
   "private": true,
-  "main": "index.js",
-  "license": "MIT",
   "workspaces": [
     "packages/*"
   ]

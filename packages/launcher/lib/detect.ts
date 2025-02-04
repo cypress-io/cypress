@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
-import { knownBrowsers, validateMinVersion } from './known-browsers'
+import { knownBrowsers } from './known-browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
@@ -35,9 +35,11 @@ export const getMajorVersion = (version: string): string => {
 // unsupported, the browser will be unavailable for selection and
 // will present the determined warning message to the user.
 const validateCypressSupport = (validator: BrowserValidator | undefined, browser: FoundBrowser, platform: NodeJS.Platform) => {
-  // If no validator parameter is provided, we fall back to validating against
-  // the browser's minimum supported version
-  const { isSupported, warningMessage } = (validator || validateMinVersion)(browser, platform)
+  if (!validator) {
+    return
+  }
+
+  const { isSupported, warningMessage } = validator(browser, platform)
 
   if (isSupported) {
     return
@@ -116,7 +118,6 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     'custom',
     'warning',
     'info',
-    'minSupportedVersion',
     'unsupportedVersion',
   ] as const
 

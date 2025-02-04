@@ -17,25 +17,26 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@types/semver": "7.5.0",
-    "@vitejs/plugin-react": "4.3.0",
-    "axios": "0.21.2",
+    "@types/semver": "7.5.8",
+    "@vitejs/plugin-react": "4.3.3",
+    "axios": "1.7.7",
     "cypress": "0.0.0-development",
-    "prop-types": "15.7.2",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-router": "6.10.0",
-    "react-router-dom": "6.10.0",
+    "prop-types": "15.8.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router": "6.28.0",
+    "react-router-dom": "6.28.0",
     "semver": "^7.5.3",
     "typescript": "~5.4.5",
-    "vite": "5.2.11",
+    "vite": "5.4.10",
     "vite-plugin-require-transform": "1.0.12"
   },
   "peerDependencies": {
-    "@types/react": "^16.9.16 || ^17.0.0",
+    "@types/react": "^18 || ^19",
+    "@types/react-dom": "^18 || ^19",
     "cypress": "*",
-    "react": "^=16.x || ^=17.x",
-    "react-dom": "^=16.x || ^=17.x"
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
   },
   "files": [
     "dist"
@@ -90,9 +91,6 @@
   "nx": {
     "targets": {
       "build": {
-        "dependsOn": [
-          "!@cypress/react18:build"
-        ],
         "outputs": [
           "{workspaceRoot}/cli/react",
           "{projectRoot}/dist"

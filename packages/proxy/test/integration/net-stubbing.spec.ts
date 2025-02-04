@@ -9,11 +9,10 @@ import express from 'express'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import supertest from 'supertest'
-import { allowDestroy } from '@packages/network'
+import { allowDestroy, DocumentDomainInjection } from '@packages/network'
 import { EventEmitter } from 'events'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
@@ -26,13 +25,27 @@ context('network stubbing', () => {
   let server
   let destinationPort
   let socket
+  let documentDomainInjection: DocumentDomainInjection
+
+  const serverPort = 3030
+  const fileServerPort = 3030
+
+  const remoteStateConfig = () => {
+    return { server: serverPort, fileServer: fileServerPort }
+  }
+
+  const createRemoteStates = () => {
+    return new RemoteStates(remoteStateConfig, documentDomainInjection)
+  }
 
   beforeEach((done) => {
     config = {
       experimentalCspAllowList: false,
     }
 
-    remoteStates = new RemoteStates(() => {})
+    documentDomainInjection = DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain: false, testingType: 'e2e' })
+
+    remoteStates = createRemoteStates()
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()

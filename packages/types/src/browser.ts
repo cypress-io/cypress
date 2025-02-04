@@ -43,8 +43,6 @@ export type Browser = {
   binary: string | string[]
   /** optional warning that will be shown in the GUI */
   warning?: string
-  /** if set, the majorVersion must be >= this to be run in Cypress */
-  minSupportedVersion?: number
   /** if set, is called to determine if found browser is supported by Cypress */
   validator?: BrowserValidator
 }

@@ -5,14 +5,14 @@ const {
 describe('driver/src/cy/net-stubbing/static-response-utils', () => {
   describe('.getBackendStaticResponse', () => {
     describe('delay', () => {
-      it('does not set delay when delayMS is not provided', () => {
+      it('does not set delay when delay is not provided', () => {
         const staticResponse = getBackendStaticResponse({})
 
         expect(staticResponse).to.not.have.property('delay')
       })
 
       it('sets delay', () => {
-        const staticResponse = getBackendStaticResponse({ delayMs: 200 })
+        const staticResponse = getBackendStaticResponse({ delay: 200 })
 
         expect(staticResponse).to.have.property('delay', 200)
       })

@@ -1,9 +1,11 @@
 import ButtonCounter from './ButtonCounter.vue'
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
 /* eslint-env mocha */
 describe('ButtonCounter', () => {
-  beforeEach(mountCallback(ButtonCounter))
+  beforeEach(() => {
+    mount(ButtonCounter)
+  })
 
   it('starts with zero', () => {
     cy.contains('button', '0')

@@ -362,48 +362,41 @@ describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
         expect(iframe.src).to.equal(expectedSrc)
       })
     })
-
-    it('succeeds if url is the super domain as top but the super domain is excepted and must be strictly same origin', () => {
-      // Intercept google to keep our tests independent from google.
-      cy.intercept('https://www.google.com', {
-        body: '<html><head><title></title></head><body><p></body></html>',
-      })
-
-      cy.visit('https://www.google.com')
-      cy.origin('accounts.google.com', () => undefined)
-      cy.then(() => {
-        const expectedSrc = `https://accounts.google.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://accounts.google.com') as HTMLIFrameElement
-
-        expect(iframe.src).to.equal(expectedSrc)
-      })
-    })
   })
 
   describe('errors', () => {
-    it('errors if the url param is same superDomainOrigin as top', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different domain than top. You passed `http://app.foobar.com` to the origin command, while top is at `http://www.foobar.com`.')
+    /*
+     * this errors in different contexts depending on 'injectDocumentDomain'.
+     * If this is true, it should error based on superdomain. If it is false,
+     * it should error based on origin.
+     */
+    if (Cypress.config('injectDocumentDomain')) {
+      it('When injecting document.domain, it fails on the same superdomain as top', (done) => {
+      // Intercept google to keep our tests independent from google.
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('When `injectDocumentDomain` is configured to true')
+          expect(err.message).to.include('`cy.origin()` requires the first argument to be a different superdomain than top.')
+          expect(err.message).to.include('www.google.com')
+          expect(err.message).to.include('accounts.google.com')
+          done()
+        })
 
-        done()
+        cy.intercept('https://www.google.com', {
+          body: '<html><head><title></title></head><body><p></body></html>',
+        })
+
+        cy.visit('https://www.google.com')
+        cy.origin('accounts.google.com', () => undefined)
       })
-
-      cy.intercept('http://www.foobar.com', {
-        body: '<html><head><title></title></head><body><p></body></html>',
-      })
-
-      cy.intercept('http://app.foobar.com', {
-        body: '<html><head><title></title></head><body><p></body></html>',
-      })
-
-      cy.visit('http://www.foobar.com')
-
-      cy.origin('http://app.foobar.com', () => undefined)
-    })
+    }
 
     it('errors if the url param is same origin as top', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different origin than top. You passed `https://www.google.com` to the origin command, while top is at `https://www.google.com`.')
+        const expectedHostnameCategory = Cypress.config('injectDocumentDomain') ?
+          'superdomain' : 'origin'
+
+        expect(err.message).to.include(`\`cy.origin()\` requires the first argument to be a different ${expectedHostnameCategory} than top.`)
+        expect(err.message).to.include('https://www.google.com')
 
         done()
       })

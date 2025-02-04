@@ -11,7 +11,6 @@ import * as linuxHelper from '../../lib/linux'
 import * as darwinHelper from '../../lib/darwin'
 import * as windowsHelper from '../../lib/windows'
 import type { Browser } from '@packages/types'
-import * as knownBrowsers from '../../lib/known-browsers'
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -63,7 +62,6 @@ describe('detect', () => {
       family: 'chromium',
       channel: 'test-channel',
       displayName: 'Test Browser',
-      minSupportedVersion: 1,
       versionRegex: /Test Browser (\S+)/m,
       binary: 'test-browser-beta',
     }
@@ -73,7 +71,7 @@ describe('detect', () => {
         return Promise.resolve({
           name: browser.name,
           path: '/path/to/test-browser',
-          version: `${browser.minSupportedVersion}`,
+          version: '130',
         })
       })
 
@@ -87,37 +85,9 @@ describe('detect', () => {
 
       expect(foundTestBrowser.name).to.eq('test-browser')
       expect(foundTestBrowser.displayName).to.eq('Test Browser')
-      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
+      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('130')
       expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.undefined
       expect(foundTestBrowser.warning, 'warning').to.be.undefined
-      expect(mockValidator).to.have.been.called
-    })
-
-    it('validates browser with default minVersionValidator', async () => {
-      stubHelpers((browser) => {
-        return Promise.resolve({
-          name: browser.name,
-          path: '/path/to/test-browser',
-          version: `${browser.minSupportedVersion}`,
-        })
-      })
-
-      const mockValidator = sinon.stub(knownBrowsers, 'validateMinVersion').returns({
-        isSupported: false,
-        warningMessage: 'This is a bad version',
-      })
-
-      const foundBrowsers = await detect([{ ...testBrowser as Browser }])
-
-      expect(foundBrowsers).to.have.length(1)
-
-      const foundTestBrowser = foundBrowsers[0]
-
-      expect(foundTestBrowser.name).to.eq('test-browser')
-      expect(foundTestBrowser.displayName).to.eq('Test Browser')
-      expect(foundTestBrowser.majorVersion, 'majorVersion').to.eq('1')
-      expect(foundTestBrowser.unsupportedVersion, 'unsupportedVersion').to.be.true
-      expect(foundTestBrowser.warning, 'warning').to.eq('This is a bad version')
       expect(mockValidator).to.have.been.called
     })
   })
@@ -199,17 +169,6 @@ describe('detect', () => {
           }),
         )
       })
-    })
-
-    it('creates warning when version is unsupported', async () => {
-      execa.withArgs('/good-firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 85.0' })
-
-      const foundBrowser = await detectByPath('/good-firefox')
-
-      expect(foundBrowser.unsupportedVersion).to.be.true
-      expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
-      .and.contain('Firefox newer than or equal to 86')
     })
   })
 })

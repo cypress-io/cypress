@@ -4,7 +4,7 @@ import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
-const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite4.5.5-react', 'vite5.4.10-react', 'vite6.0.0-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []

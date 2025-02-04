@@ -12,12 +12,12 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "svelte": "^3.49.0",
+    "svelte": "^5.4.0",
     "typescript": "~5.4.5"
   },
   "peerDependencies": {
     "cypress": ">=10.6.0",
-    "svelte": ">=3.0.0"
+    "svelte": ">=5.0.0"
   },
   "files": [
     "dist/**/*"

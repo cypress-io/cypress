@@ -277,21 +277,6 @@ describe('lib/browsers/index', () => {
       // this error is snapshotted in an e2e test, no need to do it here
       expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' })
     })
-
-    it('warns if array passed and changes it to args', () => {
-      const onWarning = sinon.stub()
-
-      const result = utils.extendLaunchOptionsFromPlugins({ args: [] }, ['foo'], { onWarning })
-
-      expect(result).to.deep.eq({
-        args: ['foo'],
-      })
-
-      // this error is snapshotted in e2e tests, no need to do it here
-      expect(onWarning).to.be.calledOnce
-
-      expect(onWarning).to.be.calledWithMatch({ type: 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS' })
-    })
   })
 
   context('.getMajorVersion', () => {

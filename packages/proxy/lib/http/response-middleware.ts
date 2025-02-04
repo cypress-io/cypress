@@ -6,8 +6,9 @@ import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
-import { concatStream, cors, httpUtils } from '@packages/network'
+import { concatStream, cors, httpUtils, DocumentDomainInjection } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { RemoteState } from '@packages/server/lib/remote_states'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
@@ -64,11 +65,12 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, skipDomainInjectionForDomains) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState: RemoteState, documentDomainInjection: DocumentDomainInjection) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props, {
-      skipDomainInjectionForDomains,
-    })
+    return documentDomainInjection.urlsMatch(
+      req.proxiedUrl,
+      remoteState.props || '',
+    )
   }
 
   if (remoteState.strategy === 'file') {
@@ -420,7 +422,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(
+    this.req,
+    this.remoteStates.current(),
+    DocumentDomainInjection.InjectionBehavior(this.config),
+  )
 
   span?.setAttributes({
     isInitialInjection: this.res.isInitial,
@@ -436,8 +442,14 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'partial'
     }
 
+    const documentDomainInjection = DocumentDomainInjection.InjectionBehavior(this.config)
+
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(
+      this.req,
+      this.remoteStates.getPrimary(),
+      documentDomainInjection,
+    )
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
@@ -832,9 +844,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
-      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
-        skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
-      }),
+      shouldInjectDocumentDomain: DocumentDomainInjection.InjectionBehavior(this.config).shouldInjectDocumentDomain(this.req.proxiedUrl),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,

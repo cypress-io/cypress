@@ -1,3 +1,21 @@
+# [@cypress/webpack-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.0.0...@cypress/webpack-dev-server-v4.0.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* add cypress 14 as a peer dependency for webpack-dev-server ([#30862](https://github.com/cypress-io/cypress/issues/30862)) ([a46c2dd](https://github.com/cypress-io/cypress/commit/a46c2dde8dc9778f2048fb5f67a74de2a9377b4b))
+
+# [@cypress/webpack-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.11.0...@cypress/webpack-dev-server-v4.0.0) (2025-01-08)
+
+
+### breaking
+
+* release version 4.0.0 of @cypress/webpack-dev-server. ([85da287](https://github.com/cypress-io/cypress/commit/85da2870fd722ea7f08c7cfc5708780415bddf2e))
+
+### BREAKING CHANGES
+
+* Cypress 14 drops support for webpack-dev-server 3. webpack/webpack-dev-server 4 and 5 are supported. @cypress/webpack-dev-server now ships with webpack-dev-server v5 by default.
+
 # [@cypress/webpack-dev-server-v3.11.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.10.1...@cypress/webpack-dev-server-v3.11.0) (2024-08-27)
 
 

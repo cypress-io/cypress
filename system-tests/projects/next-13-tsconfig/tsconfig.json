@@ -1,9 +1,0 @@
-// This is to test a bug in Next.js 13.2.1 where TS/JS config is not respected
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "*": ["styles/*"]
-    }
-  }
-}

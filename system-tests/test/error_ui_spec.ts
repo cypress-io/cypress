@@ -20,7 +20,6 @@ describe('e2e error ui', function () {
     'webpack-preprocessor',
     'webpack-preprocessor-ts-loader',
     'webpack-preprocessor-ts-loader-compiler-options',
-    'webpack-preprocessor-awesome-typescript-loader',
   ]
   .forEach((project) => {
     systemTests.it(`handles sourcemaps in webpack for project: ${project}`, {

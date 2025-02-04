@@ -4,12 +4,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "lib": ["esnext", "DOM"],
-    "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "noUnusedLocals": false,
     "noUncheckedIndexedAccess": true,
     "types": ["cypress"],
   }

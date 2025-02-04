@@ -182,17 +182,14 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
-  | [angular signals](./npm/angular-signals)                               | `@cypress/angular-signals`                   | Cypress component testing for Angular 17/18 including support for signals.     |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
  | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
- | [react18](./npm/react18)                               | `@cypress/react18`                   | Cypress component testing for React 18.           |
  | [schematic](./npm/cypress-schematic)                   | `@cypress/schematic`            | Official Angular Schematic and Builder for the Angular CLI.|
  | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
  | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
- | [vue2](./npm/vue2)                                       | `@cypress/vue2`                     | Cypress component testing for Vue 2.               |
  | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript.  |
  | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
@@ -204,37 +201,20 @@ We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate 
 You must have the following installed on your system to contribute locally:
 
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
-- [`yarn`](https://yarnpkg.com/en/docs/install)
-- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements. Use Python `3.11` or lower.)
+- [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install). If you have [`Node.js`](https://nodejs.org/en/) experimental [corepack](https://nodejs.org/docs/latest/api/corepack.html) enabled, installation of the Yarn package manager will be handled automatically. Attempting to install Yarn globally with npm will fail if [corepack](https://nodejs.org/docs/latest/api/corepack.html) is enabled.
+- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 
 #### Debian/Ubuntu
 
 `sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The Python versions shipped with Ubuntu versions `20.04` and `22.04` are compatible with Cypress requirements.
+The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
 
-Only on Ubuntu `24.04` install Python `3.11` by executing the following commands:
-
-```shell
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install python3.11
-```
-
-Add the environment variable `NODE_GYP_FORCE_PYTHON` to `~/.bashrc`:
-
-```shell
-export NODE_GYP_FORCE_PYTHON=/usr/bin/python3.11
-```
-
-> [!IMPORTANT]
-> The above steps to install an earlier version of Python are currently not available for the interim release Ubuntu `24.10`. The highest compatible Ubuntu version for rebuilding Cypress from source error-free is currently Ubuntu `24.04`.
-
-For Ubuntu `24.04` refer also to the [Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section [Unprivileged user namespace restrictions](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890#unprivileged-user-namespace-restrictions-15) and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on this version of Ubuntu after building Cypress from source.
+For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section "Unprivileged user namespace restrictions" and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on these versions of Ubuntu after building Cypress from source.
 
 #### Windows
 
-When installing the Visual Studio C++ environment recommended by [node-gyp](https://github.com/nodejs/node-gyp), install also a Windows 10 SDK. The currently used version of `node-gyp` may otherwise fail to recognise the Visual Studio installation.
+Currently no additional instructions for installation requirements.
 
 ### Getting Started
 

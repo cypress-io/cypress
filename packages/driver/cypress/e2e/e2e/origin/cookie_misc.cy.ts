@@ -1,3 +1,5 @@
+import { makeRequestForCookieBehaviorTests as makeRequest } from '../../../support/utils'
+
 // FIXME: currently cookies aren't cleared properly in headless mode with webkit between tests, as the below tests (excluding cy.origin) pass headfully locally.
 describe('misc cookie tests', { browser: '!webkit' }, () => {
   // NOTE: For this test to work correctly, we need to have a FQDN, not localhost (www.foobar.com).
@@ -201,6 +203,58 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
           })
 
           cy.getCookie('foo').should('eq', null)
+        })
+      })
+    })
+  })
+
+  describe('Same-Site Cross-Origin cookie behavior', () => {
+    const cookie = 'foo1=bar2'
+    const site = 'foobar.com'
+    const hostnameA = `www.${site}:3500`
+    const hostnameB = `app.${site}:3500`
+
+    beforeEach(() => {
+      cy.intercept(`http://${hostnameA}/test-request`, (req) => {
+        req.reply({
+          statusCode: 200,
+        })
+      }).as('cookiedRequest')
+    })
+
+    it('attaches cookies to proxied requests in a same-site cross-origin context', () => {
+      // 1. visits www.foobar.com:3500: The AUT and top are the same-origin
+      cy.visit(`http://${hostnameA}`).then(() => {
+        // 2. set a cookie via Set-Cookie Response header. Since top and AUT are the same-origin, this works
+        // @ts-expect-error
+        cy.wrap(makeRequest(window.top, `http://${hostnameA}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
+      })
+
+      // 3. navigate the AUT to app.foobar.com:3500. Now AUT and top are same-site, but cross-origin.
+      // in an actual browser, the AUT and top would both be app.foobar.com:3500 and would be same-origin
+      cy.visit(`http://${hostnameB}`).then(() => {
+        // 4. set a cookie via Set-Cookie Response header. This FAILS in Cypress <= 13 here because the AUT is cross-origin to top,
+        // but WOULD PASS in an actual browser because AUT and top would both be same-origin.
+
+        // This also does NOT get simulated in Cypress <= 13 because the simulation conditions in the Cypress middleware check
+        // for same super domain origin and not same origin in Cypress <= 13, so the cookies are NOT simulated.
+        // In Cypress 14, we are changing this to check for same origin for simulation conditions, which will allow this cookie
+        // to be set and correctly simulate the AUT as top.
+        // @ts-expect-error
+        cy.wrap(makeRequest(window.top, `http://${hostnameB}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
+      })
+
+      // 5. mock a navigation back to the first domain (this isn't necessary but makes the test cleaner) now AUT and top are same-origin
+      cy.visit(`http://${hostnameA}`).then(() => {
+        // @ts-expect-error
+        cy.wrap(makeRequest(window.top, `http://${hostnameA}/test-request`, 'fetch'))
+
+        cy.wait('@cookiedRequest').then(({ request }) => {
+          // in Cypress <= 13, this should be (which is wrong)
+          // expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+          // in Cypress 14, this should be (which is correct)
+          expect(request.headers.cookie).to.equal(cookie)
         })
       })
     })

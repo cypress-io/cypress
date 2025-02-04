@@ -3,12 +3,9 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
 const WEBPACK_ANGULAR: ProjectFixtureDir[] = [
-  'angular-13',
-  'angular-14',
-  'angular-15',
-  'angular-16',
   'angular-17',
   'angular-18',
+  'angular-19',
 ]
 
 // Add to this list to focus on a particular permutation
@@ -26,22 +23,20 @@ for (const project of WEBPACK_ANGULAR) {
     })
 
     describe('configuration handling', () => {
-      if (!['angular-13', 'angular-14'].includes(project)) {
-        it('should initialize with unsupported browserslist entries', () => {
-          // Create .browerslistrc that requests support for ES5
-          // Support was dropped in Angular CLI v15 so this should generate a warning message in that version and beyond
-          cy.withCtx(async (ctx) => {
-            await ctx.actions.file.writeFileInProject(
-              ctx.path.resolve('.browserslistrc'),
-              'IE 11',
-            )
-          })
-
-          cy.startAppServer('component')
-          cy.visitApp()
-          cy.specsPageIsVisible()
+      it('should initialize with unsupported browserslist entries', () => {
+        // Create .browerslistrc that requests support for ES5
+        // Support was dropped in Angular CLI v15 so this should generate a warning message in that version and beyond
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject(
+            ctx.path.resolve('.browserslistrc'),
+            'IE 11',
+          )
         })
-      }
+
+        cy.startAppServer('component')
+        cy.visitApp()
+        cy.specsPageIsVisible()
+      })
     })
 
     describe('test behaviors', () => {

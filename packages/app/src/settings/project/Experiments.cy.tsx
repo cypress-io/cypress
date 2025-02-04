@@ -1,5 +1,5 @@
 import { ExperimentsFragmentDoc } from '../../generated/graphql-test'
-import config from '../../../../frontend-shared/cypress/fixtures/config.json'
+import config from '@packages/frontend-shared/cypress/fixtures/config.json'
 import Experiments from './Experiments.vue'
 import { defaultMessages } from '@cy/i18n'
 

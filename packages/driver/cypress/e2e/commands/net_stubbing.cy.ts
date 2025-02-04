@@ -26,6 +26,9 @@ describe('network stubbing', { retries: 15 }, function () {
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+    // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+    // to ensure that we have a valid origin for our tests.
+    cy.visit('/fixtures/empty.html')
   })
 
   context('cy.intercept()', function () {
@@ -936,13 +939,24 @@ describe('network stubbing', { retries: 15 }, function () {
     // @see https://github.com/cypress-io/cypress/issues/8497
     it('can load transfer-encoding: chunked redirects', function () {
       cy.intercept('*')
-      const url4 = 'http://localhost:3501/fixtures/generic.html'
-      const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
-      const url2 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url3)}`
-      const url1 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+      const originOne = 'http://foobar.com:3500'
+      const originTwo = Cypress.config('injectDocumentDomain') ? 'http://localhost:3501' : 'http://foobar.com:3501'
 
-      cy.visit(url1)
-      .location('href').should('eq', url4)
+      const url4 = `${originTwo}/fixtures/generic.html`
+      const url3 = `${originTwo}/redirect?href=${encodeURIComponent(url4)}`
+      const url2 = `${originOne}/redirect?chunked=1&href=${encodeURIComponent(url3)}`
+      const url1 = `${originOne}/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+
+      cy.visit(`${originOne}/fixtures/empty.html`)
+
+      cy.visit(url1).as('redirect')
+      if (Cypress.config('injectDocumentDomain')) {
+        cy.location('href').should('eq', url4)
+      } else {
+        cy.origin('http://foobar.com:3501', { args: [url4] }, ([url4]) => {
+          cy.location('href').should('eq', url4)
+        })
+      }
     })
 
     context('can intercept against any domain', function () {
@@ -1694,23 +1708,6 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23404
-    it('can delay with deprecated delayMs param', { retries: 15 }, function () {
-      const delayMs = 250
-
-      cy.intercept('/timeout*', (req) => {
-        this.start = Date.now()
-
-        req.reply({
-          delayMs,
-        })
-      }).then(() => {
-        return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(delayMs + 100, 100)
-        })
-      })
-    })
-
     // @see https://github.com/cypress-io/cypress/issues/14446
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23406
     it('should delay the same amount on every response', { retries: 15 }, () => {
@@ -1749,6 +1746,7 @@ describe('network stubbing', { retries: 15 }, function () {
       }).as('create')
 
       cy.then(() => {
+        // tslint:disable:no-floating-promises
         fetch('/post-only', {
           method: 'POST', // *GET, POST, PUT, DELETE, etc.
         })

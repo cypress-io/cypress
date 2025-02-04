@@ -1,6 +1,6 @@
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import { useAutStore } from '../store'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { cyGeneralGlobeX16, cyBrowserChromeX16 } from '@cypress-design/icon-registry'
 
 const browser = {
   displayName: 'Chrome',
@@ -70,7 +70,7 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.mount(<SpecRunnerHeaderRunMode />)
 
-      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.Chrome)
+      cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyBrowserChromeX16.data)
       cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     })
   })
@@ -86,7 +86,7 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.mount(<SpecRunnerHeaderRunMode />)
 
-      cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
+      cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
       cy.get('[data-cy="select-browser"] > button').should('be.disabled')
     })
   })

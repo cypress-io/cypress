@@ -944,7 +944,7 @@ export default {
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
         ${isSkipDomainInjectionEnabled ? `
-        If \`experimentalSkipDomainInjection\` is enabled for this domain, a ${cmd('origin')} command is required.
+        Unless \`injectDocumentDomain\` is disabled, a ${cmd('origin')} command is required.
         ` : ''}
         Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 
@@ -1011,42 +1011,6 @@ export default {
         'full instructions for doing so at the following location.',
       ].join('\n'),
       docsUrl: 'https://on.cypress.io/mount',
-    },
-    removed_style_mounting_options (key: string) {
-      return {
-        message: `The \`${key}\` mounting option is no longer supported.`,
-        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-      }
-    },
-    cleanup_styles: {
-      message: `\`cleanupStyles\` is no longer supported.`,
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    inject_styles_before_element: {
-      message: `\`injectStylesBeforeElement\` is no longer supported.`,
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    mount_hook: {
-      message: `\`mountHook\` is no longer supported.`,
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    unmount: {
-      message: `\`unmount\` is no longer supported.`,
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    mount_callback: {
-      message: `\`mountCallback\` is no longer supported.`,
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    vue_yielded_value: {
-      message: 'As of Cypress 11, mount now yields an object with VueWrapper and the component as properties. Destructure using `{ wrapper, component }` to access the VueWrapper and component.',
-      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-    },
-    alias (alias: string) {
-      return {
-        message: `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${alias}') instead.`,
-        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
-      }
     },
   },
 
@@ -1219,8 +1183,11 @@ export default {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
     invalid_url_argument_same_origin ({ originUrl, topOrigin, policy }) {
+      const useSuperdomainLanguage = policy === 'same-super-domain-origin'
+      const hostnameCategory = useSuperdomainLanguage ? 'superdomain' : 'origin'
+
       return stripIndent`\
-      ${cmd('origin')} requires the first argument to be a different ${policy === 'same-origin' ? 'origin' : 'domain' } than top. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
+      ${useSuperdomainLanguage ? 'When `injectDocumentDomain` is configured to true, ' : ''}${cmd('origin')} requires the first argument to be a different ${hostnameCategory} than top. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
 
       Either the intended page was not visited prior to running the cy.origin block or the cy.origin block may not be needed at all.
       `

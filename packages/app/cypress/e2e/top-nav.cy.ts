@@ -3,6 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import type Sinon from 'sinon'
 import { dayjs } from '../../src/runs/utils/day'
+import { cyBrowserMozillaFirefoxX16, cyBrowserChromeX16 } from '@cypress-design/icon-registry'
 
 const pkg = require('@packages/root')
 
@@ -40,11 +41,11 @@ describe('App Top Nav Workflows', () => {
         cy.visitApp()
         cy.specsPageIsVisible()
 
-        cy.findByTestId('top-nav-active-browser-icon')
-        .should('have.attr', 'src')
-        .and('contain', 'firefox')
+        cy.findByTestId('top-nav-active-browser-icon').children()
+        .verifyBrowserIconSvg(cyBrowserMozillaFirefoxX16.data)
+        .get('title').should('contain', 'Firefox')
 
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 5')
+        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 6')
       })
     })
 
@@ -63,8 +64,9 @@ describe('App Top Nav Workflows', () => {
       })
 
       it('shows the current browser in the top nav browser list button', () => {
-        cy.findByTestId('top-nav-active-browser-icon')
-        .should('have.attr', 'src')
+        cy.findByTestId('top-nav-active-browser-icon').children()
+        .verifyBrowserIconSvg(cyBrowserChromeX16.data)
+        .get('title').should('contain', 'Chrome')
 
         cy.findByTestId('top-nav-active-browser').should('contain', 'Chrome 1')
       })
@@ -82,19 +84,19 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@browserItems').eq(1)
         .should('contain', 'Edge')
-        .and('contain', 'Version 8')
+        .and('contain', 'Version 9')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
         .should('contain', 'Electron')
-        .and('contain', 'Version 12')
+        .and('contain', 'Version 13')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(3)
         .should('contain', 'Firefox')
-        .and('contain', 'Version 5')
+        .and('contain', 'Version 6')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
       })

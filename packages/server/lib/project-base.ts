@@ -151,7 +151,7 @@ export class ProjectBase extends EE {
 
     process.chdir(this.projectRoot)
 
-    this._server = new ServerBase()
+    this._server = new ServerBase(cfg)
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,

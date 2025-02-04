@@ -70,18 +70,10 @@ declare namespace Cypress {
     strategy: 'file' | 'http'
     origin: string
     fileServer: string | null
-    props: Record<string, any>
-    visiting: string
+    props: Record<string, any> | null
   }
 
   interface Backend {
-    /**
-     * Firefox only: Force Cypress to run garbage collection routines.
-     * No-op if not running in Firefox.
-     *
-     * @see https://on.cypress.io/firefox-gc-issue
-     */
-    (task: 'firefox:force:gc'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
@@ -125,11 +117,7 @@ declare namespace Cypress {
      */
     warning?: string
     /**
-     * The minimum majorVersion of this browser supported by Cypress.
-     */
-    minSupportedVersion?: number
-    /**
-     * If `true`, this browser is too old to be supported by Cypress.
+     * If `true`, this browser version is not supported in Cypress.
      */
     unsupportedVersion?: boolean
   }
@@ -3114,24 +3102,16 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Disables setting document.domain to the applications super domain on injection.
-     * This experiment is to be used for sites that do not work with setting document.domain
-     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
-     * navigations, and will require the use of cy.origin(). This option takes an array of
-     * strings/string globs.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @see https://on.cypress.io/experiments#Experimental-Skip-Domain-Injection
-     * @default null
+     * Enables setting document.domain to the superdomain on code injection. This option is
+     * disabled by default. Enabling this option allows for navigating between subdomains in
+     * the same test without the use of cy.origin(). Setting document.domain is deprecated in Chrome.
+     * Enabling this may result in incompatibilities with sites that leverage origin-agent-cluster
+     * headers. Enabling this when a browser does not support setting document.domain will not result
+     * in the browser allowing document.domain to be set. In these cases, this configuration option
+     * must be set to false, to allow cy.origin() to be used on subdomains.
+     * @default false
      */
-    experimentalSkipDomainInjection: string[] | null
-    /**
-     * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
-     * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
-     * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
-     * Supported for vite and webpack. For component testing only.
-     * @see https://on.cypress.io/experiments#Configuration
-     */
-    experimentalJustInTimeCompile: boolean
+    injectDocumentDomain: boolean
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
@@ -3152,6 +3132,14 @@ declare namespace Cypress {
      * @default false
      */
     experimentalMemoryManagement: boolean
+    /**
+     * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
+     * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
+     * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
+     * Supported for webpack-dev-server only. For component testing only.
+     * @see https://on.cypress.io/experiments#Configuration
+     */
+    justInTimeCompile: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -3188,10 +3176,6 @@ declare namespace Cypress {
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
-    /**
-     * Polyfills `window.fetch` to enable Network spying and stubbing
-     */
-    experimentalFetchPolyfill: boolean
 
     /**
      * Override default config options for Component Testing runner.
@@ -3360,19 +3344,19 @@ declare namespace Cypress {
   interface CypressComponentDependency {
     /**
      * Unique identifier.
-     * @example 'reactscripts'
+     * @example 'react'
      */
     type: string
 
     /**
      * Name to display in the user interface.
-     * @example "React Scripts"
+     * @example "React.js"
      */
     name: string
 
     /**
      * Package name on npm.
-     * @example react-scripts
+     * @example react
      */
     package: string
 
@@ -3383,21 +3367,20 @@ declare namespace Cypress {
      *
      * @example `react`
      * @example `react@18`
-     * @example `react-scripts`
      */
     installer: string
 
     /**
      * Description shown in UI. It is recommended to use the same one the package uses on npm.
-     * @example  'Create React apps with no build configuration'
+     * @example  'A JavaScript library for building user interfaces'
      */
     description: string
 
     /**
      * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
      * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
-     * @example '^=4.0.0 || ^=5.0.0'
-     * @example '^2.0.0'
+     * @example '^=17.0.0 || ^=8.0.0'
+     * @example '^4.0.0'
      */
     minVersion: string
   }
@@ -3406,21 +3389,21 @@ declare namespace Cypress {
     /**
      * A semantic, unique identifier.
      * Must begin with `cypress-ct-` or `@org/cypress-ct-` for third party implementations.
-     * @example 'reactscripts'
+     * @example 'react'
      * @example 'nextjs'
      * @example 'cypress-ct-solid-js'
      */
     type: string
 
     /**
-     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     * Used as the flag for `getPreset` for meta frameworks, such as finding the webpack config for CRA, Angular, etc.
      * It is also the name of the string added to `cypress.config`
      *
      * @example
      *   export default {
      *     component: {
      *       devServer: {
-     *         framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *         framework: 'react' // can be 'next', 'vue', etc etc.
      *       }
      *     }
      *   }
@@ -3435,7 +3418,7 @@ declare namespace Cypress {
     /**
      * Name displayed in Launchpad when doing initial setup.
      * @example 'Solid.js'
-     * @example 'Create React App'
+     * @example 'React.js'
      */
     name: string
 
@@ -3465,12 +3448,12 @@ declare namespace Cypress {
     dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      */
     codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      * @example '*.{js,jsx,tsx}'
      */
     glob?: string
@@ -3536,7 +3519,7 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'

@@ -38,7 +38,7 @@ describe('Web Sockets', () => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
-      this.server = new ServerBase()
+      this.server = new ServerBase(cfg)
 
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,

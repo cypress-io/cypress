@@ -27,7 +27,14 @@ class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
   verifiedCommands: SpecOriginatedCommand[] = []
 
-  async getPrivilegedChannel (options) {
+  async getPrivilegedChannel (options: {
+    isSpecBridge: boolean
+    url: string
+    scripts: { relativeUrl: string }[]
+    browserFamily: string
+    namespace: string
+    documentDomainContext: string
+  }) {
     // setting up a non-spec bridge channel means the beginning of running
     // a spec and is a signal that we should reset state
     if (!options.isSpecBridge) {
@@ -56,7 +63,8 @@ class PrivilegedCommandsManager {
       key: '${key}',
       namespace: '${options.namespace}',
       scripts: '${specScripts}',
-      url: '${options.url}'
+      url: '${options.url}',
+      documentDomainContext: ${options.documentDomainContext},
     })`
   }
 

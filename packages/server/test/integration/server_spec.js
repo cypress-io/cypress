@@ -83,7 +83,7 @@ describe('Server', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerBase()),
+            (this.server = new ServerBase(cfg)),
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
@@ -139,54 +139,49 @@ describe('Server', () => {
         })
       })
 
-      it('can serve static assets', function () {
-        return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
-        .then((obj = {}) => {
-          return expectToEqDetails(obj, {
-            isOkStatusCode: true,
-            isPrimarySuperDomainOrigin: true,
-            isHtml: true,
-            contentType: 'text/html',
-            url: 'http://localhost:2000/index.html',
-            originalUrl: '/index.html',
-            filePath: Fixtures.projectPath('no-server/dev/index.html'),
-            status: 200,
-            statusText: 'OK',
-            redirects: [],
-            cookies: [],
-          })
-        }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['etag']).to.exist
-            expect(res.headers['set-cookie']).not.to.match(/initial=;/)
-            expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
-            expect(res.body).to.include('index.html content')
-            expect(res.body).to.include('document.domain = \'localhost\'')
+      it('can serve static assets', async function () {
+        const obj = await this.server._onResolveUrl('/index.html', {}, this.automationRequest)
 
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script>\n  </head>')
-          })
+        await expectToEqDetails(obj, {
+          isOkStatusCode: true,
+          isPrimarySuperDomainOrigin: true,
+          isHtml: true,
+          contentType: 'text/html',
+          url: 'http://localhost:2000/index.html',
+          originalUrl: '/index.html',
+          filePath: Fixtures.projectPath('no-server/dev/index.html'),
+          status: 200,
+          statusText: 'OK',
+          redirects: [],
+          cookies: [],
         })
+
+        const res = await this.rp('http://localhost:2000/index.html')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers['etag']).to.exist
+        expect(res.headers['set-cookie']).not.to.match(/initial=;/)
+        expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
+        expect(res.body).to.include('index.html content')
+        expect(res.body).to.include('.action("app:window:before:load",window)')
+        expect(res.body).to.include('</script>\n  </head>')
       })
 
-      it('sends back the content type', function () {
-        return this.server._onResolveUrl('/assets/foo.json', {}, this.automationRequest)
-        .then((obj = {}) => {
-          return expectToEqDetails(obj, {
-            isOkStatusCode: true,
-            isPrimarySuperDomainOrigin: true,
-            isHtml: false,
-            contentType: 'application/json',
-            url: 'http://localhost:2000/assets/foo.json',
-            originalUrl: '/assets/foo.json',
-            filePath: Fixtures.projectPath('no-server/dev/assets/foo.json'),
-            status: 200,
-            statusText: 'OK',
-            redirects: [],
-            cookies: [],
-          })
+      it('sends back the content type', async function () {
+        const obj = await this.server._onResolveUrl('/assets/foo.json', {}, this.automationRequest)
+
+        await expectToEqDetails(obj, {
+          isOkStatusCode: true,
+          isPrimarySuperDomainOrigin: true,
+          isHtml: false,
+          contentType: 'application/json',
+          url: 'http://localhost:2000/assets/foo.json',
+          originalUrl: '/assets/foo.json',
+          filePath: Fixtures.projectPath('no-server/dev/assets/foo.json'),
+          status: 200,
+          statusText: 'OK',
+          redirects: [],
+          cookies: [],
         })
       })
 
@@ -233,8 +228,6 @@ describe('Server', () => {
           return this.rp('http://localhost:2000/index.html')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('localhost')
             expect(res.body).to.include('Cypress')
 
             expect(this.buffers.buffer).to.be.undefined
@@ -459,7 +452,6 @@ describe('Server', () => {
             expect(res.headers['x-foo-bar']).to.eq('true')
             expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
             expect(res.body).to.include('content')
-            expect(res.body).to.include('document.domain = \'getbootstrap.com\'')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
@@ -595,7 +587,6 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('content')
-            expect(res.body).to.include('document.domain = \'go.com\'')
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
 
@@ -683,8 +674,6 @@ describe('Server', () => {
           return this.rp('http://espn.go.com/')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('go.com')
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</script></head><body>espn</body></html>')
 
@@ -860,7 +849,6 @@ describe('Server', () => {
             expect(res.headers['x-foo-bar']).to.eq('true')
             expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
             expect(res.body).to.include('content')
-            expect(res.body).to.include('document.domain = \'cypress.io\'')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
@@ -1116,6 +1104,72 @@ describe('Server', () => {
       })
     })
 
+    describe('http with injectDocumentDomain enabled', () => {
+      const superDomain = 'cypress.io'
+      const secondSuperDomain = 'google.com'
+      const origin = `http://www.${superDomain}`
+      const sameSuperdomainOrigin = `http://docs.${superDomain}`
+      const differentSuperdomainOrigin = `http://www.${secondSuperDomain}`
+
+      const statusCode = 200
+      const contentText = 'content'
+      const path = '/'
+
+      beforeEach(async function () {
+        await this.setup(origin, {
+          projectRoot: '/foo/bar/',
+          config: {
+            port: 2000,
+            supportFile: false,
+
+            injectDocumentDomain: true,
+
+          },
+        })
+
+        ;[origin, sameSuperdomainOrigin, differentSuperdomainOrigin].forEach((originToMock) => {
+          nock(originToMock).get(path).reply(statusCode, `<html>${contentText}</html>`, {
+            'Content-Type': 'text/html',
+          })
+        })
+      })
+
+      describe('when navigating to a different subdomain of the same superdomain without cy.origin', function () {
+        it('injects document.domain', async function () {
+          const url = `${sameSuperdomainOrigin}${path}`
+
+          await this.server._onResolveUrl(url, {}, this.automationRequest)
+          const res = await this.rp(url)
+
+          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+        })
+      })
+
+      describe('when navigating to a different superdomain with cy.origin', function () {
+        it('injects document.domain', async function () {
+          const url = `${differentSuperdomainOrigin}${path}`
+
+          this.server.remoteStates.set(differentSuperdomainOrigin, {}, false)
+          await this.server._onResolveUrl(url, {}, this.automationRequest)
+          const res = await this.rp(url)
+
+          expect(res.body).to.include(`document.domain = \'${secondSuperDomain}\'`)
+        })
+      })
+
+      describe('when navigating to the same origin', function () {
+        it('injects document.domain', async function () {
+          const url = `${origin}${path}`
+
+          this.server.remoteStates.set(differentSuperdomainOrigin)
+          await this.server._onResolveUrl(url, {}, this.automationRequest)
+          const res = await this.rp(url)
+
+          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+        })
+      })
+    })
+
     describe('both', () => {
       beforeEach(function () {
         Fixtures.scaffold('no-server')
@@ -1255,8 +1309,6 @@ describe('Server', () => {
           return this.rp('http://www.cypress.io/')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('cypress.io')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</script></head><body>cypress</body></html>')
@@ -1297,9 +1349,6 @@ describe('Server', () => {
           return this.rp('http://localhost:2000/index.html')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('localhost')
-
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
@@ -1330,8 +1379,6 @@ describe('Server', () => {
             return this.rp('http://www.cypress.io/')
             .then((res) => {
               expect(res.statusCode).to.eq(200)
-              expect(res.body).to.include('document.domain')
-              expect(res.body).to.include('cypress.io')
 
               expect(res.body).to.include('.action("app:window:before:load",window)')
               expect(res.body).to.include('</script></head><body>cypress</body></html>')
@@ -1376,9 +1423,6 @@ describe('Server', () => {
           return this.rp('https://www.foobar.com:8443/')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('foobar.com')
-
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</script></head><body>https server</body></html>')
           })
@@ -1418,9 +1462,6 @@ describe('Server', () => {
           return this.rp('http://localhost:2000/index.html')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('localhost')
-
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
@@ -1451,9 +1492,6 @@ describe('Server', () => {
             return this.rp('https://www.foobar.com:8443/')
             .then((res) => {
               expect(res.statusCode).to.eq(200)
-              expect(res.body).to.include('document.domain')
-              expect(res.body).to.include('foobar.com')
-
               expect(res.body).to.include('.action("app:window:before:load",window)')
               expect(res.body).to.include('</script></head><body>https server</body></html>')
             })
@@ -1506,9 +1544,6 @@ describe('Server', () => {
           return this.rp(s3StaticHtmlUrl)
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('amazonaws.com')
-
             expect(res.body).to.include('Cypress')
           })
         }).then(() => {
@@ -1547,9 +1582,6 @@ describe('Server', () => {
           return this.rp('http://localhost:2000/index.html')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('localhost')
-
             expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
@@ -1587,9 +1619,6 @@ describe('Server', () => {
             return this.rp(s3StaticHtmlUrl)
             .then((res) => {
               expect(res.statusCode).to.eq(200)
-              expect(res.body).to.include('document.domain')
-              expect(res.body).to.include('amazonaws.com')
-
               expect(res.body).to.include('Cypress')
             })
           }).then(() => {

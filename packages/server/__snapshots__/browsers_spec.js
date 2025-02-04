@@ -7,7 +7,7 @@ Cypress supports the following browsers:
  - electron
  - chrome
  - chromium
- - chrome:canary
+ - chrome-for-testing
  - edge
  - firefox
 
@@ -28,7 +28,7 @@ Cypress supports the following browsers:
  - electron
  - chrome
  - chromium
- - chrome:canary
+ - chrome-for-testing
  - edge
  - firefox
 

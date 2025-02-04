@@ -22,13 +22,11 @@ exports['module api and after:run results'] = `
     "env": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
-    "experimentalFetchPolyfill": false,
     "experimentalInteractiveRunEvents": false,
     "experimentalRunAllSpecs": false,
     "experimentalMemoryManagement": false,
     "experimentalModifyObstructiveThirdPartyCode": false,
-    "experimentalSkipDomainInjection": null,
-    "experimentalJustInTimeCompile": false,
+    "injectDocumentDomain": false,
     "experimentalOriginDependencies": false,
     "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
@@ -38,6 +36,7 @@ exports['module api and after:run results'] = `
     "fixturesFolder": "/path/to/fixturesFolder",
     "excludeSpecPattern": "*.hot-update.js",
     "includeShadowDom": false,
+    "justInTimeCompile": true,
     "keystrokeDelay": 0,
     "modifyObstructiveCode": true,
     "numTestsKeptInMemory": 0,
@@ -198,7 +197,7 @@ exports['module api and after:run results'] = `
               "state": "failed"
             }
           ],
-          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false <stack lines>",
           "duration": 100,
           "state": "failed",
           "title": [
@@ -294,7 +293,7 @@ exports['module api and after:run results'] = `
               "state": "failed"
             }
           ],
-          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false <stack lines>",
           "duration": 100,
           "state": "failed",
           "title": [
@@ -322,7 +321,7 @@ exports['module api and after:run results'] = `
               "state": "failed"
             }
           ],
-          "displayError": ""Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\`\\n     <stack lines>"
+          "displayError": "Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\` <stack lines>",
           "duration": 100,
           "state": "failed",
           "title": [
@@ -455,7 +454,7 @@ exports['after:spec results'] = `
             "state": "failed"
           }
         ],
-        "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
+        "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false <stack lines>",
         "duration": 100,
         "state": "failed",
         "title": [
@@ -483,7 +482,7 @@ exports['after:spec results'] = `
             "state": "failed"
           }
         ],
-        "displayError": ""Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\`\\n     <stack lines>"
+        "displayError": "Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\` <stack lines>",
         "duration": 100,
         "state": "failed",
         "title": [

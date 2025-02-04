@@ -1,5 +1,5 @@
 /* global window */
-(({ browserFamily, isSpecBridge, key, namespace, scripts, url, win = window }) => {
+(({ browserFamily, isSpecBridge, key, namespace, scripts, url, win = window, documentDomainContext }) => {
   /**
    * This file is read as a string in the server and injected into the spec
    * frame in order to create a privileged channel between the server and
@@ -54,11 +54,11 @@
     }
   }
 
-  // in chromium, stacks only include lines from the frame where the error is
-  // created, so to validate a function call was from the spec frame, we strip
-  // message lines and any eval calls (since they could be invoked from outside
-  // the spec frame) and if there are lines left, they must have been from
-  // the spec frame itself
+  // in chromium when using the older document.domain injection, stacks only include
+  // lines from the frame where the error is created, so to validate a function call
+  // was from the spec frame, we strip message lines and any eval calls (since they
+  // could be invoked from outside the spec frame) and if there are lines left, they
+  // must have been from the spec frame itself
   const hasSpecFrameStackLines = (err) => {
     const stackLines = split.call(err.stack, '\n')
     const filteredLines = filter.call(stackLines, (line) => {
@@ -83,17 +83,24 @@
     return isInCallback(err) && stringIncludes.call(err.stack, '> eval line')
   }
 
-  // in non-chromium browsers, the stack will include either the spec file url
-  // or the support file
+  // in non-chromium browsers, and chromium in non-document domain contexts, the stack will include
+  // either the spec file url or the support file
   const hasStackLinesFromSpecOrSupportFile = (err) => {
-    return filter.call(scripts, (script) => {
+    const filteredLines = filter.call(scripts, (script) => {
       // in webkit, stack line might not include the query string
       if (browserFamily === 'webkit') {
         script = replace.call(script, queryStringRegex, '')
       }
 
-      return stringIncludes.call(err.stack, script)
-    }).length > 0
+      // stack URLs come in URI encoded by default.
+      // we need to make sure our script names are also URI encoded
+      // so the comparisons match
+      const scriptName = encodeURI(script)
+
+      return stringIncludes.call(err.stack, scriptName)
+    })
+
+    return filteredLines.length > 0
   }
 
   // privileged commands are commands that should only be called from the spec
@@ -121,7 +128,7 @@
       return hasSpecBridgeInvocation(err)
     }
 
-    if (browserFamily === 'chromium') {
+    if (browserFamily === 'chromium' && documentDomainContext) {
       return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 

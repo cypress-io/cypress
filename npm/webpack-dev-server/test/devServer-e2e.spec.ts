@@ -190,7 +190,9 @@ describe('#devServer', () => {
     const oldmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs
 
     await once(devServerEvents, 'dev-server:compile:success')
-    devServerEvents.emit('dev-server:specs:changed', [newSpec])
+    devServerEvents.emit('dev-server:specs:changed', {
+      specs: [newSpec],
+    })
 
     await once(devServerEvents, 'dev-server:compile:success')
     const updatedmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs

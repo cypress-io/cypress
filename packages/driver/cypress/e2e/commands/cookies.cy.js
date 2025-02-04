@@ -17,6 +17,40 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.setCookie('key8', 'value8', { domain: 'www2.foobar.com', log: false })
   }
 
+  it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
+    const isWebkit = Cypress.browser.name.includes('webkit')
+
+    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+    cy.setCookie('foo', 'bar', { hostOnly: true })
+
+    cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
+    if (!isWebkit) {
+      cy.getCookie('foo').its('hostOnly').should('eq', true)
+    }
+
+    cy.getCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
+    })
+
+    cy.getAllCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
+    })
+  })
+
   context('#getCookies', () => {
     it('returns cookies from only the bare domain matching the AUT by default when AUT is an apex domain', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
@@ -560,40 +594,6 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
         cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
       })
-    })
-  })
-
-  it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
-    const isWebkit = Cypress.browser.name.includes('webkit')
-
-    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-    cy.setCookie('foo', 'bar', { hostOnly: true })
-
-    cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
-    if (!isWebkit) {
-      cy.getCookie('foo').its('hostOnly').should('eq', true)
-    }
-
-    cy.getCookies().then((cookies) => {
-      expect(cookies).to.have.lengthOf(1)
-
-      const cookie = cookies[0]
-
-      expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
-        expect(cookie).to.have.property('hostOnly', true)
-      }
-    })
-
-    cy.getAllCookies().then((cookies) => {
-      expect(cookies).to.have.lengthOf(1)
-
-      const cookie = cookies[0]
-
-      expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
-        expect(cookie).to.have.property('hostOnly', true)
-      }
     })
   })
 })

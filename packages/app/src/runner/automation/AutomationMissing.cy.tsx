@@ -1,6 +1,6 @@
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { AutomationMissingFragmentDoc, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql-test'
 import AutomationMissing from './AutomationMissing.vue'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 describe('AutomationMissing', () => {
   it('should render', () => {
@@ -50,7 +50,7 @@ describe('AutomationMissing', () => {
       },
     })
 
-    cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
+    cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
     cy.percySnapshot()
   })
 })

@@ -190,7 +190,6 @@ describe('<ConfigCode />', () => {
           browser.displayName && cy.contains(`displayName: '${browser.displayName}',`)
           browser.version && cy.contains(`version: '${browser.version}',`)
           browser.path && cy.contains(`path: '${browser.path}',`)
-          browser.minSupportedVersion && cy.contains(`minSupportedVersion: ${browser.minSupportedVersion},`)
           browser.majorVersion && cy.contains(`majorVersion: ${browser.majorVersion},`)
         })
       } else {

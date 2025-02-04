@@ -20,9 +20,6 @@ export function supportFileE2E (language: CodeLanguage['type']) {
 
     // Import commands.js using ES2015 syntax:
     import './commands'
-
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
   `
 }
 
@@ -45,9 +42,6 @@ export function supportFileComponent (language: CodeLanguage['type'], mountModul
 
     // Import commands.js using ES2015 syntax:
     import './commands'
-
-    // Alternatively you can use CommonJS syntax:
-    // require('./commands')
   `
 
   const exampleUse = dedent`

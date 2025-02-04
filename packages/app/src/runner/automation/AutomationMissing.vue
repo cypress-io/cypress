@@ -19,10 +19,10 @@
           data-cy="select-browser"
         >
           <template #heading>
-            <img
+            <component
+              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               class="min-w-[16px] w-[16px]"
-              :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
-            >
+            />
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
           </template>
 
@@ -56,7 +56,7 @@ import type { AutomationMissingFragment } from '../../generated/graphql'
 import SpecRunnerDropdown from '../SpecRunnerDropdown.vue'
 import { ref } from 'vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import Alert from '../../../../frontend-shared/src/components/Alert.vue'
+import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const { t } = useI18n()

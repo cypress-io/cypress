@@ -478,6 +478,50 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       cy.get(':text:first').type('foo', { scrollBehavior: false, timeout: 200 })
     })
+
+    describe('retries in after hook when failures', () => {
+      it('types in element in hook', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('expected true to be false')
+        })
+
+        expect(true).to.be.false
+      })
+
+      after(() => {
+        const input = cy.$$('input:text:first')
+
+        input.val('')
+
+        expect(input).to.have.value('')
+
+        cy.get('input:text:first').type('foo').then(($input) => {
+          expect($input).to.have.value('foo')
+        })
+      })
+    })
+
+    describe('retries in afterEach hook when failures', () => {
+      it('types in element in hook', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('expected true to be false')
+        })
+
+        expect(true).to.be.false
+      })
+
+      afterEach(() => {
+        const input = cy.$$('input:text:first')
+
+        input.val('')
+
+        expect(input).to.have.value('')
+
+        cy.get('input:text:first').type('foo').then(($input) => {
+          expect($input).to.have.value('foo')
+        })
+      })
+    })
   })
 
   describe('input types where no extra formatting required', () => {

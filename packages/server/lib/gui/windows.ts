@@ -185,7 +185,7 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
     })
   }
 
-  win.webContents.on('crashed', function (...args) {
+  win.webContents.on('render-process-gone', function (...args) {
     return options.onCrashed.apply(win, args)
   })
 

@@ -570,11 +570,6 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
-      return {
-        default: [],
-      }
-    },
     DUPLICATE_TASK_KEY: () => {
       const tasks = ['foo', 'bar', 'baz']
 
@@ -1156,6 +1151,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
         default: [{ configFile: '/path/to/cypress.config.js' }],
@@ -1282,7 +1282,7 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+    JIT_COMPONENT_TESTING: () => {
       return {
         default: [],
       }
@@ -1400,12 +1400,6 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
     PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
       const err = makeErr()
 
@@ -1419,6 +1413,24 @@ describe('visual error templates', () => {
 
       return {
         default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
+    INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
+    INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
       }
     },
   })

@@ -1,9 +1,8 @@
 {
-  "name": "@test-project/ts-proj-5",
+  "name": "ts-proj-5",
   "version": "0.0.0-test",
-  "private": true,
   "dependencies": {
-    "typescript": "5.0.3",
-    "vite": "4.2.1"
+    "typescript": "5.6.3",
+    "vite": "5.4.10"
   }
 }

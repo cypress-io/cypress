@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <script type='text/javascript'>
+      document.domain = '#{domain}';
+
+      var Cypress = window.Cypress = parent.Cypress;
+
+      if (!Cypress) {
+        throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.');
+      };
+
+      window.onerror = function(){
+        Cypress.onUncaughtException.apply(Cypress, arguments);
+      }
+    </script>
+    <script type='text/javascript'>
+      Cypress.action('app:window:before:load', window);
+    </script>
+    <meta charset="utf-8">
+    <title>absolute url test</title>
+    <link ref="stylesheet" href="/http://cdn.com/reset.css">
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li>
+          <a href="/relative.html">absolute path relative</a>
+        </li>
+        <li>
+          <a href="../relative.html">path relative</a>
+        </li>
+        <li>
+          <a href="regular/relative.html">relative</a>
+        </li>
+      </ul>
+    </nav>
+    <div>
+      <form action="/https://github.com/submit1">
+        form1
+        <a href="/http://www.google.com">google</a>
+      </form>
+      <a href="/http://getbootstrap.com/css">css</a>
+    </div>
+    <div>
+      <form action="/http://www.github.com/submit2">
+        form2
+      </form>
+      <form action="/submit3">
+        form3
+      </form>
+    </div>
+    <a href="/foo/bar?a=b#hash">path and query and hash</a>
+  </body>
+</html>

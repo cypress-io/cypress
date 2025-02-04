@@ -300,7 +300,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   })
 
   if (buffer) {
-    this.debug('ending request with buffered response')
+    this.debug('ending request with buffered response', { policyMatch: buffer.urlDoesNotMatchPolicyBasedOnDomain })
 
     // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
     this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'

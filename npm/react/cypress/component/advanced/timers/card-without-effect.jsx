@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 
+// Class components will be removed in a future release of React 18+. Until then, this example will serve as a class component example
 export default class Card extends Component {
   componentDidMount () {
     this._timeoutID = setTimeout(() => {

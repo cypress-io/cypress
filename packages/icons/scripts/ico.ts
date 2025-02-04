@@ -11,6 +11,7 @@ const files = [
   fs.readFileSync('./assets/icons/icon_256x256.png'),
 ]
 
+// tslint:disable:no-floating-promises
 toIco(files).then((buf) => {
   fs.writeFileSync('./dist/icons/cypress.ico', buf)
 })

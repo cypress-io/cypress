@@ -280,7 +280,9 @@ typings/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
+# Yarn files that shouldn't be checked in
+.yarnrc
+.yarn/
 .yarn-integrity
 
 # dotenv environment variables file
@@ -293,15 +295,11 @@ typings/
 # next.js build output
 .next
 
-# nuxt.js build output
-.nuxt
-
 # rollup.js default build output
 dist/
 
 # Uncomment the public line if your project uses Gatsby
 # https://nextjs.org/blog/next-9-1#public-directory-support
-# https://create-react-app.dev/docs/using-the-public-folder/#docsNav
 # public
 
 # Storybook build outputs

@@ -1,9 +1,11 @@
 import AlertMessage from './AlertMessage.vue'
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
 describe('AlertMessage', () => {
-  beforeEach(mountCallback(AlertMessage))
+  beforeEach(() => {
+    mount(AlertMessage)
+  })
+
   it('loads', () => {
     cy.get('button').should('be.visible')
   })

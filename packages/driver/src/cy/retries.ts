@@ -105,8 +105,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     const ended = () => {
       // we should NOT retry if
       // 1. our promise has been canceled
-      // 2. or we have an error
-      // 3. or if the runnables has changed
+      // 2. or if the runnables has changed
 
       // although bluebird SHOULD cancel these retries
       // since they're all connected - apparently they
@@ -116,7 +115,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       // bug in bluebird with not propagating cancellations
       // fast enough in a series of promises
       // https://github.com/petkaantonov/bluebird/issues/1424
-      return state('canceled') || state('error') || runnableHasChanged()
+      return state('canceled') || runnableHasChanged()
     }
 
     return Promise

@@ -10,8 +10,8 @@ Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in t
 ## Compatibility
 
 | @cypress/vite-plugin-cypress-esm | cypress |
-| ------------------------ | ------- |
-| >= v1                    | >= v12  |
+| -------------------------------- | ------- |
+| >= v1                            | >= v12  |
 
 ## Usage
 
@@ -77,6 +77,14 @@ To instruct this plugin to skip a given import and use the unaltered target modu
 ```ts
 CypressEsm({
   ignoreImportList: ['**/internal/problematic-file.js']
+})
+```
+
+If using the `@cypress/react` test harness, you may need to ignore the `react-dom/client` module by configuring as such:
+
+```ts
+CypressEsm({
+  ignoreImportList: ['**/react-dom/client']
 })
 ```
 

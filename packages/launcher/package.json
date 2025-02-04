@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob \"lib/*.js\" && rimraf --glob \"lib/**/*.js\" || true",
     "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -30,7 +31,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "mocha": "3.5.3",
-    "mock-fs": "5.2.0",
+    "mock-fs": "5.4.0",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",
     "typescript": "~5.4.5"

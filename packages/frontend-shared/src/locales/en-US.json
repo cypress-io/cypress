@@ -219,7 +219,7 @@
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       },
-      "ct": {
+      "componentTesting": {
         "title": "{0} component testing is available for this project",
         "content": "You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.",
         "primaryAction": "Quick setup",
@@ -316,7 +316,6 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
-    "versionUnsupported": "Unsupported",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -584,10 +583,6 @@
         "name": "CSP Allow List",
         "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
       },
-      "experimentalFetchPolyfill": {
-        "name": "Fetch polyfill",
-        "description": "Automatically replaces `window.fetch` with a polyfill that Cypress can spy on and stub. Note: `experimentalFetchPolyfill` has been deprecated in Cypress 6.0.0 and will be removed in a future release. Consider using [`cy.intercept()`](https://on.cypress.io/intercept) to intercept `fetch` requests instead."
-      },
       "experimentalInteractiveRunEvents": {
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
@@ -609,10 +604,6 @@
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
-      },
-      "experimentalJustInTimeCompile": {
-        "name": "Just-In-Time compiling",
-        "description": "Enables Just-In-Time (JIT) compiling for component testing, which will only compile assets related to the spec before the spec is run. Currently supported for Vite and Webpack."
       },
       "experimentalSourceRewriting": {
         "name": "Source rewriting",
@@ -637,10 +628,6 @@
       "experimentalMemoryManagement": {
         "name": "Memory Management",
         "description": "Enables support for improved memory management within Chromium-based browsers."
-      },
-      "experimentalSkipDomainInjection": {
-        "name": "Skip Domain Injection",
-        "description": "Disables setting `document.domain` to the application's super domain on injection."
       }
     },
     "device": {

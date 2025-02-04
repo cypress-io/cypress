@@ -1,10 +1,9 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
+import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
-import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
@@ -179,36 +178,17 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
   }
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
-  // if we returned an array from the plugin
-  // then we know the user is using the deprecated
-  // interface and we need to warn them
-  // TODO: remove this logic in >= v5.0.0
-  if (pluginConfigResult[0]) {
-    // eslint-disable-next-line no-console
-    (options.onWarning || console.warn)(getError(
-      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
-    ))
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+  // strip out all the known launch option properties from the resulting object
+  const unexpectedProperties: string[] = _
+  .chain(pluginConfigResult)
+  .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+  .keys()
+  .value()
 
-    _.extend(pluginConfigResult, {
-      args: _.filter(pluginConfigResult, (_val, key) => {
-        return _.isNumber(key)
-      }),
-      extensions: [],
-    })
-  } else {
-    // either warn about the array or potentially error on invalid props, but not both
-
-    // strip out all the known launch option properties from the resulting object
-    const unexpectedProperties: string[] = _
-    .chain(pluginConfigResult)
-    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-    .keys()
-    .value()
-
-    if (unexpectedProperties.length) {
-      errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
-    }
+  if (unexpectedProperties.length) {
+    // error on invalid props
+    errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
   }
 
   _.forEach(launchOptions, (val, key) => {

@@ -20,8 +20,8 @@ type EventParams = {
 export function useRecordEvent () {
   const recordEventMutation = useMutation(UseRecordEvent_RecordEventDocument)
 
-  function record (params: EventParams) {
-    recordEventMutation.executeMutation({
+  async function record (params: EventParams) {
+    await recordEventMutation.executeMutation({
       ...params,
       messageId: nanoid(),
       includeMachineId: params.includeMachineId ?? false,

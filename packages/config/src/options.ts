@@ -208,11 +208,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalFetchPolyfill',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -235,16 +230,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalSkipDomainInjection',
-    defaultValue: null,
-    validation: validate.isNullOrArrayOfStrings,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'experimentalJustInTimeCompile',
+    name: 'injectDocumentDomain',
     defaultValue: false,
     validation: validate.isBoolean,
-    isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalOriginDependencies',
@@ -299,6 +287,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     overrideLevel: 'any',
+  }, {
+    name: 'justInTimeCompile',
+    defaultValue: true,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -620,7 +613,7 @@ export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
 ]
 
 /**
- * Values not allowed in 10.X+ in the root, e2e and component config
+ * Values not allowed in 10.X+ in the root, e2e or component config
  */
 export const breakingOptions: Readonly<BreakingOption[]> = [
   {
@@ -641,6 +634,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalJustInTimeCompile',
+    errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'experimentalNetworkStubbing',
     errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
     isWarning: true,
@@ -660,6 +658,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
+  }, {
+    name: 'experimentalSkipDomainInjection',
+    errorKey: 'EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED',
+    isWarning: false,
   }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
@@ -739,14 +741,8 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalSkipDomainInjection',
-    errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  },
-  {
-    name: 'experimentalJustInTimeCompile',
-    errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+    name: 'justInTimeCompile',
+    errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
     testingTypes: ['component'],
   },
@@ -765,9 +761,14 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalJustInTimeCompile',
-      errorKey: 'EXPERIMENTAL_JIT_COMPONENT_TESTING',
+      name: 'justInTimeCompile',
+      errorKey: 'JIT_COMPONENT_TESTING',
       isWarning: false,
+    },
+    {
+      name: 'injectDocumentDomain',
+      errorKey: 'INJECT_DOCUMENT_DOMAIN_DEPRECATION',
+      isWarning: true,
     },
   ],
   component: [
@@ -797,8 +798,8 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalSkipDomainInjection',
-      errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
+      name: 'injectDocumentDomain',
+      errorKey: 'INJECT_DOCUMENT_DOMAIN_E2E_ONLY',
       isWarning: false,
     },
   ],

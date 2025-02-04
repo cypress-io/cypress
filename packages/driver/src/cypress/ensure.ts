@@ -255,7 +255,7 @@ const commandCanCommunicateWithAUT = (cy: $Cy, err?): boolean => {
     const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
       commandOrigin: window.location.origin,
       autOrigin: cy.state('autLocation').origin,
-      isSkipDomainInjectionEnabled: !!Cypress.config('experimentalSkipDomainInjection'),
+      isInjectDocumentDomainEnabled: Cypress.config('injectDocumentDomain'),
     })
 
     if (err) {

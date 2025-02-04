@@ -18,7 +18,7 @@
     "@cypress/mount-utils": "0.0.0-development",
     "@vitejs/plugin-vue": "5.0.4",
     "@vue/compiler-sfc": "3.2.47",
-    "@vue/test-utils": "2.3.2",
+    "@vue/test-utils": "2.4.6",
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
     "debug": "^4.3.4",
@@ -42,7 +42,7 @@
     "src/**/*.js"
   ],
   "engines": {
-    "node": ">=8"
+    "node": ">=18"
   },
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -82,9 +82,6 @@
   "nx": {
     "targets": {
       "build": {
-        "dependsOn": [
-          "!@cypress/react18:build"
-        ],
         "outputs": [
           "{workspaceRoot}/cli/vue",
           "{projectRoot}/dist"

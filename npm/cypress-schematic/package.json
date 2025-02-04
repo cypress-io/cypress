@@ -7,29 +7,28 @@
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
     "lint": "eslint --ext .ts,.json, .",
-    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts"
+    "test": "vitest run --no-file-parallelism"
   },
   "dependencies": {
-    "jsonc-parser": "^3.0.0",
-    "rxjs": "~6.6.0"
+    "jsonc-parser": "^3.3.1",
+    "rxjs": "~7.8.1"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^0.1402.1",
-    "@angular-devkit/core": "^14.2.1",
-    "@angular-devkit/schematics": "^14.2.1",
-    "@angular-devkit/schematics-cli": "^14.2.1",
-    "@angular/cli": "^14.2.1",
-    "@schematics/angular": "^14.2.1",
-    "@types/chai-enzyme": "0.6.7",
+    "@angular-devkit/architect": "^0.1802.11",
+    "@angular-devkit/core": "^18.2.11",
+    "@angular-devkit/schematics": "^18.2.11",
+    "@angular-devkit/schematics-cli": "^18.2.11",
+    "@angular/cli": "^18.2.11",
+    "@schematics/angular": "^18.2.11",
+    "@types/chai-enzyme": "0.6.13",
     "@types/mocha": "8.0.3",
-    "@types/node": "^18.17.5",
-    "chai": "4.2.0",
-    "mocha": "3.5.3",
-    "typescript": "~5.4.5"
+    "@types/node": "^20.16.0",
+    "typescript": "~5.4.5",
+    "vitest": "2.1.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=14",
-    "@angular/core": ">=14"
+    "@angular/cli": ">=17.2",
+    "@angular/core": ">=17.2"
   },
   "license": "MIT",
   "repository": {

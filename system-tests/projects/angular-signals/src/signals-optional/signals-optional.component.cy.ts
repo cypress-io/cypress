@@ -1,6 +1,6 @@
 import { signal } from '@angular/core'
 import { SignalsOptionalComponent } from './signals-optional.component'
-import { createOutputSpy } from 'cypress/angular-signals'
+import { createOutputSpy } from 'cypress/angular'
 
 it('can handle default props', () => {
   cy.mount(SignalsOptionalComponent)

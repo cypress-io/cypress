@@ -16,8 +16,8 @@ const onServer = function (app) {
   app.get('/ww.js', (req, res) => {
     requestsForWebWorker += 1
 
-    res.set('Content-Type', 'application/javascript')
-    res.set('Mime-Type', 'application/javascript')
+    res.set('Content-Type', 'text/javascript')
+    res.set('Mime-Type', 'text/javascript')
 
     return res.send('const x = 1')
   })
@@ -25,8 +25,8 @@ const onServer = function (app) {
   app.get('/sw.js', (req, res) => {
     requestsForSharedWorker += 1
 
-    res.set('Content-Type', 'application/javascript')
-    res.set('Mime-Type', 'application/javascript')
+    res.set('Content-Type', 'text/javascript')
+    res.set('Mime-Type', 'text/javascript')
 
     return res.send('const x = 1')
   })

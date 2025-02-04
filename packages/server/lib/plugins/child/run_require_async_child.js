@@ -193,7 +193,11 @@ function run (ipc, file, projectRoot) {
 
       debug('loaded config from %s %o', file, result)
     } catch (err) {
-      if (err.name === 'TSError') {
+      // Starting in Node 20, error objects that are thrown while using `node --load` are not properly serialized
+      // so we need to check both the name and the stack. We also have patched ts-node to ensure that the error is
+      // of the right form to be serialized.
+      if (err.name === 'TSError' || err.stack.includes('TSError')) {
+        err.name = 'TSError'
         // because of this https://github.com/TypeStrong/ts-node/issues/1418
         // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
         const cleanMessage = stripAnsi(err.message)

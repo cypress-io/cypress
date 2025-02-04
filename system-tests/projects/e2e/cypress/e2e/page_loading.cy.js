@@ -55,7 +55,6 @@ describe('page_loading', () => {
       return Cypress.Promise.all([promise1.promise, promise2.promise])
     }).spread((resp1, resp2) => {
       expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
-      expect(resp2).to.include('document.domain = \'localhost\'')
       expect(resp2).to.include('content')
     })
   })

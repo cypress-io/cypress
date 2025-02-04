@@ -4,7 +4,7 @@ const cwd = require('../cwd')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
-const { cors } = require('@packages/network')
+const { DocumentDomainInjection } = require('@packages/network/lib/document-domain-injection')
 const { privilegedCommandsManager } = require('../privileged-commands/privileged-commands-manager')
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
-    debug('handle iframe %o', { test, specFilter })
+    debug('handle iframe %o', { test, specFilter, config })
 
     const specs = await this.getSpecs(test, config, extraOptions)
     const supportFileJs = this.getSupportFile(config)
@@ -26,11 +26,12 @@ module.exports = {
 
     debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
-      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
-    }) ?
-      remoteStates.getPrimary().domainName :
-      undefined
+    const injection = DocumentDomainInjection.InjectionBehavior(config)
+
+    debug('primary remote state', remoteStates.getPrimary())
+    const { origin } = remoteStates.getPrimary()
+
+    const superDomain = injection.shouldInjectDocumentDomain(origin) ? injection.getHostname(origin) : ''
 
     const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
       browserFamily: req.query.browserFamily,
@@ -38,6 +39,7 @@ module.exports = {
       namespace: config.namespace,
       scripts: allFilesToSend,
       url: req.proxiedUrl,
+      documentDomainContext: injection.shouldInjectDocumentDomain(origin),
     })
 
     const iframeOptions = {
@@ -54,13 +56,12 @@ module.exports = {
 
   async handleCrossOriginIframe (req, res, config) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
-    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
-      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
-    }) ?
-      cors.getSuperDomain(req.proxiedUrl) :
+    const documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
+    const superDomain = documentDomainInjection.shouldInjectDocumentDomain(req.proxiedUrl) ?
+      documentDomainInjection.getHostname(req.proxiedUrl) :
       undefined
 
-    const origin = cors.getOrigin(req.proxiedUrl)
+    const { origin } = new URL(req.proxiedUrl)
 
     const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
       browserFamily: req.query.browserFamily,
@@ -68,6 +69,7 @@ module.exports = {
       namespace: config.namespace,
       scripts: [],
       url: req.proxiedUrl,
+      documentDomainContext: documentDomainInjection.shouldInjectDocumentDomain(req.proxiedUrl),
     })
 
     const iframeOptions = {

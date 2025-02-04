@@ -1,52 +1,44 @@
 // https://medium.com/@pierrehedkvist/renderless-components-in-react-8d663746314c
-import React from 'react'
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-export default class MouseMovement extends React.Component {
-  constructor (props) {
-    console.log('MouseMovement constructor')
-    super(props)
-    this.state = {
-      timer: undefined,
-    }
+export default function MouseMovement ({ onMoved }) {
+  const [timer, setTimer] = useState(undefined)
 
-    this.timeout = this.timeout.bind(this)
-    this.onMouseMove = this.onMouseMove.bind(this)
-  }
-
-  componentWillMount () {
-    console.log('MouseMovement componentWillMount')
-    document.addEventListener('mousemove', this.onMouseMove)
-    const timer = setTimeout(this.timeout, 4000)
-
-    this.setState({ timer })
-  }
-
-  componentWillUnmount () {
-    console.log('MouseMovement componentWillUnmount')
-    document.removeEventListener('mousemove', this.onMouseMove)
-    clearTimeout(this.state.timer)
-    this.setState({ timer: undefined })
-  }
-
-  onMouseMove () {
+  function onMouseMove () {
     console.log('MouseMovement onMouseMove')
-    clearTimeout(this.state.timer)
-    const timer = setTimeout(this.timeout, 4000)
+    clearTimeout(timer)
+    const timerNew = setTimeout(timeout, 4000)
 
-    this.setState({ timer })
-    this.props.onMoved(true)
+    setTimer(timerNew)
+    onMoved(true)
   }
 
-  timeout () {
+  function timeout () {
     console.log('timeout')
-    clearTimeout(this.state.timer)
-    this.props.onMoved(false)
+    clearTimeout(timer)
+    onMoved(false)
   }
 
-  render () {
-    return null
-  }
+  useEffect(() => {
+    // Anything in here is fired on component mount.
+    console.log('MouseMovement componentWillMount')
+    document.addEventListener('mousemove', onMouseMove)
+    const timerNew = setTimeout(timeout, 4000)
+
+    setTimer(timerNew)
+
+    return () => {
+      // Anything in here is fired on component unmount.
+      console.log('MouseMovement componentWillUnmount')
+      document.removeEventListener('mousemove', onMouseMove)
+      clearTimeout(timer)
+      setTimer(undefined)
+    }
+  }, [])
+
+  return null
 }
 
 MouseMovement.propTypes = {

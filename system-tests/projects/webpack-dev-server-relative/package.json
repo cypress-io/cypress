@@ -1,24 +1,16 @@
 {
-  "name": "ct-webpack-relative",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "webpack-dev-server-relative",
+  "version": "0.0.0-test",
   "dependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7",
-    "@babel/preset-react": "^7",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
-    "babel-loader": "^8.2.4",
-    "copy-webpack-plugin": "11.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "webpack": "^5.74.0",
-    "webpack-dev-server": "^4.11.1"
-  },
-  "license": "ISC",
-  "author": "",
-  "keywords": []
+    "babel-loader": "^9.2.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "^5.1.0"
+  }
 }

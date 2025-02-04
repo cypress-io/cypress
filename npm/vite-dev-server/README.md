@@ -12,7 +12,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   component: {
     devServer: {
-      framework: 'create-react-app',
+      framework: 'react',
       bundler: 'vite',
       // viteConfig?: Will try to infer, if passed it will be used as is
     }
@@ -51,10 +51,11 @@ We then merge the sourced config with the user's vite config, and layer on our o
 
 ## Compatibility
 
-| @cypress/vite-dev-server | cypress |
-| ------------------------ | ------- |
-| <= v2                    | <= v9   |
-| >= v3                    | >= v10  |
+| @cypress/vite-dev-server | cypress       |
+| ------------------------ | ------------- |
+| <= v2                    | <= v9         |
+| >= v3 <= v5              | >= v10 <= v13 |
+| >= v6                    | >= v14        |
 
 #### `devServerPublicPathRoute` for Vite v5
 

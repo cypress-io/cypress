@@ -127,7 +127,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[0],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
             isDefault: true,
@@ -146,7 +146,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[0],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
           })
@@ -166,7 +166,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            framework: CT_FRAMEWORKS[0],
+            framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
           })

@@ -218,6 +218,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
+    // TODO: this should be awaited
+    /* tslint:disable:no-floating-promises */
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
@@ -388,9 +390,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     err.stack = $stackUtils.normalizedStack(err)
 
+    const userInvocationStack = $errUtils.getUserInvocationStack(err, this.state)
+
     err = $errUtils.enhanceStack({
       err,
-      userInvocationStack: $errUtils.getUserInvocationStack(err, this.state),
+      userInvocationStack,
       projectRoot: this.config('projectRoot'),
     })
 

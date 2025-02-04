@@ -94,6 +94,7 @@ module.exports = {
     const dest = paths.getPathToResources('app')
 
     debug('appPath %s', appPath)
+
     debug('dest path %s', dest)
 
     // make sure this path exists!

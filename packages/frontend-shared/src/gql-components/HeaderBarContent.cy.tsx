@@ -53,11 +53,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('Unsupported browser').should('be.visible')
-
-    /*
-      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
-      cy.percySnapshot('unsupported browser tooltip')
-    */
   })
 
   describe('breadcrumbs', () => {

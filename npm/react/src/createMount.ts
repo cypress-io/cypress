@@ -4,7 +4,6 @@ import {
   getContainerEl,
   ROOT_SELECTOR,
   setupHooks,
-  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { InternalMountOptions, MountOptions, MountReturn, UnmountArgs } from './types'
 
@@ -29,14 +28,6 @@ export const makeMountFn = (
   if (!internalMountOptions) {
     throw Error('internalMountOptions must be provided with `render` and `reactDom` parameters')
   }
-
-  // @ts-expect-error - this is removed but we want to check if a user is passing it, and error if they are.
-  if (options.alias) {
-    // @ts-expect-error
-    Cypress.utils.throwErrByPath('mount.alias', options.alias)
-  }
-
-  checkForRemovedStyleOptions(options)
 
   mountCleanup = internalMountOptions.cleanup
 
@@ -81,10 +72,6 @@ export const makeMountFn = (
         return cy.wrap<MountReturn>({
           component: userComponent,
           rerender: (newComponent) => makeMountFn('rerender', newComponent, options, key, internalMountOptions),
-          unmount: () => {
-            // @ts-expect-error - undocumented API
-            Cypress.utils.throwErrByPath('mount.unmount')
-          },
         }, { log: false })
       })
       // by waiting, we delaying test execution for the next tick of event loop

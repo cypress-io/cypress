@@ -3,7 +3,7 @@ import $window from './window'
 import $elements from './elements'
 import $jquery from './jquery'
 
-const getElementAtPointFromViewport = (doc, x, y) => {
+const getElementAtPointFromViewport = (doc: Document, x: number, y: number) => {
   return $elements.elementFromPoint(doc, x, y)
 }
 

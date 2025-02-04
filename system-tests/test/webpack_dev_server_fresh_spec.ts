@@ -4,7 +4,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react', 'webpack5_wds5-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds4-react', 'webpack5_wds4-react', 'webpack5_wds5-react']
 
 describe('@cypress/webpack-dev-server', function () {
   systemTests.setup()

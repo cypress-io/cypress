@@ -76,7 +76,7 @@ The [project-fixtures](./project-fixtures) directory helps us here. Rather than 
 
 We will automatically copy the contents of the `project-fixtures` folder into the project just after it has been scaffolded.
 
-See the [package.json](./projects/webpack4_wds3-react/package.json) for the [webpack4_wds3-react](./projects/webpack4_wds3-react) package as an example of this pattern, and the [webpack-dev-server react tests](../npm/webpack-dev-server/cypress/e2e/react.cy.ts) as an example use.
+See the [package.json](./projects/webpack5_wds5-react/package.json) for the [webpack5_wds5-react](./projects/webpack5_wds5-react) package as an example of this pattern, and the [webpack-dev-server react tests](../npm/webpack-dev-server/cypress/e2e/react.cy.ts) as an example use.
 
 ### Developing Docker-based tests against built binary
 

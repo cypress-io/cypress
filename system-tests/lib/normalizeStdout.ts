@@ -96,18 +96,18 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
 
   const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
-  return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
-    let post = parts[0]
+  return str.replace(stackTraceRegex, (match: string, trailingWhitespace: string | undefined, offset: number) => {
+    // the whitespace between direct error stack and the "From Node.js Internals:" stack,
+    // in firefox, in visit_spec erorr contexts, does not normalize properly: it needs to
+    // be "\n  \n", in order to match other browsers. So, in cases of firefox, if that string
+    // is found immediately following the matching stack trace, we need to normalize to "\n  \n".
+    const replacementWhitespace = str.substring(offset + match.length).indexOf('From Node.js Internals') === 2 ?
+      '\n  \n' : '\n'
+    const normalizedTrailingWhitespace = browserName === 'firefox' ?
+      trailingWhitespace.replace(whiteSpaceBetweenNewlines, replacementWhitespace) :
+      trailingWhitespace
 
-    console.log('POST:')
-    console.log(`"${post}"`)
-    console.log('/POST')
-
-    if (browserName === 'firefox') {
-      post = post.replace(whiteSpaceBetweenNewlines, '\n')
-    }
-
-    return `\n      [stack trace lines]${post}`
+    return `\n      [stack trace lines]${normalizedTrailingWhitespace}`
   })
 }
 
@@ -165,7 +165,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
   // Replaces CDP connection error message in Firefox since Cypress will retry
-  .replace(/Failed to spawn CDP with Firefox. Retrying.*\.\.\./, '')
+  .replace(/\nFailed to spawn CDP with Firefox. Retrying.*\.\.\.\n/g, '')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
@@ -178,25 +178,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
 
   if (str.includes(wdsFailedMsg)) {
     str = str.split('\n').filter((line) => !line.includes(wdsFailedMsg)).join('\n')
-  }
-
-  // in Firefox 130, height dimensions are off by 1 pixel in CI, so we need to fix the offset to match common snapshots
-  if (options.browser === 'firefox' && process.env.CI) {
-    const dimensionRegex = new RegExp(/(\((?<width>\d+)x(?<height>\d+)\))/g)
-
-    const matches = dimensionRegex.exec(str)
-
-    if (matches?.groups?.height && matches?.groups?.width) {
-      const height = parseInt(matches?.groups?.height)
-
-      // only happens on default height for whatever reason in firefox 130...
-      if (height === 719) {
-        const expectedHeight = height + 1
-        const expectedWidth = matches?.groups?.width
-
-        str = str.replaceAll(`(${expectedWidth}x${height})`, `(${expectedWidth}x${expectedHeight})`)
-      }
-    }
   }
 
   if (options.sanitizeScreenshotDimensions) {

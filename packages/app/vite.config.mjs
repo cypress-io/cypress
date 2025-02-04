@@ -1,4 +1,4 @@
-import { makeConfig } from '../frontend-shared/vite.config.mjs'
+import { makeConfig } from '@packages/frontend-shared/vite.config.mjs'
 import Layouts from 'vite-plugin-vue-layouts'
 import Pages from 'vite-plugin-pages'
 import Copy from 'rollup-plugin-copy'
@@ -20,7 +20,13 @@ export default makeConfig({
       '@popperjs/core',
       '@opentelemetry/*',
     ],
+    esbuildOptions: { 
+      target: "ES2022" 
+    }
   },
+  build: {
+    target: "ES2022"
+  }
 }, {
   plugins: [
     Layouts(),
@@ -32,7 +38,7 @@ export default makeConfig({
       }],
     }),
     Legacy({
-      targets: ['Chrome >= 80', 'Firefox >= 86', 'Edge >= 80'],
+      targets: ['last 3 major versions'],
       modernPolyfills: true,
       renderLegacyChunks: false,
     }),

@@ -1,29 +1,32 @@
 {
   "name": "@cypress/angular",
   "version": "0.0.0-development",
-  "description": "Test Angular Components using Cypress",
+  "description": "Test Angular Components with Cypress",
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
+    "dev": "rollup -c rollup.config.mjs -w",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^14.2.0",
-    "@angular/core": "^14.2.0",
-    "@angular/platform-browser-dynamic": "^14.2.0",
+    "@angular/common": "^17.2.0",
+    "@angular/core": "^17.2.0",
+    "@angular/platform-browser-dynamic": "^17.2.0",
     "@cypress/mount-utils": "0.0.0-development",
+    "rollup": "^4.24.4",
     "typescript": "~5.4.5",
-    "zone.js": "~0.11.4"
+    "zone.js": "~0.14.6"
   },
   "peerDependencies": {
-    "@angular/common": ">=13",
-    "@angular/core": ">=13",
-    "@angular/platform-browser-dynamic": ">=13",
-    "zone.js": ">=0.11.0"
+    "@angular/common": ">=17.2",
+    "@angular/core": ">=17.2",
+    "@angular/platform-browser-dynamic": ">=17.2",
+    "rxjs": ">=7.5.0",
+    "zone.js": ">=0.13.0"
   },
   "files": [
     "dist"
@@ -44,6 +47,10 @@
     "testing"
   ],
   "contributors": [
+    {
+      "name": "Bill Glesias",
+      "social": "@atofstryker"
+    },
     {
       "name": "Jordan Powell",
       "social": "@jordanpowell88"

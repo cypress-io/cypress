@@ -1,7 +1,6 @@
 {
   "extends": "./../ts/tsconfig.json",
   "compilerOptions": {
-    "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": false
   },

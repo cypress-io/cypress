@@ -8,7 +8,6 @@ import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
-import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import fixture from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -20,12 +19,11 @@ import { cookieJar, SameSiteContext, automationCookieToToughCookie, Serializable
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
-
+import type { Automation } from './automation'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
-import { cors } from '@packages/network'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 
@@ -39,6 +37,12 @@ const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
 }
 
+type GenericHandler = { on: (event: string, listener: (...args: any[]) => void) => void }
+type ExtendedSocketIoServer = socketIo.SocketIOServer & GenericHandler
+type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
+
+type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
+
 export class SocketBase {
   private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
@@ -49,8 +53,8 @@ export class SocketBase {
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
-  protected _socketIo?: socketIo.SocketIOServer
-  protected _cdpIo?: CDPSocketServer
+  protected _socketIo?: ExtendedSocketIoServer
+  protected _cdpIo?: ExtendedCDPSocketServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
@@ -125,7 +129,7 @@ export class SocketBase {
 
   startListening (
     server: DestroyableHttpServer,
-    automation,
+    automation: Automation,
     config,
     options,
     callbacks: StartListeningCallbacks,
@@ -155,13 +159,14 @@ export class SocketBase {
 
     const { socketIoRoute, socketIoCookie } = config
 
-    const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie)
+    const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie) as ExtendedSocketIoServer
     const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute)
 
     automation.use({
-      onPush: (message, data) => {
+      // @ts-ignore - this error is new, but not introduced in the most recent edit. TODO: fix
+      onPush: async (message, data) => {
         socketIo.emit('automation:push:message', message, data)
-        cdpIo.emit('automation:push:message', message, data)
+        await cdpIo.emit('automation:push:message', message, data)
       },
     })
 
@@ -377,9 +382,9 @@ export class SocketBase {
         })
 
         const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const domain = cors.getOrigin(url)
+          const { hostname } = new URL(url)
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
+          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext)
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
@@ -389,7 +394,7 @@ export class SocketBase {
           // update the dev server with the spec running
           debug(`updating CT dev-server with spec: ${spec.relative}`)
           // @ts-expect-error
-          await devServer.updateSpecs([spec])
+          await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
 
           return socket.emit('dev-server:on-spec-updated')
         })
@@ -417,10 +422,6 @@ export class SocketBase {
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
                 return options.onResetServerState()
-              case 'log:memory:pressure':
-                return firefoxUtil.log()
-              case 'firefox:force:gc':
-                return firefoxUtil.collectGarbage()
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':
@@ -599,7 +600,7 @@ export class SocketBase {
     })
 
     this.getIos().forEach((io) => {
-      io?.of('/data-context').on('connection', (socket: Socket) => {
+      (io?.of('/data-context') as ExtendedSocketIoNamespace).on('connection', (socket: Socket) => {
         socket.on('graphql:request', handleGraphQLSocketRequest)
       })
     })

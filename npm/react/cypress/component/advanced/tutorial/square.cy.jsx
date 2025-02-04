@@ -1,27 +1,17 @@
 /// <reference types="cypress" />
-import React from 'react'
+import React, { useState } from 'react'
 import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // let's put React component right in the spec file
-class Square extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      value: null,
-    }
-  }
+export default function Square ({ value: valueAsProp }) {
+  const [valueAsState, setValueAsState] = useState(null)
 
-  render () {
-    return (
-      <button
-        className="square"
-        onClick={() => this.setState({ value: this.props.value })}
-      >
-        {this.state.value}
-      </button>
-    )
-  }
+  return (
+    <button className="square" onClick={() => setValueAsState(valueAsProp)}>
+      {valueAsState}
+    </button>
+  )
 }
 
 describe('Square', () => {

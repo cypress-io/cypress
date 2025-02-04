@@ -29,12 +29,12 @@
         :disabled="autStore.isRunning"
       >
         <template #heading>
-          <img
+          <component
+            :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
             v-if="selectedBrowser.displayName"
             class="min-w-[16px] w-[16px]"
             alt=""
-            :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
-          > {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
+          /> {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>
       </SpecRunnerDropdown>
       <SpecRunnerDropdown

@@ -23,6 +23,10 @@ describe('lib/browsers/memory', () => {
     await memory.default.endProfiling()
   })
 
+  after(() => {
+    sinon.restore()
+  })
+
   context('#getJsHeapSizeLimit', () => {
     it('retrieves the jsHeapSizeLimit from performance.memory', async () => {
       const automation = sinon.createStubInstance(Automation)

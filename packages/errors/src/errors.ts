@@ -120,7 +120,7 @@ export const AllCypressErrors = {
         Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
-        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox'])}
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome-for-testing', 'edge', 'firefox'])}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -387,16 +387,6 @@ export const AllCypressErrors = {
         The first setting of --auto-cancel-after-failures for any given run takes precedent.
 
         https://on.cypress.io/auto-cancellation-mismatch`
-  },
-  DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
-    return errTemplate`\
-      Deprecation Warning: The ${fmt.highlight(`before:browser:launch`)} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
-
-      The event switched from yielding the second argument as an ${fmt.highlightSecondary(`array`)} of browser arguments to an options ${fmt.highlightSecondary(`object`)} with an ${fmt.highlightSecondary(`args`)} property.
-
-      We've detected that your code is still using the previous, deprecated interface signature.
-
-      This code will not work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args`
   },
   DUPLICATE_TASK_KEY: (arg1: string[]) => {
     return errTemplate`\
@@ -1251,6 +1241,12 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
+        A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
+        You can safely remove this option from your config.`
+  },
   // TODO: verify configFile is absolute path
   // TODO: make this relative path, not absolute
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
@@ -1259,9 +1255,9 @@ export const AllCypressErrors = {
 
         Please remove this flag from: ${fmt.path(arg1.configFile)}
 
-        Component Testing is now a standalone command. You can now run your component tests with:
+        Component Testing is now a supported testing type. You can run your component tests with:
 
-          ${fmt.terminal(`cypress open-ct`)}
+          ${fmt.terminal(`cypress open --component`)}
 
         https://on.cypress.io/migration-guide`
   },
@@ -1350,25 +1346,32 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
-  EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+  JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
-    The ${fmt.highlight(`experimentalJustInTimeCompile`)} experiment is currently only supported for Component Testing.
-
-    If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/just-in-time-compile`
+    The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`
   },
-  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-    const code = errPartial`
-    {
-      e2e: {
-        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
-      },
-    }`
-
+  EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
-        The suggested values are only a recommendation.
+      The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is over. ${fmt.highlight('document.domain')} injection is now off by default.
 
-        ${fmt.code(code)}`
+      Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
+    `
+  },
+  // TODO: link to docs on injectDocumentDomain
+  INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
+    return errTemplate`\
+      The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in Cypress 15.
+    
+      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
+    `
+  },
+  INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+    // TODO: link to docs on injectDocumentDomain
+    return errTemplate`\
+      The ${fmt.highlight('injectDocumentDomain')} option is only available for E2E testing.
+
+      Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
+    `
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
@@ -1428,6 +1431,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/component-testing`
   },
+
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
   },
@@ -1632,7 +1636,7 @@ export const AllCypressErrors = {
       {
         component: {
           devServer: {
-            framework: 'create-react-app', ${fmt.comment('// Your framework')}
+            framework: 'react', ${fmt.comment('// Your framework')}
             bundler: 'webpack' ${fmt.comment('// Your dev server')}
           }
         }

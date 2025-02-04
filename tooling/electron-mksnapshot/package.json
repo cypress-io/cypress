@@ -15,7 +15,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@electron/get": "^2.0.2",
+    "@electron/get": "^3.0.0",
     "debug": "^4.3.4",
     "extract-zip": "^2.0.1",
     "fs-extra": "^10.0.0",

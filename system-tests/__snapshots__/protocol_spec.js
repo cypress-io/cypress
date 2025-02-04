@@ -72,7 +72,7 @@ exports['e2e events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:33:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -113,7 +113,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -140,7 +140,7 @@ exports['e2e events'] = `
         "line": 5,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -181,7 +181,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -208,7 +208,7 @@ exports['e2e events'] = `
         "line": 12,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -249,7 +249,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -276,7 +276,7 @@ exports['e2e events'] = `
         "line": 17,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -317,7 +317,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -344,7 +344,7 @@ exports['e2e events'] = `
         "line": 22,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -385,7 +385,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -412,7 +412,7 @@ exports['e2e events'] = `
         "line": 32,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -453,7 +453,7 @@ exports['e2e events'] = `
               "line": 38,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -480,7 +480,7 @@ exports['e2e events'] = `
         "line": 39,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -521,7 +521,7 @@ exports['e2e events'] = `
               "line": 38,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -548,7 +548,7 @@ exports['e2e events'] = `
         "line": 46,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -589,7 +589,7 @@ exports['e2e events'] = `
               "line": 54,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -616,7 +616,7 @@ exports['e2e events'] = `
         "line": 55,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -646,7 +646,7 @@ exports['e2e events'] = `
         "line": 2,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -676,7 +676,7 @@ exports['e2e events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -751,7 +751,7 @@ exports['e2e events'] = `
           "line": 7,
           "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:33:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -801,7 +801,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -837,7 +837,7 @@ exports['e2e events'] = `
           "line": 5,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -889,7 +889,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -925,7 +925,7 @@ exports['e2e events'] = `
           "line": 12,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -977,7 +977,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1013,7 +1013,7 @@ exports['e2e events'] = `
           "line": 17,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1065,7 +1065,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1101,7 +1101,7 @@ exports['e2e events'] = `
           "line": 22,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1153,7 +1153,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1189,7 +1189,7 @@ exports['e2e events'] = `
           "line": 32,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1241,7 +1241,7 @@ exports['e2e events'] = `
                 "line": 38,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1277,7 +1277,7 @@ exports['e2e events'] = `
           "line": 39,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1329,7 +1329,7 @@ exports['e2e events'] = `
                 "line": 38,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1365,7 +1365,7 @@ exports['e2e events'] = `
           "line": 46,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1417,7 +1417,7 @@ exports['e2e events'] = `
                 "line": 54,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               }
             }
           ],
@@ -1453,7 +1453,7 @@ exports['e2e events'] = `
           "line": 55,
           "column": 4,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1501,7 +1501,7 @@ exports['e2e events'] = `
           "line": 2,
           "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1551,7 +1551,7 @@ exports['e2e events'] = `
           "line": 7,
           "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -1628,7 +1628,7 @@ exports['e2e events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:33:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -1675,7 +1675,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -1712,7 +1712,7 @@ exports['e2e events'] = `
         "line": 5,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -1759,7 +1759,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -1796,7 +1796,7 @@ exports['e2e events'] = `
         "line": 12,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -1843,7 +1843,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -1880,7 +1880,7 @@ exports['e2e events'] = `
         "line": 17,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -1927,7 +1927,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -1964,7 +1964,7 @@ exports['e2e events'] = `
         "line": 22,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2011,7 +2011,7 @@ exports['e2e events'] = `
               "line": 4,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -2048,7 +2048,7 @@ exports['e2e events'] = `
         "line": 32,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2095,7 +2095,7 @@ exports['e2e events'] = `
               "line": 38,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -2132,7 +2132,7 @@ exports['e2e events'] = `
         "line": 39,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2179,7 +2179,7 @@ exports['e2e events'] = `
               "line": 38,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -2216,7 +2216,7 @@ exports['e2e events'] = `
         "line": 46,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2263,7 +2263,7 @@ exports['e2e events'] = `
               "line": 54,
               "column": 2,
               "whitespace": "    ",
-              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
             }
           }
         ],
@@ -2300,7 +2300,7 @@ exports['e2e events'] = `
         "line": 55,
         "column": 4,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2346,7 +2346,7 @@ exports['e2e events'] = `
         "line": 2,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2392,7 +2392,7 @@ exports['e2e events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -2454,7 +2454,7 @@ exports['e2e events'] = `
                 "line": 2,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:33:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -2478,7 +2478,7 @@ exports['e2e events'] = `
                 "line": 7,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:33:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -2577,7 +2577,7 @@ exports['e2e events'] = `
                 "line": 4,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               },
               "retries": -1,
               "_slow": 10000,
@@ -2599,7 +2599,7 @@ exports['e2e events'] = `
                     "line": 5,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:17:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -2638,7 +2638,7 @@ exports['e2e events'] = `
                           "line": 4,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -2669,7 +2669,7 @@ exports['e2e events'] = `
                     "line": 12,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:25:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -2708,7 +2708,7 @@ exports['e2e events'] = `
                           "line": 4,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -2739,7 +2739,7 @@ exports['e2e events'] = `
                     "line": 17,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:29:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -2778,7 +2778,7 @@ exports['e2e events'] = `
                           "line": 4,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -2809,7 +2809,7 @@ exports['e2e events'] = `
                     "line": 22,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:33:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -2848,7 +2848,7 @@ exports['e2e events'] = `
                           "line": 4,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -2879,7 +2879,7 @@ exports['e2e events'] = `
                     "line": 32,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:43:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -2918,7 +2918,7 @@ exports['e2e events'] = `
                           "line": 4,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:14:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -2955,7 +2955,7 @@ exports['e2e events'] = `
                 "line": 38,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               },
               "retries": -1,
               "_slow": 10000,
@@ -2977,7 +2977,7 @@ exports['e2e events'] = `
                     "line": 39,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:51:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -3016,7 +3016,7 @@ exports['e2e events'] = `
                           "line": 38,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -3047,7 +3047,7 @@ exports['e2e events'] = `
                     "line": 46,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:59:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -3086,7 +3086,7 @@ exports['e2e events'] = `
                           "line": 38,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:48:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -3123,7 +3123,7 @@ exports['e2e events'] = `
                 "line": 54,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
               },
               "retries": -1,
               "_slow": 10000,
@@ -3145,7 +3145,7 @@ exports['e2e events'] = `
                     "line": 55,
                     "column": 4,
                     "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:71:5)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:185:16)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -3184,7 +3184,7 @@ exports['e2e events'] = `
                           "line": 54,
                           "column": 2,
                           "whitespace": "    ",
-                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:11:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:77:12)\\n    at eval (<anonymous>)"
+                          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/test-isolation.cy.js:68:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)"
                         }
                       }
                     ],
@@ -3258,7 +3258,7 @@ exports['e2e events'] = `
                 "line": 2,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:10:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -3289,7 +3289,7 @@ exports['e2e events'] = `
                 "line": 7,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:23:12)\\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/shadow-dom.cy.js:16:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -6174,15 +6174,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -6204,15 +6204,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -6234,15 +6234,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -6264,15 +6264,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -6312,15 +6312,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+          "relativeFile": "src/components/HelloEarth.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 5,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -6362,15 +6362,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+          "relativeFile": "src/components/HelloEarth.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 11,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -6410,15 +6410,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+          "relativeFile": "src/components/HelloMars.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 5,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -6460,15 +6460,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+          "relativeFile": "src/components/HelloMars.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 11,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -6510,15 +6510,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -6556,15 +6556,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -6602,15 +6602,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -6648,15 +6648,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -6685,15 +6685,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "type": "suite",
           "file": null,
           "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
+            "function": "./src/components/HelloEarth.cy.jsx",
+            "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+            "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+            "relativeFile": "src/components/HelloEarth.cy.jsx",
             "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
+            "line": 4,
+            "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:488:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
+            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -6707,15 +6707,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+                "relativeFile": "src/components/HelloEarth.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 5,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -6738,15 +6738,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+                "relativeFile": "src/components/HelloEarth.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 11,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -6788,15 +6788,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           "type": "suite",
           "file": null,
           "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
+            "function": "./src/components/HelloMars.cy.jsx",
+            "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+            "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+            "relativeFile": "src/components/HelloMars.cy.jsx",
             "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
+            "line": 4,
+            "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:488:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-1.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
+            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -6810,15 +6810,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+                "relativeFile": "src/components/HelloMars.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 5,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -6841,15 +6841,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+                "relativeFile": "src/components/HelloMars.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 11,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -7949,52 +7949,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   ],
   "pageLoading": [],
   "resetTest": [],
-  "responseEndedWithEmptyBody": [
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    }
-  ],
+  "responseEndedWithEmptyBody": [],
   "responseStreamTimedOut": []
 }
 `
@@ -8037,15 +7992,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -8067,15 +8022,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -8097,15 +8052,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -8127,15 +8082,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -8175,15 +8130,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+          "relativeFile": "src/components/HelloEarth.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 5,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -8225,15 +8180,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+          "relativeFile": "src/components/HelloEarth.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 11,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -8273,15 +8228,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+          "relativeFile": "src/components/HelloMars.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 5,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -8323,15 +8278,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         "file": null,
         "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
+          "function": "Suite.<anonymous>",
+          "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+          "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+          "relativeFile": "src/components/HelloMars.cy.jsx",
           "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
+          "line": 11,
+          "column": 2,
           "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+          "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
         },
         "final": true,
         "currentRetry": 0,
@@ -8373,15 +8328,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -8419,15 +8374,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+        "relativeFile": "src/components/HelloEarth.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -8465,15 +8420,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 5,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -8511,15 +8466,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       },
       "file": null,
       "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
+        "function": "Suite.<anonymous>",
+        "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+        "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+        "relativeFile": "src/components/HelloMars.cy.jsx",
         "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
+        "line": 11,
+        "column": 2,
         "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+        "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
       },
       "final": true,
       "currentRetry": 0,
@@ -8548,15 +8503,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "type": "suite",
           "file": null,
           "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
+            "function": "./src/components/HelloEarth.cy.jsx",
+            "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+            "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+            "relativeFile": "src/components/HelloEarth.cy.jsx",
             "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
+            "line": 4,
+            "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:488:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
+            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -8570,15 +8525,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+                "relativeFile": "src/components/HelloEarth.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 5,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -8601,15 +8556,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloEarth.cy.jsx",
+                "relativeFile": "src/components/HelloEarth.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 11,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -8651,15 +8606,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           "type": "suite",
           "file": null,
           "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
+            "function": "./src/components/HelloMars.cy.jsx",
+            "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+            "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+            "relativeFile": "src/components/HelloMars.cy.jsx",
             "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
+            "line": 4,
+            "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:488:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-1.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
+            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -8673,15 +8628,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+                "relativeFile": "src/components/HelloMars.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 5,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -8704,15 +8659,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
               "type": "test",
               "file": null,
               "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
+                "function": "Suite.<anonymous>",
+                "fileUrl": "http://localhost:2121/__cypress/src/spec-0.js",
+                "originalFile": "webpack://protocol-sample-project/./src/components/HelloMars.cy.jsx",
+                "relativeFile": "src/components/HelloMars.cy.jsx",
                 "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
+                "line": 11,
+                "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:462:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
+                "stack": "Error\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:22:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:14)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -9812,52 +9767,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   ],
   "pageLoading": [],
   "resetTest": [],
-  "responseEndedWithEmptyBody": [
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    },
-    {
-      "requestId": "Any.Number",
-      "isCached": true,
-      "timings": {
-        "cdpRequestWillBeSentTimestamp": "Any.Number",
-        "cdpRequestWillBeSentReceivedTimestamp": "Any.Number",
-        "proxyRequestReceivedTimestamp": "Any.Number",
-        "cdpLagDuration": "Any.Number",
-        "proxyRequestCorrelationDuration": "Any.Number"
-      }
-    }
-  ],
+  "responseEndedWithEmptyBody": [],
   "responseStreamTimedOut": []
 }
 `

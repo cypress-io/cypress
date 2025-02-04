@@ -5,7 +5,7 @@ import dfd from 'p-defer'
 import type { Socket } from '@packages/socket'
 import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 import assert from 'assert'
-
+import type { Automation } from './automation'
 const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
@@ -22,7 +22,7 @@ export class SocketCt extends SocketBase {
     }
   }
 
-  startListening (server: DestroyableHttpServer, automation, config, options) {
+  startListening (server: DestroyableHttpServer, automation: Automation, config, options) {
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket: Socket) => {
         debug('do onSocketConnection')

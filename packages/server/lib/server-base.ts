@@ -14,7 +14,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri, concatStream } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri, concatStream, DocumentDomainInjection } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -30,7 +30,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
-import { RemoteStates } from './remote_states'
+import { RemoteStates, RemoteState } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 import fileServer from './file_server'
@@ -42,6 +42,8 @@ import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
+import type { Automation } from './automation'
+import type { AutomationCookie } from './automation/cookies'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -156,11 +158,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
-  private skipDomainInjectionForDomains: string[] | null = null
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
+  private _documentDomainInjection: DocumentDomainInjection
 
-  constructor () {
+  constructor (config: Cfg) {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -170,12 +172,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._baseUrl = null
     this._fileServer = null
 
-    this._remoteStates = new RemoteStates(() => {
+    this._documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
+
+    const remoteStatePorts = () => {
       return {
-        serverPort: this._port(),
-        fileServerPort: this._fileServer?.port(),
+        server: this._port(),
+        fileServer: this._fileServer?.port(),
       }
-    })
+    }
+
+    this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
 
     this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
@@ -237,11 +243,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, experimentalSkipDomainInjection } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
       this._server = this._createHttpServer(app)
-
-      this.skipDomainInjectionForDomains = experimentalSkipDomainInjection
 
       const onError = (err) => {
         // if the server bombs before starting
@@ -459,7 +463,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+  startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
     // e2e only?
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
@@ -737,7 +741,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onResolveUrl (urlStr, userAgent, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl (urlStr, userAgent, automationRequest: (message: string, data: Record<string, unknown>) => Bluebird<any>, options: Record<string, any> = { headers: {} }) {
     debug('resolving visit %o', {
       url: urlStr,
       userAgent,
@@ -820,8 +824,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         const state = this._remoteStates.set(urlStr, options)
 
         // TODO: Update url.resolve signature to not use deprecated methods
-        urlFile = url.resolve(state.fileServer as string, urlStr)
-        urlStr = url.resolve(state.origin as string, urlStr)
+        urlFile = state?.fileServer ? url.resolve(state.fileServer, urlStr) : url.resolve('', urlStr)
+        urlStr = state?.origin ? url.resolve(state.origin, urlStr) : url.resolve('', urlStr)
       }
 
       const onReqError = (err) => {
@@ -851,10 +855,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
           return runPhase(() => {
             // get the cookies that would be sent with this request so they can be rehydrated
+            const hostname = newUrl ? this._documentDomainInjection.getHostname(newUrl) : undefined
+
             return automationRequest('get:cookies', {
-              domain: cors.getSuperDomain(newUrl),
+              domain: hostname,
             })
-            .then((cookies) => {
+            .then((cookies: (AutomationCookie | null)[]) => {
               const statusIs2xxOrAllowedFailure = () => {
                 // is our status code in the 2xx range, or have we disabled failing
                 // on status code?
@@ -896,7 +902,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                 // https://github.com/cypress-io/cypress/issues/1727
                 details.isHtml = isResponseHtml(contentType, responseBuffer)
 
-                debug('resolve:url response ended, setting buffer %o', { newUrl, details })
+                debug('resolve:url response ended, setting buffer %o', { newUrl, alreadyVisited: options.hasAlreadyVisitedUrl, details })
 
                 details.totalTime = Date.now() - startTime
 
@@ -904,9 +910,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
+                  const originsMatchByPolicy = this._documentDomainInjection.urlsMatch(primaryRemoteState.origin, newUrl || '')
+
                   const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl
-                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { skipDomainInjectionForDomains: this.skipDomainInjectionForDomains })
+                    && !originsMatchByPolicy
                     || options.isFromSpecBridge
+
+                  debug('urlDoesNotMatchPolicy?', {
+                    urlDoesNotMatchPolicyBasedOnDomain,
+                    hasAlreadyVisited: options.hasAlreadyVisited,
+                    originsMatchByPolicy,
+                    isFromSpecBridge: options.isFromSpecBridge,
+                  })
 
                   if (!handlingLocalFile) {
                     this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)
@@ -943,7 +958,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         })
       }
 
-      const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
+      const restorePreviousRemoteState = (previousRemoteState: RemoteState, previousRemoteStateIsPrimary: boolean) => {
         this._remoteStates.set(previousRemoteState, {}, previousRemoteStateIsPrimary)
       }
 
@@ -991,7 +1006,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()

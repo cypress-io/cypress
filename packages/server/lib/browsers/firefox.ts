@@ -268,8 +268,6 @@ const defaultPreferences = {
 
   // necessary for adding extensions
   'devtools.debugger.remote-enabled': true,
-  // bind foxdriver to 127.0.0.1
-  'devtools.debugger.remote-host': '127.0.0.1',
   // devtools.debugger.remote-port is set per-launch
 
   'devtools.debugger.prompt-connection': false,
@@ -370,7 +368,12 @@ toolbar {
   overflow: hidden !important;
   display: none;
 }
-
+toolbox {
+  height: 0px !important;
+  min-height: 0px !important;
+  overflow: hidden !important;
+  border: none !important;
+}
 `
 
 let browserCriClient: BrowserCriClient | undefined
@@ -461,17 +464,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   const [
-    foxdriverPort,
     marionettePort,
     webDriverBiDiPort,
-  ] = await Promise.all([getPort(), getPort(), getPort()])
+  ] = await Promise.all([getPort(), getPort()])
 
-  defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
   // NOTE: we get the BiDi port and set it inside of geckodriver, but BiDi is not currently enabled (see remote.active-protocols above).
   // this is so the BiDi websocket port does not get set to 0, which is the default for the geckodriver package.
-  debug('available ports: %o', { foxdriverPort, marionettePort, webDriverBiDiPort })
+  debug('available ports: %o', { marionettePort, webDriverBiDiPort })
 
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
@@ -560,11 +561,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   // resolution of exactly 1280x720
-  // (height must account for firefox url bar, which we can only shrink to 2px)
   const BROWSER_ENVS = {
     MOZ_REMOTE_SETTINGS_DEVTOOLS: '1',
     MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '722',
+    MOZ_HEADLESS_HEIGHT: '720',
     ...launchOptions.env,
   }
 
@@ -737,7 +737,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }))
 
     debug('setting up firefox utils')
-    browserCriClient = await firefoxUtil.setup({ automation, url, foxdriverPort, webdriverClient, remotePort: cdpPort, onError: options.onError })
+    browserCriClient = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, onError: options.onError })
 
     await utils.executeAfterBrowserLaunch(browser, {
       webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),

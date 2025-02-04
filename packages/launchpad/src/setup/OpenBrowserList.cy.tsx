@@ -2,6 +2,7 @@ import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/longBrowsersList'
 import { defaultMessages } from '@cy/i18n'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 // Testing Note: because state for this component is maintained on the server and updated via gql mutations,
 // this component test can't do interactions that change the chosen browser at the moment. Interactions and states
@@ -24,37 +25,11 @@ describe('<OpenBrowserList />', () => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
-    // Firefox early version should be disabled
-    cy.get('[data-cy-browser="firefox"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[data-cy-browser="firefox"] [data-cy="unsupported-browser-tooltip-trigger"]').should('exist')
-    cy.get('[data-cy-browser="electron"] [data-cy="unsupported-browser-tooltip-trigger"]').should('not.exist')
-
     // Renders a default logo if we don't provide one
     cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
+    cy.get('[data-cy-browser="fake"] svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
 
     cy.percySnapshot()
-  })
-
-  it('displays a tooltip for an unsupported browser', () => {
-    cy.mountFragment(OpenBrowserListFragmentDoc, {
-      render: (gqlVal) =>
-        (<div class="border-current border resize overflow-auto">
-          <div class="h-40" />
-          <OpenBrowserList gql={gqlVal}/>
-        </div>),
-    })
-
-    cy.get('[data-cy-browser="firefox"]:nth(2) [data-cy="unsupported-browser-tooltip-trigger"]')
-    .trigger('mouseenter')
-
-    cy.get('.v-popper__popper--shown')
-    .contains('Cypress does not support running Firefox Developer Edition version 69.')
-
-    /*
-      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
-      cy.percySnapshot()
-    */
   })
 
   it('emits navigates back', () => {

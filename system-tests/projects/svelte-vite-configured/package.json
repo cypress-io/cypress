@@ -1,0 +1,21 @@
+{
+  "name": "svelte-vite-configured",
+  "version": "0.0.0-test",
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte": "^5.2.7",
+    "svelte-check": "^4.1.0",
+    "tslib": "^2.8.1",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.1"
+  },
+  "type": "module",
+  "projectFixtureDirectory": "svelte"
+}

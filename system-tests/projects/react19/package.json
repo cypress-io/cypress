@@ -1,0 +1,19 @@
+{
+  "name": "react19",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "style-loader": "^4.0.0",
+    "vite": "^6.0.3",
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "^5.1.0"
+  },
+  "sideEffects": false,
+  "projectFixtureDirectory": "react"
+}

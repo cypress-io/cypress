@@ -1,19 +1,21 @@
 {
+  "name": "runner-ct-specs",
+  "version": "0.0.0-test",
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7",
-    "@babel/preset-react": "^7",
-    "@babel/preset-typescript": "^7",
-    "@vitejs/plugin-react": "^2.1.0",
-    "babel-loader": "^8.3.0",
-    "typescript": "^4.7.4",
-    "vite": "3.1.3",
-    "webpack": "^5",
-    "webpack-dev-server": "^4"
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "babel-loader": "^9.2.1",
+    "typescript": "^5.6.3",
+    "vite": "5.4.10",
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "^5.1.0"
   },
   "projectFixtureDirectory": "runner-specs"
 }

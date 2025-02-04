@@ -7,7 +7,7 @@
   "scripts": {
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
@@ -15,7 +15,8 @@
     "test": "yarn test-unit",
     "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
     "pretest-unit": "yarn clean",
-    "test-unit": "mocha"
+    "test-unit": "mocha",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "ansi_up": "5.0.0",
@@ -26,7 +27,7 @@
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "8.2.2",
-    "@types/node": "18.17.5",
+    "@types/node": "20.16.0",
     "@types/pngjs": "^6.0.1",
     "ansi-styles": "^5",
     "chai": "4.2.0",

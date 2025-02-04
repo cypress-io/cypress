@@ -5,7 +5,7 @@ import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
-import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
+import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser, type OpenModeOptions } from '@packages/types'
 
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
@@ -19,6 +19,7 @@ import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
 import { logInternal } from './utils'
 import { tabUntil } from './tab-until'
+import './browserIconCommands'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -401,9 +402,11 @@ function visitLaunchpad (options: { showWelcome?: boolean } = { showWelcome: fal
         // avoid re-stubbing already stubbed prompts in case we call getPreferences multiple times
         if ((ctx._apis.localSettingsApi.getPreferences as any).wrappedMethod === undefined) {
           o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-            [13]: Date.now(),
+            [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
           } })
         }
+      }, {
+        MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
       }).then(() => {
         return launchpadVisit()
       })

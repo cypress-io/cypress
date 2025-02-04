@@ -2,22 +2,25 @@ module.exports = {
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {
-      on('before:browser:launch', (browser) => {
+      on('before:browser:launch', (browser, launchOptions) => {
         const { name } = browser
 
-        switch (name) {
-          case 'chrome':
-            return [name, 'foo', 'bar', 'baz']
-          case 'electron':
-            return {
-              preferences: {
-                browser: 'electron',
-                foo: 'bar',
-              },
-            }
-          default:
-            throw new Error(`unrecognized browser name: '${name}' for before:browser:launch`)
+        if ((name) === 'chrome') {
+          launchOptions.args = [name, 'foo', 'bar', 'baz']
+
+          return launchOptions
         }
+
+        if ((name) === 'electron') {
+          launchOptions.preferences = {
+            browser: 'electron',
+            foo: 'bar',
+          }
+
+          return launchOptions
+        }
+
+        throw new Error(`unrecognized browser name: '${name}' for before:browser:launch`)
       })
 
       return config

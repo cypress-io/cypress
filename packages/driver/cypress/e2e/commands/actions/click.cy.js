@@ -1723,6 +1723,52 @@ describe('src/cy/commands/actions/click', () => {
           cy.get('#dom').invoke('css', 'scrollBehavior').then((scrollBehavior) => expect(scrollBehavior).to.eq('smooth'))
         })
       })
+
+      describe('retries in after hook when failures', () => {
+        it('clicks element in hook', () => {
+          cy.on('fail', (err) => {
+            expect(err.message).contain('expected true to be false')
+          })
+
+          expect(true).to.be.false
+        })
+
+        after(() => {
+          const onClick = cy.stub()
+
+          const $button = cy.$$('#button')
+
+          $button.on('click', onClick)
+
+          cy.get('#button').click().then(() => {
+            expect(onClick).to.be.calledOnce
+          })
+        })
+      })
+
+      describe('retries in afterEach hook when failures', () => {
+        it('clicks element in hook', () => {
+          cy.on('fail', (err) => {
+            expect(err.message).contain('expected true to be false')
+
+            return false
+          })
+
+          expect(true).to.be.false
+        })
+
+        afterEach(() => {
+          const onClick = cy.stub()
+
+          const $button = cy.$$('#button')
+
+          $button.on('click', onClick)
+
+          cy.get('#button').click().then(() => {
+            expect(onClick).to.be.calledOnce
+          })
+        })
+      })
     })
 
     describe('assertion verification', () => {
@@ -2190,7 +2236,6 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.click()
       })
-      // Array(1).fill().map(()=>
 
       it('throws when any member of the subject isnt visible', function (done) {
         // sometimes the command will timeout early with

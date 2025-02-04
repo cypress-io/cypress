@@ -14,7 +14,7 @@
         :key="browser.id"
         :data-cy-browser="browser.name"
         :value="browser.id"
-        :disabled="browser.disabled || !browser.isVersionSupported || browserStatus.chosen"
+        :disabled="browser.disabled || !browser.isVersionSupported ||browserStatus.chosen"
       >
         <RadioGroupLabel
           :for="browser.id"
@@ -31,9 +31,9 @@
             popper-class="max-w-lg"
           >
             <i-cy-circle-bg-question-mark_x16
-              data-cy="unsupported-browser-tooltip-trigger"
+              data-cy="browser-warning-tooltip-trigger"
               class="mt-[8px] mr-[8px] top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
-              alt="unsupported browser"
+              alt="browser warning"
             />
             <template #popper>
               <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
@@ -48,16 +48,16 @@
             </template>
           </Tooltip>
           <div class="text-center">
-            <img
-              :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
+            <component
+              :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               alt=""
               class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
-            >
+            />
           </div>
           <div
             class="font-medium pt-2 px-2 text-[18px] leading-[28px] truncate"
-            :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
+            :class="checked ? 'text-jade-600' : (browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}
           </div>
@@ -109,7 +109,7 @@
             >
               <component
                 :is="testingTypeIcon"
-                class="mr-[8px] icon-dark-white"
+                class="mr-[8px] icon-dark-gray-500 icon-light-transparent"
               />
               {{ browserText.running }}
             </Button>
@@ -144,7 +144,9 @@
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
-        <ArrowRightIcon class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]" />
+        <ArrowRightIcon
+          class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
+        />
         {{ browserText.switchTestingType }}
       </Button>
     </div>
@@ -188,9 +190,9 @@ fragment OpenBrowserList on CurrentProject {
   browsers {
     id
     disabled
-    isVersionSupported
     name
     displayName
+    isVersionSupported
     warning
     majorVersion
   }

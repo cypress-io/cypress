@@ -2,8 +2,8 @@ import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
@@ -227,8 +227,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.findByTestId('select-browser').contains('Fake Browser')
 
-    cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
-
+    cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
     cy.findByTestId('viewport').contains('500x500')
   })
 

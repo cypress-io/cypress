@@ -1,10 +1,10 @@
 {
-  "name": "@test-project/webpack-preprocessor-ts-loader",
+  "name": "webpack-preprocessor-ts-loader",
   "version": "0.0.0-test",
   "devDependencies": {
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
-    "cypress": "file:../../../cli/build",
-    "ts-loader": "7.0.4",
-    "typescript": "4.2.3"
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1"
   }
 }

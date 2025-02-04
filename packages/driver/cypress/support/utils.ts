@@ -21,39 +21,28 @@ export const findReactInstance = function (dom) {
 }
 
 export const clickCommandLog = (sel, type) => {
-  return cy.wait(10)
+  // trigger the LONG_RUNNING_THRESHOLD to display the command line
+  // this adds time to test but makes a more accurate test as React 18+ does not rerender when setting internals
+  return cy.wait(2000)
   .then(() => {
-    return withMutableReporterState(() => {
-      const commandLogEl = getCommandLogWithText(sel, type)
-      const reactCommandInstance = findReactInstance(commandLogEl[0])
+    const commandLogEl = getCommandLogWithText(sel, type)
 
-      if (!reactCommandInstance) {
-        assert(false, 'failed to get command log React instance')
-      }
+    const reactCommandInstance = findReactInstance(commandLogEl[0])
 
-      reactCommandInstance.props.appState.isRunning = false
-      const inner = $(commandLogEl).find('.command-wrapper-text')
+    if (!reactCommandInstance) {
+      assert(false, 'failed to get command log React instance')
+    }
 
-      inner.get(0).click()
+    reactCommandInstance.props.appState.isRunning = false
+    const inner = $(commandLogEl).find('.command-wrapper-text')
 
+    inner.get(0).click()
+
+    // wait slightly for a repaint of the reporter
+    cy.wait(10).then(() => {
       // make sure command was pinned, otherwise throw a better error message
       expect(cy.$$('.runnable-active .command-pin', top?.document).length, 'command should be pinned').ok
     })
-  })
-}
-
-export const withMutableReporterState = (fn) => {
-  // @ts-ignore
-  top?.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
-
-  const currentTestLog = findReactInstance(cy.$$('.runnable-active', top?.document)[0])
-
-  currentTestLog.props.model._isOpen = true
-
-  return Promise.try(fn)
-  .then(() => {
-    // @ts-ignore
-    top?.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
   })
 }
 
