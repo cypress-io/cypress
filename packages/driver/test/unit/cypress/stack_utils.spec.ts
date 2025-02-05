@@ -5,7 +5,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 import source_map_utils from '../../../src/cypress/source_map_utils'
 import stack_utils from '../../../src/cypress/stack_utils'
-import stackFrameFixture from './__fixtures__/spec_stackframes.json'
+import stackFrameFixture from './__fixtures__/getInvocationDetails_spec_stackframes.json'
 
 vi.mock('../../../src/cypress/source_map_utils', () => {
   return {

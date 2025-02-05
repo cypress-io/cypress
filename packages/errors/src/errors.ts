@@ -1854,7 +1854,7 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(deps, { prefix: ' - ' })}
 
-      If you're experiencing problems, downgrade dependencies and restart Cypress.
+      If you're experiencing problems, ensure your dependencies are on a supported version and restart Cypress.
     `
   },
 

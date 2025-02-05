@@ -92,7 +92,15 @@
         script = replace.call(script, queryStringRegex, '')
       }
 
-      return stringIncludes.call(err.stack, script)
+      // stack URLs come in URI encoded by default.
+      // we need to make sure our script names are also URI encoded
+      // so the comparisons match
+      let scriptName = encodeURI(script)
+
+      // we do NOT want to encode backslashes (\) as this causes pathing issues on Windows
+      scriptName = scriptName.replace(/%5C/g, '\\')
+
+      return stringIncludes.call(err.stack, scriptName)
     })
 
     return filteredLines.length > 0

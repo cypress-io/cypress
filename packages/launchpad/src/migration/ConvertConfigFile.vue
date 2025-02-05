@@ -135,7 +135,7 @@
 import { computed } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
-import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
+import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import { useI18n } from '@cy/i18n'

@@ -1,4 +1,13 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
+
+// NOTE: If you modify the logic relating to this file, ensure the
+// UI for error code frames works as expected with the binary. This includes each
+// browser, as well as e2e and CT testing types. Stack patterns differ in Chrome
+// between the binary and dev mode, so Cy in Cy tests cannot catch them proactively.
+
+// Various stack patterns are saved as scenario fixtures in ./driver/test
+// to prevent regressions.
+
 import _ from 'lodash'
 import path from 'path'
 import errorStackParser from 'error-stack-parser'

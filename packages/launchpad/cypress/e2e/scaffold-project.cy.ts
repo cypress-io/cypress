@@ -1,4 +1,4 @@
-import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
+import type { SnapshotScaffoldTestResult } from '../tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
 // and add Cypress using the launchpad setup wizard.
