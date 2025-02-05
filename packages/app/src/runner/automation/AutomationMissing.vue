@@ -56,7 +56,7 @@ import type { AutomationMissingFragment } from '../../generated/graphql'
 import SpecRunnerDropdown from '../SpecRunnerDropdown.vue'
 import { ref } from 'vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import Alert from '../../../../frontend-shared/src/components/Alert.vue'
+import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const { t } = useI18n()

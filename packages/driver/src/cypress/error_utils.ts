@@ -1,5 +1,13 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
+// NOTE: If you modify the logic relating to this file, ensure the
+// UI for error code frames works as expected with the binary. This includes each
+// browser, as well as e2e and CT testing types. Stack patterns differ in Chrome
+// between the binary and dev mode, so Cy in Cy tests cannot catch them proactively.
+
+// Various stack patterns are saved as scenario fixtures in ./driver/test
+// to prevent regressions.
+
 import chai from 'chai'
 import _ from 'lodash'
 import $dom from '../dom'
@@ -136,7 +144,7 @@ const getUserInvocationStack = (err, state) => {
   // command errors and command assertion errors (default assertion or cy.should)
   // have the invocation stack attached to the current command
   // prefer err.userInvocation stack if it's been set
-  let userInvocationStack = err.userInvocationStack || state('currentAssertionUserInvocationStack')
+  let userInvocationStack: string | undefined = err.userInvocationStack || state('currentAssertionUserInvocationStack')
 
   // if there is no user invocation stack from an assertion or it is the default
   // assertion, meaning it came from a command (e.g. cy.get), prefer the
@@ -153,14 +161,29 @@ const getUserInvocationStack = (err, state) => {
     userInvocationStack = withInvocationStack?.get('userInvocationStack')
   }
 
-  if (!userInvocationStack) return
+  if (!userInvocationStack) return undefined
 
-  // In CT with vite, the user invocation stack includes internal cypress code, so clean it up
+  // In some environments, additional codepoints are included in the stack prior
+  // to the first userland codepoint.
+  const internalCodepointIdentifier = [
+    '/__cypress/runner', // binary environments and most dev environments
+    'cypress:///../driver', // webpack CT with a dev build
+  ].find((identifier) => {
+    return userInvocationStack?.includes(identifier)
+  })
 
-  // remove lines that are included _prior_ to the first userland line
-  userInvocationStack = $stackUtils.stackWithLinesDroppedFromMarker(userInvocationStack, '/__cypress', true)
+  // removes lines in the invocation stack above the first userland line. If one
+  // of the cypress codepoint identifiers is not present in the stack trace,
+  // the first line will be a userland codepoint, so no dropping is necessary.
+  userInvocationStack = internalCodepointIdentifier ? _.dropWhile(
+    userInvocationStack.split('\n'),
+    (stackLine) => {
+      return stackLine.includes(internalCodepointIdentifier)
+    },
+  ).join('\n') : userInvocationStack
 
-  // remove lines that are included _after and including_ the replacement marker
+  // remove lines that are included _after and including_ the replacement marker -
+  // these are also internal to cypress, and unimportant for the user invocation stack
   userInvocationStack = $stackUtils.stackPriorToReplacementMarker(userInvocationStack)
 
   if (
@@ -170,6 +193,8 @@ const getUserInvocationStack = (err, state) => {
   ) {
     return userInvocationStack
   }
+
+  return undefined
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
