@@ -2,6 +2,9 @@ const https = require('https')
 const fs = require('fs')
 const yaml = require('yaml')
 
+const CHROME_STABLE_KEY = 'chrome-stable-version'
+const CHROME_BETA_KEY = 'chrome-beta-version'
+
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
 const getLatestVersionData = ({ channel, currentVersion }) => {
   const options = {
@@ -37,8 +40,8 @@ const getVersions = async ({ core }) => {
     // file path is relative to repo root
     const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
 
-    const currentChromeStable = doc.contents.items.find((item) => item.key.value === 'chrome-stable-version').value.value
-    const currentChromeBeta = doc.contents.items.find((item) => item.key.value === 'chrome-beta-version').value.value
+    const currentChromeStable = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY).value.value
+    const currentChromeBeta = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY).value.value
 
     const stableData = JSON.parse(await getLatestVersionData({ channel: 'stable', currentVersion: currentChromeStable }))
     const betaData = JSON.parse(await getLatestVersionData({ channel: 'beta', currentVersion: currentChromeBeta }))
@@ -74,8 +77,8 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
   // file path is relative to repo root
   const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
 
-  const currentChromeStable = doc.contents.items.find((item) => item.key.value === 'chrome-stable-version').value.value
-  const currentChromeBeta = doc.contents.items.find((item) => item.key.value === 'chrome-beta-version').value.value
+  const currentChromeStable = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY).value.value
+  const currentChromeBeta = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY).value.value
 
   const hasNewerStableVersion = currentChromeStable !== latestStableVersion
   const hasNewerBetaVersion = currentChromeBeta !== latestBetaVersion
@@ -86,8 +89,8 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
   const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
 
-  const currentChromeStableYamlRef = doc.contents.items.find((item) => item.key.value === 'chrome-stable-version')
-  const currentChromeBetaYamlRef = doc.contents.items.find((item) => item.key.value === 'chrome-beta-version')
+  const currentChromeStableYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY)
+  const currentChromeBetaYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY)
 
   currentChromeStableYamlRef.value.value = latestStableVersion
   currentChromeBetaYamlRef.value.value = latestBetaVersion
