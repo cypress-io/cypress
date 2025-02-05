@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.0.3
+
+_Released 2/11/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
+
 ## 14.0.2
 
 _Released 2/05/2025_
