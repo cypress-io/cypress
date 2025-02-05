@@ -83,7 +83,7 @@ const getElementDimensions = ($el: any) => {
 type dir = 'top' | 'right' | 'bottom' | 'left'
 type attr = `padding-${dir}` | `border-${dir}-width` | `margin-${dir}`
 
-const getNumAttrValue = ($el, attr: attr) => {
+const getNumAttrValue = ($el: any, attr: attr) => {
   // nuke anything thats not a number or a negative symbol
   const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
@@ -94,15 +94,15 @@ const getNumAttrValue = ($el, attr: attr) => {
   return num
 }
 
-const getPadding = ($el, dir: dir) => {
+const getPadding = ($el: any, dir: dir) => {
   return getNumAttrValue($el, `padding-${dir}`)
 }
 
-const getBorder = ($el, dir: dir) => {
+const getBorder = ($el: any, dir: dir) => {
   return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-const getMargin = ($el, dir: dir) => {
+const getMargin = ($el: any, dir: dir) => {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 
