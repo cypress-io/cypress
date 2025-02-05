@@ -45,5 +45,10 @@
     "lib",
     "theme"
   ],
-  "nx": {}
+  "nx": {
+    "implicitDependencies": [
+      "@packages/server",
+      "@packages/socket"
+    ]
+  }
 }
