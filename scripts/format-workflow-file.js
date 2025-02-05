@@ -5,7 +5,7 @@ const yaml = require('yaml')
  * from root of directory run:
  *    node ./scripts/format-workflow-file.js
  *
- * This will get executed with as the pre-commit hook in husky to make sure the workflow file is always formatted correctly
+ * This script is also executed as a pre-commit hook in husky to ensure the workflow file is always formatted correctly
  */
 const formatWorkflowFile = () => {
   // file path is relative to repo root
