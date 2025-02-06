@@ -154,6 +154,7 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-vue": "7.18.0",
     "execa": "4.0.0",
+    "fast-xml-parser": "^4.5.1",
     "filesize": "10.1.1",
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",
@@ -209,6 +210,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "5.3.3",
+    "yaml": "2.7.0",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
@@ -263,7 +265,8 @@
   },
   "lint-staged": {
     "*.coffee": "yarn stop-only --folder",
-    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "*workflows.yml": "node scripts/format-workflow-file.js"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
