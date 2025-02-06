@@ -104,7 +104,15 @@ export const createCommonRoutes = ({
     next()
   })
 
-  getCtx().coreData.studio?.initializeRoutes(router)
+  if (!getCtx().coreData.studio) {
+    // Return a blank file when studio is undefined
+    router.get('/__cypress-studio/app-studio.js', (req, res) => {
+      res.setHeader('Content-Type', 'application/javascript')
+      res.status(200).send('')
+    })
+  } else {
+    getCtx().coreData.studio?.initializeRoutes(router)
+  }
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
