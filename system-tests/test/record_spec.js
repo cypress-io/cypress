@@ -1615,11 +1615,7 @@ describe('e2e record', () => {
 
       setupStubbedServer(routes)
 
-      beforeEach(() => {
-        count = 0
-      })
-
-      it('errors and does not create or update instances when parallel', function () {
+      it('warns and does not create or update instances', function () {
         process.env.API_RETRY_INTERVALS = '1000,2000,3000'
 
         return systemTests.exec(this, {
@@ -1632,7 +1628,6 @@ describe('e2e record', () => {
           parallel: true,
           snapshot: true,
           ciBuildId: 'ciBuildId123',
-          expectedExitCode: 1,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -1643,30 +1638,12 @@ describe('e2e record', () => {
             'POST /runs',
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-          ])
-        })
-      })
-
-      it('errors and does not create or update instances when recording and not parallel', function () {
-        process.env.API_RETRY_INTERVALS = '1000,2000,3000'
-
-        return systemTests.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress-with-project-id.config.js',
-          spec: 'record_pass*',
-          tag: 'nightly',
-          record: true,
-          snapshot: true,
-          expectedExitCode: 1,
-        })
-        .then(() => {
-          const urls = getRequestUrls()
-
-          expect(urls).to.deep.eq([
-            'POST /runs',
-            'POST /runs',
-            'POST /runs',
-            'POST /runs',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+            'PUT /screenshots/1.png',
+            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
+            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
         })
