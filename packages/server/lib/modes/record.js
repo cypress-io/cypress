@@ -501,9 +501,8 @@ const createInstance = (options = {}) => {
 
   spec = getSpecRelativePath(spec)
 
-  return api.createInstance({
+  return api.createInstance(runId, {
     spec,
-    runId,
     groupId,
     platform,
     machineId,
