@@ -48,7 +48,7 @@ const config = makeConfig({
 
 // The module federation needs to be added to the plugins array first
 config.plugins.unshift(
-  federation({
+  ...federation({
     name: 'host',
     remotes: {
       'app-studio': {
