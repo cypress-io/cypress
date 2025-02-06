@@ -5,7 +5,7 @@
 import _ from 'lodash'
 
 interface Box {
-  offset: { top: number, left: number }
+  offset: { top: number, left: number } | undefined
   paddingTop: number
   paddingRight: number
   paddingBottom: number
@@ -28,7 +28,7 @@ interface Box {
   widthWithMargin?: number
 }
 
-const getElementDimensions = ($el: any) => {
+const getElementDimensions = ($el: JQuery<HTMLElement>) => {
   const el: HTMLElement = $el.get(0)
 
   const { offsetHeight, offsetWidth } = el
@@ -83,7 +83,7 @@ const getElementDimensions = ($el: any) => {
 type dir = 'top' | 'right' | 'bottom' | 'left'
 type attr = `padding-${dir}` | `border-${dir}-width` | `margin-${dir}`
 
-const getNumAttrValue = ($el: any, attr: attr) => {
+const getNumAttrValue = ($el: JQuery<HTMLElement>, attr: attr) => {
   // nuke anything thats not a number or a negative symbol
   const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
@@ -94,15 +94,15 @@ const getNumAttrValue = ($el: any, attr: attr) => {
   return num
 }
 
-const getPadding = ($el: any, dir: dir) => {
+const getPadding = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `padding-${dir}`)
 }
 
-const getBorder = ($el: any, dir: dir) => {
+const getBorder = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-const getMargin = ($el: any, dir: dir) => {
+const getMargin = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 
