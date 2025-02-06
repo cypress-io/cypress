@@ -669,7 +669,7 @@ commands:
             - install-browsers:
                 install-chrome: true
                 google-chrome-channel: << parameters.install-chrome-channel >>
-                google-chrome-version: latest
+                google-chrome-version: *chrome-beta-version
       - when:
           condition:
             equal: [ firefox, << parameters.browser >> ]
