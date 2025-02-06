@@ -1,5 +1,6 @@
 import ConfigCode from './ConfigCode.vue'
 import config from '@packages/frontend-shared/cypress/fixtures/config.json'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 const selector = '[data-cy=code]'

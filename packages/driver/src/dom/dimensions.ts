@@ -4,16 +4,39 @@
 
 import _ from 'lodash'
 
-const getElementDimensions = ($el) => {
-  const el = $el.get(0)
+interface Box {
+  offset: { top: number, left: number } | undefined
+  paddingTop: number
+  paddingRight: number
+  paddingBottom: number
+  paddingLeft: number
+  borderTop: number
+  borderRight: number
+  borderBottom: number
+  borderLeft: number
+  marginTop: number
+  marginRight: number
+  marginBottom: number
+  marginLeft: number
+  width?: number
+  height?: number
+  heightWithPadding?: number
+  heightWithBorder?: number
+  heightWithMargin?: number
+  widthWithPadding?: number
+  widthWithBorder?: number
+  widthWithMargin?: number
+}
+
+const getElementDimensions = ($el: JQuery<HTMLElement>) => {
+  const el: HTMLElement = $el.get(0)
 
   const { offsetHeight, offsetWidth } = el
 
-  const box = {
+  const box: Box = {
     // offset disregards margin but takes into account border + padding
     offset: $el.offset(),
     // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
-    // TODO: switch back to using jquery when upgrading to jquery 3.4+
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -57,7 +80,10 @@ const getElementDimensions = ($el) => {
   return box
 }
 
-const getNumAttrValue = ($el, attr) => {
+type dir = 'top' | 'right' | 'bottom' | 'left'
+type attr = `padding-${dir}` | `border-${dir}-width` | `margin-${dir}`
+
+const getNumAttrValue = ($el: JQuery<HTMLElement>, attr: attr) => {
   // nuke anything thats not a number or a negative symbol
   const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
@@ -68,15 +94,15 @@ const getNumAttrValue = ($el, attr) => {
   return num
 }
 
-const getPadding = ($el, dir) => {
+const getPadding = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `padding-${dir}`)
 }
 
-const getBorder = ($el, dir) => {
+const getBorder = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-const getMargin = ($el, dir) => {
+const getMargin = ($el: JQuery<HTMLElement>, dir: dir) => {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 

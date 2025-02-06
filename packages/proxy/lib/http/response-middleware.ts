@@ -17,7 +17,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import type { CypressIncomingRequest, CypressOutgoingResponse } from '../types'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 

@@ -1,4 +1,5 @@
 import UpdateCypressModal from './UpdateCypressModal.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {

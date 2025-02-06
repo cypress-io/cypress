@@ -1,4 +1,5 @@
 import RecordRunModalVue from './RecordRunModal.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { UsePromptManager_SetProjectPreferencesDocument } from '../generated/graphql-test'
 

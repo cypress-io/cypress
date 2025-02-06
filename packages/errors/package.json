@@ -20,9 +20,13 @@
   },
   "dependencies": {
     "ansi_up": "5.0.0",
+    "chalk": "^2.4.2",
+    "lodash": "^4.17.21",
+    "pluralize": "8.0.0",
     "strip-ansi": "6.0.1"
   },
   "devDependencies": {
+    "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",

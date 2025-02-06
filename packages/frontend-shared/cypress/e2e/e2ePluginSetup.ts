@@ -27,6 +27,7 @@ import _ from 'lodash'
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 import * as inspector from 'inspector'
+// tslint:disable-next-line: no-implicit-dependencies - requires cypress
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'

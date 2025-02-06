@@ -241,7 +241,6 @@
     "./node_modules/combined-stream/lib/combined_stream.js",
     "./node_modules/compression/node_modules/debug/src/browser.js",
     "./node_modules/compression/node_modules/debug/src/index.js",
-    "./node_modules/compression/node_modules/safe-buffer/index.js",
     "./node_modules/concat-stream/index.js",
     "./node_modules/cp-file/cp-file-error.js",
     "./node_modules/cp-file/fs.js",
@@ -1476,6 +1475,11 @@
     "./node_modules/@xmldom/xmldom/lib/index.js",
     "./node_modules/@xmldom/xmldom/lib/sax.js",
     "./node_modules/accepts/index.js",
+    "./node_modules/accepts/node_modules/negotiator/index.js",
+    "./node_modules/accepts/node_modules/negotiator/lib/charset.js",
+    "./node_modules/accepts/node_modules/negotiator/lib/encoding.js",
+    "./node_modules/accepts/node_modules/negotiator/lib/language.js",
+    "./node_modules/accepts/node_modules/negotiator/lib/mediaType.js",
     "./node_modules/acorn-node/index.js",
     "./node_modules/acorn-node/lib/bigint/index.js",
     "./node_modules/acorn-node/lib/class-fields/index.js",
@@ -1703,7 +1707,6 @@
     "./node_modules/component-emitter/index.js",
     "./node_modules/compressible/index.js",
     "./node_modules/compression/index.js",
-    "./node_modules/compression/node_modules/bytes/index.js",
     "./node_modules/compression/node_modules/debug/src/debug.js",
     "./node_modules/compression/node_modules/ms/index.js",
     "./node_modules/concat-map/index.js",
@@ -4200,5 +4203,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "acbddae4c46907b645f31ccbb0a0f5216c9e94b802dbcd769c0b4695817421b7"
+  "deferredHash": "2df8cdc9f1cc027e1090c10763f7494712686c987ccbc223011cef5f50e08f74"
 }

@@ -15,8 +15,8 @@ function addBlackoutForElement ($body: JQuery<HTMLBodyElement>, $el: JQuery<HTML
   const dimensions = $dimensions.getElementDimensions($el)
   const width = dimensions.widthWithBorder
   const height = dimensions.heightWithBorder
-  const top = dimensions.offset.top
-  const left = dimensions.offset.left
+  const top = dimensions.offset?.top
+  const left = dimensions.offset?.left
 
   const style = styles(`
     ${resetStyles}

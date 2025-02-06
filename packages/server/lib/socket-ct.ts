@@ -1,9 +1,9 @@
 import Debug from 'debug'
-import devServer from '@packages/server/lib/plugins/dev-server'
-import { SocketBase } from '@packages/server/lib/socket-base'
+import devServer from './plugins/dev-server'
+import { SocketBase } from './socket-base'
 import dfd from 'p-defer'
 import type { Socket } from '@packages/socket'
-import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
 import assert from 'assert'
 import type { Automation } from './automation'
 const debug = Debug('cypress:server:socket-ct')
