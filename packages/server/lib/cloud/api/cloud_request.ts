@@ -36,7 +36,7 @@ export const isRetryableCloudError = (error: unknown) => {
   const axiosErr = axios.isAxiosError(error) ? error : undefined
 
   if (axiosErr && axiosErr.status) {
-    return [408, 429, 502, 503, 504].includes(axiosErr.status)
+    return [408, 429, 500, 502, 503, 504].includes(axiosErr.status)
   }
 
   return true
