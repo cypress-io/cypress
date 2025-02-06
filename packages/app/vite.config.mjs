@@ -59,7 +59,7 @@ config.plugins.unshift(
         shareScope: 'default',
       },
     },
-    filename: 'app-studio.js',
+    filename: 'assets/app-studio.js',
   }),
 )
 

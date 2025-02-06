@@ -104,7 +104,7 @@ export const createCommonRoutes = ({
     next()
   })
 
-  if (!getCtx().coreData.studio) {
+  if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
     // Return a blank file when studio is undefined
     router.get('/__cypress-studio/app-studio.js', (req, res) => {
       res.setHeader('Content-Type', 'application/javascript')
