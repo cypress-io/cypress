@@ -204,5 +204,15 @@ describe('lib/routes', () => {
 
       expect(next).to.be.called
     })
+
+    it('initializes routes on studio if present', () => {
+      routeOptions.appStudio = {
+        initializeRoutes: sinon.stub(),
+      }
+
+      const { router } = setupCommonRoutes()
+
+      expect(routeOptions.appStudio.initializeRoutes).to.be.calledWith(router)
+    })
   })
 })

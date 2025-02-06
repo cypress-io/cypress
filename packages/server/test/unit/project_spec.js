@@ -13,6 +13,7 @@ const savedState = require(`../../lib/saved_state`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const studio = require('../../lib/cloud/api/get_app_studio')
 
 let ctx
 
@@ -32,6 +33,12 @@ describe('lib/project-base', () => {
     })
 
     sinon.stub(runEvents, 'execute').resolves()
+
+    this.testAppStudio = {
+      initializeRoutes: () => {},
+    }
+
+    sinon.stub(studio, 'getAppStudio').resolves(this.testAppStudio)
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
     this.config = await ctx.project.getConfig()
@@ -420,6 +427,34 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       .then(() => {
         expect(system.info).not.to.be.called
         expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
+
+    it('gets app studio for the project id if CYPRESS_ENABLE_CLOUD_STUDIO is set', function () {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+
+      return this.project.open()
+      .then(() => {
+        expect(studio.getAppStudio).to.be.calledWith('abc123')
+        expect(ctx.coreData.studio).to.eq(this.testAppStudio)
+      })
+    })
+
+    it('gets app studio for the project id if CYPRESS_LOCAL_APP_STUDIO_PATH is set', function () {
+      process.env.CYPRESS_LOCAL_APP_STUDIO_PATH = '/path/to/app/studio'
+
+      return this.project.open()
+      .then(() => {
+        expect(studio.getAppStudio).to.be.calledWith('abc123')
+        expect(ctx.coreData.studio).to.eq(this.testAppStudio)
+      })
+    })
+
+    it('does not get app studio if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_APP_STUDIO_PATH is set', function () {
+      return this.project.open()
+      .then(() => {
+        expect(studio.getAppStudio).not.to.be.called
+        expect(ctx.coreData.studio).to.be.null
       })
     })
 

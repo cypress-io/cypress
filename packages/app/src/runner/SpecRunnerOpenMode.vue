@@ -171,6 +171,9 @@ fragment SpecRunner on Query {
   }
   ...ChooseExternalEditor
   ...SpecRunner_Preferences
+  studio {
+    status
+  }
 }
 `
 
@@ -287,6 +290,16 @@ function openFile () {
   })
 }
 onMounted(() => {
+  if (props.gql.studio?.status === 'INITIALIZED') {
+    import('app-studio').then(({ mountTestGenerationPanel }) => {
+      // eslint-disable-next-line no-console
+      console.log('Studio loaded', mountTestGenerationPanel)
+    }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('Error loading Studio', err)
+    })
+  }
+
   const eventManager = getEventManager()
 
   // these events use GraphQL

@@ -2071,6 +2071,9 @@ type Query {
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
 
+  """Studio data"""
+  studio: Studio
+
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
@@ -2368,6 +2371,18 @@ type SpecDataAggregate {
 enum SpecType {
   component
   integration
+}
+
+"""The studio manager for the app"""
+type Studio {
+  """The current status of the studio"""
+  status: StudioStatusType
+}
+
+enum StudioStatusType {
+  INITIALIZED
+  IN_ERROR
+  NOT_INITIALIZED
 }
 
 type Subscription {

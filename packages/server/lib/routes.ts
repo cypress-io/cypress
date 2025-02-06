@@ -104,6 +104,8 @@ export const createCommonRoutes = ({
     next()
   })
 
+  getCtx().coreData.studio?.initializeRoutes(router)
+
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
