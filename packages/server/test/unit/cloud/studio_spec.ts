@@ -50,7 +50,7 @@ describe('lib/cloud/studio', () => {
       await studioManager.initializeRoutes({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
-      expect(stubbedCrossFetch).to.be.calledWithMatch('http://localhost:1234/studio/errors', {
+      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
         agent: sinon.match.any,
         method: 'POST',
         headers: {
@@ -79,7 +79,7 @@ describe('lib/cloud/studio', () => {
 
       expect(manager.status).to.eq('IN_ERROR')
 
-      expect(stubbedCrossFetch).to.be.calledWithMatch('http://localhost:1234/studio/errors', {
+      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
         agent: sinon.match.any,
         method: 'POST',
         headers: {

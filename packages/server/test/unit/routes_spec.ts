@@ -6,6 +6,8 @@ import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import proxyquire from 'proxyquire'
 import { Cfg } from '../../lib/project-base'
+import '../spec_helper'
+import { getCtx } from '@packages/data-context'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -46,7 +48,7 @@ describe('lib/routes', () => {
 
     function setupCommonRoutes () {
       const router = {
-        get: () => {},
+        get: sinon.stub(),
         post: () => {},
         all: () => {},
         use: sinon.stub(),
@@ -206,13 +208,48 @@ describe('lib/routes', () => {
     })
 
     it('initializes routes on studio if present', () => {
-      routeOptions.appStudio = {
+      getCtx().coreData.studio = {
+        status: 'INITIALIZED',
         initializeRoutes: sinon.stub(),
       }
 
       const { router } = setupCommonRoutes()
 
-      expect(routeOptions.appStudio.initializeRoutes).to.be.calledWith(router)
+      expect(getCtx().coreData.studio.initializeRoutes).to.be.calledWith(router)
+    })
+
+    it('initializes a dummy route for studio if studio is not present', () => {
+      const { router } = setupCommonRoutes()
+
+      const req = {
+        path: '/__cypress-studio/app-studio.js',
+        protocol: 'https',
+      }
+      const res = {
+        setHeader: sinon.stub(),
+        status: sinon.stub(),
+        send: sinon.stub(),
+      }
+      const next = sinon.stub().throws('next() should not be called')
+
+      res.status.returns(res)
+
+      router.get.withArgs('/__cypress-studio/app-studio.js').yield(req, res, next)
+
+      expect(res.setHeader).to.be.calledWith('Content-Type', 'application/javascript')
+      expect(res.status).to.be.calledWith(200)
+      expect(res.send).to.be.calledWith('')
+    })
+
+    it('does not initialize routes on studio if status is in error', () => {
+      getCtx().coreData.studio = {
+        status: 'IN_ERROR',
+        initializeRoutes: sinon.stub(),
+      }
+
+      setupCommonRoutes()
+
+      expect(getCtx().coreData.studio.initializeRoutes).not.to.be.called
     })
   })
 })
