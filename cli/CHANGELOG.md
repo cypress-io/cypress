@@ -3,6 +3,10 @@
 
 _Released 2/11/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue in Cypress [`14.0.2`](https://docs.cypress.io/guides/references/changelog#14-0-2) where privileged commands did not run correctly when a spec file or support file contained certain encoded characters. Fixes [#31034](https://github.com/cypress-io/cypress/issues/31034) and [#31060](https://github.com/cypress-io/cypress/issues/31060).
+
 **Dependency Updates:**
 
 - Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
