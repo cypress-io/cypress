@@ -1,4 +1,5 @@
-import { CloudRequest } from './cloud_request'
+import { CloudRequest, isRetryableCloudError } from './cloud_request'
+import { asyncRetry, exponentialBackoff } from '../../util/async_retry'
 
 // TODO: generate these types like system-tests' cloudValidations
 type CreateInstanceResponse = {
@@ -22,15 +23,29 @@ type CreateInstanceRequestData = {
   }
 }
 
-export const createInstance = async (runId: string, instanceData: CreateInstanceRequestData, timeout: number = 0) => {
-  const { data } = await CloudRequest.post<CreateInstanceResponse>(`/runs/${runId}/instances`, instanceData, {
-    headers: {
-      'x-route-version': '5',
-      'x-cypress-run-id': runId,
-      'x-cypress-request-attempt': '0',
-    },
-    timeout,
-  })
+export const createInstance = async (runId: string, instanceData: CreateInstanceRequestData, timeout: number = 0): Promise<CreateInstanceResponse> => {
+  let attemptNumber = 0
 
-  return data
+  return asyncRetry(async () => {
+    const { data } = await CloudRequest.post<CreateInstanceResponse>(
+      `/runs/${runId}/instances`,
+      instanceData,
+      {
+        headers: {
+          'x-route-version': '5',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': `${attemptNumber}`,
+        },
+        timeout,
+      },
+    )
+
+    attemptNumber++
+
+    return data
+  }, {
+    maxAttempts: 3,
+    retryDelay: exponentialBackoff(),
+    shouldRetry: isRetryableCloudError,
+  })()
 }

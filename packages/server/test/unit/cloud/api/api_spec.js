@@ -907,7 +907,6 @@ describe('lib/cloud/api', () => {
       nocked = nock(API_BASEURL)
       .matchHeader('x-route-version', '5')
       .matchHeader('x-cypress-run-id', runId)
-      .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', osName)
       .matchHeader('x-cypress-version', pkg.version)
       .post(`/runs/${runId}/instances`)
@@ -963,23 +962,39 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    describe('when the request times out', () => {
+    describe('when the request times out 3 times', () => {
       const timeout = 100
 
       beforeEach(() => {
         nocked
+        .times(3)
         .delayConnection(5000)
-        .reply(200, {})
+        .reply(200, instanceResponseData)
       })
 
-      it('handles timeouts', () => {
+      it('throws an aggregate error', () => {
         return api.createInstance(runId, instanceRequestData, timeout)
         .then(() => {
           throw new Error('should have thrown here')
         }).catch((err) => {
-          expect(err.message).to.eq(`timeout of ${timeout}ms exceeded`)
-          expect(err.isApiError).to.be.true
+          for (const error of err.errors) {
+            expect(error.message).to.eq(`timeout of ${timeout}ms exceeded`)
+            expect(error.isApiError).to.be.true
+          }
         })
+      })
+    })
+
+    describe('when the request times out once and then succeeds', () => {
+      beforeEach(() => {
+        nocked.delayConnection(5000).reply(200, instanceResponseData)
+        nocked.delayConnection(0).reply(200, instanceResponseData)
+      })
+
+      it('returns the instance response data', async () => {
+        const data = await api.createInstance(runId, instanceRequestData, 100)
+
+        expect(data).to.deep.eq(instanceResponseData)
       })
     })
   })
