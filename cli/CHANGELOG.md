@@ -7,6 +7,10 @@ _Released 2/11/2025 (PENDING)_
 
 - Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
 
+**Misc:**
+
+- Updated types around `cy.readFile` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+
 ## 14.0.2
 
 _Released 2/05/2025_
