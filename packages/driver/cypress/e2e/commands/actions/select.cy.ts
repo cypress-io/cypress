@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/select', () => {
@@ -11,7 +12,7 @@ describe('src/cy/commands/actions/select', () => {
       const select = cy.$$('select[name=maps]')
 
       cy.get('select[name=maps]').select('train').then(($select) => {
-        expect($select).to.match(select)
+        expect($select.get(0)).to.eq(select.get(0))
       })
     })
 
@@ -55,7 +56,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.$$('select[name=maps] option:nth-child(3)').attr('value', '"test"')
 
       cy.get('select[name=maps]').select('"test"').then(($select) => {
-        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
       })
     })
 
@@ -63,7 +64,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.$$('select[name=maps] option:nth-child(3)').attr('value', '"test"')
 
       cy.get('select[name=maps]').select(2).then(($select) => {
-        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
       })
     })
 
@@ -71,7 +72,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.$$('select[name=maps] option').attr('value', 'foo')
 
       cy.get('select[name=maps]').select(2).then(($select) => {
-        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
       })
     })
 
@@ -91,7 +92,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('select[name=startrek-same]').select('Uhura').then(($select) => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
-        expect($select[0].selectedIndex).to.equal(2)
+        expect(($select[0] as HTMLSelectElement).selectedIndex).to.equal(2)
       })
     })
 
@@ -99,7 +100,7 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('select[name=startrek-some-same]').select('Uhura').then(($select) => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
-        expect($select[0].selectedIndex).to.equal(2)
+        expect(($select[0] as HTMLSelectElement).selectedIndex).to.equal(2)
       })
     })
 
@@ -558,6 +559,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid arguments
         cy.get('select[name=foods]').select([true, false])
       })
 

@@ -12,6 +12,7 @@ describe('src/cy/commands/actions/hover', () => {
         done()
       })
 
+      // @ts-expect-error: We're testing that this is not implemented
       cy.get('button').hover()
     })
   })

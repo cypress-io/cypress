@@ -1,5 +1,4 @@
-const { _, $, Promise } = Cypress
-const {
+import {
   assertLogLength,
   clickCommandLog,
   attachListeners,
@@ -8,7 +7,9 @@ const {
   shouldBeCalledOnce,
   shouldNotBeCalled,
   expectCaret,
-} = require('../../../support/utils')
+} from '../../../support/utils'
+
+const { _, $, Promise } = Cypress
 
 const fail = function (str) {
   throw new Error(str)
@@ -282,7 +283,7 @@ describe('src/cy/commands/actions/click', () => {
       const button = cy.$$('#button')
 
       cy.get('#button').click().then(($button) => {
-        expect($button).to.match(button)
+        expect($button[0]).to.eq(button[0])
       })
     })
 
@@ -556,7 +557,7 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseHoverListeners({ btn, span })
 
       btn.html('')
-      btn.attr('disabled', true)
+      btn.prop('disabled', true)
       btn.append(span)
 
       cy.get('button:first span').click()
@@ -832,7 +833,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('places cursor at the end of input', () => {
       cy.get('input:first').invoke('val', 'foobar').click().then(($el) => {
-        const el = $el.get(0)
+        const el = $el[0]
 
         expect(el.selectionStart).to.eql(6)
 
@@ -840,7 +841,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('input:first').invoke('val', '').click().then(($el) => {
-        const el = $el.get(0)
+        const el = $el[0]
 
         expect(el.selectionStart).to.eql(0)
 
@@ -850,7 +851,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('places cursor at the end of textarea', () => {
       cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then(($el) => {
-        const el = $el.get(0)
+        const el = $el[0]
 
         expect(el.selectionStart).to.eql(11)
 
@@ -858,7 +859,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('textarea:first').invoke('val', '').click().then(($el) => {
-        const el = $el.get(0)
+        const el = $el[0]
 
         expect(el.selectionStart).to.eql(0)
 

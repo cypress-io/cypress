@@ -40,6 +40,7 @@ declare namespace Cypress {
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
+    getAll: (tag: string, events: string) => Cypress.Chainable<T>
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
     now: <T>(string, v: T) => Cypress.Chainable<T>
@@ -58,5 +59,6 @@ declare namespace Cypress {
 
     createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
+    timeout: ITimeouts['timeout']
   }
 }

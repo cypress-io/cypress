@@ -121,10 +121,10 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
-export const expectCaret = (start, end) => {
+export const expectCaret = (start: number) => {
   return ($el) => {
-    end = end == null ? start : end
-    // @ts-ignore
+    const end = start
+
     expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
   }
 }

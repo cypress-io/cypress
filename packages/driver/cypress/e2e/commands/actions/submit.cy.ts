@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/actions/submit', () => {
@@ -392,7 +392,7 @@ describe('src/cy/commands/actions/submit', () => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('submit')
-          expect(lastLog.get('$el')).to.match($form)
+          expect(lastLog.get('$el')).to.eq($form)
         })
       })
 

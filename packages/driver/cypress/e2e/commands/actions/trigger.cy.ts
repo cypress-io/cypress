@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
@@ -150,12 +151,12 @@ describe('src/cy/commands/actions/trigger', () => {
     })
 
     it('requeries the dom while waiting for actionability', () => {
-      const $input = cy.$$('input:first').attr('disabled', true)
+      const $input = cy.$$('input:first').prop('disabled', true)
 
       cy.on('command:retry', () => {
         // Replace the input with a copy of itself, to ensure trigger is requerying the DOM
         $input.replaceWith($input[0].outerHTML)
-        cy.$$('input:first').attr('disabled', false)
+        cy.$$('input:first').prop('disabled', false)
       })
 
       cy.get('input:first').trigger('keydown')
@@ -1118,6 +1119,7 @@ describe('src/cy/commands/actions/trigger', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('button:first').trigger('mouseover', 'foo')
       })
 
@@ -1280,7 +1282,7 @@ describe('src/cy/commands/actions/trigger', () => {
           const { lastLog } = this
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          expect(lastLog.get('coords')).to.deep.eq(fromElWindow, 'x', 'y')
+          expect(lastLog.get('coords')).to.deep.eq(fromElWindow)
         })
       })
 

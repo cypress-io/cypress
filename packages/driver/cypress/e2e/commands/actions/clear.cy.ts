@@ -1,10 +1,11 @@
-const { _, $ } = Cypress
-const {
+import {
   assertLogLength,
   attachKeyListeners,
   shouldBeCalledOnce,
   shouldNotBeCalled,
-} = require('../../../support/utils')
+} from '../../../support/utils'
+
+const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #clear', () => {
   beforeEach(() => {
@@ -80,8 +81,8 @@ describe('src/cy/commands/actions/type - #clear', () => {
     $('<span>span on input</span>')
     .css({
       position: 'absolute',
-      left: $input.offset().left,
-      top: $input.offset().top,
+      left: $input.offset()?.left,
+      top: $input.offset()?.top,
       padding: 5,
       display: 'inline-block',
       backgroundColor: 'yellow',
