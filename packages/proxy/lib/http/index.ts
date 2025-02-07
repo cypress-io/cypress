@@ -18,7 +18,7 @@ import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
   BrowserPreRequest,
-} from '@packages/proxy'
+} from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import type { Readable } from 'stream'

@@ -1,4 +1,5 @@
 import RunsError from './RunsError.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import PaperAirplaneIcon from '~icons/cy/paper-airplane_x16.svg'
 
 describe('<RunsError />', () => {

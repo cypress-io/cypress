@@ -1,3 +1,4 @@
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue, Notification } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'

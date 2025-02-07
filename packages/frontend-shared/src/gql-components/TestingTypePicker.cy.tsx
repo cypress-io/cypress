@@ -1,5 +1,6 @@
 import TestingTypePicker from './TestingTypePicker.vue'
 import { TestingTypePickerFragmentDoc } from '../generated/graphql-test'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 const { component, e2e, componentDisabled } = defaultMessages.testingType

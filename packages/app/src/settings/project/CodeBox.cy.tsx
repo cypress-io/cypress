@@ -1,4 +1,5 @@
 import CodeBox from './CodeBox.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import IconOctothorpe from '~icons/cy/octothorpe_x16.svg'
 
 describe('<CodeBox/>', () => {

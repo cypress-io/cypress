@@ -1,5 +1,6 @@
 import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
 import HeaderBarContent from './HeaderBarContent.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { useUserProjectStatusStore } from '../store/user-project-status-store'

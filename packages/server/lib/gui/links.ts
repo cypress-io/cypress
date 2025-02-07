@@ -1,3 +1,4 @@
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { shell } from 'electron'
 
 // NOTE: in order for query params to be passed through on links
