@@ -78,7 +78,7 @@ export class StudioManager implements StudioManagerShape {
         },
       })
     } catch (e) {
-      debug(`Error calling ProtocolManager.sendErrors: %o, original error %o`, e, error)
+      debug(`Error calling StudioManager.reportError: %o, original error %o`, e, error)
     }
   }
 
@@ -92,8 +92,7 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
-      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._appStudio[method].apply(this._protocol, args)
+      return this._appStudio[method].apply(this._appStudio, args)
     } catch (error) {
       this.status = 'IN_ERROR'
       // Call and forget this, we don't want to block the main thread
@@ -102,7 +101,7 @@ export class StudioManager implements StudioManagerShape {
   }
 
   /**
-   * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
+   * Abstracts invoking a synchronous method on the AppStudio instance, so we can handle
    * errors in a uniform way
    */
   private async invokeAsync <K extends AppStudioAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppStudioShape[K]>): Promise<ReturnType<AppStudioShape[K]> | undefined> {
@@ -112,7 +111,7 @@ export class StudioManager implements StudioManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._appStudio[method].apply(this._protocol, args)
+      return await this._appStudio[method].apply(this._appStudio, args)
     } catch (error) {
       this.status = 'IN_ERROR'
       // Call and forget this, we don't want to block the main thread
