@@ -17,6 +17,7 @@
     "@types/node": "20.16.0",
     "better-sqlite3": "11.5.0",
     "devtools-protocol": "0.0.1413303",
+    "express": "4.21.0",
     "typescript": "~5.4.5"
   },
   "files": [

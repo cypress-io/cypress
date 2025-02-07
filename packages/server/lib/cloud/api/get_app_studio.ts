@@ -93,9 +93,9 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
     await fs.promises.rm(studioPath, { recursive: true, force: true })
     await ensureDir(studioPath)
 
-    if (process.env.CYPRESS_LOCAL_APP_STUDIO_PATH) {
-      const appPath = path.join(process.env.CYPRESS_LOCAL_APP_STUDIO_PATH, 'app')
-      const serverPath = path.join(process.env.CYPRESS_LOCAL_APP_STUDIO_PATH, 'server')
+    if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
+      const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
 
       await copy(appPath, path.join(studioPath, 'app'))
       await copy(serverPath, path.join(studioPath, 'server'))

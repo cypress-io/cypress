@@ -440,8 +440,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('gets app studio for the project id if CYPRESS_LOCAL_APP_STUDIO_PATH is set', function () {
-      process.env.CYPRESS_LOCAL_APP_STUDIO_PATH = '/path/to/app/studio'
+    it('gets app studio for the project id if CYPRESS_LOCAL_STUDIO_PATH is set', function () {
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/app/studio'
 
       return this.project.open()
       .then(() => {
@@ -450,7 +450,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('does not get app studio if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_APP_STUDIO_PATH is set', function () {
+    it('does not get app studio if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_STUDIO_PATH is set', function () {
       return this.project.open()
       .then(() => {
         expect(studio.getAppStudio).not.to.be.called

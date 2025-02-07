@@ -66,9 +66,9 @@ describe('getAppStudio', () => {
     sinon.restore()
   })
 
-  describe('CYPRESS_LOCAL_APP_STUDIO_PATH is set', () => {
+  describe('CYPRESS_LOCAL_STUDIO_PATH is set', () => {
     beforeEach(() => {
-      process.env.CYPRESS_LOCAL_APP_STUDIO_PATH = '/path/to/studio'
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
     })
 
     it('gets the studio bundle from the path specified in the environment variable', async () => {
@@ -87,7 +87,7 @@ describe('getAppStudio', () => {
     })
   })
 
-  describe('CYPRESS_LOCAL_APP_STUDIO_PATH not set', () => {
+  describe('CYPRESS_LOCAL_STUDIO_PATH not set', () => {
     it('downloads the studio bundle and extracts it', async () => {
       const readStream = Readable.from('console.log("studio script")')
 
