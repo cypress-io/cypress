@@ -1,6 +1,10 @@
 {
   "rules": {
-    "no-floating-promises": true
+    "no-floating-promises": true,
+    "no-implicit-dependencies": [
+      true,
+      "dev"
+    ]
   },
   "jsRules": {
     "no-empty": true

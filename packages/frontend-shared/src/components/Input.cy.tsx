@@ -1,6 +1,8 @@
 import Input from './Input.vue'
 import { ref } from 'vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import CoffeeIcon from '~icons/mdi/coffee'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import LoadingIcon from '~icons/mdi/loading'
 
 describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {

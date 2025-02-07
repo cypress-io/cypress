@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - cypress
 import { mount } from 'cypress/vue'
 import type { FunctionalComponent } from 'vue-demi'
 import './screenshot.scss'

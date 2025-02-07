@@ -1,6 +1,7 @@
 import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/longBrowsersList'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 

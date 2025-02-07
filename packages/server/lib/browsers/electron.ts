@@ -9,6 +9,7 @@ import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'

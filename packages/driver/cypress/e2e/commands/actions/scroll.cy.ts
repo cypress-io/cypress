@@ -402,7 +402,7 @@ describe('src/cy/commands/actions/scroll', () => {
         .onFirstCall().throws(new Error())
 
         cy.on('command:retry', () => {
-          // @ts-expect-error - this doesn't have returns defined on isScrollable
+          // @ts-expect-error - TODO: add type definition for returns on isScrollable
           return Cypress.ensure.isScrollable.returns()
         })
 
