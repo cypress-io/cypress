@@ -133,7 +133,7 @@
     "url-parse": "1.5.10",
     "uuid": "8.3.2",
     "wait-port": "1.1.0",
-    "webdriver": "9.5.4",
+    "webdriver": "9.7.3",
     "webpack-virtual-modules": "0.5.0",
     "widest-line": "3.1.0"
   },
