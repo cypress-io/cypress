@@ -9,6 +9,7 @@ _Released 2/11/2025 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `@cypress/request` from `3.0.6` to `3.0.7`. Addressed in [#31063](https://github.com/cypress-io/cypress/pull/31063).
 - Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
 
 ## 14.0.2
