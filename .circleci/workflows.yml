@@ -2,10 +2,10 @@ version: 2.1
 
 chrome-stable-version: &chrome-stable-version "133.0.6943.53"
 chrome-beta-version: &chrome-beta-version "134.0.6998.3"
-firefox-stable-version: &firefox-stable-version "134.0.2"
+firefox-stable-version: &firefox-stable-version "135.0"
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.0
+  browser-tools: circleci/browser-tools@1.5.2
 
 defaults: &defaults
   parallelism: 1
@@ -82,7 +82,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/browser_spike', << pipeline.git.branch >> ]
+      - equal: [ 'fix/em_dash_priv_command', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -669,7 +669,7 @@ commands:
             - install-browsers:
                 install-chrome: true
                 google-chrome-channel: << parameters.install-chrome-channel >>
-                google-chrome-version: latest
+                google-chrome-version: *chrome-beta-version
       - when:
           condition:
             equal: [ firefox, << parameters.browser >> ]
