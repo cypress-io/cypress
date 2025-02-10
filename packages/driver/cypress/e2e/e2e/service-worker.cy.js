@@ -711,6 +711,9 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     })
 
     cy.visit('fixtures/service-worker.html')
-    cy.get('#output').should('have.text', 'done')
+    cy.get('#output', {
+      // request takes a little longer with WebDriver BiDi to return (Firefox 135+ only)
+      timeout: 8000,
+    }).should('have.text', 'done')
   })
 })

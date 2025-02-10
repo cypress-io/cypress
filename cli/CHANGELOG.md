@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.0.4
+## 14.1.0
 
 _Released 2/25/2025 (PENDING)_
+
+**Features:**
+
+- Firefox versions 135 and up are now automated with [WebDriver BiDi](https://www.w3.org/TR/webdriver-bidi/) instead of [Chrome Devtools Protocol](https://chromedevtools.github.io/devtools-protocol/). Addresses [#30220](https://github.com/cypress-io/cypress/issues/30220).
 
 **Misc:**
 

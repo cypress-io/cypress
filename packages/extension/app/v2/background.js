@@ -31,6 +31,19 @@ const checkIfFirefox = async () => {
   return name === 'Firefox'
 }
 
+// this check only applies to firefox versioning!
+const isBiDiEnabled = async () => {
+  if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
+    return false
+  }
+
+  const { version } = await browser.runtime.getBrowserInfo()
+
+  const majorVersion = parseInt(version)
+
+  return majorVersion >= 135
+}
+
 const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
@@ -147,10 +160,16 @@ const connect = function (host, path, extraOpts) {
     const isFirefox = await checkIfFirefox()
 
     listenToCookieChanges()
-    // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
+      // Non-Firefox browsers use CDP for this instead
       listenToDownloads()
-      listenToOnBeforeHeaders()
+      // if BiDi is enabled, BiDi will handle the network interception.
+      // Otherwise, CDP does not support it for Firefox and we need to listen for it here.
+      const isBiDiTurnedOn = await isBiDiEnabled()
+
+      if (!isBiDiTurnedOn) {
+        listenToOnBeforeHeaders()
+      }
     }
   })
 

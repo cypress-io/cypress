@@ -185,6 +185,22 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   this.next()
 }
 
+const FormatCookiesIfApplicable: RequestMiddleware = function () {
+  if (this.req.headers['cookie']) {
+    const cookies = this.req.headers['cookie']
+    // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
+    // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
+    // this regex is to help make sure the cookies are fed in consistently
+    const matches = cookies.match(/;\S/gm)
+
+    if (matches) {
+      this.req.headers['cookie'] = cookies.split(';').join('; ')
+    }
+  }
+
+  return this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -560,6 +576,7 @@ export default {
   MaybeSimulateSecHeaders,
   CorrelateBrowserPreRequest,
   CalculateCredentialLevelIfApplicable,
+  FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   SetMatchingRoutes,
