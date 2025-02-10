@@ -197,7 +197,8 @@ describe('src/cy/commands/actions/type - #type', () => {
   // https://github.com/cypress-io/cypress/issues/5650
   it('should trigger KeyboardEvent, not Event, for event listeners', (done) => {
     cy.$$('input:first').on('keydown', (e) => {
-      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView.KeyboardEvent) {
+      // @ts-expect-error - TODO: Need to get this to not throw error
+      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView?.KeyboardEvent) {
         done()
 
         return
@@ -250,14 +251,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       .prependTo(cy.$$('body'))
 
       $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: $input.offset().left,
-        top: $input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${$input.offset()?.left}`)
+      .css('top', `${$input.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
       .prependTo(cy.$$('body'))
 
       const clicked = cy.stub()
@@ -889,7 +888,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('maxlength=0 events', () => {
-      const events = []
+      const events: any[] = []
 
       const push = (evt) => {
         return () => {
@@ -916,7 +915,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('maxlength=1 events', () => {
-      const events = []
+      const events: any[] = []
 
       const push = (evt) => {
         return () => {
@@ -1873,8 +1872,11 @@ describe('src/cy/commands/actions/type - #type', () => {
         .then(($iframe) => {
           const iframe = $iframe[0] as unknown as HTMLIFrameElement
           const iframeContents = $iframe.contents()
+          const iframeContentDocument = iframe.contentDocument
 
-          iframe.contentDocument.designMode = 'on'
+          if (iframeContentDocument) {
+            iframeContentDocument.designMode = 'on'
+          }
 
           cy.wrap(iframeContents.find('html')).first()
           .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
@@ -1884,7 +1886,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#generic-iframe')
         .then(($iframe) => {
           const iframe = $iframe[0] as unknown as HTMLIFrameElement
-          const iframeText = iframe.contentDocument.body.innerText
+          const iframeText = iframe.contentDocument?.body.innerText
 
           expect(iframeText).to.include('foo bar baz\nabc')
         })
@@ -2206,7 +2208,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     describe('activating modifiers', () => {
       it('sends keydown event for modifiers in order', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2227,7 +2229,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('maintains modifiers for subsequent characters', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2250,7 +2252,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('does not maintain modifiers for subsequent type commands', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2283,7 +2285,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       // https://github.com/cypress-io/cypress/issues/5622
       it('ignores duplicate modifiers in one command', () => {
-        const events = []
+        const events: any[] = []
 
         cy.$$('input:first').on('keydown', (e) => {
           events.push(['keydown', e.key])
@@ -2310,9 +2312,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('does not maintain modifiers for subsequent click commands', (done) => {
         const $button = cy.$$('button:first')
-        let mouseDownEvent = null
-        let mouseUpEvent = null
-        let clickEvent = null
+        let mouseDownEvent: null | JQuery.MouseDownEvent = null
+        let mouseUpEvent: null | JQuery.MouseUpEvent = null
+        let clickEvent: null | JQuery.ClickEvent = null
 
         $button.on('mousedown', (e) => {
           mouseDownEvent = e
@@ -2330,14 +2332,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         .get('input:text:first')
         .type('{cmd}{option}')
         .get('button:first').click().then(() => {
-          expect(mouseDownEvent.metaKey).to.be.false
-          expect(mouseDownEvent.altKey).to.be.false
+          expect(mouseDownEvent?.metaKey).to.be.false
+          expect(mouseDownEvent?.altKey).to.be.false
 
-          expect(mouseUpEvent.metaKey).to.be.false
-          expect(mouseUpEvent.altKey).to.be.false
+          expect(mouseUpEvent?.metaKey).to.be.false
+          expect(mouseUpEvent?.altKey).to.be.false
 
-          expect(clickEvent.metaKey).to.be.false
-          expect(clickEvent.altKey).to.be.false
+          expect(clickEvent?.metaKey).to.be.false
+          expect(clickEvent?.altKey).to.be.false
 
           $button.off('mousedown')
           $button.off('mouseup')
@@ -2363,7 +2365,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       // sends keyboard events for modifiers https://github.com/cypress-io/cypress/issues/3316
       it('sends keyup event for activated modifiers when typing is finished', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keyup', (e) => {
           return events.push(e)
@@ -2392,7 +2394,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     describe('release: false', () => {
       it('maintains modifiers for subsequent type commands', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2417,9 +2419,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('maintains modifiers for subsequent click commands', (done) => {
         const $button = cy.$$('button:first')
-        let mouseDownEvent = null
-        let mouseUpEvent = null
-        let clickEvent = null
+        let mouseDownEvent: null | JQuery.MouseDownEvent = null
+        let mouseUpEvent: null | JQuery.MouseUpEvent = null
+        let clickEvent: null | JQuery.ClickEvent = null
 
         $button.on('mousedown', (e) => {
           mouseDownEvent = e
@@ -2437,14 +2439,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         .get('input:text:first')
         .type('{meta}{alt}', { release: false })
         .get('button:first').click().then(() => {
-          expect(mouseDownEvent.metaKey).to.be.true
-          expect(mouseDownEvent.altKey).to.be.true
+          expect(mouseDownEvent?.metaKey).to.be.true
+          expect(mouseDownEvent?.altKey).to.be.true
 
-          expect(mouseUpEvent.metaKey).to.be.true
-          expect(mouseUpEvent.altKey).to.be.true
+          expect(mouseUpEvent?.metaKey).to.be.true
+          expect(mouseUpEvent?.altKey).to.be.true
 
-          expect(clickEvent.metaKey).to.be.true
-          expect(clickEvent.altKey).to.be.true
+          expect(clickEvent?.metaKey).to.be.true
+          expect(clickEvent?.altKey).to.be.true
 
           done()
         })
@@ -2455,7 +2457,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         // keyboard.resetModifiers
 
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keyup', (e) => {
           return events.push(e)
@@ -3032,8 +3034,8 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs only one type event', () => {
-      const logs = []
-      const types = []
+      const logs: any[] = []
+      const types: any[] = []
 
       cy.on('log:added', (attrs, log) => {
         logs.push(log)

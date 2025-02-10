@@ -169,7 +169,14 @@ describe('src/cy/commands/actions/select', () => {
       let clicked = false
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
-      $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+      $('<span>span on select</span>')
+      .css('position', 'absolute')
+      .css('left', `${select.offset()?.left}`)
+      .css('top', `${select.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
+      .prependTo(cy.$$('body'))
 
       select.on('click', () => {
         clicked = true
@@ -183,7 +190,14 @@ describe('src/cy/commands/actions/select', () => {
     it('passes timeout and interval down to click', (done) => {
       const select = $('<select />').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
-      $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+      $('<span>span on select</span>')
+      .css('position', 'absolute')
+      .css('left', `${select.offset()?.left}`)
+      .css('top', `${select.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
+      .prependTo(cy.$$('body'))
 
       cy.on('command:retry', (options) => {
         expect(options.timeout).to.eq(1000)
@@ -274,6 +288,8 @@ describe('src/cy/commands/actions/select', () => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
           }
+
+          return null
         })
 
         return null
@@ -330,7 +346,7 @@ describe('src/cy/commands/actions/select', () => {
       })
 
       it('emits all events in the correct order', () => {
-        const fired = []
+        const fired: any[] = []
         const events = ['mousedown', 'focus', 'mouseup', 'click', 'input', 'change']
 
         _.each(events, (event) => {
@@ -426,6 +442,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid arguments
         cy.get('select[name=maps]').select()
       })
 
@@ -437,6 +454,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid arguments
         cy.get('select[name=maps]').select(null)
       })
 
@@ -448,6 +466,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid arguments
         cy.get('select[name=foods]').select(true)
       })
 
@@ -780,12 +799,14 @@ describe('src/cy/commands/actions/select', () => {
       })
 
       it('logs only one select event', () => {
-        const types = []
+        const types: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'select') {
             return types.push(log)
           }
+
+          return null
         })
 
         cy.get('#select-maps').select('de_dust2').then(function () {

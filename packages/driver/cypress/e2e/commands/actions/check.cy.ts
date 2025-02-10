@@ -209,6 +209,7 @@ describe('src/cy/commands/actions/check', () => {
         done()
       }))
 
+      // @ts-expect-error: TODO: Internal types for check should accept interval
       cy.get('#checkbox-covered-in-span').check({ timeout: 1000, interval: 60 })
     })
 
@@ -1038,6 +1039,7 @@ describe('src/cy/commands/actions/check', () => {
         done()
       })
 
+      // @ts-expect-error: TODO: Internal types for uncheck should accept interval
       cy.get('#checkbox-covered-in-span').uncheck({ timeout: 1000, interval: 60 })
     })
 

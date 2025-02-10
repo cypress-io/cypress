@@ -254,14 +254,12 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
       $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: input.offset().left,
-        top: input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${input.offset()?.left}`)
+      .css('top', `${input.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
       .prependTo(cy.$$('body'))
 
       cy.on('command:retry', (options) => {
@@ -688,7 +686,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe(`triggers with single space`, () => {
       targets.forEach((target) => {
         it(target, () => {
-          const events = []
+          const events: any[] = []
 
           $(target).on('keydown keypress keyup click', (evt) => {
             events.push(evt.type)
@@ -714,7 +712,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe(`does not trigger if keyup prevented`, () => {
       targets.forEach((target) => {
         it(`${target} does not fire click event`, () => {
-          const events = []
+          const events: any[] = []
 
           $(target)
           .on('keydown keypress keyup click', (evt) => {
@@ -743,7 +741,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe('triggers after other characters', () => {
       targets.forEach((target) => {
         it(target, () => {
-          const events = []
+          const events: any[] = []
 
           $(target).on('keydown keypress keyup click', (evt) => {
             events.push(evt.type)

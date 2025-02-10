@@ -236,7 +236,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .get(':text:first').invoke('val', 'bar')
       .focus()
       .should(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(1, 3)
       })
@@ -322,7 +322,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       cy.get(':text:first').invoke('val', 'ab')
       .focus()
-      .then(($input) => $input[0].setSelectionRange(0, 0))
+      .then(($input) => $input?.[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -365,7 +365,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       cy.get('textarea:first').invoke('val', 'ab')
       .focus()
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
+      .then(($textarea) => $textarea?.[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -398,7 +398,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .then(($el) => {
         const el = $el[0] as unknown as HTMLElement
 
-        el.ownerDocument.getSelection().modify('extend', 'backward', 'character')
+        el.ownerDocument.getSelection()?.modify('extend', 'backward', 'character')
       })
       .type('{backspace}')
       .should('have.text', 'a')
@@ -433,7 +433,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // select the 'ar' characters
       cy
       .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(1, 3)
       }).get(':text:first').type('{del}').then(($input) => {
@@ -464,7 +464,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       cy.get(':text:first').invoke('val', 'ab')
       .focus()
-      .then(($input) => $input[0].setSelectionRange(0, 0))
+      .then(($input) => $input?.[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -479,7 +479,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       cy.get(':text:first').invoke('val', 'ab')
 
-      .then(($input) => $input[0].setSelectionRange(0, 0))
+      .then(($input) => $input?.[0].setSelectionRange(0, 0))
       .focus()
       .type('{selectall}{del}')
       .should('have.value', '')
@@ -509,7 +509,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       cy.get('textarea:first').invoke('val', 'ab')
       .focus()
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
+      .then(($textarea) => $textarea?.[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -523,7 +523,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ textarea })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
+      .then(($textarea) => $textarea?.[0].setSelectionRange(0, 0))
       .focus()
       .type('{selectall}{del}')
       .should('have.value', '')
@@ -570,7 +570,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .then(($el) => {
         const el = $el[0] as unknown as HTMLInputElement
 
-        el.ownerDocument.getSelection().modify('extend', 'forward', 'character')
+        el.ownerDocument.getSelection()?.modify('extend', 'forward', 'character')
       })
       .type('{del}')
       .should('have.text', 'b')
@@ -626,7 +626,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // select the 'a' character
       cy
       .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(1, 2)
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
@@ -638,7 +638,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // select the 'a' character
       cy
       .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(0, 1)
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
@@ -703,7 +703,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     it('can move the cursor from the beginning to beginning + 1', () => {
       // select the beginning
       cy.get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(0, 0)
       }).get(':text:first').type('{rightarrow}n').then(($input) => {
@@ -721,7 +721,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       // select the 'a' character
       cy
       .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         input.setSelectionRange(1, 2)
       }).get(':text:first').type('{rightarrow}n').then(($input) => {
@@ -732,7 +732,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     it('sets the cursor to the very beginning', () => {
       cy
       .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-        const input = $input[0] as unknown as HTMLInputElement
+        const input = $input?.[0] as HTMLInputElement
 
         return input.select()
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
@@ -1009,7 +1009,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.document().then((doc) => {
         ce.focus()
 
-        doc.getSelection().selectAllChildren(line)
+        doc.getSelection()?.selectAllChildren(line)
       })
 
       cy.get('[contenteditable]:first')
@@ -1115,7 +1115,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.document().then((doc) => {
         ce.focus()
 
-        doc.getSelection().selectAllChildren(line)
+        doc.getSelection()?.selectAllChildren(line)
       })
 
       cy.get('[contenteditable]:first')
@@ -1332,7 +1332,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
 
       it('triggers form submit synchronously before type logs or resolves', function () {
-        const events = []
+        const events: any[] = []
 
         cy.on('command:start', (cmd) => {
           return events.push(`${cmd.get('name')}:start`)

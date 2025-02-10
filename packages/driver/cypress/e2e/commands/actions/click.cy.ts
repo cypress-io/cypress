@@ -172,7 +172,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('sends mousedown, mouseup, click events in order', () => {
-      const events = []
+      const events: any[] = []
 
       const $btn = cy.$$('#button')
 
@@ -188,7 +188,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('sends pointer and mouse events in order', () => {
-      const events = []
+      const events: any[] = []
       const $btn = cy.$$('#button')
 
       _.each('pointerdown mousedown pointerup mouseup click'.split(' '), (event) => {
@@ -833,36 +833,32 @@ describe('src/cy/commands/actions/click', () => {
 
     it('places cursor at the end of input', () => {
       cy.get('input:first').invoke('val', 'foobar').click().then(($el) => {
-        const el = $el[0]
+        const el = $el?.[0] as unknown as HTMLInputElement
 
         expect(el.selectionStart).to.eql(6)
-
         expect(el.selectionEnd).to.eql(6)
       })
 
       cy.get('input:first').invoke('val', '').click().then(($el) => {
-        const el = $el[0]
+        const el = $el?.[0] as unknown as HTMLInputElement
 
         expect(el.selectionStart).to.eql(0)
-
         expect(el.selectionEnd).to.eql(0)
       })
     })
 
     it('places cursor at the end of textarea', () => {
       cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then(($el) => {
-        const el = $el[0]
+        const el = $el?.[0] as unknown as HTMLTextAreaElement
 
         expect(el.selectionStart).to.eql(11)
-
         expect(el.selectionEnd).to.eql(11)
       })
 
       cy.get('textarea:first').invoke('val', '').click().then(($el) => {
-        const el = $el[0]
+        const el = $el?.[0] as unknown as HTMLTextAreaElement
 
         expect(el.selectionStart).to.eql(0)
-
         expect(el.selectionEnd).to.eql(0)
       })
     })
@@ -903,14 +899,16 @@ describe('src/cy/commands/actions/click', () => {
     it('can click a canvas', () => {
       const onClick = cy.stub()
 
-      const $canvas = cy.$$('#canvas')
+      const $canvas = cy.$$('#canvas') as JQuery<HTMLCanvasElement>
 
       $canvas.click(onClick)
 
       const ctx = $canvas.get(0).getContext('2d')
 
-      ctx.fillStyle = 'green'
-      ctx.fillRect(10, 10, 100, 100)
+      if (ctx) {
+        ctx.fillStyle = 'green'
+        ctx.fillRect(10, 10, 100, 100)
+      }
 
       cy.get('#canvas').click().then(() => {
         expect(onClick).to.be.calledOnce
@@ -1142,7 +1140,9 @@ describe('src/cy/commands/actions/click', () => {
       it('can force click on disabled checkbox inputs', () => {
         cy.get(':checkbox:first')
         .then(($el) => {
-          $el[0].disabled = true
+          const el = $el?.[0] as HTMLInputElement
+
+          el.disabled = true
         })
         .click({ force: true })
         .then(($el) => {
@@ -1162,7 +1162,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('does not scroll when being forced', () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1176,7 +1176,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('does not scroll when position sticky and display flex', () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1200,15 +1200,13 @@ describe('src/cy/commands/actions/click', () => {
           <a href="#" data-cy="button"> Button </a></div>\
         `)
         .attr('id', 'nav')
-        .css({
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          width: '200px',
-          background: '#f0f0f0',
-          borderRight: '1px solid silver',
-          padding: '20px',
-        })
+        .css('position', 'sticky')
+        .css('top', 0)
+        .css('height', '100vh')
+        .css('width', '200px')
+        .css('background', '#f0f0f0')
+        .css('border-right', '1px solid silver')
+        .css('padding', '20px')
         .appendTo($wrap)
 
         const $content = $('<div><h1>Hello</h1></div>')
@@ -1388,10 +1386,19 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can forcibly click even when being covered by another element', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
 
-        $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+        $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
         let clicked = false
 
         cy.on('scrolled', ($el, type) => {
@@ -1412,8 +1419,17 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can forcibly click when being covered by element with `opacity: 0`', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
 
-        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+        $('<span>span on button</span>')
+        .css('opacity', '0px')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .prependTo(cy.$$('body'))
 
         let clicked = false
 
@@ -1432,16 +1448,18 @@ describe('src/cy/commands/actions/click', () => {
         .attr('id', 'button-covered-in-span')
         .prependTo(cy.$$('body'))
 
-        const $span = $('<span>span on button</span>').css({
-          position: 'absolute',
-          left: $btn.offset().left,
-          top: $btn.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        }).prependTo(cy.$$('body'))
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const $span = $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1488,7 +1506,7 @@ describe('src/cy/commands/actions/click', () => {
           zIndex: 1,
         }).prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1538,7 +1556,7 @@ describe('src/cy/commands/actions/click', () => {
           zIndex: 1,
         }).prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1595,7 +1613,7 @@ describe('src/cy/commands/actions/click', () => {
         })
         .prependTo($container)
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1824,7 +1842,16 @@ describe('src/cy/commands/actions/click', () => {
     describe('position argument', () => {
       it('can click center by default', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 30}`)
+        .css('top', `${top + 40}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1839,7 +1866,14 @@ describe('src/cy/commands/actions/click', () => {
       it('can click topLeft', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
 
-        const $span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const $span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${$btn.offset()?.left}`)
+        .css('top', `${$btn.offset()?.top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1853,7 +1887,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click top', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 30}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1867,7 +1910,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click topRight', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 80}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1881,7 +1933,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click left', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top + 40}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1895,7 +1956,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click center', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 30}`)
+        .css('top', `${top + 40}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1909,7 +1979,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click right', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 80}`)
+        .css('top', `${top + 40}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1923,7 +2002,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click bottomLeft', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top + 80}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1937,7 +2025,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click bottom', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 30}`)
+        .css('top', `${top + 80}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1951,7 +2048,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('can click bottomRight', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span</span>')
+        .css('position', 'absolute')
+        .css('left', `${left + 80}`)
+        .css('top', `${top + 80}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .appendTo($btn)
 
         const clicked = _.after(2, () => {
           done()
@@ -1981,8 +2087,15 @@ describe('src/cy/commands/actions/click', () => {
         .css({ height: 100, width: 100 })
         .prependTo(cy.$$('body'))
 
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
         const $span = $('<span>span</span>')
-        .css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' })
+        .css('position', 'absolute')
+        .css('left', `${left + 50}`)
+        .css('top', `${top + 65}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
         cy.on('log:changed', (log, attr) => {
@@ -2104,7 +2217,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('gives all events in order', () => {
-        const events = []
+        const events: any[] = []
 
         const input = cy.$$('input:first')
 
@@ -2274,8 +2387,17 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when element with `opacity: 0` is covering element', function (done) {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
 
-        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+        $('<span>span on button</span>')
+        .css('opacity', 0)
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .prependTo(cy.$$('body'))
 
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
@@ -2302,7 +2424,16 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when a non-descendent element is covering subject', function (done) {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
-        const span = $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+        const left = $btn.offset()?.left || 0
+        const top = $btn.offset()?.top || 0
+        const span = $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${left}`)
+        .css('top', `${top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .prependTo(cy.$$('body'))
 
         cy.once('fail', (err) => {
           const { lastLog } = this
@@ -2338,7 +2469,14 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when non-descendent element is covering with fixed position', function (done) {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
-        const span = $('<span>span on button</span>').css({ position: 'fixed', left: 0, top: 0, padding: 20, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+        const span = $('<span>span on button</span>')
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 0)
+        .css('padding', '20px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .prependTo(cy.$$('body'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -2371,7 +2509,9 @@ describe('src/cy/commands/actions/click', () => {
       it('throws when element is fixed position and being covered', function (done) {
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-span')
-        .css({ position: 'fixed', left: 0, top: 0 })
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 0)
         .prependTo(cy.$$('body'))
 
         $('<span>span on button</span>')
@@ -2439,6 +2579,7 @@ describe('src/cy/commands/actions/click', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid arg
         cy.get('button:first').click('foo')
       })
 
@@ -2471,7 +2612,7 @@ describe('src/cy/commands/actions/click', () => {
           expect(err.message).not.to.include('undefined')
           expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(window.chai.AssertionError)
+          expect(lastLog.get('error')).to.be.an.instanceof(window.Chai.AssertionError)
 
           done()
         })
@@ -2575,7 +2716,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('returns only the $el for the element of the subject that was clicked', () => {
-        const clicks = []
+        const clicks: any[] = []
 
         // append two buttons
         const button = () => {
@@ -2599,7 +2740,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('logs only 1 click event', () => {
-        const logs = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'click') {
@@ -2624,7 +2765,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('ends', () => {
-        const logs = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'click') {
@@ -3140,7 +3281,7 @@ describe('src/cy/commands/actions/click', () => {
       const $btn = cy.$$('#button')
 
       cy.get('#button').dblclick().then(($button) => {
-        expect($button).to.match($btn)
+        expect($button[0]).to.eq($btn[0])
       })
     })
 
@@ -3468,7 +3609,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('returns only the $el for the element of the subject that was dblclicked', () => {
-        const dblclicks = []
+        const dblclicks: any[] = []
 
         // append two buttons
         const $button = () => {
@@ -3492,7 +3633,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('logs only 1 dblclick event', () => {
-        const logs = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'dblclick') {
@@ -3904,7 +4045,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('returns only the $el for the element of the subject that was rightclicked', () => {
-        const rightclicks = []
+        const rightclicks: any[] = []
 
         // append two buttons
         const $button = () => {
@@ -3928,7 +4069,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('logs only 1 rightclick event', () => {
-        const logs = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'rightclick') {
@@ -4046,38 +4187,38 @@ describe('shadow dom', () => {
   })
 
   it('composes click events', (done) => {
-    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('click', () => {
       done()
     })
 
     cy
-    .get(el)
+    .get(`.${el?.className}`, { includeShadowDom: true })
     .click()
   })
 
   it('composes dblclick events', (done) => {
-    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('dblclick', () => {
       done()
     })
 
     cy
-    .get(el)
+    .get(`.${el?.className}`, { includeShadowDom: true })
     .dblclick()
   })
 
   it('composes right click events', (done) => {
-    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
       done()
     })
 
     cy
-    .get(el)
+    .get(`.${el?.className}`, { includeShadowDom: true })
     .rightclick()
   })
 
@@ -4615,7 +4756,7 @@ describe('mouse state', () => {
       attachMouseClickListeners({ btn })
 
       const onAction = cy.stub().callsFake(() => {
-        btn.attr('disabled', true)
+        btn.prop('disabled', true)
       })
 
       btn.on('pointerover', onAction)
@@ -4644,7 +4785,7 @@ describe('mouse state', () => {
       attachMouseClickListeners({ btn })
 
       btn.on('mousedown', () => {
-        btn.attr('disabled', true)
+        btn.prop('disabled', true)
       })
 
       cy.get('#btn').click()
@@ -4667,12 +4808,11 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
-        backgroundColor: 'blue',
-        position: 'relative',
-        height: 50,
-        width: 300,
-      })
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`)
+      .css('background-color', 'blue')
+      .css('position', 'relative')
+      .css('height', 50)
+      .css('width', 300)
       .appendTo(btn.parent())
 
       cover.on('mousemove', () => {
@@ -4699,12 +4839,11 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
-        backgroundColor: 'blue',
-        position: 'relative',
-        height: 50,
-        width: 300,
-      })
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`)
+      .css('background-color', 'blue')
+      .css('position', 'relative')
+      .css('height', 50)
+      .css('width', 300)
       .appendTo(btn.parent())
 
       cover.on('mousemove', () => {
@@ -4714,7 +4853,7 @@ describe('mouse state', () => {
       attachMouseHoverListeners({ btn, cover })
       attachMouseClickListeners({ btn, cover })
 
-      btn.attr('disabled', true)
+      btn.prop('disabled', true)
 
       cover.on('mousemove', () => {
         cover.hide()
@@ -4741,12 +4880,11 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
-        backgroundColor: 'blue',
-        position: 'relative',
-        height: 50,
-        width: 300,
-      })
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`)
+      .css('background-color', 'blue')
+      .css('position', 'relative')
+      .css('height', 50)
+      .css('width', 300)
       .appendTo(btn.parent())
 
       cover.on('mousedown', () => {
@@ -4757,7 +4895,7 @@ describe('mouse state', () => {
       attachMouseClickListeners({ btn, cover })
 
       btn.on('mouseup', () => {
-        btn.attr('disabled', true)
+        btn.prop('disabled', true)
       })
 
       cy.get('#cover').click()
@@ -4777,12 +4915,11 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/`<div id='cover'>#cover</div>`).css({
-        backgroundColor: 'salmon',
-        position: 'relative',
-        height: 50,
-        width: 300,
-      })
+      const cover = cy.$$(/*html*/`<div id='cover'>#cover</div>`)
+      .css('background-color', 'salmon')
+      .css('position', 'relative')
+      .css('height', 50)
+      .css('width', 300)
       .appendTo(btn.parent())
 
       const onEvent = cy.stub().callsFake(() => {
@@ -4796,7 +4933,7 @@ describe('mouse state', () => {
       attachMouseClickListeners({ btn, cover })
 
       btn.on('mouseup', () => {
-        btn.attr('disabled', true)
+        btn.prop('disabled', true)
       })
 
       // uncomment to manually test
@@ -4818,12 +4955,11 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
-        backgroundColor: 'blue',
-        position: 'relative',
-        height: 50,
-        width: 300,
-      })
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`)
+      .css('background-color', 'blue')
+      .css('position', 'relative')
+      .css('height', 50)
+      .css('width', 300)
       .appendTo(btn.parent())
 
       const onEvent = cy.stub().callsFake(() => {
@@ -4871,7 +5007,7 @@ describe('mouse state', () => {
         .click()
       })
       .then(($body) => {
-        expect($body[0].ownerDocument.defaultView.location.hash).eq('#hashchange')
+        expect($body[0].ownerDocument.defaultView?.location.hash).eq('#hashchange')
       })
 
       clickCommandLog('click')
@@ -4889,7 +5025,9 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on click', () => {
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableName = cy.spy(top.console, 'group')
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').click()
@@ -4902,7 +5040,9 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on dblclick', () => {
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableName = cy.spy(top.console, 'group')
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').dblclick()
@@ -4918,7 +5058,9 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on rightclick', () => {
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableName = cy.spy(top.console, 'group')
+      // @ts-expect-error - TODO: console isn't recognized on top for some reason
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').rightclick()

@@ -36,11 +36,17 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
   }
 
+  interface Devices {
+    keyboard: Keyboard
+    mouse: Mouse
+  }
+
   interface cy {
+    devices: Devices
+    getAll: (tag: string, events: string) => Events
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
-    getAll: (tag: string, events: string) => Cypress.Chainable<T>
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
     now: <T>(string, v: T) => Cypress.Chainable<T>
