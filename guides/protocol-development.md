@@ -2,7 +2,7 @@
 
 In production, the capture code used to capture and communicate test data will be retrieved from the Cloud. However, in order to develop the capture code locally, developers will:
 
-* Clone the `cypress-services` repo
+* Clone the `cypress-services` repo (this requires that you be a member of the Cypress organization)
   * Run `yarn`
   * Run `yarn watch` in `packages/app-capture-protocol`
 * Clone the `cypress` repo
