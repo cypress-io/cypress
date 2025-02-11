@@ -9233,57 +9233,56 @@
   dependencies:
     vue-demi "*"
 
-"@wdio/config@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/@wdio/config/-/config-9.0.0.tgz#4022e996928e3f1b29436c1a3a446a464c319a39"
-  integrity sha512-OeRSEO3fTDMeKcGWoS39YO5lrMNT8qn+/E7ZcsG6NAbXu2o0ZfLDgDh1Guhe/a8s3LKc6dck5GxgFEuAylwlAw==
+"@wdio/config@9.7.3":
+  version "9.7.3"
+  resolved "https://registry.npmjs.org/@wdio/config/-/config-9.7.3.tgz#fb612cdee5acba250f536f90d25bc4e2910080e8"
+  integrity sha512-rWiGR0WMcUpGTTMn3XP9OzNW3WH64AcNK93b9kSwq9WzVGVIzMBCZK8LPXpdQ+pFwizq/ExIXTx/Z39kc0LCyw==
   dependencies:
-    "@wdio/logger" "9.0.0"
-    "@wdio/types" "9.0.0"
-    "@wdio/utils" "9.0.0"
-    decamelize "^6.0.0"
+    "@wdio/logger" "9.4.4"
+    "@wdio/types" "9.6.3"
+    "@wdio/utils" "9.7.3"
     deepmerge-ts "^7.0.3"
     glob "^10.2.2"
     import-meta-resolve "^4.0.0"
 
-"@wdio/logger@9.0.0", "@wdio/logger@^8.38.0", "@wdio/logger@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/@wdio/logger/-/logger-9.0.0.tgz#f13ebacfce2903f31b8c6894bb152407de3cba79"
-  integrity sha512-DmmkVjxcCFUCFJVymca4/gQF4uTtevG4AF+jCzPUA4NByTnyjVtg8x83K0sG3/YX5SOxgc+JUhSdH8g5wceWSA==
+"@wdio/logger@9.4.4", "@wdio/logger@^9.1.3":
+  version "9.4.4"
+  resolved "https://registry.npmjs.org/@wdio/logger/-/logger-9.4.4.tgz#e4851256a076e2b9401f45caaa7a34d6f0278d4a"
+  integrity sha512-BXx8RXFUW2M4dcO6t5Le95Hi2ZkTQBRsvBQqLekT2rZ6Xmw8ZKZBPf0FptnoftFGg6dYmwnDidYv/0+4PiHjpQ==
   dependencies:
     chalk "^5.1.2"
     loglevel "^1.6.0"
     loglevel-plugin-prefix "^0.8.4"
     strip-ansi "^7.1.0"
 
-"@wdio/protocols@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/@wdio/protocols/-/protocols-9.0.0.tgz#bda1a6c02770711f5cf429b800da0af991b117e1"
-  integrity sha512-qM+TwCvFjmomX8oi0Ns8LXfG5dvXiqQKLaJt9Nj+JXxczSh6XsLnFTLQAcG9ynnU7uz2v1TqM11M5enj74WEAA==
+"@wdio/protocols@9.7.0":
+  version "9.7.0"
+  resolved "https://registry.npmjs.org/@wdio/protocols/-/protocols-9.7.0.tgz#2f2c0a7e371d65305e0d64980f63caa98ba5a4de"
+  integrity sha512-5DI8cqJqT9K6oQn8UpaSTmcGAl4ufkUWC5FoPT3oXdLjILfxvweZDf/2XNBCbGMk4+VOMKqB2ofOqKhDIB2nAg==
 
-"@wdio/types@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/@wdio/types/-/types-9.0.0.tgz#0bc2e3dcc3a718a9042779ecbf953f30882a9bc8"
-  integrity sha512-XDqIjNCw2ftWKXWn8vTqqZAMtjSxwJwO8IAEQczgRB0fUCvvipkeT3ZobT5Z4Mo5uvLLTaOqJxb4nwPXOfVt/A==
+"@wdio/types@9.6.3":
+  version "9.6.3"
+  resolved "https://registry.npmjs.org/@wdio/types/-/types-9.6.3.tgz#2fbbb5fcdec32f9d9953ee9d73c659052c0fb6b1"
+  integrity sha512-K3Lu7K5g5bsUcQV6/95XaS3jMwcGUn2pDdryYibKZafklhHjVt3o/xnw6Vgd/JzoSneCKHdwj941n+yDpTJHAw==
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/utils@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/@wdio/utils/-/utils-9.0.0.tgz#4613dcd01944165a5c6004bb557ef20a51acde5b"
-  integrity sha512-MGtMGHf/rbMChD/qtPLpnZuF685W5gBnMhP5b8hNzB+riDJIFbl/e41Jqhf4scrkpXHtjBM8kdvXZEI6SW3AuA==
+"@wdio/utils@9.7.3":
+  version "9.7.3"
+  resolved "https://registry.npmjs.org/@wdio/utils/-/utils-9.7.3.tgz#9b1d59e3cfb8e14cb541d28a0f790fee0e2e32aa"
+  integrity sha512-gScYudyuq/aOmiPTz7vTvEhWtmiUMdrrzkOSQqGCQk0AMy7WpAzKM19NESPe9iPTN96i11jLJnpLOXwm2j+6LQ==
   dependencies:
     "@puppeteer/browsers" "^2.2.0"
-    "@wdio/logger" "9.0.0"
-    "@wdio/types" "9.0.0"
+    "@wdio/logger" "9.4.4"
+    "@wdio/types" "9.6.3"
     decamelize "^6.0.0"
     deepmerge-ts "^7.0.3"
-    edgedriver "^5.6.1"
-    geckodriver "^4.3.3"
+    edgedriver "^6.1.1"
+    geckodriver "^5.0.0"
     get-port "^7.0.0"
     import-meta-resolve "^4.0.0"
     locate-app "^2.2.24"
-    safaridriver "^0.1.2"
+    safaridriver "^1.0.0"
     split2 "^4.2.0"
     wait-port "^1.1.0"
 
@@ -9722,10 +9721,10 @@
   resolved "https://registry.yarnpkg.com/@zeit/schemas/-/schemas-2.36.0.tgz#7a1b53f4091e18d0b404873ea3e3c83589c765f2"
   integrity sha512-7kjMwcChYEzMKjeex9ZFXkt1AyNov9R5HZtjBKVsmVpw7pa7ZtlCGvCBC2vnnXctaYN+aRI61HjIqeetZW5ROg==
 
-"@zip.js/zip.js@^2.7.48":
-  version "2.7.52"
-  resolved "https://registry.npmjs.org/@zip.js/zip.js/-/zip.js-2.7.52.tgz#bc11de93b41f09e03155bc178e7f9c2e2612671d"
-  integrity sha512-+5g7FQswvrCHwYKNMd/KFxZSObctLSsQOgqBSi0LzwHo3li9Eh1w5cF5ndjQw9Zbr3ajVnd2+XyiX85gAetx1Q==
+"@zip.js/zip.js@^2.7.53":
+  version "2.7.54"
+  resolved "https://registry.npmjs.org/@zip.js/zip.js/-/zip.js-2.7.54.tgz#ef0f46644b1a084155473b0d7710c80a892c2687"
+  integrity sha512-qMrJVg2hoEsZJjMJez9yI2+nZlBUxgYzGV3mqcb2B/6T1ihXp0fWBDYlVHlHquuorgNUQP5a8qSmX6HF5rFJNg==
 
 "@zkochan/js-yaml@0.0.7":
   version "0.0.7"
@@ -14864,18 +14863,20 @@ edge-paths@^3.0.5:
     "@types/which" "^2.0.1"
     which "^2.0.2"
 
-edgedriver@5.6.1, edgedriver@^5.6.1:
-  version "5.6.1"
-  resolved "https://registry.npmjs.org/edgedriver/-/edgedriver-5.6.1.tgz#36971f000aee8756c11f3fb1dc5273f109e860d5"
-  integrity sha512-3Ve9cd5ziLByUdigw6zovVeWJjVs8QHVmqOB0sJ0WNeVPcwf4p18GnxMmVvlFmYRloUwf5suNuorea4QzwBIOA==
+edgedriver@6.1.1, edgedriver@^6.1.1:
+  version "6.1.1"
+  resolved "https://registry.npmjs.org/edgedriver/-/edgedriver-6.1.1.tgz#9374160a0aa1bab48d3ed21dc7af8f6fe2c3103f"
+  integrity sha512-/dM/PoBf22Xg3yypMWkmRQrBKEnSyNaZ7wHGCT9+qqT14izwtFT+QvdR89rjNkMfXwW+bSFoqOfbcvM+2Cyc7w==
   dependencies:
-    "@wdio/logger" "^8.38.0"
-    "@zip.js/zip.js" "^2.7.48"
+    "@wdio/logger" "^9.1.3"
+    "@zip.js/zip.js" "^2.7.53"
     decamelize "^6.0.0"
     edge-paths "^3.0.5"
-    fast-xml-parser "^4.4.1"
+    fast-xml-parser "^4.5.0"
+    http-proxy-agent "^7.0.2"
+    https-proxy-agent "^7.0.5"
     node-fetch "^3.3.2"
-    which "^4.0.0"
+    which "^5.0.0"
 
 editorconfig@^1.0.4:
   version "1.0.4"
@@ -16672,7 +16673,7 @@ fast-xml-parser@4.2.5:
   dependencies:
     strnum "^1.0.5"
 
-fast-xml-parser@^4.4.1, fast-xml-parser@^4.5.1:
+fast-xml-parser@^4.5.0, fast-xml-parser@^4.5.1:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.5.1.tgz#a7e665ff79b7919100a5202f23984b6150f9b31e"
   integrity sha512-y655CeyUQ+jj7KBbYMc4FG01V8ZQqjN+gDYGJ50RtfsUB8iG9AmwmwoAgeKLJdmueKKMrH1RJ7yXHTSoczdv5w==
@@ -17533,19 +17534,19 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-geckodriver@4.5.1, geckodriver@^4.3.3:
-  version "4.5.1"
-  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-4.5.1.tgz#624fc01815c1aa498dd3f717f7bd4c6cca0c57b8"
-  integrity sha512-lGCRqPMuzbRNDWJOQcUqhNqPvNsIFu6yzXF8J/6K3WCYFd2r5ckbeF7h1cxsnjA7YLSEiWzERCt6/gjZ3tW0ug==
+geckodriver@5.0.0, geckodriver@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-5.0.0.tgz#88437f3812075988bb05b5e19dc4aaa42d200577"
+  integrity sha512-vn7TtQ3b9VMJtVXsyWtQQl1fyBVFhQy7UvJF96kPuuJ0or5THH496AD3eUyaDD11+EqCxH9t6V+EP9soZQk4YQ==
   dependencies:
-    "@wdio/logger" "^9.0.0"
-    "@zip.js/zip.js" "^2.7.48"
+    "@wdio/logger" "^9.1.3"
+    "@zip.js/zip.js" "^2.7.53"
     decamelize "^6.0.0"
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7.0.5"
     node-fetch "^3.3.2"
     tar-fs "^3.0.6"
-    which "^4.0.0"
+    which "^5.0.0"
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
@@ -27794,10 +27795,10 @@ rxjs@^6.3.3, rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.3:
   dependencies:
     tslib "^1.9.0"
 
-safaridriver@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/safaridriver/-/safaridriver-0.1.2.tgz#166571d5881c7d6f884900d92d51ee1309c05aa4"
-  integrity sha512-4R309+gWflJktzPXBQCobbWEHlzC4aK3a+Ov3tz2Ib2aBxiwd11phkdIBH1l0EO22x24CJMUQkpKFumRriCSRg==
+safaridriver@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/safaridriver/-/safaridriver-1.0.0.tgz#bccb5edf9df13b75ca08f23081420f3025ae83ed"
+  integrity sha512-J92IFbskyo7OYB3Dt4aTdyhag1GlInrfbPCmMteb7aBK7PwlnGz1HI0+oyNN97j7pV9DqUAVoVgkNRMrfY47mQ==
 
 safe-array-concat@^1.1.2:
   version "1.1.2"
@@ -31346,6 +31347,11 @@ undici-types@~6.20.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.20.0.tgz#8171bf22c1f588d1554d55bf204bc624af388433"
   integrity sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==
 
+undici@^6.20.1:
+  version "6.21.0"
+  resolved "https://registry.npmjs.org/undici/-/undici-6.21.0.tgz#4b3d3afaef984e07b48e7620c34ed8a285ed4cd4"
+  integrity sha512-BUgJXc752Kou3oOIuU1i+yZZypyZRqNPW0vqoMPl8VaoalSfeR0D8/t4iAS3yirs79SSMTxTag+ZC86uswv+Cw==
+
 unicode-canonical-property-names-ecmascript@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/unicode-canonical-property-names-ecmascript/-/unicode-canonical-property-names-ecmascript-2.0.0.tgz#301acdc525631670d39f6146e0e77ff6bbdebddc"
@@ -32333,19 +32339,20 @@ web-streams-polyfill@^3.0.3:
   resolved "https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.3.tgz#2073b91a2fdb1fbfbd401e7de0ac9f8214cecb4b"
   integrity sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==
 
-webdriver@9.0.0:
-  version "9.0.0"
-  resolved "https://registry.npmjs.org/webdriver/-/webdriver-9.0.0.tgz#9e07c1c5f963c09131c9ab3dbc5551cacb03d905"
-  integrity sha512-wcysboeZ1Ax6K7WPTF/vCNzegcdg+f453GOJd86ARE+wf3xRSQsvCZDwnEO8/7wvj/3xV9KMYPeuhPJ6b5VFvw==
+webdriver@9.7.3:
+  version "9.7.3"
+  resolved "https://registry.npmjs.org/webdriver/-/webdriver-9.7.3.tgz#faaa212b891a29cf15c2102d8c9daa5c518540d2"
+  integrity sha512-Mpi277WKw37Yg5xZ0MT2BcG/Q/5Y5reYA0wDXOMldVI1nLxA7eOzAvsBA8NpjPbi/+yZijZhNMrXRAtQ5Eu8NQ==
   dependencies:
     "@types/node" "^20.1.0"
     "@types/ws" "^8.5.3"
-    "@wdio/config" "9.0.0"
-    "@wdio/logger" "9.0.0"
-    "@wdio/protocols" "9.0.0"
-    "@wdio/types" "9.0.0"
-    "@wdio/utils" "9.0.0"
+    "@wdio/config" "9.7.3"
+    "@wdio/logger" "9.4.4"
+    "@wdio/protocols" "9.7.0"
+    "@wdio/types" "9.6.3"
+    "@wdio/utils" "9.7.3"
     deepmerge-ts "^7.0.3"
+    undici "^6.20.1"
     ws "^8.8.0"
 
 webextension-polyfill@0.4.0:

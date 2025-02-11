@@ -271,7 +271,6 @@
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
     "**/@types/enzyme": "3.10.5",
-    "**/@wdio/logger": "9.0.0",
     "**/jquery": "3.7.1",
     "**/pretty-format": "26.4.0",
     "**/sharp": "0.29.3",
