@@ -12,6 +12,7 @@ import { agent } from '@packages/network'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
 
+const pkg = require('@packages/root')
 const routes = require('../routes')
 
 const _delay = linearDelay(500)
@@ -33,6 +34,8 @@ const downloadAppStudioBundleToTempDirectory = async (projectId?: string): Promi
         'x-cypress-signature': cloudApi.publicKeyVersion,
         ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
         'x-cypress-studio-mount-version': '1',
+        'x-os-name': os.platform(),
+        'x-cypress-version': pkg.version,
       },
       encrypt: 'signed',
     })

@@ -40,6 +40,7 @@ describe('getAppStudio', () => {
       },
       os: {
         tmpdir: () => tmpdir,
+        platform: () => 'linux',
       },
       'fs-extra': {
         ensureDir: ensureStub.resolves(),
@@ -59,6 +60,9 @@ describe('getAppStudio', () => {
         },
       },
       'cross-fetch': crossFetchStub,
+      '@packages/root': {
+        version: '1.2.3',
+      },
     }) as typeof import('@packages/server/lib/cloud/api/get_app_studio')).getAppStudio
   })
 
@@ -132,6 +136,8 @@ describe('getAppStudio', () => {
           'x-cypress-signature': '1',
           'x-cypress-project-slug': '12345',
           'x-cypress-studio-mount-version': '1',
+          'x-os-name': 'linux',
+          'x-cypress-version': '1.2.3',
         },
         encrypt: 'signed',
       })
@@ -199,6 +205,8 @@ describe('getAppStudio', () => {
           'x-cypress-signature': '1',
           'x-cypress-project-slug': '12345',
           'x-cypress-studio-mount-version': '1',
+          'x-os-name': 'linux',
+          'x-cypress-version': '1.2.3',
         },
         encrypt: 'signed',
       })
@@ -242,6 +250,8 @@ describe('getAppStudio', () => {
           'x-cypress-signature': '1',
           'x-cypress-project-slug': '12345',
           'x-cypress-studio-mount-version': '1',
+          'x-os-name': 'linux',
+          'x-cypress-version': '1.2.3',
         },
         encrypt: 'signed',
       })
@@ -294,6 +304,8 @@ describe('getAppStudio', () => {
           'x-cypress-signature': '1',
           'x-cypress-project-slug': '12345',
           'x-cypress-studio-mount-version': '1',
+          'x-os-name': 'linux',
+          'x-cypress-version': '1.2.3',
         },
         encrypt: 'signed',
       })
