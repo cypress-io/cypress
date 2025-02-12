@@ -1,7 +1,10 @@
 import { CloudRequest, isRetryableCloudError } from './cloud_request'
 import { asyncRetry, exponentialBackoff } from '../../util/async_retry'
+import * as errors from '../../errors'
+import { isAxiosError } from 'axios'
 
-// TODO: generate these types like system-tests' cloudValidations
+const MAX_RETRIES = 3
+
 type CreateInstanceResponse = {
   instanceId: string
   claimedInstances: number
@@ -27,25 +30,38 @@ export const createInstance = async (runId: string, instanceData: CreateInstance
   let attemptNumber = 0
 
   return asyncRetry(async () => {
-    const { data } = await CloudRequest.post<CreateInstanceResponse>(
-      `/runs/${runId}/instances`,
-      instanceData,
-      {
-        headers: {
-          'x-route-version': '5',
-          'x-cypress-run-id': runId,
-          'x-cypress-request-attempt': `${attemptNumber}`,
+    try {
+      const { data } = await CloudRequest.post<CreateInstanceResponse>(
+        `/runs/${runId}/instances`,
+        instanceData,
+        {
+          headers: {
+            'x-route-version': '5',
+            'x-cypress-run-id': runId,
+            'x-cypress-request-attempt': `${attemptNumber}`,
+          },
+          timeout,
         },
-        timeout,
-      },
-    )
+      )
 
-    attemptNumber++
+      return data
+    } catch (err: unknown) {
+      attemptNumber++
 
-    return data
+      throw err
+    }
   }, {
-    maxAttempts: 3,
+    maxAttempts: MAX_RETRIES,
     retryDelay: exponentialBackoff(),
     shouldRetry: isRetryableCloudError,
+    onRetry: (delay, err) => {
+      errors.warning(
+        'CLOUD_API_RESPONSE_FAILED_RETRYING', {
+          delayMs: delay,
+          tries: MAX_RETRIES - attemptNumber,
+          response: isAxiosError(err) ? err : err instanceof Error ? err : new Error(String(err)),
+        },
+      )
+    },
   })()
 }

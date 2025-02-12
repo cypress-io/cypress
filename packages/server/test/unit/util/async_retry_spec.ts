@@ -1,6 +1,10 @@
 import { asyncRetry } from '../../../lib/util/async_retry'
 import sinon from 'sinon'
-import { expect } from 'chai'
+import chai from 'chai'
+import sinonChai from '@cypress/sinon-chai'
+
+chai.use(sinonChai)
+const { expect } = chai
 
 describe('asyncRetry', () => {
   let asyncFn
@@ -111,6 +115,32 @@ describe('asyncRetry', () => {
       await clock.tickAsync(delay)
       await asyncP
       expect(asyncFn).to.have.been.calledTwice
+    })
+  })
+
+  describe('onRetry option', () => {
+    let clock: sinon.SinonFakeTimers
+    let err: Error
+
+    beforeEach(() => {
+      err = new Error('Some Error')
+      asyncFn.rejects(err)
+      clock = sinon.useFakeTimers()
+    })
+
+    afterEach(() => {
+      sinon.restore()
+    })
+
+    it('is called with the delay and the error that occurred, before the next retry', async () => {
+      const onRetryFn = sinon.stub<[number, unknown], void>()
+      const delay = 500
+      const p = asyncRetry(asyncFn, { maxAttempts: 2, retryDelay: () => delay, onRetry: onRetryFn })().catch((e) => {})
+
+      await clock.tickAsync(1)
+      expect(onRetryFn).to.have.been.calledOnceWith(delay, err)
+      await clock.tickAsync(delay * 2)
+      await p
     })
   })
 })

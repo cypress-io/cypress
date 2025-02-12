@@ -33,6 +33,13 @@ export const _create = (): AxiosInstance => {
 export const CloudRequest = _create()
 
 export const isRetryableCloudError = (error: unknown) => {
+  // setting this env via mocha's beforeEach coerces this to a string, even if it's a boolean
+  const disabled = process.env.DISABLE_API_RETRIES && process.env.DISABLE_API_RETRIES !== 'false'
+
+  if (disabled) {
+    return false
+  }
+
   const axiosErr = axios.isAxiosError(error) ? error : undefined
 
   if (axiosErr && axiosErr.status) {

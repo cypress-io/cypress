@@ -10,13 +10,13 @@ const logRequest = (req: InternalAxiosRequestConfig): InternalAxiosRequestConfig
 }
 
 const logResponse = (res: AxiosResponse): AxiosResponse => {
-  debug(`${res.config.method} ${res.config.url}: %d %s -> \n  %o`, res.status, res.statusText, res.data)
+  debug(`${res.config.method} ${res.config.url} Success: %d %s -> \n  Response: %o`, res.status, res.statusText, res.data)
 
   return res
 }
 
 const logResponseErr = (err: AxiosError): never => {
-  debug(`${err.config?.method} ${err.config?.url}: %d -> \n  %o`, err.response?.statusText, err.response?.statusText, err.response?.data)
+  debug(`${err.config?.method} ${err.config?.url} Error: %s -> \n  Response: %o`, err.response?.statusText || err.code, err.response?.data)
   throw err
 }
 

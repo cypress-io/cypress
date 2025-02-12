@@ -1169,7 +1169,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
 
 We encountered an unexpected error communicating with our servers.
 
-StatusCodeError: 500 - "Internal Server Error"
+Request failed with status code 500
 
 Because you passed the --parallel flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -1195,7 +1195,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
 
 We encountered an unexpected error communicating with our servers.
 
-StatusCodeError: 500 - "Internal Server Error"
+Request failed with status code 500
 
 Because you passed the --record flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -1413,7 +1413,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
 
 We encountered an unexpected error communicating with our servers.
 
-StatusCodeError: 500 - "Internal Server Error"
+Request failed with status code 500
 
 Because you passed the --record flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -4420,9 +4420,9 @@ We will retry 1 more time in X second(s)...
 
 We encountered an unexpected error communicating with our servers.
 
-StatusCodeError: 500 - "Internal Server Error"
+Request failed with status code 500
 
-We will retry 3 more times in X second(s)...
+We will retry 2 more times in ...
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

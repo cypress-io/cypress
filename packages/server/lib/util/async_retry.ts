@@ -2,6 +2,7 @@ type RetryOptions = {
   maxAttempts: number
   retryDelay?: (attempt: number) => number
   shouldRetry?: (err?: unknown) => boolean
+  onRetry?: (delay: number, err: unknown) => void
 }
 
 export function asyncRetry <
@@ -30,6 +31,10 @@ export function asyncRetry <
         }
 
         const delay = options.retryDelay ? options.retryDelay(attempt) : undefined
+
+        if (options.onRetry) {
+          options.onRetry(delay ?? 0, e)
+        }
 
         if (delay !== undefined) {
           await new Promise((resolve) => {

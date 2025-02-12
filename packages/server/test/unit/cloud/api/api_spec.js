@@ -970,6 +970,8 @@ describe('lib/cloud/api', () => {
         .times(3)
         .delayConnection(5000)
         .reply(200, instanceResponseData)
+
+        process.env.DISABLE_API_RETRIES = false
       })
 
       it('throws an aggregate error', () => {
@@ -989,6 +991,8 @@ describe('lib/cloud/api', () => {
       beforeEach(() => {
         nocked.delayConnection(5000).reply(200, instanceResponseData)
         nocked.delayConnection(0).reply(200, instanceResponseData)
+
+        process.env.DISABLE_API_RETRIES = false
       })
 
       it('returns the instance response data', async () => {
