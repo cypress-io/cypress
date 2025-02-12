@@ -193,7 +193,7 @@ export class CDPConnection {
         return 100
       },
       shouldRetry (err) {
-        return !(err && CDPTerminatedError.isCDPTerminatedError(err))
+        return !(err && err instanceof Error && CDPTerminatedError.isCDPTerminatedError(err))
       },
     })()
 
