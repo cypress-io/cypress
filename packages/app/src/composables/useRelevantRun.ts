@@ -1,5 +1,5 @@
 import { gql, useSubscription } from '@urql/vue'
-import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '@packages/app/src/generated/graphql'
+import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '../generated/graphql'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { computed } from 'vue'

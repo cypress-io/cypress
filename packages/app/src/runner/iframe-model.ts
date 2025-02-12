@@ -1,6 +1,7 @@
 import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { useStudioStore } from '../store/studio-store'
 

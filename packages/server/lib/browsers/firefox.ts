@@ -635,9 +635,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
           },
           // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
           // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-          // NOTE: this typing is fixed in @wdio/types 9.1.0 https://github.com/webdriverio/webdriverio/commit/ed14717ac4269536f9e7906e4d1612f74650b09b
-          // Once we have a node engine that can support the package (i.e., electron 32+ update) we can update the package
-          // @ts-expect-error
           'moz:debuggerAddress': true,
           // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
           // webdriver starts geckodriver with the correct options on behalf of Cypress

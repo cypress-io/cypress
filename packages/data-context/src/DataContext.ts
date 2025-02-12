@@ -36,6 +36,7 @@ import {
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
 import type { IncomingHttpHeaders } from 'http'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { App as ElectronApp } from 'electron'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'

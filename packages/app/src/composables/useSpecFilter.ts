@@ -2,7 +2,7 @@ import { useSpecStore } from '../store'
 import { useMutation, gql } from '@urql/vue'
 import { ref, watch } from 'vue'
 import { useDebounce } from '@vueuse/core'
-import { SpecFilter_SetPreferencesDocument } from '@packages/app/src/generated/graphql'
+import { SpecFilter_SetPreferencesDocument } from '../generated/graphql'
 
 gql`
 mutation SpecFilter_SetPreferences ($value: String!) {

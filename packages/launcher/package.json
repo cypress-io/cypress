@@ -26,6 +26,7 @@
     "win-version-info": "5.0.1"
   },
   "devDependencies": {
+    "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "chai": "3.5.0",

@@ -1,6 +1,7 @@
 /* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
 import { faker } from '@faker-js/faker'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 
 const content = `import { defineConfig } from 'cypress'

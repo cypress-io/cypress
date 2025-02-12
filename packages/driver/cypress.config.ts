@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - cypress
 import { defineConfig } from 'cypress'
 import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-server'
 

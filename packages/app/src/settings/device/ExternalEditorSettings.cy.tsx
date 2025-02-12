@@ -1,4 +1,5 @@
 import ExternalEditorSettings from './ExternalEditorSettings.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { ExternalEditorSettingsFragmentDoc } from '../../generated/graphql-test'
 

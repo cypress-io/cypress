@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
 import type { GlobalPageFragment } from '../generated/graphql-test'
