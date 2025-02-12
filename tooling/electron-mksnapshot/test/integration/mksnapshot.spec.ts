@@ -25,7 +25,7 @@ describe('mksnapshot', () => {
     expect(snapshotBlobFile).to.equal('snapshot_blob.bin')
     expect(v8ContextFile.startsWith('v8_context_snapshot')).to.be.true
   })
-
+//test
   it('builds invalid snapshot providing version 12.0.10', async () => {
     const providedVersion = '12.0.10'
     const args = [invalidSnapshot, '--output_dir', outputDir]
