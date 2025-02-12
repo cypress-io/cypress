@@ -330,6 +330,7 @@ class HttpsAgent extends https.Agent {
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
     // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
+    // while `uri` is not optional on https.RequestOptions, axios seems to regard it as optional.
     if (!options?.uri?.port && options?.uri?.protocol === 'https:') {
       options.uri = {
         ...options.uri,
