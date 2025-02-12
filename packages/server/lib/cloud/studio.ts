@@ -1,27 +1,14 @@
 import type { AppStudioShape, StudioErrorReport, StudioManagerShape, StudioStatus } from '@packages/types'
 import type { Router } from 'express'
-import Module from 'module'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
 import os from 'os'
 import { agent } from '@packages/network'
 import Debug from 'debug'
+import { requireScript } from './require_script'
 
 const debug = Debug('cypress:server:studio')
 const routes = require('./routes')
-
-const requireScript = (script: string) => {
-  const mod = new Module('id', module)
-
-  mod.filename = ''
-  // _compile is a private method
-  // @ts-expect-error
-  mod._compile(script, mod.filename)
-
-  module.children.splice(module.children.indexOf(mod), 1)
-
-  return mod.exports
-}
 
 export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
@@ -38,7 +25,7 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  async setup ({ script, studioPath, studioHash }: { script: string, studioPath: string, studioHash?: string }): Promise<void> {
+  setup ({ script, studioPath, studioHash }: { script: string, studioPath: string, studioHash?: string }): void {
     const { AppStudio } = requireScript(script)
 
     this._appStudio = new AppStudio({ studioPath })
@@ -93,10 +80,18 @@ export class StudioManager implements StudioManagerShape {
 
     try {
       return this._appStudio[method].apply(this._appStudio, args)
-    } catch (error) {
+    } catch (error: unknown) {
+      let actualError: Error
+
+      if (!(error instanceof Error)) {
+        actualError = new Error(String(error))
+      } else {
+        actualError = error
+      }
+
       this.status = 'IN_ERROR'
       // Call and forget this, we don't want to block the main thread
-      this.reportError(error).catch(() => { })
+      this.reportError(actualError).catch(() => { })
     }
   }
 
@@ -112,10 +107,18 @@ export class StudioManager implements StudioManagerShape {
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._appStudio[method].apply(this._appStudio, args)
-    } catch (error) {
+    } catch (error: unknown) {
+      let actualError: Error
+
+      if (!(error instanceof Error)) {
+        actualError = new Error(String(error))
+      } else {
+        actualError = error
+      }
+
       this.status = 'IN_ERROR'
       // Call and forget this, we don't want to block the main thread
-      this.reportError(error).catch(() => { })
+      this.reportError(actualError).catch(() => { })
 
       // TODO: Figure out errors
       return undefined

@@ -23,14 +23,14 @@ describe('lib/cloud/studio', () => {
   let studio: AppStudioShape
   let StudioManager: typeof import('@packages/server/lib/cloud/studio').StudioManager
 
-  beforeEach(async () => {
+  beforeEach(() => {
     stubbedCrossFetch = sinon.stub()
     StudioManager = (proxyquire('../lib/cloud/studio', {
       'cross-fetch': stubbedCrossFetch,
     }) as typeof import('@packages/server/lib/cloud/studio')).StudioManager
 
     studioManager = new StudioManager()
-    await studioManager.setup({ script: stubStudio, studioPath: 'path', studioHash: 'abcdefg' })
+    studioManager.setup({ script: stubStudio, studioPath: 'path', studioHash: 'abcdefg' })
     studio = (studioManager as any)._appStudio
 
     sinon.stub(os, 'platform').returns('darwin')

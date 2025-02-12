@@ -104,7 +104,7 @@ export const Query = objectType({
 
     t.field('studio', {
       type: Studio,
-      description: 'Studio data',
+      description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
       resolve: (source, args, ctx) => ctx.coreData.studio,
     })
 

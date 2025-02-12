@@ -70,7 +70,7 @@ const downloadAppStudioBundleToTempDirectory = async (projectId?: string): Promi
   }
 }
 
-const getTarHash = async (): Promise<string> => {
+const getTarHash = (): Promise<string> => {
   let hash = ''
 
   return new Promise<string>((resolve, reject) => {
@@ -96,6 +96,9 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
     await fs.promises.rm(studioPath, { recursive: true, force: true })
     await ensureDir(studioPath)
 
+    // Note that this code path is effectively removed when we create the binary.
+    // This is to prevent users from being able to run their own version of
+    // studio code.
     if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
       const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
@@ -117,10 +120,18 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
 
     const appStudio = new StudioManager()
 
-    await appStudio.setup({ script, studioPath, studioHash })
+    appStudio.setup({ script, studioPath, studioHash })
 
     return appStudio
-  } catch (error) {
-    return StudioManager.createInErrorManager(error)
+  } catch (error: unknown) {
+    let actualError: Error
+
+    if (!(error instanceof Error)) {
+      actualError = new Error(String(error))
+    } else {
+      actualError = error
+    }
+
+    return StudioManager.createInErrorManager(actualError)
   }
 }

@@ -92,9 +92,25 @@ describe('getAppStudio', () => {
   })
 
   describe('CYPRESS_LOCAL_STUDIO_PATH not set', () => {
-    it('downloads the studio bundle and extracts it', async () => {
-      const readStream = Readable.from('console.log("studio script")')
+    let writeResult: string
+    let readStream: Readable
 
+    beforeEach(() => {
+      readStream = Readable.from('console.log("studio script")')
+
+      writeResult = ''
+      const writeStream = new Writable({
+        write: (chunk, encoding, callback) => {
+          writeResult += chunk.toString()
+          callback()
+        },
+      })
+
+      createWriteStreamStub.returns(writeStream)
+      createReadStreamStub.returns(Readable.from('tar contents'))
+    })
+
+    it('downloads the studio bundle and extracts it', async () => {
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -106,20 +122,7 @@ describe('getAppStudio', () => {
         },
       })
 
-      let writeResult = ''
-
-      const writeStream = new Writable({
-        write: (chunk, encoding, callback) => {
-          writeResult += chunk.toString()
-          callback()
-        },
-      })
-
-      createWriteStreamStub.returns(writeStream)
-
       verifySignatureFromFileStub.resolves(true)
-
-      createReadStreamStub.returns(Readable.from('tar contents'))
 
       const projectId = '12345'
 
@@ -161,8 +164,6 @@ describe('getAppStudio', () => {
     })
 
     it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
-      const readStream = Readable.from('console.log("studio script")')
-
       crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
       crossFetchStub.onSecondCall().resolves({
         body: readStream,
@@ -175,20 +176,7 @@ describe('getAppStudio', () => {
         },
       })
 
-      let writeResult = ''
-
-      const writeStream = new Writable({
-        write: (chunk, encoding, callback) => {
-          writeResult += chunk.toString()
-          callback()
-        },
-      })
-
-      createWriteStreamStub.returns(writeStream)
-
       verifySignatureFromFileStub.resolves(true)
-
-      createReadStreamStub.returns(Readable.from('tar contents'))
 
       const projectId = '12345'
 
@@ -256,12 +244,10 @@ describe('getAppStudio', () => {
         encrypt: 'signed',
       })
 
-      expect(createInErrorManagerStub).to.be.called
+      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(AggregateError))
     })
 
     it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
-      const readStream = Readable.from('console.log("studio script")')
-
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -272,19 +258,6 @@ describe('getAppStudio', () => {
           },
         },
       })
-
-      let writeResult = ''
-
-      const writeStream = new Writable({
-        write: (chunk, encoding, callback) => {
-          writeResult += chunk.toString()
-          callback()
-        },
-      })
-
-      createWriteStreamStub.returns(writeStream)
-
-      createReadStreamStub.returns(Readable.from('tar contents'))
 
       verifySignatureFromFileStub.resolves(false)
 
@@ -311,12 +284,10 @@ describe('getAppStudio', () => {
       })
 
       expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/bundle.tar', '159')
-      expect(createInErrorManagerStub).to.be.called
+      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to verify studio signature')))
     })
 
     it('throws an error if there is no signature in the response headers', async () => {
-      const readStream = Readable.from('console.log("studio script")')
-
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -330,7 +301,7 @@ describe('getAppStudio', () => {
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
-      expect(createInErrorManagerStub).to.be.called
+      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to get studio signature')))
     })
   })
 })
