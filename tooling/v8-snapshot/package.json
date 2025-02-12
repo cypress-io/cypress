@@ -17,7 +17,7 @@
   "dependencies": {
     "@tooling/electron-mksnapshot": "0.0.0-development",
     "@tooling/packherd": "0.0.0-development",
-    "ansi-colors": "^4.1.1",
+    "ansi-colors": "^4.1.3",
     "convert-source-map": "^1.8.0",
     "debug": "^4.3.4",
     "resolve-from": "^5.0.0",
