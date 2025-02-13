@@ -186,7 +186,7 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
 }
 
 const FormatCookiesIfApplicable: RequestMiddleware = function () {
-  if (this.req.headers['cookie']) {
+  if (this.req.headers['x-cypress-is-webdriver-bidi'] && this.req.headers['cookie']) {
     const cookies = this.req.headers['cookie']
     // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
     // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
@@ -197,6 +197,8 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
       this.req.headers['cookie'] = cookies.split(';').join('; ')
     }
   }
+
+  delete this.req.headers['x-cypress-is-webdriver-bidi']
 
   return this.next()
 }

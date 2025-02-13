@@ -294,11 +294,21 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    context('BiDi enabled', () => {
-      beforeEach(() => {
-        browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox', version: '135.0.1' })
+    beforeEach(() => {
+      browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox', version: '135.0.1' })
+    })
+
+    it('allows for CDP to be used as an escape hatch if BiDi would otherwise be enabled', async function () {
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect({
+        IS_CDP_FORCED_FOR_FIREFOX: true,
       })
 
+      expect(browser.webRequest.onBeforeSendHeaders.addListener).to.be.called
+    })
+
+    context('BiDi enabled', () => {
       it('does not attach onBeforeSendHeaders listener if BiDi is enabled', async function () {
         sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 

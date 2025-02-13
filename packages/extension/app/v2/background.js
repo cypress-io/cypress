@@ -32,8 +32,8 @@ const checkIfFirefox = async () => {
 }
 
 // this check only applies to firefox versioning!
-const isBiDiEnabled = async () => {
-  if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
+const isBiDiEnabled = async (config) => {
+  if (!browser || !get(browser, 'runtime.getBrowserInfo') || config.IS_CDP_FORCED_FOR_FIREFOX) {
     return false
   }
 
@@ -165,7 +165,7 @@ const connect = function (host, path, extraOpts) {
       listenToDownloads()
       // if BiDi is enabled, BiDi will handle the network interception.
       // Otherwise, CDP does not support it for Firefox and we need to listen for it here.
-      const isBiDiTurnedOn = await isBiDiEnabled()
+      const isBiDiTurnedOn = await isBiDiEnabled(config)
 
       if (!isBiDiTurnedOn) {
         listenToOnBeforeHeaders()

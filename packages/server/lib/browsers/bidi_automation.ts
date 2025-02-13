@@ -80,20 +80,20 @@ export class BidiAutomation {
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
-    this.webDriverClient.on('network.beforeRequestSent', this.onBeforeRequestSent.bind(this))
-    this.webDriverClient.on('network.responseStarted', this.onResponseStarted.bind(this))
-    this.webDriverClient.on('network.responseCompleted', this.onResponseComplete.bind(this))
-    this.webDriverClient.on('network.fetchError', this.onFetchError.bind(this))
-    this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated.bind(this))
-    this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed.bind(this))
+    this.webDriverClient.on('network.beforeRequestSent', this.onBeforeRequestSent)
+    this.webDriverClient.on('network.responseStarted', this.onResponseStarted)
+    this.webDriverClient.on('network.responseCompleted', this.onResponseComplete)
+    this.webDriverClient.on('network.fetchError', this.onFetchError)
+    this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
+    this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
   }
 
-  setTopLevelContextId (contextId?: string) {
+  setTopLevelContextId = (contextId?: string) => {
     debug(`setting top level context ID to: ${contextId}`)
     this.topLevelContextId = contextId
   }
 
-  private async onBrowsingContextCreated (params: BrowsingContextInfo) {
+  private onBrowsingContextCreated = async (params: BrowsingContextInfo) => {
     debugVerbose('received browsingContext.contextCreated %o', params)
     // the AUT iframe is always the FIRST child created by the top level parent (second is the reporter, if it exists which isnt the case for headless/test replay)
     if (!this.autContextId && params.parent && this.topLevelContextId === params.parent) {
@@ -121,7 +121,7 @@ export class BidiAutomation {
     }
   }
 
-  private async onBrowsingContextDestroyed (params: BrowsingContextInfo) {
+  private onBrowsingContextDestroyed = async (params: BrowsingContextInfo) => {
     debugVerbose('received browsingContext.contextDestroyed %o', params)
 
     // if the top level context gets destroyed, we need to clear the AUT context and destroy the interceptor as it is no longer applicable
@@ -153,8 +153,7 @@ export class BidiAutomation {
     }
   }
 
-  // CDP equivalent: Network.requestWillBeSent
-  private async onBeforeRequestSent (params: NetworkBeforeRequestSentParametersModified) {
+  private onBeforeRequestSent = async (params: NetworkBeforeRequestSentParametersModified) => {
     debugVerbose('received network.beforeRequestSend %o', params)
 
     let url = params.request.url
@@ -175,6 +174,9 @@ export class BidiAutomation {
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
       initiator: params.initiator,
+      // Since we are NOT using CDP, we set the values to -1 to indicate that we do not have this information.
+      cdpRequestWillBeSentTimestamp: -1,
+      cdpRequestWillBeSentReceivedTimestamp: -1,
     }
 
     debugVerbose(`prerequest received for request ID ${params.request.request}: %o`, browserPreRequest)
@@ -185,6 +187,14 @@ export class BidiAutomation {
     // so the request-middleware can identify the request
 
     if (params.isBlocked) {
+      params.request.headers.push({
+        name: 'X-Cypress-Is-WebDriver-BiDi',
+        value: {
+          type: 'string',
+          value: 'true',
+        },
+      })
+
       if (params.context === this.autContextId && resourceType === 'document') {
         debug(`AUT request detected, adding X-Cypress-Is-AUT-Frame for request ID: ${params.request.request}`)
 
@@ -214,7 +224,7 @@ export class BidiAutomation {
     }
   }
 
-  private onResponseStarted (params: NetworkResponseStartedParameters) {
+  private onResponseStarted = (params: NetworkResponseStartedParameters) => {
     debugVerbose('received network.responseStarted %o', params)
 
     if (params.response.fromCache) {
@@ -222,7 +232,7 @@ export class BidiAutomation {
     }
   }
 
-  private onResponseComplete (params: NetworkResponseCompletedParameters) {
+  private onResponseComplete = (params: NetworkResponseCompletedParameters) => {
     debugVerbose('received network.responseComplete %o', params)
 
     if (params.response.fromCache) {
@@ -246,19 +256,19 @@ export class BidiAutomation {
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
   }
 
-  private onFetchError (params: NetworkFetchErrorParameters) {
+  private onFetchError = (params: NetworkFetchErrorParameters) => {
     debugVerbose('received network.fetchError %o', params)
 
     this.automation.onRemoveBrowserPreRequest?.(params.request.request)
   }
 
   close () {
-    this.webDriverClient.off('network.beforeRequestSent', this.onBeforeRequestSent.bind(this))
-    this.webDriverClient.off('network.responseStarted', this.onResponseStarted.bind(this))
-    this.webDriverClient.off('network.responseCompleted', this.onResponseComplete.bind(this))
-    this.webDriverClient.off('network.fetchError', this.onFetchError.bind(this))
-    this.webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated.bind(this))
-    this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed.bind(this))
+    this.webDriverClient.off('network.beforeRequestSent', this.onBeforeRequestSent)
+    this.webDriverClient.off('network.responseStarted', this.onResponseStarted)
+    this.webDriverClient.off('network.responseCompleted', this.onResponseComplete)
+    this.webDriverClient.off('network.fetchError', this.onFetchError)
+    this.webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated)
+    this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {

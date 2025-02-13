@@ -282,11 +282,20 @@ describe('lib/browsers/bidi_automation', () => {
               type: 'other',
             },
             headers: {},
+            cdpRequestWillBeSentTimestamp: -1,
+            cdpRequestWillBeSentReceivedTimestamp: -1,
           })
 
           expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({
             request: 'request1',
             headers: [
+              {
+                name: 'X-Cypress-Is-WebDriver-BiDi',
+                value: {
+                  type: 'string',
+                  value: 'true',
+                },
+              },
               {
                 name: 'X-Cypress-Is-AUT-Frame',
                 value: {
@@ -318,6 +327,8 @@ describe('lib/browsers/bidi_automation', () => {
             headers: {
               foo: 'bar',
             },
+            cdpRequestWillBeSentTimestamp: -1,
+            cdpRequestWillBeSentReceivedTimestamp: -1,
           })
 
           expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({
@@ -328,6 +339,13 @@ describe('lib/browsers/bidi_automation', () => {
                 value: {
                   type: 'string',
                   value: 'bar',
+                },
+              },
+              {
+                name: 'X-Cypress-Is-WebDriver-BiDi',
+                value: {
+                  type: 'string',
+                  value: 'true',
                 },
               },
             ],

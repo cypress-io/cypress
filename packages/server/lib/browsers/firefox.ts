@@ -393,9 +393,11 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   }
 }
 
-export function shouldUseBiDi (browser: Browser): boolean {
+function shouldUseBiDi (browser: Browser): boolean {
+  const isCDPForced = !!process.env.FORCE_FIREFOX_CDP
+
   try {
-    if (browser.family === 'firefox') {
+    if (browser.family === 'firefox' && !isCDPForced) {
       if (browser.majorVersion) {
         const majorVersion = parseInt(browser.majorVersion)
 
@@ -434,6 +436,11 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   const USE_WEBDRIVER_BIDI = shouldUseBiDi(browser)
+
+  if (!USE_WEBDRIVER_BIDI) {
+    errors.warning('CDP_FIREFOX_DEPRECATED')
+  }
+
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
