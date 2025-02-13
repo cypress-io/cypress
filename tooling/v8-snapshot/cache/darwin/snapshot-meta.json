@@ -3769,6 +3769,11 @@
     "./packages/graphql/node_modules/express/node_modules/debug/src/debug.js",
     "./packages/graphql/node_modules/express/node_modules/ms/index.js",
     "./packages/graphql/node_modules/path-to-regexp/index.js",
+    "./packages/graphql/node_modules/qs/lib/formats.js",
+    "./packages/graphql/node_modules/qs/lib/index.js",
+    "./packages/graphql/node_modules/qs/lib/parse.js",
+    "./packages/graphql/node_modules/qs/lib/stringify.js",
+    "./packages/graphql/node_modules/qs/lib/utils.js",
     "./packages/graphql/src/index.ts",
     "./packages/https-proxy/lib/proxy.js",
     "./packages/https-proxy/lib/server.js",
@@ -4232,5 +4237,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "73bbac1e409c29fd3133b87219f629df7ebde9d448abcc1ed996a975f2eec60d"
+  "deferredHash": "f58ed5e2e3642eeec614da121a092e718fed167055de7255f24c101e181e8fb7"
 }

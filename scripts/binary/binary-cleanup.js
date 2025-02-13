@@ -51,6 +51,13 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/html-webpack-plugin-5/index.js',
     'node_modules/mocha-7.0.1/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
+    // dependencies needed for geckodriver when running firefox in the binary
+    'node_modules/pump/index.js',
+    'node_modules/sprintf-js/src/sprintf.js',
+    'node_modules/esutils/lib/utils.js',
+    'node_modules/through/index.js',
+    'node_modules/string-width/index.js',
+    // end needed deps for geckodriver
   ]
 
   let entryPoints = new Set([

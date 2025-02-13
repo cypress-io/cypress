@@ -36,6 +36,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
+        - chore/update_wdio_deps
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
 
