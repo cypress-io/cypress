@@ -96,9 +96,7 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
     await fs.promises.rm(studioPath, { recursive: true, force: true })
     await ensureDir(studioPath)
 
-    // Note that this code path is effectively removed when we create the binary.
-    // This is to prevent users from being able to run their own version of
-    // studio code.
+    // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
     if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
       const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
