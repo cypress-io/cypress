@@ -12,7 +12,7 @@ describe('CDP deprecated in Firefox', () => {
     snapshot: true,
     spec: 'simple_passing.cy.js',
     onStdout: (stdout) => {
-      expect(stdout).to.include('Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. Cypress will default to automating the Firefox browser with WebDriver BiDi in Firefox 135. Cypress will no longer support CDP within Firefox in the future. Cypress CDP support within Firefox is planned to be removed in Cypress 15.')
+      expect(stdout).to.include('Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. In Firefox 135 and above, Cypress defaults to automating the Firefox browser with WebDriver BiDi. Cypress will no longer support CDP within Firefox in the future. Cypress CDP support within Firefox is planned to be removed in Cypress 15.')
     },
   })
 })
