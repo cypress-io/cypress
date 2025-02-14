@@ -46,7 +46,9 @@ const config = makeConfig({
   ],
 })
 
-// The module federation needs to be added to the plugins array first
+// With some trial and error, it appears that the module federation plugin needs to be added 
+// to the plugins array first so that the dynamic modules are available properly with respect 
+// to the other plugins.
 config.plugins.unshift(
   ...federation({
     name: 'host',
