@@ -2071,7 +2071,9 @@ type Query {
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
 
-  """Studio data"""
+  """
+  Data pertaining to studio and the studio manager that is loaded from the cloud
+  """
   studio: Studio
 
   """Previous versions of cypress and their release date"""
