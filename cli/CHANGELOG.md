@@ -3,6 +3,10 @@
 
 _Released 2/25/2025 (PENDING)_
 
+**Features:**
+
+ - Add `log: boolean` option to hide the `cy.origin()` log. Addressed in [#31114](https://github.com/cypress-io/cypress/pull/31114).
+
 ## 14.0.3
 
 _Released 2/11/2025_

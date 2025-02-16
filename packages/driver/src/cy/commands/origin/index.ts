@@ -25,7 +25,7 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
-type OptionsOrFn<T> = { args: T } | (() => {})
+type OptionsOrFn<T> = (Partial<Cypress.Loggable> & { args: T }) | (() => {})
 type Fn<T> = (args?: T) => {}
 
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
@@ -57,6 +57,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         callbackFn = optionsOrFn
         options = {
           args: undefined,
+          log: undefined,
         }
       }
 
@@ -67,6 +68,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         type: 'parent',
         message: urlOrDomain,
         timeout,
+        log: !(options.log === false),
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log

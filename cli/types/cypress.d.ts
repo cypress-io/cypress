@@ -1663,7 +1663,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    origin<T, S extends any>(urlOrDomain: string, options: {
+    origin<T, S extends any>(urlOrDomain: string, options: Partial<Loggable> & {
       args: T
     }, fn: (args: T) => void): Chainable<S>
 

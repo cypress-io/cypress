@@ -1012,6 +1012,8 @@ namespace CypressOriginTests {
   cy.origin('example.com', { args: 'value' }, (value: string) => { })
   cy.origin('example.com', { args: 1 }, (value: number) => { })
   cy.origin('example.com', { args: true }, (value: boolean) => { })
+  cy.origin('example.com', { args: true, log: true }, (value: boolean) => { })
+  cy.origin('example.com', { args: true, log: false }, (value: boolean) => { })
 
   cy.origin() // $ExpectError
   cy.origin('example.com') // $ExpectError
