@@ -238,7 +238,6 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
     )
   })
 
-  // @ts-expect-error - TODO: Fix this
   chai.Assertion.overwriteProperty('empty', (_super) => {
     return (function (...args) {
       if ($dom.isDom(this._obj)) {
