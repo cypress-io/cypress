@@ -14,7 +14,7 @@ _Released 2/11/2025 (PENDING)_
 
 **Misc:**
 
-- Updated types around `cy.readFile` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+- Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
 
 ## 14.0.2
 
