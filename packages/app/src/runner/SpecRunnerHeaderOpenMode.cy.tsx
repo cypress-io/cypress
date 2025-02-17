@@ -228,7 +228,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('select-browser').contains('Fake Browser')
 
     cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
-    cy.findByTestId('viewport').contains('500x500')
   })
 
   it('shows current viewport info', () => {
@@ -241,39 +240,24 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines').should('be.visible')
-    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport() command.')
-    .should('be.visible')
-
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines').should('be.hidden')
-    cy.get('[data-cy="viewport"] button').focus().type(' ')
-    cy.contains('The viewport determines').should('be.visible')
-    cy.get('[data-cy="viewport"] button').focus().type('{enter}')
-    cy.contains('The viewport determines').should('be.hidden')
+    cy.get('[data-cy="viewport"]').contains('500x500')
   })
 
-  it('links to the viewport docs', () => {
+  it('shows scale % in viewport info', () => {
+    const autStore = useAutStore()
+
+    autStore.setScale(0.4)
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
         return renderWithGql({
           ...gqlVal,
-          currentTestingType: 'e2e',
+          configFile: 'cypress.config.js',
         })
       },
     })
 
-    cy.findByTestId('viewport').click()
-    cy.findByTestId('viewport-docs')
-    .should('be.visible')
-    .should('have.attr', 'href', 'https://on.cypress.io/viewport')
-
-    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for end-to-end testing.')
-    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport() command.')
-    .should('be.visible')
-
-    cy.findByTestId('viewport-docs').should('have.attr', 'href', 'https://on.cypress.io/viewport')
+    cy.get('[data-cy="viewport"]').contains('500x500 (40%)')
+    cy.percySnapshot()
   })
 
   it('disables browser dropdown button when isRunning is true', () => {

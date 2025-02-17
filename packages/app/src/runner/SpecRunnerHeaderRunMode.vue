@@ -17,6 +17,18 @@
         <div class="mx-[12px] max-w-full grid text-gray-600 items-center truncate">
           {{ autStore.url }}
         </div>
+        <Tag
+          data-cy="viewport"
+          size="20"
+          color="gray"
+          class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
+        >
+          <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
+          <span
+            v-if="displayScale"
+            class="mr-[-6px] text-gray-500"
+          >({{ displayScale }})</span>
+        </Tag>
       </div>
       <div
         v-else
@@ -34,20 +46,8 @@
             v-if="selectedBrowser.displayName"
             class="min-w-[16px] w-[16px]"
             alt=""
-          /> {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
-        </template>
-      </SpecRunnerDropdown>
-      <SpecRunnerDropdown
-        variant="panel"
-        data-cy="viewport"
-      >
-        <template #heading>
-          <i-cy-ruler_x16 class="icon-dark-gray-500 icon-light-gray-400" />
-          <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
-          <span
-            v-if="displayScale"
-            class="mr-[-6px] text-gray-500"
-          >({{ displayScale }})</span>
+          /> {{ selectedBrowser.displayName }}
+          {{ selectedBrowser.majorVersion }}
         </template>
       </SpecRunnerDropdown>
     </div>
@@ -57,6 +57,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useAutStore } from '../store'
+import Tag from '@cypress-design/vue-tag'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { useAutHeader } from './useAutHeader'
