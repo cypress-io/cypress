@@ -1455,6 +1455,7 @@ type LocalSettingsPreferences {
   """
   shouldLaunchBrowserFromOpenBrowser: Boolean
   specListWidth: Int
+  studioWidth: Int
   wasBrowserSetInCLI: Boolean
 }
 
