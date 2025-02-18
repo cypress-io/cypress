@@ -62,7 +62,7 @@
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
     "@vueuse/core": "7.2.2",
-    "autoprefixer": "^10.4.19",
+    "autoprefixer": "^10.4.20",
     "axe-core": "4.4.1",
     "chai": "4.5.0",
     "chai-as-promised": "7.1.1",
