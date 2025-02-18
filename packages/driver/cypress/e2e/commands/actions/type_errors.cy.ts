@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #type errors', () => {
@@ -95,7 +95,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       })
     })
 
-    it('throws when the subject isnt visible', function (done) {
+    it('throws when the subject is not visible', function (done) {
       cy.$$('input:text:first').show().hide()
 
       cy.on('fail', (err) => {
@@ -146,14 +146,12 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       .prependTo(cy.$$('body'))
 
       $('<span>span on button</span>')
-      .css({
-        position: 'absolute',
-        left: $input.offset().left,
-        top: $input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${$input.offset()?.left}`)
+      .css('top', `${$input.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
       .prependTo(cy.$$('body'))
 
       cy.on('fail', (err) => {
@@ -167,10 +165,11 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       cy.get('#input-covered-in-span').type('foo')
     })
 
-    it('throws when special characters dont exist', function (done) {
+    it('throws when special characters do not exist', function (done) {
       cy.on('fail', (err) => {
         assertLogLength(this.logs, 2)
 
+        // @ts-expect-error - TODO: Get this to use the internal Keyboard types
         const allChars = _.keys(Cypress.Keyboard.getKeymap()).join(', ')
 
         expect(err.message).to.eq(`Special character sequence: \`{bar}\` is not recognized. Available sequences are: \`${allChars}\`
@@ -222,9 +221,12 @@ If you want to skip parsing special character sequences and type the text exactl
     _.each(['toString', 'toLocaleString', 'hasOwnProperty', 'valueOf',
       'undefined', 'null', 'true', 'false', 'True', 'False'], (val) => {
       it(`allows typing reserved Javscript word (${val})`, () => {
+        const value = val as string
+
         cy
-        .get(':text:first').type(val)
-        .should('have.value', val)
+        .get(':text:first')
+        .type(value)
+        .should('have.value', value)
       })
     })
 
@@ -234,7 +236,9 @@ If you want to skip parsing special character sequences and type the text exactl
         '<script>alert(123)</script>', '$USER'], (val) => {
         it(`allows typing some naughty strings (${val})`, () => {
           cy
-          .get(':text:first').type(val)
+          .get(':text:first')
+          // tslin:disable-next-line - we are testing interesting input, although should be valid
+          .type(val)
           .should('have.value', val)
         })
       })
@@ -258,7 +262,7 @@ If you want to skip parsing special character sequences and type the text exactl
     describe('throws when trying to type', () => {
       _.each([NaN, Infinity, [], {}, null, undefined], (val) => {
         it(`throws when trying to type: ${val}`, function (done) {
-          const logs = []
+          const logs: any[] = []
 
           cy.on('log:added', (attrs, log) => {
             return logs.push(log)
@@ -271,7 +275,9 @@ If you want to skip parsing special character sequences and type the text exactl
             done()
           })
 
-          cy.get(':text:first').type(val)
+          cy.get(':text:first')
+          // @ts-expect-error - we are testing invalid input
+          .type(val)
         })
       })
     })
@@ -332,6 +338,7 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
+        // @ts-expect-error - we are testing invalid input
         cy.get('#date-without-value').type(1989)
       })
 
@@ -368,6 +375,7 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
+        // @ts-expect-error - we are testing invalid input
         cy.get('#month-without-value').type(6)
       })
 
@@ -417,6 +425,7 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
+        // @ts-expect-error - we are testing invalid input
         cy.get('#week-without-value').type(23)
       })
 
@@ -452,6 +461,7 @@ If you want to skip parsing special character sequences and type the text exactl
           done()
         })
 
+        // @ts-expect-error - we are testing invalid input
         cy.get('#time-without-value').type(9999)
       })
 

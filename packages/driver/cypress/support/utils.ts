@@ -1,6 +1,10 @@
 const { $, _, Promise } = Cypress
 
-export const getCommandLogWithText = (command, type = 'method') => {
+export const getCommandLogWithText = (command, type?) => {
+  if (!type) {
+    type = 'method'
+  }
+
   // Open current test if not already open, so we can find the command log
   cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
 
@@ -20,7 +24,7 @@ export const findReactInstance = function (dom) {
     : internalInstance.return.stateNode
 }
 
-export const clickCommandLog = (sel, type) => {
+export const clickCommandLog = (sel, type?) => {
   // trigger the LONG_RUNNING_THRESHOLD to display the command line
   // this adds time to test but makes a more accurate test as React 18+ does not rerender when setting internals
   return cy.wait(2000)
@@ -121,10 +125,10 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
-export const expectCaret = (start, end) => {
+export const expectCaret = (start: number) => {
   return ($el) => {
-    end = end == null ? start : end
-    // @ts-ignore
+    const end = start
+
     expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
   }
 }

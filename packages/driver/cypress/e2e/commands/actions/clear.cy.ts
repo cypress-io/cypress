@@ -1,10 +1,11 @@
-const { _, $ } = Cypress
-const {
+import {
   assertLogLength,
   attachKeyListeners,
   shouldBeCalledOnce,
   shouldNotBeCalled,
-} = require('../../../support/utils')
+} from '../../../support/utils'
+
+const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #clear', () => {
   beforeEach(() => {
@@ -15,7 +16,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     const textarea = cy.$$('textarea')
 
     cy.get('textarea').clear().then(($textarea) => {
-      expect($textarea).to.match(textarea)
+      expect($textarea[0]).to.eq(textarea[0])
     })
   })
 
@@ -77,15 +78,16 @@ describe('src/cy/commands/actions/type - #clear', () => {
     .attr('id', 'input-covered-in-span')
     .prependTo(cy.$$('body'))
 
+    const left = $input.offset()?.left || 0
+    const top = $input.offset()?.top || 0
+
     $('<span>span on input</span>')
-    .css({
-      position: 'absolute',
-      left: $input.offset().left,
-      top: $input.offset().top,
-      padding: 5,
-      display: 'inline-block',
-      backgroundColor: 'yellow',
-    })
+    .css('position', 'absolute')
+    .css('left', left)
+    .css('top', top)
+    .css('padding', '5px')
+    .css('display', 'inline-block')
+    .css('backgroundColor', 'yellow')
     .prependTo(cy.$$('body'))
 
     const clicked = cy.stub()
@@ -186,7 +188,17 @@ describe('src/cy/commands/actions/type - #clear', () => {
   it('passes timeout and interval down to click', (done) => {
     const input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
-    $('<span>span on input</span>').css({ position: 'absolute', left: input.offset().left, top: input.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+    const left = input.offset()?.left || 0
+    const top = input.offset()?.top || 0
+
+    $('<span>span on input</span>')
+    .css('position', 'absolute')
+    .css('left', left)
+    .css('top', top)
+    .css('padding', 5)
+    .css('display', 'inline-block')
+    .css('backgroundColor', 'yellow')
+    .prependTo(cy.$$('body'))
 
     cy.on('command:retry', (options) => {
       expect(options.timeout).to.eq(1000)
@@ -195,6 +207,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       done()
     })
 
+    // @ts-expect-error: TODO: Internal types for clear should accept interval
     cy.get('#input-covered-in-span').clear({ timeout: 1000, interval: 60 })
   })
 
@@ -416,16 +429,17 @@ describe('src/cy/commands/actions/type - #clear', () => {
       .attr('id', 'input-covered-in-span')
       .prependTo(cy.$$('body'))
 
+      const left = $input.offset()?.left || 0
+      const top = $input.offset()?.top || 0
+
       $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: $input.offset().left,
-        top: $input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-        width: '120px',
-      })
+      .css('position', 'absolute')
+      .css('left', left)
+      .css('top', top)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
+      .css('width', '120px')
       .prependTo(cy.$$('body'))
 
       cy.on('fail', (err) => {
@@ -456,7 +470,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
 
     it('does not log an additional log on failure', function (done) {
-      const logs = []
+      const logs: any[] = []
 
       cy.on('log:added', (attrs, log) => {
         return logs.push(log)
@@ -531,7 +545,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
 
     it('ends', () => {
-      const logs = []
+      const logs: any[] = []
 
       cy.on('log:added', (attrs, log) => {
         if (log.get('name') === 'clear') {

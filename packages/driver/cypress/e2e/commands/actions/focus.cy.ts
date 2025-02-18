@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { _, $ } = Cypress
 
 const getActiveElement = () => {
@@ -79,7 +80,7 @@ describe('src/cy/commands/actions/focus', () => {
       const button = cy.$$('#button')
 
       cy.get('#button').focus().then(($button) => {
-        expect($button).to.match(button)
+        expect($button.get(0)).to.eq(button.get(0))
       })
     })
 
@@ -564,7 +565,7 @@ describe('src/cy/commands/actions/focus', () => {
       const input = cy.$$('input:first')
 
       cy.get('input:first').focus().blur().then(($input) => {
-        expect($input).to.match(input)
+        expect($input.get(0)).to.eq(input.get(0))
       })
     })
 

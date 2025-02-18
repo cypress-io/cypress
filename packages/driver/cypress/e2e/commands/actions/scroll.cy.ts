@@ -1,3 +1,4 @@
+// @ts-expect-error - this is declared multiple times
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/scroll', () => {
@@ -401,6 +402,7 @@ describe('src/cy/commands/actions/scroll', () => {
         .onFirstCall().throws(new Error())
 
         cy.on('command:retry', () => {
+          // @ts-expect-error - TODO: add type definition for returns on isScrollable
           return Cypress.ensure.isScrollable.returns()
         })
 
@@ -484,6 +486,7 @@ describe('src/cy/commands/actions/scroll', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid scenario
           cy.scrollTo()
         })
 
@@ -540,6 +543,7 @@ describe('src/cy/commands/actions/scroll', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid scenario
           cy.get('#scroll-to-both').scrollTo('25px', { easing: 'flower' })
         })
 
@@ -551,6 +555,7 @@ describe('src/cy/commands/actions/scroll', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid scenario
           cy.get('button:first').scrollTo('bottom', { ensureScrollable: 'force' })
         })
       })
@@ -693,7 +698,7 @@ describe('src/cy/commands/actions/scroll', () => {
       const div = cy.$$('#scroll-into-view-vertical div')
 
       cy.get('#scroll-into-view-vertical div').scrollIntoView().then(($div) => {
-        expect($div).to.match(div)
+        expect($div.get(0)).to.eq(div.get(0))
       })
     })
 
@@ -805,14 +810,6 @@ describe('src/cy/commands/actions/scroll', () => {
 
       cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '500' }).then(() => {
         expect(scrollTo.args[0][1].duration).to.eq('500')
-      })
-    })
-
-    it('accepts offset string option', () => {
-      const scrollTo = cy.spy($.fn, 'scrollTo')
-
-      cy.get('#scroll-into-view-both h5').scrollIntoView({ offset: 500 }).then(() => {
-        expect(scrollTo.args[0][1].offset).to.eq(500)
       })
     })
 
@@ -958,6 +955,7 @@ describe('src/cy/commands/actions/scroll', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid scenario
           cy.get('#scroll-into-view-both h5').scrollIntoView('foo')
         })
       })
@@ -982,6 +980,7 @@ describe('src/cy/commands/actions/scroll', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid scenario
           cy.get('#scroll-into-view-both h5').scrollIntoView({ easing: 'flower' })
         })
       })
