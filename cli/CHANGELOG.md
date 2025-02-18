@@ -10,6 +10,7 @@ _Released 2/25/2025 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `chrome-remote-interface` from `0.33.2` to `0.33.3`. Addressed in [#31128](https://github.com/cypress-io/cypress/pull/31128).
+- Upgraded `ci-info` from `4.0.0` to `4.1.0`. Addressed in [#31132](https://github.com/cypress-io/cypress/pull/31132).
 
 ## 14.0.3
 
