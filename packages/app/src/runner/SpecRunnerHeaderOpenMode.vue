@@ -7,7 +7,7 @@
     <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end">
       <div
         data-cy="aut-url"
-        class="border rounded flex grow border-gray-100 h-[32px] overflow-hidden align-middle"
+        class="border rounded flex grow border-gray-100 h-[32px] align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -24,6 +24,27 @@
             :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']"
           />
         </Button>
+        <SpecRunnerDropdown
+          v-if="selectedBrowser?.displayName"
+          data-cy="select-browser"
+          :disabled="autStore.isRunning"
+        >
+          <template #heading>
+            <component
+              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              class="min-w-[16px] w-[16px]"
+              :alt="selectedBrowser.displayName"
+            />
+          </template>
+          <template #default>
+            <div class="max-h-[50vh] overflow-auto">
+              <VerticalBrowserListItems
+                :gql="props.gql"
+                :spec-path="activeSpecPath"
+              />
+            </div>
+          </template>
+        </SpecRunnerDropdown>
         <input
           ref="autUrlInputRef"
           data-cy="aut-url-input"
@@ -65,30 +86,6 @@
           </span>
         </Tag>
       </div>
-
-      <SpecRunnerDropdown
-        v-if="selectedBrowser?.displayName"
-        data-cy="select-browser"
-        :disabled="autStore.isRunning"
-      >
-        <template #heading>
-          <component
-            :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
-            class="min-w-[16px] w-[16px]"
-            :alt="selectedBrowser.displayName"
-          />
-          {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
-        </template>
-
-        <template #default>
-          <div class="max-h-[50vh] overflow-auto">
-            <VerticalBrowserListItems
-              :gql="props.gql"
-              :spec-path="activeSpecPath"
-            />
-          </div>
-        </template>
-      </SpecRunnerDropdown>
     </div>
 
     <SelectorPlayground

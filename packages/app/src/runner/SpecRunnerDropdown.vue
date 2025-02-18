@@ -1,11 +1,11 @@
 <template>
   <Popover
     :key="`${props.disabled}`"
-    class="bg-white rounded border-[1px] border-gray-100 h-[32px] relative"
+    class="rounded-[50px] h-[30px] mx-[6px] py-[2px] relative"
     #="{ open, close }"
   >
     <PopoverButton
-      class="border-transparent rounded grow h-full border-[1px] px-[12px] group"
+      class=" border border-transparent rounded-[50px] self-center h-full grow px-[5px] group"
       :class="{
         'hocus-default': !props.disabled,
         'opacity-50 cursor-auto': props.disabled,
@@ -24,14 +24,6 @@
           name="heading"
           :open="open"
           :close="close"
-        />
-        <i-cy-chevron-down
-          class="transform transition-all w-[10px] duration-300"
-          :class="{
-            'group-hocus:icon-dark-indigo-500': !props.disabled,
-            'icon-dark-gray-200': !open,
-            'rotate-180 icon-dark-indigo-500': open,
-          }"
         />
       </div>
     </PopoverButton>
@@ -68,7 +60,7 @@ const props = withDefaults(defineProps<{
   disabled?: boolean
 }>(), {
   variant: undefined,
-  align: 'right',
+  align: 'left',
   disabled: false,
 })
 
