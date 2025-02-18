@@ -73,9 +73,5 @@ export default [
   'packages/server/node_modules/ci-info/index.js',
   'node_modules/@babel/traverse/lib/index.js',
   'node_modules/@babel/types/lib/definitions/index.js',
-  'packages/server/node_modules/axios/dist/node/axios.cjs',
-  'packages/server/node_modules/axios/dist/axios.js',
-  'packages/server/node_modules/axios/dist/axios.min.js',
-  'packages/server/node_modules/axios/dist/esm/axios.js',
-  'packages/server/node_modules/axios/dist/esm/axios.min.js',
+  'packages/server/node_modules/axios/lib/adapters/http.js',
 ]
