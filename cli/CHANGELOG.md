@@ -7,6 +7,10 @@ _Released 2/25/2025 (PENDING)_
 
 - Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
 
+**Dependency Updates:**
+
+- Upgraded `chrome-remote-interface` from `0.33.2` to `0.33.3`. Addressed in [#31128](https://github.com/cypress-io/cypress/pull/31128).
+
 ## 14.0.3
 
 _Released 2/11/2025_
