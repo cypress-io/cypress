@@ -7,34 +7,36 @@
     <!-- this is similar to the Open Mode header but it's not interactive, so can be a lot smaller-->
     <div class="flex grow flex-wrap py-[16px] gap-[12px] justify-end">
       <div
-        v-if="testingType === 'e2e'"
         data-cy="aut-url"
         class="border rounded flex grow border-[1px] border-gray-100 h-[32px] align-middle overflow-hidden"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <div class="mx-[12px] max-w-full grid text-gray-600 items-center truncate">
-          {{ autStore.url }}
+        <div class="mx-[12px] flex grow text-gray-600 items-center truncate">
+          {{ testingType === 'e2e' ? autStore.url : 'URL navigation disabled in component testing' }}
         </div>
         <Tag
-          data-cy="viewport"
+          data-cy="viewport-size"
           size="20"
-          color="gray"
+          color="white"
           class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
         >
-          <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
-          <span
-            v-if="displayScale"
-            class="mr-[-6px] text-gray-500"
-          >({{ displayScale }})</span>
+          <span class="whitespace-nowrap text-[12px]">{{ autStore.viewportWidth }}x{{
+            autStore.viewportHeight
+          }}</span>
         </Tag>
-      </div>
-      <div
-        v-else
-        class="grow"
-      >
-        <!-- spacer -->
+        <Tag
+          v-if="displayScale"
+          data-cy="viewport-scale"
+          size="20"
+          color="white"
+          class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
+        >
+          <span class="text-[12px]">
+            {{ displayScale }}
+          </span>
+        </Tag>
       </div>
       <SpecRunnerDropdown
         data-cy="select-browser"

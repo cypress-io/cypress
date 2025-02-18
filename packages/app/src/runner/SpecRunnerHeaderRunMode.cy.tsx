@@ -46,10 +46,11 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.mount(<SpecRunnerHeaderRunMode />)
 
-      cy.get('[data-cy="aut-url"]').should('not.exist')
+      cy.contains('URL navigation disabled in component testing').should('be.visible')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
       // confirm expected content is rendered
       cy.contains('500x500').should('be.visible')
+      cy.contains('40%').should('be.visible')
       cy.contains('Chrome 1').should('be.visible')
 
       // confirm no interactions are implemented

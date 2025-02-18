@@ -6,7 +6,6 @@
   >
     <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end">
       <div
-        v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
         class="border rounded flex grow border-gray-100 h-[32px] overflow-hidden align-middle"
         :class="{
@@ -27,56 +26,46 @@
         </Button>
         <input
           ref="autUrlInputRef"
-          :value="studioStore.needsUrl ? urlInProgress : autUrl"
           data-cy="aut-url-input"
+          :disabled="urlDisabled"
+          :value="inputValue"
+          :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-51 self-center hocus-link-default truncate"
+          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-51 self-center hocus-link-default truncate"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
         >
         <StudioUrlPrompt
-          v-if="studioStore.needsUrl"
+          v-if="studioStore.needsUrl && !urlDisabled"
           :aut-url-input-ref="autUrlInputRef"
           :url-in-progress="urlInProgress"
           @submit="visitUrl"
           @cancel="() => eventManager.emit('studio:cancel', undefined)"
         />
         <Tag
-          data-cy="viewport"
+          data-cy="viewport-size"
           size="20"
-          color="gray"
+          color="white"
           class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
         >
           <span class="whitespace-nowrap text-[12px]">{{ autStore.viewportWidth }}x{{
             autStore.viewportHeight
-          }}px</span>
-          <span
-            v-if="displayScale"
-            class="text-gray-500 text-[12px]"
-          >
-            ({{ displayScale }})
+          }}</span>
+        </Tag>
+        <Tag
+          v-if="displayScale"
+          data-cy="viewport-scale"
+          size="20"
+          color="white"
+          class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
+        >
+          <span class="text-[12px]">
+            {{ displayScale }}
           </span>
         </Tag>
       </div>
 
-      <div
-        v-else
-        class="grow"
-      >
-        <Button
-          data-cy="playground-activator"
-          :disabled="isDisabled"
-          class="border-gray-100 mr-[12px]"
-          variant="outline"
-          :aria-label="t('runner.selectorPlayground.toggle')"
-          @click="togglePlayground"
-        >
-          <i-cy-crosshairs_x16
-            :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']"
-          />
-        </Button>
-      </div>
       <SpecRunnerDropdown
         v-if="selectedBrowser?.displayName"
         data-cy="select-browser"
@@ -218,6 +207,18 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
+const urlDisabled = computed(() => props.gql.currentTestingType === 'component')
+
+const inputPlaceholder = computed(() => props.gql.currentTestingType === 'e2e' ? '' : 'URL navigation disabled in component testing')
+
+const inputValue = computed(() => {
+  if (props.gql.currentTestingType === 'component') {
+    return ''
+  }
+
+  return studioStore.needsUrl ? urlInProgress.value : autUrl.value
+})
+
 const openExternal = useExternalLink()
 
 function setStudioUrl (event: Event) {
@@ -238,3 +239,13 @@ function openExternally () {
   openExternal(autStore.url)
 }
 </script>
+
+<style scoped>
+.aut-url-input:disabled {
+  background-color: transparent;
+}
+
+.aut-url-input:disabled:hover {
+  text-decoration: none;
+}
+</style>
