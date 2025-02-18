@@ -3,6 +3,10 @@
 
 _Released 2/25/2025 (PENDING)_
 
+**Misc:**
+
+- Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+
 ## 14.0.3
 
 _Released 2/11/2025_
@@ -15,10 +19,6 @@ _Released 2/11/2025_
 
 - Upgraded `@cypress/request` from `3.0.6` to `3.0.7`. Addressed in [#31063](https://github.com/cypress-io/cypress/pull/31063).
 - Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
-
-**Misc:**
-
-- Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
 
 ## 14.0.2
 
