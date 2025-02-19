@@ -103,7 +103,7 @@ export class BidiAutomation {
       this.autContextId = params.context
 
       // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
-      // in this case, we do NOT have to redefined the top level context intercept but instead update the autContextId to properly identify the
+      // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
       // AUT in the request interceptor.
       if (!this.interceptId) {
         debugVerbose(`no interceptor defined for top-level context ${params.parent}.`)
